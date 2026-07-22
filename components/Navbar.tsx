@@ -54,9 +54,12 @@ export default function Navbar() {
           scrolled ? "glass-strong shadow-soft" : "bg-transparent"
         }`}
       >
-        <a href="#" className="flex items-center gap-2.5 font-display font-semibold text-lg tracking-tight text-ink dark:text-white">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-electric to-emerald text-white text-sm font-bold">
-            T
+        <a
+          href="#"
+          className="flex items-center gap-2.5 font-display font-semibold text-lg tracking-tight text-ink dark:text-white"
+        >
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-electric to-emerald text-white text-base font-bold">
+            P
           </span>
           Phygo
         </a>
@@ -83,6 +86,7 @@ export default function Navbar() {
           >
             {dark ? <Sun size={17} /> : <Moon size={17} />}
           </button>
+
           <MagneticButton
             href="#pricing"
             strength={10}
@@ -90,6 +94,7 @@ export default function Navbar() {
           >
             Start Free
           </MagneticButton>
+
           <button
             aria-label="Open menu"
             onClick={() => setOpen((o) => !o)}
@@ -116,6 +121,7 @@ export default function Navbar() {
               {l.label}
             </a>
           ))}
+
           <a
             href="#pricing"
             onClick={() => setOpen(false)}

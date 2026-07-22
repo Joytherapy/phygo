@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Inter, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const sans = Inter({
@@ -8,11 +8,11 @@ const sans = Inter({
   display: "swap",
 });
 
-const display = Space_Grotesk({
+const display = Manrope({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
-  weight: ["500", "600", "700"],
+  weight: ["500", "600", "700", "800"],
 });
 
 const mono = JetBrains_Mono({
@@ -75,11 +75,13 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`${sans.variable} ${display.variable} ${mono.variable}`}>
+    <html
+      lang="en"
+      className={`${sans.variable} ${display.variable} ${mono.variable}`}
+    >
       <head>
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
