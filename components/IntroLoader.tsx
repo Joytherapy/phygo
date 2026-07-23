@@ -32,7 +32,7 @@ export default function IntroLoader() {
             className="flex items-center gap-3"
           >
             <span className="relative inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-electric to-emerald text-white text-lg font-display font-bold shadow-glow">
-              T
+              P
               <motion.span
                 className="absolute inset-0 rounded-2xl border border-white/40"
                 animate={{ scale: [1, 1.6], opacity: [0.6, 0] }}
