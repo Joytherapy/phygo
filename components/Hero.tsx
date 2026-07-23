@@ -6,6 +6,7 @@ import { Mic, ArrowRight, ChevronDown } from "lucide-react";
 import MagneticButton from "./MagneticButton";
 import SignatureIllustration from "./SignatureIllustration";
 import LiveStructuring from "./liveStructuring/LiveStructuring";
+import LiveDemo from "./liveDemoV2/LiveDemo";
 
 const headlineWords = [
   "The",
@@ -237,6 +238,9 @@ export default function Hero() {
           style={{ y: boardY }}
         >
           <LiveStructuring instanceId="hero" variant="hero" />
+          <div className="mt-12">
+  <LiveDemo />
+</div>
         </motion.div>
       </div>
 

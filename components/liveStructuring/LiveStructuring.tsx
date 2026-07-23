@@ -16,6 +16,7 @@ import {
   type Category,
   type Phrase,
 } from "./data";
+import TranscriptPanel from "./TranscriptPanel";
 
 type Phase =
   | "idle"
@@ -383,7 +384,11 @@ export default function LiveStructuring({
           {/* Transcript */}
 
           <div className="flex min-h-[170px] flex-col">
-
+<TranscriptPanel>
+  <div className="text-sm text-ink/60 dark:text-white/60">
+    Transcript coming soon...
+  </div>
+</TranscriptPanel>
             {phase === "idle" && (
               <div className="flex flex-1 flex-col items-center justify-center gap-5 py-8 text-center">
 
