@@ -159,7 +159,7 @@ export default function LiveDemo() {
           @keyframes ringPulse { 0% { transform: scale(1); opacity: 0.55; } 100% { transform: scale(2.4); opacity: 0; } }
         `}</style>
 
-        <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1700px] px-4 sm:px-6 lg:px-8">
           <div className="overflow-hidden rounded-[32px] border border-neutral-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03),0_28px_64px_-28px_rgba(0,0,0,0.10)] transition-shadow duration-500">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 px-5 py-5 sm:px-7">
               <div className="flex items-center gap-3">
@@ -231,7 +231,7 @@ export default function LiveDemo() {
       </section>
 
       <section id="ai-analysis" className="w-full bg-white pb-16 sm:pb-24">
-        <div className="mx-auto max-w-[1000px] px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
           <div className="overflow-hidden rounded-[32px] border border-neutral-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03),0_28px_64px_-28px_rgba(0,0,0,0.10)] transition-shadow duration-500">
             <div className="px-5 py-8 sm:px-9">
               <div className="mb-12 flex items-center gap-2">

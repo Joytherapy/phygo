@@ -81,11 +81,11 @@ export default function Hero() {
 
       <motion.div style={{ y: illustrationY }}>
         <SignatureIllustration
-          className="absolute inset-x-0 top-16 h-40 w-full opacity-30 pointer-events-none hidden sm:block"
+          className="absolute inset-x-0 top-12 h-40 w-full opacity-30 pointer-events-none hidden sm:block"
         />
       </motion.div>
 
-      <div className="relative mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-20 items-center">
+      <div className="relative mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-20 items-start">
         <motion.div style={{ y: textY, opacity: textOpacity }}>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -94,7 +94,7 @@ export default function Hero() {
               duration: 0.6,
               delay: 0.85,
             }}
-            className="inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-xs font-semibold tracking-wide text-ink/75 dark:text-white/75 shadow-soft mb-8"
+            className="inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-xs font-semibold tracking-wide text-ink/75 dark:text-white/75 shadow-soft mb-2"
           >
             <span className="h-2 w-2 rounded-full bg-emerald animate-pulse" />
 
