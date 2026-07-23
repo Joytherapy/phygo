@@ -24,6 +24,11 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://phygo.app"),
+
+  icons: {
+    icon: "/image.png",
+  },
+
   title: "Phygo — The AI Assistant Every Therapist Deserves",
   description:
     "Turn your voice into professional clinical notes, patient reports, WhatsApp follow-ups and PDF summaries in seconds.",
