@@ -71,7 +71,7 @@ export default function LiveDemo() {
   const [processing, setProcessing] = useState(false);
   const [planDone, setPlanDone] = useState(false);
   const [typed, setTyped] = useState("");
-  const chatEndRef = useRef<HTMLDivElement>(null);
+const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const total = TRANSCRIPT.length;
   const isComplete = visibleCount >= total;
@@ -101,9 +101,12 @@ export default function LiveDemo() {
     return () => clearTimeout(t);
   }, [isComplete]);
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    useEffect(() => {
+    const el = chatContainerRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [visibleCount]);
+
+
 
   const assessment = assessmentText(visibleCount);
 
@@ -192,7 +195,7 @@ export default function LiveDemo() {
             </div>
 
             <div className="flex min-w-0 flex-col">
-              <div className="h-[380px] overflow-y-auto px-5 py-6 sm:h-[440px] sm:px-7">
+<div ref={chatContainerRef} className="h-[380px] overflow-y-auto px-5 py-6 sm:h-[440px] sm:px-7">
                 <div className="flex flex-col gap-5">
                   {visibleMessages.map((m) => (
                     <ChatBubble key={m.id} message={m} />
@@ -207,7 +210,6 @@ export default function LiveDemo() {
                     </span>
                   </div>
 
-                  <div ref={chatEndRef} />
                 </div>
               </div>
 
