@@ -7,7 +7,10 @@ import {
   Square,
   CheckCircle2,
   Sparkles,
+  Download,
 } from "lucide-react";
+import jsPDF from "jspdf";
+
 import {
   CATEGORIES,
   EXAMPLES,
@@ -40,6 +43,8 @@ export default function LiveStructuring({
   const [movedIds, setMovedIds] = useState<Set<string>>(new Set());
 
   const [aiPhrases, setAiPhrases] = useState<Phrase[]>([]);
+  const [finalNote, setFinalNote] = useState<any>(null);
+  const [phraseFields, setPhraseFields] = useState<Record<string, string>>({});
   const [aiError, setAiError] = useState<string | null>(null);
 
   const [justFilled, setJustFilled] = useState<Category | null>(null);
@@ -231,29 +236,31 @@ export default function LiveStructuring({
 
         const data = await res.json();
         const note = data.note ?? {};
+        setFinalNote(note);
 
-        const built: Phrase[] = [];
+                const built: Phrase[] = [];
+        const fieldMap: Record<string, string> = {};
         let idx = 0;
 
-        const push = (text: string | undefined, cat: Category) => {
+        const push = (text: string | undefined, cat: Category, field?: string) => {
           if (!text) return;
-          built.push({
-            id: `${instanceId}-ai-${Date.now()}-${idx++}`,
-            text,
-            cat,
-          });
+          const id = `${instanceId}-ai-${Date.now()}-${idx++}`;
+          built.push({ id, text, cat });
+          if (field) fieldMap[id] = field;
         };
 
-        push(note.subjective, "findings");
-        push(note.objective, "findings");
-        push(note.assessment, "assessment");
-        push(note.plan, "plan");
+        push(note.subjective, "findings", "subjective");
+        push(note.objective, "findings", "objective");
+        push(note.assessment, "assessment", "assessment");
+        push(note.plan, "plan", "plan");
 
         if (Array.isArray(note.exercises) && note.exercises.length) {
-          push(`Exercises: ${note.exercises.join(", ")}`, "plan");
+          push(`Exercises: ${note.exercises.join(", ")}`, "plan", "_exercisesText");
         }
 
-        push(note.summaryForPatient, "followup");
+        push(note.summaryForPatient, "followup", "summaryForPatient");
+
+        setPhraseFields(fieldMap);
 
         if (built.length === 0) {
           throw new Error("empty note");
@@ -382,8 +389,99 @@ recognition.lang = navigator.language || "en-US";
     recognition.start();
   };
 
+  const updatePhraseText = (phraseId: string, newText: string) => {
+    setAiPhrases((prev) =>
+      prev.map((ph) => (ph.id === phraseId ? { ...ph, text: newText } : ph))
+    );
+    const field = phraseFields[phraseId];
+    if (field) {
+      setFinalNote((prev: any) => (prev ? { ...prev, [field]: newText } : prev));
+    }
+  };
+
   const stopVoice = () =>
     recognitionRef.current?.stop?.();
+
+
+  const downloadPdf = () => {
+    if (!finalNote) return;
+
+    const doc = new jsPDF();
+    const marginLeft = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const usableWidth = pageWidth - marginLeft * 2;
+    let y = 20;
+
+    const addSection = (title: string, content?: string) => {
+      if (!content) return;
+      if (y > 260) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text(title, marginLeft, y);
+      y += 7;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      const lines = doc.splitTextToSize(content, usableWidth);
+      lines.forEach((line: string) => {
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(line, marginLeft, y);
+        y += 6;
+      });
+      y += 6;
+    };
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Clinical Note - Phygo", marginLeft, y);
+    y += 8;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(new Date().toLocaleString(), marginLeft, y);
+    y += 12;
+
+    addSection("Subjective", finalNote.subjective);
+    addSection("Objective", finalNote.objective);
+    addSection("Assessment", finalNote.assessment);
+    addSection("Plan", finalNote.plan);
+
+        if (finalNote._exercisesText) {
+      addSection("Exercises", finalNote._exercisesText);
+    } else if (Array.isArray(finalNote.exercises) && finalNote.exercises.length) {
+      if (y > 260) {
+
+        doc.addPage();
+        y = 20;
+      }
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text("Exercises", marginLeft, y);
+      y += 7;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      finalNote.exercises.forEach((ex: string) => {
+        const lines = doc.splitTextToSize(`- ${ex}`, usableWidth);
+        lines.forEach((line: string) => {
+          if (y > 280) {
+            doc.addPage();
+            y = 20;
+          }
+          doc.text(line, marginLeft, y);
+          y += 6;
+        });
+      });
+      y += 6;
+    }
+
+    addSection("Patient Summary", finalNote.summaryForPatient);
+
+    doc.save(`phygo-note-${Date.now()}.pdf`);
+  };
 
   const isTranscriptPhase =
     phase === "typing" ||
@@ -603,6 +701,18 @@ recognition.lang = navigator.language || "en-US";
                     SOAP note, treatment plan and clinical summary generated automatically.
                   </p>
                 </div>
+
+                {isLiveVoice && finalNote && (
+                  <button
+                    onClick={downloadPdf}
+                    data-cursor-hover
+                    className="mt-1 inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-[11px] font-semibold text-white transition-transform hover:scale-[1.03] dark:bg-white dark:text-ink"
+                  >
+                    <Download size={13} />
+                    Download PDF
+                  </button>
+                )}
+
               </motion.div>
             )}
           </div>
@@ -668,13 +778,23 @@ recognition.lang = navigator.language || "en-US";
                           transition={{
                             duration: .45,
                           }}
-                          className="text-[11.5px] leading-snug text-ink/70 dark:text-white/70"
+                          contentEditable={isLiveVoice}
+                          suppressContentEditableWarning
+                          onBlur={(e) =>
+                            updatePhraseText(p.id, e.currentTarget.textContent || "")
+                          }
+                          className={`text-[11.5px] leading-snug text-ink/70 dark:text-white/70 ${
+                            isLiveVoice
+                              ? "cursor-text rounded px-1 -mx-1 outline-none focus:bg-black/5 dark:focus:bg-white/10"
+                              : ""
+                          }`}
                         >
                           {p.text}
                         </motion.p>
                       ))}
 
                     </AnimatePresence>
+
 
                   </div>
 
