@@ -7,7 +7,7 @@ export default function TryItLive() {
   return (
     <section id="demo" className="relative py-28 sm:py-36 overflow-hidden">
       <div className="absolute inset-0 bg-grad-hero opacity-60 pointer-events-none" />
-      <div className="relative mx-auto max-w-3xl px-6 text-center">
+<div className="relative mx-auto max-w-5xl px-6 text-center">
         <p className="eyebrow text-electric mb-4">The real thing</p>
         <h2 className="font-display font-semibold text-ink dark:text-white text-3xl sm:text-5xl tracking-tight mb-4 text-balance">
           Talk to it. Really.

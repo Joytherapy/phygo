@@ -329,7 +329,7 @@ export default function LiveStructuring({
 
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = "en-US";
+recognition.lang = navigator.language || "en-US";
 
     let finalTranscript = "";
 
@@ -474,7 +474,7 @@ export default function LiveStructuring({
 
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+<div className={`grid gap-6 ${variant === "full" ? "grid-cols-1" : "sm:grid-cols-2"}`}>
 
           {/* Transcript */}
 
