@@ -11,12 +11,10 @@ import {
 import {
   CATEGORIES,
   EXAMPLES,
-  categorize,
   chunkTranscript,
   type Category,
   type Phrase,
 } from "./data";
-import TranscriptPanel from "./TranscriptPanel";
 
 type Phase =
   | "idle"
@@ -41,6 +39,9 @@ export default function LiveStructuring({
   const [typedIds, setTypedIds] = useState<Set<string>>(new Set());
   const [movedIds, setMovedIds] = useState<Set<string>>(new Set());
 
+  const [aiPhrases, setAiPhrases] = useState<Phrase[]>([]);
+  const [aiError, setAiError] = useState<string | null>(null);
+
   const [justFilled, setJustFilled] = useState<Category | null>(null);
 
   const [elapsed, setElapsed] = useState<string | null>(null);
@@ -54,7 +55,6 @@ export default function LiveStructuring({
 
   const [interim, setInterim] = useState("");
 
-  // Nuovo: servirà per la barra di avanzamento AI
   const [progress, setProgress] = useState(0);
 
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -90,6 +90,9 @@ export default function LiveStructuring({
     setPhrases([]);
     setTypedIds(new Set());
     setMovedIds(new Set());
+
+    setAiPhrases([]);
+    setAiError(null);
 
     setJustFilled(null);
 
@@ -147,7 +150,7 @@ export default function LiveStructuring({
           }, finalPhrases.length * 420 + 500)
         );
       }, 550)
-          );
+    );
   }, []);
 
   const runExample = useCallback(
@@ -209,6 +212,100 @@ export default function LiveStructuring({
     return () => clearTimeout(t);
   }, [variant, runExample]);
 
+  // Chiama il vero endpoint AI e trasforma la nota SOAP
+  // nelle 4 categorie mostrate a destra.
+  const generateRealNote = useCallback(
+    async (raw: string, transcriptPhrases: Phrase[]) => {
+      setPhase("pause");
+      setProgress(30);
+      setAiError(null);
+
+      try {
+        const res = await fetch("/api/generate-note", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ transcript: raw }),
+        });
+
+        if (!res.ok) throw new Error("request failed");
+
+        const data = await res.json();
+        const note = data.note ?? {};
+
+        const built: Phrase[] = [];
+        let idx = 0;
+
+        const push = (text: string | undefined, cat: Category) => {
+          if (!text) return;
+          built.push({
+            id: `${instanceId}-ai-${Date.now()}-${idx++}`,
+            text,
+            cat,
+          });
+        };
+
+        push(note.subjective, "findings");
+        push(note.objective, "findings");
+        push(note.assessment, "assessment");
+        push(note.plan, "plan");
+
+        if (Array.isArray(note.exercises) && note.exercises.length) {
+          push(`Exercises: ${note.exercises.join(", ")}`, "plan");
+        }
+
+        push(note.summaryForPatient, "followup");
+
+        if (built.length === 0) {
+          throw new Error("empty note");
+        }
+
+        setPhase("flying");
+        setProgress(60);
+
+        // Il transcript "vola via" a sinistra...
+        setMovedIds(new Set(transcriptPhrases.map((p) => p.id)));
+
+        // ...e la nota AI compare a destra, una riga alla volta.
+        built.forEach((p, i) => {
+          timers.current.push(
+            setTimeout(() => {
+              setAiPhrases((prev) => [...prev, p]);
+              setJustFilled(p.cat);
+
+              setProgress(
+                Math.min(95, 60 + ((i + 1) / built.length) * 35)
+              );
+
+              timers.current.push(
+                setTimeout(() => setJustFilled(null), 550)
+              );
+            }, i * 420)
+          );
+        });
+
+        timers.current.push(
+          setTimeout(() => {
+            setPhase("done");
+            setProgress(100);
+            setElapsed(
+              (
+                (performance.now() - startedAt.current) /
+                1000
+              ).toFixed(1)
+            );
+          }, built.length * 420 + 500)
+        );
+      } catch (err) {
+        console.error("Errore generazione nota reale:", err);
+        setAiError(
+          "Non sono riuscito a generare la nota clinica. Riprova."
+        );
+        setPhase("idle");
+      }
+    },
+    [instanceId]
+  );
+
   const startVoice = () => {
     const SR =
       (window as any).SpeechRecognition ||
@@ -268,19 +365,16 @@ export default function LiveStructuring({
 
       const chunks = chunkTranscript(raw);
 
-      const withIds: Phrase[] = chunks.map((text, i) => ({
+      const transcriptPhrases: Phrase[] = chunks.map((text, i) => ({
         id: `${instanceId}-voice-${Date.now()}-${i}`,
         text,
-        cat: categorize(text),
+        cat: "findings",
       }));
 
-      setPhrases(withIds);
+      setPhrases(transcriptPhrases);
+      setTypedIds(new Set(transcriptPhrases.map((p) => p.id)));
 
-      setTypedIds(
-        new Set(withIds.map((p) => p.id))
-      );
-
-      runFlyPhase(withIds);
+      generateRealNote(raw, transcriptPhrases);
     };
 
     recognitionRef.current = recognition;
@@ -302,7 +396,8 @@ export default function LiveStructuring({
       !movedIds.has(p.id) &&
       (isLiveVoice || typedIds.has(p.id))
   );
-    return (
+
+  return (
     <div className={className}>
       <div className="relative overflow-hidden rounded-[28px] border border-white/10 glass-strong shadow-lift p-7 sm:p-9">
 
@@ -384,11 +479,7 @@ export default function LiveStructuring({
           {/* Transcript */}
 
           <div className="flex min-h-[170px] flex-col">
-<TranscriptPanel>
-  <div className="text-sm text-ink/60 dark:text-white/60">
-    Transcript coming soon...
-  </div>
-</TranscriptPanel>
+
             {phase === "idle" && (
               <div className="flex flex-1 flex-col items-center justify-center gap-5 py-8 text-center">
 
@@ -410,6 +501,12 @@ export default function LiveStructuring({
                     ? "Speak naturally. Phygo structures everything automatically."
                     : "Watch AI transform a real consultation into structured documentation."}
                 </p>
+
+                {aiError && (
+                  <p className="max-w-[250px] text-xs text-red-500">
+                    {aiError}
+                  </p>
+                )}
 
               </div>
             )}
@@ -482,9 +579,7 @@ export default function LiveStructuring({
                 </div>
 
               </>
-        
-
-                        )}
+            )}
 
             {phase === "done" && (
               <motion.div
@@ -518,11 +613,11 @@ export default function LiveStructuring({
 
             {CATEGORIES.map((cat) => {
 
-              const items = phrases.filter(
-                (p) =>
-                  movedIds.has(p.id) &&
-                  p.cat === cat.key
-              );
+              const items = isLiveVoice
+                ? aiPhrases.filter((p) => p.cat === cat.key)
+                : phrases.filter(
+                    (p) => movedIds.has(p.id) && p.cat === cat.key
+                  );
 
               return (
                 <motion.div
