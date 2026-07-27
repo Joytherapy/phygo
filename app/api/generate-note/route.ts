@@ -7,7 +7,7 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { transcript } = await request.json();
+const { transcript, lang } = await request.json();
 
     if (!transcript || typeof transcript !== "string") {
       return NextResponse.json(
@@ -24,6 +24,8 @@ export async function POST(request: NextRequest) {
                                                  content: `You are an experienced physiotherapist writing clinical documentation. Turn a short voice note (recorded by the practitioner at the end of a session) into a thorough, structured, professional clinical note and treatment plan — a draft the practitioner will review and edit before it is used.
 
 Detect the language the transcript is written in (it may be Italian, English, Spanish, French, or another language) and respond in that SAME language.
+The user has selected "${lang || 'auto'}" as the expected spoken language for this recording — treat this as a strong hint: if the transcript is unclear or ambiguous, prefer this language; only override it if the transcript clearly and unambiguously uses a different language.
+
 
 Writing style:
 - Write like a clinician documenting a case, NOT like someone paraphrasing what was said.
@@ -47,6 +49,8 @@ Respond ALWAYS and ONLY in valid JSON, with this exact structure:
   "plan": "structured, phased treatment plan with brief rationale",
   "exercises": ["exercise 1 with sets/reps/frequency", "exercise 2 with sets/reps/frequency", "exercise 3 with sets/reps/frequency"],
   "summaryForPatient": "short, simple message to send the patient via WhatsApp — plain language, not clinical jargon"
+  "language": "the two-letter ISO code of the language you detected and used for this entire response (it, en, es, fr, or others)",
+
 }
 
 If a field truly cannot be inferred even loosely from the transcript and condition, leave it as an empty string.`,

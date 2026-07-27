@@ -44,6 +44,10 @@ export default function LiveStructuring({
 
   const [aiPhrases, setAiPhrases] = useState<Phrase[]>([]);
   const [finalNote, setFinalNote] = useState<any>(null);
+  const [clinicalInsight, setClinicalInsight] = useState<any>(null);
+  const [rehabPhases, setRehabPhases] = useState<any[]>([]);
+
+
   const [phraseFields, setPhraseFields] = useState<Record<string, string>>({});
   const [aiError, setAiError] = useState<string | null>(null);
 
@@ -55,6 +59,7 @@ export default function LiveStructuring({
     useState<string | null>(null);
 
   const [isLiveVoice, setIsLiveVoice] = useState(false);
+const [recordingLang, setRecordingLang] = useState("it-IT");
 
   const [voiceSupported, setVoiceSupported] = useState(false);
 
@@ -227,16 +232,35 @@ export default function LiveStructuring({
 
       try {
         const res = await fetch("/api/generate-note", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ transcript: raw }),
-        });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ transcript: raw, lang: recordingLang }),
+});
+
 
         if (!res.ok) throw new Error("request failed");
 
         const data = await res.json();
         const note = data.note ?? {};
         setFinalNote(note);
+                if (note.assessment) {
+          try {
+            const kbRes = await fetch("/api/knowledge-lookup", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ assessment: note.assessment, lang: note.language || 'it' }),
+            });
+            const kbData = await kbRes.json();
+setClinicalInsight(kbData.match || null);
+setRehabPhases(kbData.phases || []);
+          } catch (kbErr) {
+            console.error("Knowledge lookup failed:", kbErr);
+            setClinicalInsight(null);
+            setRehabPhases([]);
+
+          }
+        }
+
 
                 const built: Phrase[] = [];
         const fieldMap: Record<string, string> = {};
@@ -310,7 +334,7 @@ export default function LiveStructuring({
         setPhase("idle");
       }
     },
-    [instanceId]
+    [instanceId, recordingLang]
   );
 
   const startVoice = () => {
@@ -336,7 +360,7 @@ export default function LiveStructuring({
 
     recognition.continuous = true;
     recognition.interimResults = true;
-recognition.lang = navigator.language || "en-US";
+recognition.lang = recordingLang;
 
     let finalTranscript = "";
 
@@ -803,6 +827,84 @@ recognition.lang = navigator.language || "en-US";
             })}
 
           </div>
+                  {clinicalInsight && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 p-5"
+          >
+            <div className="mb-3 flex items-center gap-2">
+              <span className="eyebrow text-emerald-700 dark:text-emerald-400">
+                Clinical Insights
+              </span>
+            </div>
+            <h4 className="text-sm font-semibold text-ink mb-3">
+              {clinicalInsight.condition_name}
+            </h4>
+            <div className="grid grid-cols-2 gap-3 text-sm text-ink/80">
+              <div>
+                <p className="font-medium mb-1">Goals</p>
+                <p className="text-ink/60">{clinicalInsight.goals}</p>
+              </div>
+              <div>
+                <p className="font-medium mb-1">Clinical Tests</p>
+                <p className="text-ink/60">{clinicalInsight.clinical_tests}</p>
+              </div>
+              <div>
+                <p className="font-medium mb-1">Red Flags</p>
+                <p className="text-ink/60">{clinicalInsight.red_flags}</p>
+              </div>
+              <div>
+                <p className="font-medium mb-1">Typical Exercises</p>
+                <p className="text-ink/60">{clinicalInsight.typical_exercises}</p>
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-ink/40">
+              Source: {clinicalInsight.source} ({clinicalInsight.source_date}) — Clinical decision support, not a diagnosis.
+            </p>
+          </motion.div>
+        )}
+                {rehabPhases.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="mt-4 rounded-2xl border border-black/5 bg-mist p-5"
+          >
+            <span className="eyebrow text-ink/35 dark:text-white/35 mb-3 block">
+              Rehab Protocol
+            </span>
+            <div className="space-y-4">
+              {rehabPhases.map((phase, i) => (
+                <div key={phase.id} className="relative pl-6">
+                  <div className="absolute left-0 top-1 w-3 h-3 rounded-full bg-electric" />
+                  {i < rehabPhases.length - 1 && (
+                    <div className="absolute left-[5px] top-4 w-px h-full bg-black/10" />
+                  )}
+                  <p className="text-sm font-semibold text-ink">
+                    Phase {phase.phase_number}: {phase.phase_name}
+                  </p>
+                  <p className="text-xs text-ink/40 mb-2">{phase.typical_duration}</p>
+                  <p className="text-sm text-ink/70">
+                    <span className="font-medium">Goals: </span>
+                    {phase.phase_goals}
+                  </p>
+                  <p className="text-sm text-ink/70 mt-1">
+                    <span className="font-medium">Exercises: </span>
+                    {phase.phase_exercises}
+                  </p>
+                  <p className="text-xs text-ink/40 mt-1">
+                    <span className="font-medium">Progress when: </span>
+                    {phase.criteria_to_progress}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+
         </div>
 
         {/* Controls */}
@@ -827,6 +929,8 @@ recognition.lang = navigator.language || "en-US";
 
           {variant === "full" &&
             voiceSupported && (
+              <>
+
               <button
                 onClick={
                   phase === "listening"
@@ -849,6 +953,19 @@ recognition.lang = navigator.language || "en-US";
                   ? "Stop Recording"
                   : "Start Recording"}
               </button>
+                      <select
+          value={recordingLang}
+          onChange={(e) => setRecordingLang(e.target.value)}
+          className="ml-2 text-[11px] rounded-lg border border-black/10 bg-white/80 dark:bg-white/10 px-2 py-1 text-ink/70 dark:text-white/70"
+        >
+          <option value="it-IT">🇮🇹 Italiano</option>
+          <option value="en-US">🇬🇧 English</option>
+          <option value="es-ES">🇪🇸 Español</option>
+          <option value="fr-FR">🇫🇷 Français</option>
+        </select>
+        </>
+
+
           )}
 
           {variant === "full" &&
