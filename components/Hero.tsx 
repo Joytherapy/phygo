@@ -188,9 +188,9 @@ export default function Hero() {
             <MagneticButton
               href="#pricing"
               className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-ink px-7 py-3.5 text-sm font-semibold text-white shadow-lift transition-all hover:shadow-glow shimmer-sweep"
-          >
-            Start Free
-            <ArrowRight
+            >
+              Start Free
+              <ArrowRight
                 size={16}
                 className="transition-transform group-hover:translate-x-1"
               />
@@ -200,11 +200,11 @@ export default function Hero() {
               href="#demo"
               strength={12}
               className="inline-flex items-center gap-2 rounded-full glass px-7 py-3.5 text-sm font-semibold text-ink dark:text-white shadow-soft transition-all hover:shadow-glow"
-          >
-            <Mic size={15} />
-            See Live Demo
-          </MagneticButton>
-        </motion.div>
+            >
+              <Mic size={15} />
+              See Live Demo
+            </MagneticButton>
+          </motion.div>
 
           <motion.div
             variants={fadeUp}
@@ -235,7 +235,8 @@ export default function Hero() {
           ease: [0.22, 1, 0.36, 1],
         }}
         style={{ y: boardY }}
-        className="mt-20 mx-auto max-w-3xl px-6"
+className="mt-20 mx-auto max-w-3xl px-6"
+
       >
         <LiveDemo />
       </motion.div>

@@ -686,7 +686,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
 
         </div>
 
-<div className={`grid gap-6 ${variant === "full" ? "grid-cols-1" : "sm:grid-cols-2"}`}>
+<div className={`grid gap-6 items-start ${variant === "full" ? "grid-cols-1" : "sm:grid-cols-2"}`}>
 
           {/* Transcript */}
 

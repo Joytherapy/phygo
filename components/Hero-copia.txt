@@ -84,8 +84,8 @@ export default function Hero() {
         />
       </motion.div>
 
-      <div className="relative mx-auto max-w-3xl px-6 text-center">
-        <motion.div style={{ y: textY }}>
+      <div className="relative mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-20 items-start">
+<motion.div style={{ y: textY }}>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -133,7 +133,7 @@ export default function Hero() {
                         pathLength: 0,
                         opacity: 0,
                       }}
-                      animate={{ pathLength: 1, opacity: 1 }}
+                                            animate={{ pathLength: 1, opacity: 1 }}
                       transition={{
                         duration: 0.7,
                         delay: 2.15,
@@ -171,7 +171,7 @@ export default function Hero() {
             initial="hidden"
             animate="show"
             custom={0}
-            className="mt-8 max-w-xl mx-auto text-lg leading-8 text-ink/65 dark:text-white/65 text-balance"
+            className="mt-8 max-w-xl text-lg leading-8 text-ink/65 dark:text-white/65 text-balance"
           >
             Transform every patient conversation into structured clinical notes,
             treatment plans, home exercise programs and professional PDF reports
@@ -183,14 +183,14 @@ export default function Hero() {
             initial="hidden"
             animate="show"
             custom={1}
-            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
+            className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4"
           >
             <MagneticButton
               href="#pricing"
               className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-ink px-7 py-3.5 text-sm font-semibold text-white shadow-lift transition-all hover:shadow-glow shimmer-sweep"
-          >
-            Start Free
-            <ArrowRight
+            >
+              Start Free
+              <ArrowRight
                 size={16}
                 className="transition-transform group-hover:translate-x-1"
               />
@@ -200,18 +200,18 @@ export default function Hero() {
               href="#demo"
               strength={12}
               className="inline-flex items-center gap-2 rounded-full glass px-7 py-3.5 text-sm font-semibold text-ink dark:text-white shadow-soft transition-all hover:shadow-glow"
-          >
-            <Mic size={15} />
-            See Live Demo
-          </MagneticButton>
-        </motion.div>
+            >
+              <Mic size={15} />
+              See Live Demo
+            </MagneticButton>
+          </motion.div>
 
           <motion.div
             variants={fadeUp}
             initial="hidden"
             animate="show"
             custom={2}
-            className="mt-14 flex flex-wrap items-center justify-center gap-6 text-xs eyebrow text-ink/45 dark:text-white/45"
+            className="mt-14 flex flex-wrap items-center gap-6 text-xs eyebrow text-ink/45 dark:text-white/45"
           >
             <span>Free forever plan</span>
 
@@ -224,21 +224,21 @@ export default function Hero() {
             <span>No credit card required</span>
           </motion.div>
         </motion.div>
-      </div>
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.94 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{
-          duration: 0.9,
-          delay: 1.0,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-        style={{ y: boardY }}
-        className="mt-20 mx-auto max-w-3xl px-6"
-      >
-        <LiveDemo />
-      </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.94 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            duration: 0.9,
+            delay: 1.0,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          style={{ y: boardY }}
+        >
+         
+<LiveDemo />
+        </motion.div>
+      </div>
 
       <motion.a
         href="#logos"
@@ -264,3 +264,4 @@ export default function Hero() {
     </section>
   );
 }
+                      
