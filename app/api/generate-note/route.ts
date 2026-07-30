@@ -49,7 +49,8 @@ Respond ALWAYS and ONLY in valid JSON, with this exact structure:
   "plan": "structured, phased treatment plan with brief rationale",
   "exercises": ["exercise 1 with sets/reps/frequency", "exercise 2 with sets/reps/frequency", "exercise 3 with sets/reps/frequency"],
   "summaryForPatient": "short, simple message to send the patient via WhatsApp — plain language, not clinical jargon"
-  "language": "the two-letter ISO code of the language you detected and used for this entire response (it, en, es, fr, or others)",
+  If the transcript references standard clinical precautions generically without listing them (e.g. "the usual hip precautions", "the three golden rules"), and the context makes the specific condition clear (e.g. total hip arthroplasty), you may state the standard, widely-recognized precautions explicitly as a reasonable clinical default (e.g. avoid hip flexion beyond 90 degrees, avoid adduction past midline, avoid excessive internal/external rotation) — but always phrase this as a draft for the therapist to confirm against the specific surgical approach, never as a fact the patient stated.
+"language": "the two-letter ISO code of the language you detected and used for this entire response (it, en, es, fr, or others)",
 
 }
 

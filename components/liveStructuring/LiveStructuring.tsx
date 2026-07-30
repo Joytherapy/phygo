@@ -8,7 +8,15 @@ import {
   CheckCircle2,
   Sparkles,
   Download,
+  Target,
+  Stethoscope,
+  AlertTriangle,
+  Dumbbell,
+    FileText,
+  MessageCircle,
+
 } from "lucide-react";
+
 import jsPDF from "jspdf";
 
 import {
@@ -18,8 +26,15 @@ import {
   type Category,
   type Phrase,
 } from "./data";
+const CATEGORY_ICONS: Record<string, any> = {
+  findings: Stethoscope,
+  assessment: Target,
+  plan: FileText,
+  followup: MessageCircle,
+};
 
 type Phase =
+
   | "idle"
   | "typing"
   | "listening"
@@ -46,6 +61,16 @@ export default function LiveStructuring({
   const [finalNote, setFinalNote] = useState<any>(null);
   const [clinicalInsight, setClinicalInsight] = useState<any>(null);
   const [rehabPhases, setRehabPhases] = useState<any[]>([]);
+  const [evidenceLevel, setEvidenceLevel] = useState<string | null>(null);
+const [matchedKeyword, setMatchedKeyword] = useState<string | null>(null);
+const [showWhy, setShowWhy] = useState(false);
+const [showAskPhygo, setShowAskPhygo] = useState(false);
+const [askQuestion, setAskQuestion] = useState("");
+const [askAnswer, setAskAnswer] = useState<string | null>(null);
+const [askLoading, setAskLoading] = useState(false);
+
+
+
 
 
   const [phraseFields, setPhraseFields] = useState<Record<string, string>>({});
@@ -141,7 +166,7 @@ const [recordingLang, setRecordingLang] = useState("it-IT");
               timers.current.push(
                 setTimeout(() => setJustFilled(null), 550)
               );
-            }, i * 420)
+            }, i * 200)
           );
         });
 
@@ -157,7 +182,7 @@ const [recordingLang, setRecordingLang] = useState("it-IT");
                 1000
               ).toFixed(1)
             );
-          }, finalPhrases.length * 420 + 500)
+          }, finalPhrases.length * 200 + 500)
         );
       }, 550)
     );
@@ -243,7 +268,10 @@ const [recordingLang, setRecordingLang] = useState("it-IT");
         const data = await res.json();
         const note = data.note ?? {};
         setFinalNote(note);
-                if (note.assessment) {
+
+        let rehabPhasesLocal: any[] = [];
+
+        if (note.assessment) {
           try {
             const kbRes = await fetch("/api/knowledge-lookup", {
               method: "POST",
@@ -253,6 +281,10 @@ body: JSON.stringify({ assessment: note.assessment, lang: note.language || 'it' 
             const kbData = await kbRes.json();
 setClinicalInsight(kbData.match || null);
 setRehabPhases(kbData.phases || []);
+setEvidenceLevel(kbData.evidenceLevel || null);
+setMatchedKeyword(kbData.matchedKeyword || null);
+rehabPhasesLocal = kbData.phases || [];
+
           } catch (kbErr) {
             console.error("Knowledge lookup failed:", kbErr);
             setClinicalInsight(null);
@@ -261,8 +293,14 @@ setRehabPhases(kbData.phases || []);
           }
         }
 
+        let planText = note.plan;
+        if (rehabPhasesLocal.length > 0) {
+          const primaFase = rehabPhasesLocal[0];
+          planText = `${note.plan}\n\nSecondo il protocollo evidence-based per questa condizione (${primaFase.phase_name}): ${primaFase.phase_goals}. ${primaFase.phase_exercises}`;
+          setFinalNote((prev: any) => (prev ? { ...prev, plan: planText } : prev));
+        }
 
-                const built: Phrase[] = [];
+        const built: Phrase[] = [];
         const fieldMap: Record<string, string> = {};
         let idx = 0;
 
@@ -276,7 +314,7 @@ setRehabPhases(kbData.phases || []);
         push(note.subjective, "findings", "subjective");
         push(note.objective, "findings", "objective");
         push(note.assessment, "assessment", "assessment");
-        push(note.plan, "plan", "plan");
+        push(planText, "plan", "plan");
 
         if (Array.isArray(note.exercises) && note.exercises.length) {
           push(`Exercises: ${note.exercises.join(", ")}`, "plan", "_exercisesText");
@@ -310,7 +348,7 @@ setRehabPhases(kbData.phases || []);
               timers.current.push(
                 setTimeout(() => setJustFilled(null), 550)
               );
-            }, i * 420)
+            }, i * 200)
           );
         });
 
@@ -324,7 +362,7 @@ setRehabPhases(kbData.phases || []);
                 1000
               ).toFixed(1)
             );
-          }, built.length * 420 + 500)
+          }, built.length * 200 + 500)
         );
       } catch (err) {
         console.error("Errore generazione nota reale:", err);
@@ -422,6 +460,29 @@ recognition.lang = recordingLang;
       setFinalNote((prev: any) => (prev ? { ...prev, [field]: newText } : prev));
     }
   };
+const askPhygoAI = async () => {
+  if (!askQuestion.trim()) return;
+  setAskLoading(true);
+  setAskAnswer(null);
+  try {
+    const noteContext = finalNote
+      ? `Subjective: ${finalNote.subjective || ""}. Objective: ${finalNote.objective || ""}. Assessment: ${finalNote.assessment || ""}. Plan: ${finalNote.plan || ""}.`
+      : "";
+    const res = await fetch("/api/ask-phygo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: askQuestion, noteContext }),
+    });
+    const data = await res.json();
+    setAskAnswer(data.answer || "Non sono riuscito a generare una risposta.");
+  } catch (err) {
+    console.error("Errore ask-phygo:", err);
+    setAskAnswer("Errore durante la richiesta. Riprova.");
+  } finally {
+    setAskLoading(false);
+  }
+};
+
 
   const stopVoice = () =>
     recognitionRef.current?.stop?.();
@@ -431,13 +492,23 @@ recognition.lang = recordingLang;
     if (!finalNote) return;
 
     const doc = new jsPDF();
-    const marginLeft = 20;
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const usableWidth = pageWidth - marginLeft * 2;
-    let y = 20;
+const marginLeft = 20;
+const pageWidth = doc.internal.pageSize.getWidth();
+const usableWidth = pageWidth - marginLeft * 2;
+let y = 20;
 
-    const addSection = (title: string, content?: string) => {
-      if (!content) return;
+const sanitizeForPdf = (text: string) =>
+  text
+    .replace(/≥/g, ">=")
+    .replace(/≤/g, "<=")
+    .replace(/[""]/g, '"')
+    .replace(/['']/g, "'")
+    .replace(/[–—]/g, "-");
+
+const addSection = (title: string, content?: string) => {
+  if (!content) return;
+  content = sanitizeForPdf(content);
+
       if (y > 260) {
         doc.addPage();
         y = 20;
@@ -489,7 +560,8 @@ recognition.lang = recordingLang;
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
       finalNote.exercises.forEach((ex: string) => {
-        const lines = doc.splitTextToSize(`- ${ex}`, usableWidth);
+        const lines = doc.splitTextToSize(`- ${sanitizeForPdf(ex)}`, usableWidth);
+
         lines.forEach((line: string) => {
           if (y > 280) {
             doc.addPage();
@@ -504,7 +576,25 @@ recognition.lang = recordingLang;
 
     addSection("Patient Summary", finalNote.summaryForPatient);
 
-    doc.save(`phygo-note-${Date.now()}.pdf`);
+if (clinicalInsight) {
+  addSection(
+    "Clinical Insights",
+    `${clinicalInsight.condition_name}\n\nGoals: ${clinicalInsight.goals}\nClinical Tests: ${clinicalInsight.clinical_tests}\nRed Flags: ${clinicalInsight.red_flags}\nTypical Exercises: ${clinicalInsight.typical_exercises}\n\nSource: ${clinicalInsight.source} (${clinicalInsight.source_date})`
+  );
+}
+
+if (rehabPhases.length > 0) {
+  const phasesText = rehabPhases
+    .map(
+      (p) =>
+        `Phase ${p.phase_number}: ${p.phase_name} (${p.typical_duration})\nGoals: ${p.phase_goals}\nExercises: ${p.phase_exercises}\nProgress when: ${p.criteria_to_progress}`
+    )
+    .join("\n\n");
+  addSection("Rehab Protocol", phasesText);
+}
+
+doc.save(`phygo-note-${Date.now()}.pdf`);
+
   };
 
   const isTranscriptPhase =
@@ -521,7 +611,7 @@ recognition.lang = recordingLang;
 
   return (
     <div className={className}>
-      <div className="relative overflow-hidden rounded-[28px] border border-white/10 glass-strong shadow-lift p-7 sm:p-9">
+<div className="relative overflow-hidden rounded-[28px] !border-4 !border-red-500 glass-strong shadow-lift p-7 sm:p-9">
 
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-electric/60 to-transparent" />
 
@@ -679,13 +769,17 @@ recognition.lang = recordingLang;
                         initial={{
                           opacity: 0,
                           y: 8,
+                          filter: "blur(0px)",
                         }}
                         animate={{
                           opacity: 1,
                           y: 0,
+                          filter: "blur(0px)",
                         }}
                         exit={{
                           opacity: 0,
+                          filter: "blur(6px)",
+                          transition: { duration: 0.25 },
                         }}
                         transition={{
                           duration: .4,
@@ -743,166 +837,255 @@ recognition.lang = recordingLang;
 
           {/* AI Output */}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-            {CATEGORIES.map((cat) => {
+  {CATEGORIES.map((cat) => {
 
-              const items = isLiveVoice
-                ? aiPhrases.filter((p) => p.cat === cat.key)
-                : phrases.filter(
-                    (p) => movedIds.has(p.id) && p.cat === cat.key
-                  );
+    const items = isLiveVoice
+      ? aiPhrases.filter((p) => p.cat === cat.key)
+      : phrases.filter(
+          (p) => movedIds.has(p.id) && p.cat === cat.key
+        );
 
-              return (
-                <motion.div
-                  key={cat.key}
-                  animate={
-                    justFilled === cat.key
-                      ? {
-                          scale: [1, 1.03, 1],
-                          boxShadow:
-                            "0 0 0 2px rgba(50,214,160,.45)",
-                        }
-                      : {
-                          scale: 1,
-                          boxShadow:
-                            "0 0 0 0 rgba(0,0,0,0)",
-                        }
-                  }
-                  transition={{
-                    duration: .45,
-                  }}
-                  className="rounded-2xl border border-black/5 bg-mist/70 p-3 dark:border-white/5 dark:bg-white/5"
-                >
+    const Icon = CATEGORY_ICONS[cat.key] || Stethoscope;
 
-                  <div className="mb-2 flex items-center justify-between">
+    return (
+      <motion.div
+        key={cat.key}
+        animate={
+          justFilled === cat.key
+            ? {
+                scale: [1, 1.02, 1],
+                boxShadow:
+                  "0 0 0 2px rgba(50,214,160,.35)",
+              }
+            : {
+                scale: 1,
+                boxShadow:
+                  "0 0 0 0 rgba(0,0,0,0)",
+              }
+        }
+        transition={{
+          duration: .45,
+        }}
+        className="rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-white/[0.03] p-5 shadow-sm"
+      >
 
-                    <span className="eyebrow text-ink/35 dark:text-white/35">
-                      {cat.label}
-                    </span>
+        <div className="mb-3 flex items-center justify-between">
 
-                    {items.length > 0 && (
-                      <CheckCircle2
-                        size={13}
-                        className="text-emerald"
-                      />
-                    )}
-
-                  </div>
-
-                  <div className="space-y-2 min-h-[74px]">
-
-                    <AnimatePresence>
-
-                      {items.map((p) => (
-                        <motion.p
-                          key={p.id}
-                          layout
-                          layoutId={`${instanceId}-${p.id}`}
-                          transition={{
-                            duration: .45,
-                          }}
-                          contentEditable={isLiveVoice}
-                          suppressContentEditableWarning
-                          onBlur={(e) =>
-                            updatePhraseText(p.id, e.currentTarget.textContent || "")
-                          }
-                          className={`text-[11.5px] leading-snug text-ink/70 dark:text-white/70 ${
-                            isLiveVoice
-                              ? "cursor-text rounded px-1 -mx-1 outline-none focus:bg-black/5 dark:focus:bg-white/10"
-                              : ""
-                          }`}
-                        >
-                          {p.text}
-                        </motion.p>
-                      ))}
-
-                    </AnimatePresence>
-
-
-                  </div>
-
-                </motion.div>
-              );
-            })}
-
-          </div>
-                  {clinicalInsight && (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 p-5"
-          >
-            <div className="mb-3 flex items-center gap-2">
-              <span className="eyebrow text-emerald-700 dark:text-emerald-400">
-                Clinical Insights
-              </span>
-            </div>
-            <h4 className="text-sm font-semibold text-ink mb-3">
-              {clinicalInsight.condition_name}
-            </h4>
-            <div className="grid grid-cols-2 gap-3 text-sm text-ink/80">
-              <div>
-                <p className="font-medium mb-1">Goals</p>
-                <p className="text-ink/60">{clinicalInsight.goals}</p>
-              </div>
-              <div>
-                <p className="font-medium mb-1">Clinical Tests</p>
-                <p className="text-ink/60">{clinicalInsight.clinical_tests}</p>
-              </div>
-              <div>
-                <p className="font-medium mb-1">Red Flags</p>
-                <p className="text-ink/60">{clinicalInsight.red_flags}</p>
-              </div>
-              <div>
-                <p className="font-medium mb-1">Typical Exercises</p>
-                <p className="text-ink/60">{clinicalInsight.typical_exercises}</p>
-              </div>
-            </div>
-            <p className="mt-3 text-xs text-ink/40">
-              Source: {clinicalInsight.source} ({clinicalInsight.source_date}) — Clinical decision support, not a diagnosis.
-            </p>
-          </motion.div>
-        )}
-                {rehabPhases.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="mt-4 rounded-2xl border border-black/5 bg-mist p-5"
-          >
-            <span className="eyebrow text-ink/35 dark:text-white/35 mb-3 block">
-              Rehab Protocol
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-electric/10 text-electric">
+              <Icon size={14} />
             </span>
-            <div className="space-y-4">
-              {rehabPhases.map((phase, i) => (
-                <div key={phase.id} className="relative pl-6">
-                  <div className="absolute left-0 top-1 w-3 h-3 rounded-full bg-electric" />
-                  {i < rehabPhases.length - 1 && (
-                    <div className="absolute left-[5px] top-4 w-px h-full bg-black/10" />
-                  )}
-                  <p className="text-sm font-semibold text-ink">
-                    Phase {phase.phase_number}: {phase.phase_name}
-                  </p>
-                  <p className="text-xs text-ink/40 mb-2">{phase.typical_duration}</p>
-                  <p className="text-sm text-ink/70">
-                    <span className="font-medium">Goals: </span>
-                    {phase.phase_goals}
-                  </p>
-                  <p className="text-sm text-ink/70 mt-1">
-                    <span className="font-medium">Exercises: </span>
-                    {phase.phase_exercises}
-                  </p>
-                  <p className="text-xs text-ink/40 mt-1">
-                    <span className="font-medium">Progress when: </span>
-                    {phase.criteria_to_progress}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
+            <span className="eyebrow text-ink/40 dark:text-white/40">
+              {cat.label}
+            </span>
+          </div>
+
+          {items.length > 0 && (
+            <CheckCircle2
+              size={14}
+              className="text-emerald"
+            />
+          )}
+
+        </div>
+
+        <div className="space-y-2.5 min-h-[74px]">
+
+          <AnimatePresence>
+
+            {items.map((p) => (
+              <motion.p
+                key={p.id}
+                layout
+                layoutId={`${instanceId}-${p.id}`}
+                transition={{
+                  duration: .28,
+                }}
+                contentEditable={isLiveVoice}
+                suppressContentEditableWarning
+                onBlur={(e) =>
+                  updatePhraseText(p.id, e.currentTarget.textContent || "")
+                }
+                className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${
+                  isLiveVoice
+                    ? "cursor-text rounded px-1 -mx-1 outline-none focus:bg-black/5 dark:focus:bg-white/10"
+                    : ""
+                }`}
+              >
+                {p.text}
+              </motion.p>
+            ))}
+
+          </AnimatePresence>
+
+
+        </div>
+
+      </motion.div>
+    );
+  })}
+
+</div>
+
+            {clinicalInsight && (
+  <motion.div
+    initial={{ opacity: 0, y: 12 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4 }}
+    className="mt-4 relative overflow-hidden rounded-[24px] border border-[#0F1B2E]/10 dark:border-white/10 bg-gradient-to-br from-[#0F1B2E]/[0.02] to-white dark:from-white/[0.02] dark:to-white/[0.03] p-6 shadow-sm"
+  >
+    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald/50 to-transparent" />
+
+    <div className="flex items-start justify-between mb-5 gap-3">
+      <div>
+        <span className="eyebrow text-emerald-600 dark:text-emerald-400">
+          Clinical Insights
+        </span>
+        <h4 className="mt-1 text-base font-semibold text-ink dark:text-white">
+          {clinicalInsight.condition_name}
+        </h4>
+      </div>
+      {evidenceLevel && (
+        <span className="shrink-0 rounded-full bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+          {evidenceLevel === "high" ? "★★★★☆ Strong" : "★★★☆☆ Moderate"}
+        </span>
+      )}
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div className="flex gap-3">
+        <Target size={16} className="mt-0.5 shrink-0 text-electric" />
+        <div>
+          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Goals</p>
+          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.goals}</p>
+        </div>
+      </div>
+      <div className="flex gap-3">
+        <Stethoscope size={16} className="mt-0.5 shrink-0 text-electric" />
+        <div>
+          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Clinical Tests</p>
+          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.clinical_tests}</p>
+        </div>
+      </div>
+      <div className="flex gap-3">
+        <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-500" />
+        <div>
+          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Red Flags</p>
+          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.red_flags}</p>
+        </div>
+      </div>
+      <div className="flex gap-3">
+        <Dumbbell size={16} className="mt-0.5 shrink-0 text-electric" />
+        <div>
+          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Typical Exercises</p>
+          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.typical_exercises}</p>
+        </div>
+      </div>
+    </div>
+
+    <div className="mt-5 pt-4 border-t border-black/5 dark:border-white/10 flex items-center justify-between flex-wrap gap-2">
+      <p className="font-mono text-[11px] tracking-tight text-ink/45 dark:text-white/45">
+        {clinicalInsight.source} ({clinicalInsight.source_date}) — Clinical decision support, not a diagnosis.
+      </p>
+      {matchedKeyword && (
+        <button
+          onClick={() => setShowWhy(!showWhy)}
+          className="text-xs font-medium text-electric hover:underline"
+        >
+          Why this suggestion?
+        </button>
+      )}
+    </div>
+
+    {showWhy && matchedKeyword && (
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="mt-2 text-xs text-ink/50 dark:text-white/50"
+      >
+        Suggested because the note mentions: "{matchedKeyword}"
+      </motion.p>
+    )}
+
+    <div className="mt-4">
+      <button
+        onClick={() => setShowAskPhygo((prev) => !prev)}
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-electric hover:underline"
+      >
+        <Sparkles size={12} />
+        Ask Phygo AI for more insight
+      </button>
+      {showAskPhygo && (
+        <div className="mt-3 space-y-2 rounded-2xl bg-mist/60 dark:bg-white/5 p-4">
+          <textarea
+            value={askQuestion}
+            onChange={(e) => setAskQuestion(e.target.value)}
+            placeholder="e.g. What else should I consider for this case?"
+            className="w-full rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 p-2.5 text-xs text-ink/80 dark:text-white/80 focus:outline-none focus:ring-2 focus:ring-electric/30"
+            rows={2}
+          />
+          <button
+            onClick={askPhygoAI}
+            disabled={askLoading}
+            className="rounded-full bg-ink dark:bg-white px-4 py-1.5 text-[11px] font-semibold text-white dark:text-ink disabled:opacity-50"
+          >
+            {askLoading ? "Thinking..." : "Ask"}
+          </button>
+          {askAnswer && (
+            <p className="text-xs text-ink/70 dark:text-white/70 whitespace-pre-line leading-relaxed pt-1">
+              {askAnswer}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  </motion.div>
+)}
+{rehabPhases.length > 0 && (
+  <motion.div
+    initial={{ opacity: 0, y: 12 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4, delay: 0.1 }}
+    className="mt-4 rounded-[24px] border border-black/5 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-sm"
+  >
+    <span className="eyebrow text-ink/40 dark:text-white/40 mb-4 block">
+      Rehab Protocol
+    </span>
+
+    <div className="grid gap-4 sm:grid-cols-3">
+      {rehabPhases.map((phase) => (
+        <div key={phase.id} className="rounded-2xl bg-mist/60 dark:bg-white/5 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-electric text-[11px] font-bold text-white">
+              {phase.phase_number}
+            </span>
+            <p className="text-sm font-semibold text-ink dark:text-white">
+              {phase.phase_name}
+            </p>
+          </div>
+          <p className="text-[11px] text-ink/40 dark:text-white/40 mb-3">
+            {phase.typical_duration}
+          </p>
+          <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
+            <span className="font-medium text-ink/70 dark:text-white/70">Goals: </span>
+            {phase.phase_goals}
+          </p>
+          <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
+            <span className="font-medium text-ink/70 dark:text-white/70">Exercises: </span>
+            {phase.phase_exercises}
+          </p>
+          <p className="text-[11px] text-ink/40 dark:text-white/40 leading-relaxed">
+            <span className="font-medium">Progress when: </span>
+            {phase.criteria_to_progress}
+          </p>
+        </div>
+      ))}
+    </div>
+  </motion.div>
+)}
+
 
 
         </div>

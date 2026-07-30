@@ -23,14 +23,24 @@ const { assessment, lang } = await request.json();
       return NextResponse.json({ match: null });
     }
 
-    const assessmentLower = assessment.toLowerCase();
+const normalize = (s: string) => s.toLowerCase().replace(/['’]/g, '');
+const assessmentLower = normalize(assessment);
 
-    const match = data?.find((row) => {
-      const keywords = row.condition_keywords
-        .split(',')
-        .map((k: string) => k.trim().toLowerCase());
-      return keywords.some((keyword: string) => assessmentLower.includes(keyword));
-    });
+    let matchedKeyword: string | null = null;
+
+const match = data?.find((row) => {
+  const keywords = row.condition_keywords
+  .split(',')
+  .map((k: string) => normalize(k.trim()));
+
+  const found = keywords.find((keyword: string) => assessmentLower.includes(keyword));
+  if (found) {
+    matchedKeyword = found;
+    return true;
+  }
+  return false;
+});
+
 
     let phases: any[] = [];
     if (match) {
@@ -54,7 +64,12 @@ if (lang && lang !== 'it') {
   );
 }
 
-return NextResponse.json({ match: finalMatch || null, phases: finalPhases });
+return NextResponse.json({
+  match: finalMatch || null,
+  phases: finalPhases,
+  evidenceLevel: match?.evidence_level || null,
+  matchedKeyword: matchedKeyword || null,
+});
   } catch (err) {
     console.error('Knowledge lookup error:', err);
     return NextResponse.json({ match: null });
