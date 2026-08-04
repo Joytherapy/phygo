@@ -68,6 +68,32 @@ const [showAskPhygo, setShowAskPhygo] = useState(false);
 const [askQuestion, setAskQuestion] = useState("");
 const [askAnswer, setAskAnswer] = useState<string | null>(null);
 const [askLoading, setAskLoading] = useState(false);
+const [showTextInput, setShowTextInput] = useState(false);
+const [textInput, setTextInput] = useState("");
+
+const submitTextInput = () => {
+  const raw = textInput.trim();
+  if (!raw) return;
+
+  reset();
+  setIsLiveVoice(true);
+  setActiveLabel("Live Session");
+  setShowTextInput(false);
+  setTextInput("");
+
+  const chunks = chunkTranscript(raw);
+  const transcriptPhrases: Phrase[] = chunks.map((text, i) => ({
+    id: `${instanceId}-text-${Date.now()}-${i}`,
+    text,
+    cat: "findings",
+  }));
+
+  setPhrases(transcriptPhrases);
+  setTypedIds(new Set(transcriptPhrases.map((p) => p.id)));
+
+  generateRealNote(raw, transcriptPhrases);
+};
+
 
 
 
@@ -293,12 +319,30 @@ rehabPhasesLocal = kbData.phases || [];
           }
         }
 
-        let planText = note.plan;
+                let planText = note.plan;
         if (rehabPhasesLocal.length > 0) {
-          const primaFase = rehabPhasesLocal[0];
-          planText = `${note.plan}\n\nSecondo il protocollo evidence-based per questa condizione (${primaFase.phase_name}): ${primaFase.phase_goals}. ${primaFase.phase_exercises}`;
+          try {
+            const refineRes = await fetch("/api/refine-plan", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                transcript: raw,
+                assessment: note.assessment,
+                planDraft: note.plan,
+                phases: rehabPhasesLocal,
+                lang: note.language || recordingLang,
+              }),
+            });
+            const refineData = await refineRes.json();
+            if (refineData.plan) {
+              planText = refineData.plan;
+            }
+          } catch (refineErr) {
+            console.error("Errore refine-plan:", refineErr);
+          }
           setFinalNote((prev: any) => (prev ? { ...prev, plan: planText } : prev));
         }
+
 
         const built: Phrase[] = [];
         const fieldMap: Record<string, string> = {};
@@ -317,7 +361,7 @@ rehabPhasesLocal = kbData.phases || [];
         push(planText, "plan", "plan");
 
         if (Array.isArray(note.exercises) && note.exercises.length) {
-          push(`Exercises: ${note.exercises.join(", ")}`, "plan", "_exercisesText");
+push(`Exercises:\n${note.exercises.map((e: string) => `• ${e}`).join("\n")}`, "plan", "_exercisesText");
         }
 
         push(note.summaryForPatient, "followup", "summaryForPatient");
@@ -908,7 +952,8 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                 onBlur={(e) =>
                   updatePhraseText(p.id, e.currentTarget.textContent || "")
                 }
-                className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${
+className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseFields[p.id] === "_exercisesText" ? "whitespace-pre-line " : ""}
+
                   isLiveVoice
                     ? "cursor-text rounded px-1 -mx-1 outline-none focus:bg-black/5 dark:focus:bg-white/10"
                     : ""
@@ -1151,7 +1196,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
 
           )}
 
-          {variant === "full" &&
+                    {variant === "full" &&
             !voiceSupported && (
               <span className="ml-auto flex items-center gap-2 text-[11px] text-ink/35 dark:text-white/35">
                 <Sparkles size={12} />
@@ -1159,7 +1204,39 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
               </span>
           )}
 
+          {variant === "full" && (
+            <button
+              onClick={() => setShowTextInput((prev) => !prev)}
+              data-cursor-hover
+              className={`inline-flex items-center gap-2 rounded-full bg-mist px-4 py-2 text-[11px] font-semibold text-ink/70 transition-all hover:scale-[1.03] hover:bg-mist-dark dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20 ${voiceSupported ? "" : "ml-auto"}`}
+            >
+              <FileText size={13} />
+              Write instead
+            </button>
+          )}
+
         </div>
+
+        {variant === "full" && showTextInput && (
+          <div className="mt-4 space-y-2 rounded-2xl bg-mist/60 dark:bg-white/5 p-4">
+            <textarea
+              value={textInput}
+              onChange={(e) => setTextInput(e.target.value)}
+              placeholder="Scrivi qui le tue osservazioni sulla seduta..."
+              className="w-full rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 p-2.5 text-xs text-ink/80 dark:text-white/80 focus:outline-none focus:ring-2 focus:ring-electric/30"
+              rows={4}
+            />
+            <button
+              onClick={submitTextInput}
+              disabled={!textInput.trim()}
+              data-cursor-hover
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-electric to-emerald px-4 py-2 text-[11px] font-semibold text-white shadow-glow transition-transform hover:scale-[1.03] disabled:opacity-50"
+            >
+              Genera nota
+            </button>
+          </div>
+        )}
+
 
       </div>
     </div>
