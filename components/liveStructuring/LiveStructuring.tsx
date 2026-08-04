@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   Dumbbell,
     FileText,
+    ImagePlus,
   MessageCircle,
 
 } from "lucide-react";
@@ -69,6 +70,8 @@ const [askQuestion, setAskQuestion] = useState("");
 const [askAnswer, setAskAnswer] = useState<string | null>(null);
 const [askLoading, setAskLoading] = useState(false);
 const [showTextInput, setShowTextInput] = useState(false);
+const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+const [uploadedImagePreview, setUploadedImagePreview] = useState<string | null>(null);
 const [textInput, setTextInput] = useState("");
 
 const submitTextInput = () => {
@@ -92,6 +95,16 @@ const submitTextInput = () => {
   setTypedIds(new Set(transcriptPhrases.map((p) => p.id)));
 
   generateRealNote(raw, transcriptPhrases);
+};
+const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  setUploadedImage(file);
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setUploadedImagePreview(reader.result as string);
+  };
+  reader.readAsDataURL(file);
 };
 
 
@@ -727,6 +740,17 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
               {isLiveVoice ? "LIVE SESSION" : "AI DEMO"}
             </span>
           )}
+          <select
+  value={recordingLang}
+  onChange={(e) => setRecordingLang(e.target.value)}
+className="text-[11px] rounded-lg border border-black/15 dark:border-white/10 bg-black/[0.04] dark:bg-white/10 px-2 py-1"
+>
+  <option value="it-IT">🇮🇹 Italiano</option>
+  <option value="en-US">🇬🇧 English</option>
+  <option value="es-ES">🇪🇸 Español</option>
+  <option value="fr-FR">🇫🇷 Français</option>
+</select>
+
 
         </div>
 
@@ -1137,6 +1161,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
 
         {/* Controls */}
 
+
         <div className="mt-7 flex flex-wrap items-center gap-2">
 
           {EXAMPLES.map((ex) => (
@@ -1181,16 +1206,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                   ? "Stop Recording"
                   : "Start Recording"}
               </button>
-                      <select
-          value={recordingLang}
-          onChange={(e) => setRecordingLang(e.target.value)}
-          className="ml-2 text-[11px] rounded-lg border border-black/10 bg-white/80 dark:bg-white/10 px-2 py-1 text-ink/70 dark:text-white/70"
-        >
-          <option value="it-IT">🇮🇹 Italiano</option>
-          <option value="en-US">🇬🇧 English</option>
-          <option value="es-ES">🇪🇸 Español</option>
-          <option value="fr-FR">🇫🇷 Français</option>
-        </select>
+              
         </>
 
 
@@ -1208,12 +1224,38 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
             <button
               onClick={() => setShowTextInput((prev) => !prev)}
               data-cursor-hover
-              className={`inline-flex items-center gap-2 rounded-full bg-mist px-4 py-2 text-[11px] font-semibold text-ink/70 transition-all hover:scale-[1.03] hover:bg-mist-dark dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20 ${voiceSupported ? "" : "ml-auto"}`}
+className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold transition-all hover:scale-[1.03] ${voiceSupported ? "" : "ml-auto"}`}
+style={{
+  background: "rgba(79,124,255,0.12)",
+  color: "#4F7CFF",
+  border: "1px solid rgba(79,124,255,0.25)",
+}}
             >
               <FileText size={13} />
-              Write instead
-            </button>
-          )}
+Write instead
+</button>
+)}
+{variant === "full" && (
+  <label
+    data-cursor-hover
+className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold transition-all hover:scale-[1.03] cursor-pointer"
+style={{
+  background: "rgba(50,214,160,0.10)",
+  color: "#1a9c74",
+  border: "1px solid rgba(50,214,160,0.22)",
+}}
+  >
+    <ImagePlus size={13} />
+    Upload scan
+    <input
+      type="file"
+      accept="image/*"
+      onChange={handleImageUpload}
+      className="hidden"
+    />
+  </label>
+)}
+
 
         </div>
 
