@@ -43,6 +43,7 @@ export default function LiveDemo() {
     plan: "",
   });
   const [flashKey, setFlashKey] = useState<FieldKey | null>(null);
+  const [showEvidence, setShowEvidence] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [bars, setBars] = useState<number[]>(() => Array(NUM_BARS).fill(4));
   const waveActive = useRef(true);
@@ -70,9 +71,11 @@ export default function LiveDemo() {
       setTyped("");
       setSeconds(0);
       setFilled({ subjective: "", objective: "", assessment: "", plan: "" });
-      setTags([]);
+            setTags([]);
+      setShowEvidence(false);
       waveActive.current = true;
     }
+
 
     function runCycle() {
       if (cancelled) return;
@@ -113,9 +116,11 @@ export default function LiveDemo() {
               f++;
               if (f < FIELD_ORDER.length) {
                 cycleTimeout.current = setTimeout(fillStep, 600);
-              } else {
-                cycleTimeout.current = setTimeout(runCycle, 2800);
+                            } else {
+                setTimeout(() => setShowEvidence(true), 300);
+                cycleTimeout.current = setTimeout(runCycle, 3600);
               }
+
             }
             fillStep();
           }, 500);
@@ -162,10 +167,14 @@ export default function LiveDemo() {
             <span className="h-[8.5px] w-[8.5px] rounded-full bg-[#FEBC2E]" />
             <span className="h-[8.5px] w-[8.5px] rounded-full bg-[#28C840]" />
           </div>
-          <span className="text-[12.5px] font-medium tracking-tight text-ink dark:text-white/90">
+                    <span className="text-[12.5px] font-medium tracking-tight text-ink dark:text-white/90">
             Post-session note
           </span>
+                                        
+
+
         </div>
+
 
         {/* status + waveform */}
         <div className="relative flex items-center gap-3.5 px-5 py-3.5 border-b border-black/[0.06] dark:border-white/[0.07] bg-black/[0.012] dark:bg-white/[0.018] overflow-hidden">
@@ -263,8 +272,31 @@ export default function LiveDemo() {
           ))}
         </div>
 
+                {/* evidence-based reveal */}
+        <AnimatePresence>
+          {showEvidence && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="mx-5 mb-3 flex items-center gap-2 rounded-xl px-3.5 py-2.5"
+              style={{
+                background: "linear-gradient(90deg, rgba(50,214,160,0.12), rgba(79,124,255,0.12))",
+                border: "1px solid rgba(50,214,160,0.25)",
+              }}
+            >
+              <span className="text-base leading-none">🛡️</span>
+              <span className="text-[12px] font-semibold text-ink dark:text-white/90">
+                Evidence-based rehab protocol suggested
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* tags */}
         <div className="flex min-h-[30px] flex-wrap gap-1.5 px-5 pb-4">
+
           <AnimatePresence>
             {tags.map((t) => (
               <motion.span
