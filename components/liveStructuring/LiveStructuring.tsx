@@ -72,6 +72,9 @@ const [askLoading, setAskLoading] = useState(false);
 const [showTextInput, setShowTextInput] = useState(false);
 const [uploadedImage, setUploadedImage] = useState<File | null>(null);
 const [uploadedImagePreview, setUploadedImagePreview] = useState<string | null>(null);
+const [scanSummary, setScanSummary] = useState<string | null>(null);
+const [scanAnalyzing, setScanAnalyzing] = useState(false);
+
 const [textInput, setTextInput] = useState("");
 
 const submitTextInput = () => {
@@ -100,12 +103,30 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
   const file = e.target.files?.[0];
   if (!file) return;
   setUploadedImage(file);
+  setScanSummary(null);
+  setScanAnalyzing(true);
   const reader = new FileReader();
-  reader.onloadend = () => {
-    setUploadedImagePreview(reader.result as string);
+  reader.onloadend = async () => {
+    const base64 = reader.result as string;
+    setUploadedImagePreview(base64);
+    try {
+      const res = await fetch("/api/analyze-scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageBase64: base64 }),
+      });
+      const data = await res.json();
+      setScanSummary(data.summary || "Could not analyze document.");
+    } catch (err) {
+      console.error("Scan analysis failed:", err);
+      setScanSummary("Could not analyze document.");
+    } finally {
+      setScanAnalyzing(false);
+    }
   };
   reader.readAsDataURL(file);
 };
+
 
 
 
@@ -1254,7 +1275,29 @@ style={{
       className="hidden"
     />
   </label>
+  )}
+  {scanAnalyzing && (
+  <span className="text-[11px] text-ink/50 dark:text-white/50 italic">
+    Analyzing document...
+  </span>
 )}
+
+{scanSummary && !scanAnalyzing && (
+  <div
+    className="mt-3 w-full rounded-xl px-3.5 py-2.5 text-[12px] leading-relaxed"
+    style={{
+      background: "rgba(50,214,160,0.06)",
+      border: "1px solid rgba(50,214,160,0.18)",
+      color: "inherit",
+    }}
+  >
+    <span className="font-semibold text-[11px] uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+      Document summary
+    </span>
+    <p className="mt-1">{scanSummary}</p>
+  </div>
+)}
+
 
 
         </div>
