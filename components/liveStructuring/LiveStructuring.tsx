@@ -73,6 +73,7 @@ const [showTextInput, setShowTextInput] = useState(false);
 const [uploadedImage, setUploadedImage] = useState<File | null>(null);
 const [uploadedImagePreview, setUploadedImagePreview] = useState<string | null>(null);
 const [scanSummary, setScanSummary] = useState<string | null>(null);
+const [clinicalContext, setClinicalContext] = useState("");
 const [scanAnalyzing, setScanAnalyzing] = useState(false);
 
 const [textInput, setTextInput] = useState("");
@@ -100,32 +101,49 @@ const submitTextInput = () => {
   generateRealNote(raw, transcriptPhrases);
 };
 const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  setUploadedImage(file);
+  const files = e.target.files;
+  if (!files || files.length === 0) return;
   setScanSummary(null);
   setScanAnalyzing(true);
-  const reader = new FileReader();
-  reader.onloadend = async () => {
-    const base64 = reader.result as string;
-    setUploadedImagePreview(base64);
-    try {
-      const res = await fetch("/api/analyze-scan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageBase64: base64 }),
-      });
-      const data = await res.json();
-      setScanSummary(data.summary || "Could not analyze document.");
-    } catch (err) {
-      console.error("Scan analysis failed:", err);
-      setScanSummary("Could not analyze document.");
-    } finally {
+
+  const fileArray = Array.from(files);
+  const readers = fileArray.map(
+    (file) =>
+      new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      })
+  );
+
+  Promise.all(readers)
+    .then(async (base64Images) => {
+      try {
+        const res = await fetch("/api/analyze-scan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            images: base64Images,
+            language: recordingLang,
+            context: clinicalContext,
+          }),
+        });
+        const data = await res.json();
+        setScanSummary(data.summary || "Could not analyze document.");
+      } catch (err) {
+        console.error("Scan analysis failed:", err);
+        setScanSummary("Could not analyze document.");
+      } finally {
+        setScanAnalyzing(false);
+      }
+    })
+    .catch((err) => {
+      console.error("Failed to read files:", err);
       setScanAnalyzing(false);
-    }
-  };
-  reader.readAsDataURL(file);
+    });
 };
+
 
 
 
@@ -1257,24 +1275,48 @@ Write instead
 </button>
 )}
 {variant === "full" && (
-  <label
-    data-cursor-hover
-className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold transition-all hover:scale-[1.03] cursor-pointer"
-style={{
-  background: "rgba(50,214,160,0.10)",
-  color: "#1a9c74",
-  border: "1px solid rgba(50,214,160,0.22)",
-}}
-  >
+  <div className="w-full flex flex-col gap-2">
+  <input
+  type="text"
+  value={clinicalContext}
+  onChange={(e) => setClinicalContext(e.target.value)}
+  placeholder="Clinical context (optional): e.g. suspected osteoarthritis, acute trauma"
+  className="w-full mb-2 text-[11px] rounded-lg border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/10 px-2 py-1.5"
+/>
+ <label
+  data-cursor-hover
+  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold ${
+    !finalNote ? "cursor-not-allowed opacity-40" : ""
+  }`}
+  style={{
+    background: "rgba(50,214,160,0.10)",
+    color: "#1a9c74",
+    border: "1px solid rgba(50,214,160,0.22)",
+  }}
+  onClick={(e) => {
+    if (!finalNote) e.preventDefault();
+  }}
+>
+
     <ImagePlus size={13} />
     Upload scan
     <input
       type="file"
       accept="image/*"
+      multiple
       onChange={handleImageUpload}
+      disabled={!finalNote}
+
       className="hidden"
     />
   </label>
+  {!finalNote && (
+  <p className="text-[10px] text-ink/40 dark:text-white/40 mt-1">
+    Available after generating a session note
+  </p>
+)}
+
+  </div>
   )}
   {scanAnalyzing && (
   <span className="text-[11px] text-ink/50 dark:text-white/50 italic">
