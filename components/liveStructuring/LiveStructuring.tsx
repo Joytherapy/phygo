@@ -74,6 +74,7 @@ const [uploadedImage, setUploadedImage] = useState<File | null>(null);
 const [uploadedImagePreview, setUploadedImagePreview] = useState<string | null>(null);
 const [scanSummary, setScanSummary] = useState<string | null>(null);
 const [clinicalContext, setClinicalContext] = useState("");
+const [uploadedFileNames, setUploadedFileNames] = useState<string[]>([]);
 const [scanAnalyzing, setScanAnalyzing] = useState(false);
 
 const [textInput, setTextInput] = useState("");
@@ -107,6 +108,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
   setScanAnalyzing(true);
 
   const fileArray = Array.from(files);
+  setUploadedFileNames(fileArray.map((f) => f.name));
   const readers = fileArray.map(
     (file) =>
       new Promise<string>((resolve, reject) => {
@@ -124,10 +126,18 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            images: base64Images,
-            language: recordingLang,
-            context: clinicalContext,
-          }),
+  images: base64Images,
+  language: recordingLang,
+  context: [
+    finalNote?.subjective,
+    finalNote?.assessment,
+    finalNote?.plan,
+    clinicalContext,
+  ]
+    .filter(Boolean)
+    .join(" "),
+}),
+
         });
         const data = await res.json();
         setScanSummary(data.summary || "Could not analyze document.");
@@ -1318,6 +1328,21 @@ Write instead
 
   </div>
   )}
+  {uploadedFileNames.length > 0 && (
+  <p className="text-[11px] text-ink/50 dark:text-white/50 mt-2">
+    {uploadedFileNames.length === 1
+      ? `1 file: ${uploadedFileNames[0]}`
+      : `${uploadedFileNames.length} files: ${uploadedFileNames.join(", ")}`}
+  </p>
+)}
+{uploadedFileNames.length > 0 && (
+  <p className="text-[11px] text-ink/50 dark:text-white/50 mt-2">
+    {uploadedFileNames.length === 1
+      ? `1 file: ${uploadedFileNames[0]}`
+      : `${uploadedFileNames.length} files: ${uploadedFileNames.join(", ")}`}
+  </p>
+)}
+
   {scanAnalyzing && (
   <span className="text-[11px] text-ink/50 dark:text-white/50 italic">
     Analyzing document...
