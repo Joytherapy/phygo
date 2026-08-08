@@ -1293,6 +1293,9 @@ Write instead
   placeholder="Clinical context (optional): e.g. suspected osteoarthritis, acute trauma"
   className="w-full mb-2 text-[11px] rounded-lg border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/10 px-2 py-1.5"
 />
+<p className="text-[10px] text-ink/40 dark:text-white/40 mt-1">
+  Tip: hold Cmd (or Ctrl on Windows) and select multiple files together to analyze them as one case.
+</p>
  <label
   data-cursor-hover
   className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold ${
