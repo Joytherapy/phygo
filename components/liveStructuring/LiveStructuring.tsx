@@ -337,6 +337,13 @@ const [recordingLang, setRecordingLang] = useState("it-IT");
 
   // Chiama il vero endpoint AI e trasforma la nota SOAP
   // nelle 4 categorie mostrate a destra.
+  const formatPhaseText = (text: string) => {
+  if (!text) return "";
+  const pattern =
+    /\s*((?:Fase\s*\d+|Settimana\s*\d+|Prima settimana|Seconda settimana|Terza settimana|Quarta settimana|Quinta settimana|Sesta settimana|Settima settimana|Ottava settimana|Giorno\s*\d+|Giorni\s*\d+)\s*[:\(])/gi;
+  return text.replace(pattern, "\n\n$1").trim();
+};
+
   const generateRealNote = useCallback(
     async (raw: string, transcriptPhrases: Phrase[]) => {
       setPhase("pause");
@@ -402,7 +409,31 @@ rehabPhasesLocal = kbData.phases || [];
           } catch (refineErr) {
             console.error("Errore refine-plan:", refineErr);
           }
-          setFinalNote((prev: any) => (prev ? { ...prev, plan: planText } : prev));
+          let exercisesArr = note.exercises;
+if (rehabPhasesLocal.length > 0) {
+  try {
+    const exRes = await fetch("/api/refine-exercises", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        transcript: raw,
+        assessment: note.assessment,
+        exercisesDraft: note.exercises,
+        phases: rehabPhasesLocal,
+        lang: note.language || recordingLang,
+      }),
+    });
+    const exData = await exRes.json();
+    if (exData.exercises) {
+      exercisesArr = exData.exercises;
+    }
+  } catch (exErr) {
+    console.error("Errore refine-exercises:", exErr);
+  }
+}
+setFinalNote((prev: any) =>
+  prev ? { ...prev, plan: planText, exercises: exercisesArr } : prev
+);
         }
 
 
@@ -1174,7 +1205,12 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
 
     <div className="grid gap-4 sm:grid-cols-3">
       {rehabPhases.map((phase) => (
-        <div key={phase.id} className="rounded-2xl bg-mist/60 dark:bg-white/5 p-4">
+<div
+  key={phase.id}
+  className={`rounded-2xl bg-mist/60 dark:bg-white/5 p-4 ${
+    (phase.phase_exercises?.length || 0) > 300 ? "sm:col-span-3" : ""
+  }`}
+>
           <div className="flex items-center gap-2 mb-2">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-electric text-[11px] font-bold text-white">
               {phase.phase_number}
@@ -1192,7 +1228,8 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
           </p>
           <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
             <span className="font-medium text-ink/70 dark:text-white/70">Exercises: </span>
-            {phase.phase_exercises}
+<span className="whitespace-pre-line">{formatPhaseText(phase.phase_exercises)}
+</span>
           </p>
           <p className="text-[11px] text-ink/40 dark:text-white/40 leading-relaxed">
             <span className="font-medium">Progress when: </span>
