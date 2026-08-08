@@ -1361,7 +1361,7 @@ Write instead
     <span className="font-semibold text-[11px] uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
       Document summary
     </span>
-    <p className="mt-1">{scanSummary}</p>
+<p className="mt-1 whitespace-pre-line">{scanSummary}</p>
   </div>
 )}
 
