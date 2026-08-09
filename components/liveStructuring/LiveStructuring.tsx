@@ -358,7 +358,18 @@ const [recordingLang, setRecordingLang] = useState("it-IT");
 });
 
 
-        if (!res.ok) throw new Error("request failed");
+if (!res.ok) {
+  if (res.status === 403) {
+    const data = await res.json().catch(() => ({}));
+    setAiError(
+      data.message ||
+        "You've already tried the free demo. Sign up to keep using Phygo on unlimited patients."
+    );
+    setPhase("idle");
+    return;
+  }
+  throw new Error("request failed");
+}
 
         const data = await res.json();
         const note = data.note ?? {};
@@ -1251,20 +1262,26 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
         <div className="mt-7 flex flex-wrap items-center gap-2">
 
           {EXAMPLES.map((ex) => (
-            <button
-              key={ex.id}
-              onClick={() => runExample(ex.id)}
-              data-cursor-hover
-              className={`rounded-full px-3.5 py-2 text-[11px] font-semibold transition-all ${
-                activeLabel === ex.label &&
-                !isLiveVoice
-                  ? "bg-ink text-white dark:bg-white dark:text-ink"
-                  : "bg-mist text-ink/60 hover:scale-[1.03] hover:bg-mist-dark dark:bg-white/10 dark:text-white/60 dark:hover:bg-white/20"
-              }`}
-            >
-              {ex.label}
-            </button>
-          ))}
+  <button
+    key={ex.id}
+    onClick={() => runExample(ex.id)}
+    data-cursor-hover
+    className="rounded-full px-3 py-1.5 text-[10px] font-medium transition-all hover:scale-[1.02]"
+    style={
+      activeLabel === ex.label && !isLiveVoice
+        ? { background: "#0e0f12", color: "#ffffff" }
+        : {
+            background: "rgba(168,85,247,0.06)",
+            color: "rgba(168,85,247,0.75)",
+            border: "1px solid rgba(168,85,247,0.15)",
+          }
+    }
+  >
+    {ex.label}
+  </button>
+))}
+
+
 
           {variant === "full" &&
             voiceSupported && (
@@ -1277,7 +1294,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                     : startVoice
                 }
                 data-cursor-hover
-                className="ml-auto inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-electric to-emerald px-4 py-2 text-[11px] font-semibold text-white shadow-glow transition-transform hover:scale-[1.03]"
+className="ml-auto inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-electric to-emerald px-5 py-2.5 text-[12px] font-bold text-white shadow-[0_8px_24px_rgba(79,124,255,0.4)] transition-transform hover:scale-[1.05]"
               >
                 {phase === "listening" ? (
                   <Square
@@ -1308,14 +1325,15 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
 
           {variant === "full" && (
             <button
-              onClick={() => setShowTextInput((prev) => !prev)}
-              data-cursor-hover
-className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold transition-all hover:scale-[1.03] ${voiceSupported ? "" : "ml-auto"}`}
+  onClick={() => setShowTextInput((prev) => !prev)}
+  data-cursor-hover
+className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[12px] font-bold transition-all hover:scale-[1.05] ${voiceSupported ? "" : "ml-auto"}`}
 style={{
-  background: "rgba(79,124,255,0.12)",
+  background: "rgba(79,124,255,0.16)",
   color: "#4F7CFF",
-  border: "1px solid rgba(79,124,255,0.25)",
+  border: "1.5px solid rgba(79,124,255,0.35)",
 }}
+
             >
               <FileText size={13} />
 Write instead

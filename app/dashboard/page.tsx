@@ -1,10 +1,278 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { createBrowserClient } from '@supabase/ssr'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Plus, X, User, Users, FileText, Activity } from 'lucide-react'
+import Navbar from '@/components/Navbar'
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+type Patient = {
+  id: string
+  name: string
+  age: number | null
+  main_condition: string | null
+  created_at: string
+}
+
 export default function DashboardPage() {
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [name, setName] = useState('')
+  const [age, setAge] = useState('')
+  const [condition, setCondition] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [greeting, setGreeting] = useState('Welcome back')
+
+  useEffect(() => {
+    const hour = new Date().getHours()
+    const timeGreeting =
+      hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      const displayName = user?.user_metadata?.display_name
+      setGreeting(displayName ? `${timeGreeting}, ${displayName}` : timeGreeting)
+    })
+  }, [])
+
+  const loadPatients = async () => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('patients')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (!error && data) {
+      setPatients(data)
+    }
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    loadPatients()
+  }, [])
+
+  const handleCreatePatient = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSaving(true)
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      setSaving(false)
+      return
+    }
+
+    const { error } = await supabase.from('patients').insert({
+      user_id: user.id,
+      name,
+      age: age ? parseInt(age) : null,
+      main_condition: condition || null,
+    })
+
+    if (!error) {
+      setName('')
+      setAge('')
+      setCondition('')
+      setShowForm(false)
+      await loadPatients()
+    }
+    setSaving(false)
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold text-ink">Dashboard</h1>
-        <p className="text-gray-500 mt-2">Work in progress</p>
+    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+      <Navbar />
+
+      <div
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)',
+        }}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.06] mix-blend-overlay"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' /%3E%3C/svg%3E\")",
+        }}
+      />
+
+      <div className="relative max-w-4xl mx-auto pt-40 pb-20 px-6">
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-start justify-between mb-12"
+        >
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span
+                className="h-1.5 w-1.5 rounded-full animate-pulse"
+                style={{ background: 'linear-gradient(90deg, #4F7CFF, #32D6A0)' }}
+              />
+              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-[#4F7CFF]">
+                Dashboard
+              </p>
+            </div>
+            <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tight leading-none text-ink dark:text-white">
+              {greeting}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]">.</span>
+            </h1>
+            <p className="text-base text-ink/40 dark:text-white/40 mt-3">
+              Here's your patient roster
+            </p>
+          </div>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="hidden sm:flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105"
+            style={{
+              background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)',
+            }}
+          >
+            {showForm ? <X size={16} /> : <Plus size={16} />}
+            {showForm ? 'Cancel' : 'New patient'}
+          </button>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="grid grid-cols-3 gap-4 mb-10"
+        >
+          {[
+            { icon: Users, label: 'Patients', value: patients.length },
+            { icon: FileText, label: 'Notes this month', value: 0 },
+            { icon: Activity, label: 'Active plans', value: patients.length },
+          ].map((stat, i) => (
+            <div
+              key={i}
+              className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-sm"
+            >
+              <stat.icon size={16} className="text-[#4F7CFF] mb-3" />
+              <p className="font-display text-2xl font-bold text-ink dark:text-white">
+                {stat.value}
+              </p>
+              <p className="text-xs text-ink/40 dark:text-white/40 mt-0.5">{stat.label}</p>
+            </div>
+          ))}
+        </motion.div>
+
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="sm:hidden w-full flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white mb-8 shadow-lg"
+          style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+        >
+          {showForm ? <X size={16} /> : <Plus size={16} />}
+          {showForm ? 'Cancel' : 'New patient'}
+        </button>
+
+        <AnimatePresence>
+          {showForm && (
+            <motion.form
+              initial={{ opacity: 0, y: -10, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, y: -10, height: 0 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              onSubmit={handleCreatePatient}
+              className="mb-10 rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.04] backdrop-blur-2xl shadow-2xl p-8 space-y-5 overflow-hidden"
+            >
+              <div>
+                <label className="text-sm font-medium text-ink/50 dark:text-white/50">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-ink/50 dark:text-white/50">
+                  Age
+                </label>
+                <input
+                  type="number"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-ink/50 dark:text-white/50">
+                  Main condition
+                </label>
+                <input
+                  type="text"
+                  value={condition}
+                  onChange={(e) => setCondition(e.target.value)}
+                  className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={saving}
+                className="rounded-full px-7 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105 disabled:opacity-60"
+                style={{
+                  background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)',
+                }}
+              >
+                {saving ? 'Saving...' : 'Save patient'}
+              </button>
+            </motion.form>
+          )}
+        </AnimatePresence>
+
+        {loading ? (
+          <p className="text-ink/40 dark:text-white/40">Loading...</p>
+        ) : patients.length === 0 ? (
+          <div className="rounded-[28px] border border-dashed border-black/10 dark:border-white/15 py-20 text-center">
+            <p className="text-ink/40 dark:text-white/40">
+              No patients yet. Add one to get started.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <AnimatePresence>
+              {patients.map((patient, i) => (
+                <motion.div
+                  key={patient.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  exit={{ opacity: 0 }}
+                  className="group rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-center gap-4 shadow-sm transition-all hover:shadow-xl hover:-translate-y-0.5 hover:border-[#4F7CFF]/30 cursor-pointer"
+                >
+                  <div
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white shadow-md"
+                    style={{
+                      background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)',
+                    }}
+                  >
+                    <User size={18} />
+                  </div>
+                  <div>
+                    <p className="font-medium text-ink dark:text-white">{patient.name}</p>
+                    <p className="text-sm text-ink/50 dark:text-white/40">
+                      {patient.age ? `${patient.age} years old` : ''}
+                      {patient.age && patient.main_condition ? ' · ' : ''}
+                      {patient.main_condition || ''}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
     </div>
-  );
+  )
 }

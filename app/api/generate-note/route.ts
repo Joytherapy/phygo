@@ -1,13 +1,88 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+const DEMO_LIMIT = 1;
+
+async function isLoggedIn() {
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll() {
+          // no-op: not needed for a read-only check
+        },
+      },
+    }
+  );
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return !!user;
+}
+
+async function checkDemoLimit(request: NextRequest) {
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    "unknown";
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  const { data } = await supabase
+    .from("demo_usage")
+    .select("count")
+    .eq("ip", ip)
+    .maybeSingle();
+
+  if (data && data.count >= DEMO_LIMIT) {
+    return false;
+  }
+
+  if (data) {
+    await supabase
+      .from("demo_usage")
+      .update({ count: data.count + 1, last_used: new Date().toISOString() })
+      .eq("ip", ip);
+  } else {
+    await supabase.from("demo_usage").insert({ ip, count: 1 });
+  }
+
+  return true;
+}
+
 export async function POST(request: NextRequest) {
   try {
-const { transcript, lang } = await request.json();
+    const loggedIn = await isLoggedIn();
+
+    if (!loggedIn) {
+      const allowed = await checkDemoLimit(request);
+      if (!allowed) {
+        return NextResponse.json(
+          {
+            error: "demo_limit_reached",
+            message:
+              "You've already tried the free demo. Sign up to keep using Phygo on unlimited patients.",
+          },
+          { status: 403 }
+        );
+      }
+    }
+
+    const { transcript, lang } = await request.json();
 
     if (!transcript || typeof transcript !== "string") {
       return NextResponse.json(
@@ -21,7 +96,7 @@ const { transcript, lang } = await request.json();
       messages: [
         {
           role: "system",
-                                                 content: `You are an experienced physiotherapist writing clinical documentation. Turn a short voice note (recorded by the practitioner at the end of a session) into a thorough, structured, professional clinical note and treatment plan — a draft the practitioner will review and edit before it is used.
+          content: `You are an experienced physiotherapist writing clinical documentation. Turn a short voice note (recorded by the practitioner at the end of a session) into a thorough, structured, professional clinical note and treatment plan — a draft the practitioner will review and edit before it is used.
 
 Detect the language the transcript is written in (it may be Italian, English, Spanish, French, or another language) and respond in that SAME language.
 The user has selected "${lang || 'auto'}" as the expected spoken language for this recording — treat this as a strong hint: if the transcript is unclear or ambiguous, prefer this language; only override it if the transcript clearly and unambiguously uses a different language.

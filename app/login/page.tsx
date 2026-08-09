@@ -42,7 +42,8 @@ export default function LoginPage() {
       if (error) {
         setError(error.message);
       } else {
-        setMessage("Account created. Check your email to confirm it.");
+        router.push("/onboarding");
+        router.refresh();
       }
     }
 
