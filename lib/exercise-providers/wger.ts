@@ -48,30 +48,44 @@ function langCodeToId(language: string): number {
   return map[language] || 2;
 }
 
+function langCodeToName(language: string): string {
+  const map: Record<string, string> = {
+    en: "english",
+    it: "italian",
+    es: "spanish",
+    fr: "french",
+  };
+  return map[language] || "english";
+}
+
 export class WgerProvider implements ExerciseProvider {
-  async searchExercises(criteria: ExerciseSearchCriteria): Promise<ExerciseEntry[]> {
+     async searchExercises(criteria: ExerciseSearchCriteria): Promise<ExerciseEntry[]> {
     const term = criteria.keywords?.join(" ") || "";
     const language = criteria.language || "en";
-    const url = `${WGER_BASE}/exercise/search/?term=${encodeURIComponent(
+    const langId = langCodeToId(language);
+    const url = `${WGER_BASE}/exercisetranslation/?name=${encodeURIComponent(
       term
-    )}&language=${langCodeToId(language)}&format=json`;
+    )}&language=${langId}&format=json&limit=10`;
 
     const res = await fetch(url);
     if (!res.ok) return [];
     const data = await res.json();
 
-    const results = data.suggestions || [];
-    const entries: ExerciseEntry[] = [];
+    const results = data.results || [];
+    const exerciseIds = Array.from(
+      new Set(results.map((r: any) => r.exercise).filter(Boolean))
+    );
 
-    for (const s of results.slice(0, 10)) {
-      const baseId = s.data?.base_id;
-      if (!baseId) continue;
-      const full = await this.getExercise(String(baseId), language);
+    const entries: ExerciseEntry[] = [];
+    for (const id of exerciseIds.slice(0, 10)) {
+      const full = await this.getExercise(String(id), language);
       if (full) entries.push(full);
     }
 
     return entries;
   }
+
+
 
   async getExercise(providerId: string, language = "en"): Promise<ExerciseEntry | null> {
     const url = `${WGER_BASE}/exerciseinfo/${providerId}/?format=json`;

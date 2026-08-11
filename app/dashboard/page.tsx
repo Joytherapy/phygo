@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, X, User, Users, FileText, Activity } from 'lucide-react'
+import { Plus, X, User, Users, FileText, Activity, Search } from 'lucide-react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 
@@ -24,7 +24,7 @@ type Patient = {
 const avatarGradient = (gender: string | null) => {
   if (gender === 'male') return 'linear-gradient(135deg, #4F7CFF 0%, #6E8FFF 100%)'
   if (gender === 'female') return 'linear-gradient(135deg, #F472B6 0%, #C084FC 100%)'
-  return 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)'
+  return 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)'
 }
 
 export default function DashboardPage() {
@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const [gender, setGender] = useState('')
   const [saving, setSaving] = useState(false)
   const [greeting, setGreeting] = useState('Welcome back')
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     const hour = new Date().getHours()
@@ -94,6 +95,10 @@ export default function DashboardPage() {
     }
     setSaving(false)
   }
+
+  const filteredPatients = patients.filter((p) =>
+    p.name.toLowerCase().includes(search.trim().toLowerCase())
+  )
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
@@ -155,7 +160,7 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="grid grid-cols-3 gap-4 mb-10"
+          className="grid grid-cols-3 gap-4 mb-8"
         >
           {[
             { icon: Users, label: 'Patients', value: patients.length },
@@ -177,12 +182,23 @@ export default function DashboardPage() {
 
         <button
           onClick={() => setShowForm(!showForm)}
-          className="sm:hidden w-full flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white mb-8 shadow-lg"
+          className="sm:hidden w-full flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white mb-6 shadow-lg"
           style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
         >
           {showForm ? <X size={16} /> : <Plus size={16} />}
           {showForm ? 'Cancel' : 'New patient'}
         </button>
+
+        <div className="relative mb-8">
+          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search patients by name..."
+            className="w-full rounded-full border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl pl-11 pr-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+          />
+        </div>
 
         <AnimatePresence>
           {showForm && (
@@ -280,29 +296,35 @@ export default function DashboardPage() {
               No patients yet. Add one to get started.
             </p>
           </div>
+        ) : filteredPatients.length === 0 ? (
+          <div className="rounded-[28px] border border-dashed border-black/10 dark:border-white/15 py-16 text-center">
+            <p className="text-ink/40 dark:text-white/40">
+              No patients match "{search}".
+            </p>
+          </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             <AnimatePresence>
-              {patients.map((patient, i) => (
+              {filteredPatients.map((patient, i) => (
                 <Link href={`/dashboard/patients/${patient.id}`} key={patient.id}>
                   <motion.div
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
+                    transition={{ delay: Math.min(i, 20) * 0.03 }}
                     exit={{ opacity: 0 }}
-                    className="group rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-center gap-4 shadow-sm transition-all hover:shadow-xl hover:-translate-y-0.5 hover:border-[#4F7CFF]/30 cursor-pointer"
+                    className="group rounded-xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl px-4 py-3 flex items-center gap-3 shadow-sm transition-all hover:shadow-md hover:border-[#4F7CFF]/30 cursor-pointer"
                   >
                     <div
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white shadow-md"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white shadow-sm"
                       style={{
                         background: avatarGradient(patient.gender),
                       }}
                     >
-                      <User size={18} />
+                      <User size={14} />
                     </div>
-                    <div>
-                      <p className="font-medium text-ink dark:text-white">{patient.name}</p>
-                      <p className="text-sm text-ink/50 dark:text-white/40">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-ink dark:text-white truncate">{patient.name}</p>
+                      <p className="text-xs text-ink/50 dark:text-white/40 truncate">
                         {patient.age ? `${patient.age} years old` : ''}
                         {patient.age && patient.main_condition ? ' · ' : ''}
                         {patient.main_condition || ''}
