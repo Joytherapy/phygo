@@ -54,6 +54,7 @@ export default function OfficialSessionPage() {
   const [clinicalInsight, setClinicalInsight] = useState<any>(null)
   const [rehabPhases, setRehabPhases] = useState<any[]>([])
   const [exerciseEntries, setExerciseEntries] = useState<any[]>([])
+  const [expandedExercise, setExpandedExercise] = useState<string | null>(null)
   const [evidenceLevel, setEvidenceLevel] = useState<string | null>(null)
 
   const [showAskPhygo, setShowAskPhygo] = useState(false)
@@ -531,47 +532,78 @@ body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.prima
                   Exercises
                 </p>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {exerciseEntries.map((ex: any, i: number) => (
-                    <div
-                      key={ex.internal_id || i}
-                      className="rounded-2xl bg-black/[0.03] dark:bg-white/5 p-4 flex gap-3"
-                    >
-                      {ex.media?.image_url ? (
-                        <img
-                          src={ex.media.image_url}
-                          alt={ex.name}
-                          className="h-16 w-16 rounded-xl object-cover shrink-0 bg-black/5 dark:bg-white/10"
-                        />
-                      ) : (
-                        <div className="h-16 w-16 rounded-xl shrink-0 bg-black/5 dark:bg-white/10 flex items-center justify-center text-[10px] text-ink/30 dark:text-white/30 text-center px-1">
-                          No image
+                  {exerciseEntries.map((ex: any, i: number) => {
+                    const key = ex.internal_id || String(i)
+                    const isOpen = expandedExercise === key
+                    const hasDetails = ex.description || (Array.isArray(ex.instructions) && ex.instructions.length > 0)
+                    return (
+                      <div
+                        key={key}
+                        onClick={() => hasDetails && setExpandedExercise(isOpen ? null : key)}
+                        className={`rounded-2xl bg-black/[0.03] dark:bg-white/5 p-4 flex flex-col gap-3 ${hasDetails ? 'cursor-pointer hover:bg-black/[0.05] dark:hover:bg-white/10 transition-colors' : ''} ${isOpen ? 'sm:col-span-2' : ''}`}
+                      >
+                        <div className="flex gap-3">
+                          {ex.media?.image_url ? (
+                            <img
+                              src={ex.media.image_url}
+                              alt={ex.name}
+                              className="h-16 w-16 rounded-xl object-cover shrink-0 bg-black/5 dark:bg-white/10"
+                            />
+                          ) : (
+                            <div className="h-16 w-16 rounded-xl shrink-0 bg-black/5 dark:bg-white/10 flex items-center justify-center text-[10px] text-ink/30 dark:text-white/30 text-center px-1">
+                              No image
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-ink dark:text-white truncate">
+                              {ex.name}
+                            </p>
+                            {ex.primary_muscle && (
+                              <p className="text-[11px] text-ink/40 dark:text-white/40 mt-0.5">
+                                {ex.primary_muscle}
+                              </p>
+                            )}
+                            {(ex.dosing?.sets || ex.dosing?.reps || ex.dosing?.duration_seconds) && (
+                              <p className="text-[11px] text-ink/50 dark:text-white/50 mt-1">
+                                {ex.dosing?.sets && `${ex.dosing.sets} sets`}
+                                {ex.dosing?.sets && ex.dosing?.reps && ' × '}
+                                {ex.dosing?.reps && `${ex.dosing.reps} reps`}
+                                {ex.dosing?.duration_seconds && ` · ${ex.dosing.duration_seconds}s`}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2 mt-1.5">
+                              {ex.provider === 'custom' && (
+                                <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                                  Custom exercise
+                                </span>
+                              )}
+                              {hasDetails && (
+                                <span className="text-[10px] font-medium text-[#4F7CFF]">
+                                  {isOpen ? 'Hide details ▲' : 'How to do it ▼'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-ink dark:text-white truncate">
-                          {ex.name}
-                        </p>
-                        {ex.primary_muscle && (
-                          <p className="text-[11px] text-ink/40 dark:text-white/40 mt-0.5">
-                            {ex.primary_muscle}
-                          </p>
-                        )}
-                        {(ex.dosing?.sets || ex.dosing?.reps || ex.dosing?.duration_seconds) && (
-                          <p className="text-[11px] text-ink/50 dark:text-white/50 mt-1">
-                            {ex.dosing?.sets && `${ex.dosing.sets} sets`}
-                            {ex.dosing?.sets && ex.dosing?.reps && ' × '}
-                            {ex.dosing?.reps && `${ex.dosing.reps} reps`}
-                            {ex.dosing?.duration_seconds && ` · ${ex.dosing.duration_seconds}s`}
-                          </p>
-                        )}
-                        {ex.provider === 'custom' && (
-                          <span className="inline-block mt-1.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
-                            Custom exercise
-                          </span>
+                        {isOpen && hasDetails && (
+                          <div className="pt-2 border-t border-black/5 dark:border-white/10">
+                            {ex.description && (
+                              <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
+                                {ex.description}
+                              </p>
+                            )}
+                            {Array.isArray(ex.instructions) && ex.instructions.length > 0 && (
+                              <ol className="mt-2 text-xs text-ink/60 dark:text-white/60 leading-relaxed space-y-1 list-decimal list-inside">
+                                {ex.instructions.map((step: string, j: number) => (
+                                  <li key={j}>{step}</li>
+                                ))}
+                              </ol>
+                            )}
+                          </div>
                         )}
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             ) : Array.isArray(finalNote.exercises) && finalNote.exercises.length > 0 && (

@@ -31,9 +31,8 @@ export async function POST(request: Request) {
     }
 
     const language = (lang || "en").slice(0, 2);
-    const results: ExerciseOutput[] = [];
 
-    for (const draft of exercisesDraft) {
+    const processOne = async (draft: any): Promise<ExerciseOutput> => {
       const draftText: string =
         typeof draft === "string" ? draft : draft.name || String(draft);
 
@@ -67,53 +66,53 @@ export async function POST(request: Request) {
         console.error("Exercise search failed:", searchErr);
       }
 
+      const dosing = {
+        sets: parsed.sets ?? null,
+        reps: parsed.reps ?? null,
+        duration_seconds: parsed.duration_seconds ?? null,
+        frequency_per_week: parsed.frequency_per_week ?? null,
+        notes: parsed.notes ?? null,
+      };
+
       if (match) {
-        results.push({
+        return {
           ...match,
           _debugKeywords: keywords,
           source_type: "professional",
-          dosing: {
-            sets: parsed.sets ?? null,
-            reps: parsed.reps ?? null,
-            duration_seconds: parsed.duration_seconds ?? null,
-            frequency_per_week: parsed.frequency_per_week ?? null,
-            notes: parsed.notes ?? null,
-          },
+          dosing,
           clinical_check: null,
-        });
-      } else {
-        results.push({
-          internal_id: `custom-${Date.now()}-${Math.random()
-            .toString(36)
-            .slice(2, 8)}`,
-          _debugKeywords: keywords,
-          provider: "custom",
-          provider_id: null,
-          name: draftText,
-          description: null,
-          instructions: null,
-          body_region: null,
-          primary_muscle: null,
-          secondary_muscles: null,
-          equipment: null,
-          difficulty: null,
-          category: null,
-          tags: null,
-          media: null,
-          license: null,
-          language,
-          source_type: "professional",
-          dosing: {
-            sets: parsed.sets ?? null,
-            reps: parsed.reps ?? null,
-            duration_seconds: parsed.duration_seconds ?? null,
-            frequency_per_week: parsed.frequency_per_week ?? null,
-            notes: parsed.notes ?? null,
-          },
-          clinical_check: null,
-        });
+        };
       }
-    }
+
+      return {
+        internal_id: `custom-${Date.now()}-${Math.random()
+          .toString(36)
+          .slice(2, 8)}`,
+        _debugKeywords: keywords,
+        provider: "custom",
+        provider_id: null,
+        name: draftText,
+        description: null,
+        instructions: null,
+        body_region: null,
+        primary_muscle: null,
+        secondary_muscles: null,
+        equipment: null,
+        difficulty: null,
+        category: null,
+        tags: null,
+        media: null,
+        license: null,
+        language,
+        source_type: "professional",
+        dosing,
+        clinical_check: null,
+      };
+    };
+
+    const results: ExerciseOutput[] = await Promise.all(
+      exercisesDraft.map((draft: any) => processOne(draft))
+    );
 
     return NextResponse.json({ exercises: results });
   } catch (err) {
