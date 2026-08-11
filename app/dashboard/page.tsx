@@ -24,7 +24,7 @@ type Patient = {
 const avatarGradient = (gender: string | null) => {
   if (gender === 'male') return 'linear-gradient(135deg, #4F7CFF 0%, #6E8FFF 100%)'
   if (gender === 'female') return 'linear-gradient(135deg, #F472B6 0%, #C084FC 100%)'
-  return 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)'
+  return 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)'
 }
 
 export default function DashboardPage() {
