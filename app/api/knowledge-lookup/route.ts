@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export async function POST(request: Request) {
   try {
-const { assessment, lang } = await request.json();
+const { assessment, primaryCondition, lang } = await request.json();
 
     if (!assessment || typeof assessment !== 'string') {
       return NextResponse.json({ match: null });
@@ -24,7 +24,8 @@ const { assessment, lang } = await request.json();
     }
 
 const normalize = (s: string) => s.toLowerCase().replace(/['’]/g, '');
-const assessmentLower = normalize(assessment);
+const textForMatching = primaryCondition && typeof primaryCondition === 'string' ? primaryCondition : assessment;
+const assessmentLower = normalize(textForMatching);
 
     let matchedKeyword: string | null = null;
 

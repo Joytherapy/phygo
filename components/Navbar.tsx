@@ -18,7 +18,12 @@ export default function Navbar() {
   const [hidden, setHidden] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const [dark, setDark] = useState(false);
+const [dark, setDark] = useState(() => {
+  if (typeof window === "undefined") return false;
+  const stored = window.localStorage.getItem("phygo-theme");
+  if (stored) return stored === "dark";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+});
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() ?? 0;

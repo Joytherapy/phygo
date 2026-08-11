@@ -382,7 +382,7 @@ if (!res.ok) {
             const kbRes = await fetch("/api/knowledge-lookup", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ assessment: note.assessment, lang: note.language || 'it' }),
+body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.primaryCondition, lang: note.language || 'it' }),
             });
             const kbData = await kbRes.json();
 setClinicalInsight(kbData.match || null);
