@@ -53,6 +53,7 @@ export default function OfficialSessionPage() {
 
   const [clinicalInsight, setClinicalInsight] = useState<any>(null)
   const [rehabPhases, setRehabPhases] = useState<any[]>([])
+  const [exerciseEntries, setExerciseEntries] = useState<any[]>([])
   const [evidenceLevel, setEvidenceLevel] = useState<string | null>(null)
 
   const [showAskPhygo, setShowAskPhygo] = useState(false)
@@ -170,6 +171,27 @@ body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.prima
             console.error('Errore refine-exercises:', err)
           }
         }
+
+        let exerciseEntriesArr: any[] = []
+        if (Array.isArray(exercisesArr) && exercisesArr.length > 0) {
+          try {
+            const eiRes = await fetch('/api/exercise-intelligence', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                exercisesDraft: exercisesArr,
+                assessment: note.assessment,
+                primaryCondition: note.primaryCondition,
+                lang: note.language || recordingLang,
+              }),
+            })
+            const eiData = await eiRes.json()
+            if (Array.isArray(eiData.exercises)) exerciseEntriesArr = eiData.exercises
+          } catch (err) {
+            console.error('Errore exercise-intelligence:', err)
+          }
+        }
+        setExerciseEntries(exerciseEntriesArr)
 
         setFinalNote((prev: any) =>
           prev ? { ...prev, plan: planText, exercises: exercisesArr } : prev
@@ -503,7 +525,56 @@ body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.prima
               </div>
             ))}
 
-            {Array.isArray(finalNote.exercises) && finalNote.exercises.length > 0 && (
+            {exerciseEntries.length > 0 ? (
+              <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5">
+                <p className="text-xs font-semibold tracking-[0.15em] uppercase text-[#4F7CFF] mb-4">
+                  Exercises
+                </p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {exerciseEntries.map((ex: any, i: number) => (
+                    <div
+                      key={ex.internal_id || i}
+                      className="rounded-2xl bg-black/[0.03] dark:bg-white/5 p-4 flex gap-3"
+                    >
+                      {ex.media?.image_url ? (
+                        <img
+                          src={ex.media.image_url}
+                          alt={ex.name}
+                          className="h-16 w-16 rounded-xl object-cover shrink-0 bg-black/5 dark:bg-white/10"
+                        />
+                      ) : (
+                        <div className="h-16 w-16 rounded-xl shrink-0 bg-black/5 dark:bg-white/10 flex items-center justify-center text-[10px] text-ink/30 dark:text-white/30 text-center px-1">
+                          No image
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-ink dark:text-white truncate">
+                          {ex.name}
+                        </p>
+                        {ex.primary_muscle && (
+                          <p className="text-[11px] text-ink/40 dark:text-white/40 mt-0.5">
+                            {ex.primary_muscle}
+                          </p>
+                        )}
+                        {(ex.dosing?.sets || ex.dosing?.reps || ex.dosing?.duration_seconds) && (
+                          <p className="text-[11px] text-ink/50 dark:text-white/50 mt-1">
+                            {ex.dosing?.sets && `${ex.dosing.sets} sets`}
+                            {ex.dosing?.sets && ex.dosing?.reps && ' × '}
+                            {ex.dosing?.reps && `${ex.dosing.reps} reps`}
+                            {ex.dosing?.duration_seconds && ` · ${ex.dosing.duration_seconds}s`}
+                          </p>
+                        )}
+                        {ex.provider === 'custom' && (
+                          <span className="inline-block mt-1.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                            Custom exercise
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : Array.isArray(finalNote.exercises) && finalNote.exercises.length > 0 && (
               <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5">
                 <p className="text-xs font-semibold tracking-[0.15em] uppercase text-[#4F7CFF] mb-2">
                   Exercises
