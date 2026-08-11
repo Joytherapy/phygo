@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, User, Users, FileText, Activity } from 'lucide-react'
+import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 
 const supabase = createBrowserClient(
@@ -243,31 +244,32 @@ export default function DashboardPage() {
           <div className="space-y-3">
             <AnimatePresence>
               {patients.map((patient, i) => (
-                <motion.div
-                  key={patient.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  exit={{ opacity: 0 }}
-                  className="group rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-center gap-4 shadow-sm transition-all hover:shadow-xl hover:-translate-y-0.5 hover:border-[#4F7CFF]/30 cursor-pointer"
-                >
-                  <div
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white shadow-md"
-                    style={{
-                      background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)',
-                    }}
+                <Link href={`/dashboard/patients/${patient.id}`} key={patient.id}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    exit={{ opacity: 0 }}
+                    className="group rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-center gap-4 shadow-sm transition-all hover:shadow-xl hover:-translate-y-0.5 hover:border-[#4F7CFF]/30 cursor-pointer"
                   >
-                    <User size={18} />
-                  </div>
-                  <div>
-                    <p className="font-medium text-ink dark:text-white">{patient.name}</p>
-                    <p className="text-sm text-ink/50 dark:text-white/40">
-                      {patient.age ? `${patient.age} years old` : ''}
-                      {patient.age && patient.main_condition ? ' · ' : ''}
-                      {patient.main_condition || ''}
-                    </p>
-                  </div>
-                </motion.div>
+                    <div
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white shadow-md"
+                      style={{
+                        background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)',
+                      }}
+                    >
+                      <User size={18} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-ink dark:text-white">{patient.name}</p>
+                      <p className="text-sm text-ink/50 dark:text-white/40">
+                        {patient.age ? `${patient.age} years old` : ''}
+                        {patient.age && patient.main_condition ? ' · ' : ''}
+                        {patient.main_condition || ''}
+                      </p>
+                    </div>
+                  </motion.div>
+                </Link>
               ))}
             </AnimatePresence>
           </div>
