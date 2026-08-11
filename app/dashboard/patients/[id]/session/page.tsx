@@ -84,6 +84,12 @@ export default function OfficialSessionPage() {
     }
     load()
   }, [patientId])
+  const formatPhaseText = (text: string) => {
+    if (!text) return ''
+    const pattern =
+      /\s*((?:Fase\s*\d+|Settimana\s*\d+|Prima settimana|Seconda settimana|Terza settimana|Quarta settimana|Quinta settimana|Sesta settimana|Settima settimana|Ottava settimana|Giorno\s*\d+|Giorni\s*\d+)\s*[:\(])/gi
+    return text.replace(pattern, '\n\n$1').trim()
+  }
 
   const generateNote = useCallback(
     async (raw: string) => {
@@ -613,9 +619,14 @@ body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.prima
                 <span className="text-xs font-semibold tracking-[0.15em] uppercase text-[#4F7CFF] mb-4 block">
                   Rehab Protocol
                 </span>
-                <div className="grid gap-4 sm:grid-cols-3">
+                                <div className="grid gap-4 sm:grid-cols-3">
                   {rehabPhases.map((p) => (
-                    <div key={p.id} className="rounded-2xl bg-black/[0.03] dark:bg-white/5 p-4">
+                    <div
+                      key={p.id}
+                      className={`rounded-2xl bg-black/[0.03] dark:bg-white/5 p-4 ${
+                        (p.phase_exercises?.length || 0) > 300 ? 'sm:col-span-3' : ''
+                      }`}
+                    >
                       <div className="flex items-center gap-2 mb-2">
                         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#4F7CFF] text-[11px] font-bold text-white">
                           {p.phase_number}
@@ -627,13 +638,18 @@ body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.prima
                         <span className="font-medium">Goals: </span>
                         {p.phase_goals}
                       </p>
-                      <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
+                      <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
                         <span className="font-medium">Exercises: </span>
-                        {p.phase_exercises}
+                        <span className="whitespace-pre-line">{formatPhaseText(p.phase_exercises)}</span>
+                      </p>
+                      <p className="text-[11px] text-ink/40 dark:text-white/40 leading-relaxed">
+                        <span className="font-medium">Progress when: </span>
+                        {p.criteria_to_progress}
                       </p>
                     </div>
                   ))}
                 </div>
+
               </motion.div>
             )}
 

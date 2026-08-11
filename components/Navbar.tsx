@@ -25,6 +25,11 @@ const [dark, setDark] = useState(() => {
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
 });
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() ?? 0;
     setScrolled(latest > 8);
@@ -89,7 +94,7 @@ const [dark, setDark] = useState(() => {
             data-cursor-hover
             className="flex h-9 w-9 items-center justify-center rounded-full text-ink/60 hover:text-ink hover:bg-ink/5 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/10 transition-colors"
           >
-            {dark ? <Sun size={17} /> : <Moon size={17} />}
+            {mounted ? (dark ? <Sun size={17} /> : <Moon size={17} />) : <span className="block h-[17px] w-[17px]" />}
           </button>
 
           <MagneticButton
