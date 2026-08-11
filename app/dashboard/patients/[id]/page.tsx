@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
-import { ArrowLeft, User, Plus, FileText } from 'lucide-react'
+import { ArrowLeft, Plus, FileText, Calendar, Activity, Stethoscope, ClipboardList } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 
 const supabase = createBrowserClient(
@@ -17,14 +17,40 @@ type Patient = {
   name: string
   age: number | null
   main_condition: string | null
+  gender: string | null
   created_at: string
 }
+
+const avatarGradient = (gender: string | null) => {
+  if (gender === 'male') return 'linear-gradient(135deg, #4F7CFF 0%, #6E8FFF 100%)'
+  if (gender === 'female') return 'linear-gradient(135deg, #F472B6 0%, #C084FC 100%)'
+  return 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)'
+}
+
 
 type Note = {
   id: string
   assessment: string | null
   plan: string | null
   created_at: string
+}
+
+const getInitials = (name: string) => {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
+const formatSince = (dateStr: string) => {
+  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24))
+  if (days < 1) return 'Today'
+  if (days === 1) return '1 day'
+  if (days < 30) return `${days} days`
+  const months = Math.floor(days / 30)
+  if (months === 1) return '1 month'
+  if (months < 12) return `${months} months`
+  const years = Math.floor(months / 12)
+  return years === 1 ? '1 year' : `${years} years`
 }
 
 export default function PatientDetailPage() {
@@ -77,6 +103,8 @@ export default function PatientDetailPage() {
     )
   }
 
+  const lastSessionDate = notes.length > 0 ? new Date(notes[0].created_at) : null
+
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
@@ -85,6 +113,14 @@ export default function PatientDetailPage() {
         className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
         style={{
           background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)',
+        }}
+      />
+
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.06]"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
         }}
       />
 
@@ -103,35 +139,82 @@ export default function PatientDetailPage() {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex items-start justify-between mb-10"
+          className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-8"
         >
           <div className="flex items-center gap-4">
             <div
-              className="flex h-14 w-14 items-center justify-center rounded-full text-white shadow-md"
-              style={{ background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' }}
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-white text-lg font-bold shadow-[0_8px_24px_rgba(79,124,255,0.35)]"
+              style={{ background: avatarGradient(patient.gender) }}
             >
-              <User size={24} />
+              {getInitials(patient.name)}
             </div>
             <div>
               <h1 className="font-display text-3xl font-bold tracking-tight text-ink dark:text-white">
                 {patient.name}
               </h1>
-              <p className="text-sm text-ink/40 dark:text-white/40 mt-1">
-                {patient.age ? `${patient.age} years old` : ''}
-                {patient.age && patient.main_condition ? ' · ' : ''}
-                {patient.main_condition || ''}
-              </p>
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                {patient.age && (
+                  <span className="text-sm text-ink/40 dark:text-white/40">
+                    {patient.age} years old
+                  </span>
+                )}
+                {patient.main_condition && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#4F7CFF]/10 px-3 py-1 text-xs font-semibold text-[#4F7CFF]">
+                    <Stethoscope size={11} />
+                    {patient.main_condition}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
           <button
             onClick={() => router.push(`/dashboard/patients/${patientId}/session`)}
-            className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105"
+            className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105 shrink-0"
             style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
           >
             <Plus size={16} />
             Generate new note
           </button>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="grid grid-cols-3 gap-3 mb-10"
+        >
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <ClipboardList size={13} className="text-[#4F7CFF]" />
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40">
+                Sessions
+              </span>
+            </div>
+            <p className="text-2xl font-bold text-ink dark:text-white">{notes.length}</p>
+          </div>
+
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Calendar size={13} className="text-[#32D6A0]" />
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40">
+                Last session
+              </span>
+            </div>
+            <p className="text-2xl font-bold text-ink dark:text-white">
+              {lastSessionDate ? lastSessionDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '—'}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-4">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Activity size={13} className="text-amber-500" />
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40">
+                Patient since
+              </span>
+            </div>
+            <p className="text-2xl font-bold text-ink dark:text-white">{formatSince(patient.created_at)}</p>
+          </div>
         </motion.div>
 
         <div>
@@ -140,30 +223,43 @@ export default function PatientDetailPage() {
           </p>
 
           {notes.length === 0 ? (
-            <div className="rounded-[28px] border border-dashed border-black/10 dark:border-white/15 py-16 text-center">
+            <div className="rounded-[28px] border border-dashed border-black/10 dark:border-white/15 py-16 text-center flex flex-col items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF]">
+                <FileText size={20} />
+              </div>
               <p className="text-ink/40 dark:text-white/40">
                 No notes yet for this patient.
+              </p>
+              <p className="text-xs text-ink/30 dark:text-white/30">
+                Generate the first session note to start their history.
               </p>
             </div>
           ) : (
             <div className="space-y-3">
-              {notes.map((note) => (
-                <div
+              {notes.map((note, i) => (
+                <motion.div
                   key={note.id}
-                  className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-start gap-4 shadow-sm"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: i * 0.05 }}
+                  className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-start gap-4 shadow-sm hover:border-[#4F7CFF]/30 transition-colors"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF]">
                     <FileText size={16} />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xs text-ink/40 dark:text-white/40 mb-1">
-                      {new Date(note.created_at).toLocaleDateString()}
+                      {new Date(note.created_at).toLocaleDateString(undefined, {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
                     </p>
                     <p className="text-sm text-ink/70 dark:text-white/70 line-clamp-2">
                       {note.assessment || 'No assessment recorded.'}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}

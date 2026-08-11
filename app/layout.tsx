@@ -79,6 +79,17 @@ export default function RootLayout({
     },
   };
 
+  const themeInitScript = `
+    (function() {
+      try {
+        var stored = window.localStorage.getItem("phygo-theme");
+        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var isDark = stored ? stored === "dark" : prefersDark;
+        if (isDark) document.documentElement.classList.add("dark");
+      } catch (e) {}
+    })();
+  `;
+
   return (
     <html
       lang="en"
@@ -89,6 +100,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="font-sans antialiased bg-white text-ink dark:bg-ink dark:text-white">
         <a

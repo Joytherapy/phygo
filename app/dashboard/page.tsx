@@ -17,7 +17,14 @@ type Patient = {
   name: string
   age: number | null
   main_condition: string | null
+  gender: string | null
   created_at: string
+}
+
+const avatarGradient = (gender: string | null) => {
+  if (gender === 'male') return 'linear-gradient(135deg, #4F7CFF 0%, #6E8FFF 100%)'
+  if (gender === 'female') return 'linear-gradient(135deg, #F472B6 0%, #C084FC 100%)'
+  return 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)'
 }
 
 export default function DashboardPage() {
@@ -27,6 +34,7 @@ export default function DashboardPage() {
   const [name, setName] = useState('')
   const [age, setAge] = useState('')
   const [condition, setCondition] = useState('')
+  const [gender, setGender] = useState('')
   const [saving, setSaving] = useState(false)
   const [greeting, setGreeting] = useState('Welcome back')
 
@@ -73,12 +81,14 @@ export default function DashboardPage() {
       name,
       age: age ? parseInt(age) : null,
       main_condition: condition || null,
+      gender: gender || null,
     })
 
     if (!error) {
       setName('')
       setAge('')
       setCondition('')
+      setGender('')
       setShowForm(false)
       await loadPatients()
     }
@@ -198,6 +208,36 @@ export default function DashboardPage() {
               </div>
               <div>
                 <label className="text-sm font-medium text-ink/50 dark:text-white/50">
+                  Gender
+                </label>
+                <div className="flex gap-2 mt-1.5">
+                  {[
+                    { value: 'male', label: 'Male' },
+                    { value: 'female', label: 'Female' },
+                    { value: '', label: 'Not specified' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.label}
+                      type="button"
+                      onClick={() => setGender(opt.value)}
+                      className={`rounded-full px-4 py-2 text-sm font-medium border transition-colors ${
+                        gender === opt.value
+                          ? 'text-white border-transparent'
+                          : 'text-ink/50 dark:text-white/50 border-black/10 dark:border-white/10'
+                      }`}
+                      style={
+                        gender === opt.value
+                          ? { background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }
+                          : undefined
+                      }
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-ink/50 dark:text-white/50">
                   Age
                 </label>
                 <input
@@ -255,7 +295,7 @@ export default function DashboardPage() {
                     <div
                       className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white shadow-md"
                       style={{
-                        background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)',
+                        background: avatarGradient(patient.gender),
                       }}
                     >
                       <User size={18} />
