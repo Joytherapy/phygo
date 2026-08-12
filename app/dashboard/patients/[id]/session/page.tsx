@@ -17,6 +17,8 @@ import {
   AlertTriangle,
   Dumbbell,
   ImagePlus,
+  Pencil,
+  Trash2,
 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 
@@ -55,6 +57,7 @@ export default function OfficialSessionPage() {
   const [rehabPhases, setRehabPhases] = useState<any[]>([])
   const [exerciseEntries, setExerciseEntries] = useState<any[]>([])
   const [expandedExercise, setExpandedExercise] = useState<string | null>(null)
+  const [editingExercise, setEditingExercise] = useState<string | null>(null)
   const [evidenceLevel, setEvidenceLevel] = useState<string | null>(null)
 
   const [showAskPhygo, setShowAskPhygo] = useState(false)
@@ -264,6 +267,26 @@ body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.prima
 
   const updateField = (field: string, value: string) => {
     setFinalNote((prev: any) => (prev ? { ...prev, [field]: value } : prev))
+  }
+
+  const updateExerciseDosing = (key: string, field: string, value: string) => {
+    setExerciseEntries((prev) =>
+      prev.map((ex: any, i: number) => {
+        const exKey = ex.internal_id || String(i)
+        if (exKey !== key) return ex
+        const numFields = ['sets', 'reps', 'duration_seconds', 'frequency_per_week']
+        const parsedValue = numFields.includes(field)
+          ? value === '' ? null : Number(value)
+          : value
+        return { ...ex, dosing: { ...ex.dosing, [field]: parsedValue } }
+      })
+    )
+  }
+
+  const removeExercise = (key: string) => {
+    setExerciseEntries((prev) =>
+      prev.filter((ex: any, i: number) => (ex.internal_id || String(i)) !== key)
+    )
   }
 
   const askPhygoAI = async () => {
@@ -535,57 +558,134 @@ body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.prima
                   {exerciseEntries.map((ex: any, i: number) => {
                     const key = ex.internal_id || String(i)
                     const isOpen = expandedExercise === key
+                    const isEditing = editingExercise === key
                     const hasDetails = ex.description || (Array.isArray(ex.instructions) && ex.instructions.length > 0)
                     return (
                       <div
                         key={key}
-                        onClick={() => hasDetails && setExpandedExercise(isOpen ? null : key)}
-                        className={`rounded-2xl bg-black/[0.03] dark:bg-white/5 p-4 flex flex-col gap-3 ${hasDetails ? 'cursor-pointer hover:bg-black/[0.05] dark:hover:bg-white/10 transition-colors' : ''} ${isOpen ? 'sm:col-span-2' : ''}`}
+                        className={`rounded-2xl bg-black/[0.03] dark:bg-white/5 p-4 flex flex-col gap-3 ${(isOpen || isEditing) ? 'sm:col-span-2' : ''}`}
                       >
                         <div className="flex gap-3">
-                          {ex.media?.image_url ? (
-                            <img
-                              src={ex.media.image_url}
-                              alt={ex.name}
-                              className="h-16 w-16 rounded-xl object-cover shrink-0 bg-black/5 dark:bg-white/10"
-                            />
-                          ) : (
-                            <div className="h-16 w-16 rounded-xl shrink-0 bg-black/5 dark:bg-white/10 flex items-center justify-center text-[10px] text-ink/30 dark:text-white/30 text-center px-1">
-                              No image
-                            </div>
-                          )}
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-semibold text-ink dark:text-white truncate">
-                              {ex.name}
-                            </p>
-                            {ex.primary_muscle && (
-                              <p className="text-[11px] text-ink/40 dark:text-white/40 mt-0.5">
-                                {ex.primary_muscle}
-                              </p>
+                          <div
+                            onClick={() => !isEditing && hasDetails && setExpandedExercise(isOpen ? null : key)}
+                            className={`flex gap-3 flex-1 min-w-0 ${!isEditing && hasDetails ? 'cursor-pointer' : ''}`}
+                          >
+                            {ex.media?.image_url ? (
+                              <img
+                                src={ex.media.image_url}
+                                alt={ex.name}
+                                className="h-16 w-16 rounded-xl object-cover shrink-0 bg-black/5 dark:bg-white/10"
+                              />
+                            ) : (
+                              <div className="h-16 w-16 rounded-xl shrink-0 bg-black/5 dark:bg-white/10 flex items-center justify-center text-[10px] text-ink/30 dark:text-white/30 text-center px-1">
+                                No image
+                              </div>
                             )}
-                            {(ex.dosing?.sets || ex.dosing?.reps || ex.dosing?.duration_seconds) && (
-                              <p className="text-[11px] text-ink/50 dark:text-white/50 mt-1">
-                                {ex.dosing?.sets && `${ex.dosing.sets} sets`}
-                                {ex.dosing?.sets && ex.dosing?.reps && ' × '}
-                                {ex.dosing?.reps && `${ex.dosing.reps} reps`}
-                                {ex.dosing?.duration_seconds && ` · ${ex.dosing.duration_seconds}s`}
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-semibold text-ink dark:text-white truncate">
+                                {ex.name}
                               </p>
-                            )}
-                            <div className="flex items-center gap-2 mt-1.5">
-                              {ex.provider === 'custom' && (
-                                <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">
-                                  Custom exercise
-                                </span>
+                              {ex.primary_muscle && (
+                                <p className="text-[11px] text-ink/40 dark:text-white/40 mt-0.5">
+                                  {ex.primary_muscle}
+                                </p>
                               )}
-                              {hasDetails && (
-                                <span className="text-[10px] font-medium text-[#4F7CFF]">
-                                  {isOpen ? 'Hide details ▲' : 'How to do it ▼'}
-                                </span>
+                              {!isEditing && (ex.dosing?.sets || ex.dosing?.reps || ex.dosing?.duration_seconds) && (
+                                <p className="text-[11px] text-ink/50 dark:text-white/50 mt-1">
+                                  {ex.dosing?.sets && `${ex.dosing.sets} sets`}
+                                  {ex.dosing?.sets && ex.dosing?.reps && ' × '}
+                                  {ex.dosing?.reps && `${ex.dosing.reps} reps`}
+                                  {ex.dosing?.duration_seconds && ` · ${ex.dosing.duration_seconds}s`}
+                                </p>
                               )}
+                              <div className="flex items-center gap-2 mt-1.5">
+                                {ex.provider === 'custom' && (
+                                  <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                                    Custom exercise
+                                  </span>
+                                )}
+                                {!isEditing && hasDetails && (
+                                  <span className="text-[10px] font-medium text-[#4F7CFF]">
+                                    {isOpen ? 'Hide details ▲' : 'How to do it ▼'}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
+                          <div className="flex items-start gap-1 shrink-0">
+                            <button
+                              onClick={() => setEditingExercise(isEditing ? null : key)}
+                              className="p-1.5 rounded-lg text-ink/40 dark:text-white/40 hover:bg-black/5 dark:hover:bg-white/10 hover:text-[#4F7CFF] transition-colors"
+                            >
+                              <Pencil size={13} />
+                            </button>
+                            <button
+                              onClick={() => removeExercise(key)}
+                              className="p-1.5 rounded-lg text-ink/40 dark:text-white/40 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
                         </div>
-                        {isOpen && hasDetails && (
+
+                        {isEditing && (
+                          <div className="pt-2 border-t border-black/5 dark:border-white/10 grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="text-[10px] text-ink/40 dark:text-white/40">Sets</label>
+                              <input
+                                type="number"
+                                value={ex.dosing?.sets ?? ''}
+                                onChange={(e) => updateExerciseDosing(key, 'sets', e.target.value)}
+                                className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-ink/40 dark:text-white/40">Reps</label>
+                              <input
+                                type="number"
+                                value={ex.dosing?.reps ?? ''}
+                                onChange={(e) => updateExerciseDosing(key, 'reps', e.target.value)}
+                                className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-ink/40 dark:text-white/40">Duration (s)</label>
+                              <input
+                                type="number"
+                                value={ex.dosing?.duration_seconds ?? ''}
+                                onChange={(e) => updateExerciseDosing(key, 'duration_seconds', e.target.value)}
+                                className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-ink/40 dark:text-white/40">Freq/week</label>
+                              <input
+                                type="number"
+                                value={ex.dosing?.frequency_per_week ?? ''}
+                                onChange={(e) => updateExerciseDosing(key, 'frequency_per_week', e.target.value)}
+                                className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
+                              />
+                            </div>
+                            <div className="col-span-2">
+                              <label className="text-[10px] text-ink/40 dark:text-white/40">Notes</label>
+                              <textarea
+                                value={ex.dosing?.notes ?? ''}
+                                onChange={(e) => updateExerciseDosing(key, 'notes', e.target.value)}
+                                rows={2}
+                                className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
+                              />
+                            </div>
+                            <button
+                              onClick={() => setEditingExercise(null)}
+                              className="col-span-2 mt-1 rounded-full px-4 py-1.5 text-[11px] font-semibold text-white self-start"
+                              style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                            >
+                              Done
+                            </button>
+                          </div>
+                        )}
+
+                        {!isEditing && isOpen && hasDetails && (
                           <div className="pt-2 border-t border-black/5 dark:border-white/10">
                             {ex.description && (
                               <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
