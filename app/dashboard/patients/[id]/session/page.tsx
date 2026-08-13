@@ -19,6 +19,9 @@ import {
   ImagePlus,
   Pencil,
   Trash2,
+  Plus,
+  Search,
+  X,
 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 
@@ -59,6 +62,11 @@ export default function OfficialSessionPage() {
   const [expandedExercise, setExpandedExercise] = useState<string | null>(null)
   const [editingExercise, setEditingExercise] = useState<string | null>(null)
   const [evidenceLevel, setEvidenceLevel] = useState<string | null>(null)
+
+  const [showAddExercise, setShowAddExercise] = useState(false)
+  const [exerciseSearchQuery, setExerciseSearchQuery] = useState('')
+  const [exerciseSearchResults, setExerciseSearchResults] = useState<any[]>([])
+  const [exerciseSearching, setExerciseSearching] = useState(false)
 
   const [showAskPhygo, setShowAskPhygo] = useState(false)
   const [askQuestion, setAskQuestion] = useState('')
@@ -287,6 +295,47 @@ body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.prima
     setExerciseEntries((prev) =>
       prev.filter((ex: any, i: number) => (ex.internal_id || String(i)) !== key)
     )
+  }
+
+  const searchExerciseDb = async (query: string) => {
+    setExerciseSearchQuery(query)
+    if (!query.trim()) {
+      setExerciseSearchResults([])
+      return
+    }
+    setExerciseSearching(true)
+    try {
+      const res = await fetch(`/api/exercise-search?q=${encodeURIComponent(query.trim())}`)
+      const data = await res.json()
+      setExerciseSearchResults(data.exercises || [])
+    } catch (err) {
+      console.error('Errore ricerca esercizio:', err)
+      setExerciseSearchResults([])
+    } finally {
+      setExerciseSearching(false)
+    }
+  }
+
+  const addExerciseToList = (entry: any) => {
+    setExerciseEntries((prev) => [
+      ...prev,
+      {
+        ...entry,
+        internal_id: `${entry.internal_id}-${Date.now()}`,
+        source_type: 'professional',
+        dosing: {
+          sets: null,
+          reps: null,
+          duration_seconds: null,
+          frequency_per_week: null,
+          notes: null,
+        },
+        clinical_check: null,
+      },
+    ])
+    setShowAddExercise(false)
+    setExerciseSearchQuery('')
+    setExerciseSearchResults([])
   }
 
   const askPhygoAI = async () => {
@@ -549,11 +598,79 @@ body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.prima
               </div>
             ))}
 
-            {exerciseEntries.length > 0 ? (
-              <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5">
-                <p className="text-xs font-semibold tracking-[0.15em] uppercase text-[#4F7CFF] mb-4">
+            <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs font-semibold tracking-[0.15em] uppercase text-[#4F7CFF]">
                   Exercises
                 </p>
+                <button
+                  onClick={() => setShowAddExercise((prev) => !prev)}
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold"
+                  style={{
+                    background: 'rgba(79,124,255,0.12)',
+                    color: '#4F7CFF',
+                  }}
+                >
+                  {showAddExercise ? <X size={12} /> : <Plus size={12} />}
+                  {showAddExercise ? 'Cancel' : 'Add exercise'}
+                </button>
+              </div>
+
+              {showAddExercise && (
+                <div className="mb-4 rounded-2xl bg-black/[0.03] dark:bg-white/5 p-4">
+                  <div className="relative">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
+                    <input
+                      type="text"
+                      value={exerciseSearchQuery}
+                      onChange={(e) => searchExerciseDb(e.target.value)}
+                      placeholder="Search exercises (e.g. plank, bridge, squat)..."
+                      autoFocus
+                      className="w-full text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 pl-9 pr-3 py-2 outline-none focus:border-[#4F7CFF]"
+                    />
+                  </div>
+                  {exerciseSearching && (
+                    <p className="text-xs text-ink/40 dark:text-white/40 mt-2">Searching...</p>
+                  )}
+                  {!exerciseSearching && exerciseSearchQuery && exerciseSearchResults.length === 0 && (
+                    <p className="text-xs text-ink/40 dark:text-white/40 mt-2">No exercises found.</p>
+                  )}
+                  {exerciseSearchResults.length > 0 && (
+                    <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+                      {exerciseSearchResults.map((result: any) => (
+                        <div
+                          key={result.internal_id}
+                          onClick={() => addExerciseToList(result)}
+                          className="flex items-center gap-3 rounded-xl bg-white dark:bg-white/10 p-2.5 cursor-pointer hover:bg-[#4F7CFF]/5 dark:hover:bg-[#4F7CFF]/10 transition-colors"
+                        >
+                          {result.media?.image_url ? (
+                            <img
+                              src={result.media.image_url}
+                              alt={result.name}
+                              className="h-10 w-10 rounded-lg object-cover shrink-0 bg-black/5 dark:bg-white/10"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-lg shrink-0 bg-black/5 dark:bg-white/10" />
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-semibold text-ink dark:text-white truncate">
+                              {result.name}
+                            </p>
+                            {result.primary_muscle && (
+                              <p className="text-[10px] text-ink/40 dark:text-white/40">
+                                {result.primary_muscle}
+                              </p>
+                            )}
+                          </div>
+                          <Plus size={14} className="text-[#4F7CFF] shrink-0" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {exerciseEntries.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2">
                   {exerciseEntries.map((ex: any, i: number) => {
                     const key = ex.internal_id || String(i)
@@ -705,19 +822,14 @@ body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.prima
                     )
                   })}
                 </div>
-              </div>
-            ) : Array.isArray(finalNote.exercises) && finalNote.exercises.length > 0 && (
-              <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5">
-                <p className="text-xs font-semibold tracking-[0.15em] uppercase text-[#4F7CFF] mb-2">
-                  Exercises
-                </p>
+              ) : Array.isArray(finalNote.exercises) && finalNote.exercises.length > 0 && (
                 <ul className="text-sm text-ink/70 dark:text-white/70 leading-relaxed space-y-1">
                   {finalNote.exercises.map((ex: string, i: number) => (
                     <li key={i}>• {ex}</li>
                   ))}
                 </ul>
-              </div>
-            )}
+              )}
+            </div>
 
             {clinicalInsight && (
               <motion.div

@@ -15,6 +15,11 @@ import {
     FileText,
     ImagePlus,
   MessageCircle,
+  Pencil,
+  Trash2,
+  Plus,
+  Search,
+  X,
 
 } from "lucide-react";
 
@@ -76,6 +81,14 @@ const [scanSummary, setScanSummary] = useState<string | null>(null);
 const [clinicalContext, setClinicalContext] = useState("");
 const [uploadedFileNames, setUploadedFileNames] = useState<string[]>([]);
 const [scanAnalyzing, setScanAnalyzing] = useState(false);
+
+const [exerciseEntries, setExerciseEntries] = useState<any[]>([]);
+const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
+const [editingExercise, setEditingExercise] = useState<string | null>(null);
+const [showAddExercise, setShowAddExercise] = useState(false);
+const [exerciseSearchQuery, setExerciseSearchQuery] = useState("");
+const [exerciseSearchResults, setExerciseSearchResults] = useState<any[]>([]);
+const [exerciseSearching, setExerciseSearching] = useState(false);
 
 const [textInput, setTextInput] = useState("");
 
@@ -224,6 +237,13 @@ const [recordingLang, setRecordingLang] = useState("it-IT");
     setInterim("");
 
     setProgress(0);
+
+    setExerciseEntries([]);
+    setExpandedExercise(null);
+    setEditingExercise(null);
+    setShowAddExercise(false);
+    setExerciseSearchQuery("");
+    setExerciseSearchResults([]);
   };
 
   const runFlyPhase = useCallback((finalPhrases: Phrase[]) => {
@@ -442,6 +462,30 @@ if (rehabPhasesLocal.length > 0) {
     console.error("Errore refine-exercises:", exErr);
   }
 }
+
+let exerciseEntriesArr: any[] = [];
+if (Array.isArray(exercisesArr) && exercisesArr.length > 0) {
+  try {
+    const eiRes = await fetch("/api/exercise-intelligence", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        exercisesDraft: exercisesArr,
+        assessment: note.assessment,
+        primaryCondition: note.primaryCondition,
+        lang: note.language || recordingLang,
+      }),
+    });
+    const eiData = await eiRes.json();
+    if (Array.isArray(eiData.exercises)) {
+      exerciseEntriesArr = eiData.exercises;
+    }
+  } catch (eiErr) {
+    console.error("Errore exercise-intelligence:", eiErr);
+  }
+}
+setExerciseEntries(exerciseEntriesArr);
+
 setFinalNote((prev: any) =>
   prev ? { ...prev, plan: planText, exercises: exercisesArr } : prev
 );
@@ -463,10 +507,6 @@ setFinalNote((prev: any) =>
         push(note.objective, "findings", "objective");
         push(note.assessment, "assessment", "assessment");
         push(planText, "plan", "plan");
-
-        if (Array.isArray(note.exercises) && note.exercises.length) {
-push(`Exercises:\n${note.exercises.map((e: string) => `• ${e}`).join("\n")}`, "plan", "_exercisesText");
-        }
 
         push(note.summaryForPatient, "followup", "summaryForPatient");
 
@@ -608,6 +648,68 @@ recognition.lang = recordingLang;
       setFinalNote((prev: any) => (prev ? { ...prev, [field]: newText } : prev));
     }
   };
+
+  const updateExerciseDosing = (key: string, field: string, value: string) => {
+    setExerciseEntries((prev) =>
+      prev.map((ex: any, i: number) => {
+        const exKey = ex.internal_id || String(i);
+        if (exKey !== key) return ex;
+        const numFields = ["sets", "reps", "duration_seconds", "frequency_per_week"];
+        const parsedValue = numFields.includes(field)
+          ? value === "" ? null : Number(value)
+          : value;
+        return { ...ex, dosing: { ...ex.dosing, [field]: parsedValue } };
+      })
+    );
+  };
+
+  const removeExercise = (key: string) => {
+    setExerciseEntries((prev) =>
+      prev.filter((ex: any, i: number) => (ex.internal_id || String(i)) !== key)
+    );
+  };
+
+  const searchExerciseDb = async (query: string) => {
+    setExerciseSearchQuery(query);
+    if (!query.trim()) {
+      setExerciseSearchResults([]);
+      return;
+    }
+    setExerciseSearching(true);
+    try {
+      const res = await fetch(`/api/exercise-search?q=${encodeURIComponent(query.trim())}`);
+      const data = await res.json();
+      setExerciseSearchResults(data.exercises || []);
+    } catch (err) {
+      console.error("Errore ricerca esercizio:", err);
+      setExerciseSearchResults([]);
+    } finally {
+      setExerciseSearching(false);
+    }
+  };
+
+  const addExerciseToList = (entry: any) => {
+    setExerciseEntries((prev) => [
+      ...prev,
+      {
+        ...entry,
+        internal_id: `${entry.internal_id}-${Date.now()}`,
+        source_type: "professional",
+        dosing: {
+          sets: null,
+          reps: null,
+          duration_seconds: null,
+          frequency_per_week: null,
+          notes: null,
+        },
+        clinical_check: null,
+      },
+    ]);
+    setShowAddExercise(false);
+    setExerciseSearchQuery("");
+    setExerciseSearchResults([]);
+  };
+
 const askPhygoAI = async () => {
   if (!askQuestion.trim()) return;
   setAskLoading(true);
@@ -693,11 +795,53 @@ const addSection = (title: string, content?: string) => {
     addSection("Assessment", finalNote.assessment);
     addSection("Plan", finalNote.plan);
 
-        if (finalNote._exercisesText) {
+    if (exerciseEntries.length > 0) {
+      if (y > 260) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text("Exercises", marginLeft, y);
+      y += 7;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      exerciseEntries.forEach((ex: any) => {
+        const dosingParts: string[] = [];
+        if (ex.dosing?.sets) dosingParts.push(`${ex.dosing.sets} sets`);
+        if (ex.dosing?.reps) dosingParts.push(`${ex.dosing.reps} reps`);
+        if (ex.dosing?.duration_seconds) dosingParts.push(`${ex.dosing.duration_seconds}s`);
+        if (ex.dosing?.frequency_per_week) dosingParts.push(`${ex.dosing.frequency_per_week}x/week`);
+        const dosingText = dosingParts.length ? ` (${dosingParts.join(", ")})` : "";
+        const mainLine = `- ${sanitizeForPdf(ex.name)}${dosingText}`;
+        const lines = doc.splitTextToSize(mainLine, usableWidth);
+        lines.forEach((line: string) => {
+          if (y > 280) {
+            doc.addPage();
+            y = 20;
+          }
+          doc.text(line, marginLeft, y);
+          y += 6;
+        });
+        if (ex.dosing?.notes) {
+          doc.setFont("helvetica", "italic");
+          const noteLines = doc.splitTextToSize(`  ${sanitizeForPdf(ex.dosing.notes)}`, usableWidth);
+          noteLines.forEach((line: string) => {
+            if (y > 280) {
+              doc.addPage();
+              y = 20;
+            }
+            doc.text(line, marginLeft, y);
+            y += 6;
+          });
+          doc.setFont("helvetica", "normal");
+        }
+      });
+      y += 6;
+    } else if (finalNote._exercisesText) {
       addSection("Exercises", finalNote._exercisesText);
     } else if (Array.isArray(finalNote.exercises) && finalNote.exercises.length) {
       if (y > 260) {
-
         doc.addPage();
         y = 20;
       }
@@ -709,7 +853,6 @@ const addSection = (title: string, content?: string) => {
       doc.setFontSize(10);
       finalNote.exercises.forEach((ex: string) => {
         const lines = doc.splitTextToSize(`- ${sanitizeForPdf(ex)}`, usableWidth);
-
         lines.forEach((line: string) => {
           if (y > 280) {
             doc.addPage();
@@ -1203,6 +1346,235 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
     </div>
   </motion.div>
 )}
+
+{exerciseEntries.length > 0 && (
+  <motion.div
+    initial={{ opacity: 0, y: 12 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4, delay: 0.05 }}
+    className="mt-4 rounded-[24px] border border-black/5 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-sm"
+  >
+    <div className="flex items-center justify-between mb-4">
+      <span className="eyebrow text-ink/40 dark:text-white/40">
+        Exercises
+      </span>
+      <button
+        onClick={() => setShowAddExercise((prev) => !prev)}
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold"
+        style={{ background: "rgba(79,124,255,0.12)", color: "#4F7CFF" }}
+      >
+        {showAddExercise ? <X size={12} /> : <Plus size={12} />}
+        {showAddExercise ? "Cancel" : "Add exercise"}
+      </button>
+    </div>
+
+    {showAddExercise && (
+      <div className="mb-4 rounded-2xl bg-mist/60 dark:bg-white/5 p-4">
+        <div className="relative">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
+          <input
+            type="text"
+            value={exerciseSearchQuery}
+            onChange={(e) => searchExerciseDb(e.target.value)}
+            placeholder="Search exercises (e.g. plank, bridge, squat)..."
+            autoFocus
+            className="w-full text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 pl-9 pr-3 py-2 outline-none focus:border-electric"
+          />
+        </div>
+        {exerciseSearching && (
+          <p className="text-xs text-ink/40 dark:text-white/40 mt-2">Searching...</p>
+        )}
+        {!exerciseSearching && exerciseSearchQuery && exerciseSearchResults.length === 0 && (
+          <p className="text-xs text-ink/40 dark:text-white/40 mt-2">No exercises found.</p>
+        )}
+        {exerciseSearchResults.length > 0 && (
+          <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+            {exerciseSearchResults.map((result: any) => (
+              <div
+                key={result.internal_id}
+                onClick={() => addExerciseToList(result)}
+                className="flex items-center gap-3 rounded-xl bg-white dark:bg-white/10 p-2.5 cursor-pointer hover:bg-electric/5 dark:hover:bg-electric/10 transition-colors"
+              >
+                {result.media?.image_url ? (
+                  <img
+                    src={result.media.image_url}
+                    alt={result.name}
+                    className="h-10 w-10 rounded-lg object-cover shrink-0 bg-black/5 dark:bg-white/10"
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded-lg shrink-0 bg-black/5 dark:bg-white/10" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-ink dark:text-white truncate">
+                    {result.name}
+                  </p>
+                  {result.primary_muscle && (
+                    <p className="text-[10px] text-ink/40 dark:text-white/40">
+                      {result.primary_muscle}
+                    </p>
+                  )}
+                </div>
+                <Plus size={14} className="text-electric shrink-0" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
+
+    <div className="grid gap-4 sm:grid-cols-2">
+      {exerciseEntries.map((ex: any, i: number) => {
+        const key = ex.internal_id || String(i);
+        const isOpen = expandedExercise === key;
+        const isEditing = editingExercise === key;
+        const hasDetails = ex.description || (Array.isArray(ex.instructions) && ex.instructions.length > 0);
+        return (
+          <div
+            key={key}
+            className={`rounded-2xl bg-mist/60 dark:bg-white/5 p-4 flex flex-col gap-3 ${(isOpen || isEditing) ? "sm:col-span-2" : ""}`}
+          >
+            <div className="flex gap-3">
+              <div
+                onClick={() => !isEditing && hasDetails && setExpandedExercise(isOpen ? null : key)}
+                className={`flex gap-3 flex-1 min-w-0 ${!isEditing && hasDetails ? "cursor-pointer" : ""}`}
+              >
+                {ex.media?.image_url ? (
+                  <img
+                    src={ex.media.image_url}
+                    alt={ex.name}
+                    className="h-16 w-16 rounded-xl object-cover shrink-0 bg-black/5 dark:bg-white/10"
+                  />
+                ) : (
+                  <div className="h-16 w-16 rounded-xl shrink-0 bg-black/5 dark:bg-white/10 flex items-center justify-center text-[10px] text-ink/30 dark:text-white/30 text-center px-1">
+                    No image
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-ink dark:text-white truncate">
+                    {ex.name}
+                  </p>
+                  {ex.primary_muscle && (
+                    <p className="text-[11px] text-ink/40 dark:text-white/40 mt-0.5">
+                      {ex.primary_muscle}
+                    </p>
+                  )}
+                  {!isEditing && (ex.dosing?.sets || ex.dosing?.reps || ex.dosing?.duration_seconds) && (
+                    <p className="text-[11px] text-ink/50 dark:text-white/50 mt-1">
+                      {ex.dosing?.sets && `${ex.dosing.sets} sets`}
+                      {ex.dosing?.sets && ex.dosing?.reps && " × "}
+                      {ex.dosing?.reps && `${ex.dosing.reps} reps`}
+                      {ex.dosing?.duration_seconds && ` · ${ex.dosing.duration_seconds}s`}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-2 mt-1.5">
+                    {ex.provider === "custom" && (
+                      <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                        Custom exercise
+                      </span>
+                    )}
+                    {!isEditing && hasDetails && (
+                      <span className="text-[10px] font-medium text-electric">
+                        {isOpen ? "Hide details ▲" : "How to do it ▼"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-start gap-1 shrink-0">
+                <button
+                  onClick={() => setEditingExercise(isEditing ? null : key)}
+                  className="p-1.5 rounded-lg text-ink/40 dark:text-white/40 hover:bg-black/5 dark:hover:bg-white/10 hover:text-electric transition-colors"
+                >
+                  <Pencil size={13} />
+                </button>
+                <button
+                  onClick={() => removeExercise(key)}
+                  className="p-1.5 rounded-lg text-ink/40 dark:text-white/40 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            </div>
+
+            {isEditing && (
+              <div className="pt-2 border-t border-black/5 dark:border-white/10 grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[10px] text-ink/40 dark:text-white/40">Sets</label>
+                  <input
+                    type="number"
+                    value={ex.dosing?.sets ?? ""}
+                    onChange={(e) => updateExerciseDosing(key, "sets", e.target.value)}
+                    className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-ink/40 dark:text-white/40">Reps</label>
+                  <input
+                    type="number"
+                    value={ex.dosing?.reps ?? ""}
+                    onChange={(e) => updateExerciseDosing(key, "reps", e.target.value)}
+                    className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-ink/40 dark:text-white/40">Duration (s)</label>
+                  <input
+                    type="number"
+                    value={ex.dosing?.duration_seconds ?? ""}
+                    onChange={(e) => updateExerciseDosing(key, "duration_seconds", e.target.value)}
+                    className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-ink/40 dark:text-white/40">Freq/week</label>
+                  <input
+                    type="number"
+                    value={ex.dosing?.frequency_per_week ?? ""}
+                    onChange={(e) => updateExerciseDosing(key, "frequency_per_week", e.target.value)}
+                    className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-[10px] text-ink/40 dark:text-white/40">Notes</label>
+                  <textarea
+                    value={ex.dosing?.notes ?? ""}
+                    onChange={(e) => updateExerciseDosing(key, "notes", e.target.value)}
+                    rows={2}
+                    className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
+                  />
+                </div>
+                <button
+                  onClick={() => setEditingExercise(null)}
+                  className="col-span-2 mt-1 rounded-full px-4 py-1.5 text-[11px] font-semibold text-white self-start bg-gradient-to-r from-electric to-emerald"
+                >
+                  Done
+                </button>
+              </div>
+            )}
+
+            {!isEditing && isOpen && hasDetails && (
+              <div className="pt-2 border-t border-black/5 dark:border-white/10">
+                {ex.description && (
+                  <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
+                    {ex.description}
+                  </p>
+                )}
+                {Array.isArray(ex.instructions) && ex.instructions.length > 0 && (
+                  <ol className="mt-2 text-xs text-ink/60 dark:text-white/60 leading-relaxed space-y-1 list-decimal list-inside">
+                    {ex.instructions.map((step: string, j: number) => (
+                      <li key={j}>{step}</li>
+                    ))}
+                  </ol>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  </motion.div>
+)}
+
 {rehabPhases.length > 0 && (
   <motion.div
     initial={{ opacity: 0, y: 12 }}
