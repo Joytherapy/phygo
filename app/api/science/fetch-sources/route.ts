@@ -8,9 +8,8 @@ const supabase = createClient(
 
 export async function GET() {
   try {
-    // 1. Cerca su PubMed studi recenti di fisioterapia (query di test)
     const searchRes = await fetch(
-      'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=physiotherapy+rehabilitation&retmax=8&sort=date&retmode=json'
+      'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=(physical+therapy%5BTitle%2FAbstract%5D+OR+physiotherapy%5BTitle%2FAbstract%5D+OR+%22exercise+therapy%22%5BTitle%2FAbstract%5D+OR+%22musculoskeletal+rehabilitation%22%5BTitle%2FAbstract%5D)+AND+(randomized+controlled+trial%5BPublication+Type%5D+OR+systematic+review%5BPublication+Type%5D+OR+meta-analysis%5BPublication+Type%5D)+NOT+(cancer%5BTitle%5D+OR+oncology%5BTitle%5D+OR+tumor%5BTitle%5D)&retmax=10&sort=date&retmode=json'
     );
     const searchData = await searchRes.json();
     const pmids: string[] = searchData.esearchresult?.idlist || [];
@@ -19,7 +18,6 @@ export async function GET() {
       return NextResponse.json({ imported: 0, message: 'Nessun PMID trovato' });
     }
 
-    // 2. Recupera i dettagli (titolo, autori, journal, abstract) per quei PMID
     const summaryRes = await fetch(
       `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${pmids.join(',')}&retmode=json`
     );
@@ -30,7 +28,6 @@ export async function GET() {
     );
     const xmlText = await fetchRes.text();
 
-    // 3. Recupera l'id della fonte "PubMed" già inserita
     const { data: source } = await supabase
       .from('research_sources')
       .select('id')
@@ -43,7 +40,6 @@ export async function GET() {
       const item = summaryData.result?.[pmid];
       if (!item) continue;
 
-      // Estrae l'abstract dal blocco XML corrispondente a questo PMID (parsing semplice)
       const articleBlock = xmlText.split(`<PMID Version="1">${pmid}</PMID>`)[1] || '';
       const abstractMatch = articleBlock
         .split('</AbstractText>')[0]
@@ -53,6 +49,16 @@ export async function GET() {
       const authors = (item.authors || [])
         .map((a: { name: string }) => a.name)
         .join(', ');
+
+      const pubTypeMatch = articleBlock.match(/<PublicationType[^>]*>([^<]+)<\/PublicationType>/g) || [];
+      const pubTypes = pubTypeMatch.map((t: string) => t.replace(/<[^>]+>/g, ''));
+      let studyType = 'Other';
+      if (pubTypes.some((t: string) => /systematic review/i.test(t))) studyType = 'Systematic Review';
+      else if (pubTypes.some((t: string) => /meta-analysis/i.test(t))) studyType = 'Meta-analysis';
+      else if (pubTypes.some((t: string) => /randomized controlled trial/i.test(t))) studyType = 'RCT';
+      else if (pubTypes.some((t: string) => /observational study|cohort/i.test(t))) studyType = 'Cohort';
+      else if (pubTypes.some((t: string) => /case reports/i.test(t))) studyType = 'Case Report';
+      else if (pubTypes.some((t: string) => /guideline|practice guideline/i.test(t))) studyType = 'Guideline';
 
       const { error } = await supabase.from('research_papers').upsert(
         {
@@ -64,6 +70,7 @@ export async function GET() {
           pmid,
           abstract,
           original_url: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`,
+          study_type: studyType,
           status: 'pending_review',
         },
         { onConflict: 'pmid', ignoreDuplicates: true }

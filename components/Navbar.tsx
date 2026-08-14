@@ -11,6 +11,7 @@ const links = [
   { label: "Trust", href: "#trust" },
   { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
+  { label: "Science", href: "/dashboard/science" },
 ];
 
 export default function Navbar() {
