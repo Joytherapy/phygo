@@ -351,6 +351,10 @@ body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.prima
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: askQuestion, noteContext }),
       })
+          if (res.status === 429) {
+      setAskAnswer('Hai raggiunto il limite di domande per questa ora. Riprova più tardi o passa a un piano superiore.')
+      return
+    }
       const data = await res.json()
       setAskAnswer(data.answer || 'Could not generate an answer.')
     } catch (err) {

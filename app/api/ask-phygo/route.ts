@@ -1,12 +1,126 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { createClient } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+const WINDOW_MS = 60 * 60 * 1000; // finestra di 1 ora
+
+const LIMITS: Record<string, number> = {
+  anonymous: 5,
+  free: 20,
+  pro: 200,
+  super_pro: 100000, // di fatto illimitato
+};
+
+async function getPlan(): Promise<{ key: string; plan: string }> {
+  const cookieStore = cookies();
+  const supabaseAuth = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+      },
+    }
+  );
+
+  const {
+    data: { user },
+  } = await supabaseAuth.auth.getUser();
+
+  if (!user) {
+    return { key: "anonymous", plan: "anonymous" };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan")
+    .eq("id", user.id)
+    .single();
+
+  const plan = profile?.plan || "free";
+  return { key: `user:${user.id}`, plan };
+}
+
+async function checkRateLimit(
+  key: string,
+  plan: string
+): Promise<boolean> {
+  const now = new Date();
+  const limit = LIMITS[plan] ?? LIMITS.free;
+
+  const { data: existing } = await supabase
+    .from("ask_phygo_usage")
+    .select("*")
+    .eq("ip", key)
+    .single();
+
+  if (!existing) {
+    await supabase.from("ask_phygo_usage").insert({
+      ip: key,
+      request_count: 1,
+      window_start: now.toISOString(),
+    });
+    return true;
+  }
+
+  const windowStart = new Date(existing.window_start);
+  const elapsed = now.getTime() - windowStart.getTime();
+
+  if (elapsed > WINDOW_MS) {
+    await supabase
+      .from("ask_phygo_usage")
+      .update({ request_count: 1, window_start: now.toISOString() })
+      .eq("ip", key);
+    return true;
+  }
+
+  if (existing.request_count >= limit) {
+    return false;
+  }
+
+  await supabase
+    .from("ask_phygo_usage")
+    .update({ request_count: existing.request_count + 1 })
+    .eq("ip", key);
+  return true;
+}
+
 export async function POST(request: NextRequest) {
   try {
+    const { key, plan } = await getPlan();
+
+    let rateLimitKey = key;
+    if (key === "anonymous") {
+      const ip =
+        request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+        "unknown";
+      rateLimitKey = `ip:${ip}`;
+    }
+
+    const allowed = await checkRateLimit(rateLimitKey, plan);
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          error:
+            "Too many requests. Please wait a bit before asking again.",
+        },
+        { status: 429 }
+      );
+    }
+
     const { question, noteContext } = await request.json();
 
     if (!question || typeof question !== "string") {

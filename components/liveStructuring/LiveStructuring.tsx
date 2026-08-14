@@ -723,6 +723,10 @@ const askPhygoAI = async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: askQuestion, noteContext }),
     });
+        if (res.status === 429) {
+      setAskAnswer("Hai raggiunto il limite di domande per questa ora. Riprova più tardi o passa a un piano superiore.");
+      return;
+    }
     const data = await res.json();
     setAskAnswer(data.answer || "Non sono riuscito a generare una risposta.");
   } catch (err) {
