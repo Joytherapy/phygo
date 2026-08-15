@@ -131,7 +131,7 @@ export default function Pricing() {
                     ))}
                   </ul>
                   <a
-                    href="#"
+                    href={tier.monthly === null ? "#contact" : "/login?mode=signup"}
                     className={`block text-center rounded-full text-sm font-semibold py-3 transition-opacity hover:opacity-90 ${
                       tier.featured ? "bg-white text-ink" : "bg-ink text-white"
                     }`}

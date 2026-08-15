@@ -42,7 +42,7 @@ export default function FinalCTA() {
           className="relative mt-10"
         >
           <MagneticButton
-            href="#pricing"
+            href="/login?mode=signup"
             className="group inline-flex items-center gap-2 rounded-full bg-white text-ink px-7 py-4 text-sm font-semibold shadow-lift shimmer-sweep"
           >
             Start Free

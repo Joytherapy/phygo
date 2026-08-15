@@ -186,7 +186,7 @@ export default function Hero() {
             className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <MagneticButton
-              href="#pricing"
+              href="/login?mode=signup"
               className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-ink px-7 py-3.5 text-sm font-semibold text-white shadow-lift transition-all hover:shadow-glow shimmer-sweep"
           >
             Start Free

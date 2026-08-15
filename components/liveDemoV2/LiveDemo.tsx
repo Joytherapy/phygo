@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import MagneticButton from "../MagneticButton";
 
 type FieldKey = "subjective" | "objective" | "assessment" | "plan";
 
