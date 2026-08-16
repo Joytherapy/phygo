@@ -66,7 +66,7 @@ const [dark, setDark] = useState(() => {
         }`}
       >
         <a
-          href="#"
+          href="/"
           className="flex items-center gap-2.5 font-display font-semibold text-lg tracking-tight text-ink dark:text-white"
         >
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-electric to-emerald text-white text-base font-bold">
