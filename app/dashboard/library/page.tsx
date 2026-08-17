@@ -23,6 +23,7 @@ interface Item {
   harder_option: string;
   tip: string;
   safety_note: string;
+  image_url: string;
 }
 
 interface Subcategory {
@@ -158,18 +159,30 @@ export default function LibraryPage() {
                 <button
                   key={item.id}
                   onClick={() => setOpenItem(item)}
-                  className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#4F7CFF]/40 transition-colors"
+                  className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden hover:border-[#4F7CFF]/40 transition-colors"
                 >
-                  <span
-                    className="inline-block text-xs px-2.5 py-1 rounded-full text-white font-medium mb-2"
-                    style={{ background: levelColor[item.level] || '#4F7CFF' }}
-                  >
-                    {item.level}
-                  </span>
-                  <h3 className="text-base font-semibold text-ink dark:text-white mb-1">{item.title}</h3>
-                  <p className="text-xs text-ink/50 dark:text-white/50">
-                    {item.body_position} · {item.equipment}
-                  </p>
+                                    {item.image_url && (
+                    <div className="w-full aspect-video bg-white overflow-hidden flex items-center justify-center">
+                      <img
+                        src={item.image_url}
+                        alt={item.title}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  )}
+
+                  <div className="p-5">
+                    <span
+                      className="inline-block text-xs px-2.5 py-1 rounded-full text-white font-medium mb-2"
+                      style={{ background: levelColor[item.level] || '#4F7CFF' }}
+                    >
+                      {item.level}
+                    </span>
+                    <h3 className="text-base font-semibold text-ink dark:text-white mb-1">{item.title}</h3>
+                    <p className="text-xs text-ink/50 dark:text-white/50">
+                      {item.body_position} · {item.equipment}
+                    </p>
+                  </div>
                 </button>
               ))}
               {filteredItems.length === 0 && (
@@ -189,6 +202,15 @@ export default function LibraryPage() {
             onClick={(e) => e.stopPropagation()}
             className="max-w-lg w-full max-h-[85vh] overflow-y-auto rounded-[24px] bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 p-6"
           >
+            {openItem.image_url && (
+              <div className="w-full h-48 bg-white rounded-2xl overflow-hidden mb-4">
+                <img
+                  src={openItem.image_url}
+                  alt={openItem.title}
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
+            )}
             <span
               className="inline-block text-xs px-2.5 py-1 rounded-full text-white font-medium mb-3"
               style={{ background: levelColor[openItem.level] || '#4F7CFF' }}

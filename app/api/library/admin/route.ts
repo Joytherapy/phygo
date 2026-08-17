@@ -43,6 +43,8 @@ export async function POST(req: Request) {
       tip,
       safety_note,
       sort_order,
+      image_url,
+      objective,
     } = body;
 
     if (!subcategory_id || !title || !level || !body_position) {
@@ -63,6 +65,8 @@ export async function POST(req: Request) {
       tip: tip || null,
       safety_note: safety_note || null,
       sort_order: sort_order ?? 0,
+      image_url: image_url || null,
+      objective: objective || null,
       updated_at: new Date().toISOString(),
     };
 
