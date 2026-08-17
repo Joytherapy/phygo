@@ -53,6 +53,7 @@ export default function LibraryPage() {
   const [loading, setLoading] = useState(true);
   const [forbidden, setForbidden] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [openItem, setOpenItem] = useState<Item | null>(null);
 
@@ -73,12 +74,21 @@ export default function LibraryPage() {
       });
   }, []);
 
-  const filteredSubcats = subcategories.filter((s) => s.category_id === activeCategory);
+  const subcatsForCategory = subcategories.filter((s) => s.category_id === activeCategory);
+
+  useEffect(() => {
+    if (subcatsForCategory.length > 0) {
+      setActiveSubcategory(subcatsForCategory[0].id);
+    } else {
+      setActiveSubcategory(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCategory, subcategories.length]);
+
   const filteredItems = items.filter((item) => {
-    const sub = subcategories.find((s) => s.id === item.subcategory_id);
-    const matchesCategory = sub?.category_id === activeCategory;
+    const matchesSubcategory = activeSubcategory ? item.subcategory_id === activeSubcategory : true;
     const matchesQuery = item.title.toLowerCase().includes(query.toLowerCase());
-    return matchesCategory && matchesQuery;
+    return matchesSubcategory && matchesQuery;
   });
 
   if (forbidden) {
@@ -120,7 +130,7 @@ export default function LibraryPage() {
           <p className="text-sm text-ink/50 dark:text-white/50">Loading…</p>
         ) : (
           <>
-            <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+            <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
               {categories.map((cat) => (
                 <button
                   key={cat.id}
@@ -140,6 +150,24 @@ export default function LibraryPage() {
                 </button>
               ))}
             </div>
+
+            {subcatsForCategory.length > 0 && (
+              <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+                {subcatsForCategory.map((sub) => (
+                  <button
+                    key={sub.id}
+                    onClick={() => setActiveSubcategory(sub.id)}
+                    className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold border transition-colors ${
+                      activeSubcategory === sub.id
+                        ? 'border-[#4F7CFF] text-[#4F7CFF] bg-[#4F7CFF]/10'
+                        : 'border-black/10 dark:border-white/15 text-ink/50 dark:text-white/50'
+                    }`}
+                  >
+                    {sub.name}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="relative mb-6">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none flex items-center justify-center h-6 w-6 rounded-full bg-[#4F7CFF]/15">
@@ -161,7 +189,7 @@ export default function LibraryPage() {
                   onClick={() => setOpenItem(item)}
                   className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden hover:border-[#4F7CFF]/40 transition-colors"
                 >
-                                    {item.image_url && (
+                  {item.image_url && (
                     <div className="w-full aspect-video bg-white overflow-hidden flex items-center justify-center">
                       <img
                         src={item.image_url}
@@ -203,11 +231,11 @@ export default function LibraryPage() {
             className="max-w-lg w-full max-h-[85vh] overflow-y-auto rounded-[24px] bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 p-6"
           >
             {openItem.image_url && (
-              <div className="w-full h-48 bg-white rounded-2xl overflow-hidden mb-4">
+              <div className="w-full aspect-video bg-white rounded-2xl overflow-hidden mb-4 flex items-center justify-center">
                 <img
                   src={openItem.image_url}
                   alt={openItem.title}
-                  className="w-full h-full object-cover object-top"
+                  className="w-full h-full object-contain"
                 />
               </div>
             )}
