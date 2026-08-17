@@ -50,13 +50,15 @@ export default function SciencePage() {
       />
 
       <div className="relative max-w-4xl mx-auto pt-40 pb-20 px-6">
-        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#4F7CFF] mb-3">
-          Phygo Science
-        </p>
-        <h1 className="font-display text-5xl font-bold tracking-tight mb-2">
+        <div className="inline-flex items-center gap-2 rounded-full border border-[#4F7CFF]/20 bg-[#4F7CFF]/10 px-3.5 py-1.5 mb-5">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }} />
+          <p className="text-xs font-semibold tracking-[0.15em] uppercase text-[#4F7CFF]">Phygo Science</p>
+        </div>
+        <h1 className="font-display text-6xl font-bold tracking-tight mb-3">
           <span className="text-ink dark:text-white">Latest </span>
-          <span style={{ color: '#00E5A0' }}>Evidence</span>
+          <span style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Evidence</span>
         </h1>
+
         <p className="text-sm text-ink/50 dark:text-white/50 mb-8">
           Evidence-based research for physiotherapists.
         </p>

@@ -118,13 +118,17 @@ export default function LibraryPage() {
       />
 
       <div className="relative max-w-5xl mx-auto pt-40 pb-24 px-6">
-        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#4F7CFF] mb-3">Phygo Pro</p>
-        <h1 className="font-display text-5xl font-bold tracking-tight mb-2 text-ink dark:text-white">
-          Pro Library
+         <div className="inline-flex items-center gap-2 rounded-full border border-[#4F7CFF]/20 bg-[#4F7CFF]/10 px-3.5 py-1.5 mb-5">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }} />
+<p className="text-xs font-semibold tracking-[0.15em] uppercase text-[#4F7CFF]">Members Only</p>
+        </div>
+        <h1 className="font-display text-6xl font-bold tracking-tight mb-3 text-ink dark:text-white">
+          Pro <span style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Library</span>
         </h1>
-        <p className="text-sm text-ink/50 dark:text-white/50 mb-8">
-          Structured clinical content, ready to bring into a session.
+        <p className="text-base text-ink/50 dark:text-white/50 mb-8 max-w-lg">
+          Curated, clinically structured content — ready to bring straight into a session.
         </p>
+
 
         {loading ? (
           <p className="text-sm text-ink/50 dark:text-white/50">Loading…</p>
