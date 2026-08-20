@@ -83,8 +83,7 @@ export default function RootLayout({
     (function() {
       try {
         var stored = window.localStorage.getItem("phygo-theme");
-        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        var isDark = stored ? stored === "dark" : prefersDark;
+        var isDark = stored ? stored === "dark" : true;
         if (isDark) document.documentElement.classList.add("dark");
       } catch (e) {}
     })();

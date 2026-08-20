@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import Navbar from '@/components/Navbar';
 
 type View = 'front' | 'back';
 type Point = { x: number; y: number };
@@ -22,13 +23,13 @@ const INITIAL_ZONES: Zone[] = [
     name: 'Cervical Spine',
     points: {
       front: [{ x: 50, y: 18.9 }],
-      back: [{ x: 50, y: 12 }], // stima, da calibrare — base cranio/suboccipitale
+      back: [{ x: 50, y: 12 }],
     },
   },
   {
     slug: 'trapezius',
     name: 'Trapezius / Upper Trap',
-    points: { back: [{ x: 40, y: 19 }, { x: 60, y: 19 }] }, // stima, da calibrare
+    points: { back: [{ x: 40, y: 19 }, { x: 60, y: 19 }] },
   },
   {
     slug: 'shoulder',
@@ -41,7 +42,7 @@ const INITIAL_ZONES: Zone[] = [
   {
     slug: 'chest',
     name: 'Chest / Pectorals',
-    points: { front: [{ x: 50, y: 26 }] }, // stima, da calibrare
+    points: { front: [{ x: 50, y: 26 }] },
   },
   {
     slug: 'biceps',
@@ -61,7 +62,7 @@ const INITIAL_ZONES: Zone[] = [
   {
     slug: 'forearm',
     name: 'Forearm',
-    points: { front: [{ x: 30, y: 40.5 }, { x: 69, y: 40.5 }] }, // stima, da calibrare
+    points: { front: [{ x: 30, y: 40.5 }, { x: 69, y: 40.5 }] },
   },
   {
     slug: 'wrist-hand',
@@ -76,7 +77,7 @@ const INITIAL_ZONES: Zone[] = [
   {
     slug: 'thoracic-spine',
     name: 'Thoracic Spine / Upper Back',
-    points: { back: [{ x: 50, y: 20 }, { x: 50, y: 28 }] }, // stima, da calibrare
+    points: { back: [{ x: 50, y: 20 }, { x: 50, y: 28 }] },
   },
   {
     slug: 'lumbar-spine',
@@ -94,17 +95,17 @@ const INITIAL_ZONES: Zone[] = [
   {
     slug: 'glutes',
     name: 'Glutes',
-    points: { back: [{ x: 41, y: 50 }, { x: 58, y: 50 }] }, // stima, da calibrare
+    points: { back: [{ x: 41, y: 50 }, { x: 58, y: 50 }] },
   },
   {
     slug: 'quadriceps',
     name: 'Quadriceps',
-    points: { front: [{ x: 42.7, y: 52.4 }, { x: 55.8, y: 52.4 }] }, // stima, da calibrare
+    points: { front: [{ x: 42.7, y: 52.4 }, { x: 55.8, y: 52.4 }] },
   },
   {
     slug: 'hamstrings',
     name: 'Hamstrings',
-    points: { back: [{ x: 41.7, y: 54 }, { x: 57.4, y: 54 }] }, // stima, da calibrare
+    points: { back: [{ x: 41.7, y: 54 }, { x: 57.4, y: 54 }] },
   },
   {
     slug: 'knee',
@@ -114,7 +115,7 @@ const INITIAL_ZONES: Zone[] = [
   {
     slug: 'calf',
     name: 'Calf',
-    points: { back: [{ x: 40, y: 75 }, { x: 58.7, y: 75 }] }, // stima, da calibrare
+    points: { back: [{ x: 40, y: 75 }, { x: 58.7, y: 75 }] },
   },
   {
     slug: 'ankle-foot',
@@ -126,7 +127,7 @@ const INITIAL_ZONES: Zone[] = [
   },
 ];
 
-export default function BodyMapPage() {
+function BodyMapContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const calibrate = searchParams.get('calibrate') === '1';
@@ -173,19 +174,23 @@ export default function BodyMapPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#08090b] text-white relative overflow-hidden">
+    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+      <Navbar />
+
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full blur-[120px] opacity-30 pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)' }}
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
+        style={{
+          background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)',
+        }}
       />
 
-      <div className="relative max-w-5xl mx-auto px-6 pt-16 pb-24">
+      <div className="relative max-w-5xl mx-auto px-6 pt-40 pb-24">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]" />
             {calibrate ? 'Calibration Mode — drag the dots' : 'Interactive Body Map'}
           </div>
-          <h1 className="text-6xl font-bold tracking-tight">
+          <h1 className="font-display text-6xl font-bold tracking-tight">
             Anatomical{' '}
             <span className="bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] bg-clip-text text-transparent">
               Navigator
@@ -194,13 +199,15 @@ export default function BodyMapPage() {
         </div>
 
         <div className="flex justify-center mb-8">
-          <div className="inline-flex rounded-full border border-white/10 bg-white/[0.03] backdrop-blur-xl p-1">
+          <div className="inline-flex rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl p-1">
             {(['front', 'back'] as View[]).map((v) => (
               <button
                 key={v}
                 onClick={() => setView(v)}
                 className={`px-6 py-2 rounded-full text-sm font-semibold capitalize transition-all ${
-                  view === v ? 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-black' : 'text-white/60 hover:text-white'
+                  view === v
+                    ? 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-black'
+                    : 'text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white'
                 }`}
               >
                 {v === 'front' ? 'Front' : 'Back'}
@@ -214,7 +221,7 @@ export default function BodyMapPage() {
             <select
               value={isolated ?? ''}
               onChange={(e) => setIsolated(e.target.value || null)}
-              className="px-4 py-2 rounded-xl bg-white/[0.05] border border-white/10 text-sm"
+              className="px-4 py-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.08] dark:border-white/10 text-sm text-ink dark:text-white"
             >
               <option value="">Mostra tutte le zone</option>
               {zones
@@ -228,76 +235,79 @@ export default function BodyMapPage() {
           </div>
         )}
 
+        {/* Il pannello con l'immagine resta SEMPRE scuro (schermo/device), anche in tema chiaro */}
         <div className="flex justify-center">
-          <div
-            ref={containerRef}
-            className="relative w-full max-w-md select-none touch-none"
-            onPointerMove={handlePointerMove}
-            onPointerUp={() => setDragging(null)}
-            onPointerLeave={() => setDragging(null)}
-          >
-            <AnimatePresence mode="wait">
-              <motion.img
-                key={view}
-                src={imageSrc}
-                alt={`Anatomical body map - ${view}`}
-                className="w-full h-auto pointer-events-none"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.25 }}
-                draggable={false}
-              />
-            </AnimatePresence>
+          <div className="w-full max-w-md rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-[#08090b] p-6 shadow-2xl">
+            <div
+              ref={containerRef}
+              className="relative w-full select-none touch-none"
+              onPointerMove={handlePointerMove}
+              onPointerUp={() => setDragging(null)}
+              onPointerLeave={() => setDragging(null)}
+            >
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={view}
+                  src={imageSrc}
+                  alt={`Anatomical body map - ${view}`}
+                  className="w-full h-auto pointer-events-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  draggable={false}
+                />
+              </AnimatePresence>
 
-            {zones.flatMap((zone) => {
-              const pts = zone.points[view];
-              if (!pts) return [];
-              if (calibrate && isolated && isolated !== zone.slug) return [];
-              return pts.map((p, i) => (
-                <div
-                  key={`${zone.slug}-${view}-${i}`}
-                  onPointerDown={(e) => {
-                    if (!calibrate) return;
-                    e.preventDefault();
-                    setDragging({ slug: zone.slug, index: i });
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!calibrate) router.push(`/dashboard/body-map/${zone.slug}`);
-                  }}
-                  onMouseEnter={() => setHovered(`${zone.slug}-${i}`)}
-                  onMouseLeave={() => setHovered(null)}
-                  className={`absolute -translate-x-1/2 -translate-y-1/2 group flex items-center justify-center ${
-                    calibrate ? 'cursor-grab active:cursor-grabbing p-3' : 'cursor-pointer'
-                  }`}
-                  style={{ left: `${p.x}%`, top: `${p.y}%` }}
-                >
-                  <span className="relative flex h-5 w-5">
-                    {!calibrate && (
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#32D6A0] opacity-60" />
+              {zones.flatMap((zone) => {
+                const pts = zone.points[view];
+                if (!pts) return [];
+                if (calibrate && isolated && isolated !== zone.slug) return [];
+                return pts.map((p, i) => (
+                  <div
+                    key={`${zone.slug}-${view}-${i}`}
+                    onPointerDown={(e) => {
+                      if (!calibrate) return;
+                      e.preventDefault();
+                      setDragging({ slug: zone.slug, index: i });
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!calibrate) router.push(`/dashboard/body-map/${zone.slug}`);
+                    }}
+                    onMouseEnter={() => setHovered(`${zone.slug}-${i}`)}
+                    onMouseLeave={() => setHovered(null)}
+                    className={`absolute -translate-x-1/2 -translate-y-1/2 group flex items-center justify-center ${
+                      calibrate ? 'cursor-grab active:cursor-grabbing p-3' : 'cursor-pointer'
+                    }`}
+                    style={{ left: `${p.x}%`, top: `${p.y}%` }}
+                  >
+                    <span className="relative flex h-5 w-5">
+                      {!calibrate && (
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#32D6A0] opacity-60" />
+                      )}
+                      <span
+                        className={`relative inline-flex rounded-full h-5 w-5 border-2 ${
+                          calibrate
+                            ? 'bg-red-500/70 border-red-300'
+                            : 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] border-white/40'
+                        }`}
+                      />
+                    </span>
+                    {calibrate && (
+                      <span className="absolute left-1/2 -translate-x-1/2 -top-5 whitespace-nowrap px-1.5 py-0.5 rounded bg-black/70 text-[9px] font-mono text-white/70 pointer-events-none">
+                        {p.x}, {p.y}
+                      </span>
                     )}
-                    <span
-                      className={`relative inline-flex rounded-full h-5 w-5 border-2 ${
-                        calibrate
-                          ? 'bg-red-500/70 border-red-300'
-                          : 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] border-white/40'
-                      }`}
-                    />
-                  </span>
-                  {calibrate && (
-                    <span className="absolute left-1/2 -translate-x-1/2 -top-5 whitespace-nowrap px-1.5 py-0.5 rounded bg-black/70 text-[9px] font-mono text-white/70 pointer-events-none">
-                      {p.x}, {p.y}
-                    </span>
-                  )}
-                  {!calibrate && hovered === `${zone.slug}-${i}` && (
-                    <span className="absolute left-1/2 -translate-x-1/2 -top-8 whitespace-nowrap px-3 py-1 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 text-xs font-medium pointer-events-none">
-                      {zone.name}
-                    </span>
-                  )}
-                </div>
-              ));
-            })}
+                    {!calibrate && hovered === `${zone.slug}-${i}` && (
+                      <span className="absolute left-1/2 -translate-x-1/2 -top-8 whitespace-nowrap px-3 py-1 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 text-xs font-medium text-white pointer-events-none">
+                        {zone.name}
+                      </span>
+                    )}
+                  </div>
+                ));
+              })}
+            </div>
           </div>
         </div>
 
@@ -305,7 +315,7 @@ export default function BodyMapPage() {
           <div className="flex justify-center mt-10">
             <button
               onClick={() => router.push('/dashboard/body-map/whole-body')}
-              className="px-6 py-3 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl hover:bg-white/[0.06] transition-all text-sm font-semibold"
+              className="px-6 py-3 rounded-2xl border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl hover:bg-black/[0.05] dark:hover:bg-white/[0.06] transition-all text-sm font-semibold"
             >
               Whole Body / Balance &amp; Gait →
             </button>
@@ -314,7 +324,7 @@ export default function BodyMapPage() {
 
         {calibrate && (
           <div className="flex flex-col items-center gap-4 mt-8">
-            <p className="text-white/50 text-sm text-center max-w-md">
+            <p className="text-ink/50 dark:text-white/50 text-sm text-center max-w-md">
               Trascina ogni pallino rosso esattamente sopra il punto anatomico giusto. Usa il menu sopra per isolare una zona se ce ne sono troppe vicine. Quando hai finito con Front e Back, premi Esporta.
             </p>
             <button
@@ -335,10 +345,10 @@ export default function BodyMapPage() {
               <p className="text-sm text-white/60 mb-3">
                 Copia questo testo e incollalo qui in chat — sostituirò l'array ZONES definitivo.
               </p>
-              <pre className="text-xs bg-black/40 p-4 rounded-xl overflow-auto whitespace-pre-wrap">{exportCode()}</pre>
+              <pre className="text-xs bg-black/40 p-4 rounded-xl overflow-auto whitespace-pre-wrap text-white">{exportCode()}</pre>
               <button
                 onClick={() => setShowExport(false)}
-                className="mt-4 px-4 py-2 rounded-xl bg-white/10 text-sm"
+                className="mt-4 px-4 py-2 rounded-xl bg-white/10 text-sm text-white"
               >
                 Chiudi
               </button>
@@ -347,5 +357,13 @@ export default function BodyMapPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function BodyMapPage() {
+  return (
+    <Suspense fallback={null}>
+      <BodyMapContent />
+    </Suspense>
   );
 }

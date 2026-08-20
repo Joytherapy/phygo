@@ -12,7 +12,9 @@ const links = [
   { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
   { label: "Science", href: "/dashboard/science" },
+  { label: "Body Map", href: "/dashboard/body-map" },
 ];
+
 
 export default function Navbar() {
   const { scrollY } = useScroll();
@@ -20,11 +22,12 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 const [dark, setDark] = useState(() => {
-  if (typeof window === "undefined") return false;
+  if (typeof window === "undefined") return true;
   const stored = window.localStorage.getItem("phygo-theme");
   if (stored) return stored === "dark";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  return true;
 });
+
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -44,10 +47,10 @@ const [dark, setDark] = useState(() => {
   }, [open]);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("phygo-theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setDark(stored ? stored === "dark" : prefersDark);
-  }, []);
+  const stored = window.localStorage.getItem("phygo-theme");
+  setDark(stored ? stored === "dark" : true);
+}, []);
+
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
