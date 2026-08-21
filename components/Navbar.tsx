@@ -14,6 +14,8 @@ const links = [
   { label: "Science", href: "/dashboard/science" },
   { label: "Body Map", href: "/dashboard/body-map" },
   { label: "Neurology", href: "/dashboard/brain-map" },
+    { label: "Clinical Tools", href: "/dashboard/clinical-tools" },
+
 ];
 
 
