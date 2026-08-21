@@ -13,7 +13,9 @@ const links = [
   { label: "FAQ", href: "#faq" },
   { label: "Science", href: "/dashboard/science" },
   { label: "Body Map", href: "/dashboard/body-map" },
+  { label: "Neurology", href: "/dashboard/brain-map" },
 ];
+
 
 
 export default function Navbar() {
