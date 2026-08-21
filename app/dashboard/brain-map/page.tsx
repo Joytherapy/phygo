@@ -116,31 +116,94 @@ const PATHWAYS = [
     title: 'Corticospinal (Pyramidal) Pathway',
     subtitle: 'Voluntary motor control — limbs and trunk',
     image: `${IMAGE_BASE}/pathway-corticospinal.png`,
+    route: 'Corteccia motoria (M1, Area 4) → capsula interna → peduncolo cerebrale → ponte → piramidi bulbari → decussazione (70-90% delle fibre) → midollo spinale → motoneuroni',
+    description:
+      "Origina per circa il 60% dalla corteccia motoria primaria (M1, Area 4) e per il 40% dalla corteccia premotoria (Area 6) e dall'area parietale. Scende attraverso il braccio posteriore della capsula interna, il peduncolo cerebrale del mesencefalo, la base del ponte, fino alle piramidi del bulbo, dove la maggior parte delle fibre (70-90%) decussa formando il tratto corticospinale laterale (controlla la muscolatura distale degli arti). Le fibre restanti proseguono omolateralmente come tratto corticospinale anteriore, decussando solo vicino al livello di terminazione, e controllano prevalentemente la muscolatura assiale. È la via responsabile dei movimenti volontari rapidi, precisi e appresi, in particolare delle dita e della mano.",
   },
   {
     title: 'Corticobulbar Pathway',
     subtitle: 'Voluntary motor control — head and face',
     image: `${IMAGE_BASE}/pathway-corticobulbar.png`,
+    route: 'Corteccia motoria (Aree 4 e 6) → ginocchio della capsula interna → tronco encefalico → nuclei motori dei nervi cranici (III, IV, V, VI, VII, IX, X, XII)',
+    description:
+      "Origina dalla corteccia motoria primaria e premotoria e discende attraverso il ginocchio della capsula interna fino ai nuclei motori dei nervi cranici nel tronco encefalico, controllando i muscoli di volto, mandibola, faringe, laringe e lingua. A differenza del tratto corticospinale, la maggior parte delle fibre corticobulbari NON decussa: l'innervazione della muscolatura del volto superiore (fronte, chiusura degli occhi) è bilaterale, mentre quella del volto inferiore (bocca) e della lingua è prevalentemente controlaterale. Questa distinzione è clinicamente fondamentale: una lesione centrale (es. ictus) risparmia tipicamente il movimento della fronte ma causa paralisi della metà inferiore del volto controlaterale, mentre una lesione periferica del nervo facciale (es. paralisi di Bell) coinvolge l'intero emivolto omolaterale, fronte inclusa.",
   },
   {
     title: 'Extrapyramidal Pathways',
     subtitle: 'Involuntary motor control, posture and tone',
     image: `${IMAGE_BASE}/pathway-extrapyramidal.png`,
+    route: 'Nuclei del tronco encefalico (nucleo rosso, formazione reticolare, nuclei vestibolari, collicolo superiore) → midollo spinale → interneuroni e motoneuroni',
+    description:
+      "A differenza del sistema piramidale, le vie extrapiramidali non originano dalla corteccia ma da nuclei del tronco encefalico, e agiscono in gran parte al di fuori del controllo cosciente diretto. Il tratto rubrospinale (dal nucleo rosso mesencefalico) facilita i muscoli flessori, soprattutto dell'arto superiore. Il tratto reticolospinale (dalla formazione reticolare di ponte e bulbo) regola postura, tono muscolare e movimenti automatici. Il tratto vestibolospinale (dai nuclei vestibolari) mantiene equilibrio e postura integrando l'informazione labirintica. Il tratto tettospinale (dal collicolo superiore) coordina i movimenti riflessi di capo e occhi in risposta a stimoli visivi/uditivi. Clinicamente, una lesione piramidale causa debolezza/paralisi con iperreflessia, mentre una disfunzione extrapiramidale si manifesta come alterazione del tono (rigidità, spasticità, distonia) senza vera paralisi.",
   },
   {
     title: 'Dorsal Column-Medial Lemniscus Pathway',
     subtitle: 'Fine touch, vibration and proprioception',
     image: `${IMAGE_BASE}/pathway-dorsal-column.png`,
+    route: 'Recettori periferici → colonne dorsali (fascicolo gracile/cuneato) → nuclei gracile/cuneato nel bulbo → decussazione (fibre arcuate interne) → lemnisco mediale → talamo (VPL) → corteccia somatosensoriale (S1)',
+    description:
+      "Trasporta tatto fine, vibrazione, propriocezione cosciente e discriminazione tra due punti. Le fibre di primo ordine entrano nel midollo spinale e salgono omolateralmente senza sinapsi nelle colonne dorsali: il fascicolo gracile (mediale) porta informazioni dagli arti inferiori, il fascicolo cuneato (laterale) dagli arti superiori. Fanno sinapsi nei nuclei gracile e cuneato del bulbo, dove le fibre di secondo ordine decussano (fibre arcuate interne) formando il lemnisco mediale, che sale fino al talamo (nucleo ventrale posterolaterale). Da qui, le fibre di terzo ordine proiettano alla corteccia somatosensoriale primaria. Punto chiave: questa via decussa solo nel bulbo — molto più in alto rispetto alla via spinotalamica, che decussa subito nel midollo spinale.",
   },
   {
     title: 'Spinothalamic (Anterolateral) Pathway',
     subtitle: 'Pain, temperature and crude touch',
     image: `${IMAGE_BASE}/pathway-spinothalamic.png`,
+    route: 'Recettori periferici → corno dorsale del midollo → decussazione immediata (commissura bianca anteriore) → tratto anterolaterale → talamo (VPL) → corteccia somatosensoriale (S1)',
+    description:
+      "Trasporta dolore, temperatura e tatto grossolano/pressione. Le fibre di primo ordine entrano nel corno dorsale del midollo spinale e fanno sinapsi quasi subito. Le fibre di secondo ordine decussano immediatamente (entro 1-2 segmenti spinali) attraverso la commissura bianca anteriore, per poi salire controlateralmente nel funicolo anterolaterale come tratto spinotalamico laterale (dolore/temperatura) e tratto spinotalamico anteriore (tatto grossolano/pressione). Raggiungono il talamo e da lì la corteccia somatosensoriale. Punto chiave: questa via decussa subito a livello del midollo spinale — l'opposto della via delle colonne dorsali. Clinicamente, un'emisezione del midollo spinale causa un pattern dissociato: perdita di propriocezione/tatto fine OMOLATERALE (colonne dorsali, non ancora decussate) ma perdita di dolore/temperatura CONTROLATERALE (spinotalamica, già decussata) al di sotto del livello della lesione.",
   },
   {
     title: 'Basal Ganglia Circuitry',
     subtitle: 'Direct and indirect pathways of movement control',
     image: `${IMAGE_BASE}/pathway-basal-ganglia.png`,
+    route: 'Corteccia → striato (caudato + putamen) → [via diretta: globo pallido interno/substantia nigra reticolata] o [via indiretta: globo pallido esterno → nucleo subtalamico → globo pallido interno] → talamo → corteccia',
+    description:
+      "I gangli della base non hanno connessioni dirette con il midollo spinale, ma modulano il movimento tramite un circuito che parte e ritorna alla corteccia, passando per il talamo. La via diretta facilita il movimento: la corteccia eccita lo striato, che inibisce il globo pallido interno/substantia nigra reticolata, riducendo l'inibizione tonica sul talamo — risultato netto: eccitazione della corteccia motoria. La via indiretta inibisce il movimento attraverso un percorso più lungo (striato → globo pallido esterno → nucleo subtalamico → globo pallido interno), con un risultato netto opposto: maggiore inibizione del talamo. La dopamina, rilasciata dalla substantia nigra pars compacta, facilita la via diretta (recettori D1) e inibisce la via indiretta (recettori D2) — l'effetto netto è la facilitazione del movimento. Nella malattia di Parkinson, la degenerazione dei neuroni dopaminergici sposta l'equilibrio verso l'inibizione del talamo, causando bradicinesia, rigidità e tremore a riposo.",
+  },
+];
+
+const GAIT_TYPES = [
+  {
+    name: 'Andatura Spastica',
+    origin: 'Lesione del I motoneurone (es. post-ictus, paralisi cerebrale)',
+    description:
+      "Movimento a falce dell'arto inferiore colpito (circumduzione), ginocchio esteso e piede in equinismo/inversione durante lo swing, per compensare la difficoltà a flettere anca/ginocchio/caviglia contro l'ipertono spastico. Tipicamente asimmetrica negli esiti di ictus.",
+  },
+  {
+    name: 'Andatura Parkinsoniana',
+    origin: 'Disfunzione dei gangli della base (deplezione dopaminergica)',
+    description:
+      "Passi piccoli e strascicati (marche a piccoli passi), ridotta oscillazione delle braccia, postura flessa in avanti, difficoltà nell'iniziare il passo (freezing) e tendenza alla festinazione (accelerazione involontaria progressiva del passo).",
+  },
+  {
+    name: 'Andatura Atassica Cerebellare',
+    origin: 'Disfunzione cerebellare',
+    description:
+      "Base d'appoggio allargata, passo irregolare ed eterogeneo (varia in ampiezza e lunghezza da un passo all'altro, a differenza della marcia a piccoli passi che è più omogenea), oscillazione del tronco, difficoltà nei cambi di direzione.",
+  },
+  {
+    name: 'Andatura Steppante (Steppage)',
+    origin: 'Paralisi del nervo peroneale / foot drop',
+    description:
+      "Eccessiva flessione di anca e ginocchio durante lo swing per compensare l'incapacità di dorsiflettere la caviglia (piede cadente), evitando che le dita strascichino a terra. Il piede tocca terra prima con le dita che con il tallone.",
+  },
+  {
+    name: 'Andatura Talloneggiante (Atassia Sensitiva)',
+    origin: 'Deficit propriocettivo (es. via delle colonne dorsali)',
+    description:
+      "Il paziente colpisce il suolo con forza eccessiva con il tallone, spesso guardando i propri piedi per compensare visivamente la perdita di informazione propriocettiva. Peggiora marcatamente a occhi chiusi (Romberg positivo).",
+  },
+  {
+    name: 'Andatura Vestibolare',
+    origin: 'Disfunzione del sistema vestibolare',
+    description:
+      "Collo e testa mantenuti rigidi per minimizzare le vertigini, possibile deviazione laterale verso il lato della lesione durante la marcia.",
+  },
+  {
+    name: 'Andatura Cauta (Anziano)',
+    origin: 'Paura di cadere, deficit multisensoriale età-correlato',
+    description:
+      "Passi corti, base d'appoggio lievemente allargata, ridotta velocità, aumentato tempo di doppio appoggio — un pattern adattivo protettivo più che una vera lesione neurologica focale, spesso multifattoriale (visione, propriocezione, forza, paura).",
   },
 ];
 
@@ -151,19 +214,18 @@ export default function BrainMapPage() {
   const [view, setView] = useState<View>('brain');
   const [hovered, setHovered] = useState<string | null>(null);
   const [expandedPathway, setExpandedPathway] = useState<{ title: string; image: string } | null>(null);
+  const [pathwaySubView, setPathwaySubView] = useState<'circuits' | 'gait'>('circuits');
 
   const imageSrc =
     view === 'brain'
       ? `${IMAGE_BASE}/brain-lateral.png`
       : `${IMAGE_BASE}/nervous-system.png`;
 
-  const activeStyle = VIEW_STYLES[view];
-
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
-            <div
+      <div
         className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
         style={{
           background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)',
@@ -182,7 +244,6 @@ export default function BrainMapPage() {
             </span>
           </h1>
         </div>
-
 
         <div className="flex justify-center mb-8">
           <div className="inline-flex rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl p-1">
@@ -307,32 +368,97 @@ export default function BrainMapPage() {
         )}
 
         {view === 'pathways' && (
-          <div className="grid sm:grid-cols-2 gap-4">
-            {PATHWAYS.map((p) => (
-              <button
-                key={p.title}
-                onClick={() => setExpandedPathway(p)}
-                className="group text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden shadow-sm hover:shadow-lg transition-all"
-              >
-                <div className="relative aspect-[4/5] overflow-hidden">
-                  <img
-                    src={p.image}
-                    alt={p.title}
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div
-                    className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full text-white"
-                    style={{ background: `${VIEW_STYLES.pathways.solid}CC` }}
+          <div>
+            <div className="flex justify-center mb-8">
+              <div className="inline-flex rounded-full border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
+                {(['circuits', 'gait'] as const).map((sv) => (
+                  <button
+                    key={sv}
+                    onClick={() => setPathwaySubView(sv)}
+                    className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                      pathwaySubView === sv
+                        ? 'text-white'
+                        : 'text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
+                    }`}
+                    style={
+                      pathwaySubView === sv
+                        ? { background: VIEW_STYLES.pathways.solid }
+                        : undefined
+                    }
                   >
-                    <Maximize2 size={14} />
+                    {sv === 'circuits' ? 'Pathways' : 'Gait Patterns'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {pathwaySubView === 'circuits' && (
+              <div className="space-y-6">
+                {PATHWAYS.map((p) => (
+                  <div
+                    key={p.title}
+                    className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden"
+                  >
+                    <button
+                      onClick={() => setExpandedPathway(p)}
+                      className="group relative w-full aspect-[16/9] overflow-hidden bg-[#08090b] block"
+                    >
+                      <img
+                        src={p.image}
+                        alt={p.title}
+                        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div
+                        className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full text-white"
+                        style={{ background: `${VIEW_STYLES.pathways.solid}CC` }}
+                      >
+                        <Maximize2 size={14} />
+                      </div>
+                    </button>
+                    <div className="p-5">
+                      <p className="text-base font-semibold text-ink dark:text-white">{p.title}</p>
+                      <p className="text-xs text-ink/50 dark:text-white/50 mt-0.5 mb-3">{p.subtitle}</p>
+                      <p
+                        className="text-xs font-mono mb-3 leading-relaxed"
+                        style={{ color: VIEW_STYLES.pathways.solid }}
+                      >
+                        {p.route}
+                      </p>
+                      <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">
+                        {p.description}
+                      </p>
+                    </div>
                   </div>
+                ))}
+              </div>
+            )}
+
+            {pathwaySubView === 'gait' && (
+              <div>
+                <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+                  Il riconoscimento del pattern del cammino orienta la localizzazione della lesione neurologica sottostante.
+                </p>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {GAIT_TYPES.map((g) => (
+                    <div
+                      key={g.name}
+                      className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                    >
+                      <p className="text-sm font-semibold text-ink dark:text-white">{g.name}</p>
+                      <p
+                        className="text-xs font-medium mt-0.5 mb-2"
+                        style={{ color: VIEW_STYLES.pathways.solid }}
+                      >
+                        {g.origin}
+                      </p>
+                      <p className="text-sm text-ink/60 dark:text-white/60 leading-relaxed">
+                        {g.description}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-                <div className="p-4 bg-white/70 dark:bg-white/[0.03]">
-                  <p className="text-sm font-semibold text-ink dark:text-white">{p.title}</p>
-                  <p className="text-xs text-ink/50 dark:text-white/50 mt-0.5">{p.subtitle}</p>
-                </div>
-              </button>
-            ))}
+              </div>
+            )}
           </div>
         )}
       </div>
