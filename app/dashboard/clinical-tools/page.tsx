@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { ClipboardList } from 'lucide-react';
 
-type ScaleKey = 'katz' | 'barthel' | 'tinetti' | 'conley' | 'berg' | 'morse' | 'ashworth' | 'nrs' | 'sppb';
+type ScaleKey = 'katz' | 'barthel' | 'tinetti' | 'conley' | 'berg' | 'morse' | 'ashworth' | 'nrs' | 'sppb' | 'mmse' | 'gcs' | 'tug' | 'sixmwt';
 
 const SCALES: { key: ScaleKey; name: string; subtitle: string }[] = [
   { key: 'katz', name: 'Katz Index', subtitle: 'Autonomia nelle ADL' },
@@ -16,6 +16,10 @@ const SCALES: { key: ScaleKey; name: string; subtitle: string }[] = [
   { key: 'ashworth', name: 'Modified Ashworth', subtitle: 'Spasticità' },
   { key: 'nrs', name: 'NRS Pain Scale', subtitle: 'Intensità del dolore' },
   { key: 'sppb', name: 'SPPB', subtitle: 'Performance fisica' },
+  { key: 'mmse', name: 'MMSE', subtitle: 'Screening cognitivo' },
+  { key: 'gcs', name: 'Glasgow Coma Scale', subtitle: 'Stato di coscienza' },
+  { key: 'tug', name: 'Timed Up and Go', subtitle: 'Mobilità funzionale' },
+  { key: 'sixmwt', name: '6-Minute Walk Test', subtitle: 'Capacità aerobica' },
 ];
 
 function ButtonGroup({
@@ -45,6 +49,30 @@ function ButtonGroup({
     </div>
   );
 }
+
+function ScaleDescription({ text }: { text: string }) {
+  return (
+    <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] p-4 mb-4">
+      <p className="text-sm text-ink/60 dark:text-white/60 leading-relaxed">{text}</p>
+    </div>
+  );
+}
+
+const SCALE_DESCRIPTIONS: Record<ScaleKey, string> = {
+  katz: "Misura il grado di autonomia dell'anziano in 6 attività di base della vita quotidiana (ADL): fare il bagno, vestirsi, uso della toilette, trasferimenti, continenza, alimentazione. Ogni item è dicotomico (indipendente/dipendente). Utile per una valutazione rapida dell'autosufficienza globale, meno sensibile ai cambiamenti rispetto a scale più dettagliate come il Barthel.",
+  barthel: "Scala di disabilità funzionale tra le più utilizzate nella pratica riabilitativa, valuta 10 attività della vita quotidiana con punteggi differenziati (0-15 punti per item) in base al livello di assistenza necessario. Un punteggio ≤40 indica generalmente la necessità di un ricovero riabilitativo intensivo. Va tipicamente somministrata all'ingresso e alla dimissione per misurare l'efficacia del trattamento.",
+  tinetti: "Valuta equilibrio (13 item) e andatura (9 item) con osservazione diretta del paziente durante compiti standardizzati (alzarsi dalla sedia, stare in piedi, girarsi, camminare). Il punteggio combinato orienta il rischio di caduta: sotto i 19 punti il rischio è considerato elevato. Richiede l'osservazione diretta del movimento, non è compilabile solo con un'intervista.",
+  conley: "Scala di screening rapido del rischio di caduta, basata su 6 domande (storia di cadute, vertigini, incontinenza urgente, deterioramento cognitivo, agitazione, deficit di giudizio). Pensata per un utilizzo veloce al momento del ricovero ospedaliero, un punteggio ≥2 indica un rischio significativo che giustifica misure preventive.",
+  berg: "Considerata il gold standard per la valutazione dell'equilibrio in ambito riabilitativo e geriatrico. Composta da 14 compiti funzionali (da seduto a in piedi, stazione eretta a occhi chiusi, raggiungere in avanti, girarsi, stazione monopodalica) ciascuno valutato 0-4. Più lunga da somministrare rispetto alla Tinetti ma con maggiore sensibilità nei range intermedi di funzione.",
+  morse: "Scala di screening del rischio di caduta molto diffusa in ambito ospedaliero internazionale, alternativa alla Conley. Valuta 6 fattori (storia di cadute, diagnosi secondaria, ausilio per la deambulazione, terapia endovenosa, tipo di andatura, stato mentale) con pesi diversi. Va ripetuta periodicamente durante la degenza, non solo all'ingresso.",
+  ashworth: "Scala di valutazione clinica della spasticità (0-4, con il grado intermedio 1+ nella versione modificata), basata sulla resistenza percepita dall'esaminatore durante lo stiramento passivo rapido del muscolo. È soggettiva e dipende dall'esperienza del valutatore, ma resta lo strumento clinico più diffuso per il monitoraggio della spasticità nel tempo.",
+  nrs: "Scala numerica di autovalutazione del dolore, da 0 (nessun dolore) a 10 (peggior dolore immaginabile). Semplice, rapida, ampiamente validata; il paziente stesso indica il numero che meglio rappresenta l'intensità del dolore percepito in quel momento.",
+  sppb: "Batteria composita di performance fisica molto utilizzata in geriatria, combina tre test cronometrati (equilibrio in piedi in posizioni progressivamente più impegnative, velocità del cammino su 4 metri, tempo per alzarsi 5 volte dalla sedia) in un punteggio 0-12. Un punteggio basso predice un aumentato rischio di disabilità, ospedalizzazione e mortalità.",
+  mmse: "Test di screening cognitivo più utilizzato al mondo, esplora orientamento spazio-temporale, memoria immediata e differita, attenzione/calcolo, linguaggio e prassia costruttiva in circa 10 minuti. Il punteggio va corretto per età e scolarità del paziente secondo le tabelle normative italiane. Non è uno strumento diagnostico da solo, ma un valido screening di primo livello.",
+  gcs: "Scala standard per la valutazione dello stato di coscienza dopo trauma cranico o evento neurologico acuto, basata su tre componenti indipendenti (apertura degli occhi, risposta verbale, risposta motoria). Il punteggio totale classifica la gravità del trauma: 13-15 lieve, 9-12 moderato, 3-8 grave (quest'ultimo generalmente associato a necessità di protezione delle vie aeree).",
+  tug: "Test rapido e semplice di mobilità funzionale: il paziente si alza da una sedia, cammina 3 metri, si gira, torna e si siede, mentre viene cronometrato il tempo totale. Un tempo superiore a 20 secondi è generalmente associato a un aumentato rischio di caduta e a difficoltà nelle attività della vita quotidiana.",
+  sixmwt: "Misura la distanza massima percorribile in 6 minuti camminando al proprio passo, su un percorso piano di lunghezza nota. Riflette la capacità funzionale aerobica sub-massimale ed è ampiamente utilizzato in cardiologia, pneumologia e riabilitazione geriatrica per monitorare l'evoluzione della capacità di esercizio nel tempo.",
+};
 
 function ResultBox({ score, max, interpretation }: { score: number; max?: number; interpretation: string }) {
   return (
@@ -235,7 +263,7 @@ const BERG_ITEMS = [
   'Girarsi a guardare indietro',
   'Girarsi di 360°',
   'Posizionare alternativamente il piede su un gradino',
-  'Stazione eretta con un piede davanti all\'altro',
+  "Stazione eretta con un piede davanti all'altro",
   'Stazione eretta su un piede solo',
 ];
 
@@ -440,8 +468,247 @@ function SPPBScale() {
   );
 }
 
+// --- MMSE ---
+function MMSEScale() {
+  const [value, setValue] = useState<number | null>(null);
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-3">Punteggio totale ottenuto</p>
+        <div className="flex flex-wrap gap-2">
+          {Array.from({ length: 31 }, (_, v) => (
+            <button
+              key={v}
+              onClick={() => setValue(v)}
+              className={`w-9 h-9 rounded-full text-xs font-semibold transition-all ${
+                value === v
+                  ? 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white'
+                  : 'bg-black/5 dark:bg-white/10 text-ink/60 dark:text-white/60'
+              }`}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
+      </div>
+      {value !== null && (
+        <ResultBox
+          score={value}
+          max={30}
+          interpretation={value >= 24 ? 'Funzione cognitiva normale' : value >= 18 ? 'Decadimento cognitivo lieve-moderato' : 'Decadimento cognitivo severo'}
+        />
+      )}
+    </div>
+  );
+}
+
+// --- GLASGOW COMA SCALE ---
+function GCSScale() {
+  const [eye, setEye] = useState<number | null>(null);
+  const [verbal, setVerbal] = useState<number | null>(null);
+  const [motor, setMotor] = useState<number | null>(null);
+  const total = (eye ?? 0) + (verbal ?? 0) + (motor ?? 0);
+  const answered = eye !== null && verbal !== null && motor !== null;
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-2">Apertura degli occhi (E)</p>
+        <ButtonGroup
+          options={[
+            { v: 1, l: 'Assente' },
+            { v: 2, l: 'Al dolore' },
+            { v: 3, l: 'Alla voce' },
+            { v: 4, l: 'Spontanea' },
+          ]}
+          value={eye ?? undefined}
+          onChange={setEye}
+        />
+      </div>
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-2">Risposta verbale (V)</p>
+        <ButtonGroup
+          options={[
+            { v: 1, l: 'Assente' },
+            { v: 2, l: 'Suoni incomprensibili' },
+            { v: 3, l: 'Parole inappropriate' },
+            { v: 4, l: 'Confusa' },
+            { v: 5, l: 'Orientata' },
+          ]}
+          value={verbal ?? undefined}
+          onChange={setVerbal}
+        />
+      </div>
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-2">Risposta motoria (M)</p>
+        <ButtonGroup
+          options={[
+            { v: 1, l: 'Assente' },
+            { v: 2, l: 'Estensione al dolore' },
+            { v: 3, l: 'Flessione al dolore' },
+            { v: 4, l: 'Retrazione al dolore' },
+            { v: 5, l: 'Localizza il dolore' },
+            { v: 6, l: 'Obbedisce ai comandi' },
+          ]}
+          value={motor ?? undefined}
+          onChange={setMotor}
+        />
+      </div>
+      {answered && (
+        <ResultBox
+          score={total}
+          max={15}
+          interpretation={total >= 13 ? 'Trauma lieve' : total >= 9 ? 'Trauma moderato' : 'Trauma grave'}
+        />
+      )}
+    </div>
+  );
+}
+
+// --- TIMED UP AND GO ---
+function TUGScale() {
+  const [seconds, setSeconds] = useState<number | null>(null);
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-3">Tempo cronometrato</p>
+        <div className="flex items-center gap-3">
+          <input
+            type="number"
+            step="0.1"
+            value={seconds ?? ''}
+            onChange={(e) => setSeconds(e.target.value ? parseFloat(e.target.value) : null)}
+            placeholder="0.0"
+            className="w-28 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm outline-none focus:border-[#4F7CFF]"
+          />
+          <span className="text-sm text-ink/50 dark:text-white/50">secondi</span>
+        </div>
+      </div>
+      {seconds !== null && (
+        <ResultBox
+          score={seconds}
+          interpretation={seconds <= 10 ? 'Mobilità normale' : seconds <= 20 ? 'Mobilità nella norma per anziano fragile' : 'Rischio di caduta aumentato — approfondire'}
+        />
+      )}
+    </div>
+  );
+}
+
+// --- 6-MINUTE WALK TEST ---
+function SixMWTScale() {
+  const [meters, setMeters] = useState<number | null>(null);
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-3">Distanza percorsa</p>
+        <div className="flex items-center gap-3">
+          <input
+            type="number"
+            value={meters ?? ''}
+            onChange={(e) => setMeters(e.target.value ? parseFloat(e.target.value) : null)}
+            placeholder="0"
+            className="w-28 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm outline-none focus:border-[#4F7CFF]"
+          />
+          <span className="text-sm text-ink/50 dark:text-white/50">metri</span>
+        </div>
+      </div>
+      {meters !== null && (
+        <ResultBox
+          score={meters}
+          interpretation="Confronta con i valori normativi attesi per età, sesso, altezza e peso del paziente (equazioni di riferimento come Enright & Sherrill)"
+        />
+      )}
+    </div>
+  );
+}
+type BodyRegion = 'knee' | 'shoulder' | 'hip' | 'spine' | 'ankle' | 'elbow-wrist' | 'cervical';
+
+interface OrthoTest {
+  name: string;
+  targets: string;
+  procedure: string;
+  positive: string;
+  accuracy: string;
+}
+
+const REGIONS: { key: BodyRegion; label: string }[] = [
+  { key: 'knee', label: 'Knee' },
+  { key: 'shoulder', label: 'Shoulder' },
+  { key: 'hip', label: 'Hip' },
+  { key: 'spine', label: 'Lumbar Spine' },
+  { key: 'ankle', label: 'Ankle/Foot' },
+  { key: 'elbow-wrist', label: 'Elbow/Wrist' },
+  { key: 'cervical', label: 'Cervical Spine' },
+];
+
+const KNEE_TESTS: OrthoTest[] = [
+  {
+    name: 'Lachman Test',
+    targets: 'Legamento crociato anteriore (LCA)',
+    procedure: "Paziente supino, ginocchio flesso a 20-30°. L'esaminatore stabilizza il femore con una mano e con l'altra applica una forza anteriore sulla tibia prossimale, valutando l'entità della traslazione anteriore e la qualità dell'arresto finale (end-feel).",
+    positive: "Aumentata traslazione anteriore della tibia rispetto al lato controlaterale, con end-feel molle o assente (non netto e deciso).",
+    accuracy: 'Sensibilità 80-87%, specificità 90-97% — considerato il test clinico singolo più accurato per la diagnosi di lesione del LCA, superiore al cassetto anteriore.',
+  },
+  {
+    name: 'Cassetto Anteriore (Anterior Drawer Test)',
+    targets: 'Legamento crociato anteriore (LCA)',
+    procedure: "Paziente supino, anca flessa a 45°, ginocchio flesso a 90°, piede stabilizzato sul lettino. L'esaminatore afferra la tibia prossimale con entrambe le mani e applica una trazione anteriore.",
+    positive: "Aumentata traslazione anteriore della tibia rispetto al lato controlaterale.",
+    accuracy: "Sensibilità 40-90% (ampia variabilità in letteratura, meno affidabile del Lachman), specificità generalmente >90%. La flessione a 90° può essere limitata dalla guardia muscolare del paziente o dal dolore in fase acuta, riducendone l'accuratezza rispetto al Lachman.",
+  },
+  {
+    name: 'Cassetto Posteriore (Posterior Drawer Test)',
+    targets: 'Legamento crociato posteriore (LCP)',
+    procedure: "Stessa posizione del cassetto anteriore, ma la forza applicata dall'esaminatore è diretta posteriormente sulla tibia prossimale.",
+    positive: "Aumentata traslazione posteriore della tibia rispetto al lato controlaterale.",
+    accuracy: 'Considerato il test più accurato per il LCP, con specificità generalmente elevata (>90%); sensibilità variabile in letteratura.',
+  },
+  {
+    name: 'McMurray Test',
+    targets: 'Menischi (mediale e laterale)',
+    procedure: "Paziente supino, ginocchio flesso al massimo. L'esaminatore applica una rotazione tibiale (esterna per il menisco mediale, interna per il laterale) mentre estende gradualmente il ginocchio, palpando la rima articolare.",
+    positive: "Click, schiocco o dolore palpabile/udibile durante la manovra, riproducibile a livello della rima articolare.",
+    accuracy: 'Sensibilità moderata-bassa (35-60% a seconda degli studi), specificità elevata (85-95%) — utile per confermare quando positivo, meno affidabile per escludere una lesione quando negativo.',
+  },
+  {
+    name: 'Test di Thessaly',
+    targets: 'Menischi (mediale e laterale)',
+    procedure: "Paziente in appoggio monopodalico sull'arto da esaminare con ginocchio flesso a 20°, mano dell'esaminatore di supporto. Il paziente ruota il tronco e il ginocchio internamente ed esternamente mantenendo la flessione.",
+    positive: "Dolore alla rima articolare mediale o laterale, spesso associato a sensazione di blocco articolare.",
+    accuracy: "Sensibilità e specificità elevate in diversi studi (intorno all'85-90% per entrambe), superiore al McMurray in alcune comparazioni dirette, ma richiede la capacità del paziente di reggere il carico monopodalico.",
+  },
+  {
+    name: 'Valgus Stress Test',
+    targets: 'Legamento collaterale mediale (LCM)',
+    procedure: "Paziente supino, ginocchio in leggera flessione (20-30°). L'esaminatore applica una forza in valgo (verso l'interno) alla gamba, stabilizzando la coscia.",
+    positive: "Dolore e/o apertura eccessiva della rima articolare mediale rispetto al lato controlaterale.",
+    accuracy: 'Test clinico consolidato per il LCM; il grado di apertura articolare orienta la severità della lesione (I-III).',
+  },
+  {
+    name: 'Varus Stress Test',
+    targets: 'Legamento collaterale laterale (LCL)',
+    procedure: "Stessa posizione del valgus test, ma la forza applicata è diretta in varo (verso l'esterno).",
+    positive: "Dolore e/o apertura eccessiva della rima articolare laterale rispetto al lato controlaterale.",
+    accuracy: 'Test clinico consolidato per il LCL, meno frequentemente lesionato isolatamente rispetto al LCM.',
+  },
+  {
+    name: "Patellar Apprehension Test",
+    targets: 'Instabilità/lussazione femoro-rotulea',
+    procedure: "Paziente supino, ginocchio in leggera flessione. L'esaminatore applica una pressione laterale sul margine mediale della rotula, spingendola lateralmente.",
+    positive: "Il paziente contrae il quadricipite in risposta o mostra evidente apprensione/resistenza al movimento, per timore di sublussazione.",
+    accuracy: 'Test clinico classico per instabilità rotulea, alta specificità quando la risposta di apprensione è chiara e riproducibile.',
+  },
+];
+
+type Category = 'functional' | 'orthopedic';
+
 export default function ClinicalToolsPage() {
+  const [category, setCategory] = useState<Category>('functional');
   const [activeScale, setActiveScale] = useState<ScaleKey>('katz');
+  const [activeRegion, setActiveRegion] = useState<BodyRegion>('knee');
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
@@ -462,38 +729,114 @@ export default function ClinicalToolsPage() {
           </div>
           <h1 className="font-display text-6xl font-bold tracking-tight">
             <span className="bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] bg-clip-text text-transparent">
-              Assessment
+              Clinical
             </span>{' '}
-            Scales
+            Toolkit
           </h1>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-10">
-          {SCALES.map((s) => (
-            <button
-              key={s.key}
-              onClick={() => setActiveScale(s.key)}
-              className={`text-left rounded-2xl border p-4 transition-all ${
-                activeScale === s.key
-                  ? 'border-[#4F7CFF] bg-[#4F7CFF]/5'
-                  : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03]'
-              }`}
-            >
-              <p className="text-sm font-semibold">{s.name}</p>
-              <p className="text-xs text-ink/50 dark:text-white/50 mt-0.5">{s.subtitle}</p>
-            </button>
-          ))}
+        <div className="flex justify-center mb-10">
+          <div className="inline-flex rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl p-1">
+            {(['functional', 'orthopedic'] as Category[]).map((c) => (
+              <button
+                key={c}
+                onClick={() => setCategory(c)}
+                className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${
+                  category === c
+                    ? 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white'
+                    : 'text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white'
+                }`}
+              >
+                {c === 'functional' ? 'Functional Scales' : 'Orthopedic Tests'}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {activeScale === 'katz' && <KatzScale />}
-        {activeScale === 'barthel' && <BarthelScale />}
-        {activeScale === 'tinetti' && <TinettiScale />}
-        {activeScale === 'conley' && <ConleyScale />}
-        {activeScale === 'berg' && <BergBalanceScale />}
-        {activeScale === 'morse' && <MorseFallScale />}
-        {activeScale === 'ashworth' && <AshworthScale />}
-        {activeScale === 'nrs' && <NRSPainScale />}
-        {activeScale === 'sppb' && <SPPBScale />}
+        {category === 'functional' && (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-10">
+              {SCALES.map((s) => (
+                <button
+                  key={s.key}
+                  onClick={() => setActiveScale(s.key)}
+                  className={`text-left rounded-2xl border p-4 transition-all ${
+                    activeScale === s.key
+                      ? 'border-[#4F7CFF] bg-[#4F7CFF]/5'
+                      : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03]'
+                  }`}
+                >
+                  <p className="text-sm font-semibold">{s.name}</p>
+                  <p className="text-xs text-ink/50 dark:text-white/50 mt-0.5">{s.subtitle}</p>
+                </button>
+              ))}
+            </div>
+
+            <ScaleDescription text={SCALE_DESCRIPTIONS[activeScale]} />
+
+            {activeScale === 'katz' && <KatzScale />}
+            {activeScale === 'barthel' && <BarthelScale />}
+            {activeScale === 'tinetti' && <TinettiScale />}
+            {activeScale === 'conley' && <ConleyScale />}
+            {activeScale === 'berg' && <BergBalanceScale />}
+            {activeScale === 'morse' && <MorseFallScale />}
+            {activeScale === 'ashworth' && <AshworthScale />}
+            {activeScale === 'nrs' && <NRSPainScale />}
+            {activeScale === 'sppb' && <SPPBScale />}
+            {activeScale === 'mmse' && <MMSEScale />}
+            {activeScale === 'gcs' && <GCSScale />}
+            {activeScale === 'tug' && <TUGScale />}
+            {activeScale === 'sixmwt' && <SixMWTScale />}
+          </>
+        )}
+
+                {category === 'orthopedic' && (
+          <>
+            <div className="flex flex-wrap justify-center gap-2 mb-10">
+              {REGIONS.map((r) => (
+                <button
+                  key={r.key}
+                  onClick={() => setActiveRegion(r.key)}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                    activeRegion === r.key
+                      ? 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white'
+                      : 'bg-black/5 dark:bg-white/10 text-ink/60 dark:text-white/60'
+                  }`}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+
+            {activeRegion === 'knee' && (
+              <div className="space-y-4">
+                {KNEE_TESTS.map((t) => (
+                  <div
+                    key={t.name}
+                    className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-5"
+                  >
+                    <p className="text-base font-semibold text-ink dark:text-white">{t.name}</p>
+                    <p className="text-xs font-medium text-[#4F7CFF] mt-0.5 mb-3">{t.targets}</p>
+                    <div className="space-y-2 text-sm text-ink/70 dark:text-white/70 leading-relaxed">
+                      <p><span className="font-semibold text-ink/50 dark:text-white/50">Procedura: </span>{t.procedure}</p>
+                      <p><span className="font-semibold text-ink/50 dark:text-white/50">Positivo se: </span>{t.positive}</p>
+                      <p className="text-xs text-ink/50 dark:text-white/50 pt-1">{t.accuracy}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeRegion !== 'knee' && (
+              <div className="text-center py-16">
+                <p className="text-ink/40 dark:text-white/40 text-sm">
+                  {REGIONS.find((r) => r.key === activeRegion)?.label} tests coming soon.
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
       </div>
     </div>
   );

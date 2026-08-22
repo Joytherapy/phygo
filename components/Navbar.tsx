@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { motion, useMotionValueEvent, useScroll, AnimatePresence } from "framer-motion";
 import { Menu, X, Moon, Sun } from "lucide-react";
 import MagneticButton from "./MagneticButton";
 
@@ -11,27 +11,27 @@ const links = [
   { label: "Trust", href: "#trust" },
   { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
-  { label: "Science", href: "/dashboard/science" },
-  { label: "Body Map", href: "/dashboard/body-map" },
-  { label: "Neurology", href: "/dashboard/brain-map" },
-    { label: "Clinical Tools", href: "/dashboard/clinical-tools" },
-
 ];
 
-
+const libraryLinks = [
+  { label: "Science", href: "/dashboard/science", description: "Latest research summaries" },
+  { label: "Body Map", href: "/dashboard/body-map", description: "Interactive anatomy explorer" },
+  { label: "Neurology", href: "/dashboard/brain-map", description: "Brain, nerves & pathways" },
+  { label: "Clinical Tools", href: "/dashboard/clinical-tools", description: "Assessment scales & tests" },
+];
 
 export default function Navbar() {
   const { scrollY } = useScroll();
   const [hidden, setHidden] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-const [dark, setDark] = useState(() => {
-  if (typeof window === "undefined") return true;
-  const stored = window.localStorage.getItem("phygo-theme");
-  if (stored) return stored === "dark";
-  return true;
-});
-
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [dark, setDark] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const stored = window.localStorage.getItem("phygo-theme");
+    if (stored) return stored === "dark";
+    return true;
+  });
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -51,10 +51,9 @@ const [dark, setDark] = useState(() => {
   }, [open]);
 
   useEffect(() => {
-  const stored = window.localStorage.getItem("phygo-theme");
-  setDark(stored ? stored === "dark" : true);
-}, []);
-
+    const stored = window.localStorage.getItem("phygo-theme");
+    setDark(stored ? stored === "dark" : true);
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -93,6 +92,48 @@ const [dark, setDark] = useState(() => {
               <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/60 transition-all duration-300 group-hover:w-full" />
             </a>
           ))}
+
+          <div
+            className="relative"
+            onMouseEnter={() => setLibraryOpen(true)}
+            onMouseLeave={() => setLibraryOpen(false)}
+          >
+            <button className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors flex items-center gap-1">
+              Library
+              <svg
+                width="10"
+                height="6"
+                viewBox="0 0 10 6"
+                fill="none"
+                className={`transition-transform ${libraryOpen ? "rotate-180" : ""}`}
+              >
+                <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+            <AnimatePresence>
+              {libraryOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-64"
+                >
+                  <div className="glass-strong rounded-xl2 shadow-soft p-2">
+                    {libraryLinks.map((l) => (
+                      <a
+                        key={l.href}
+                        href={l.href}
+                        className="block rounded-xl px-3 py-2.5 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+                      >
+                        <p className="text-sm font-semibold text-ink dark:text-white">{l.label}</p>
+                        <p className="text-xs text-ink/50 dark:text-white/50 mt-0.5">{l.description}</p>
+                      </a>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -130,6 +171,17 @@ const [dark, setDark] = useState(() => {
           className="absolute top-16 left-4 right-4 glass-strong rounded-xl2 shadow-soft p-4 flex flex-col gap-3 md:hidden"
         >
           {links.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              onClick={() => setOpen(false)}
+              className="text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
+            >
+              {l.label}
+            </a>
+          ))}
+          <div className="h-px bg-ink/10 dark:bg-white/10 my-1" />
+          {libraryLinks.map((l) => (
             <a
               key={l.href}
               href={l.href}
