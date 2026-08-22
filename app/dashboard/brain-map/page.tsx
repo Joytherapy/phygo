@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
-import { X, Maximize2 } from 'lucide-react';
+import { X, Maximize2, Sparkles, Loader2 } from 'lucide-react';
 
 type View = 'brain' | 'nerves' | 'pathways';
 type Point = { x: number; y: number };
@@ -14,6 +14,33 @@ interface Zone {
   name: string;
   points: Point[];
 }
+interface PeripheralCondition {
+  id: number;
+  condition_name: string;
+  goals?: string;
+  clinical_tests?: string;
+  red_flags?: string;
+  contraindications?: string;
+  typical_exercises?: string;
+  progression_criteria?: string;
+  evidence_level?: string;
+}
+interface NerveListItem {
+  id: string;
+  slug: string;
+  name: string;
+  region: string;
+  compression_site?: string;
+}
+
+const REGION_LABEL: Record<string, string> = {
+  plexus: 'Plesso',
+  upper_limb: 'Arto Superiore',
+  lower_limb: 'Arto Inferiore',
+  cranial: 'Nervi Cranici',
+};
+
+
 
 const IMAGE_BASE =
   'https://dckmumxswheamyymerea.supabase.co/storage/v1/object/public/library-images';
@@ -50,44 +77,6 @@ const BRAIN_ZONES: Zone[] = [
   { slug: 'hypothalamus', name: 'Hypothalamus', points: [{ x: 46, y: 47 }] },
   { slug: 'amygdala', name: 'Amygdala', points: [{ x: 44, y: 52 }] },
   { slug: 'hippocampus', name: 'Hippocampus', points: [{ x: 43, y: 55 }] },
-];
-
-const NERVE_INFO = [
-  {
-    name: 'Brachial Plexus',
-    description:
-      "Rete nervosa formata dalle radici C5-T1 che origina i principali nervi dell'arto superiore (mediano, ulnare, radiale, muscolocutaneo, ascellare). Lesioni traumatiche (es. da trazione durante il parto o incidenti motociclistici) causano deficit motori/sensitivi variabili in base al livello coinvolto.",
-  },
-  {
-    name: 'Median Nerve',
-    description:
-      "Innerva la maggior parte dei flessori dell'avambraccio e i muscoli tenar. Sede più comune di compressione: tunnel carpale al polso, con parestesie a pollice-indice-medio.",
-  },
-  {
-    name: 'Ulnar Nerve',
-    description:
-      "Innerva la maggior parte dei muscoli intrinseci della mano. Sede più comune di compressione: tunnel cubitale al gomito, con parestesie a mignolo e metà anulare.",
-  },
-  {
-    name: 'Radial Nerve',
-    description:
-      "Innerva il tricipite e i muscoli estensori di polso e dita. Vulnerabile a compressione nel solco radiale dell'omero (es. 'paralisi del sabato sera'), causa mano cadente (wrist drop).",
-  },
-  {
-    name: 'Sciatic Nerve',
-    description:
-      "Il nervo più grande del corpo, origina dal plesso sacrale (L4-S3) e si divide in nervo tibiale e peroneale comune a livello del cavo popliteo. Coinvolto nella sciatalgia da compressione radicolare lombare.",
-  },
-  {
-    name: 'Femoral Nerve',
-    description:
-      "Innerva il quadricipite e fornisce sensibilità alla faccia anteriore della coscia. Vulnerabile in chirurgia pelvica/inguinale e in caso di ematoma del muscolo ileopsoas.",
-  },
-  {
-    name: 'Peroneal Nerve',
-    description:
-      "Ramo del nervo sciatico, decorre superficialmente attorno alla testa del perone — sede comune di compressione (es. accavallare le gambe a lungo), causa piede cadente (foot drop).",
-  },
 ];
 
 const NERVE_INJURY_TYPES = [
@@ -209,17 +198,113 @@ const GAIT_TYPES = [
 
 export default function BrainMapPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [view, setView] = useState<View>('brain');
+  const initialView = (searchParams.get('view') as View) || 'brain';
+  const [view, setView] = useState<View>(initialView);
   const [hovered, setHovered] = useState<string | null>(null);
   const [expandedPathway, setExpandedPathway] = useState<{ title: string; image: string } | null>(null);
   const [pathwaySubView, setPathwaySubView] = useState<'circuits' | 'gait'>('circuits');
+  const [nervesSubView, setNervesSubView] = useState<'atlas' | 'seddon' | 'conditions'>('atlas');
+const [peripheralConditions, setPeripheralConditions] = useState<PeripheralCondition[]>([]);
+const [conditionsLoading, setConditionsLoading] = useState(false);
+const [conditionsError, setConditionsError] = useState<string | null>(null);
+const [selectedCondition, setSelectedCondition] = useState<PeripheralCondition | null>(null);
+const [hasFetchedConditions, setHasFetchedConditions] = useState(false);
+
+useEffect(() => {
+  if (view !== 'nerves' || hasFetchedConditions) return;
+  const fetchConditions = async () => {
+    setConditionsLoading(true);
+    setConditionsError(null);
+    try {
+      const res = await fetch('/api/brain-map/peripheral-nerves');
+      if (!res.ok) throw new Error('Errore nel recupero delle patologie');
+      const data = await res.json();
+      setPeripheralConditions(data.conditions ?? []);
+      setHasFetchedConditions(true);
+    } catch (err) {
+      setConditionsError('Impossibile caricare le patologie collegate.');
+      console.error(err);
+    } finally {
+      setConditionsLoading(false);
+    }
+  };
+  fetchConditions();
+}, [view, hasFetchedConditions]);
+
+const [allNerves, setAllNerves] = useState<NerveListItem[]>([]);
+const [nervesLoading, setNervesLoading] = useState(false);
+const [nervesError, setNervesError] = useState<string | null>(null);
+const [hasFetchedNerves, setHasFetchedNerves] = useState(false);
+const [nerveRegionFilter, setNerveRegionFilter] = useState<'all' | 'plexus' | 'cranial' | 'upper_limb' | 'lower_limb'>('all');
+
+useEffect(() => {
+  if (view !== 'nerves' || hasFetchedNerves) return;
+  const fetchNerves = async () => {
+    setNervesLoading(true);
+    setNervesError(null);
+    try {
+      const res = await fetch('/api/brain-map/nerves');
+      if (!res.ok) throw new Error('Errore nel recupero dei nervi');
+      const data = await res.json();
+      setAllNerves(data.nerves ?? []);
+      setHasFetchedNerves(true);
+    } catch (err) {
+      setNervesError('Impossibile caricare i nervi.');
+      console.error(err);
+    } finally {
+      setNervesLoading(false);
+    }
+  };
+  fetchNerves();
+}, [view, hasFetchedNerves]);
+
+// Ricerca libera "Ask Phygo" per nervi/argomenti non presenti nell'atlante
+const [askQuery, setAskQuery] = useState('');
+const [askAnswer, setAskAnswer] = useState<string | null>(null);
+const [askLoading, setAskLoading] = useState(false);
+const [askError, setAskError] = useState<string | null>(null);
+
+const handleAskPhygo = async () => {
+  if (!askQuery.trim() || askLoading) return;
+  setAskLoading(true);
+  setAskError(null);
+  setAskAnswer(null);
+  try {
+    const res = await fetch('/api/ask-phygo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: askQuery,
+        noteContext: 'Sezione: Phygo Neurology — Atlante dei Nervi Periferici. La domanda riguarda un nervo, plesso o argomento di neuroanatomia periferica non necessariamente presente nell\'atlante attuale.',
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setAskError(data.error || 'Errore nella richiesta.');
+      return;
+    }
+    setAskAnswer(data.answer);
+  } catch (err) {
+    setAskError('Impossibile contattare Phygo in questo momento.');
+    console.error(err);
+  } finally {
+    setAskLoading(false);
+  }
+};
 
   const imageSrc =
     view === 'brain'
       ? `${IMAGE_BASE}/brain-lateral.png`
       : `${IMAGE_BASE}/nervous-system.png`;
+
+  const NERVES_SUB_TABS = [
+    { key: 'atlas' as const, label: 'Atlante Nervi' },
+    { key: 'seddon' as const, label: 'Classificazione Seddon' },
+    { key: 'conditions' as const, label: 'Patologie Collegate' },
+  ];
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
@@ -317,54 +402,229 @@ export default function BrainMapPage() {
         )}
 
         {view === 'nerves' && (
-          <>
-            <div className="mt-12">
-              <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-4">
-                Major Peripheral Nerves
-              </h2>
-              <div className="space-y-4">
-                {NERVE_INFO.map((n) => (
-                  <div
-                    key={n.name}
-                    className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+          <div className="mt-12">
+            <div className="flex justify-center mb-10">
+              <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
+                {NERVES_SUB_TABS.map((t) => (
+                  <button
+                    key={t.key}
+                    onClick={() => setNervesSubView(t.key)}
+                    className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                      nervesSubView === t.key
+                        ? 'text-white'
+                        : 'text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
+                    }`}
+                    style={
+                      nervesSubView === t.key
+                        ? { background: VIEW_STYLES.nerves.solid }
+                        : undefined
+                    }
                   >
-                    <p className="text-sm font-semibold mb-1">{n.name}</p>
-                    <p className="text-sm text-ink/60 dark:text-white/60 leading-relaxed">
-                      {n.description}
-                    </p>
-                  </div>
+                    {t.label}
+                  </button>
                 ))}
               </div>
             </div>
 
-            <div className="mt-12">
-              <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-                Nerve Injury Classification
-              </h2>
-              <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
-                Classificazione di Seddon, dalla più lieve alla più severa — utile per orientare prognosi e tempistiche di recupero.
-              </p>
-              <div className="grid sm:grid-cols-3 gap-4">
-                {NERVE_INJURY_TYPES.map((t) => (
-                  <div
-                    key={t.name}
-                    className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
-                  >
-                    <span
-                      className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full text-white mb-2"
-                      style={{ background: VIEW_STYLES.nerves.gradient }}
-                    >
-                      {t.severity}
-                    </span>
-                    <p className="text-sm font-semibold mb-1">{t.name}</p>
-                    <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
-                      {t.description}
-                    </p>
-                  </div>
-                ))}
+            {nervesSubView === 'atlas' && (
+              <div>
+                <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
+                  Peripheral Nerve Atlas
+                </h2>
+                <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+                  Tocca un nervo per anatomia, funzione motoria/sensitiva, sede di compressione tipica e patologie collegate.
+                </p>
+
+                {nervesLoading && (
+                  <p className="text-sm text-ink/40 dark:text-white/40">Caricamento nervi...</p>
+                )}
+                {nervesError && <p className="text-sm text-red-500">{nervesError}</p>}
+
+                {!nervesLoading && !nervesError && (
+                  <>
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      {(['all', 'plexus', 'cranial', 'upper_limb', 'lower_limb'] as const).map((r) => (
+                        <button
+                          key={r}
+                          onClick={() => setNerveRegionFilter(r)}
+                          className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                            nerveRegionFilter === r
+                              ? 'text-white'
+                              : 'text-ink/60 dark:text-white/60 border border-black/[0.08] dark:border-white/10 hover:text-ink dark:hover:text-white'
+                          }`}
+                          style={nerveRegionFilter === r ? { background: VIEW_STYLES.nerves.gradient } : undefined}
+                        >
+                          {r === 'all' ? 'Tutti' : REGION_LABEL[r]}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="space-y-8">
+                      {(['plexus', 'cranial', 'upper_limb', 'lower_limb'] as const)
+                        .filter((region) => nerveRegionFilter === 'all' || nerveRegionFilter === region)
+                        .map((region) => {
+                          const nervesInRegion = allNerves.filter((n) => n.region === region);
+                          if (nervesInRegion.length === 0) return null;
+                          return (
+                            <div key={region}>
+                              <h3 className="text-xs font-bold uppercase tracking-wide text-[#F5A524] mb-3">
+                                {REGION_LABEL[region] ?? region}
+                              </h3>
+                              <div className="grid sm:grid-cols-2 gap-3">
+                                {nervesInRegion.map((n) => (
+                                  <button
+                                    key={n.id}
+                                    onClick={() => router.push(`/dashboard/brain-map/nerve/${n.slug}`)}
+                                    className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#F5A524]/40 transition-colors"
+                                  >
+                                    <p className="text-sm font-semibold text-ink dark:text-white mb-1">{n.name}</p>
+                                    {n.compression_site && (
+                                      <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed line-clamp-2">
+                                        {n.compression_site}
+                                      </p>
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+
+                    <div className="mt-8 rounded-2xl border border-[#F5A524]/20 bg-[#F5A524]/5 p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Sparkles size={16} className="text-[#F5A524]" />
+                        <p className="text-sm font-semibold text-ink dark:text-white">
+                          Non trovi il nervo che cerchi? Chiedi a Phygo
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={askQuery}
+                          onChange={(e) => setAskQuery(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAskPhygo()}
+                          placeholder="es. nervo ileoipogastrico, nervo genitofemorale..."
+                          className="flex-1 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] px-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none focus:border-[#F5A524]/40"
+                        />
+                        <button
+                          onClick={handleAskPhygo}
+                          disabled={askLoading || !askQuery.trim()}
+                          className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50 transition-opacity"
+                          style={{ background: VIEW_STYLES.nerves.gradient }}
+                        >
+                          {askLoading ? <Loader2 size={16} className="animate-spin" /> : 'Chiedi'}
+                        </button>
+                      </div>
+
+                      {askError && (
+                        <p className="text-sm text-red-500 mt-3">{askError}</p>
+                      )}
+
+                      {askAnswer && (
+                        <div className="mt-4 rounded-xl bg-white dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/10 p-4">
+                          <p className="text-sm text-ink/80 dark:text-white/80 leading-relaxed whitespace-pre-line">
+                            {askAnswer}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
-            </div>
-          </>
+            )}
+
+            {nervesSubView === 'seddon' && (
+              <div>
+                <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
+                  Nerve Injury Classification
+                </h2>
+                <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+                  Classificazione di Seddon, dalla più lieve alla più severa — utile per orientare prognosi e tempistiche di recupero.
+                </p>
+
+                <button
+                  onClick={() => setExpandedPathway({
+                    title: 'Nerve Injury Classification (Seddon)',
+                    image: `${IMAGE_BASE}/nerve-injury-classification.png`,
+                  })}
+                  className="group relative w-full rounded-2xl border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden mb-6 block"
+                >
+                  <img
+                    src={`${IMAGE_BASE}/nerve-injury-classification.png`}
+                    alt="Seddon Nerve Injury Classification"
+                    className="w-full h-auto group-hover:scale-[1.02] transition-transform duration-300"
+                  />
+                  <div
+                    className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ background: `${VIEW_STYLES.nerves.solid}CC` }}
+                  >
+                    <Maximize2 size={14} />
+                  </div>
+                </button>
+
+                <div className="grid sm:grid-cols-3 gap-4">
+                  {NERVE_INJURY_TYPES.map((t) => (
+                    <div
+                      key={t.name}
+                      className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                    >
+                      <span
+                        className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full text-white mb-2"
+                        style={{ background: VIEW_STYLES.nerves.gradient }}
+                      >
+                        {t.severity}
+                      </span>
+                      <p className="text-sm font-semibold mb-1">{t.name}</p>
+                      <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
+                        {t.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {nervesSubView === 'conditions' && (
+              <div>
+                <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
+                  Related Conditions
+                </h2>
+                <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+                  Patologie del sistema nervoso periferico presenti nella Knowledge Base di Phygo. Tocca una card per i dettagli clinici.
+                </p>
+
+                {conditionsLoading && (
+                  <p className="text-sm text-ink/40 dark:text-white/40">Caricamento patologie...</p>
+                )}
+
+                {conditionsError && (
+                  <p className="text-sm text-red-500">{conditionsError}</p>
+                )}
+
+                {!conditionsLoading && !conditionsError && (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {peripheralConditions.map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => setSelectedCondition(c)}
+                        className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#F5A524]/40 transition-colors"
+                      >
+                        <p className="text-sm font-semibold text-ink dark:text-white">
+                          {c.condition_name}
+                        </p>
+                        {c.evidence_level && (
+                          <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/40 dark:text-white/40">
+                            Evidence: {c.evidence_level}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         )}
 
         {view === 'pathways' && (
@@ -487,6 +747,84 @@ export default function BrainMapPage() {
               onClick={(e) => e.stopPropagation()}
               className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
             />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {selectedCondition && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-6"
+            onClick={() => setSelectedCondition(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 p-8"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <h3 className="text-xl font-bold text-ink dark:text-white pr-6">
+                  {selectedCondition.condition_name}
+                </h3>
+                <button
+                  onClick={() => setSelectedCondition(null)}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/5 dark:bg-white/10"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="space-y-4 text-sm">
+                {selectedCondition.goals && (
+                  <div>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Obiettivi</p>
+                    <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.goals}</p>
+                  </div>
+                )}
+                {selectedCondition.clinical_tests && (
+                  <div>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Test clinici</p>
+                    <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.clinical_tests}</p>
+                  </div>
+                )}
+                {selectedCondition.typical_exercises && (
+                  <div>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Esercizi tipici</p>
+                    <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.typical_exercises}</p>
+                  </div>
+                )}
+                {selectedCondition.progression_criteria && (
+                  <div>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Criteri di progressione</p>
+                    <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.progression_criteria}</p>
+                  </div>
+                )}
+                {selectedCondition.red_flags && (
+                  <div>
+                    <p className="font-semibold text-red-500 mb-1">Red flags</p>
+                    <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.red_flags}</p>
+                  </div>
+                )}
+                {selectedCondition.contraindications && (
+                  <div>
+                    <p className="font-semibold text-red-500 mb-1">Controindicazioni</p>
+                    <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.contraindications}</p>
+                  </div>
+                )}
+                {selectedCondition.evidence_level && (
+                  <div className="pt-2 border-t border-black/[0.06] dark:border-white/10">
+                    <p className="text-xs text-ink/40 dark:text-white/40">
+                      Evidence: {selectedCondition.evidence_level}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

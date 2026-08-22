@@ -6,6 +6,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, X, Stethoscope, AlertTriangle } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
+const IMAGE_BASE =
+  'https://dckmumxswheamyymerea.supabase.co/storage/v1/object/public/library-images';
+
 const ZONE_INFO: Record<string, string> = {
   'frontal-lobe':
     "Il lobo frontale governa funzioni esecutive (pianificazione, giudizio, controllo degli impulsi), il movimento volontario e il linguaggio espressivo (area di Broca, tipicamente emisfero sinistro). Al suo interno si distinguono tre regioni motorie organizzate gerarchicamente: la corteccia motoria primaria (M1, Area 4), che esegue il comando motorio finale; la corteccia premotoria e l'area motoria supplementare (Area 6), che pianificano la sequenza del movimento prima che M1 lo esegua; e la corteccia prefrontale (Area 10), coinvolta in funzioni cognitive superiori come il processo decisionale. Lesioni causano deficit di personalità/comportamento, emiparesi controlaterale, o afasia espressiva. Nell'anziano, un deterioramento delle funzioni esecutive frontali è spesso il primo segno di decadimento cognitivo vascolare, distinto dal pattern mnesico tipico dell'Alzheimer.",
@@ -61,7 +64,7 @@ interface ConditionItem {
 }
 
 interface HubData {
-  zone: { id: string; name: string; slug: string };
+  zone: { id: string; name: string; slug: string; image_url?: string };
   conditions: ConditionItem[];
 }
 
@@ -140,11 +143,20 @@ export default function BrainZoneHubPage() {
             <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]" />
             Neurological Zone
           </div>
-          <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tight">
-            {zone.name}
-          </h1>
+          
+
+          {zone.image_url && (
+            <div className="mt-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden">
+              <img
+                src={`${IMAGE_BASE}/${zone.image_url}`}
+                alt={`${zone.name} highlighted`}
+                className="w-full h-auto"
+              />
+            </div>
+          )}
+
           {info && (
-            <p className="text-ink/50 dark:text-white/50 mt-4 max-w-2xl text-base leading-relaxed">
+            <p className="text-ink/50 dark:text-white/50 mt-6 max-w-2xl text-base leading-relaxed">
               {info}
             </p>
           )}

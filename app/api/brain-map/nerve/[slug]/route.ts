@@ -15,19 +15,20 @@ export async function GET(
   try {
     const { slug } = params;
 
-    const { data: zone, error: zoneErr } = await adminSupabase
-      .from('brain_zones')
-.select('id, name, slug, image_url')      .eq('slug', slug)
+    const { data: nerve, error: nerveErr } = await adminSupabase
+      .from('peripheral_nerves')
+      .select('*')
+      .eq('slug', slug)
       .single();
 
-    if (zoneErr || !zone) {
-      return NextResponse.json({ error: 'Zone not found' }, { status: 404 });
+    if (nerveErr || !nerve) {
+      return NextResponse.json({ error: 'Nerve not found' }, { status: 404 });
     }
 
     const { data: conditionLinks } = await adminSupabase
-      .from('brain_zone_conditions')
+      .from('nerve_conditions')
       .select('condition_id')
-      .eq('zone_id', zone.id);
+      .eq('nerve_id', nerve.id);
 
     const conditionIds = (conditionLinks || []).map((l) => l.condition_id);
 
@@ -42,9 +43,9 @@ export async function GET(
       conditions = conds || [];
     }
 
-    return NextResponse.json({ zone, conditions });
+    return NextResponse.json({ nerve, conditions });
   } catch (err) {
-    console.error('brain-map zone error:', err);
-    return NextResponse.json({ error: 'Failed to load zone' }, { status: 500 });
+    console.error('nerve detail error:', err);
+    return NextResponse.json({ error: 'Failed to load nerve' }, { status: 500 });
   }
 }

@@ -5,13 +5,14 @@ import { motion, useMotionValueEvent, useScroll, AnimatePresence } from "framer-
 import { Menu, X, Moon, Sun } from "lucide-react";
 import MagneticButton from "./MagneticButton";
 
-const links = [
-  { label: "Live demo", href: "#demo" },
-  { label: "Features", href: "#features" },
-  { label: "Trust", href: "#trust" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "FAQ", href: "#faq" },
+const linksBeforeLibrary = [
+  { label: "Live demo", href: "/#demo" },
+  { label: "Features", href: "/#features" },
+  { label: "Trust", href: "/#trust" },
+  { label: "Pricing", href: "/#pricing" },
 ];
+
+const faqLink = { label: "FAQ", href: "/#faq" };
 
 const libraryLinks = [
   { label: "Science", href: "/dashboard/science", description: "Latest research summaries" },
@@ -82,7 +83,7 @@ export default function Navbar() {
         </a>
 
         <div className="hidden md:flex items-center gap-8">
-          {links.map((l) => (
+          {linksBeforeLibrary.map((l) => (
             <a
               key={l.href}
               href={l.href}
@@ -134,6 +135,15 @@ export default function Navbar() {
               )}
             </AnimatePresence>
           </div>
+
+          <a
+            key={faqLink.href}
+            href={faqLink.href}
+            className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors group"
+          >
+            {faqLink.label}
+            <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/60 transition-all duration-300 group-hover:w-full" />
+          </a>
         </div>
 
         <div className="flex items-center gap-2">
@@ -170,7 +180,7 @@ export default function Navbar() {
           animate={{ opacity: 1, y: 0 }}
           className="absolute top-16 left-4 right-4 glass-strong rounded-xl2 shadow-soft p-4 flex flex-col gap-3 md:hidden"
         >
-          {links.map((l) => (
+          {linksBeforeLibrary.map((l) => (
             <a
               key={l.href}
               href={l.href}
@@ -191,6 +201,14 @@ export default function Navbar() {
               {l.label}
             </a>
           ))}
+          <div className="h-px bg-ink/10 dark:bg-white/10 my-1" />
+          <a
+            href={faqLink.href}
+            onClick={() => setOpen(false)}
+            className="text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
+          >
+            {faqLink.label}
+          </a>
 
           <a
             href="/login?mode=signup"
