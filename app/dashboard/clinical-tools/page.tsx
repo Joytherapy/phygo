@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import { ClipboardList } from 'lucide-react';
 
@@ -410,7 +410,7 @@ function SixMWTScale() {
   );
 }
 
-type Category = 'functional' | 'orthopedic';
+type Category = 'functional' | 'orthopedic' | 'pelvic-floor';
 type BodyRegion = 'knee' | 'shoulder' | 'hip' | 'spine' | 'ankle' | 'elbow-wrist' | 'cervical';
 
 interface OrthoTest {
@@ -420,6 +420,334 @@ interface OrthoTest {
   positive: string;
   accuracy: string;
 }
+
+interface PelvicFloorTest {
+  slug: string;
+  name: string;
+  category: string;
+  procedure: string;
+  interpretation: string;
+}
+
+const PELVIC_FLOOR_CATEGORY_LABELS: Record<string, string> = {
+  neuropathy: 'Test Neuropatici',
+  manual_assessment: 'Valutazione Manuale',
+  urodynamic: 'Test Urodinamici',
+  questionnaire: 'Questionari',
+};
+
+// ===================== SF-36 (RAND 36-Item Health Survey 1.0 — dominio pubblico, RAND Corporation) =====================
+
+type SF36Domain = 'PF' | 'RP' | 'RE' | 'VT' | 'MH' | 'SF' | 'BP' | 'GH';
+
+const SF36_DOMAIN_LABELS: Record<SF36Domain, string> = {
+  PF: 'Attività Fisica',
+  RP: 'Limitazioni di Ruolo — Fisico',
+  RE: 'Limitazioni di Ruolo — Emotivo',
+  VT: 'Vitalità/Energia',
+  MH: 'Salute Mentale',
+  SF: 'Attività Sociali',
+  BP: 'Dolore Fisico',
+  GH: 'Salute Generale',
+};
+
+const OPT_HEALTH1 = [{ v: 1, l: 'Eccellente' }, { v: 2, l: 'Molto buona' }, { v: 3, l: 'Buona' }, { v: 4, l: 'Discreta' }, { v: 5, l: 'Scadente' }];
+const OPT_CHANGE = [{ v: 1, l: 'Decisamente migliore' }, { v: 2, l: 'Leggermente migliore' }, { v: 3, l: 'Più o meno uguale' }, { v: 4, l: 'Leggermente peggiore' }, { v: 5, l: 'Decisamente peggiore' }];
+const OPT_LIMIT3 = [{ v: 1, l: "Sì, mi limita molto" }, { v: 2, l: "Sì, mi limita un po'" }, { v: 3, l: 'No, non mi limita affatto' }];
+const OPT_YESNO = [{ v: 1, l: 'Sì' }, { v: 2, l: 'No' }];
+const OPT_EXTENT5 = [{ v: 1, l: 'Per niente' }, { v: 2, l: 'Un poco' }, { v: 3, l: 'Moderatamente' }, { v: 4, l: 'Molto' }, { v: 5, l: 'Moltissimo' }];
+const OPT_PAIN6 = [{ v: 1, l: 'Nessuno' }, { v: 2, l: 'Molto lieve' }, { v: 3, l: 'Lieve' }, { v: 4, l: 'Moderato' }, { v: 5, l: 'Forte' }, { v: 6, l: 'Molto forte' }];
+const OPT_FREQ6 = [{ v: 1, l: 'Sempre' }, { v: 2, l: 'Quasi sempre' }, { v: 3, l: 'Molto spesso' }, { v: 4, l: 'Qualche volta' }, { v: 5, l: 'Raramente' }, { v: 6, l: 'Mai' }];
+const OPT_FREQ5 = [{ v: 1, l: 'Sempre' }, { v: 2, l: 'Quasi sempre' }, { v: 3, l: 'A volte' }, { v: 4, l: 'Raramente' }, { v: 5, l: 'Mai' }];
+const OPT_TRUEFALSE5 = [{ v: 1, l: 'Assolutamente vero' }, { v: 2, l: 'Abbastanza vero' }, { v: 3, l: 'Non so' }, { v: 4, l: 'Abbastanza falso' }, { v: 5, l: 'Assolutamente falso' }];
+
+const RECODE_5_DESC = [100, 75, 50, 25, 0];
+const RECODE_5_ASC = [0, 25, 50, 75, 100];
+const RECODE_3 = [0, 50, 100];
+const RECODE_2 = [0, 100];
+const RECODE_6_DESC = [100, 80, 60, 40, 20, 0];
+const RECODE_6_ASC = [0, 20, 40, 60, 80, 100];
+
+interface SF36ItemDef {
+  id: number;
+  domain: SF36Domain | null;
+  text: string;
+  options: { v: number; l: string }[];
+  recode: number[];
+}
+
+const SF36_ITEMS: SF36ItemDef[] = [
+  { id: 1, domain: 'GH', text: 'In generale, direbbe che la sua salute è:', options: OPT_HEALTH1, recode: RECODE_5_DESC },
+  { id: 2, domain: null, text: 'Rispetto a un anno fa, come valuterebbe la sua salute in generale, adesso?', options: OPT_CHANGE, recode: RECODE_5_DESC },
+  { id: 3, domain: 'PF', text: 'Attività intense, come correre, sollevare oggetti pesanti, praticare sport faticosi', options: OPT_LIMIT3, recode: RECODE_3 },
+  { id: 4, domain: 'PF', text: "Attività di moderato impegno, come spostare un tavolo, usare l'aspirapolvere, andare in bicicletta", options: OPT_LIMIT3, recode: RECODE_3 },
+  { id: 5, domain: 'PF', text: 'Sollevare o portare le borse della spesa', options: OPT_LIMIT3, recode: RECODE_3 },
+  { id: 6, domain: 'PF', text: 'Salire diverse rampe di scale', options: OPT_LIMIT3, recode: RECODE_3 },
+  { id: 7, domain: 'PF', text: 'Salire una sola rampa di scale', options: OPT_LIMIT3, recode: RECODE_3 },
+  { id: 8, domain: 'PF', text: 'Piegarsi, inginocchiarsi o chinarsi', options: OPT_LIMIT3, recode: RECODE_3 },
+  { id: 9, domain: 'PF', text: 'Camminare per più di un chilometro', options: OPT_LIMIT3, recode: RECODE_3 },
+  { id: 10, domain: 'PF', text: 'Camminare per alcune centinaia di metri', options: OPT_LIMIT3, recode: RECODE_3 },
+  { id: 11, domain: 'PF', text: 'Camminare per circa cento metri', options: OPT_LIMIT3, recode: RECODE_3 },
+  { id: 12, domain: 'PF', text: 'Fare il bagno o vestirsi da soli', options: OPT_LIMIT3, recode: RECODE_3 },
+  { id: 13, domain: 'RP', text: 'Ha dovuto ridurre il tempo dedicato al lavoro o ad altre attività', options: OPT_YESNO, recode: RECODE_2 },
+  { id: 14, domain: 'RP', text: 'Ha ottenuto meno di quanto avrebbe voluto', options: OPT_YESNO, recode: RECODE_2 },
+  { id: 15, domain: 'RP', text: 'Ha dovuto limitare alcuni tipi di lavoro o di altre attività', options: OPT_YESNO, recode: RECODE_2 },
+  { id: 16, domain: 'RP', text: 'Ha avuto difficoltà nello svolgere il lavoro o altre attività (per esempio, le è costato uno sforzo maggiore)', options: OPT_YESNO, recode: RECODE_2 },
+  { id: 17, domain: 'RE', text: 'Ha dovuto ridurre il tempo dedicato al lavoro o ad altre attività', options: OPT_YESNO, recode: RECODE_2 },
+  { id: 18, domain: 'RE', text: 'Ha ottenuto meno di quanto avrebbe voluto', options: OPT_YESNO, recode: RECODE_2 },
+  { id: 19, domain: 'RE', text: 'Ha svolto il lavoro o le altre attività con meno cura del solito', options: OPT_YESNO, recode: RECODE_2 },
+  { id: 20, domain: 'SF', text: 'In che misura la salute fisica o i problemi emotivi hanno interferito con le sue normali attività sociali con famiglia, amici o vicini?', options: OPT_EXTENT5, recode: RECODE_5_DESC },
+  { id: 21, domain: 'BP', text: 'Quanto dolore fisico ha provato?', options: OPT_PAIN6, recode: RECODE_6_DESC },
+  { id: 22, domain: 'BP', text: 'Quanto il dolore ha interferito con il suo normale lavoro (compreso il lavoro fuori casa e le faccende domestiche)?', options: OPT_EXTENT5, recode: RECODE_5_DESC },
+  { id: 23, domain: 'VT', text: 'Si è sentito pieno di energia e vitalità?', options: OPT_FREQ6, recode: RECODE_6_DESC },
+  { id: 24, domain: 'MH', text: 'È stato/a una persona molto nervosa?', options: OPT_FREQ6, recode: RECODE_6_ASC },
+  { id: 25, domain: 'MH', text: 'Si è sentito così giù di morale che niente riusciva a tirarla su?', options: OPT_FREQ6, recode: RECODE_6_ASC },
+  { id: 26, domain: 'MH', text: 'Si è sentito calmo e sereno?', options: OPT_FREQ6, recode: RECODE_6_DESC },
+  { id: 27, domain: 'VT', text: 'Ha avuto molta energia?', options: OPT_FREQ6, recode: RECODE_6_DESC },
+  { id: 28, domain: 'MH', text: 'Si è sentito scoraggiato e triste?', options: OPT_FREQ6, recode: RECODE_6_ASC },
+  { id: 29, domain: 'VT', text: 'Si è sentito sfinito?', options: OPT_FREQ6, recode: RECODE_6_ASC },
+  { id: 30, domain: 'MH', text: 'È stato/a una persona felice?', options: OPT_FREQ6, recode: RECODE_6_DESC },
+  { id: 31, domain: 'VT', text: 'Si è sentito stanco?', options: OPT_FREQ6, recode: RECODE_6_ASC },
+  { id: 32, domain: 'SF', text: 'Per quanto tempo la salute fisica o i problemi emotivi hanno interferito con le sue attività sociali (visitare amici, parenti, ecc.)?', options: OPT_FREQ5, recode: RECODE_5_ASC },
+  { id: 33, domain: 'GH', text: "Mi sembra di ammalarmi un po' più facilmente delle altre persone", options: OPT_TRUEFALSE5, recode: RECODE_5_ASC },
+  { id: 34, domain: 'GH', text: 'Sono sano/a quanto chiunque altro conosca', options: OPT_TRUEFALSE5, recode: RECODE_5_DESC },
+  { id: 35, domain: 'GH', text: 'Mi aspetto che la mia salute peggiori', options: OPT_TRUEFALSE5, recode: RECODE_5_ASC },
+  { id: 36, domain: 'GH', text: 'La mia salute è eccellente', options: OPT_TRUEFALSE5, recode: RECODE_5_DESC },
+];
+
+const SF36_SECTIONS: { title: string; ids: number[] }[] = [
+  { title: 'Salute generale', ids: [1] },
+  { title: 'Cambiamento rispetto a un anno fa (informativo, non incluso nei punteggi)', ids: [2] },
+  { title: 'La sua salute la limita attualmente in queste attività? Se sì, quanto?', ids: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
+  { title: 'Nelle ultime 4 settimane, a causa della sua salute FISICA, ha avuto uno di questi problemi sul lavoro o in altre attività abituali?', ids: [13, 14, 15, 16] },
+  { title: 'Nelle ultime 4 settimane, a causa di problemi EMOTIVI (es. sentirsi depresso o ansioso), ha avuto uno di questi problemi sul lavoro o in altre attività abituali?', ids: [17, 18, 19] },
+  { title: 'Attività sociali e dolore', ids: [20, 21, 22] },
+  { title: 'Nelle ultime 4 settimane, per quanto tempo...', ids: [23, 24, 25, 26, 27, 28, 29, 30, 31] },
+  { title: 'Attività sociali (continua)', ids: [32] },
+  { title: 'Quanto sono vere o false per lei le seguenti affermazioni?', ids: [33, 34, 35, 36] },
+];
+
+function SF36Scale() {
+  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const domainOrder: SF36Domain[] = ['PF', 'RP', 'RE', 'VT', 'MH', 'SF', 'BP', 'GH'];
+  const domainScores = domainOrder.map((d) => {
+    const items = SF36_ITEMS.filter((it) => it.domain === d);
+    const values = items
+      .map((it) => (answers[it.id] ? it.recode[answers[it.id] - 1] : null))
+      .filter((v): v is number => v !== null);
+    const avg = values.length > 0 ? Math.round((values.reduce((s, v) => s + v, 0) / values.length) * 10) / 10 : null;
+    return { domain: d, score: avg, answered: values.length, total: items.length };
+  });
+  const answeredCount = Object.keys(answers).length;
+
+  return (
+    <div className="space-y-6">
+      {SF36_SECTIONS.map((sec) => (
+        <div key={sec.title}>
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{sec.title}</h4>
+          <div className="space-y-3">
+            {sec.ids.map((id) => {
+              const item = SF36_ITEMS.find((it) => it.id === id)!;
+              return (
+                <div key={id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+                  <p className="text-sm font-semibold mb-2">{id}. {item.text}</p>
+                  <ButtonGroup options={item.options} value={answers[id]} onChange={(v) => setAnswers((s) => ({ ...s, [id]: v }))} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      <div className="rounded-2xl bg-gradient-to-r from-[#4F7CFF]/10 to-[#32D6A0]/10 border border-[#4F7CFF]/20 p-5">
+        <p className="text-sm font-semibold mb-3">Punteggi per dominio (0-100, più alto = stato di salute percepito migliore) — {answeredCount}/36 domande compilate</p>
+        <div className="grid grid-cols-2 gap-3">
+          {domainScores.map((d) => (
+            <div key={d.domain} className="rounded-xl bg-white/60 dark:bg-white/[0.04] p-3">
+              <p className="text-xs text-ink/50 dark:text-white/50">{SF36_DOMAIN_LABELS[d.domain]}</p>
+              <p className="text-xl font-bold">{d.score !== null ? d.score : '—'}</p>
+              <p className="text-[10px] text-ink/40 dark:text-white/40">{d.answered}/{d.total} risposte</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===================== PFDI-20 (algoritmo di punteggio validato, domande riformulate) =====================
+
+const OPT_PFDI = [
+  { v: 0, l: 'No' },
+  { v: 1, l: 'Sì — per niente' },
+  { v: 2, l: 'Sì — un poco' },
+  { v: 3, l: 'Sì — moderatamente' },
+  { v: 4, l: 'Sì — molto' },
+];
+
+const PFDI_POPDI: { id: string; text: string }[] = [
+  { id: 'p1', text: 'Sensazione di pressione nella zona pelvica' },
+  { id: 'p2', text: 'Sensazione di un rigonfiamento o di qualcosa che "scende" dalla vagina' },
+  { id: 'p3', text: 'Rigonfiamento o massa vaginale che si può vedere o toccare' },
+  { id: 'p4', text: "Necessità di spingere con le dita in vagina o intorno al retto per svuotare completamente l'intestino" },
+  { id: 'p5', text: 'Sensazione di svuotamento incompleto della vescica dopo la minzione' },
+  { id: 'p6', text: 'Necessità di spingere un rigonfiamento vaginale per riuscire a urinare o completare la minzione' },
+];
+
+const PFDI_CRADI: { id: string; text: string }[] = [
+  { id: 'c1', text: 'Necessità di sforzarsi eccessivamente per evacuare' },
+  { id: 'c2', text: 'Sensazione di evacuazione incompleta al termine della defecazione' },
+  { id: 'c3', text: 'Perdita involontaria di feci liquide' },
+  { id: 'c4', text: 'Perdita involontaria di feci solide' },
+  { id: 'c5', text: 'Perdita involontaria di gas intestinali' },
+  { id: 'c6', text: "Dolore durante l'evacuazione" },
+  { id: 'c7', text: 'Urgenza intestinale improvvisa e forte, con difficoltà a trattenersi' },
+  { id: 'c8', text: 'Protrusione di parte del retto durante o dopo la defecazione, che richiede di essere ridotta manualmente' },
+];
+
+const PFDI_UDI: { id: string; text: string }[] = [
+  { id: 'u1', text: 'Frequenza urinaria eccessiva' },
+  { id: 'u2', text: 'Perdita di urina associata a un forte stimolo improvviso (urgenza)' },
+  { id: 'u3', text: 'Perdita di urina associata a tosse, starnuti o risate' },
+  { id: 'u4', text: 'Perdita di urina in piccole quantità (gocciolamento)' },
+  { id: 'u5', text: 'Difficoltà a svuotare completamente la vescica' },
+  { id: 'u6', text: 'Dolore o fastidio nella zona pelvica o genitale' },
+];
+
+function PFDI20Scale() {
+  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const subscales = [
+    { key: 'POPDI', label: 'Prolasso Genitale (POPDI-6)', items: PFDI_POPDI },
+    { key: 'CRADI', label: 'Colon-Retto-Ano (CRADI-8)', items: PFDI_CRADI },
+    { key: 'UDI', label: 'Urinario (UDI-6)', items: PFDI_UDI },
+  ];
+  const subscaleScores = subscales.map((s) => {
+    const values = s.items.map((it) => answers[it.id]).filter((v): v is number => v !== undefined);
+    const avg = values.length > 0 ? (values.reduce((a, b) => a + b, 0) / values.length) * 25 : null;
+    return { ...s, score: avg !== null ? Math.round(avg * 10) / 10 : null, answered: values.length };
+  });
+  const totalScore = subscaleScores.reduce((sum, s) => sum + (s.score ?? 0), 0);
+  const answeredCount = Object.keys(answers).length;
+
+  return (
+    <div className="space-y-6">
+      {subscales.map((s) => (
+        <div key={s.key}>
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{s.label}</h4>
+          <div className="space-y-3">
+            {s.items.map((item) => (
+              <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+                <p className="text-sm font-semibold mb-2">{item.text}</p>
+                <ButtonGroup options={OPT_PFDI} value={answers[item.id]} onChange={(v) => setAnswers((a) => ({ ...a, [item.id]: v }))} />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div className="rounded-2xl bg-gradient-to-r from-[#4F7CFF]/10 to-[#32D6A0]/10 border border-[#4F7CFF]/20 p-5">
+        <p className="text-sm font-semibold mb-3">Punteggi per sottoscala (0-100, più alto = maggiore disagio) — {answeredCount}/20 domande compilate</p>
+        <div className="grid grid-cols-3 gap-3 mb-3">
+          {subscaleScores.map((s) => (
+            <div key={s.key} className="rounded-xl bg-white/60 dark:bg-white/[0.04] p-3">
+              <p className="text-xs text-ink/50 dark:text-white/50">{s.label}</p>
+              <p className="text-xl font-bold">{s.score !== null ? s.score : '—'}</p>
+              <p className="text-[10px] text-ink/40 dark:text-white/40">{s.answered}/{s.items.length} risposte</p>
+            </div>
+          ))}
+        </div>
+        <ResultBox score={Math.round(totalScore * 10) / 10} max={300} interpretation={totalScore <= 50 ? 'Sintomi minimi' : totalScore <= 150 ? 'Disagio moderato' : 'Disagio severo'} />
+      </div>
+    </div>
+  );
+}
+
+// ===================== ICIQ-UI SF (algoritmo di punteggio validato, domande riformulate) =====================
+
+const OPT_ICIQ_FREQ = [
+  { v: 0, l: 'Mai' },
+  { v: 1, l: 'Circa una volta a settimana o meno' },
+  { v: 2, l: 'Due o tre volte a settimana' },
+  { v: 3, l: 'Circa una volta al giorno' },
+  { v: 4, l: 'Diverse volte al giorno' },
+  { v: 5, l: 'Continuamente' },
+];
+
+const OPT_ICIQ_AMOUNT = [
+  { v: 0, l: 'Nessuna' },
+  { v: 2, l: 'Una piccola quantità' },
+  { v: 4, l: 'Una quantità moderata' },
+  { v: 6, l: 'Una grande quantità' },
+];
+
+const ICIQ_CIRCUMSTANCES = [
+  'Prima di raggiungere il bagno',
+  'Quando tossisce o starnutisce',
+  'Durante il sonno',
+  'Durante attività fisica o sforzo',
+  'Dopo aver finito di urinare e essersi rivestito/a',
+  'Senza un motivo evidente',
+  'In modo continuo',
+];
+
+function ICIQScale() {
+  const [freq, setFreq] = useState<number | undefined>(undefined);
+  const [amount, setAmount] = useState<number | undefined>(undefined);
+  const [impact, setImpact] = useState<number | undefined>(undefined);
+  const [circumstances, setCircumstances] = useState<string[]>([]);
+
+  const toggleCircumstance = (c: string) => {
+    setCircumstances((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+  };
+
+  const total = (freq ?? 0) + (amount ?? 0) + (impact ?? 0);
+  const answered = freq !== undefined && amount !== undefined && impact !== undefined;
+  const severity = total <= 5 ? 'Lieve' : total <= 12 ? 'Moderato' : total <= 18 ? 'Severo' : 'Molto severo';
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-2">Con quale frequenza perde urina involontariamente?</p>
+        <ButtonGroup options={OPT_ICIQ_FREQ} value={freq} onChange={setFreq} />
+      </div>
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-2">Quanta urina perde di solito (con o senza protezione)?</p>
+        <ButtonGroup options={OPT_ICIQ_AMOUNT} value={amount} onChange={setAmount} />
+      </div>
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-3">In generale, quanto la perdita di urina interferisce con la sua vita quotidiana? (0 = per niente, 10 = moltissimo)</p>
+        <div className="flex flex-wrap gap-2">
+          {Array.from({ length: 11 }, (_, v) => (
+            <button key={v} onClick={() => setImpact(v)} className={`w-10 h-10 rounded-full text-sm font-bold transition-all ${impact === v ? 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white' : 'bg-black/5 dark:bg-white/10 text-ink/60 dark:text-white/60'}`}>
+              {v}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-2">Quando perde urina? (informativo, non incluso nel punteggio — può selezionare più risposte)</p>
+        <div className="flex flex-wrap gap-2">
+          {ICIQ_CIRCUMSTANCES.map((c) => (
+            <button key={c} onClick={() => toggleCircumstance(c)} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${circumstances.includes(c) ? 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white' : 'bg-black/5 dark:bg-white/10 text-ink/60 dark:text-white/60'}`}>
+              {c}
+            </button>
+          ))}
+        </div>
+      </div>
+      {answered && <ResultBox score={total} max={21} interpretation={`Severità: ${severity}`} />}
+    </div>
+  );
+}
+
+function getQuestionnaireMatch(name: string): 'sf36' | 'pfdi20' | 'iciq' | null {
+  const n = name.toUpperCase();
+  if (n.includes('SF-36') || n.includes('SF36')) return 'sf36';
+  if (n.includes('PFDI')) return 'pfdi20';
+  if (n.includes('ICIQ')) return 'iciq';
+  return null;
+}
+
+const PELVIC_FLOOR_CATEGORY_ORDER = ['questionnaire', 'neuropathy', 'manual_assessment', 'urodynamic'];
 
 const REGIONS: { key: BodyRegion; label: string }[] = [
   { key: 'knee', label: 'Knee' },
@@ -502,6 +830,34 @@ export default function ClinicalToolsPage() {
   const [category, setCategory] = useState<Category>('functional');
   const [activeScale, setActiveScale] = useState<ScaleKey>('katz');
   const [activeRegion, setActiveRegion] = useState<BodyRegion>('knee');
+  const [pelvicFloorTests, setPelvicFloorTests] = useState<PelvicFloorTest[] | null>(null);
+  const [pelvicFloorLoading, setPelvicFloorLoading] = useState(false);
+  const [pelvicFloorError, setPelvicFloorError] = useState<string | null>(null);
+  const [openQuestionnaire, setOpenQuestionnaire] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (category !== 'pelvic-floor' || pelvicFloorTests !== null || pelvicFloorLoading) return;
+    setPelvicFloorLoading(true);
+    fetch('/api/pelvic-floor/tests')
+      .then((res) => res.json())
+      .then((data) => {
+        setPelvicFloorTests(Array.isArray(data) ? data : data.tests ?? []);
+        setPelvicFloorLoading(false);
+      })
+      .catch(() => {
+        setPelvicFloorError('Impossibile caricare i test del pavimento pelvico.');
+        setPelvicFloorLoading(false);
+      });
+  }, [category, pelvicFloorTests, pelvicFloorLoading]);
+
+  const pelvicFloorGrouped = (pelvicFloorTests ?? []).reduce<Record<string, PelvicFloorTest[]>>((acc, t) => {
+    (acc[t.category] ??= []).push(t);
+    return acc;
+  }, {});
+
+  const pelvicFloorGroupedSorted = Object.entries(pelvicFloorGrouped).sort(
+    ([a], [b]) => PELVIC_FLOOR_CATEGORY_ORDER.indexOf(a) - PELVIC_FLOOR_CATEGORY_ORDER.indexOf(b)
+  );
 
   const ortho = {
     knee: KNEE_TESTS,
@@ -530,9 +886,9 @@ export default function ClinicalToolsPage() {
 
         <div className="flex justify-center mb-10">
           <div className="inline-flex rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl p-1">
-            {(['functional', 'orthopedic'] as Category[]).map((c) => (
+            {(['functional', 'orthopedic', 'pelvic-floor'] as Category[]).map((c) => (
               <button key={c} onClick={() => setCategory(c)} className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${category === c ? 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white' : 'text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white'}`}>
-                {c === 'functional' ? 'Functional Scales' : 'Orthopedic Tests'}
+                {c === 'functional' ? 'Functional Scales' : c === 'orthopedic' ? 'Orthopedic Tests' : 'Pelvic Floor'}
               </button>
             ))}
           </div>
@@ -590,6 +946,60 @@ export default function ClinicalToolsPage() {
                 </div>
               ))}
             </div>
+          </>
+        )}
+
+        {category === 'pelvic-floor' && (
+          <>
+            {pelvicFloorLoading && (
+              <p className="text-center text-sm text-ink/50 dark:text-white/50 py-10">Caricamento test in corso...</p>
+            )}
+            {pelvicFloorError && (
+              <p className="text-center text-sm text-red-500 py-10">{pelvicFloorError}</p>
+            )}
+            {!pelvicFloorLoading && !pelvicFloorError && (
+              <div className="space-y-8">
+                {pelvicFloorGroupedSorted.map(([cat, tests]) => (
+                  <div key={cat}>
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">
+                      {PELVIC_FLOOR_CATEGORY_LABELS[cat] ?? cat}
+                    </h3>
+                    <div className="space-y-4">
+                      {tests.map((t) => {
+                        const match = getQuestionnaireMatch(t.name);
+                        const isOpen = openQuestionnaire === t.slug;
+                        return (
+                          <div key={t.slug} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-5">
+                            <p className="text-base font-semibold text-ink dark:text-white">{t.name}</p>
+                            <div className="space-y-2 text-sm text-ink/70 dark:text-white/70 leading-relaxed mt-3">
+                              <p><span className="font-semibold text-ink/50 dark:text-white/50">Procedura: </span>{t.procedure}</p>
+                              <p><span className="font-semibold text-ink/50 dark:text-white/50">Interpretazione: </span>{t.interpretation}</p>
+                            </div>
+                            {match && (
+                              <>
+                                <button
+                                  onClick={() => setOpenQuestionnaire(isOpen ? null : t.slug)}
+                                  className="mt-4 px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white"
+                                >
+                                  {isOpen ? 'Nascondi questionario' : 'Compila il questionario'}
+                                </button>
+                                {isOpen && (
+                                  <div className="mt-5 pt-5 border-t border-black/[0.06] dark:border-white/10">
+                                    {match === 'sf36' && <SF36Scale />}
+                                    {match === 'pfdi20' && <PFDI20Scale />}
+                                    {match === 'iciq' && <ICIQScale />}
+                                  </div>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>

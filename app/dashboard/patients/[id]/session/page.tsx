@@ -1,117 +1,140 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import Navbar from '@/components/Navbar';
+import { useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { createBrowserClient } from '@supabase/ssr'
+import { motion } from 'framer-motion'
+import { ArrowLeft, Video } from 'lucide-react'
+import Navbar from '@/components/Navbar'
+import LiveStructuring from '@/components/liveStructuring/LiveStructuring'
+import { usePatientContext } from '@/contexts/PatientContext'
 
-interface Paper {
-  id: string;
-  title: string;
-  authors: string | null;
-  journal: string | null;
-  publication_date: string | null;
-  study_type: string | null;
-  original_url: string;
-  status: string;
-  research_summaries: {
-    clinical_question: string | null;
-    main_findings: string | null;
-    why_it_matters: string | null;
-  }[];
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+type Patient = {
+  id: string
+  name: string
 }
 
-export default function SciencePage() {
-  const [papers, setPapers] = useState<Paper[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function PatientSessionPage() {
+  const params = useParams()
+  const router = useRouter()
+  const patientId = params.id as string
+
+  const { setCurrentPatient } = usePatientContext()
+  const [patient, setPatient] = useState<Patient | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [tab, setTab] = useState<'session' | 'video'>('session')
+  const [savedMessage, setSavedMessage] = useState(false)
 
   useEffect(() => {
-    fetch('/api/science/list')
-      .then((res) => res.json())
-      .then((data) => {
-        setPapers(data.papers || []);
-        setLoading(false);
-      });
-  }, []);
+    const load = async () => {
+      const { data } = await supabase
+        .from('patients')
+        .select('id, name')
+        .eq('id', patientId)
+        .single()
+
+      if (data) {
+        setPatient(data)
+        setCurrentPatient({ id: data.id, name: data.name })
+      }
+      setLoading(false)
+    }
+    load()
+  }, [patientId, setCurrentPatient])
+
+  if (loading) {
+    return (
+      <div className="relative min-h-screen bg-white dark:bg-[#08090b]">
+        <Navbar />
+        <div className="pt-40 text-center text-ink/40 dark:text-white/40">Loading...</div>
+      </div>
+    )
+  }
+
+  if (!patient) {
+    return (
+      <div className="relative min-h-screen bg-white dark:bg-[#08090b]">
+        <Navbar />
+        <div className="pt-40 text-center text-ink/40 dark:text-white/40">Patient not found.</div>
+      </div>
+    )
+  }
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
-        style={{
-          background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)',
-        }}
-      />
-
       <div className="relative max-w-4xl mx-auto pt-40 pb-20 px-6">
-        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#4F7CFF] mb-3">
-          Phygo Science
-        </p>
-        <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white mb-2">
-          Latest Evidence
-        </h1>
-        <p className="text-sm text-ink/50 dark:text-white/50 mb-10">
-          Evidence-based research for physiotherapists.
-        </p>
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={() => router.push(`/dashboard/patients/${patientId}`)}
+          className="flex items-center gap-1.5 text-sm text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white mb-6 transition-colors"
+        >
+          <ArrowLeft size={15} />
+          Back to {patient.name}
+        </motion.button>
 
-        {loading ? (
-          <div className="rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
-            <p className="text-sm text-ink/50 dark:text-white/50">Loading research…</p>
+        <div className="flex items-center gap-2 mb-8">
+          <button
+            onClick={() => setTab('session')}
+            className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
+              tab === 'session'
+                ? 'text-white'
+                : 'text-ink/50 dark:text-white/50 border border-black/10 dark:border-white/10'
+            }`}
+            style={tab === 'session' ? { background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
+          >
+            Session Note
+          </button>
+          <button
+            onClick={() => setTab('video')}
+            className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
+              tab === 'video'
+                ? 'text-white'
+                : 'text-ink/50 dark:text-white/50 border border-black/10 dark:border-white/10'
+            }`}
+            style={tab === 'video' ? { background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
+          >
+            <Video size={14} />
+            Video Call
+          </button>
+        </div>
+
+        {savedMessage && (
+          <div className="mb-6 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400">
+            Note saved to {patient.name}'s record.
           </div>
-        ) : (
-          <div className="grid gap-4">
-            {papers.map((paper) => {
-              const summary = paper.research_summaries?.[0];
-              return (
-                <div
-                  key={paper.id}
-                  className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    {paper.study_type && (
-                      <span
-                        className="text-xs px-2.5 py-1 rounded-full text-white font-medium"
-                        style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
-                      >
-                        {paper.study_type}
-                      </span>
-                    )}
-                    <span className="text-xs text-ink/40 dark:text-white/40">{paper.status}</span>
-                  </div>
+        )}
 
-                  <h2 className="text-lg font-semibold text-ink dark:text-white mb-1">
-                    {paper.title}
-                  </h2>
-                  <p className="text-sm text-ink/50 dark:text-white/50 mb-3">
-                    {paper.journal} {paper.publication_date ? `· ${paper.publication_date}` : ''}
-                  </p>
+        {tab === 'session' && (
+          <LiveStructuring
+            instanceId={`session-${patientId}`}
+            variant="full"
+            patientId={patientId}
+            onSaved={() => setSavedMessage(true)}
+          />
+        )}
 
-                  {summary?.clinical_question && (
-                    <p className="text-sm text-ink/70 dark:text-white/70 mb-1">
-                      <span className="font-medium">Clinical question: </span>
-                      {summary.clinical_question}
-                    </p>
-                  )}
-                  {summary?.why_it_matters && (
-                    <p className="text-sm text-ink/60 dark:text-white/60 mb-3">
-                      {summary.why_it_matters}
-                    </p>
-                  )}
-
-                  <a
-                    href={paper.original_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-medium text-[#4F7CFF] hover:underline"
-                  >
-                    Original Study →
-                  </a>
-                </div>
-              );
-            })}
+        {tab === 'video' && (
+          <div className="rounded-[28px] border border-dashed border-black/10 dark:border-white/15 py-20 text-center flex flex-col items-center gap-3">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF]">
+              <Video size={22} />
+            </div>
+            <p className="text-ink/50 dark:text-white/50 font-medium">
+              Video call — coming soon
+            </p>
+            <p className="text-xs text-ink/30 dark:text-white/30 max-w-[280px]">
+              Remote consultation with {patient.name} will be available in a future update.
+            </p>
           </div>
         )}
       </div>
     </div>
-  );
+  )
 }

@@ -18,8 +18,10 @@ const libraryLinks = [
   { label: "Science", href: "/dashboard/science", description: "Latest research summaries" },
   { label: "Body Map", href: "/dashboard/body-map", description: "Interactive anatomy explorer" },
   { label: "Neurology", href: "/dashboard/brain-map", description: "Brain, nerves & pathways" },
+{ label: "Pelvic Floor", href: "/dashboard/pelvic-floor", description: "Anatomy, conditions & rehab" },
   { label: "Clinical Tools", href: "/dashboard/clinical-tools", description: "Assessment scales & tests" },
 ];
+
 
 export default function Navbar() {
   const { scrollY } = useScroll();
