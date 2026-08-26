@@ -9,7 +9,7 @@ import Navbar from '@/components/Navbar'
 import LiveStructuring from '@/components/liveStructuring/LiveStructuring'
 import { usePatientContext } from '@/contexts/PatientContext'
 import VideoCallPanel from '@/components/VideoCallPanel'
-
+import AppointmentScheduler from '@/components/AppointmentScheduler'
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -110,6 +110,12 @@ export default function PatientSessionPage() {
         {savedMessage && (
           <div className="mb-6 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400">
             Note saved to {patient.name}'s record.
+          </div>
+        )}
+
+        {tab === 'session' && (
+          <div className="mb-6">
+            <AppointmentScheduler patientId={patientId} mode="physio" />
           </div>
         )}
 

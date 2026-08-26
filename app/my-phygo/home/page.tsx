@@ -6,7 +6,7 @@ import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
 import { FileText, Calendar, Dumbbell, ClipboardList } from 'lucide-react'
 import VideoCallPanel from '@/components/VideoCallPanel'
-
+import AppointmentScheduler from '@/components/AppointmentScheduler'
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -107,6 +107,10 @@ export default function MyPhygoHomePage() {
           <p className="text-sm text-ink/50 dark:text-white/50 mt-2">{patient.main_condition}</p>
         )}
       </motion.div>
+
+            <div className="mb-8">
+        <AppointmentScheduler patientId={patient.id} mode="patient" />
+      </div>
 
       <div className="mb-8">
         <VideoCallPanel patientId={patient.id} canStart={false} />

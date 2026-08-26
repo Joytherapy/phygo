@@ -144,16 +144,24 @@ export default function DashboardPage() {
               Here's your patient roster
             </p>
           </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="hidden sm:flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105"
-            style={{
-              background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)',
-            }}
-          >
-            {showForm ? <X size={16} /> : <Plus size={16} />}
-            {showForm ? 'Cancel' : 'New patient'}
-          </button>
+          <div className="hidden sm:flex items-center gap-2">
+            <Link
+              href="/dashboard/agenda"
+              className="flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10 hover:border-[#4F7CFF]/40 transition-colors"
+            >
+              Agenda
+            </Link>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105"
+              style={{
+                background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)',
+              }}
+            >
+              {showForm ? <X size={16} /> : <Plus size={16} />}
+              {showForm ? 'Cancel' : 'New patient'}
+            </button>
+          </div>
         </motion.div>
 
         <motion.div
@@ -180,14 +188,22 @@ export default function DashboardPage() {
           ))}
         </motion.div>
 
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="sm:hidden w-full flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white mb-6 shadow-lg"
-          style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
-        >
-          {showForm ? <X size={16} /> : <Plus size={16} />}
-          {showForm ? 'Cancel' : 'New patient'}
-        </button>
+        <div className="flex items-center gap-2 mb-6 sm:hidden">
+          <Link
+            href="/dashboard/agenda"
+            className="flex-1 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10"
+          >
+            Agenda
+          </Link>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="flex-1 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg"
+            style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+          >
+            {showForm ? <X size={16} /> : <Plus size={16} />}
+            {showForm ? 'Cancel' : 'New patient'}
+          </button>
+        </div>
 
         <div className="relative mb-8">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
