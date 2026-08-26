@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { motion, useMotionValueEvent, useScroll, AnimatePresence } from "framer-motion";
-import { Menu, X, Moon, Sun } from "lucide-react";
+import { Menu, X, Moon, Sun, User } from "lucide-react";
 import MagneticButton from "./MagneticButton";
+import { usePatientContext } from "@/contexts/PatientContext";
 
 const linksBeforeLibrary = [
   { label: "Live demo", href: "/#demo" },
@@ -29,6 +30,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const { currentPatient, setCurrentPatient } = usePatientContext();
   const [dark, setDark] = useState(() => {
     if (typeof window === "undefined") return true;
     const stored = window.localStorage.getItem("phygo-theme");
@@ -149,6 +151,24 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-2">
+          {currentPatient && (
+            <div className="hidden sm:flex items-center gap-1.5 rounded-full pl-1 pr-2 py-1 bg-[#4F7CFF]/10 text-[#4F7CFF]">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#4F7CFF] text-white">
+                <User size={12} />
+              </span>
+              <span className="text-xs font-semibold max-w-[100px] truncate">
+                {currentPatient.name}
+              </span>
+              <button
+                aria-label="Clear current patient"
+                onClick={() => setCurrentPatient(null)}
+                className="flex h-4 w-4 items-center justify-center rounded-full hover:bg-[#4F7CFF]/20 transition-colors"
+              >
+                <X size={11} />
+              </button>
+            </div>
+          )}
+
           <button
             aria-label="Toggle dark mode"
             onClick={() => setDark((d) => !d)}
@@ -175,6 +195,20 @@ export default function Navbar() {
           </button>
         </div>
       </nav>
+
+      {currentPatient && (
+        <div className="sm:hidden absolute top-16 left-4 right-4 flex items-center justify-center gap-1.5 rounded-full py-1.5 bg-[#4F7CFF]/10 text-[#4F7CFF]">
+          <User size={12} />
+          <span className="text-xs font-semibold">Current patient: {currentPatient.name}</span>
+          <button
+            aria-label="Clear current patient"
+            onClick={() => setCurrentPatient(null)}
+            className="ml-1 flex h-4 w-4 items-center justify-center rounded-full hover:bg-[#4F7CFF]/20 transition-colors"
+          >
+            <X size={11} />
+          </button>
+        </div>
+      )}
 
       {open && (
         <motion.div

@@ -9,7 +9,12 @@ type PatientContextValue = {
   setCurrentPatient: (p: Patient | null) => void
 }
 
-const PatientContext = createContext<PatientContextValue | undefined>(undefined)
+const defaultValue: PatientContextValue = {
+  currentPatient: null,
+  setCurrentPatient: () => {},
+}
+
+const PatientContext = createContext<PatientContextValue>(defaultValue)
 
 export function PatientProvider({ children }: { children: ReactNode }) {
   const [currentPatient, setCurrentPatientState] = useState<Patient | null>(null)
@@ -42,7 +47,5 @@ export function PatientProvider({ children }: { children: ReactNode }) {
 }
 
 export function usePatientContext() {
-  const ctx = useContext(PatientContext)
-  if (!ctx) throw new Error('usePatientContext deve essere usato dentro PatientProvider')
-  return ctx
+  return useContext(PatientContext)
 }

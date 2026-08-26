@@ -24,6 +24,12 @@ import {
 } from "lucide-react";
 
 import jsPDF from "jspdf";
+import { createBrowserClient } from "@supabase/ssr";
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 import {
   CATEGORIES,
@@ -52,10 +58,14 @@ export default function LiveStructuring({
   instanceId,
   variant = "hero",
   className = "",
+  patientId,
+  onSaved,
 }: {
   instanceId: string;
   variant?: "hero" | "full";
   className?: string;
+  patientId?: string;
+  onSaved?: () => void;
 }) {
   const [phase, setPhase] = useState<Phase>("idle");
 
@@ -166,10 +176,6 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       setScanAnalyzing(false);
     });
 };
-
-
-
-
 
 
 
@@ -355,8 +361,6 @@ const [recordingLang, setRecordingLang] = useState("it-IT");
     return () => clearTimeout(t);
   }, [variant, runExample]);
 
-  // Chiama il vero endpoint AI e trasforma la nota SOAP
-  // nelle 4 categorie mostrate a destra.
   const formatPhaseText = (text: string) => {
   if (!text) return "";
   const pattern =
@@ -420,6 +424,8 @@ rehabPhasesLocal = kbData.phases || [];
         }
 
                 let planText = note.plan;
+        let exercisesArr: any = note.exercises;
+        let exerciseEntriesArr: any[] = [];
         if (rehabPhasesLocal.length > 0) {
           try {
             const refineRes = await fetch("/api/refine-plan", {
@@ -440,7 +446,6 @@ rehabPhasesLocal = kbData.phases || [];
           } catch (refineErr) {
             console.error("Errore refine-plan:", refineErr);
           }
-          let exercisesArr = note.exercises;
 if (rehabPhasesLocal.length > 0) {
   try {
     const exRes = await fetch("/api/refine-exercises", {
@@ -463,7 +468,6 @@ if (rehabPhasesLocal.length > 0) {
   }
 }
 
-let exerciseEntriesArr: any[] = [];
 if (Array.isArray(exercisesArr) && exercisesArr.length > 0) {
   try {
     const eiRes = await fetch("/api/exercise-intelligence", {
@@ -491,6 +495,25 @@ setFinalNote((prev: any) =>
 );
         }
 
+        if (patientId) {
+          try {
+            const { data: { user } } = await supabase.auth.getUser();
+            await supabase.from("notes").insert({
+              patient_id: patientId,
+              user_id: user?.id,
+              subjective: note.subjective || null,
+              objective: note.objective || null,
+              assessment: note.assessment || null,
+              plan: planText || null,
+              exercises: exercisesArr || null,
+              summary_for_patient: note.summaryForPatient || null,
+              language: note.language || recordingLang,
+            });
+            onSaved?.();
+          } catch (saveErr) {
+            console.error("Errore salvataggio nota:", saveErr);
+          }
+        }
 
         const built: Phrase[] = [];
         const fieldMap: Record<string, string> = {};
@@ -519,10 +542,8 @@ setFinalNote((prev: any) =>
         setPhase("flying");
         setProgress(60);
 
-        // Il transcript "vola via" a sinistra...
         setMovedIds(new Set(transcriptPhrases.map((p) => p.id)));
 
-        // ...e la nota AI compare a destra, una riga alla volta.
         built.forEach((p, i) => {
           timers.current.push(
             setTimeout(() => {
@@ -560,7 +581,7 @@ setFinalNote((prev: any) =>
         setPhase("idle");
       }
     },
-    [instanceId, recordingLang]
+    [instanceId, recordingLang, patientId, onSaved]
   );
 
   const startVoice = () => {
@@ -906,7 +927,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
 
   return (
     <div className={className}>
-<div className="relative overflow-hidden rounded-[28px] !border-4 !border-red-500 glass-strong shadow-lift p-7 sm:p-9">
+<div className="relative overflow-hidden rounded-[28px] glass-strong shadow-lift p-7 sm:p-9">
 
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-electric/60 to-transparent" />
 
@@ -1214,8 +1235,7 @@ className="text-[11px] rounded-lg border border-black/15 dark:border-white/10 bg
                 onBlur={(e) =>
                   updatePhraseText(p.id, e.currentTarget.textContent || "")
                 }
-className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseFields[p.id] === "_exercisesText" ? "whitespace-pre-line " : ""}
-
+className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseFields[p.id] === "_exercisesText" ? "whitespace-pre-line " : ""} ${
                   isLiveVoice
                     ? "cursor-text rounded px-1 -mx-1 outline-none focus:bg-black/5 dark:focus:bg-white/10"
                     : ""
@@ -1763,13 +1783,6 @@ Write instead
   </div>
   )}
   {uploadedFileNames.length > 0 && (
-  <p className="text-[11px] text-ink/50 dark:text-white/50 mt-2">
-    {uploadedFileNames.length === 1
-      ? `1 file: ${uploadedFileNames[0]}`
-      : `${uploadedFileNames.length} files: ${uploadedFileNames.join(", ")}`}
-  </p>
-)}
-{uploadedFileNames.length > 0 && (
   <p className="text-[11px] text-ink/50 dark:text-white/50 mt-2">
     {uploadedFileNames.length === 1
       ? `1 file: ${uploadedFileNames[0]}`

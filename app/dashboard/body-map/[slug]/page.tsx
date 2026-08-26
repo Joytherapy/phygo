@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, X, Activity, Stethoscope, AlertTriangle, Sparkles, Send, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import ClinicalActionBar from '@/components/ClinicalActionBar';
 
 interface ZoneAnatomy {
   anatomy: string;
@@ -291,6 +292,9 @@ export default function ZoneHubPage() {
           <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tight">
             {zone.name}
           </h1>
+          <div className="mt-4">
+            <ClinicalActionBar contentType="anatomical_zone" contentId={zone.id} />
+          </div>
         </div>
 
         {anatomyData && (
@@ -395,10 +399,10 @@ export default function ZoneHubPage() {
               {exercises.map((ex) => (
                 <div
                   key={ex.id}
-                  className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden shadow-sm hover:shadow-md transition-all"
+                  className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl shadow-sm hover:shadow-md transition-all"
                 >
                   {ex.image_url && (
-                    <div className="aspect-video bg-white flex items-center justify-center">
+                    <div className="aspect-video bg-white flex items-center justify-center rounded-t-2xl overflow-hidden">
                       <img
                         src={ex.image_url}
                         alt={ex.title}
@@ -418,6 +422,9 @@ export default function ZoneHubPage() {
                       {ex.body_position}
                       {ex.equipment ? ` \u00b7 ${ex.equipment}` : ''}
                     </p>
+                    <div className="mt-2">
+                      <ClinicalActionBar contentType="exercise" contentId={ex.id} />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -496,6 +503,10 @@ export default function ZoneHubPage() {
                   {selectedCondition.evidence_level} evidence
                 </span>
               )}
+
+              <div className="mb-4">
+                <ClinicalActionBar contentType="condition" contentId={String(selectedCondition.id)} />
+              </div>
 
               <div className="space-y-4 text-sm">
                 {selectedCondition.goals && (
