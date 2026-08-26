@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
-import { FileText, Calendar, Video, Dumbbell, ClipboardList } from 'lucide-react'
+import { FileText, Calendar, Dumbbell, ClipboardList } from 'lucide-react'
+import VideoCallPanel from '@/components/VideoCallPanel'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -107,13 +108,9 @@ export default function MyPhygoHomePage() {
         )}
       </motion.div>
 
-      <button
-        disabled
-        className="w-full mb-8 flex items-center justify-center gap-2 rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-4 text-sm font-semibold text-ink/40 dark:text-white/40"
-      >
-        <Video size={16} />
-        Video call with your physio — coming soon
-      </button>
+      <div className="mb-8">
+        <VideoCallPanel patientId={patient.id} canStart={false} />
+      </div>
 
       {!latestNote ? (
         <div className="rounded-[28px] border border-dashed border-black/10 dark:border-white/15 py-16 text-center">

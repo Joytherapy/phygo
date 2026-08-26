@@ -8,6 +8,7 @@ import { ArrowLeft, Video } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import LiveStructuring from '@/components/liveStructuring/LiveStructuring'
 import { usePatientContext } from '@/contexts/PatientContext'
+import VideoCallPanel from '@/components/VideoCallPanel'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -122,17 +123,7 @@ export default function PatientSessionPage() {
         )}
 
         {tab === 'video' && (
-          <div className="rounded-[28px] border border-dashed border-black/10 dark:border-white/15 py-20 text-center flex flex-col items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF]">
-              <Video size={22} />
-            </div>
-            <p className="text-ink/50 dark:text-white/50 font-medium">
-              Video call — coming soon
-            </p>
-            <p className="text-xs text-ink/30 dark:text-white/30 max-w-[280px]">
-              Remote consultation with {patient.name} will be available in a future update.
-            </p>
-          </div>
+          <VideoCallPanel patientId={patientId} canStart={true} />
         )}
       </div>
     </div>
