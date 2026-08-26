@@ -149,7 +149,7 @@ export default function DashboardPage() {
               href="/dashboard/agenda"
               className="flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10 hover:border-[#4F7CFF]/40 transition-colors"
             >
-              Agenda
+              Schedule
             </Link>
             <button
               onClick={() => setShowForm(!showForm)}
@@ -193,7 +193,7 @@ export default function DashboardPage() {
             href="/dashboard/agenda"
             className="flex-1 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10"
           >
-            Agenda
+            Schedule
           </Link>
           <button
             onClick={() => setShowForm(!showForm)}

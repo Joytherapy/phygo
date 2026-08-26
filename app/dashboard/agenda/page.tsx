@@ -106,7 +106,7 @@ export default function AgendaPage() {
             Your schedule
           </p>
           <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white">
-            Agenda
+            Schedule
           </h1>
         </motion.div>
 

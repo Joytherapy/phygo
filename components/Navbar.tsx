@@ -5,6 +5,7 @@ import { motion, useMotionValueEvent, useScroll, AnimatePresence } from "framer-
 import { Menu, X, Moon, Sun, User } from "lucide-react";
 import MagneticButton from "./MagneticButton";
 import { usePatientContext } from "@/contexts/PatientContext";
+import { usePathname } from "next/navigation";
 
 const linksBeforeLibrary = [
   { label: "Live demo", href: "/#demo" },
@@ -31,6 +32,8 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const { currentPatient, setCurrentPatient } = usePatientContext();
+  const pathname = usePathname();
+  const isDashboard = pathname?.startsWith("/dashboard");
   const [dark, setDark] = useState(() => {
     if (typeof window === "undefined") return true;
     const stored = window.localStorage.getItem("phygo-theme");
@@ -140,6 +143,16 @@ export default function Navbar() {
             </AnimatePresence>
           </div>
 
+          {isDashboard && (
+            <a
+              href="/dashboard/agenda"
+              className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors group"
+            >
+              Schedule
+              <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/60 transition-all duration-300 group-hover:w-full" />
+            </a>
+          )}
+
           <a
             key={faqLink.href}
             href={faqLink.href}
@@ -237,6 +250,18 @@ export default function Navbar() {
               {l.label}
             </a>
           ))}
+          {isDashboard && (
+            <>
+              <div className="h-px bg-ink/10 dark:bg-white/10 my-1" />
+              <a
+                href="/dashboard/agenda"
+                onClick={() => setOpen(false)}
+                className="text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
+              >
+                Schedule
+              </a>
+            </>
+          )}
           <div className="h-px bg-ink/10 dark:bg-white/10 my-1" />
           <a
             href={faqLink.href}

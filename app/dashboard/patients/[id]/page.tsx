@@ -219,14 +219,23 @@ export default function PatientDetailPage() {
           </div>
 
           <div className="flex flex-col gap-2 shrink-0">
-            <button
-              onClick={() => router.push(`/dashboard/patients/${patientId}/session`)}
-              className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105"
-              style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
-            >
-              <Plus size={16} />
-              Generate new note
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => router.push('/dashboard/agenda')}
+                className="flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10 hover:border-[#4F7CFF]/40 transition-colors"
+              >
+                <Calendar size={16} />
+                Schedule
+              </button>
+              <button
+                onClick={() => router.push(`/dashboard/patients/${patientId}/session`)}
+                className="flex-1 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105"
+                style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+              >
+                <Plus size={16} />
+                Generate new note
+              </button>
+            </div>
 
             {!patient.patient_user_id && (
               <button

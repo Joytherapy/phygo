@@ -10,6 +10,7 @@ import LiveStructuring from '@/components/liveStructuring/LiveStructuring'
 import { usePatientContext } from '@/contexts/PatientContext'
 import VideoCallPanel from '@/components/VideoCallPanel'
 import AppointmentScheduler from '@/components/AppointmentScheduler'
+
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -114,18 +115,24 @@ export default function PatientSessionPage() {
         )}
 
         {tab === 'session' && (
-          <div className="mb-6">
+          <>
             <AppointmentScheduler patientId={patientId} mode="physio" />
-          </div>
-        )}
 
-        {tab === 'session' && (
-          <LiveStructuring
-            instanceId={`session-${patientId}`}
-            variant="full"
-            patientId={patientId}
-            onSaved={() => setSavedMessage(true)}
-          />
+            <div className="flex items-center gap-3 my-8">
+              <div className="h-px flex-1 bg-black/[0.06] dark:bg-white/10" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink/30 dark:text-white/30">
+                Session Note
+              </p>
+              <div className="h-px flex-1 bg-black/[0.06] dark:bg-white/10" />
+            </div>
+
+            <LiveStructuring
+              instanceId={`session-${patientId}`}
+              variant="full"
+              patientId={patientId}
+              onSaved={() => setSavedMessage(true)}
+            />
+          </>
         )}
 
         {tab === 'video' && (
