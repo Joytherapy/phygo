@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Search, Lock } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import ClinicalActionBar from '@/components/ClinicalActionBar';
 
 interface Step {
   label: string;
@@ -188,34 +189,41 @@ export default function LibraryPage() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               {filteredItems.map((item) => (
-                <button
+                <div
                   key={item.id}
-                  onClick={() => setOpenItem(item)}
-                  className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden hover:border-[#4F7CFF]/40 transition-colors"
+                  className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl hover:border-[#4F7CFF]/40 transition-colors"
                 >
-                  {item.image_url && (
-                    <div className="w-full aspect-video bg-white overflow-hidden flex items-center justify-center">
-                      <img
-                        src={item.image_url}
-                        alt={item.title}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  )}
+                  <button
+                    onClick={() => setOpenItem(item)}
+                    className="text-left w-full"
+                  >
+                    {item.image_url && (
+                      <div className="w-full aspect-video bg-white rounded-t-2xl overflow-hidden flex items-center justify-center">
+                        <img
+                          src={item.image_url}
+                          alt={item.title}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    )}
 
-                  <div className="p-5">
-                    <span
-                      className="inline-block text-xs px-2.5 py-1 rounded-full text-white font-medium mb-2"
-                      style={{ background: levelColor[item.level] || '#4F7CFF' }}
-                    >
-                      {item.level}
-                    </span>
-                    <h3 className="text-base font-semibold text-ink dark:text-white mb-1">{item.title}</h3>
-                    <p className="text-xs text-ink/50 dark:text-white/50">
-                      {item.body_position} · {item.equipment}
-                    </p>
+                    <div className="p-5 pb-3">
+                      <span
+                        className="inline-block text-xs px-2.5 py-1 rounded-full text-white font-medium mb-2"
+                        style={{ background: levelColor[item.level] || '#4F7CFF' }}
+                      >
+                        {item.level}
+                      </span>
+                      <h3 className="text-base font-semibold text-ink dark:text-white mb-1">{item.title}</h3>
+                      <p className="text-xs text-ink/50 dark:text-white/50">
+                        {item.body_position} · {item.equipment}
+                      </p>
+                    </div>
+                  </button>
+                  <div className="px-5 pb-5">
+                    <ClinicalActionBar contentType="exercise" contentId={item.id} />
                   </div>
-                </button>
+                </div>
               ))}
               {filteredItems.length === 0 && (
                 <p className="text-sm text-ink/50 dark:text-white/50 col-span-2">No items yet in this category.</p>
@@ -251,6 +259,10 @@ export default function LibraryPage() {
             </span>
             <h2 className="text-xl font-bold text-ink dark:text-white mb-1">{openItem.title}</h2>
             <p className="text-sm text-ink/60 dark:text-white/60 mb-4">{openItem.goal}</p>
+
+            <div className="mb-4">
+              <ClinicalActionBar contentType="exercise" contentId={openItem.id} />
+            </div>
 
             <div className="flex gap-4 text-xs text-ink/50 dark:text-white/50 mb-4">
               <span>{openItem.body_position}</span>
