@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Plus, FileText, Calendar, Activity, Stethoscope, ClipboardList } from 'lucide-react'
+import { ArrowLeft, Plus, FileText, Calendar, Activity, Stethoscope, ClipboardList, Smartphone, Copy, Check } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 
 const supabase = createBrowserClient(
@@ -19,6 +19,7 @@ type Patient = {
   main_condition: string | null
   gender: string | null
   created_at: string
+  patient_user_id: string | null
 }
 
 const avatarGradient = (gender: string | null) => {
@@ -53,6 +54,13 @@ const formatSince = (dateStr: string) => {
   return years === 1 ? '1 year' : `${years} years`
 }
 
+const generateInviteCode = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let code = ''
+  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)]
+  return code
+}
+
 export default function PatientDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -61,6 +69,11 @@ export default function PatientDetailPage() {
   const [patient, setPatient] = useState<Patient | null>(null)
   const [notes, setNotes] = useState<Note[]>([])
   const [loading, setLoading] = useState(true)
+
+  const [inviteLoading, setInviteLoading] = useState(false)
+  const [inviteLink, setInviteLink] = useState<string | null>(null)
+  const [inviteError, setInviteError] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -84,6 +97,37 @@ export default function PatientDetailPage() {
 
     load()
   }, [patientId])
+
+  const handleInvite = async () => {
+    setInviteLoading(true)
+    setInviteError(null)
+    const code = generateInviteCode()
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const { error } = await supabase.from('patient_invites').insert({
+      patient_id: patientId,
+      code,
+      created_by: user?.id,
+      expires_at: expiresAt,
+    })
+
+    if (!error) {
+      setInviteLink(`${window.location.origin}/my-phygo/join/${code}`)
+    } else {
+      console.error('Errore creazione invito:', error)
+      setInviteError('Could not create invite. Please try again.')
+    }
+    setInviteLoading(false)
+  }
+
+  const copyInviteLink = async () => {
+    if (!inviteLink) return
+    await navigator.clipboard.writeText(inviteLink)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   if (loading) {
     return (
@@ -112,7 +156,7 @@ export default function PatientDetailPage() {
       <div
         className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
         style={{
-          background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)',
+          background: 'radial-gradient(circle, rgba(79,124,255,0.6)0%, rgba(50,214,160,0.5) 100%)',
         }}
       />
 
@@ -159,24 +203,77 @@ export default function PatientDetailPage() {
                   </span>
                 )}
                 {patient.main_condition && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#4F7CFF]/10 px-3 py-1 text-xs font-semibold text-[#4F7CFF]">
+                  <span className="inline-flex items-center gap-1.5rounded-full bg-[#4F7CFF]/10 px-3 py-1 text-xs font-semibold text-[#4F7CFF]">
                     <Stethoscope size={11} />
                     {patient.main_condition}
+                  </span>
+                )}
+                {patient.patient_user_id && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                    <Smartphone size={11} />
+                    Portal active
                   </span>
                 )}
               </div>
             </div>
           </div>
 
-          <button
-            onClick={() => router.push(`/dashboard/patients/${patientId}/session`)}
-            className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105 shrink-0"
-            style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
-          >
-            <Plus size={16} />
-            Generate new note
-          </button>
+          <div className="flex flex-col gap-2 shrink-0">
+            <button
+              onClick={() => router.push(`/dashboard/patients/${patientId}/session`)}
+              className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105"
+              style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+            >
+              <Plus size={16} />
+              Generate new note
+            </button>
+
+            {!patient.patient_user_id && (
+              <button
+                onClick={handleInvite}
+                disabled={inviteLoading}
+                className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold border border-black/10 dark:border-white/10 text-ink/70 dark:text-white/70 hover:border-[#4F7CFF]/40 hover:text-[#4F7CFF] transition-colors disabled:opacity-60"
+              >
+                <Smartphone size={16} />
+                {inviteLoading ? 'Generating...' : 'Invite to Portal'}
+              </button>
+            )}
+          </div>
         </motion.div>
+
+        {inviteLink && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 rounded-2xl border border-[#4F7CFF]/20 bg-[#4F7CFF]/5 p-5"
+          >
+            <p className="text-sm font-semibold text-ink dark:text-white mb-1">
+              Invite link ready — valid for 7 days
+            </p>
+            <p className="text-xs text-ink/50 dark:text-white/50 mb-3">
+              Share this with {patient.name} so they can access their My Phygo portal.
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                readOnly
+                value={inviteLink}
+                className="flex-1 text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 outline-none text-ink/70 dark:text-white/70"
+              />
+              <button
+                onClick={copyInviteLink}
+                className="shrink-0 flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-white transition-colors"
+                style={{ background: copied ? '#32D6A0' : '#4F7CFF' }}
+              >
+                {copied ? <Check size={13} /> : <Copy size={13} />}
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {inviteError && (
+          <p className="mb-8 text-xs text-red-500">{inviteError}</p>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -242,7 +339,7 @@ export default function PatientDetailPage() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.35, delay: i * 0.05 }}
-                  className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-start gap-4 shadow-sm hover:border-[#4F7CFF]/30 transition-colors"
+                  className="rounded-2xl border border-black/[0.06]dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-start gap-4 shadow-sm hover:border-[#4F7CFF]/30 transition-colors"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF]">
                     <FileText size={16} />
