@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Plus, FileText, Calendar, Activity, Stethoscope, ClipboardList, Smartphone, Copy, Check } from 'lucide-react'
+import { ArrowLeft, Plus, FileText, Calendar, Activity, Stethoscope, ClipboardList, Smartphone, Copy, Check, RotateCcw } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 
 const supabase = createBrowserClient(
@@ -129,6 +129,22 @@ export default function PatientDetailPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const handleResetPortalAccess = async () => {
+    const confirmed = window.confirm(
+      `This will disconnect ${patient?.name}'s current portal account. They will need a new invite link to log in again. Continue?`
+    )
+    if (!confirmed) return
+
+    const { error } = await supabase
+      .from('patients')
+      .update({ patient_user_id: null })
+      .eq('id', patientId)
+
+    if (!error) {
+      setPatient((prev) => (prev ? { ...prev, patient_user_id: null } : prev))
+    }
+  }
+
   if (loading) {
     return (
       <div className="relative min-h-screen bg-white dark:bg-[#08090b]">
@@ -245,6 +261,16 @@ export default function PatientDetailPage() {
               >
                 <Smartphone size={16} />
                 {inviteLoading ? 'Generating...' : 'Invite to Portal'}
+              </button>
+            )}
+
+            {patient.patient_user_id && (
+              <button
+                onClick={handleResetPortalAccess}
+                className="flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ink/40 dark:text-white/40 hover:text-red-500 transition-colors self-end"
+              >
+                <RotateCcw size={12} />
+                Reset portal access
               </button>
             )}
           </div>
