@@ -255,6 +255,13 @@ export default function Navbar() {
                     className="absolute top-full right-0 pt-3 w-44"
                   >
                     <div className="glass-strong rounded-xl2 shadow-soft p-1.5">
+                      <a
+                        href="/dashboard/profile"
+                        className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 dark:text-white/70 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+                      >
+                        <User size={14} />
+                        Profile
+                      </a>
                       <button
                         onClick={handleSignOut}
                         className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 dark:text-white/70 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
