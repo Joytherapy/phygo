@@ -28,6 +28,7 @@ const libraryLinks = [
   { label: "Neurology", href: "/dashboard/brain-map", description: "Brain, nerves & pathways" },
 { label: "Pelvic Floor", href: "/dashboard/pelvic-floor", description: "Anatomy, conditions & rehab" },
   { label: "Clinical Tools", href: "/dashboard/clinical-tools", description: "Assessment scales & tests" },
+  { label: "Shop", href: "/dashboard/shop", description: "Equipment picks to recommend" },
 ];
 
 const getInitials = (name: string) => {

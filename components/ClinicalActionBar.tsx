@@ -11,7 +11,7 @@ const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-type ContentType = 'exercise' | 'clinical_test' | 'questionnaire' | 'condition' | 'anatomical_zone'
+type ContentType = 'exercise' | 'clinical_test' | 'questionnaire' | 'condition' | 'anatomical_zone' | 'product'
 
 const ACTION_LABELS: Record<ContentType, string> = {
   exercise: 'Add to Treatment Plan',
@@ -19,6 +19,7 @@ const ACTION_LABELS: Record<ContentType, string> = {
   questionnaire: 'Start for Patient',
   condition: 'Use as Clinical Reference',
   anatomical_zone: 'Use with Patient',
+  product: 'Recommend to Patient',
 }
 
 type PatientOption = { id: string; name: string }
