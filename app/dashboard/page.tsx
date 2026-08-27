@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, X, User, Users, FileText, Activity, Search } from 'lucide-react'
+import { Plus, X, User, Users, FileText, Activity, Search, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 
@@ -26,6 +26,19 @@ const avatarGradient = (gender: string | null) => {
   if (gender === 'female') return 'linear-gradient(135deg, #F472B6 0%, #C084FC 100%)'
   return 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)'
 }
+
+const getInitials = (name: string) => {
+  const parts = name.trim().split(/\s+/)
+  if (!parts[0]) return '··'
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
+const STAT_STYLES = [
+  { gradient: 'linear-gradient(135deg, #4F7CFF 0%, #6E8FFF 100%)', glow: 'rgba(79,124,255,0.25)' },
+  { gradient: 'linear-gradient(135deg, #32D6A0 0%, #22B888 100%)', glow: 'rgba(50,214,160,0.25)' },
+  { gradient: 'linear-gradient(135deg, #F472B6 0%, #C084FC 100%)', glow: 'rgba(244,114,182,0.25)' },
+]
 
 export default function DashboardPage() {
   const [patients, setPatients] = useState<Patient[]>([])
@@ -108,7 +121,7 @@ export default function DashboardPage() {
         className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
         style={{
           background:
-            'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)',
+            'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(244,114,182,0.35) 50%, rgba(50,214,160,0.5) 100%)',
         }}
       />
       <div
@@ -136,21 +149,14 @@ export default function DashboardPage() {
                 Dashboard
               </p>
             </div>
-            <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tight leading-none text-ink dark:text-white">
-              {greeting}
+            <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight leading-tight text-ink dark:text-white">              {greeting}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]">.</span>
             </h1>
             <p className="text-base text-ink/40 dark:text-white/40 mt-3">
               Here's your patient roster
             </p>
           </div>
-          <div className="hidden sm:flex items-center gap-2">
-            <Link
-              href="/dashboard/agenda"
-              className="flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10 hover:border-[#4F7CFF]/40 transition-colors"
-            >
-              Schedule
-            </Link>
+                   <div className="hidden sm:flex items-center gap-2">
             <button
               onClick={() => setShowForm(!showForm)}
               className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105"
@@ -177,27 +183,30 @@ export default function DashboardPage() {
           ].map((stat, i) => (
             <div
               key={i}
-              className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-sm"
+              className="group relative rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden"
             >
-              <stat.icon size={16} className="text-[#4F7CFF] mb-3" />
-              <p className="font-display text-2xl font-bold text-ink dark:text-white">
+              <div
+                className="pointer-events-none absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-25 blur-2xl transition-transform duration-500 group-hover:scale-125"
+                style={{ background: STAT_STYLES[i].gradient }}
+              />
+              <div
+                className="relative flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-sm mb-3"
+                style={{ background: STAT_STYLES[i].gradient }}
+              >
+                <stat.icon size={16} />
+              </div>
+              <p className="relative font-display text-2xl font-bold text-ink dark:text-white">
                 {stat.value}
               </p>
-              <p className="text-xs text-ink/40 dark:text-white/40 mt-0.5">{stat.label}</p>
+              <p className="relative text-xs text-ink/40 dark:text-white/40 mt-0.5">{stat.label}</p>
             </div>
           ))}
         </motion.div>
 
-        <div className="flex items-center gap-2 mb-6 sm:hidden">
-          <Link
-            href="/dashboard/agenda"
-            className="flex-1 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10"
-          >
-            Schedule
-          </Link>
+               <div className="mb-6 sm:hidden">
           <button
             onClick={() => setShowForm(!showForm)}
-            className="flex-1 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg"
+            className="w-full flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg"
             style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
           >
             {showForm ? <X size={16} /> : <Plus size={16} />}
@@ -322,30 +331,35 @@ export default function DashboardPage() {
           <div className="space-y-2">
             <AnimatePresence>
               {filteredPatients.map((patient, i) => (
-                <Link href={`/dashboard/patients/${patient.id}`} key={patient.id}>
+                                <Link href={`/dashboard/patients/${patient.id}`} key={patient.id} className="block">
                   <motion.div
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(i, 20) * 0.03 }}
                     exit={{ opacity: 0 }}
-                    className="group rounded-xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl px-4 py-3 flex items-center gap-3 shadow-sm transition-all hover:shadow-md hover:border-[#4F7CFF]/30 cursor-pointer"
+                    whileHover={{ y: -2 }}
+                    className="group w-full rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl px-4 py-3.5 flex items-center gap-3.5 shadow-sm transition-all hover:shadow-lg hover:border-[#4F7CFF]/30 cursor-pointer"
                   >
                     <div
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white shadow-sm"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white text-xs font-bold shadow-sm"
                       style={{
                         background: avatarGradient(patient.gender),
                       }}
                     >
-                      <User size={14} />
+                      {getInitials(patient.name)}
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-ink dark:text-white truncate">{patient.name}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-ink dark:text-white truncate">{patient.name}</p>
                       <p className="text-xs text-ink/50 dark:text-white/40 truncate">
                         {patient.age ? `${patient.age} years old` : ''}
                         {patient.age && patient.main_condition ? ' · ' : ''}
                         {patient.main_condition || ''}
                       </p>
                     </div>
+                    <ChevronRight
+                      size={16}
+                      className="shrink-0 text-ink/20 dark:text-white/20 opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0"
+                    />
                   </motion.div>
                 </Link>
               ))}
