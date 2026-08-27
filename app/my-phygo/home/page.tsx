@@ -15,6 +15,7 @@ const supabase = createBrowserClient(
 type PatientRecord = {
   id: string
   name: string
+  age: number | null
   main_condition: string | null
 }
 
@@ -51,8 +52,7 @@ export default function MyPhygoHomePage() {
 
       const { data: patientData } = await supabase
         .from('patients')
-        .select('id, name, main_condition')
-        .eq('patient_user_id', user.id)
+        .select('id, name, age, main_condition')        .eq('patient_user_id', user.id)
         .single()
 
       if (!patientData) {
@@ -118,8 +118,8 @@ export default function MyPhygoHomePage() {
         <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white">
           {patient.name}
         </h1>
-        {patient.main_condition && (
-          <p className="text-sm text-ink/50 dark:text-white/50 mt-2">{patient.main_condition}</p>
+                {patient.age && (
+          <p className="text-sm text-ink/50 dark:text-white/50 mt-2">{patient.age} years old</p>
         )}
       </motion.div>
 
