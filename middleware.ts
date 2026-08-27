@@ -37,6 +37,20 @@ if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
   return NextResponse.redirect(url)
 }
 
+if (user && request.nextUrl.pathname.startsWith('/dashboard')) {
+  const { data: patientRecord } = await supabase
+    .from('patients')
+    .select('id')
+    .eq('patient_user_id', user.id)
+    .maybeSingle()
+
+  if (patientRecord) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/my-phygo/home'
+    return NextResponse.redirect(url)
+  }
+}
+
   return response
 }
 
