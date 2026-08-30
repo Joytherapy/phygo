@@ -27,6 +27,8 @@ const libraryLinks = [
   { label: "Body Map", href: "/dashboard/body-map", description: "Interactive anatomy explorer" },
   { label: "Neurology", href: "/dashboard/brain-map", description: "Brain, nerves & pathways" },
 { label: "Pelvic Floor", href: "/dashboard/pelvic-floor", description: "Anatomy, conditions & rehab" },
+  { label: "Cardiopulmonary", href: "/dashboard/cardiopulmonary", description: "Anatomy, conditions & rehab" },
+    { label: "Oncology", href: "/dashboard/oncology", description: "Anatomy, conditions & rehab" },
   { label: "Clinical Tools", href: "/dashboard/clinical-tools", description: "Assessment scales & tests" },
   { label: "Shop", href: "/dashboard/shop", description: "Equipment picks to recommend" },
 ];

@@ -78,7 +78,12 @@ const BRAIN_ZONES: Zone[] = [
   { slug: 'amygdala', name: 'Amygdala', points: [{ x: 44, y: 52 }] },
   { slug: 'hippocampus', name: 'Hippocampus', points: [{ x: 43, y: 55 }] },
 ];
-
+const CONDUCTION_FIBER_TYPES = [
+  { name: 'Aα (A-alfa)', diameter: '13–20 μm', myelination: 'Sì', velocity: '80–120 m/s', function: 'Motoria ai muscoli scheletrici, propriocezione' },
+  { name: 'Aβ (A-beta)', diameter: '5–12 μm', myelination: 'Sì', velocity: '35–75 m/s', function: 'Tatto, pressione, vibrazione' },
+  { name: 'Aδ (A-delta)', diameter: '1–5 μm', myelination: 'Sì (sottile)', velocity: '5–30 m/s', function: 'Dolore acuto, freddo, tatto grossolano' },
+  { name: 'C', diameter: '0.2–1.5 μm', myelination: 'No', velocity: '0.5–2 m/s', function: 'Dolore sordo, caldo, funzioni autonomiche' },
+];
 const NERVE_INJURY_TYPES = [
   {
     name: 'Neuroaprassia',
@@ -303,6 +308,7 @@ const handleAskPhygo = async () => {
   const NERVES_SUB_TABS = [
     { key: 'atlas' as const, label: 'Atlante Nervi' },
     { key: 'seddon' as const, label: 'Classificazione Seddon' },
+      { key: 'conduction' as const, label: 'Conduzione Nervosa' },
     { key: 'conditions' as const, label: 'Patologie Collegate' },
   ];
 
@@ -626,7 +632,61 @@ const handleAskPhygo = async () => {
             )}
           </div>
         )}
+{nervesSubView === 'conduction' && (
+      <div>
+        <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/50 dark:text-white/50 mb-2">
+          Nerve Conduction
+        </h2>
+        <p className="text-sm text-ink/50 dark:text-white/50 mb-6">
+          Tipi di fibre nervose e relative velocità di conduzione.
+        </p>
 
+               <button
+          onClick={() => setExpandedPathway({
+            title: 'Nerve Conduction Velocity',
+            image: `${IMAGE_BASE}/nerve-conduction-and-velocity.png`
+          })}
+          className="group relative w-full rounded-2xl overflow-hidden mb-6 block"
+        >
+          <img
+            src={`${IMAGE_BASE}/nerve-conduction-and-velocity.png`}
+            alt="Nerve Conduction Velocity"
+            className="w-full h-auto group-hover:scale-[1.02] transition-transform"
+          />
+          <div
+            className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full"
+            style={{ background: VIEW_STYLES.nerves.solid }}
+          >
+            <Maximize2 size={14} />
+          </div>
+        </button>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          {CONDUCTION_FIBER_TYPES.map((f) => (
+            <div key={f.name} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-5">
+              <span
+                className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full text-white mb-2"
+                style={{ background: VIEW_STYLES.nerves.solid }}
+              >
+                {f.name}
+              </span>
+              <p className="text-xs text-ink/70 dark:text-white/70 leading-relaxed">
+                <span className="font-semibold text-ink/50 dark:text-white/50">Diametro: </span>{f.diameter}
+              </p>
+              <p className="text-xs text-ink/70 dark:text-white/70 leading-relaxed">
+                <span className="font-semibold text-ink/50 dark:text-white/50">Mielinizzazione: </span>{f.myelination}
+              </p>
+              <p className="text-xs text-ink/70 dark:text-white/70 leading-relaxed">
+                <span className="font-semibold text-ink/50 dark:text-white/50">Velocità: </span>{f.velocity}
+              </p>
+              <p className="text-xs text-ink/70 dark:text-white/70 leading-relaxed">
+                <span className="font-semibold text-ink/50 dark:text-white/50">Funzione: </span>{f.function}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
         {view === 'pathways' && (
           <div>
             <div className="flex justify-center mb-8">

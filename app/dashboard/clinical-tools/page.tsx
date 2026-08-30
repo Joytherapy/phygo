@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import { ClipboardList } from 'lucide-react';
 
-type ScaleKey = 'katz' | 'barthel' | 'tinetti' | 'conley' | 'berg' | 'morse' | 'ashworth' | 'nrs' | 'sppb' | 'mmse' | 'gcs' | 'tug' | 'sixmwt';
-
+type ScaleKey = 'katz' | 'barthel' | 'tinetti' | 'conley' | 'berg' | 'morse' | 'ashworth' | 'nrs' | 'sppb' | 'mmse' | 'gcs' | 'tug' | 'sixmwt' | 'sf36' | 'nihss' | 'updrs3' | 'womac' | 'dash' | 'wmft' | 'boxblock' | 'jebsen' | 'tct' | 'edss' | 'hy' | 'fss' | 'hhs' | 'ucla' | 'drs';
 const SCALES: { key: ScaleKey; name: string; subtitle: string }[] = [
   { key: 'katz', name: 'Katz Index', subtitle: 'Autonomia nelle ADL' },
   { key: 'barthel', name: 'Barthel Index', subtitle: 'Disabilità funzionale' },
@@ -20,6 +19,21 @@ const SCALES: { key: ScaleKey; name: string; subtitle: string }[] = [
   { key: 'gcs', name: 'Glasgow Coma Scale', subtitle: 'Stato di coscienza' },
   { key: 'tug', name: 'Timed Up and Go', subtitle: 'Mobilità funzionale' },
   { key: 'sixmwt', name: '6-Minute Walk Test', subtitle: 'Capacità aerobica' },
+  { key: 'sf36', name: 'SF-36', subtitle: 'Qualità della vita percepita' },
+  { key: 'nihss', name: 'NIHSS', subtitle: 'Severità ictus' },
+  { key: 'updrs3', name: 'UPDRS Parte III', subtitle: 'Esame motorio Parkinson' },
+  { key: 'womac', name: 'WOMAC', subtitle: 'Artrosi ginocchio/anca' },
+  { key: 'dash', name: 'DASH', subtitle: 'Disabilità arto superiore' },
+  { key: 'wmft', name: 'Wolf Motor Function Test', subtitle: 'Funzione arto superiore post-ictus' },
+  { key: 'boxblock', name: 'Box and Block Test', subtitle: 'Destrezza manuale grossolana' },
+  { key: 'jebsen', name: 'Jebsen Hand Function Test', subtitle: 'Funzione della mano' },
+  { key: 'tct', name: 'Trunk Control Test', subtitle: 'Controllo del tronco' },
+  { key: 'edss', name: 'EDSS', subtitle: 'Disabilità in sclerosi multipla' },
+  { key: 'hy', name: 'Hoehn & Yahr', subtitle: 'Stadiazione Parkinson' },
+  { key: 'fss', name: 'Fatigue Severity Scale', subtitle: 'Severità della fatica' },
+  { key: 'hhs', name: 'Harris Hip Score', subtitle: 'Funzione dell\'anca' },
+  { key: 'ucla', name: 'UCLA Shoulder Rating', subtitle: 'Funzione della spalla' },
+  { key: 'drs', name: 'Disability Rating Scale', subtitle: 'Disabilità post trauma cranico' },
 ];
 
 function ButtonGroup({
@@ -72,6 +86,21 @@ const SCALE_DESCRIPTIONS: Record<ScaleKey, string> = {
   gcs: "Scala standard per la valutazione dello stato di coscienza dopo trauma cranico o evento neurologico acuto, basata su tre componenti indipendenti (apertura degli occhi, risposta verbale, risposta motoria). Il punteggio totale classifica la gravità del trauma: 13-15 lieve, 9-12 moderato, 3-8 grave (quest'ultimo generalmente associato a necessità di protezione delle vie aeree).",
   tug: "Test rapido e semplice di mobilità funzionale: il paziente si alza da una sedia, cammina 3 metri, si gira, torna e si siede, mentre viene cronometrato il tempo totale. Un tempo superiore a 20 secondi è generalmente associato a un aumentato rischio di caduta e a difficoltà nelle attività della vita quotidiana.",
   sixmwt: "Misura la distanza massima percorribile in 6 minuti camminando al proprio passo, su un percorso piano di lunghezza nota. Riflette la capacità funzionale aerobica sub-massimale ed è ampiamente utilizzato in cardiologia, pneumologia e riabilitazione geriatrica per monitorare l'evoluzione della capacità di esercizio nel tempo.",
+  sf36: "Questionario generico di qualità della vita correlata alla salute, tra i più utilizzati al mondo in ambito clinico e di ricerca. Esplora 8 domini (attività fisica, limitazioni di ruolo fisiche ed emotive, dolore fisico, salute generale, vitalità, attività sociali, salute mentale) tramite 36 item, con punteggi 0-100 per dominio dove valori più alti indicano uno stato di salute percepito migliore. Non è specifico di una patologia, quindi si applica trasversalmente a qualsiasi condizione clinica.",
+  nihss: "Esame neurologico standardizzato di 15 voci, usato per quantificare la severità di un ictus acuto. Copre livello di coscienza, motilità oculare, campo visivo, paralisi facciale, forza degli arti, atassia, sensibilità, linguaggio, disartria e neglect. Punteggio totale 0-42: più alto indica ictus più severo. Va amministrato da personale formato, tipicamente in meno di 10 minuti.",
+  updrs3: "Parte motoria della MDS-UPDRS (Movement Disorder Society - Unified Parkinson's Disease Rating Scale), condotta direttamente dal clinico a differenza delle altre 3 parti (compilate dal paziente). Valuta rigidità, bradicinesia, tremore, andatura e stabilità posturale. Ogni voce 0-4 (normale-molto severo); il punteggio totale orienta la severità motoria e la risposta alla terapia dopaminergica.",
+  womac: "Questionario specifico per artrosi di ginocchio e/o anca, tra i più utilizzati in ambito ortopedico. 24 item su 3 sottoscale: dolore (5 item), rigidità (2 item), funzione fisica (17 item), ciascuno 0-4. Punteggio totale 0-96, più alto indica sintomi/limitazioni peggiori. Sensibile al cambiamento dopo trattamento conservativo o chirurgico (es. protesi).",
+  dash: "Questionario di 30 item che valuta sintomi e capacità funzionale dell'arto superiore (braccio, spalla, mano) indipendentemente dalla diagnosi specifica. Ogni item 1-5; il punteggio finale (0-100, richiede almeno 27/30 risposte) si calcola come [(media risposte) - 1] × 25. Punteggio più alto indica maggiore disabilità. Ampiamente usato per monitorare il recupero dopo traumi, chirurgia o patologie dell'arto superiore.",
+  wmft: "Valuta la funzione dell'arto superiore paretico attraverso 15 compiti funzionali in ordine crescente di complessità, tipicamente usato in ambito post-ictus. Ogni compito è misurato sia per il tempo di esecuzione (secondi, max 120) sia per la qualità del movimento sulla Functional Ability Scale (FAS 0-5). Ampiamente usato per monitorare l'efficacia della terapia del movimento indotto da constraint (CIMT).",
+  boxblock: "Misura la destrezza manuale grossolana contando il numero di cubetti da 1 pollice spostati da un vano all'altro di una scatola in 60 secondi, una mano alla volta. Semplice e rapido, ampiamente usato in ambito neurologico (ictus, sclerosi multipla, lesioni midollari) e ortopedico. Adulti sani trasferiscono in media 75-78 cubetti; punteggi più alti indicano migliore destrezza.",
+  jebsen: "7 sottotest cronometrati che simulano attività quotidiane (scrittura, girare pagine, raccogliere piccoli oggetti, impilare pedine, simulare il mangiare, spostare oggetti leggeri e pesanti), eseguiti con ciascuna mano separatamente. Il punteggio è il tempo totale per completare tutti i sottotest; tempi più brevi indicano funzione migliore.",
+  tct: "Valuta il controllo del tronco nel paziente con ictus attraverso 4 compiti assiali: rotolare verso il lato debole, rotolare verso il lato forte, alzarsi da sdraiato a seduto, e mantenere l'equilibrio da seduto per 30 secondi. Ogni voce è valutata 0 (incapace), 12 (modalità anomala) o 25 (normale), per un punteggio totale 0-100. Buon predittore precoce dell'esito riabilitativo.",
+  edss: "Scala standard per quantificare la disabilità nella sclerosi multipla e monitorarne l'evoluzione. Combina la valutazione di 7 sistemi funzionali del sistema nervoso centrale (piramidale, cerebellare, tronco encefalico, sensitivo, vescico-sfinterico, visivo, cerebrale) con la capacità di deambulazione, per determinare uno step finale da 0 (esame normale) a 10 (morte per SM), con incrementi di 0.5. Ampiamente usata in trial clinici, criticata per la sua dipendenza dalla sola deambulazione nei punteggi medio-alti.",
+  hy: "Stadiazione clinica della malattia di Parkinson in 8 livelli (0-5, con incrementi 1.5 e 2.5), che descrive la progressione dei sintomi motori da un coinvolgimento unilaterale isolato fino alla completa dipendenza. Stadi 1-3 sono generalmente considerati a disabilità minima, 4-5 a disabilità severa. Semplice e rapida da applicare, ma poco sensibile ai cambiamenti fini.",
+  fss: "Questionario di 9 item che misura l'impatto della fatica sulla vita quotidiana, molto usato in sclerosi multipla, malattia di Parkinson e altre condizioni neurologiche croniche. Ogni item 1-7 (fortemente in disaccordo - fortemente in accordo); il punteggio finale è la media dei 9 item. Un punteggio medio superiore a 4 è generalmente considerato indicativo di fatica clinicamente significativa.",
+  hhs: "Scala di 100 punti per valutare la funzione dell'anca dopo protesi d'anca o altri interventi, su 4 domini: dolore (44 punti), funzione (47 punti su 7 item), assenza di deformità (4 punti) e range di movimento (5 punti). Punteggi ≥90 sono eccellenti, 80-89 buoni, 70-79 discreti, <70 scarsi. Uno dei punteggi più utilizzati in chirurgia ortopedica dell'anca.",
+  ucla: "Scala di 35 punti che integra valutazione soggettiva (dolore, funzione, soddisfazione del paziente) e oggettiva (flessione anteriore attiva, forza) della spalla. Usata soprattutto per artroplastica di spalla e riparazione della cuffia dei rotatori. Punteggi ≥27 indicano risultato buono/eccellente, <27 risultato scarso/insoddisfacente.",
+  drs: "Scala di 8 item per classificare il grado di disabilità dopo trauma cranico, dal coma al reinserimento nella comunità. Copre vigilanza/consapevolezza (apertura occhi, comunicazione, risposta motoria), capacità cognitiva per l'autocura (alimentazione, toilette, igiene), dipendenza dagli altri e adattabilità psicosociale (occupabilità). Punteggio 0 (nessuna disabilità) a 29 (stato vegetativo estremo in vita); 30 indica il decesso.",
 };
 
 function ResultBox({ score, max, interpretation }: { score: number; max?: number; interpretation: string }) {
@@ -410,7 +439,792 @@ function SixMWTScale() {
   );
 }
 
-type Category = 'functional' | 'orthopedic' | 'pelvic-floor';
+
+// ===================== NIHSS =====================
+
+const OPT_NIHSS_1A = [{ v: 0, l: 'Vigile' }, { v: 1, l: 'Non vigile, risvegliabile con stimoli minimi' }, { v: 2, l: 'Non vigile, richiede stimoli ripetuti' }, { v: 3, l: 'Risposta solo riflessa o nessuna risposta' }];
+const OPT_NIHSS_1B = [{ v: 0, l: 'Entrambe corrette' }, { v: 1, l: 'Una corretta' }, { v: 2, l: 'Nessuna corretta' }];
+const OPT_NIHSS_1C = [{ v: 0, l: 'Entrambi eseguiti' }, { v: 1, l: 'Uno eseguito' }, { v: 2, l: 'Nessuno eseguito' }];
+const OPT_NIHSS_GAZE = [{ v: 0, l: 'Normale' }, { v: 1, l: 'Paresi parziale dello sguardo' }, { v: 2, l: 'Deviazione forzata' }];
+const OPT_NIHSS_VISUAL = [{ v: 0, l: 'Nessuna perdita' }, { v: 1, l: 'Emianopsia parziale' }, { v: 2, l: 'Emianopsia completa' }, { v: 3, l: 'Emianopsia bilaterale' }];
+const OPT_NIHSS_FACIAL = [{ v: 0, l: 'Normale' }, { v: 1, l: 'Paralisi minore' }, { v: 2, l: 'Paralisi parziale' }, { v: 3, l: 'Paralisi completa' }];
+const OPT_NIHSS_LIMB = [{ v: 0, l: 'Nessuna caduta' }, { v: 1, l: 'Caduta lieve' }, { v: 2, l: 'Qualche sforzo contro gravita' }, { v: 3, l: 'Nessuno sforzo contro gravita' }, { v: 4, l: 'Nessun movimento' }];
+const OPT_NIHSS_ATAXIA = [{ v: 0, l: 'Assente' }, { v: 1, l: 'Presente in un arto' }, { v: 2, l: 'Presente in due arti' }];
+const OPT_NIHSS_SENSORY = [{ v: 0, l: 'Normale' }, { v: 1, l: 'Perdita lieve-moderata' }, { v: 2, l: 'Perdita severa-totale' }];
+const OPT_NIHSS_LANGUAGE = [{ v: 0, l: 'Nessuna afasia' }, { v: 1, l: 'Afasia lieve-moderata' }, { v: 2, l: 'Afasia severa' }, { v: 3, l: 'Muto/afasia globale' }];
+const OPT_NIHSS_DYSARTHRIA = [{ v: 0, l: 'Normale' }, { v: 1, l: 'Lieve-moderata' }, { v: 2, l: 'Severa' }];
+const OPT_NIHSS_NEGLECT = [{ v: 0, l: 'Nessuna anomalia' }, { v: 1, l: 'Lieve (una modalita)' }, { v: 2, l: 'Severa (piu modalita)' }];
+
+const NIHSS_ITEMS: { id: string; label: string; options: { v: number; l: string }[] }[] = [
+  { id: '1a', label: '1a. Livello di coscienza', options: OPT_NIHSS_1A },
+  { id: '1b', label: '1b. Domande sul livello di coscienza (mese, eta)', options: OPT_NIHSS_1B },
+  { id: '1c', label: '1c. Comandi sul livello di coscienza (apri/chiudi occhi, apri/chiudi mano)', options: OPT_NIHSS_1C },
+  { id: '2', label: '2. Sguardo coniugato', options: OPT_NIHSS_GAZE },
+  { id: '3', label: '3. Campo visivo', options: OPT_NIHSS_VISUAL },
+  { id: '4', label: '4. Paralisi facciale', options: OPT_NIHSS_FACIAL },
+  { id: '5a', label: '5a. Forza arto superiore sinistro', options: OPT_NIHSS_LIMB },
+  { id: '5b', label: '5b. Forza arto superiore destro', options: OPT_NIHSS_LIMB },
+  { id: '6a', label: '6a. Forza arto inferiore sinistro', options: OPT_NIHSS_LIMB },
+  { id: '6b', label: '6b. Forza arto inferiore destro', options: OPT_NIHSS_LIMB },
+  { id: '7', label: '7. Atassia degli arti', options: OPT_NIHSS_ATAXIA },
+  { id: '8', label: '8. Sensibilita', options: OPT_NIHSS_SENSORY },
+  { id: '9', label: '9. Linguaggio', options: OPT_NIHSS_LANGUAGE },
+  { id: '10', label: '10. Disartria', options: OPT_NIHSS_DYSARTHRIA },
+  { id: '11', label: '11. Estinzione e inattenzione (neglect)', options: OPT_NIHSS_NEGLECT },
+];
+
+function NIHSSScale() {
+  const [scores, setScores] = useState<Record<string, number>>({});
+  const total = NIHSS_ITEMS.reduce((s, i) => s + (scores[i.id] ?? 0), 0);
+  const answeredCount = Object.keys(scores).length;
+  const interpretation =
+    total === 0 ? 'Nessun sintomo di ictus' :
+    total <= 4 ? 'Ictus minore' :
+    total <= 15 ? 'Ictus moderato' :
+    total <= 20 ? 'Ictus da moderato a severo' : 'Ictus severo';
+  return (
+    <div className="space-y-4">
+      {NIHSS_ITEMS.map((item) => (
+        <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <p className="text-sm font-semibold mb-2">{item.label}</p>
+          <ButtonGroup options={item.options} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
+        </div>
+      ))}
+      <ResultBox score={total} max={42} interpretation={`${interpretation} - ${answeredCount}/15 voci compilate`} />
+    </div>
+  );
+}
+
+// ===================== MDS-UPDRS Parte III (Esame Motorio) =====================
+
+const OPT_UPDRS5 = [{ v: 0, l: 'Normale' }, { v: 1, l: 'Lieve' }, { v: 2, l: 'Moderato' }, { v: 3, l: 'Severo' }, { v: 4, l: 'Molto severo' }];
+
+const UPDRS_III_ITEMS: { id: string; label: string }[] = [
+  { id: 'speech', label: 'Eloquio' },
+  { id: 'facial', label: 'Espressione facciale' },
+  { id: 'rigidity_neck', label: 'Rigidita - collo' },
+  { id: 'rigidity_ue_dx', label: 'Rigidita - arto superiore destro' },
+  { id: 'rigidity_ue_sx', label: 'Rigidita - arto superiore sinistro' },
+  { id: 'rigidity_le_dx', label: 'Rigidita - arto inferiore destro' },
+  { id: 'rigidity_le_sx', label: 'Rigidita - arto inferiore sinistro' },
+  { id: 'finger_tap_dx', label: 'Movimenti alternati dita - destra' },
+  { id: 'finger_tap_sx', label: 'Movimenti alternati dita - sinistra' },
+  { id: 'hand_mov_dx', label: 'Movimenti mano - destra' },
+  { id: 'hand_mov_sx', label: 'Movimenti mano - sinistra' },
+  { id: 'pron_sup_dx', label: 'Prono-supinazione mano - destra' },
+  { id: 'pron_sup_sx', label: 'Prono-supinazione mano - sinistra' },
+  { id: 'toe_tap_dx', label: 'Movimenti alternati piede - destra' },
+  { id: 'toe_tap_sx', label: 'Movimenti alternati piede - sinistra' },
+  { id: 'leg_agility_dx', label: 'Agilita della gamba - destra' },
+  { id: 'leg_agility_sx', label: 'Agilita della gamba - sinistra' },
+  { id: 'arising', label: 'Alzarsi dalla sedia' },
+  { id: 'gait', label: 'Andatura' },
+  { id: 'freezing', label: 'Freezing dell andatura' },
+  { id: 'postural_stability', label: 'Stabilita posturale' },
+  { id: 'posture', label: 'Postura' },
+  { id: 'bradykinesia_global', label: 'Bradicinesia globale' },
+  { id: 'tremor_postural_dx', label: 'Tremore posturale mano - destra' },
+  { id: 'tremor_postural_sx', label: 'Tremore posturale mano - sinistra' },
+  { id: 'tremor_kinetic_dx', label: 'Tremore cinetico mano - destra' },
+  { id: 'tremor_kinetic_sx', label: 'Tremore cinetico mano - sinistra' },
+  { id: 'tremor_rest_amp', label: 'Ampiezza tremore a riposo (globale)' },
+  { id: 'tremor_rest_const', label: 'Costanza del tremore a riposo' },
+];
+
+function UPDRSPartIIIScale() {
+  const [scores, setScores] = useState<Record<string, number>>({});
+  const total = UPDRS_III_ITEMS.reduce((s, i) => s + (scores[i.id] ?? 0), 0);
+  const answeredCount = Object.keys(scores).length;
+  return (
+    <div className="space-y-4">
+      {UPDRS_III_ITEMS.map((item) => (
+        <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <p className="text-sm font-semibold mb-2">{item.label}</p>
+          <ButtonGroup options={OPT_UPDRS5} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
+        </div>
+      ))}
+      <ResultBox score={total} max={112} interpretation={`Punteggio motorio (Parte III) - ${answeredCount}/${UPDRS_III_ITEMS.length} voci compilate`} />
+    </div>
+  );
+}
+
+// ===================== WOMAC =====================
+
+const OPT_WOMAC = [{ v: 0, l: 'Nessuno' }, { v: 1, l: 'Lieve' }, { v: 2, l: 'Moderato' }, { v: 3, l: 'Severo' }, { v: 4, l: 'Estremo' }];
+
+const WOMAC_PAIN: { id: string; label: string }[] = [
+  { id: 'p1', label: 'Camminando su una superficie piana' },
+  { id: 'p2', label: 'Salendo o scendendo le scale' },
+  { id: 'p3', label: 'Di notte, a letto' },
+  { id: 'p4', label: 'Stando seduto o sdraiato' },
+  { id: 'p5', label: 'Stando in piedi' },
+];
+const WOMAC_STIFFNESS: { id: string; label: string }[] = [
+  { id: 's1', label: 'Rigidita al risveglio mattutino' },
+  { id: 's2', label: 'Rigidita piu tardi nel corso della giornata' },
+];
+const WOMAC_FUNCTION: { id: string; label: string }[] = [
+  { id: 'f1', label: 'Scendere le scale' },
+  { id: 'f2', label: 'Salire le scale' },
+  { id: 'f3', label: 'Alzarsi da seduto' },
+  { id: 'f4', label: 'Stare in piedi' },
+  { id: 'f5', label: 'Chinarsi verso il pavimento' },
+  { id: 'f6', label: 'Camminare in piano' },
+  { id: 'f7', label: 'Entrare/uscire dall auto' },
+  { id: 'f8', label: 'Fare la spesa' },
+  { id: 'f9', label: 'Indossare le calze' },
+  { id: 'f10', label: 'Alzarsi dal letto' },
+  { id: 'f11', label: 'Togliersi le calze' },
+  { id: 'f12', label: 'Stare sdraiato a letto' },
+  { id: 'f13', label: 'Entrare/uscire dalla vasca da bagno' },
+  { id: 'f14', label: 'Stare seduto' },
+  { id: 'f15', label: 'Sedersi/alzarsi dal water' },
+  { id: 'f16', label: 'Faccende domestiche pesanti' },
+  { id: 'f17', label: 'Faccende domestiche leggere' },
+];
+
+function WOMACScale() {
+  const [scores, setScores] = useState<Record<string, number>>({});
+  const painTotal = WOMAC_PAIN.reduce((s, i) => s + (scores[i.id] ?? 0), 0);
+  const stiffTotal = WOMAC_STIFFNESS.reduce((s, i) => s + (scores[i.id] ?? 0), 0);
+  const funcTotal = WOMAC_FUNCTION.reduce((s, i) => s + (scores[i.id] ?? 0), 0);
+  const grandTotal = painTotal + stiffTotal + funcTotal;
+  const answeredCount = Object.keys(scores).length;
+  const renderGroup = (items: typeof WOMAC_PAIN) =>
+    items.map((item) => (
+      <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-2">{item.label}</p>
+        <ButtonGroup options={OPT_WOMAC} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
+      </div>
+    ));
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">Dolore (max 20)</h3>
+        <div className="space-y-3">{renderGroup(WOMAC_PAIN)}</div>
+      </div>
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">Rigidita (max 8)</h3>
+        <div className="space-y-3">{renderGroup(WOMAC_STIFFNESS)}</div>
+      </div>
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">Funzione Fisica (max 68)</h3>
+        <div className="space-y-3">{renderGroup(WOMAC_FUNCTION)}</div>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-xl bg-white/60 dark:bg-white/[0.04] p-3 text-center">
+          <p className="text-xs text-ink/50 dark:text-white/50">Dolore</p>
+          <p className="text-xl font-bold">{painTotal}/20</p>
+        </div>
+        <div className="rounded-xl bg-white/60 dark:bg-white/[0.04] p-3 text-center">
+          <p className="text-xs text-ink/50 dark:text-white/50">Rigidita</p>
+          <p className="text-xl font-bold">{stiffTotal}/8</p>
+        </div>
+        <div className="rounded-xl bg-white/60 dark:bg-white/[0.04] p-3 text-center">
+          <p className="text-xs text-ink/50 dark:text-white/50">Funzione</p>
+          <p className="text-xl font-bold">{funcTotal}/68</p>
+        </div>
+      </div>
+      <ResultBox score={grandTotal} max={96} interpretation={`Punteggio totale WOMAC - ${answeredCount}/24 voci compilate. Punteggi piu alti indicano sintomi/limitazioni peggiori.`} />
+    </div>
+  );
+}
+
+// ===================== DASH =====================
+
+const OPT_DASH = [{ v: 1, l: 'Nessuna difficolta' }, { v: 2, l: 'Lieve' }, { v: 3, l: 'Moderata' }, { v: 4, l: 'Severa' }, { v: 5, l: 'Impossibile' }];
+
+const DASH_ITEMS: { id: string; label: string }[] = [
+  { id: 'd1', label: 'Aprire un barattolo con coperchio a vite nuovo o rigido' },
+  { id: 'd2', label: 'Scrivere' },
+  { id: 'd3', label: 'Girare una chiave nella serratura' },
+  { id: 'd4', label: 'Preparare un pasto' },
+  { id: 'd5', label: 'Aprire una porta pesante spingendola' },
+  { id: 'd6', label: 'Sistemare un oggetto su un ripiano sopra la testa' },
+  { id: 'd7', label: 'Fare lavori domestici pesanti (es. lavare pareti, pavimenti)' },
+  { id: 'd8', label: 'Curare il giardino' },
+  { id: 'd9', label: 'Rifare un letto' },
+  { id: 'd10', label: 'Portare una borsa della spesa o una ventiquattrore' },
+  { id: 'd11', label: 'Portare un oggetto pesante (oltre 5 kg)' },
+  { id: 'd12', label: 'Cambiare una lampadina sopra la testa' },
+  { id: 'd13', label: 'Lavarsi o asciugarsi i capelli' },
+  { id: 'd14', label: 'Lavarsi la schiena' },
+  { id: 'd15', label: 'Indossare un maglione' },
+  { id: 'd16', label: 'Usare un coltello per tagliare il cibo' },
+  { id: 'd17', label: 'Attivita ricreative con poco sforzo (es. giocare a carte)' },
+  { id: 'd18', label: 'Attivita ricreative con impatto sul braccio (es. golf, martello)' },
+  { id: 'd19', label: 'Attivita ricreative con movimento libero del braccio (es. nuoto)' },
+  { id: 'd20', label: 'Gestire i trasporti (entrare/uscire da un auto)' },
+  { id: 'd21', label: 'Attivita sessuale' },
+  { id: 'd22', label: 'Interferenza con le normali attivita sociali' },
+  { id: 'd23', label: 'Limitazione nel lavoro o nelle attivita quotidiane abituali' },
+  { id: 'd24', label: 'Dolore al braccio, alla spalla o alla mano' },
+  { id: 'd25', label: 'Dolore durante lo svolgimento di attivita specifiche' },
+  { id: 'd26', label: 'Formicolio (parestesia) al braccio, spalla o mano' },
+  { id: 'd27', label: 'Debolezza al braccio, spalla o mano' },
+  { id: 'd28', label: 'Rigidita al braccio, spalla o mano' },
+  { id: 'd29', label: 'Difficolta a dormire per il dolore al braccio, spalla o mano' },
+  { id: 'd30', label: 'Sensazione di scarsa fiducia o utilita del braccio' },
+];
+
+function DASHScale() {
+  const [scores, setScores] = useState<Record<string, number>>({});
+  const answered = Object.values(scores);
+  const answeredCount = answered.length;
+  const sum = answered.reduce((s, v) => s + v, 0);
+  const canScore = answeredCount >= 27;
+  const dashScore = canScore ? Math.round(((sum / answeredCount) - 1) * 25 * 10) / 10 : null;
+  return (
+    <div className="space-y-4">
+      {DASH_ITEMS.map((item) => (
+        <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <p className="text-sm font-semibold mb-2">{item.label}</p>
+          <ButtonGroup options={OPT_DASH} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
+        </div>
+      ))}
+      {canScore ? (
+        <ResultBox score={dashScore as number} max={100} interpretation={`${answeredCount}/30 voci compilate. Punteggio piu alto = maggiore disabilita.`} />
+      ) : (
+        <div className="rounded-2xl bg-black/[0.02] dark:bg-white/[0.02] p-5 text-center">
+          <p className="text-sm text-ink/60 dark:text-white/60">Compila almeno 27 voci per calcolare il punteggio ({answeredCount}/27)</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ===================== Wolf Motor Function Test (WMFT) =====================
+
+const OPT_FAS = [{ v: 0, l: '0 - Non tenta' }, { v: 1, l: '1' }, { v: 2, l: '2' }, { v: 3, l: '3' }, { v: 4, l: '4' }, { v: 5, l: '5 - Normale' }];
+
+const WMFT_ITEMS: { id: string; label: string }[] = [
+  { id: 'w1', label: 'Avambraccio verso il tavolo (di lato)' },
+  { id: 'w2', label: 'Avambraccio verso la scatola (di lato)' },
+  { id: 'w3', label: 'Estensione del gomito (di lato)' },
+  { id: 'w4', label: 'Estensione del gomito con peso' },
+  { id: 'w5', label: 'Mano verso il tavolo (frontale)' },
+  { id: 'w6', label: 'Mano verso la scatola (frontale)' },
+  { id: 'w7', label: 'Raggiungere e recuperare un oggetto' },
+  { id: 'w8', label: 'Solleva una lattina' },
+  { id: 'w9', label: 'Solleva una matita' },
+  { id: 'w10', label: 'Solleva una graffetta' },
+  { id: 'w11', label: 'Impila le pedine (dama)' },
+  { id: 'w12', label: 'Gira le carte' },
+  { id: 'w13', label: 'Gira una chiave nella serratura' },
+  { id: 'w14', label: 'Piega un asciugamano' },
+  { id: 'w15', label: 'Solleva un cestino' },
+];
+
+function WMFTScale() {
+  const [fas, setFas] = useState<Record<string, number>>({});
+  const [times, setTimes] = useState<Record<string, number>>({});
+  const fasValues = Object.values(fas);
+  const timeValues = Object.values(times);
+  const avgFas = fasValues.length > 0 ? Math.round((fasValues.reduce((s, v) => s + v, 0) / fasValues.length) * 100) / 100 : null;
+  const avgTime = timeValues.length > 0 ? Math.round((timeValues.reduce((s, v) => s + v, 0) / timeValues.length) * 100) / 100 : null;
+  return (
+    <div className="space-y-4">
+      {WMFT_ITEMS.map((item) => (
+        <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <p className="text-sm font-semibold mb-2">{item.label}</p>
+          <div className="flex items-center gap-3 mb-3">
+            <input
+              type="number"
+              step="0.1"
+              max={120}
+              value={times[item.id] ?? ''}
+              onChange={(e) => setTimes((t) => ({ ...t, [item.id]: e.target.value ? Math.min(120, parseFloat(e.target.value)) : 0 }))}
+              placeholder="0.0"
+              className="w-24 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm outline-none focus:border-[#4F7CFF]"
+            />
+            <span className="text-xs text-ink/50 dark:text-white/50">secondi (max 120)</span>
+          </div>
+          <ButtonGroup options={OPT_FAS} value={fas[item.id]} onChange={(v) => setFas((f) => ({ ...f, [item.id]: v }))} />
+        </div>
+      ))}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="rounded-xl bg-white/60 dark:bg-white/[0.04] p-4 text-center">
+          <p className="text-xs text-ink/50 dark:text-white/50 mb-1">FAS media</p>
+          <p className="text-2xl font-bold">{avgFas !== null ? avgFas : '-'} / 5</p>
+          <p className="text-[10px] text-ink/40 dark:text-white/40">{fasValues.length}/15 voci</p>
+        </div>
+        <div className="rounded-xl bg-white/60 dark:bg-white/[0.04] p-4 text-center">
+          <p className="text-xs text-ink/50 dark:text-white/50 mb-1">Tempo medio</p>
+          <p className="text-2xl font-bold">{avgTime !== null ? avgTime : '-'} s</p>
+          <p className="text-[10px] text-ink/40 dark:text-white/40">{timeValues.length}/15 voci</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===================== Box and Block Test =====================
+
+function BoxBlockScale() {
+  const [dominant, setDominant] = useState<number | null>(null);
+  const [nonDominant, setNonDominant] = useState<number | null>(null);
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-3">Mano dominante - cubetti in 60 secondi</p>
+        <input
+          type="number"
+          value={dominant ?? ''}
+          onChange={(e) => setDominant(e.target.value ? parseInt(e.target.value) : null)}
+          placeholder="0"
+          className="w-28 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm outline-none focus:border-[#4F7CFF]"
+        />
+      </div>
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-3">Mano non dominante - cubetti in 60 secondi</p>
+        <input
+          type="number"
+          value={nonDominant ?? ''}
+          onChange={(e) => setNonDominant(e.target.value ? parseInt(e.target.value) : null)}
+          placeholder="0"
+          className="w-28 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm outline-none focus:border-[#4F7CFF]"
+        />
+      </div>
+      {(dominant !== null || nonDominant !== null) && (
+        <ResultBox
+          score={dominant ?? 0}
+          interpretation={`Dominante: ${dominant ?? '-'} | Non dominante: ${nonDominant ?? '-'} - adulti sani: media 77+/-11 (dx), 75+/-11 (sx)`}
+        />
+      )}
+    </div>
+  );
+}
+
+// ===================== Jebsen-Taylor Hand Function Test =====================
+
+const JEBSEN_ITEMS: { id: string; label: string }[] = [
+  { id: 'j1', label: 'Scrittura di una frase' },
+  { id: 'j2', label: 'Girare schede (simulazione voltare pagina)' },
+  { id: 'j3', label: 'Raccogliere piccoli oggetti (monete, graffette, tappi)' },
+  { id: 'j4', label: 'Impilare pedine (dama)' },
+  { id: 'j5', label: 'Simulazione dell atto di mangiare' },
+  { id: 'j6', label: 'Spostare oggetti grandi e leggeri (lattine vuote)' },
+  { id: 'j7', label: 'Spostare oggetti grandi e pesanti (lattine con peso)' },
+];
+
+function JebsenScale() {
+  const [times, setTimes] = useState<Record<string, number>>({});
+  const values = Object.values(times);
+  const total = values.reduce((s, v) => s + v, 0);
+  return (
+    <div className="space-y-4">
+      {JEBSEN_ITEMS.map((item) => (
+        <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <p className="text-sm font-semibold mb-3">{item.label}</p>
+          <div className="flex items-center gap-3">
+            <input
+              type="number"
+              step="0.1"
+              max={120}
+              value={times[item.id] ?? ''}
+              onChange={(e) => setTimes((t) => ({ ...t, [item.id]: e.target.value ? Math.min(120, parseFloat(e.target.value)) : 0 }))}
+              placeholder="0.0"
+              className="w-24 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm outline-none focus:border-[#4F7CFF]"
+            />
+            <span className="text-xs text-ink/50 dark:text-white/50">secondi (max 120)</span>
+          </div>
+        </div>
+      ))}
+      <ResultBox score={Math.round(total * 10) / 10} interpretation={`Tempo totale - ${values.length}/7 sottotest compilati. Tempi piu brevi indicano funzione migliore.`} />
+    </div>
+  );
+}
+
+// ===================== Trunk Control Test =====================
+
+const OPT_TCT = [{ v: 0, l: '0 - Incapace senza assistenza' }, { v: 12, l: '12 - Modalita anomala' }, { v: 25, l: '25 - Normale' }];
+
+const TCT_ITEMS: { id: string; label: string }[] = [
+  { id: 't1', label: 'Rotolare verso il lato debole' },
+  { id: 't2', label: 'Rotolare verso il lato forte' },
+  { id: 't3', label: 'Alzarsi da sdraiato a seduto' },
+  { id: 't4', label: 'Equilibrio in posizione seduta (30 secondi, piedi a terra)' },
+];
+
+function TrunkControlScale() {
+  const [scores, setScores] = useState<Record<string, number>>({});
+  const total = TCT_ITEMS.reduce((s, i) => s + (scores[i.id] ?? 0), 0);
+  const answeredCount = Object.keys(scores).length;
+  return (
+    <div className="space-y-4">
+      {TCT_ITEMS.map((item) => (
+        <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <p className="text-sm font-semibold mb-2">{item.label}</p>
+          <ButtonGroup options={OPT_TCT} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
+        </div>
+      ))}
+      <ResultBox score={total} max={100} interpretation={`${answeredCount}/4 voci compilate. Punteggio piu alto = migliore controllo del tronco.`} />
+    </div>
+  );
+}
+
+
+// ===================== EDSS (Kurtzke Expanded Disability Status Scale) =====================
+
+const OPT_FS0_5 = [{ v: 0, l: '0 - Normale' }, { v: 1, l: '1' }, { v: 2, l: '2' }, { v: 3, l: '3' }, { v: 4, l: '4' }, { v: 5, l: '5 - Massima disfunzione' }];
+
+const EDSS_FS_SYSTEMS: { id: string; label: string }[] = [
+  { id: 'pyramidal', label: 'Piramidale (forza, debolezza agli arti)' },
+  { id: 'cerebellar', label: 'Cerebellare (atassia, coordinazione, tremore)' },
+  { id: 'brainstem', label: 'Tronco encefalico (linguaggio, deglutizione, nistagmo)' },
+  { id: 'sensory', label: 'Sensitivo (ipoestesia, perdita di sensibilita)' },
+  { id: 'bowel_bladder', label: 'Vescico-sfinterico' },
+  { id: 'visual', label: 'Visivo' },
+  { id: 'cerebral', label: 'Cerebrale/Mentale (cognitivo, umore)' },
+];
+
+const EDSS_STEPS: { v: number; l: string }[] = [
+  { v: 0, l: '0.0 - Esame neurologico normale' },
+  { v: 1, l: '1.0 - Nessuna disabilita, segni minimi in un sistema funzionale' },
+  { v: 1.5, l: '1.5 - Nessuna disabilita, segni minimi in piu di un sistema' },
+  { v: 2, l: '2.0 - Disabilita minima in un sistema funzionale' },
+  { v: 2.5, l: '2.5 - Disabilita lieve in un sistema, o minima in due' },
+  { v: 3, l: '3.0 - Disabilita moderata in un sistema, o lieve in 3-4. Pienamente ambulante' },
+  { v: 3.5, l: '3.5 - Pienamente ambulante ma con disabilita moderata in un sistema e piu di minima in altri' },
+  { v: 4, l: '4.0 - Ambulante senza aiuto per almeno 500m, autosufficiente circa 12h/die' },
+  { v: 4.5, l: '4.5 - Ambulante senza aiuto per almeno 300m, limitazione significativa nelle attivita' },
+  { v: 5, l: '5.0 - Ambulante senza aiuto per circa 200m' },
+  { v: 5.5, l: '5.5 - Ambulante senza aiuto per circa 100m' },
+  { v: 6, l: '6.0 - Necessita di supporto unilaterale intermittente o costante per camminare circa 100m' },
+  { v: 6.5, l: '6.5 - Necessita di supporto bilaterale costante per camminare circa 20m' },
+  { v: 7, l: '7.0 - Incapace di camminare oltre 5m anche con aiuto, confinato a sedia a rotelle' },
+  { v: 7.5, l: '7.5 - Incapace di fare piu di pochi passi, confinato a sedia a rotelle' },
+  { v: 8, l: '8.0 - Confinato a letto o sedia, mantiene molte funzioni di autocura' },
+  { v: 8.5, l: '8.5 - Confinato a letto per la maggior parte della giornata' },
+  { v: 9, l: '9.0 - Paziente completamente dipendente, non comunicativo o non alimentabile/deglutente normalmente' },
+  { v: 9.5, l: '9.5 - Totalmente dipendente, incapace di comunicare efficacemente' },
+  { v: 10, l: '10.0 - Morte per sclerosi multipla' },
+];
+
+function EDSSScale() {
+  const [fsScores, setFsScores] = useState<Record<string, number>>({});
+  const [edssStep, setEdssStep] = useState<number | undefined>(undefined);
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">Sistemi Funzionali (documentazione)</h3>
+        <div className="space-y-3">
+          {EDSS_FS_SYSTEMS.map((item) => (
+            <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+              <p className="text-sm font-semibold mb-2">{item.label}</p>
+              <ButtonGroup options={OPT_FS0_5} value={fsScores[item.id]} onChange={(v) => setFsScores((s) => ({ ...s, [item.id]: v }))} />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">Step EDSS Finale</h3>
+        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <div className="space-y-2">
+            {EDSS_STEPS.map((step) => (
+              <button
+                key={step.v}
+                onClick={() => setEdssStep(step.v)}
+                className={`w-full text-left rounded-xl p-3 text-sm transition-all ${edssStep === step.v ? 'bg-gradient-to-r from-[#4F7CFF]/15 to-[#32D6A0]/15 border border-[#4F7CFF]/40' : 'bg-black/[0.02] dark:bg-white/[0.02] border border-transparent'}`}
+              >
+                {step.l}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      {edssStep !== undefined && (
+        <ResultBox score={edssStep} max={10} interpretation={EDSS_STEPS.find((s) => s.v === edssStep)?.l ?? ''} />
+      )}
+    </div>
+  );
+}
+
+// ===================== Hoehn and Yahr =====================
+
+const HY_STAGES: { v: number; l: string; desc: string }[] = [
+  { v: 0, l: 'Stadio 0', desc: 'Nessun segno di malattia' },
+  { v: 1, l: 'Stadio 1', desc: 'Sintomi unilaterali soltanto' },
+  { v: 1.5, l: 'Stadio 1.5', desc: 'Coinvolgimento unilaterale e assiale' },
+  { v: 2, l: 'Stadio 2', desc: 'Sintomi bilaterali, senza compromissione dell\'equilibrio' },
+  { v: 2.5, l: 'Stadio 2.5', desc: 'Malattia bilaterale lieve, con recupero al pull test' },
+  { v: 3, l: 'Stadio 3', desc: 'Compromissione dell\'equilibrio, malattia lieve-moderata, fisicamente indipendente' },
+  { v: 4, l: 'Stadio 4', desc: 'Disabilita severa, ancora in grado di camminare o stare in piedi senza assistenza' },
+  { v: 5, l: 'Stadio 5', desc: 'Necessita di sedia a rotelle o costretto a letto salvo assistenza' },
+];
+
+function HoehnYahrScale() {
+  const [stage, setStage] = useState<number | undefined>(undefined);
+  const selected = HY_STAGES.find((s) => s.v === stage);
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-3">Stadio di malattia osservato</p>
+        <div className="space-y-2">
+          {HY_STAGES.map((s) => (
+            <button
+              key={s.v}
+              onClick={() => setStage(s.v)}
+              className={`w-full text-left rounded-xl p-3 transition-all ${stage === s.v ? 'bg-gradient-to-r from-[#4F7CFF]/15 to-[#32D6A0]/15 border border-[#4F7CFF]/40' : 'bg-black/[0.02] dark:bg-white/[0.02] border border-transparent'}`}
+            >
+              <span className="text-sm font-bold mr-2">{s.l}</span>
+              <span className="text-sm text-ink/60 dark:text-white/60">{s.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      {selected && <ResultBox score={selected.v} max={5} interpretation={`${selected.l} - ${selected.desc}`} />}
+    </div>
+  );
+}
+
+// ===================== Fatigue Severity Scale (FSS) =====================
+
+const OPT_FSS = [{ v: 1, l: '1 - Fortemente in disaccordo' }, { v: 2, l: '2' }, { v: 3, l: '3' }, { v: 4, l: '4' }, { v: 5, l: '5' }, { v: 6, l: '6' }, { v: 7, l: '7 - Fortemente in accordo' }];
+
+const FSS_ITEMS: { id: string; label: string }[] = [
+  { id: 'f1', label: 'La mia motivazione e piu bassa quando sono stanco/a' },
+  { id: 'f2', label: 'L\'esercizio fisico mi provoca stanchezza' },
+  { id: 'f3', label: 'Mi stanco facilmente' },
+  { id: 'f4', label: 'La stanchezza interferisce con il mio funzionamento fisico' },
+  { id: 'f5', label: 'La stanchezza mi causa problemi frequenti' },
+  { id: 'f6', label: 'La mia stanchezza mi impedisce un funzionamento fisico prolungato' },
+  { id: 'f7', label: 'La stanchezza interferisce con lo svolgimento di certi doveri e responsabilita' },
+  { id: 'f8', label: 'La stanchezza e tra i tre sintomi piu invalidanti che ho' },
+  { id: 'f9', label: 'La stanchezza interferisce con il mio lavoro, la famiglia o la vita sociale' },
+];
+
+function FSSScale() {
+  const [scores, setScores] = useState<Record<string, number>>({});
+  const values = Object.values(scores);
+  const average = values.length > 0 ? Math.round((values.reduce((s, v) => s + v, 0) / values.length) * 100) / 100 : null;
+  return (
+    <div className="space-y-4">
+      {FSS_ITEMS.map((item) => (
+        <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <p className="text-sm font-semibold mb-2">{item.label}</p>
+          <ButtonGroup options={OPT_FSS} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
+        </div>
+      ))}
+      {average !== null && (
+        <ResultBox score={average} max={7} interpretation={`${values.length}/9 voci compilate. Punteggio medio >4 e generalmente considerato indicativo di fatica clinicamente significativa.`} />
+      )}
+    </div>
+  );
+}
+
+// ===================== Harris Hip Score =====================
+
+const OPT_HHS_PAIN = [{ v: 44, l: 'Nessuno' }, { v: 40, l: 'Leggero, occasionale' }, { v: 30, l: 'Lieve, nessun effetto sulle attivita' }, { v: 20, l: 'Moderato, qualche limitazione' }, { v: 10, l: 'Marcato, seria limitazione' }, { v: 0, l: 'Totalmente disabilitante' }];
+const OPT_HHS_LIMP = [{ v: 11, l: 'Nessuna zoppia' }, { v: 8, l: 'Lieve' }, { v: 5, l: 'Moderata' }, { v: 0, l: 'Severa' }];
+const OPT_HHS_SUPPORT = [{ v: 11, l: 'Nessuno' }, { v: 7, l: 'Bastone per camminate lunghe' }, { v: 5, l: 'Bastone per la maggior parte del tempo' }, { v: 3, l: 'Una stampella' }, { v: 2, l: 'Due bastoni' }, { v: 0, l: 'Due stampelle o incapace di camminare' }];
+const OPT_HHS_DISTANCE = [{ v: 11, l: 'Illimitata' }, { v: 8, l: 'Circa 6 isolati' }, { v: 5, l: 'Circa 2-3 isolati' }, { v: 2, l: 'Solo in casa' }, { v: 0, l: 'Solo a letto/sedia' }];
+const OPT_HHS_SITTING = [{ v: 5, l: 'Qualsiasi sedia per 1 ora' }, { v: 3, l: 'Solo sedia alta' }, { v: 0, l: 'Incapace di sedersi comodamente su qualsiasi sedia' }];
+const OPT_HHS_TRANSPORT = [{ v: 1, l: 'In grado di usare i trasporti pubblici' }, { v: 0, l: 'Incapace' }];
+const OPT_HHS_STAIRS = [{ v: 4, l: 'Normalmente senza corrimano' }, { v: 2, l: 'Normalmente con corrimano' }, { v: 1, l: 'In qualche modo' }, { v: 0, l: 'Incapace' }];
+const OPT_HHS_SHOES = [{ v: 4, l: 'Con facilita' }, { v: 2, l: 'Con difficolta' }, { v: 0, l: 'Incapace' }];
+const OPT_HHS_DEFORMITY = [{ v: 4, l: 'Assente' }, { v: 0, l: 'Presente' }];
+const OPT_HHS_ROM = [{ v: 5, l: 'Normale' }, { v: 4, l: 'Lieve limitazione' }, { v: 3, l: 'Limitazione moderata' }, { v: 2, l: 'Limitazione significativa' }, { v: 1, l: 'Limitazione severa' }, { v: 0, l: 'Anchilosi' }];
+
+function HarrisHipScale() {
+  const [pain, setPain] = useState<number | undefined>(undefined);
+  const [limp, setLimp] = useState<number | undefined>(undefined);
+  const [support, setSupport] = useState<number | undefined>(undefined);
+  const [distance, setDistance] = useState<number | undefined>(undefined);
+  const [sitting, setSitting] = useState<number | undefined>(undefined);
+  const [transport, setTransport] = useState<number | undefined>(undefined);
+  const [stairs, setStairs] = useState<number | undefined>(undefined);
+  const [shoes, setShoes] = useState<number | undefined>(undefined);
+  const [deformity, setDeformity] = useState<number | undefined>(undefined);
+  const [rom, setRom] = useState<number | undefined>(undefined);
+
+  const functionTotal = (limp ?? 0) + (support ?? 0) + (distance ?? 0) + (sitting ?? 0) + (transport ?? 0) + (stairs ?? 0) + (shoes ?? 0);
+  const total = (pain ?? 0) + functionTotal + (deformity ?? 0) + (rom ?? 0);
+  const allAnswered = [pain, limp, support, distance, sitting, transport, stairs, shoes, deformity, rom].every((v) => v !== undefined);
+  const grade = total >= 90 ? 'Eccellente' : total >= 80 ? 'Buono' : total >= 70 ? 'Discreto' : 'Scarso';
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">Dolore (max 44)</h3>
+        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <ButtonGroup options={OPT_HHS_PAIN} value={pain} onChange={setPain} />
+        </div>
+      </div>
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">Funzione (max 47)</h3>
+        <div className="space-y-3">
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+            <p className="text-sm font-semibold mb-2">Zoppia</p>
+            <ButtonGroup options={OPT_HHS_LIMP} value={limp} onChange={setLimp} />
+          </div>
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+            <p className="text-sm font-semibold mb-2">Supporto</p>
+            <ButtonGroup options={OPT_HHS_SUPPORT} value={support} onChange={setSupport} />
+          </div>
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+            <p className="text-sm font-semibold mb-2">Distanza percorsa</p>
+            <ButtonGroup options={OPT_HHS_DISTANCE} value={distance} onChange={setDistance} />
+          </div>
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+            <p className="text-sm font-semibold mb-2">Sedersi</p>
+            <ButtonGroup options={OPT_HHS_SITTING} value={sitting} onChange={setSitting} />
+          </div>
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+            <p className="text-sm font-semibold mb-2">Uso dei trasporti pubblici</p>
+            <ButtonGroup options={OPT_HHS_TRANSPORT} value={transport} onChange={setTransport} />
+          </div>
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+            <p className="text-sm font-semibold mb-2">Scale</p>
+            <ButtonGroup options={OPT_HHS_STAIRS} value={stairs} onChange={setStairs} />
+          </div>
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+            <p className="text-sm font-semibold mb-2">Indossare scarpe e calze</p>
+            <ButtonGroup options={OPT_HHS_SHOES} value={shoes} onChange={setShoes} />
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">Assenza di Deformita (max 4)</h3>
+        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <ButtonGroup options={OPT_HHS_DEFORMITY} value={deformity} onChange={setDeformity} />
+        </div>
+      </div>
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">Range di Movimento (max 5)</h3>
+        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <ButtonGroup options={OPT_HHS_ROM} value={rom} onChange={setRom} />
+        </div>
+      </div>
+      {allAnswered && <ResultBox score={total} max={100} interpretation={`Grado: ${grade} (90-100 eccellente, 80-89 buono, 70-79 discreto, <70 scarso)`} />}
+    </div>
+  );
+}
+
+// ===================== UCLA Shoulder Rating Scale =====================
+
+const OPT_UCLA_PAIN = [{ v: 1, l: 'Presente sempre, insopportabile' }, { v: 2, l: 'Presente sempre, sopportabile' }, { v: 4, l: 'Assente/minimo a riposo, presente in attivita leggere' }, { v: 6, l: 'Presente solo in attivita pesanti' }, { v: 8, l: 'Occasionale e lieve' }, { v: 10, l: 'Nessuno' }];
+const OPT_UCLA_FUNCTION = [{ v: 1, l: 'Incapace di usare l\'arto' }, { v: 2, l: 'Solo attivita leggere possibili' }, { v: 4, l: 'Lavori domestici leggeri o quasi tutte le ADL' }, { v: 6, l: 'Maggior parte lavori domestici, spesa, guidare' }, { v: 8, l: 'Solo lieve restrizione' }, { v: 10, l: 'Attivita normali' }];
+const OPT_UCLA_FLEXION = [{ v: 5, l: '>150°' }, { v: 4, l: '120-150°' }, { v: 3, l: '90-120°' }, { v: 2, l: '45-90°' }, { v: 1, l: '30-45°' }, { v: 0, l: '<30°' }];
+const OPT_UCLA_STRENGTH = [{ v: 5, l: 'Grado 5 (normale)' }, { v: 4, l: 'Grado 4+' }, { v: 3, l: 'Grado 4' }, { v: 2, l: 'Grado 3+' }, { v: 1, l: 'Grado 3' }, { v: 0, l: 'Grado 0-2' }];
+const OPT_UCLA_SATISFACTION = [{ v: 5, l: 'Soddisfatto e migliorato' }, { v: 0, l: 'Non soddisfatto' }];
+
+function UCLAShoulderScale() {
+  const [pain, setPain] = useState<number | undefined>(undefined);
+  const [func, setFunc] = useState<number | undefined>(undefined);
+  const [flexion, setFlexion] = useState<number | undefined>(undefined);
+  const [strength, setStrength] = useState<number | undefined>(undefined);
+  const [satisfaction, setSatisfaction] = useState<number | undefined>(undefined);
+  const allAnswered = [pain, func, flexion, strength, satisfaction].every((v) => v !== undefined);
+  const total = (pain ?? 0) + (func ?? 0) + (flexion ?? 0) + (strength ?? 0) + (satisfaction ?? 0);
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-2">Dolore (max 10)</p>
+        <ButtonGroup options={OPT_UCLA_PAIN} value={pain} onChange={setPain} />
+      </div>
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-2">Funzione (max 10)</p>
+        <ButtonGroup options={OPT_UCLA_FUNCTION} value={func} onChange={setFunc} />
+      </div>
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-2">Flessione anteriore attiva (max 5)</p>
+        <ButtonGroup options={OPT_UCLA_FLEXION} value={flexion} onChange={setFlexion} />
+      </div>
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-2">Forza in flessione anteriore (max 5)</p>
+        <ButtonGroup options={OPT_UCLA_STRENGTH} value={strength} onChange={setStrength} />
+      </div>
+      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <p className="text-sm font-semibold mb-2">Soddisfazione del paziente (max 5)</p>
+        <ButtonGroup options={OPT_UCLA_SATISFACTION} value={satisfaction} onChange={setSatisfaction} />
+      </div>
+      {allAnswered && <ResultBox score={total} max={35} interpretation={total >= 34 ? 'Eccellente' : total >= 29 ? 'Buono' : 'Scarso'} />}
+    </div>
+  );
+}
+
+// ===================== Disability Rating Scale (DRS) =====================
+
+const OPT_DRS_EYE = [{ v: 0, l: 'Spontanea' }, { v: 1, l: 'Alla voce' }, { v: 2, l: 'Al dolore' }, { v: 3, l: 'Nessuna' }];
+const OPT_DRS_COMM = [{ v: 0, l: 'Orientata' }, { v: 1, l: 'Confusa' }, { v: 2, l: 'Inappropriata' }, { v: 3, l: 'Incomprensibile' }, { v: 4, l: 'Nessuna' }];
+const OPT_DRS_MOTOR = [{ v: 0, l: 'Obbedisce ai comandi' }, { v: 1, l: 'Localizza gli stimoli' }, { v: 2, l: 'Retrazione' }, { v: 3, l: 'Flessione' }, { v: 4, l: 'Estensione' }, { v: 5, l: 'Nessuna risposta' }];
+const OPT_DRS_SELFCARE = [{ v: 0, l: 'Completa' }, { v: 1, l: 'Parziale' }, { v: 2, l: 'Minima' }, { v: 3, l: 'Nessuna' }];
+const OPT_DRS_LEVEL = [{ v: 0, l: 'Completamente indipendente' }, { v: 1, l: 'Indipendente in ambiente speciale' }, { v: 2, l: 'Lievemente dipendente' }, { v: 3, l: 'Moderatamente dipendente' }, { v: 4, l: 'Marcatamente dipendente' }, { v: 5, l: 'Totalmente dipendente' }];
+const OPT_DRS_EMPLOY = [{ v: 0, l: 'Non limitata' }, { v: 1, l: 'Lavori selezionati, competitivo' }, { v: 2, l: 'Laboratorio protetto, non competitivo' }, { v: 3, l: 'Non occupabile' }];
+
+function DRSScale() {
+  const [eye, setEye] = useState<number | undefined>(undefined);
+  const [comm, setComm] = useState<number | undefined>(undefined);
+  const [motor, setMotor] = useState<number | undefined>(undefined);
+  const [feeding, setFeeding] = useState<number | undefined>(undefined);
+  const [toileting, setToileting] = useState<number | undefined>(undefined);
+  const [grooming, setGrooming] = useState<number | undefined>(undefined);
+  const [level, setLevel] = useState<number | undefined>(undefined);
+  const [employ, setEmploy] = useState<number | undefined>(undefined);
+  const allAnswered = [eye, comm, motor, feeding, toileting, grooming, level, employ].every((v) => v !== undefined);
+  const total = (eye ?? 0) + (comm ?? 0) + (motor ?? 0) + (feeding ?? 0) + (toileting ?? 0) + (grooming ?? 0) + (level ?? 0) + (employ ?? 0);
+  const interpretation =
+    total <= 3 ? 'Disabilita da nulla a parziale' :
+    total <= 14 ? 'Disabilita moderata-severa' :
+    total <= 21 ? 'Disabilita severa-estrema' :
+    total <= 28 ? 'Stato vegetativo' : 'Stato vegetativo estremo';
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">Vigilanza, Consapevolezza, Responsivita</h3>
+        <div className="space-y-3">
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+            <p className="text-sm font-semibold mb-2">Apertura degli occhi</p>
+            <ButtonGroup options={OPT_DRS_EYE} value={eye} onChange={setEye} />
+          </div>
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+            <p className="text-sm font-semibold mb-2">Capacita comunicativa</p>
+            <ButtonGroup options={OPT_DRS_COMM} value={comm} onChange={setComm} />
+          </div>
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+            <p className="text-sm font-semibold mb-2">Risposta motoria</p>
+            <ButtonGroup options={OPT_DRS_MOTOR} value={motor} onChange={setMotor} />
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">Capacita Cognitiva per l'Autocura</h3>
+        <div className="space-y-3">
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+            <p className="text-sm font-semibold mb-2">Alimentazione</p>
+            <ButtonGroup options={OPT_DRS_SELFCARE} value={feeding} onChange={setFeeding} />
+          </div>
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+            <p className="text-sm font-semibold mb-2">Toilette</p>
+            <ButtonGroup options={OPT_DRS_SELFCARE} value={toileting} onChange={setToileting} />
+          </div>
+          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+            <p className="text-sm font-semibold mb-2">Igiene personale</p>
+            <ButtonGroup options={OPT_DRS_SELFCARE} value={grooming} onChange={setGrooming} />
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">Dipendenza dagli Altri</h3>
+        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <p className="text-sm font-semibold mb-2">Livello di funzionamento</p>
+          <ButtonGroup options={OPT_DRS_LEVEL} value={level} onChange={setLevel} />
+        </div>
+      </div>
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">Adattabilita Psicosociale</h3>
+        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <p className="text-sm font-semibold mb-2">Occupabilita</p>
+          <ButtonGroup options={OPT_DRS_EMPLOY} value={employ} onChange={setEmploy} />
+        </div>
+      </div>
+      {allAnswered && <ResultBox score={total} max={29} interpretation={interpretation} />}
+    </div>
+  );
+}
+
+type Category = 'functional' | 'orthopedic' | 'pelvic-floor' | 'neuro';
 type BodyRegion = 'knee' | 'shoulder' | 'hip' | 'spine' | 'ankle' | 'elbow-wrist' | 'cervical';
 
 interface OrthoTest {
@@ -429,6 +1243,14 @@ interface PelvicFloorTest {
   interpretation: string;
 }
 
+interface NeuroTest {
+  slug: string;
+  name: string;
+  category: string;
+  procedure: string;
+  interpretation: string;
+}
+
 const PELVIC_FLOOR_CATEGORY_LABELS: Record<string, string> = {
   neuropathy: 'Test Neuropatici',
   manual_assessment: 'Valutazione Manuale',
@@ -436,7 +1258,16 @@ const PELVIC_FLOOR_CATEGORY_LABELS: Record<string, string> = {
   questionnaire: 'Questionari',
 };
 
-// ===================== SF-36 (RAND 36-Item Health Survey 1.0 — dominio pubblico, RAND Corporation) =====================
+const NEURO_CATEGORY_LABELS: Record<string, string> = {
+  cranial_nerves: 'Nervi Cranici',
+  reflexes: 'Riflessi',
+  sensation: 'Sensibilità',
+  strength: 'Forza Muscolare',
+  coordination: 'Coordinazione',
+  balance_gait: 'Equilibrio e Andatura',
+};
+
+const NEURO_CATEGORY_ORDER = ['cranial_nerves', 'reflexes', 'sensation', 'strength', 'coordination', 'balance_gait'];
 
 type SF36Domain = 'PF' | 'RP' | 'RE' | 'VT' | 'MH' | 'SF' | 'BP' | 'GH';
 
@@ -575,8 +1406,6 @@ function SF36Scale() {
   );
 }
 
-// ===================== PFDI-20 (algoritmo di punteggio validato, domande riformulate) =====================
-
 const OPT_PFDI = [
   { v: 0, l: 'No' },
   { v: 1, l: 'Sì — per niente' },
@@ -661,8 +1490,6 @@ function PFDI20Scale() {
     </div>
   );
 }
-
-// ===================== ICIQ-UI SF (algoritmo di punteggio validato, domande riformulate) =====================
 
 const OPT_ICIQ_FREQ = [
   { v: 0, l: 'Mai' },
@@ -834,6 +1661,9 @@ export default function ClinicalToolsPage() {
   const [pelvicFloorLoading, setPelvicFloorLoading] = useState(false);
   const [pelvicFloorError, setPelvicFloorError] = useState<string | null>(null);
   const [openQuestionnaire, setOpenQuestionnaire] = useState<string | null>(null);
+  const [neuroTests, setNeuroTests] = useState<NeuroTest[] | null>(null);
+  const [neuroLoading, setNeuroLoading] = useState(false);
+  const [neuroError, setNeuroError] = useState<string | null>(null);
 
   useEffect(() => {
     if (category !== 'pelvic-floor' || pelvicFloorTests !== null || pelvicFloorLoading) return;
@@ -850,6 +1680,21 @@ export default function ClinicalToolsPage() {
       });
   }, [category, pelvicFloorTests, pelvicFloorLoading]);
 
+  useEffect(() => {
+    if (category !== 'neuro' || neuroTests !== null || neuroLoading) return;
+    setNeuroLoading(true);
+    fetch('/api/neuro/tests')
+      .then((res) => res.json())
+      .then((data) => {
+        setNeuroTests(Array.isArray(data) ? data : data.tests ?? []);
+        setNeuroLoading(false);
+      })
+      .catch(() => {
+        setNeuroError('Impossibile caricare i test neurologici.');
+        setNeuroLoading(false);
+      });
+  }, [category, neuroTests, neuroLoading]);
+
   const pelvicFloorGrouped = (pelvicFloorTests ?? []).reduce<Record<string, PelvicFloorTest[]>>((acc, t) => {
     (acc[t.category] ??= []).push(t);
     return acc;
@@ -857,6 +1702,15 @@ export default function ClinicalToolsPage() {
 
   const pelvicFloorGroupedSorted = Object.entries(pelvicFloorGrouped).sort(
     ([a], [b]) => PELVIC_FLOOR_CATEGORY_ORDER.indexOf(a) - PELVIC_FLOOR_CATEGORY_ORDER.indexOf(b)
+  );
+
+  const neuroGrouped = (neuroTests ?? []).reduce<Record<string, NeuroTest[]>>((acc, t) => {
+    (acc[t.category] ??= []).push(t);
+    return acc;
+  }, {});
+
+  const neuroGroupedSorted = Object.entries(neuroGrouped).sort(
+    ([a], [b]) => NEURO_CATEGORY_ORDER.indexOf(a) - NEURO_CATEGORY_ORDER.indexOf(b)
   );
 
   const ortho = {
@@ -885,10 +1739,10 @@ export default function ClinicalToolsPage() {
         </div>
 
         <div className="flex justify-center mb-10">
-          <div className="inline-flex rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl p-1">
-            {(['functional', 'orthopedic', 'pelvic-floor'] as Category[]).map((c) => (
+          <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl p-1">
+            {(['functional', 'orthopedic', 'pelvic-floor', 'neuro'] as Category[]).map((c) => (
               <button key={c} onClick={() => setCategory(c)} className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${category === c ? 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white' : 'text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white'}`}>
-                {c === 'functional' ? 'Functional Scales' : c === 'orthopedic' ? 'Orthopedic Tests' : 'Pelvic Floor'}
+                {c === 'functional' ? 'Functional Scales' : c === 'orthopedic' ? 'Orthopedic Tests' : c === 'pelvic-floor' ? 'Pelvic Floor' : 'Neurology'}
               </button>
             ))}
           </div>
@@ -920,6 +1774,21 @@ export default function ClinicalToolsPage() {
             {activeScale === 'gcs' && <GCSScale />}
             {activeScale === 'tug' && <TUGScale />}
             {activeScale === 'sixmwt' && <SixMWTScale />}
+            {activeScale === 'sf36' && <SF36Scale />}
+            {activeScale === 'nihss' && <NIHSSScale />}
+            {activeScale === 'updrs3' && <UPDRSPartIIIScale />}
+            {activeScale === 'womac' && <WOMACScale />}
+            {activeScale === 'dash' && <DASHScale />}
+            {activeScale === 'wmft' && <WMFTScale />}
+            {activeScale === 'boxblock' && <BoxBlockScale />}
+            {activeScale === 'jebsen' && <JebsenScale />}
+            {activeScale === 'tct' && <TrunkControlScale />}
+            {activeScale === 'edss' && <EDSSScale />}
+            {activeScale === 'hy' && <HoehnYahrScale />}
+            {activeScale === 'fss' && <FSSScale />}
+            {activeScale === 'hhs' && <HarrisHipScale />}
+            {activeScale === 'ucla' && <UCLAShoulderScale />}
+            {activeScale === 'drs' && <DRSScale />}
           </>
         )}
 
@@ -951,6 +1820,21 @@ export default function ClinicalToolsPage() {
 
         {category === 'pelvic-floor' && (
           <>
+            <div className="mb-8 rounded-2xl border border-pink-400/20 bg-pink-400/5 p-6">
+              <p className="text-sm font-semibold text-ink dark:text-white mb-2">
+                Questionario Anamnestico Interattivo
+              </p>
+              <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-4">
+                Raccolta strutturata di anamnesi intestinale, urinaria e del dolore pelvico, con riepilogo finale organizzato per area.
+              </p>
+              <a
+                href="/dashboard/pelvic-floor/questionnaire"
+                className="inline-flex items-center px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]"
+              >
+                Avvia Questionario
+              </a>
+            </div>
+
             {pelvicFloorLoading && (
               <p className="text-center text-sm text-ink/50 dark:text-white/50 py-10">Caricamento test in corso...</p>
             )}
@@ -995,6 +1879,54 @@ export default function ClinicalToolsPage() {
                           </div>
                         );
                       })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {category === 'neuro' && (
+          <>
+            <div className="mb-8 rounded-2xl border border-[#4F7CFF]/20 bg-[#4F7CFF]/5 p-6">
+              <p className="text-sm font-semibold text-ink dark:text-white mb-2">
+                Esame Obiettivo Neurologico
+              </p>
+              <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-4">
+                Esame clinico multi-step: nervi cranici, riflessi, segni patologici, sensibilita, forza muscolare, coordinazione, equilibrio e andatura, con riepilogo finale.
+              </p>
+              <a
+                href="/dashboard/clinical-tools/neuro-exam"
+                className="inline-flex items-center px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]"
+              >
+                Avvia Esame
+              </a>
+            </div>
+
+            {neuroLoading && (
+              <p className="text-center text-sm text-ink/50 dark:text-white/50 py-10">Caricamento test in corso...</p>
+            )}
+            {neuroError && (
+              <p className="text-center text-sm text-red-500 py-10">{neuroError}</p>
+            )}
+            {!neuroLoading && !neuroError && (
+              <div className="space-y-8">
+                {neuroGroupedSorted.map(([cat, tests]) => (
+                  <div key={cat}>
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">
+                      {NEURO_CATEGORY_LABELS[cat] ?? cat}
+                    </h3>
+                    <div className="space-y-4">
+                      {tests.map((t) => (
+                        <div key={t.slug} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-5">
+                          <p className="text-base font-semibold text-ink dark:text-white">{t.name}</p>
+                          <div className="space-y-2 text-sm text-ink/70 dark:text-white/70 leading-relaxed mt-3">
+                            <p><span className="font-semibold text-ink/50 dark:text-white/50">Procedura: </span>{t.procedure}</p>
+                            <p><span className="font-semibold text-ink/50 dark:text-white/50">Interpretazione: </span>{t.interpretation}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
