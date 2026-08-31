@@ -29,6 +29,7 @@ const libraryLinks = [
 { label: "Pelvic Floor", href: "/dashboard/pelvic-floor", description: "Anatomy, conditions & rehab" },
   { label: "Cardiopulmonary", href: "/dashboard/cardiopulmonary", description: "Anatomy, conditions & rehab" },
     { label: "Oncology", href: "/dashboard/oncology", description: "Anatomy, conditions & rehab" },
+  { label: "First Aid", href: "/dashboard/first-aid", description: "Protocols by country" },
   { label: "Clinical Tools", href: "/dashboard/clinical-tools", description: "Assessment scales & tests" },
   { label: "Shop", href: "/dashboard/shop", description: "Equipment picks to recommend" },
 ];
