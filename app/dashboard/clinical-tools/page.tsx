@@ -1224,8 +1224,7 @@ function DRSScale() {
   );
 }
 
-type Category = 'functional' | 'orthopedic' | 'pelvic-floor' | 'neuro';
-type BodyRegion = 'knee' | 'shoulder' | 'hip' | 'spine' | 'ankle' | 'elbow-wrist' | 'cervical';
+type Category = 'functional' | 'orthopedic' | 'pelvic-floor' | 'neuro' | 'manual-therapy';type BodyRegion = 'knee' | 'shoulder' | 'hip' | 'spine' | 'ankle' | 'elbow-wrist' | 'cervical';
 
 interface OrthoTest {
   name: string;
@@ -1250,6 +1249,21 @@ interface NeuroTest {
   procedure: string;
   interpretation: string;
 }
+
+interface MTTechnique {
+  id: string;
+  name: string;
+  joint_region: string;
+  technique_type: string;
+  grade: string;
+  patient_position: string;
+  direction: string;
+  indications: string;
+  contraindications: string;
+  procedure: string;
+}
+
+const MT_REGION_ORDER = ['ATM', 'Colonna Cervicale', 'Colonna Toracica', 'Colonna Lombare e Pelvi', 'Spalla', 'Gomito', 'Polso e Mano', 'Anca', 'Ginocchio', 'Caviglia', 'Piede'];
 
 const PELVIC_FLOOR_CATEGORY_LABELS: Record<string, string> = {
   neuropathy: 'Test Neuropatici',
@@ -1661,9 +1675,13 @@ export default function ClinicalToolsPage() {
   const [pelvicFloorLoading, setPelvicFloorLoading] = useState(false);
   const [pelvicFloorError, setPelvicFloorError] = useState<string | null>(null);
   const [openQuestionnaire, setOpenQuestionnaire] = useState<string | null>(null);
-  const [neuroTests, setNeuroTests] = useState<NeuroTest[] | null>(null);
+    const [neuroTests, setNeuroTests] = useState<NeuroTest[] | null>(null);
   const [neuroLoading, setNeuroLoading] = useState(false);
   const [neuroError, setNeuroError] = useState<string | null>(null);
+  const [mtTechniques, setMtTechniques] = useState<MTTechnique[] | null>(null);
+  const [mtLoading, setMtLoading] = useState(false);
+  const [mtError, setMtError] = useState<string | null>(null);
+  const [activeMTRegion, setActiveMTRegion] = useState<string>('ATM');
 
   useEffect(() => {
     if (category !== 'pelvic-floor' || pelvicFloorTests !== null || pelvicFloorLoading) return;
@@ -1680,7 +1698,7 @@ export default function ClinicalToolsPage() {
       });
   }, [category, pelvicFloorTests, pelvicFloorLoading]);
 
-  useEffect(() => {
+    useEffect(() => {
     if (category !== 'neuro' || neuroTests !== null || neuroLoading) return;
     setNeuroLoading(true);
     fetch('/api/neuro/tests')
@@ -1694,6 +1712,21 @@ export default function ClinicalToolsPage() {
         setNeuroLoading(false);
       });
   }, [category, neuroTests, neuroLoading]);
+
+  useEffect(() => {
+    if (category !== 'manual-therapy' || mtTechniques !== null || mtLoading) return;
+    setMtLoading(true);
+    fetch('/api/manual-therapy/techniques')
+      .then((res) => res.json())
+      .then((data) => {
+        setMtTechniques(Array.isArray(data) ? data : data.techniques ?? []);
+        setMtLoading(false);
+      })
+      .catch(() => {
+        setMtError('Impossibile caricare le tecniche di terapia manuale.');
+        setMtLoading(false);
+      });
+  }, [category, mtTechniques, mtLoading]);
 
   const pelvicFloorGrouped = (pelvicFloorTests ?? []).reduce<Record<string, PelvicFloorTest[]>>((acc, t) => {
     (acc[t.category] ??= []).push(t);
@@ -1712,6 +1745,8 @@ export default function ClinicalToolsPage() {
   const neuroGroupedSorted = Object.entries(neuroGrouped).sort(
     ([a], [b]) => NEURO_CATEGORY_ORDER.indexOf(a) - NEURO_CATEGORY_ORDER.indexOf(b)
   );
+
+    const mtFilteredByRegion = (mtTechniques ?? []).filter((t) => t.joint_region === activeMTRegion);
 
   const ortho = {
     knee: KNEE_TESTS,
@@ -1740,9 +1775,9 @@ export default function ClinicalToolsPage() {
 
         <div className="flex justify-center mb-10">
           <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl p-1">
-            {(['functional', 'orthopedic', 'pelvic-floor', 'neuro'] as Category[]).map((c) => (
-              <button key={c} onClick={() => setCategory(c)} className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${category === c ? 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white' : 'text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white'}`}>
-                {c === 'functional' ? 'Functional Scales' : c === 'orthopedic' ? 'Orthopedic Tests' : c === 'pelvic-floor' ? 'Pelvic Floor' : 'Neurology'}
+                                   {(['functional', 'orthopedic', 'pelvic-floor', 'neuro', 'manual-therapy'] as Category[]).map((c) => (
+              <button key={c} onClick={() => setCategory(c)} className={`px-4 py-2 rounded-full text-sm font-semibold transition-all whitespace-nowrap ${category === c ? 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white' : 'text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white'}`}>
+                {c === 'functional' ? 'Functional Scales' : c === 'orthopedic' ? 'Orthopedic Tests' : c === 'pelvic-floor' ? 'Pelvic Floor' : c === 'neuro' ? 'Neurology' : 'Manual Therapy'}
               </button>
             ))}
           </div>
@@ -1917,7 +1952,7 @@ export default function ClinicalToolsPage() {
                     <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">
                       {NEURO_CATEGORY_LABELS[cat] ?? cat}
                     </h3>
-                    <div className="space-y-4">
+                                        <div className="space-y-4">
                       {tests.map((t) => (
                         <div key={t.slug} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-5">
                           <p className="text-base font-semibold text-ink dark:text-white">{t.name}</p>
@@ -1930,6 +1965,48 @@ export default function ClinicalToolsPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {category === 'manual-therapy' && (
+          <>
+            <div className="flex flex-wrap justify-center gap-2 mb-10">
+              {MT_REGION_ORDER.map((r) => (
+                <button key={r} onClick={() => setActiveMTRegion(r)} className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${activeMTRegion === r ? 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white' : 'bg-black/5 dark:bg-white/10 text-ink/60 dark:text-white/60'}`}>
+                  {r}
+                </button>
+              ))}
+            </div>
+
+            {mtLoading && (
+              <p className="text-center text-sm text-ink/50 dark:text-white/50 py-10">Caricamento tecniche in corso...</p>
+            )}
+            {mtError && (
+              <p className="text-center text-sm text-red-500 py-10">{mtError}</p>
+            )}
+            {!mtLoading && !mtError && (
+              <div className="space-y-4">
+                {mtFilteredByRegion.map((t) => (
+                  <div key={t.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-5">
+                    <p className="text-base font-semibold text-ink dark:text-white">{t.name}</p>
+                    <div className="flex flex-wrap gap-2 mt-1 mb-3">
+                      <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF]">{t.technique_type}</span>
+                      {t.grade && <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-ink/60 dark:text-white/60">{t.grade}</span>}
+                    </div>
+                    <div className="space-y-2 text-sm text-ink/70 dark:text-white/70 leading-relaxed">
+                      <p><span className="font-semibold text-ink/50 dark:text-white/50">Posizione paziente: </span>{t.patient_position}</p>
+                      <p><span className="font-semibold text-ink/50 dark:text-white/50">Direzione: </span>{t.direction}</p>
+                      <p><span className="font-semibold text-ink/50 dark:text-white/50">Indicazioni: </span>{t.indications}</p>
+                      <p><span className="font-semibold text-ink/50 dark:text-white/50">Controindicazioni: </span>{t.contraindications}</p>
+                      <p><span className="font-semibold text-ink/50 dark:text-white/50">Procedura: </span>{t.procedure}</p>
+                    </div>
+                  </div>
+                ))}
+                {mtFilteredByRegion.length === 0 && (
+                  <p className="text-center text-sm text-ink/50 dark:text-white/50 py-10">Nessuna tecnica trovata per questa regione.</p>
+                )}
               </div>
             )}
           </>
