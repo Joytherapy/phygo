@@ -6,8 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { X } from 'lucide-react';
 
-type SubView = 'anatomy' | 'conditions' | 'assessment' | 'rehab';
-
+type SubView = 'anatomy' | 'conditions' | 'assessment' | 'rehab' | 'airway-clearance';
 interface StructureItem {
   id: number;
   slug: string;
@@ -49,6 +48,19 @@ interface RehabItem {
   evidence_note?: string;
 }
 
+interface AirwayClearanceItem {
+  id: string;
+  name: string;
+  technique_category: string;
+  patient_position?: string;
+  procedure?: string;
+  indications?: string;
+  contraindications_precautions?: string;
+  evidence_note?: string;
+  age_group?: string;
+  image_url?: string | null;
+}
+
 const CATEGORY_LABEL: Record<string, string> = {
   cardiac: 'Cardiaco',
   respiratory: 'Respiratorio',
@@ -79,6 +91,18 @@ const REHAB_CATEGORY_LABEL: Record<string, string> = {
   respiratory_specific: 'Specifico Respiratorio',
 };
 
+const AIRWAY_CATEGORY_LABEL: Record<string, string> = {
+  postural_drainage: 'Drenaggio Posturale',
+  manual: 'Tecniche Manuali',
+  active_breathing: 'Respirazione Attiva',
+  device_dependent: 'Dispositivi (PEP)',
+  machine_dependent: 'Dispositivi Meccanici',
+  ventilation_support: 'Supporto Ventilatorio',
+  dyspnoea_technique: 'Tecniche per la Dispnea',
+};
+
+const AIRWAY_CATEGORY_ORDER = ['postural_drainage', 'manual', 'active_breathing', 'device_dependent', 'machine_dependent', 'ventilation_support', 'dyspnoea_technique'];
+
 const ACCENT = {
   gradient: 'linear-gradient(90deg, #FF6B6B 0%, #FFA36B 100%)',
   solid: '#FF6B6B',
@@ -107,10 +131,16 @@ export default function CardiopulmonaryPage() {
   const [testsError, setTestsError] = useState<string | null>(null);
   const [hasFetchedTests, setHasFetchedTests] = useState(false);
 
-  const [rehab, setRehab] = useState<RehabItem[]>([]);
+    const [rehab, setRehab] = useState<RehabItem[]>([]);
   const [rehabLoading, setRehabLoading] = useState(false);
   const [rehabError, setRehabError] = useState<string | null>(null);
   const [hasFetchedRehab, setHasFetchedRehab] = useState(false);
+
+  const [airwayTechniques, setAirwayTechniques] = useState<AirwayClearanceItem[]>([]);
+  const [airwayLoading, setAirwayLoading] = useState(false);
+  const [airwayError, setAirwayError] = useState<string | null>(null);
+  const [hasFetchedAirway, setHasFetchedAirway] = useState(false);
+  const [selectedTechnique, setSelectedTechnique] = useState<AirwayClearanceItem | null>(null);
 
   const [expandedImage, setExpandedImage] = useState<{ file: string; label: string } | null>(null);
 
@@ -177,7 +207,7 @@ export default function CardiopulmonaryPage() {
     fetchTests();
   }, [subView, hasFetchedTests]);
 
-  useEffect(() => {
+    useEffect(() => {
     if (subView !== 'rehab' || hasFetchedRehab) return;
     const fetchRehab = async () => {
       setRehabLoading(true);
@@ -198,11 +228,33 @@ export default function CardiopulmonaryPage() {
     fetchRehab();
   }, [subView, hasFetchedRehab]);
 
-  const SUB_TABS: { key: SubView; label: string }[] = [
+  useEffect(() => {
+    if (subView !== 'airway-clearance' || hasFetchedAirway) return;
+    const fetchAirway = async () => {
+      setAirwayLoading(true);
+      setAirwayError(null);
+      try {
+        const res = await fetch('/api/cardiopulmonary/airway-clearance');
+        if (!res.ok) throw new Error('Errore nel recupero delle tecniche di disostruzione');
+        const data = await res.json();
+        setAirwayTechniques(data.techniques ?? []);
+        setHasFetchedAirway(true);
+      } catch (err) {
+        setAirwayError('Impossibile caricare le tecniche di disostruzione.');
+        console.error(err);
+      } finally {
+        setAirwayLoading(false);
+      }
+    };
+    fetchAirway();
+  }, [subView, hasFetchedAirway]);
+
+    const SUB_TABS: { key: SubView; label: string }[] = [
     { key: 'anatomy', label: 'Anatomia' },
     { key: 'conditions', label: 'Patologie' },
     { key: 'assessment', label: 'Valutazione' },
     { key: 'rehab', label: 'Riabilitazione' },
+    { key: 'airway-clearance', label: 'Disostruzione' },
   ];
 
   return (
@@ -495,6 +547,57 @@ export default function CardiopulmonaryPage() {
               </div>
             )}
           </div>
+               )}
+
+        {subView === 'airway-clearance' && (
+          <div>
+            <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
+              Airway Clearance Techniques
+            </h2>
+            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+              Tecniche di disostruzione bronchiale: drenaggio posturale, tecniche manuali, PEP, respirazione attiva, supporto ventilatorio. Tocca una card per la procedura completa.
+            </p>
+
+            {airwayLoading && (
+              <p className="text-sm text-ink/40 dark:text-white/40">Caricamento...</p>
+            )}
+            {airwayError && <p className="text-sm text-red-500">{airwayError}</p>}
+
+            {!airwayLoading && !airwayError && (
+              <div className="space-y-8">
+                {AIRWAY_CATEGORY_ORDER.map((cat) => {
+                  const items = airwayTechniques.filter((t) => t.technique_category === cat);
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={cat}>
+                      <h3
+                        className="text-xs font-bold uppercase tracking-wide mb-3"
+                        style={{ color: ACCENT.solid }}
+                      >
+                        {AIRWAY_CATEGORY_LABEL[cat] ?? cat}
+                      </h3>
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        {items.map((t) => (
+                          <button
+                            key={t.id}
+                            onClick={() => setSelectedTechnique(t)}
+                            className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-colors hover:border-[#FF6B6B]/40"
+                          >
+                            <p className="text-sm font-semibold text-ink dark:text-white">{t.name}</p>
+                            {t.age_group && (
+                              <span className="inline-block mt-2 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-ink/50 dark:text-white/50">
+                                {t.age_group === 'both' ? 'Adulti e bambini' : t.age_group === 'adult' ? 'Adulti' : 'Pediatrico'}
+                              </span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -555,6 +658,84 @@ export default function CardiopulmonaryPage() {
                   <div>
                     <p className="font-semibold text-red-500 mb-1">Controindicazioni</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.contraindications}</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+            </AnimatePresence>
+
+      <AnimatePresence>
+        {selectedTechnique && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-6"
+            onClick={() => setSelectedTechnique(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 p-8"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <h3 className="text-xl font-bold text-ink dark:text-white pr-6">
+                  {selectedTechnique.name}
+                </h3>
+                <button
+                  onClick={() => setSelectedTechnique(null)}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/5 dark:bg-white/10"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {selectedTechnique.image_url && (
+                <button
+                  onClick={() => setExpandedImage({ file: selectedTechnique.image_url as string, label: selectedTechnique.name })}
+                  className="group block w-full rounded-2xl overflow-hidden mb-4 bg-[#08090b]"
+                >
+                  <img
+                    src={selectedTechnique.image_url}
+                    alt={selectedTechnique.name}
+                    className="w-full h-auto group-hover:scale-105 transition-transform duration-300"
+                  />
+                </button>
+              )}
+
+              <div className="space-y-4 text-sm">
+                {selectedTechnique.patient_position && (
+                  <div>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Posizione paziente</p>
+                    <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedTechnique.patient_position}</p>
+                  </div>
+                )}
+                {selectedTechnique.procedure && (
+                  <div>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Procedura</p>
+                    <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedTechnique.procedure}</p>
+                  </div>
+                )}
+                {selectedTechnique.indications && (
+                  <div>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Indicazioni</p>
+                    <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedTechnique.indications}</p>
+                  </div>
+                )}
+                {selectedTechnique.contraindications_precautions && (
+                  <div>
+                    <p className="font-semibold text-red-500 mb-1">Controindicazioni/Precauzioni</p>
+                    <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedTechnique.contraindications_precautions}</p>
+                  </div>
+                )}
+                {selectedTechnique.evidence_note && (
+                  <div>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Evidenza</p>
+                    <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedTechnique.evidence_note}</p>
                   </div>
                 )}
               </div>
