@@ -30,6 +30,7 @@ const libraryLinks = [
   { label: "Cardiopulmonary", href: "/dashboard/cardiopulmonary", description: "Anatomy, conditions & rehab" },
     { label: "Oncology", href: "/dashboard/oncology", description: "Anatomy, conditions & rehab" },
   { label: "First Aid", href: "/dashboard/first-aid", description: "Protocols by country" },
+  { label: "BLSD", href: "/dashboard/bls", description: "CPR, AED & choking relief" },
   { label: "Clinical Tools", href: "/dashboard/clinical-tools", description: "Assessment scales & tests" },
   { label: "Shop", href: "/dashboard/shop", description: "Equipment picks to recommend" },
 ];
