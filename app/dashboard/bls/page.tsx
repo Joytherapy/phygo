@@ -87,8 +87,14 @@ export default function BLSPage() {
               Basic Life Support
             </span>
           </h1>
-          <p className="text-sm text-ink/50 dark:text-white/50 mt-4 max-w-xl mx-auto">
+                    <p className="text-sm text-ink/50 dark:text-white/50 mt-4 max-w-xl mx-auto">
             RCP, DAE e disostruzione delle vie aeree — verificato con le linee guida AHA 2025 (American Heart Association).
+          </p>
+        </div>
+
+        <div className="mb-10 rounded-2xl border p-6" style={{ borderColor: `${ACCENT.solid}33`, background: `${ACCENT.solid}0D` }}>
+          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">
+            Il BLSD (Basic Life Support Defibrillation) è l'insieme delle manovre salvavita di base — rianimazione cardiopolmonare, uso del defibrillatore e disostruzione delle vie aeree — che ogni operatore sanitario dovrebbe saper eseguire in autonomia prima dell'arrivo del soccorso avanzato. Ogni scheda qui sotto riporta la procedura completa, i parametri tecnici chiave (frequenza, profondità, rapporto compressioni/ventilazioni) e le precauzioni specifiche per fascia d'età, con le eventuali variazioni introdotte dalle linee guida più recenti.
           </p>
         </div>
 

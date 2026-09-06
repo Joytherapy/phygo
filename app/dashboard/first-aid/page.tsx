@@ -86,11 +86,16 @@ export default function FirstAidPage() {
               Primo Soccorso
             </span>
           </h1>
-          <p className="text-sm text-ink/50 dark:text-white/50 mt-4 max-w-xl mx-auto">
+                    <p className="text-sm text-ink/50 dark:text-white/50 mt-4 max-w-xl mx-auto">
             Protocolli confrontati tra Italia, Francia, Regno Unito, Spagna e USA — perché le linee guida non sono sempre le stesse ovunque.
           </p>
         </div>
 
+                <div className="mb-10 rounded-2xl border p-6" style={{ borderColor: `${ACCENT.solid}33`, background: `${ACCENT.solid}0D` }}>
+          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">
+            Ogni scheda riporta, per ciascun paese, il numero di emergenza da chiamare, l'ente sanitario di riferimento, il protocollo pratico da seguire e la fonte ufficiale consultata — così da poter passare rapidamente da un paese all'altro senza perdere accuratezza.
+          </p>
+        </div>
         <div className="flex justify-center flex-wrap gap-2 mb-10">
           <button
             onClick={() => setCategoryFilter('all')}
