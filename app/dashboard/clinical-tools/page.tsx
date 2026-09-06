@@ -1263,8 +1263,27 @@ interface MTTechnique {
   procedure: string;
 }
 
+interface MTConcept {
+  id: string;
+  name: string;
+  framework: string;
+  category: string;
+  summary: string;
+  content: string;
+}
+
 const MT_REGION_ORDER = ['ATM', 'Colonna Cervicale', 'Colonna Toracica', 'Colonna Lombare e Pelvi', 'Spalla', 'Gomito', 'Polso e Mano', 'Anca', 'Ginocchio', 'Caviglia', 'Piede'];
 
+const MT_TYPE_ORDER = ['all', 'mobilization', 'manipulation', 'thrust', 'nonthrust', 'mwm', 'prp'];
+const MT_TYPE_LABELS: Record<string, string> = {
+  all: 'Tutte',
+  mobilization: 'Mobilizzazione',
+  manipulation: 'Manipolazione',
+  thrust: 'Thrust',
+  nonthrust: 'Non-thrust',
+  mwm: 'MWM (Mulligan)',
+  prp: 'PRP (Mulligan)',
+};
 const PELVIC_FLOOR_CATEGORY_LABELS: Record<string, string> = {
   neuropathy: 'Test Neuropatici',
   manual_assessment: 'Valutazione Manuale',
@@ -1678,11 +1697,13 @@ export default function ClinicalToolsPage() {
     const [neuroTests, setNeuroTests] = useState<NeuroTest[] | null>(null);
   const [neuroLoading, setNeuroLoading] = useState(false);
   const [neuroError, setNeuroError] = useState<string | null>(null);
-  const [mtTechniques, setMtTechniques] = useState<MTTechnique[] | null>(null);
+    const [mtTechniques, setMtTechniques] = useState<MTTechnique[] | null>(null);
   const [mtLoading, setMtLoading] = useState(false);
   const [mtError, setMtError] = useState<string | null>(null);
   const [activeMTRegion, setActiveMTRegion] = useState<string>('ATM');
-
+    const [mtConcepts, setMtConcepts] = useState<MTConcept[] | null>(null);
+  const [openConcept, setOpenConcept] = useState<string | null>(null);
+  const [activeMTType, setActiveMTType] = useState<string>('all');
   useEffect(() => {
     if (category !== 'pelvic-floor' || pelvicFloorTests !== null || pelvicFloorLoading) return;
     setPelvicFloorLoading(true);
@@ -1713,7 +1734,7 @@ export default function ClinicalToolsPage() {
       });
   }, [category, neuroTests, neuroLoading]);
 
-  useEffect(() => {
+   useEffect(() => {
     if (category !== 'manual-therapy' || mtTechniques !== null || mtLoading) return;
     setMtLoading(true);
     fetch('/api/manual-therapy/techniques')
@@ -1727,6 +1748,18 @@ export default function ClinicalToolsPage() {
         setMtLoading(false);
       });
   }, [category, mtTechniques, mtLoading]);
+
+  useEffect(() => {
+    if (category !== 'manual-therapy' || mtConcepts !== null) return;
+    fetch('/api/manual-therapy/concepts')
+      .then((res) => res.json())
+      .then((data) => {
+        setMtConcepts(Array.isArray(data) ? data : data.concepts ?? []);
+      })
+      .catch(() => {
+        setMtConcepts([]);
+      });
+  }, [category, mtConcepts]);
 
   const pelvicFloorGrouped = (pelvicFloorTests ?? []).reduce<Record<string, PelvicFloorTest[]>>((acc, t) => {
     (acc[t.category] ??= []).push(t);
@@ -1746,8 +1779,7 @@ export default function ClinicalToolsPage() {
     ([a], [b]) => NEURO_CATEGORY_ORDER.indexOf(a) - NEURO_CATEGORY_ORDER.indexOf(b)
   );
 
-    const mtFilteredByRegion = (mtTechniques ?? []).filter((t) => t.joint_region === activeMTRegion);
-
+    const mtFilteredByRegion = (mtTechniques ?? []).filter((t) => t.joint_region === activeMTRegion && (activeMTType === 'all' || t.technique_type === activeMTType));
   const ortho = {
     knee: KNEE_TESTS,
     shoulder: SHOULDER_TESTS,
@@ -1970,12 +2002,55 @@ export default function ClinicalToolsPage() {
           </>
         )}
 
-        {category === 'manual-therapy' && (
+                {category === 'manual-therapy' && (
           <>
-            <div className="flex flex-wrap justify-center gap-2 mb-10">
+            {mtConcepts && mtConcepts.length > 0 && (
+              <div className="mb-8 rounded-2xl border border-[#4F7CFF]/20 bg-[#4F7CFF]/5 p-6">
+                <p className="text-sm font-semibold text-ink dark:text-white mb-2">
+                  Principi Fondamentali del Mulligan Concept
+                </p>
+                <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-4">
+                  Il framework teorico (PILL, CROCKS, Specifica Disfunzione) che guida l'applicazione di tutte le tecniche MWM presenti nelle regioni sottostanti.
+                </p>
+                <div className="space-y-3">
+                  {mtConcepts.map((c) => {
+                    const isOpen = openConcept === c.id;
+                    return (
+                      <div key={c.id} className="rounded-xl bg-white/70 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/10 overflow-hidden">
+                        <button
+                          onClick={() => setOpenConcept(isOpen ? null : c.id)}
+                          className="w-full text-left px-4 py-3 flex items-center justify-between gap-3"
+                        >
+                          <span>
+                            <span className="text-sm font-semibold text-ink dark:text-white block">{c.name}</span>
+                            <span className="text-xs text-ink/50 dark:text-white/50">{c.summary}</span>
+                          </span>
+                          <span className="text-xs text-[#4F7CFF] font-semibold shrink-0">{isOpen ? 'Chiudi' : 'Leggi'}</span>
+                        </button>
+                        {isOpen && (
+                          <div className="px-4 pb-4 pt-1 border-t border-black/[0.06] dark:border-white/10">
+                            <p className="text-xs text-ink/70 dark:text-white/70 leading-relaxed whitespace-pre-line">{c.content}</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+                        <div className="flex flex-wrap justify-center gap-2 mb-4">
               {MT_REGION_ORDER.map((r) => (
                 <button key={r} onClick={() => setActiveMTRegion(r)} className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${activeMTRegion === r ? 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white' : 'bg-black/5 dark:bg-white/10 text-ink/60 dark:text-white/60'}`}>
                   {r}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-2 mb-10">
+              {MT_TYPE_ORDER.map((t) => (
+                <button key={t} onClick={() => setActiveMTType(t)} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${activeMTType === t ? 'bg-[#4F7CFF]/15 text-[#4F7CFF] border border-[#4F7CFF]/40' : 'bg-black/[0.03] dark:bg-white/[0.05] text-ink/50 dark:text-white/50 border border-transparent'}`}>
+                  {MT_TYPE_LABELS[t]}
                 </button>
               ))}
             </div>
