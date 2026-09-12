@@ -67,6 +67,9 @@ const CATEGORY_LABEL: Record<string, string> = {
 };
 
 const REGION_BY_SLUG: Record<string, string> = {
+  'cancerogenesi-danno-dna': 'Biologia del Tumore',
+  'cancerogenesi-invasione-metastasi': 'Biologia del Tumore',
+  'cancerogenesi-microambiente-angiogenesi': 'Biologia del Tumore',
   'sistema-linfatico-generale': 'Sistema Linfatico Generale',
   'anatomia-vascolarizzazione-mammella': 'Mammella',
   'drenaggio-linfatico-ascellare': 'Mammella',
@@ -81,11 +84,15 @@ const REGION_BY_SLUG: Record<string, string> = {
 };
 
 const REGION_SLUG_ORDER: Record<string, number> = {
+  'cancerogenesi-danno-dna': 0,
+  'cancerogenesi-invasione-metastasi': 1,
+  'cancerogenesi-microambiente-angiogenesi': 2,
   'anatomia-vascolarizzazione-mammella': 0,
   'drenaggio-linfatico-ascellare': 1,
 };
 
 const REGION_ORDER = [
+  'Biologia del Tumore',
   'Sistema Linfatico Generale',
   'Mammella',
   'Ginecologico',
@@ -97,7 +104,6 @@ const REGION_ORDER = [
   'Colon-Retto',
   'Sistemico',
 ];
-
 const SYSTEM_LABEL: Record<string, string> = {
   mammario: 'Carcinoma Mammario',
   ginecologico: 'Tumori Ginecologici',
@@ -380,9 +386,9 @@ export default function OncologyPage() {
               Anatomia e drenaggio linfatico rilevanti per la comprensione delle principali neoplasie e delle loro complicanze riabilitative.
             </p>
 
-            <div className="mb-10 rounded-2xl border p-6" style={{ borderColor: `${ACCENT.solid}33`, background: `${ACCENT.solid}0D` }}>
+                        <div className="mb-10 rounded-2xl border p-6" style={{ borderColor: `${ACCENT.solid}33`, background: `${ACCENT.solid}0D` }}>
               <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">
-                La riabilitazione oncologica affronta un ventaglio ampio di complicanze — fatica, debolezza muscolare, neuropatia, cardiotossicita, disfunzioni del pavimento pelvico, oltre al linfedema. Questa sezione si concentra in particolare sull&apos;anatomia del sistema linfatico, poiche molte delle complicanze piu specificamente fisioterapiche derivano dall&apos;interruzione chirurgica o radioterapica delle vie di drenaggio linfatico regionale. Le altre complicanze (fatica, neuropatia, cardiotossicita) sono approfondite nelle sezioni Patologie, Trattamenti e Riabilitazione.
+                Questa sezione parte dai meccanismi biologici e molecolari con cui una cellula normale si trasforma in cellula tumorale — un passaggio spesso trascurato ma utile per capire perché un tumore si comporta come si comporta. Segue poi l&apos;anatomia del drenaggio linfatico regionale, organo per organo: è la mappa più rilevante per la pratica fisioterapica, perché gran parte delle complicanze riabilitative post-chirurgiche (in primis il linfedema) dipende da quali vie linfatiche sono state interrotte.
               </p>
             </div>
 

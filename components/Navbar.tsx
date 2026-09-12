@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { motion, useMotionValueEvent, useScroll, AnimatePresence } from "framer-motion";
-import { Menu, X, Moon, Sun, User, LogOut } from "lucide-react";
+import { Menu, X, Moon, Sun, User, LogOut, Search } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import MagneticButton from "./MagneticButton";
 import { usePatientContext } from "@/contexts/PatientContext";
-
+import SearchModal from "./SearchModal";
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -47,8 +47,9 @@ export default function Navbar() {
   const [hidden, setHidden] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const [libraryOpen, setLibraryOpen] = useState(false);
+    const [libraryOpen, setLibraryOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { currentPatient, setCurrentPatient } = usePatientContext();
   const pathname = usePathname();
   const isDashboard = pathname?.startsWith("/dashboard");
@@ -229,6 +230,17 @@ export default function Navbar() {
             </div>
           )}
 
+                   {isDashboard && (
+            <button
+              aria-label="Search"
+              onClick={() => setSearchOpen(true)}
+              data-cursor-hover
+              className="flex h-9 w-9 items-center justify-center rounded-full text-ink/60 hover:text-ink hover:bg-ink/5 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/10 transition-colors"
+            >
+              <Search size={17} />
+            </button>
+          )}
+
           <button
             aria-label="Toggle dark mode"
             onClick={() => setDark((d) => !d)}
@@ -400,8 +412,10 @@ export default function Navbar() {
               Start Free
             </a>
           )}
-        </motion.div>
+                </motion.div>
       )}
+
+      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
     </motion.header>
   );
 }

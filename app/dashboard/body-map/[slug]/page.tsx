@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, X, Activity, Stethoscope, AlertTriangle, Sparkles, Send, Loader2 } from 'lucide-react';
+import { ArrowLeft, X, Activity, Stethoscope, AlertTriangle, Sparkles, Send, Loader2, Bone, Zap, BookOpen, ClipboardCheck, Quote, Link2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ClinicalActionBar from '@/components/ClinicalActionBar';
 
@@ -135,6 +135,173 @@ const ZONE_ANATOMY: Record<string, ZoneAnatomy> = {
     biomechanics: 'Il ginocchio compie principalmente flesso-estensione sul piano sagittale (0-135° circa di flessione attiva), con una minima rotazione interna-esterna disponibile solo a ginocchio flesso ("screw-home mechanism" in estensione terminale, che blocca l\'articolazione in appoggio). Durante il cammino assorbe carichi fino a 3-4 volte il peso corporeo, fino a 6-8 volte in corsa o scendendo le scale. La cinematica coinvolge uno scivolamento combinato a rotolamento dei condili femorali sui piatti tibiali, reso possibile dall\'azione sinergica di legamenti, menischi e muscolatura circostante.',
     clinicalRelevance: "Il ginocchio è tra le articolazioni più coinvolte in patologie acute e degenerative, per l'elevato carico funzionale e la ridotta protezione dei tessuti molli. Le lesioni del LCA sono comuni in sport con cambi di direzione improvvisi (calcio, basket, sci) e spesso associate a lesioni meniscali concomitanti. Le lesioni degenerative meniscali sono frequenti dopo i 40 anni, spesso senza trauma identificabile. L'artrosi femoro-tibiale è tra le cause più comuni di dolore cronico e disabilità nell'anziano, mentre la sindrome femoro-rotulea è tipica di popolazioni giovani e sportive, legata a squilibri di forza tra vasto mediale e laterale o a malallineamenti dell'arto inferiore.",
   },
+  // --- Bone layer (X-ray view) ---
+  'bone-cranio': {
+    anatomy: "Il cranio è composto da 8 ossa (frontale, 2 parietali, occipitale, 2 temporali, sfenoide, etmoide) unite da suture fibrose praticamente immobili nell'adulto — sagittale, coronale, lambdoidea, squamosa — che nel neonato restano membranose alle fontanelle (bregmatica/anteriore, chiusura intorno ai 18-24 mesi; lambdoidea/posteriore, entro 2-3 mesi), consentendo la deformazione plastica del cranio durante il parto e la crescita encefalica postnatale. Lo scheletro facciale (mascella, mandibola, zigomi, ossa nasali, palatino, lacrimali, vomere, cornetti nasali inferiori) si articola con il neurocranio principalmente alle suture fronto-nasale, zigomatico-mascellare e zigomatico-temporale. La mandibola è l'unico osso cranico mobile, con corpo, ramo, condilo (testa + collo) e processo coronoideo; si articola bilateralmente con la fossa mandibolare del temporale all'articolazione temporo-mandibolare (ATM), l'unica vera sinovia del cranio, dotata di disco articolare fibrocartilagineo biconcavo che la suddivide in due compartimenti (superiore: traslazione; inferiore: rotazione), con funzionamento sempre accoppiato bilateralmente tramite la sinfisi mandibolare.",
+    innervation: "L'ATM e i muscoli masticatori (massetere, temporale, pterigoidei mediale/laterale) sono innervati dal nervo trigemino (V, branca mandibolare V3), che fornisce anche il ramo aurico-lo-temporale sensitivo alla capsula articolare. Il cuoio capelluto e il periostio della volta ricevono rami sensitivi di trigemino (V1 sovraorbitario/sovratrocleare, V2 zigomatico-temporale, V3 aurico-lo-temporale anteriormente) e plesso cervicale superiore (grande e piccolo occipitale posteriormente, con il grande occipitale spesso coinvolto nella nevralgia occipitale). La dura madre è innervata da rami meningei del trigemino e dai primi nervi cervicali, base anatomica della cefalea cervicogenica e della cefalea riferita da tensione delle strutture craniche profonde (nucleo trigemino-cervicale, convergenza tra afferenze di V e C1-C3).",
+    biomechanics: "L'ATM lavora in coppia funzionale obbligata con la controlaterale: l'apertura orale (~40-50mm nell'adulto) combina rotazione del condilo nel compartimento inferiore (primi ~20-25mm) e traslazione anteriore condilo-discale nel compartimento superiore lungo il tubercolo articolare (fase finale dell'apertura); protrusione e lateralità richiedono una coordinazione condilo-discale bilaterale asimmetrica (il condilo di lavoro ruota, il controlaterale trasla in avanti). Il rachide cervicale superiore è biomeccanicamente accoppiato all'ATM tramite catene miofasciali (sovraioidei, sternocleidomastoideo, muscoli sub-occipitali) e tramite il pattern posturale testa-collo-mandibola, per cui disfunzioni posturali cervicali (forward head posture) alterano il rapporto condilo-fossa a riposo e si ripercuotono sulla meccanica masticatoria, e viceversa.",
+    clinicalRelevance: "La disfunzione temporo-mandibolare (DTM), classificata secondo i criteri diagnostici DC/TMD in forme articolari (dislocazione discale con/senza riduzione, artrosi) e miogene (mialgia masticatoria), è la condizione di gran lunga più rilevante per la fisioterapia in questa regione, spesso associata a cervicalgia e cefalea tensiva/cervicogenica per la convergenza trigemino-cervicale. Fratture della volta (lineari, depresse) o della base cranica (con possibile rinorrea/otorrea liquorale, segno di Battle, ecchimosi periorbitaria a 'occhi di procione') sono eventi ad alta energia di pertinenza medico-neurochirurgica acuta; il ruolo fisioterapico riguarda le sequele post-acute (cervicalgia post-traumatica, cefalea post-traumatica, riabilitazione vestibolare post-commotiva).",
+  },
+  'bone-clavicola-scapola': {
+    anatomy: "La clavicola, a doppia curva a S (convessa anteriormente medialmente, concava lateralmente), è l'unico collegamento scheletrico diretto tra tronco e arto superiore ed è l'osso a ossificazione più precoce (dalla 5ª-6ª settimana embrionale) ma con fusione dell'epifisi mediale più tardiva di tutto lo scheletro (fino a 25 anni, rilevante nella diagnosi differenziale età-correlata delle fratture mediali). La scapola, piatta e triangolare, presenta spina, acromion, processo coracoideo, cavità glenoidea (con labbro fibrocartilagineo) e scorre sulla parete toracica posteriore senza vera articolazione ossea con le coste — un piano di scorrimento scapolo-toracico funzionale mantenuto da un cuscinetto muscolare (dentato anteriore/sottoscapolare anteriormente, romboidi/trapezio posteriormente). Insieme a sterno e prima costa formano il cingolo scapolare, stabilizzato dai legamenti costo-clavicolare (stabilità verticale sternoclaveare) e coraco-clavicolare (fasci trapezoide e conoide, stabilità verticale acromion-claveare).",
+    innervation: "Il periostio clavicolare e scapolare riceve fibre dai nervi sovraclaveari (plesso cervicale, C3-C4) e sovrascapolare (C5-C6, dal tronco superiore del plesso brachiale); quest'ultimo decorre attraverso l'incisura scapolare sotto il legamento trasverso scapolare superiore per innervare sovraspinato e sottospinato, ed è a rischio di intrappolamento in questa sede (sindrome del nervo sovrascapolare) oltre che di stiramento in traumi scapolari. Il nervo ascellare (C5-C6) circonda il collo chirurgico della glena/omero ed è a rischio in fratture-lussazioni di questa regione. La clavicola è in stretta contiguità con il plesso brachiale (tronchi superiore/medio) e i vasi succlavi, che decorrono posteriormente ad essa nello spazio costo-clavicolare.",
+    biomechanics: "La clavicola funge da puntone rigido che mantiene la distanza sterno-spalla, ruotando di circa 40-50° sul proprio asse durante l'elevazione del braccio (rotazione claveare, essenziale per l'elevazione completa oltre i 90°); la scapola posiziona la glenoide nello spazio ottimale tramite il ritmo scapolo-omerale (rapporto approssimativo 2:1 tra movimento gleno-omerale e scapolo-toracico oltre i 30° di elevazione), che combina rotazione verso l'alto, retrazione/protrazione e tilt posteriore, coordinato con l'elevazione del braccio per mantenere la congruenza articolare ed evitare il conflitto sub-acromiale.",
+    clinicalRelevance: "La frattura di clavicola (classificazione di Allman/Neer per terzo medio, laterale, mediale — il terzo medio è il più frequente) è tra le fratture più comuni in assoluto, tipica da caduta su spalla/braccio teso, gestita perlopiù conservativamente salvo scomposizione/accorciamento significativo. La discinesia scapolare (classificata secondo i pattern di Kibler: winging inferiore, prominenza del margine mediale, iperattivazione del trapezio superiore) è un reperto frequente in impingement e instabilità di spalla, spesso da debolezza di trapezio inferiore/dentato anteriore. Le lussazioni acromion-claveari sono classificate per grado di severità (Rockwood I-VI, in base al coinvolgimento dei legamenti acromion-claveare e coraco-claveare) e ne guidano l'indicazione conservativa vs chirurgica.",
+  },
+  'bone-coste-sterno': {
+    anatomy: "12 paia di coste e lo sterno (manubrio, corpo, processo xifoideo) formano la gabbia toracica. Le prime 7 coste sono 'vere' (cartilagine propria allo sterno), 8-10 'false' (cartilagine che si fonde a quella della 7ª formando il margine costale), 11-12 'fluttuanti' (senza attacco anteriore, libere nella muscolatura del fianco). Ogni costa tipica presenta testa (due faccette per il corpo vertebrale corrispondente e quello soprastante), collo, tubercolo (faccetta per il processo trasverso) e corpo con solco costale sul margine inferiore. Il manubrio e il corpo si uniscono all'angolo sternale (angolo di Louis), reperto palpatorio a livello della 2ª costa e punto di repere standard per il conteggio degli spazi intercostali; la sincondrosi manubrio-sternale può ossificarsi con l'età, mentre l'articolazione xifo-sternale resta generalmente cartilaginea.",
+    innervation: "Ogni costa è servita dal proprio nervo intercostale (rami ventrali T1-T11, con T12 come nervo subcostale), che decorre nel solco costale insieme a vena e arteria in ordine VAN dall'alto in basso (Vena, Arteria, Nervo) — rapporto rilevante per drenaggi toracici e blocchi intercostali, da eseguire lungo il margine superiore della costa sottostante per evitare il fascio vascolo-nervoso. I nervi intercostali inferiori (T7-T11) proseguono nella parete addominale anterolaterale, innervando anche cute e muscoli addominali.",
+    biomechanics: "Ogni costa si articola posteriormente con la vertebra dorsale tramite doppia articolazione (costo-vertebrale con il/i corpo/i vertebrale/i, costo-trasversaria con il processo trasverso), permettendo elevazione/depressione durante la respirazione: le coste superiori (1-6) ruotano attorno a un asse quasi trasverso, aumentando prevalentemente il diametro antero-posteriore ('manico di pompa'), mentre le coste inferiori (7-10) ruotano attorno a un asse più sagittale, aumentando il diametro trasverso ('manico di secchio'). Il diaframma, inserendosi sul margine costale interno, converte la propria contrazione in espansione delle coste inferiori tramite l'effetto 'a inserzione a zona d'apposizione'.",
+    clinicalRelevance: "Le fratture costali (classificate per numero/sede e presenza di scomposizione) sono dolorose soprattutto ai movimenti respiratori e alla tosse; la gestione fisioterapica privilegia respirazione efficace e prevenzione di atelettasia/polmonite, complicanze più frequenti negli anziani e nelle fratture multiple. La costocondrite (sindrome di Tietze quando associata a tumefazione visibile) è causa comune di dolore toracico meccanico da differenziare da cause cardiache tramite riproduzione palpatoria del sintomo. Fratture multiple con doppia rima per costa (lembo costale/flail chest, movimento paradosso della parete toracica) sono un'emergenza respiratoria di pertinenza intensivistica.",
+  },
+  'bone-omero': {
+    anatomy: "Osso lungo del braccio: prossimalmente testa (articolare, retroversa di circa 20-30° rispetto all'asse epicondilare), collo anatomico (linea di inserzione capsulare), grande tubercolo (inserzioni di sovraspinato, sottospinato, piccolo rotondo) e piccolo tubercolo (sottoscapolare), separati dal solco intertubercolare (bicipitale, sede del tendine del capo lungo del bicipite) e collo chirurgico (giunzione metafisi-diafisi, sede frequente di frattura per la transizione osso spugnoso/corticale). Distalmente si allarga nei condili con troclea mediale (per l'incisura trocleare dell'ulna) e capitello laterale (per la testa del radio), affiancati da epicondilo mediale (origine flessori-pronatori) e laterale (origine estensori-supinatore) e dalle fosse coronoidea/radiale anteriormente e olecranica posteriormente.",
+    innervation: "Il nervo radiale decorre nel solco spirale (o radiale) sulla faccia postero-laterale della diafisi omerale, a diretto rischio in fratture diafisarie del terzo medio-distale (paralisi radiale, mano cadente per deficit degli estensori di polso/dita). Il nervo ascellare circonda il collo chirurgico insieme all'arteria circonflessa posteriore, vulnerabile in fratture/lussazioni prossimali (deficit sensitivo della 'regimental badge area' e del deltoide). Il nervo mediano e l'arteria brachiale decorrono anteromedialmente al gomito, a rischio nelle fratture sovracondiloidee pediatriche (la più comune frattura di gomito nel bambino, classificata secondo Gartland).",
+    biomechanics: "Funge da braccio di leva per i muscoli della spalla (deltoide, cuffia dei rotatori, grande pettorale, gran dorsale — posizionamento dell'arto nello spazio) e del gomito (bicipite, tricipite, brachiale — flesso-estensione); l'orientamento/retroversione della testa determina l'arco di rotazione disponibile alla spalla, bilanciando extra e intrarotazione nella posizione funzionale a 90° di abduzione.",
+    clinicalRelevance: "La frattura del collo chirurgico è tipica dell'anziano osteoporotico da caduta su braccio teso o sul gomito (classificazione di Neer a 4 segmenti: testa, tuberosità maggiore, tuberosità minore, diafisi, in base al numero di frammenti scomposti); quella di diafisi comporta rischio di lesione del nervo radiale (10-18% dei casi in letteratura, spesso neuroaprassia reversibile); la testa omerale scomposta rischia necrosi avascolare per compromissione dell'arteria circonflessa posteriore (contributo vascolare principale) e, in minor misura, dell'anteriore.",
+  },
+  'bone-radio-ulna': {
+    anatomy: "Ulna mediale, osso stabilizzatore primario: olecrano prossimale (che si incastra nella fossa olecranica dell'omero in estensione completa) e processo coronoideo formano insieme l'incisura trocleare, articolata con la troclea omerale; distalmente la testa ulnare (piccola) si articola con l'incisura ulnare del radio e con il complesso fibrocartilagineo triangolare (TFCC) verso il carpo. Radio laterale: testa prossimale discoidale che ruota nel legamento anulare radiale (stabilizzato anche dal legamento collaterale ulnare/laterale del gomito), collo, tuberosità radiale (inserzione del bicipite), e distalmente si allarga nella superficie articolare per lo scafoide/semilunare e nell'incisura ulnare. Le due ossa sono unite per tutta la lunghezza dalla membrana interossea, la cui corda centrale trasmette carico dal radio all'ulna in compressione assiale.",
+    innervation: "Il nervo ulnare decorre nel tunnel cubitale posteriormente all'epicondilo mediale, molto superficiale e vulnerabile a compressione diretta o a trazione in flessione prolungata del gomito (sindrome del tunnel cubitale). Il nervo interosseo posteriore (ramo profondo del radiale) attraversa l'arcata di Frohse nel supinatore e avvolge il collo radiale, a rischio in fratture/lussazioni della testa radiale (frattura di Monteggia) e in interventi chirurgici su questa regione. Il nervo interosseo anteriore (ramo del mediano) decorre sulla membrana interossea, innervando flessore lungo del pollice e porzione laterale del flessore profondo delle dita.",
+    biomechanics: "Il radio ruota attorno all'ulna, relativamente fissa, tramite le articolazioni radio-ulnari prossimale (perno testa radiale-incisura radiale dell'ulna) e distale (testa ulnare-incisura ulnare del radio), generando circa 80-90° di pronazione e 80-90° di supinazione: un grado di libertà che orienta la mano indipendentemente dalla posizione del gomito, essenziale per compiti di manipolazione. Durante questo movimento il radio 'ruota attorno' all'ulna incrociandola anteriormente in pronazione.",
+    clinicalRelevance: "La frattura di Colles (radio distale con angolazione dorsale, caduta su mano estesa) è tra le più frequenti in assoluto, tipica della donna post-menopausale osteoporotica; la frattura di Smith (angolazione volare, caduta su mano flessa) è la sua controparte meno comune. Le fratture di entrambe le ossa dell'avambraccio nell'adulto richiedono quasi sempre fissazione chirurgica per l'elevato rischio di malunion rotazionale (perdita di prono-supinazione anche con consolidamento osseo apparentemente corretto). Monteggia (frattura ulnare prossimale + lussazione della testa radiale) e Galeazzi (frattura radiale distale + lussazione radio-ulnare distale) sono pattern lesionali classici, spesso misconosciuti se non si valuta sistematicamente l'articolazione adiacente alla frattura evidente.",
+  },
+  'bone-mano': {
+    anatomy: "8 ossa carpali su due file (prossimale, da radiale a ulnare: scafoide, semilunare, piramidale, pisiforme — quest'ultimo un sesamoide nel tendine del flessore ulnare del carpo; distale: trapezio, trapezoide, capitato, uncinato), 5 metacarpi, 14 falangi (2 nel pollice, 3 nelle altre dita). Il tunnel carpale è delimitato dal retinacolo dei flessori (superficialmente) e dal pavimento carpale a doccia (profondamente), contenendo 9 tendini flessori e il nervo mediano. La trapezio-metacarpale del pollice è un'articolazione a sella biassiale con ampia mobilità (flesso-estensione, abdo-adduzione, più una componente di rotazione assiale accoppiata), base dell'opponibilità.",
+    innervation: "Nervo mediano (attraverso il tunnel carpale) su cute palmare di pollice-indice-medio-metà anulare e sui muscoli tenar (eccetto adduttore del pollice); nervo ulnare (canale di Guyon) su mignolo/metà anulare e sulla maggior parte dei muscoli intrinseci (interossei, ipotenar, adduttore del pollice); nervo radiale puramente sensitivo sul dorso radiale della mano. Lo scafoide riceve vascolarizzazione retrograda che entra prevalentemente dal polo distale (rami dell'arteria radiale) e risale verso il polo prossimale, il che rende quest'ultimo il segmento più vulnerabile a necrosi avascolare dopo frattura del terzo medio/prossimale.",
+    biomechanics: "Il carpo trasmette e distribuisce i carichi tra avambraccio e dita adattando la propria configurazione tridimensionale (concetto della 'colonna del semilunare' nella dinamica carpale); l'opponibilità del pollice, resa possibile dall'articolazione trapezio-metacarpale a sella, è il tratto distintivo della mano umana e la base della presa di precisione (pinza pollice-indice) rispetto alla sola presa di forza.",
+    clinicalRelevance: "La frattura di scafoide (dolore in tabacchiera anatomica dopo caduta su mano estesa, spesso non visibile alla radiografia iniziale) va trattata come frattura fino a nuova valutazione per l'elevato rischio di pseudoartrosi/necrosi avascolare se misconosciuta. Le fratture di metacarpo (es. frattura del boxeur al collo del 5° metacarpo) e delle falangi sono tra le più comuni dell'arto superiore; la mobilizzazione precoce è centrale per prevenire rigidità articolare, particolarmente invalidante alla mano. La rizoartrosi (artrosi trapezio-metacarpale) è una causa frequente di dolore e riduzione della forza di pinza nell'anziano, più comune nelle donne.",
+  },
+  'bone-bacino': {
+    anatomy: "Le due ossa iliache (ciascuna fusione embriologica di ileo, ischio e pube attorno all'acetabolo a livello della cartilagine a Y triradiata) si uniscono posteriormente al sacro alle articolazioni sacro-iliache e anteriormente tra loro alla sinfisi pubica, formando un anello osseo funzionalmente chiuso. L'acetabolo, formato dalla giunzione dei tre segmenti, presenta una superficie articolare a ferro di cavallo (semilunare) e la fossa acetabolare non articolare (contenente il legamento della testa del femore e il pulvinar adiposo).",
+    innervation: "Ricca rete di rami dell'arteria iliaca interna (glutee superiore/inferiore, otturatoria, pudenda interna, ileo-lombare) spiega il potenziale emorragico delle fratture pelviche ad alta energia, per rottura del plesso venoso presacrale o dei rami arteriosi stessi. Il nervo otturatorio attraversa il forame omonimo per innervare gli adduttori; il nervo cutaneo femorale laterale attraversa la spina iliaca antero-superiore/legamento inguinale, sede tipica di intrappolamento (meralgia parestesica). Il nervo sciatico emerge dalla grande incisura ischiatica, in stretto rapporto con il piriforme.",
+    biomechanics: "Trasferisce il peso del tronco agli arti inferiori in stazione eretta (tramite le articolazioni sacro-iliache e l'acetabolo) o al piano di appoggio da seduti (tramite le tuberosità ischiatiche); ampia superficie di inserzione per grande gluteo, ileopsoas, adduttori, retto femorale (spina iliaca antero-inferiore) e pavimento pelvico, rendendo il bacino un fulcro di trasmissione di forza tra tronco e arti inferiori in gesti come corsa e sollevamento.",
+    clinicalRelevance: "Le fratture pelviche giovanili sono generalmente ad alta energia (classificazione di Tile/AO in base alla stabilità dell'anello pelvico) con rischio emorragico significativo; nell'anziano osteoporotico anche cadute a bassa energia causano fratture da fragilità (tipicamente branche ilio/ischio-pubiche), spesso gestite conservativamente con mobilizzazione precoce. La disfunzione sacro-iliaca è causa comune di lombalgia bassa/gluteo, valutata con cluster di test di provocazione. La sinfisi pubica è sede di pubalgia da overuse degli adduttori negli sportivi e si allenta fisiologicamente in gravidanza sotto l'azione della relaxina.",
+  },
+  'bone-sacro': {
+    anatomy: "Il sacro (5 vertebre sacrali fuse, con creste mediane residue dei processi spinosi e forami sacrali anteriori/posteriori per il passaggio delle radici sacrali) chiude posteriormente l'anello pelvico e continua il rachide lombare alla giunzione lombo-sacrale (L5-S1), angolata di circa 30-40° rispetto all'orizzontale (angolo sacrale). Il coccige (3-5 vertebre rudimentali fuse, spesso con una piccola mobilità residua all'articolazione sacro-coccigea) si articola all'apice del sacro ed è orientato con una curvatura anteriore variabile.",
+    innervation: "Il canale sacrale contiene la porzione terminale del sacco durale (che termina generalmente a livello di S2) e le radici della cauda equina, rilevante per le infiltrazioni epidurali caudali eseguite attraverso lo iato sacrale. Le radici sacrali S2-S4 innervano il pavimento pelvico, gli sfinteri vescicale/anale e forniscono sensibilità perineale a sella — la loro compressione bilaterale (sindrome della cauda equina) è un'emergenza chirurgica assoluta.",
+    biomechanics: "Trasmette il peso della colonna vertebrale al bacino tramite le articolazioni sacro-iliache (con una minima mobilità di nutazione/contro-nutazione); base di inserzione per i legamenti pelvici maggiori (sacro-tuberoso, sacro-spinoso, che convertono le grandi/piccole incisure ischiatiche in forami) e per parte del pavimento pelvico e del grande gluteo. Il coccige sopporta un carico diretto significativo nella posizione seduta reclinata all'indietro.",
+    clinicalRelevance: "La coccigodinia (spesso post-caduta in posizione seduta o post-parto) risponde ad adattamenti posturali (cuscini a ciambella), terapia manuale e talvolta lavoro sul pavimento pelvico. Le fratture sacrali da insufficienza (tipicamente a farfalla/H, bilaterali) sono spesso misconosciute come causa di lombalgia bassa nell'anziano osteoporotico in assenza di trauma significativo, e richiedono un elevato indice di sospetto clinico oltre alla sola radiografia standard (poco sensibile).",
+  },
+  'bone-femore': {
+    anatomy: "L'osso più lungo e robusto del corpo: prossimalmente testa (rivestita di cartilagine per circa due terzi della sua superficie, con la fovea per il legamento rotondo), collo (angolo cervico-diafisario di circa 125° in valgo — coxa valga/vara le deviazioni patologiche —, antiversione di circa 10-15° rispetto al piano condilare), grande trocantere (inserzioni di medio/piccolo gluteo, piriforme, otturatori) e piccolo trocantere (ileopsoas); la linea aspra posteriormente offre inserzione a grande adduttore, capo breve del bicipite femorale e vasti. Distalmente i condili femorali (mediale più grande e meno curvo, laterale più prominente anteriormente per contrastare la lussazione rotulea) si articolano con i piatti tibiali e, anteriormente, con la rotula nella troclea femorale.",
+    innervation: "Il nervo sciatico decorre posteriormente lungo tutta la diafisi (uscendo dalla grande incisura ischiatica sotto/attraverso il piriforme), a rischio in fratture prossimali e nella chirurgia protesica d'anca per via posteriore. Il nervo femorale innerva il quadricipite anteriormente. La testa femorale riceve il proprio apporto vascolare principalmente dall'arteria circonflessa femorale mediale (tramite rami retinacolari che risalgono lungo il collo posteriormente), con un contributo minore e spesso insufficiente nell'adulto dall'arteria del legamento rotondo; una frattura scomposta del collo può interrompere l'apporto retinacolare, causando necrosi avascolare della testa.",
+    biomechanics: "Trasmette il peso corporeo dal bacino al ginocchio durante stazione eretta, cammino e corsa, sopportando forze articolari all'anca fino a 3-6 volte il peso corporeo in appoggio monopodalico; braccio di leva per i grandi gruppi muscolari dell'anca (glutei, ileopsoas, adduttori) e del ginocchio (quadricipite, ischiocrurali) inseriti su trocanteri, collo e linea aspra, con il collo femorale sottoposto a un significativo momento flettente in varo durante il carico monopodalico.",
+    clinicalRelevance: "La frattura del collo femorale nell'anziano (classificazione di Garden I-IV in base al grado di scomposizione, predittiva del rischio di necrosi avascolare) è un'emergenza chirurgica-riabilitativa ad alta mortalità/perdita di autonomia se non operata e mobilizzata precocemente; è spesso trattata con endoprotesi/artroprotesi anziché sintesi nelle forme scomposte per l'elevato rischio di necrosi avascolare e pseudoartrosi. La frattura diafisaria nel giovane è tipicamente ad alta energia (incidenti stradali), trattata con inchiodamento endomidollare.",
+  },
+  'bone-tibia-perone': {
+    anatomy: "Tibia mediale, principale osso portante della gamba: piatto tibiale prossimale (mediale concavo, laterale convesso, separati dall'eminenza intercondiloidea con le inserzioni dei legamenti crociati), tuberosità tibiale anteriore (inserzione del tendine rotuleo), diafisi triangolare in sezione con la cresta tibiale sottocutanea (scarsa copertura di tessuti molli), e distalmente il malleolo mediale. Perone laterale, sottile e non portante per il carico assiale ma essenziale per la stabilità della caviglia: testa prossimale (articolazione tibio-peroneale prossimale, inserzione del bicipite femorale e legamento collaterale laterale del ginocchio) e malleolo laterale distale, più lungo e posteriore rispetto al mediale. Le due ossa sono unite dalla membrana interossea e, distalmente, dalla sindesmosi tibio-peroneale.",
+    innervation: "Il nervo peroneale comune avvolge il collo del perone subito sotto la testa, decorso molto superficiale che lo rende a rischio di compressione/lesione in traumi diretti, fratture del collo del perone o gessi/tutori stretti (piede cadente da deficit dei muscoli dorsiflessori/evertori). La tibia riceve l'apporto nutritizio principale da un singolo grande vaso che entra nella diafisi prossimale posteriore e si distribuisce in senso centrifugo; il terzo distale, con scarsa copertura muscolare rispetto al femore, guarisce più lentamente e con maggior rischio di pseudoartrosi.",
+    biomechanics: "La tibia trasmette la quasi totalità del carico assiale dal ginocchio alla caviglia (circa il 90%, contro il 10% del perone); tibia e perone formano insieme, tramite la sindesmosi distale, la mortasa che accoglie l'astragalo nell'articolazione tibio-tarsica (talo-crurale), con il perone che trasla e ruota leggermente durante la dorsiflessione per accogliere la porzione più larga anteriore della troclea astragalica.",
+    clinicalRelevance: "Le fratture di tibia (spesso ad alta energia) rischiano esposizione (per la scarsa copertura di tessuti molli antero-mediale) e sindrome compartimentale acuta, un'emergenza da riconoscere precocemente tramite dolore sproporzionato e in aumento. Le fratture malleolari (classificazione di Weber A/B/C in base al livello della rima peroneale rispetto alla sindesmosi) coinvolgono tipicamente il perone distale da meccanismo torsionale. La tibia è sede classica di frattura da stress nei corridori (dolore tibiale mediale da overuse, da distinguere dalla periostite tibiale).",
+  },
+  'bone-piede': {
+    anatomy: "7 ossa tarsali (astragalo, calcagno, navicolare, cuboide, 3 cuneiformi), 5 metatarsi, 14 falangi, organizzati in retropiede (astragalo, calcagno), mesopiede (navicolare, cuboide, cuneiformi) e avampiede (metatarsi, falangi). L'astragalo, privo di inserzioni muscolari dirette e coperto di cartilagine per circa il 60% della sua superficie, trasmette il carico dalla tibia al resto del piede tramite le sue tre faccette articolari con il calcagno (articolazione sottoastragalica). L'insieme forma le arcate plantari (longitudinale mediale, la più alta e clinicamente rilevante; longitudinale laterale; trasversa), sostenute da legamenti plantari (calcaneo-navicolare plantare o 'a molla', plantare lungo e breve) e dalla fascia plantare.",
+    innervation: "Nervo tibiale posteriore (pianta, via i nervi plantari mediale e laterale, dopo aver decorso nel tunnel tarsale dietro il malleolo mediale — sede di possibile intrappolamento, sindrome del tunnel tarsale) e nervi peroneale superficiale (dorso, sensitivo) e profondo (primo spazio interdigitale, motorio per l'estensore breve delle dita). L'astragalo ha una vascolarizzazione retrograda relativamente precaria (analoga allo scafoide carpale), rendendolo vulnerabile a necrosi avascolare dopo frattura del collo astragalico (classificazione di Hawkins, con il segno omonimo alla radiografia come indicatore prognostico favorevole).",
+    biomechanics: "Assorbe e ridistribuisce le forze d'impatto all'appoggio tramite la pronazione della sottoastragalica (che 'sblocca' le articolazioni del mesopiede rendendo il piede adattabile alle irregolarità del terreno) e diventa leva rigida in fase di spinta tramite la supinazione e il meccanismo a verricello ('windlass') della fascia plantare, che si tende con la dorsiflessione delle dita durante il push-off, rialzando l'arco longitudinale mediale.",
+    clinicalRelevance: "Le fratture da stress metatarsali (più comuni al 2°-3° metatarso, da overuse in corridori/militari) e la frattura acuta della base del 5° metatarso (frattura di Jones, in zona relativamente ipovascolarizzata e a rischio di ritardata consolidazione/pseudoartrosi) sono pattern classici, insieme alle fratture-lussazioni tarso-metatarsali (di Lisfranc), spesso misconosciute alla radiografia standard e con implicazioni funzionali a lungo termine se non trattate correttamente.",
+  },
+  'bone-cervicale': {
+    anatomy: "7 vertebre: atlante (C1, privo di corpo vertebrale, ad anello con due masse laterali e archi anteriore/posteriore) ed epistrofeo (C2, con il dente/odontoide che si sviluppa embriologicamente dal corpo dell'atlante e migra su C2) specializzate per la rotazione della testa; C3-C7 hanno una morfologia più uniforme, con corpo relativamente piccolo, processi trasversi forati (forami trasversari per l'arteria e vena vertebrale da C6 a C1) e articolazioni uncovertebrali di Luschka (creste laterali del corpo vertebrale, sviluppo post-natale, che guidano il movimento e possono degenerare restringendo il forame intervertebrale). C7 (vertebra prominente) ha un processo spinoso lungo e non bifido, reperto palpatorio di repere.",
+    innervation: "L'arteria vertebrale risale attraverso i forami trasversari da C6 a C1 prima di entrare nel cranio attraverso il forame magno e unirsi alla controlaterale a formare l'arteria basilare; il tratto tra C1 e C2 presenta le angolazioni più marcate del suo decorso, teoricamente vulnerabile a manovre di rotazione/estensione cervicale spinta — motivo dello screening dei fattori di rischio vascolare pre-manipolativo. Il midollo cervicale è protetto dal canale vertebrale ma vulnerabile in presenza di stenosi congenita/degenerativa o instabilità (mielopatia cervicale, con segni quali iperreflessia, segno di Hoffmann, andatura atassica).",
+    biomechanics: "L'articolazione atlanto-occipitale (C0-C1) permette prevalentemente flesso-estensione (il movimento del 'sì' con la testa, circa 15-20°); l'atlo-assiale (C1-C2) permette circa la metà della rotazione totale del collo (il movimento del 'no', circa 40-45° per lato su un totale di ~80-90°), stabilizzata dal legamento trasverso dell'atlante che contiene il dente dell'epistrofeo entro il canale vertebrale; da C2 a C7 le vertebre aggiungono flesso-estensione (~50-60° totali), inclinazione laterale (~35-45° per lato) e rotazione combinate grazie alle faccette orientate a circa 45° e alle articolazioni uncovertebrali.",
+    clinicalRelevance: "Le fratture di C1 (frattura di Jefferson, da carico assiale, spesso stabile per la scomposizione simmetrica delle masse laterali) e di C2 (frattura del dente dell'epistrofeo, classificata secondo Anderson-D'Alonzo in base al livello della rima) sono ad alto rischio neurologico per la vicinanza a midollo alto e tronco encefalico — una red flag assoluta da escludere sempre dopo trauma cervicale significativo (regole cliniche di Canadian C-Spine o NEXUS) prima di qualsiasi trattamento manuale. La radicolopatia cervicale da ernia discale o stenosi foraminale degenerativa causa dolore/parestesie irradiate all'arto superiore secondo un pattern dermatomerico riconoscibile, tipicamente più severo con estensione/rotazione omolaterale (test di Spurling).",
+  },
+  'bone-dorsale': {
+    anatomy: "12 vertebre con faccette costali per l'articolazione con le coste corrispondenti — ogni vertebra tipica presenta una faccetta costale superiore ed inferiore sul corpo (per la testa della costa omonima e di quella soprastante) e una faccetta sul processo trasverso (per il tubercolo costale) — la caratteristica che le distingue nettamente da vertebre cervicali e lombari. I processi spinosi sono lunghi e marcatamente obliqui verso il basso nella porzione medio-toracica (T5-T8), sovrapponendosi come tegole ed è per questo che l'estensione dorsale è limitata meccanicamente in questo tratto.",
+    innervation: "Il midollo toracico è la zona di 'spartiacque' (watershed) vascolare più vulnerabile ischemicamente di tutto il midollo spinale, poiché riceve un contributo segmentale relativamente scarso rispetto ai rinforzi cervicale e lombare; l'arteria di Adamkiewicz (arteria radicolare magna, tipicamente tra T9 e L2, più spesso a sinistra) è il principale contributo radicolo-midollare per questo tratto, e la sua compromissione (es. in chirurgia aortica o traumi) è la causa classica di ischemia midollare toraco-lombare.",
+    biomechanics: "L'accoppiamento con la gabbia costale rende il tratto dorsale il più rigido della colonna vertebrale mobile, con mobilità prevalentemente in rotazione (favorita dall'orientamento delle faccette articolari quasi sul piano frontale, circa 60° dal piano trasverso) e flesso-estensione limitata dalla gabbia costale (circa 30-40° totali combinati); fornisce l'ancoraggio posteriore della gabbia toracica per la meccanica respiratoria tramite le articolazioni costo-vertebrali e costo-trasversarie.",
+    clinicalRelevance: "Le fratture da compressione osteoporotica sono particolarmente frequenti alla giunzione toraco-lombare (T11-L2), zona di transizione biomeccanica tra il tratto dorsale rigido (guidato dalle coste) e quello lombare più mobile, dove si concentrano i momenti flettenti maggiori. La rigidità dorsale (spesso associata a ipercifosi posturale, frequente anche per fratture vertebrali da fragilità nell'anziano) limita compensatoriamente la mobilità di rachide cervicale e lombare adiacenti, ed è un target comune di mobilizzazione in fisioterapia muscolo-scheletrica. La scoliosi idiopatica dell'adolescente coinvolge tipicamente il tratto dorsale come curva primaria, più frequente nelle femmine e monitorata con l'angolo di Cobb.",
+  },
+  'bone-lombare': {
+    anatomy: "5 vertebre, le più voluminose della colonna mobile, con corpi vertebrali larghi e peduncoli robusti adatti a sopportare il carico assiale maggiore; i processi spinosi sono corti, quadrangolari e quasi orizzontali (a differenza di quelli dorsali obliqui), i processi articolari sono orientati quasi sul piano sagittale. L'ultima vertebra lombare (L5) si articola con il sacro alla giunzione lombo-sacrale, spesso con un corpo a forma di cuneo (più alto anteriormente) che contribuisce alla lordosi lombare fisiologica e a un punto di elevato stress meccanico per l'inclinazione del piano sacrale (angolo sacrale di circa 30-40°).",
+    innervation: "Il midollo spinale termina a livello di L1-L2 nell'adulto (cono midollare, con variabilità individuale); al di sotto di questo livello il canale vertebrale lombare contiene la cauda equina (le radici nervose lombosacrali che scendono verso i propri forami di uscita), non il midollo stesso — per questo le procedure invasive lombari (puntura lombare, infiltrazioni epidurali) sono relativamente più sicure a questo livello rispetto a segmenti più craniali. Le arterie lombari segmentali, rami diretti dell'aorta addominale, irrorano corpi vertebrali e strutture adiacenti.",
+    biomechanics: "Sostiene il peso della porzione superiore del corpo trasferendolo al bacino attraverso la giunzione lombo-sacrale; permette ampia flesso-estensione (circa 40-50° in flessione, 15-20° in estensione) e inclinazione laterale (circa 20° per lato), con rotazione assiale marcatamente limitata (circa 5° per lato) dall'orientamento sagittale delle faccette articolari, che favoriscono il movimento nel piano sagittale a scapito della torsione. La lordosi fisiologica è base dell'equilibrio sagittale posturale globale, insieme a cifosi dorsale e lordosi cervicale.",
+    clinicalRelevance: "La lombalgia è il motivo di consulto fisioterapico più frequente al mondo. L'ernia discale lombare (più comune a L4-L5 e L5-S1, per la maggiore concentrazione di stress meccanico e il legamento longitudinale posteriore più stretto a questo livello) può dare radicolopatia con dolore irradiato secondo il dermatomero coinvolto (es. sciatalgia); la sindrome della cauda equina (deficit sfinterico, anestesia a sella, bilateralità dei sintomi) è una red flag chirurgica assoluta da riconoscere immediatamente. La spondilolistesi istmica (scivolamento di una vertebra sull'altra, spesso a L5-S1 per lisi istmica bilaterale, classificata secondo Meyerding in base al grado di scivolamento) e la stenosi del canale lombare degenerativa (claudicatio neurogena, tipica dell'anziano, tipicamente migliora in flessione/seduta) sono condizioni comuni nella pratica fisioterapica geriatrica e sportiva.",
+  },
+};
+
+// Nomi di tutte le 34 zone (20 muscolari + 14 ossee) — usati solo per
+// etichettare i link nella sezione "Zone correlate" qui sotto, senza dover
+// fare una chiamata API aggiuntiva solo per un nome da mostrare.
+const ALL_ZONE_NAMES: Record<string, string> = {
+  'cervical-spine': 'Cervical Spine',
+  trapezius: 'Trapezius / Upper Trap',
+  shoulder: 'Shoulder',
+  chest: 'Chest / Pectorals',
+  biceps: 'Biceps',
+  triceps: 'Triceps',
+  elbow: 'Elbow',
+  forearm: 'Forearm',
+  'wrist-hand': 'Wrist / Hand',
+  'core-abdomen': 'Core / Abdomen',
+  'thoracic-spine': 'Thoracic Spine / Upper Back',
+  'lumbar-spine': 'Lumbar Spine / Lower Back',
+  hip: 'Hip',
+  glutes: 'Glutes',
+  quadriceps: 'Quadriceps',
+  hamstrings: 'Hamstrings',
+  knee: 'Knee',
+  calf: 'Calf',
+  'ankle-foot': 'Ankle / Foot',
+  'whole-body': 'Whole Body / Balance & Gait',
+  'bone-cranio': 'Skull',
+  'bone-clavicola-scapola': 'Clavicle & Scapula',
+  'bone-coste-sterno': 'Ribs & Sternum',
+  'bone-omero': 'Humerus',
+  'bone-radio-ulna': 'Radius & Ulna',
+  'bone-mano': 'Hand Bones',
+  'bone-bacino': 'Pelvis',
+  'bone-sacro': 'Sacrum & Coccyx',
+  'bone-femore': 'Femur',
+  'bone-tibia-perone': 'Tibia & Fibula',
+  'bone-piede': 'Foot Bones',
+  'bone-cervicale': 'Cervical Vertebrae',
+  'bone-dorsale': 'Thoracic Vertebrae',
+  'bone-lombare': 'Lumbar Vertebrae',
+};
+
+// Adiacenze anatomiche/cliniche tra zone muscolari e ossee — è il cuore del
+// cross-linking muscolo <-> osso che nessun altro atlante 3D generico offre:
+// da un osso si arriva subito al muscolo che lo muove (e viceversa), invece
+// di dover tornare al modello e ricliccare a mano. Elenco intenzionalmente
+// corto (max 4) per restare uno strumento di navigazione, non un altro muro
+// di link.
+const RELATED_ZONES: Record<string, string[]> = {
+  'cervical-spine': ['bone-cervicale', 'bone-cranio', 'trapezius'],
+  trapezius: ['shoulder', 'bone-clavicola-scapola', 'bone-cervicale'],
+  shoulder: ['bone-omero', 'bone-clavicola-scapola', 'biceps'],
+  chest: ['bone-coste-sterno', 'shoulder'],
+  biceps: ['shoulder', 'elbow', 'bone-omero'],
+  triceps: ['shoulder', 'elbow', 'bone-omero'],
+  elbow: ['bone-omero', 'bone-radio-ulna', 'forearm'],
+  forearm: ['bone-radio-ulna', 'wrist-hand', 'elbow'],
+  'wrist-hand': ['bone-mano', 'bone-radio-ulna', 'forearm'],
+  'core-abdomen': ['bone-bacino', 'lumbar-spine'],
+  'thoracic-spine': ['bone-dorsale', 'bone-coste-sterno', 'lumbar-spine'],
+  'lumbar-spine': ['bone-lombare', 'bone-sacro', 'hip'],
+  hip: ['bone-bacino', 'bone-femore', 'glutes'],
+  glutes: ['hip', 'bone-bacino', 'hamstrings'],
+  quadriceps: ['hip', 'knee', 'bone-femore'],
+  hamstrings: ['hip', 'knee', 'bone-femore'],
+  knee: ['bone-femore', 'bone-tibia-perone', 'quadriceps'],
+  calf: ['bone-tibia-perone', 'ankle-foot'],
+  'ankle-foot': ['bone-piede', 'bone-tibia-perone', 'calf'],
+  'bone-cranio': ['bone-cervicale', 'cervical-spine'],
+  'bone-clavicola-scapola': ['bone-omero', 'shoulder', 'trapezius'],
+  'bone-coste-sterno': ['bone-dorsale', 'chest', 'thoracic-spine'],
+  'bone-omero': ['bone-clavicola-scapola', 'shoulder', 'biceps', 'triceps'],
+  'bone-radio-ulna': ['bone-mano', 'forearm', 'elbow'],
+  'bone-mano': ['bone-radio-ulna', 'wrist-hand'],
+  'bone-bacino': ['bone-sacro', 'hip', 'core-abdomen'],
+  'bone-sacro': ['bone-bacino', 'lumbar-spine', 'hip'],
+  'bone-femore': ['bone-tibia-perone', 'hip', 'quadriceps'],
+  'bone-tibia-perone': ['bone-femore', 'bone-piede', 'knee', 'calf'],
+  'bone-piede': ['bone-tibia-perone', 'ankle-foot'],
+  'bone-cervicale': ['bone-cranio', 'cervical-spine', 'trapezius'],
+  'bone-dorsale': ['bone-coste-sterno', 'thoracic-spine'],
+  'bone-lombare': ['bone-sacro', 'lumbar-spine', 'core-abdomen'],
 };
 
 interface ExerciseItem {
@@ -157,6 +324,10 @@ interface ConditionItem {
   typical_exercises: string | null;
   progression_criteria: string | null;
   evidence_level: string | null;
+  return_to_activity_criteria?: string | null;
+  outcome_measures?: string | null;
+  source?: string | null;
+  source_date?: string | null;
 }
 
 interface HubData {
@@ -214,12 +385,31 @@ export default function ZoneHubPage() {
     setAskError('');
     setAskAnswer('');
     try {
+      // Contesto arricchito con le patologie e i red flag realmente curati
+      // per questa zona (non solo il nome) -- risposte ancorate a quello che
+      // Phygo ha gia verificato per questa regione, non generiche.
+      const zoneConditionNames = data.conditions.slice(0, 6).map((c) => c.condition_name);
+      const zoneRedFlags = Array.from(
+        new Set(data.conditions.map((c) => c.red_flags).filter(Boolean))
+      ).slice(0, 4);
+      const contextParts = [
+        `The clinician is reviewing the "${data.zone.name}" anatomical region in the Body Map tool (${
+          data.zone.slug.startsWith('bone-') ? 'skeletal/X-ray view' : 'muscular view'
+        }).`,
+      ];
+      if (zoneConditionNames.length > 0) {
+        contextParts.push(`Conditions curated by Phygo for this region: ${zoneConditionNames.join(', ')}.`);
+      }
+      if (zoneRedFlags.length > 0) {
+        contextParts.push(`Known red flags to screen for in this region: ${zoneRedFlags.join(' | ')}`);
+      }
+
       const res = await fetch('/api/ask-phygo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question: askQuestion,
-          noteContext: `The clinician is reviewing the "${data.zone.name}" anatomical region in the Body Map tool.`,
+          noteContext: contextParts.join(' '),
         }),
       });
       const json = await res.json();
@@ -263,6 +453,7 @@ export default function ZoneHubPage() {
 
   const { zone, exercises, totalExercises, conditions } = data;
   const anatomyData = ZONE_ANATOMY[zone.slug];
+  const isBoneZone = zone.slug.startsWith('bone-');
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
@@ -287,7 +478,7 @@ export default function ZoneHubPage() {
         <div className="mb-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]" />
-            Anatomical Zone
+            {isBoneZone ? 'Skeletal Structure' : 'Anatomical Zone'}
           </div>
           <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tight">
             {zone.name}
@@ -295,46 +486,61 @@ export default function ZoneHubPage() {
           <div className="mt-4">
             <ClinicalActionBar contentType="anatomical_zone" contentId={zone.id} />
           </div>
+
+          {(RELATED_ZONES[zone.slug] || []).length > 0 && (
+            <div className="mt-6 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-ink/35 dark:text-white/35 mr-1">
+                <Link2 size={11} />
+                Zone correlate
+              </span>
+              {(RELATED_ZONES[zone.slug] || []).map((relSlug) => (
+                <button
+                  key={relSlug}
+                  onClick={() => router.push(`/dashboard/body-map/${relSlug}`)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:border-black/[0.14] dark:hover:border-white/20 transition-all text-xs font-medium"
+                >
+                  {relSlug.startsWith('bone-') && <Bone size={11} className="text-[#4F7CFF]" />}
+                  {ALL_ZONE_NAMES[relSlug] || relSlug}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {anatomyData && (
-          <div className="mt-8 space-y-6">
-            <div>
-              <h3 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-                Anatomy
-              </h3>
-              <p className="text-ink/60 dark:text-white/60 text-sm leading-relaxed max-w-3xl">
-                {anatomyData.anatomy}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-                Innervation
-              </h3>
-              <p className="text-ink/60 dark:text-white/60 text-sm leading-relaxed max-w-3xl">
-                {anatomyData.innervation}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-                Biomechanics
-              </h3>
-              <p className="text-ink/60 dark:text-white/60 text-sm leading-relaxed max-w-3xl">
-                {anatomyData.biomechanics}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-                Clinical Relevance
-              </h3>
-              <p className="text-ink/60 dark:text-white/60 text-sm leading-relaxed max-w-3xl">
-                {anatomyData.clinicalRelevance}
-              </p>
-            </div>
+          <div className="mt-10 grid sm:grid-cols-2 gap-4">
+            {(
+              [
+                { key: 'anatomy', label: 'Anatomy', icon: Bone, color: '#4F7CFF' },
+                { key: 'innervation', label: 'Innervation', icon: Zap, color: '#A855F7' },
+                { key: 'biomechanics', label: 'Biomechanics', icon: Activity, color: '#32D6A0' },
+                { key: 'clinicalRelevance', label: 'Clinical Relevance', icon: BookOpen, color: '#F59E0B' },
+              ] as const
+            ).map(({ key, label, icon: Icon, color }) => (
+              <div
+                key={key}
+                className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-sm"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <span
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
+                    style={{ backgroundColor: `${color}1F`, color }}
+                  >
+                    <Icon size={14} />
+                  </span>
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60">
+                    {label}
+                  </h3>
+                </div>
+                <p className="text-ink/60 dark:text-white/60 text-sm leading-relaxed">
+                  {anatomyData[key]}
+                </p>
+              </div>
+            ))}
           </div>
         )}
 
-        <div className="mt-8">
+        <div className="mt-10 pt-10 border-t border-black/[0.06] dark:border-white/10">
           {!askOpen ? (
             <button
               onClick={() => {
@@ -382,9 +588,11 @@ export default function ZoneHubPage() {
           )}
         </div>
 
-        <div className="mt-12">
+        <div className="mt-10 pt-10 border-t border-black/[0.06] dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
-            <Activity size={16} className="text-[#4F7CFF]" />
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/[0.12] text-[#4F7CFF]">
+              <Activity size={14} />
+            </span>
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60">
               Featured Exercises
             </h2>
@@ -441,9 +649,11 @@ export default function ZoneHubPage() {
           )}
         </div>
 
-        <div className="mt-12">
+        <div className="mt-10 pt-10 border-t border-black/[0.06] dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
-            <Stethoscope size={16} className="text-[#32D6A0]" />
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#32D6A0]/[0.12] text-[#32D6A0]">
+              <Stethoscope size={14} />
+            </span>
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60">
               Related Conditions
             </h2>
@@ -454,14 +664,34 @@ export default function ZoneHubPage() {
               No conditions linked to this zone yet.
             </p>
           ) : (
-            <div className="flex flex-wrap gap-2">
+            <div className="grid sm:grid-cols-2 gap-3">
               {conditions.map((c) => (
                 <button
                   key={c.id}
                   onClick={() => setSelectedCondition(c)}
-                  className="px-4 py-2 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] text-sm font-medium transition-all"
+                  className="group flex items-start justify-between gap-3 text-left px-4 py-3 rounded-2xl border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:border-black/[0.14] dark:hover:border-white/20 transition-all"
                 >
-                  {c.condition_name}
+                  <span className="inline-flex items-center gap-1.5 text-sm font-medium text-ink dark:text-white leading-snug">
+                    {c.condition_name}
+                    {c.source && (
+                      <Quote size={10} className="shrink-0 text-ink/25 dark:text-white/25" aria-label="Fonte citata" />
+                    )}
+                  </span>
+                  {c.evidence_level && (
+                    <span
+                      className="shrink-0 mt-0.5 text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full text-white"
+                      style={{
+                        backgroundColor:
+                          c.evidence_level.toLowerCase() === 'high'
+                            ? '#32D6A0'
+                            : c.evidence_level.toLowerCase() === 'moderate'
+                            ? '#4F7CFF'
+                            : '#94A3B8',
+                      }}
+                    >
+                      {c.evidence_level}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -499,7 +729,17 @@ export default function ZoneHubPage() {
               </div>
 
               {selectedCondition.evidence_level && (
-                <span className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#32D6A0] text-white mb-4">
+                <span
+                  className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full text-white mb-4"
+                  style={{
+                    backgroundColor:
+                      selectedCondition.evidence_level.toLowerCase() === 'high'
+                        ? '#32D6A0'
+                        : selectedCondition.evidence_level.toLowerCase() === 'moderate'
+                        ? '#4F7CFF'
+                        : '#94A3B8',
+                  }}
+                >
                   {selectedCondition.evidence_level} evidence
                 </span>
               )}
@@ -525,6 +765,14 @@ export default function ZoneHubPage() {
                     </p>
                   </div>
                 )}
+                {selectedCondition.outcome_measures && (
+                  <div>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Outcome Measures</p>
+                    <p className="text-ink/60 dark:text-white/60 leading-relaxed">
+                      {selectedCondition.outcome_measures}
+                    </p>
+                  </div>
+                )}
                 {selectedCondition.typical_exercises && (
                   <div>
                     <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Typical Exercises</p>
@@ -539,6 +787,17 @@ export default function ZoneHubPage() {
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">
                       {selectedCondition.progression_criteria}
                     </p>
+                  </div>
+                )}
+                {selectedCondition.return_to_activity_criteria && (
+                  <div className="flex items-start gap-2">
+                    <ClipboardCheck size={14} className="text-[#32D6A0] mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Return to Activity Criteria</p>
+                      <p className="text-ink/60 dark:text-white/60 leading-relaxed">
+                        {selectedCondition.return_to_activity_criteria}
+                      </p>
+                    </div>
                   </div>
                 )}
                 {selectedCondition.contraindications && (
@@ -563,6 +822,16 @@ export default function ZoneHubPage() {
                   </div>
                 )}
               </div>
+
+              {selectedCondition.source && (
+                <div className="mt-5 pt-4 border-t border-black/[0.06] dark:border-white/10 flex items-start gap-2">
+                  <Quote size={12} className="text-ink/30 dark:text-white/30 mt-0.5 shrink-0" />
+                  <p className="text-[11px] text-ink/40 dark:text-white/40 leading-relaxed italic">
+                    {selectedCondition.source}
+                    {selectedCondition.source_date ? ` (${selectedCondition.source_date})` : ''}
+                  </p>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}

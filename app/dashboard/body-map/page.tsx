@@ -1,359 +1,190 @@
 'use client';
 
-import { useState, useRef, Suspense } from 'react';
+import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { MousePointerClick, ScanLine, Search, ArrowRight, Move3d } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import BodyMap3D from '@/components/BodyMap3D';
 
-type View = 'front' | 'back';
-type Point = { x: number; y: number };
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  show: (i: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, delay: 0.12 * i, ease: [0.22, 1, 0.36, 1] },
+  }),
+};
 
-interface Zone {
-  slug: string;
-  name: string;
-  points: Partial<Record<View, Point[]>>;
-}
-
-const IMAGE_BASE =
-  'https://dckmumxswheamyymerea.supabase.co/storage/v1/object/public/library-images';
-
-const INITIAL_ZONES: Zone[] = [
+const HOW_IT_WORKS = [
   {
-    slug: 'cervical-spine',
-    name: 'Cervical Spine',
-    points: {
-      front: [{ x: 50, y: 18.9 }],
-      back: [{ x: 50, y: 12 }],
-    },
+    icon: MousePointerClick,
+    color: '#32D6A0',
+    label: 'Clicca una zona',
+    text: 'Ogni regione evidenziata apre la sua pagina dedicata: anatomia, biomeccanica, test clinici e protocolli riabilitativi.',
   },
   {
-    slug: 'trapezius',
-    name: 'Trapezius / Upper Trap',
-    points: { back: [{ x: 40, y: 19 }, { x: 60, y: 19 }] },
+    icon: ScanLine,
+    color: '#bcd7ff',
+    label: 'Attiva i raggi-X',
+    text: 'Passa alla modalità scheletrica per esplorare 14 gruppi ossei, con le loro fratture e patologie più frequenti.',
   },
   {
-    slug: 'shoulder',
-    name: 'Shoulder',
-    points: {
-      front: [{ x: 35.5, y: 21.9 }, { x: 64.3, y: 21.9 }],
-      back: [{ x: 34.5, y: 21.9 }, { x: 64.3, y: 21.9 }],
-    },
+    icon: Search,
+    color: '#4F7CFF',
+    label: 'Cerca una zona',
+    text: 'Per le aree piccole (polso, caviglia, gomito) è più rapido digitare il nome nella barra di ricerca che centrarle col mouse.',
   },
-  {
-    slug: 'chest',
-    name: 'Chest / Pectorals',
-    points: { front: [{ x: 50, y: 26 }] },
-  },
-  {
-    slug: 'biceps',
-    name: 'Biceps',
-    points: { front: [{ x: 33.2, y: 30 }, { x: 65.7, y: 30 }] },
-  },
-  {
-    slug: 'triceps',
-    name: 'Triceps',
-    points: { back: [{ x: 31.9, y: 30 }, { x: 67.3, y: 30 }] },
-  },
-  {
-    slug: 'elbow',
-    name: 'Elbow',
-    points: { front: [{ x: 32.1, y: 36.2 }, { x: 67.2, y: 36.2 }] },
-  },
-  {
-    slug: 'forearm',
-    name: 'Forearm',
-    points: { front: [{ x: 30, y: 40.5 }, { x: 69, y: 40.5 }] },
-  },
-  {
-    slug: 'wrist-hand',
-    name: 'Wrist / Hand',
-    points: { front: [{ x: 28, y: 44.9 }, { x: 71, y: 44.9 }] },
-  },
-  {
-    slug: 'core-abdomen',
-    name: 'Core / Abdomen',
-    points: { front: [{ x: 50, y: 33.9 }] },
-  },
-  {
-    slug: 'thoracic-spine',
-    name: 'Thoracic Spine / Upper Back',
-    points: { back: [{ x: 50, y: 20 }, { x: 50, y: 28 }] },
-  },
-  {
-    slug: 'lumbar-spine',
-    name: 'Lumbar Spine / Lower Back',
-    points: { back: [{ x: 49.5, y: 41.8 }] },
-  },
-  {
-    slug: 'hip',
-    name: 'Hip',
-    points: {
-      front: [{ x: 44.6, y: 41.7 }, { x: 54.2, y: 41.7 }],
-      back: [{ x: 41.7, y: 45.4 }, { x: 57.4, y: 45.4 }],
-    },
-  },
-  {
-    slug: 'glutes',
-    name: 'Glutes',
-    points: { back: [{ x: 41, y: 50 }, { x: 58, y: 50 }] },
-  },
-  {
-    slug: 'quadriceps',
-    name: 'Quadriceps',
-    points: { front: [{ x: 42.7, y: 52.4 }, { x: 55.8, y: 52.4 }] },
-  },
-  {
-    slug: 'hamstrings',
-    name: 'Hamstrings',
-    points: { back: [{ x: 41.7, y: 54 }, { x: 57.4, y: 54 }] },
-  },
-  {
-    slug: 'knee',
-    name: 'Knee',
-    points: { front: [{ x: 40.9, y: 63.1 }, { x: 57.4, y: 63.1 }] },
-  },
-  {
-    slug: 'calf',
-    name: 'Calf',
-    points: { back: [{ x: 40, y: 75 }, { x: 58.7, y: 75 }] },
-  },
-  {
-    slug: 'ankle-foot',
-    name: 'Ankle / Foot',
-    points: {
-      front: [{ x: 39.3, y: 85.3 }, { x: 59.3, y: 85.3 }],
-      back: [{ x: 39.8, y: 87.1 }, { x: 58.7, y: 87.1 }],
-    },
-  },
-];
+] as const;
 
 function BodyMapContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const calibrate = searchParams.get('calibrate') === '1';
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const [view, setView] = useState<View>('front');
-  const [hovered, setHovered] = useState<string | null>(null);
-  const [zones, setZones] = useState<Zone[]>(INITIAL_ZONES);
-  const [dragging, setDragging] = useState<{ slug: string; index: number } | null>(null);
-  const [showExport, setShowExport] = useState(false);
-  const [isolated, setIsolated] = useState<string | null>(null);
-
-  const imageSrc = view === 'front' ? `${IMAGE_BASE}/bodymap-front.png` : `${IMAGE_BASE}/bodymap-back.png`;
-
-  function updatePoint(slug: string, index: number, x: number, y: number) {
-    setZones((prev) =>
-      prev.map((z) => {
-        if (z.slug !== slug) return z;
-        const pts = [...(z.points[view] || [])];
-        pts[index] = { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
-        return { ...z, points: { ...z.points, [view]: pts } };
-      })
-    );
-  }
-
-  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    if (!dragging || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    let x = ((e.clientX - rect.left) / rect.width) * 100;
-    let y = ((e.clientY - rect.top) / rect.height) * 100;
-    x = Math.max(0, Math.min(100, x));
-    y = Math.max(0, Math.min(100, y));
-    updatePoint(dragging.slug, dragging.index, x, y);
-  }
-
-  function exportCode() {
-    const lines = zones.map((z) => {
-      const parts: string[] = [];
-      if (z.points.front) parts.push(`      front: ${JSON.stringify(z.points.front)},`);
-      if (z.points.back) parts.push(`      back: ${JSON.stringify(z.points.back)},`);
-      return `  {\n    slug: '${z.slug}',\n    name: '${z.name}',\n    points: {\n${parts.join('\n')}\n    },\n  },`;
-    });
-    return `const ZONES: Zone[] = [\n${lines.join('\n')}\n];`;
-  }
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px] animate-drift"
         style={{
           background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)',
         }}
       />
+      <div
+        className="pointer-events-none absolute top-1/3 right-[-200px] w-[600px] h-[600px] rounded-full opacity-[0.12] dark:opacity-[0.18] blur-[130px] animate-floatSlow"
+        style={{
+          background: 'radial-gradient(circle, rgba(50,214,160,0.6) 0%, rgba(79,124,255,0.4) 100%)',
+        }}
+      />
 
-      <div className="relative max-w-5xl mx-auto px-6 pt-40 pb-24">
+      <div className="relative max-w-6xl mx-auto px-6 pt-40 pb-24">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
-            <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]" />
-            {calibrate ? 'Calibration Mode — drag the dots' : 'Interactive Body Map'}
-          </div>
-          <h1 className="font-display text-6xl font-bold tracking-tight">
-            Anatomical{' '}
-            <span className="bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] bg-clip-text text-transparent">
-              Navigator
+          <motion.div
+            initial="hidden"
+            animate="show"
+            custom={0}
+            variants={fadeUp}
+            className="inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-xs font-semibold tracking-wide text-ink/75 dark:text-white/75 shadow-soft mb-5"
+          >
+            <span className="h-2 w-2 rounded-full bg-emerald animate-pulse" />
+            {calibrate ? 'Calibration Mode — click the model' : 'Interactive 3D Body Map'}
+          </motion.div>
+
+          <motion.h1
+            initial="hidden"
+            animate="show"
+            custom={1}
+            variants={fadeUp}
+            className="relative font-display font-semibold tracking-[-0.03em] text-6xl sm:text-8xl leading-[1.02] sm:leading-none"
+          >
+            <span
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-r from-electric via-[#6D8FFF] to-emerald bg-clip-text text-transparent blur-2xl opacity-50 select-none"
+            >
+              Anatomical Navigator
             </span>
-          </h1>
+            <span className="relative bg-gradient-to-r from-electric via-[#6D8FFF] to-emerald bg-clip-text text-transparent">
+              Anatomical Navigator
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial="hidden"
+            animate="show"
+            custom={2}
+            variants={fadeUp}
+            className="mt-5 text-ink/55 dark:text-white/55 text-lg max-w-xl mx-auto text-balance"
+          >
+            Ruota, ingrandisci ed esplora il modello anatomico 3D — clicca su una zona per aprire condizioni, test e protocolli specifici.
+          </motion.p>
         </div>
 
-        <div className="flex justify-center mb-8">
-          <div className="inline-flex rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl p-1">
-            {(['front', 'back'] as View[]).map((v) => (
-              <button
-                key={v}
-                onClick={() => setView(v)}
-                className={`px-6 py-2 rounded-full text-sm font-semibold capitalize transition-all ${
-                  view === v
-                    ? 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-black'
-                    : 'text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white'
-                }`}
-              >
-                {v === 'front' ? 'Front' : 'Back'}
-              </button>
-            ))}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="flex justify-center"
+        >
+          <div className="w-full rounded-[28px] shadow-lift">
+            <BodyMap3D
+              calibrate={calibrate}
+              onSelectZone={(slug) => router.push(`/dashboard/body-map/${slug}`)}
+            />
           </div>
-        </div>
-
-        {calibrate && (
-          <div className="flex justify-center mb-6">
-            <select
-              value={isolated ?? ''}
-              onChange={(e) => setIsolated(e.target.value || null)}
-              className="px-4 py-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.08] dark:border-white/10 text-sm text-ink dark:text-white"
-            >
-              <option value="">Mostra tutte le zone</option>
-              {zones
-                .filter((z) => z.points[view])
-                .map((z) => (
-                  <option key={z.slug} value={z.slug}>
-                    Isola: {z.name}
-                  </option>
-                ))}
-            </select>
-          </div>
-        )}
-
-        {/* Il pannello con l'immagine resta SEMPRE scuro (schermo/device), anche in tema chiaro */}
-        <div className="flex justify-center">
-          <div className="w-full max-w-md rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-[#08090b] p-6 shadow-2xl">
-            <div
-              ref={containerRef}
-              className="relative w-full select-none touch-none"
-              onPointerMove={handlePointerMove}
-              onPointerUp={() => setDragging(null)}
-              onPointerLeave={() => setDragging(null)}
-            >
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={view}
-                  src={imageSrc}
-                  alt={`Anatomical body map - ${view}`}
-                  className="w-full h-auto pointer-events-none"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                  draggable={false}
-                />
-              </AnimatePresence>
-
-              {zones.flatMap((zone) => {
-                const pts = zone.points[view];
-                if (!pts) return [];
-                if (calibrate && isolated && isolated !== zone.slug) return [];
-                return pts.map((p, i) => (
-                  <div
-                    key={`${zone.slug}-${view}-${i}`}
-                    onPointerDown={(e) => {
-                      if (!calibrate) return;
-                      e.preventDefault();
-                      setDragging({ slug: zone.slug, index: i });
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (!calibrate) router.push(`/dashboard/body-map/${zone.slug}`);
-                    }}
-                    onMouseEnter={() => setHovered(`${zone.slug}-${i}`)}
-                    onMouseLeave={() => setHovered(null)}
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 group flex items-center justify-center ${
-                      calibrate ? 'cursor-grab active:cursor-grabbing p-3' : 'cursor-pointer'
-                    }`}
-                    style={{ left: `${p.x}%`, top: `${p.y}%` }}
-                  >
-                    <span className="relative flex h-5 w-5">
-                      {!calibrate && (
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#32D6A0] opacity-60" />
-                      )}
-                      <span
-                        className={`relative inline-flex rounded-full h-5 w-5 border-2 ${
-                          calibrate
-                            ? 'bg-red-500/70 border-red-300'
-                            : 'bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] border-white/40'
-                        }`}
-                      />
-                    </span>
-                    {calibrate && (
-                      <span className="absolute left-1/2 -translate-x-1/2 -top-5 whitespace-nowrap px-1.5 py-0.5 rounded bg-black/70 text-[9px] font-mono text-white/70 pointer-events-none">
-                        {p.x}, {p.y}
-                      </span>
-                    )}
-                    {!calibrate && hovered === `${zone.slug}-${i}` && (
-                      <span className="absolute left-1/2 -translate-x-1/2 -top-8 whitespace-nowrap px-3 py-1 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 text-xs font-medium text-white pointer-events-none">
-                        {zone.name}
-                      </span>
-                    )}
-                  </div>
-                ));
-              })}
-            </div>
-          </div>
-        </div>
+        </motion.div>
 
         {!calibrate && (
-          <div className="flex justify-center mt-10">
-            <button
-              onClick={() => router.push('/dashboard/body-map/whole-body')}
-              className="px-6 py-3 rounded-2xl border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl hover:bg-black/[0.05] dark:hover:bg-white/[0.06] transition-all text-sm font-semibold"
-            >
-              Whole Body / Balance &amp; Gait →
-            </button>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.9 }}
+            className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-6 text-xs text-ink/40 dark:text-white/40"
+          >
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-emerald" />
+              Zone muscolari
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: '#bcd7ff' }} />
+              Zone ossee (raggi-X)
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Move3d size={12} />
+              Trascina per ruotare, scorri per zoom
+            </span>
+          </motion.div>
+        )}
+
+        {!calibrate && (
+          <div className="grid sm:grid-cols-3 gap-4 mt-14">
+            {HOW_IT_WORKS.map(({ icon: Icon, color, label, text }, i) => (
+              <motion.div
+                key={label}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.0 + i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                className="group rounded-xl3 glass-strong p-5 shadow-soft hover:shadow-lift transition-all duration-300 hover:-translate-y-1"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <span
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-110"
+                    style={{ backgroundColor: `${color}1F`, color }}
+                  >
+                    <Icon size={15} />
+                  </span>
+                  <h3 className="text-sm font-semibold tracking-wide text-ink dark:text-white">{label}</h3>
+                </div>
+                <p className="text-ink/60 dark:text-white/60 text-sm leading-relaxed">{text}</p>
+              </motion.div>
+            ))}
           </div>
+        )}
+
+        {!calibrate && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.4 }}
+            className="flex justify-center mt-12"
+          >
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => router.push('/dashboard/body-map/whole-body')}
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-electric to-emerald px-7 py-3.5 text-sm font-semibold text-white shadow-glow transition-shadow hover:shadow-lift shimmer-sweep"
+            >
+              Whole Body / Balance &amp; Gait
+              <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+            </motion.button>
+          </motion.div>
         )}
 
         {calibrate && (
-          <div className="flex flex-col items-center gap-4 mt-8">
-            <p className="text-ink/50 dark:text-white/50 text-sm text-center max-w-md">
-              Trascina ogni pallino rosso esattamente sopra il punto anatomico giusto. Usa il menu sopra per isolare una zona se ce ne sono troppe vicine. Quando hai finito con Front e Back, premi Esporta.
-            </p>
-            <button
-              onClick={() => setShowExport(true)}
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-black text-sm font-bold"
-            >
-              Esporta coordinate
-            </button>
-          </div>
-        )}
-
-        {showExport && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-6 z-50" onClick={() => setShowExport(false)}>
-            <div
-              className="bg-[#0e0f12] border border-white/10 rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <p className="text-sm text-white/60 mb-3">
-                Copia questo testo e incollalo qui in chat — sostituirò l'array ZONES definitivo.
-              </p>
-              <pre className="text-xs bg-black/40 p-4 rounded-xl overflow-auto whitespace-pre-wrap text-white">{exportCode()}</pre>
-              <button
-                onClick={() => setShowExport(false)}
-                className="mt-4 px-4 py-2 rounded-xl bg-white/10 text-sm text-white"
-              >
-                Chiudi
-              </button>
-            </div>
-          </div>
+          <p className="text-ink/50 dark:text-white/50 text-sm text-center max-w-md mx-auto mt-8">
+            Clicca sui punti anatomici direttamente sul modello: ogni clic aggiunge una riga con la frazione [x, y, z] nel pannello in alto. Copiala qui in chat e sostituirò le coordinate definitive in BODY_ZONES_3D.
+          </p>
         )}
       </div>
     </div>
