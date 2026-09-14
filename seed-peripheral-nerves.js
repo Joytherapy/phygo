@@ -10,7 +10,7 @@ const NERVES = [
   // ─── PLESSI ───
   {
     slug: 'brachial-plexus',
-    name: 'Brachial Plexus',
+    name: 'Plesso Brachiale',
     region: 'plexus',
     origin: 'Radici anteriori C5-T1',
     anatomy: 'Rete nervosa complessa organizzata in radici, tronchi, divisioni, fasci e branche terminali. Decorre dal collo, attraverso lo spazio interscalenico, sotto la clavicola, fino all\'ascella, dove origina i nervi principali dell\'arto superiore (mediano, ulnare, radiale, muscolocutaneo, ascellare).',
@@ -21,7 +21,7 @@ const NERVES = [
   },
   {
     slug: 'lumbosacral-plexus',
-    name: 'Lumbosacral Plexus',
+    name: 'Plesso Lombosacrale',
     region: 'plexus',
     origin: 'Radici anteriori L1-S4',
     anatomy: 'Formato dal plesso lombare (L1-L4, davanti al muscolo psoas) e dal plesso sacrale (L4-S4, sulla parete posteriore della pelvi), origina i principali nervi dell\'arto inferiore (femorale, otturatorio, sciatico, gluteo superiore e inferiore).',
@@ -34,7 +34,7 @@ const NERVES = [
   // ─── ARTO SUPERIORE ───
   {
     slug: 'median-nerve',
-    name: 'Median Nerve',
+    name: 'Nervo Mediano',
     region: 'upper_limb',
     origin: 'Fasci laterale e mediale del plesso brachiale (C5-T1)',
     anatomy: 'Decorre lungo la faccia mediale del braccio, attraversa la fossa cubitale tra i due capi del muscolo pronatore rotondo, scende nell\'avambraccio tra i flessori superficiali e profondi delle dita, ed entra nella mano attraverso il tunnel carpale al polso.',
@@ -45,7 +45,7 @@ const NERVES = [
   },
   {
     slug: 'ulnar-nerve',
-    name: 'Ulnar Nerve',
+    name: 'Nervo Ulnare',
     region: 'upper_limb',
     origin: 'Fascio mediale del plesso brachiale (C8-T1)',
     anatomy: 'Decorre lungo la faccia mediale del braccio, passa posteriormente all\'epicondilo mediale dell\'omero (il "gomito del violinista"), scende nell\'avambraccio tra flessore ulnare del carpo e flessore profondo delle dita, ed entra nella mano attraverso il canale di Guyon al polso.',
@@ -56,7 +56,7 @@ const NERVES = [
   },
   {
     slug: 'radial-nerve',
-    name: 'Radial Nerve',
+    name: 'Nervo Radiale',
     region: 'upper_limb',
     origin: 'Fascio posteriore del plesso brachiale (C5-T1)',
     anatomy: 'Decorre posteriormente attorno all\'omero nel solco radiale (a stretto contatto con l\'osso), passa anteriormente al gomito tra brachiale e brachioradiale, e si divide in un ramo superficiale sensitivo e un ramo profondo (nervo interosseo posteriore) prevalentemente motorio.',
@@ -67,7 +67,7 @@ const NERVES = [
   },
   {
     slug: 'musculocutaneous-nerve',
-    name: 'Musculocutaneous Nerve',
+    name: 'Nervo Muscolocutaneo',
     region: 'upper_limb',
     origin: 'Fascio laterale del plesso brachiale (C5-C7)',
     anatomy: 'Perfora il muscolo coracobrachiale, decorre tra bicipite brachiale e brachiale nel compartimento anteriore del braccio, e termina come nervo cutaneo laterale dell\'avambraccio.',
@@ -78,7 +78,7 @@ const NERVES = [
   },
   {
     slug: 'axillary-nerve',
-    name: 'Axillary Nerve',
+    name: 'Nervo Ascellare',
     region: 'upper_limb',
     origin: 'Fascio posteriore del plesso brachiale (C5-C6)',
     anatomy: 'Decorre posteriormente attraverso lo spazio quadrilatero (delimitato da piccolo rotondo, grande rotondo, capo lungo del tricipite e omero), avvolgendo il collo chirurgico dell\'omero.',
@@ -89,7 +89,7 @@ const NERVES = [
   },
   {
     slug: 'long-thoracic-nerve',
-    name: 'Long Thoracic Nerve',
+    name: 'Nervo Toracico Lungo',
     region: 'upper_limb',
     origin: 'Radici C5-C7 (direttamente, prima della formazione dei tronchi del plesso)',
     anatomy: 'Decorre lungo la parete laterale del torace, sulla superficie del muscolo dentato anteriore, particolarmente superficiale e vulnerabile durante la dissezione ascellare.',
@@ -102,7 +102,7 @@ const NERVES = [
   // ─── ARTO INFERIORE ───
   {
     slug: 'sciatic-nerve',
-    name: 'Sciatic Nerve',
+    name: 'Nervo Sciatico',
     region: 'lower_limb',
     origin: 'Plesso sacrale (L4-S3)',
     anatomy: 'Il nervo più grande e spesso del corpo umano. Esce dalla pelvi attraverso il grande forame ischiatico (sotto o attraverso il muscolo piriforme), decorre posteriormente alla coscia, e si divide tipicamente a livello del cavo popliteo nei nervi tibiale e peroneale comune.',
@@ -113,7 +113,7 @@ const NERVES = [
   },
   {
     slug: 'femoral-nerve',
-    name: 'Femoral Nerve',
+    name: 'Nervo Femorale',
     region: 'lower_limb',
     origin: 'Plesso lombare (L2-L4)',
     anatomy: 'Decorre nel solco tra muscolo psoas e iliaco, passa sotto il legamento inguinale lateralmente ai vasi femorali, ed entra nella coscia dove si divide rapidamente in numerosi rami.',
@@ -124,7 +124,7 @@ const NERVES = [
   },
   {
     slug: 'obturator-nerve',
-    name: 'Obturator Nerve',
+    name: 'Nervo Otturatorio',
     region: 'lower_limb',
     origin: 'Plesso lombare (L2-L4)',
     anatomy: 'Decorre lungo la parete pelvica laterale ed esce dalla pelvi attraverso il forame otturatorio, entrando nel compartimento mediale della coscia.',
@@ -135,7 +135,7 @@ const NERVES = [
   },
   {
     slug: 'tibial-nerve',
-    name: 'Tibial Nerve',
+    name: 'Nervo Tibiale',
     region: 'lower_limb',
     origin: 'Ramo terminale mediale del nervo sciatico',
     anatomy: 'Decorre attraverso il cavo popliteo, scende in profondità nel compartimento posteriore della gamba (sotto il muscolo soleo), e passa posteriormente al malleolo mediale attraverso il tunnel tarsale, dove si divide nei nervi plantari mediale e laterale.',
@@ -146,7 +146,7 @@ const NERVES = [
   },
   {
     slug: 'common-peroneal-nerve',
-    name: 'Common Peroneal Nerve',
+    name: 'Nervo Peroneale Comune',
     region: 'lower_limb',
     origin: 'Ramo terminale laterale del nervo sciatico',
     anatomy: 'Decorre lateralmente nel cavo popliteo, avvolge superficialmente il collo del perone (dove è particolarmente vulnerabile a compressione, essendo qui palpabile sotto la cute), e si divide nei nervi peroneale superficiale e profondo.',
@@ -157,7 +157,7 @@ const NERVES = [
   },
   {
     slug: 'superficial-peroneal-nerve',
-    name: 'Superficial Peroneal Nerve',
+    name: 'Nervo Peroneale Superficiale',
     region: 'lower_limb',
     origin: 'Ramo terminale del nervo peroneale comune',
     anatomy: 'Decorre nel compartimento laterale della gamba, tra i muscoli peronei, per poi diventare superficiale e cutaneo nel terzo distale della gamba.',
@@ -168,7 +168,7 @@ const NERVES = [
   },
   {
     slug: 'deep-peroneal-nerve',
-    name: 'Deep Peroneal Nerve',
+    name: 'Nervo Peroneale Profondo',
     region: 'lower_limb',
     origin: 'Ramo terminale del nervo peroneale comune',
     anatomy: 'Decorre nel compartimento anteriore della gamba insieme all\'arteria tibiale anteriore, passa sotto il retinacolo estensore alla caviglia.',
@@ -179,7 +179,7 @@ const NERVES = [
   },
   {
     slug: 'lateral-femoral-cutaneous-nerve',
-    name: 'Lateral Femoral Cutaneous Nerve',
+    name: 'Nervo Cutaneo Femorale Laterale',
     region: 'lower_limb',
     origin: 'Plesso lombare (L2-L3)',
     anatomy: 'Nervo puramente sensitivo. Decorre lungo la parete pelvica ed esce sotto o attraverso il legamento inguinale, vicino alla spina iliaca anterosuperiore, per poi diventare sottocutaneo sulla faccia laterale della coscia.',
@@ -192,7 +192,7 @@ const NERVES = [
   // ─── NERVI CRANICI CON DECORSO PERIFERICO RILEVANTE ───
   {
     slug: 'spinal-accessory-nerve',
-    name: 'Spinal Accessory Nerve (CN XI)',
+    name: 'Nervo Accessorio Spinale (XI nervo cranico)',
     region: 'plexus',
     origin: 'Radici del midollo cervicale superiore (C1-C5), con contributo variabile dal nucleo ambiguo bulbare',
     anatomy: 'Emerge dal forame giugulare insieme ai nervi cranici IX e X, decorre attraverso il triangolo posteriore del collo, dove è particolarmente superficiale e vulnerabile durante la dissezione linfonodale chirurgica.',

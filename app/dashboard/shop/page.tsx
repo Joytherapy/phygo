@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   ExternalLink,
@@ -10,10 +10,13 @@ import {
   Move3d,
   HeartPulse,
   Sparkles,
+  Scale,
+  Apple,
 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import ClinicalActionBar from '@/components/ClinicalActionBar'
-import { products, categories, type Product } from '@/lib/products'
+import { getProducts, categories, type Product } from '@/lib/products'
+import { useUiStrings, useLanguage } from '@/contexts/LanguageContext'
 
 const CATEGORY_STYLE: Record<Product['category'], { icon: any; gradient: string; glow: string }> = {
   'Pelvic Floor': {
@@ -41,10 +44,27 @@ const CATEGORY_STYLE: Record<Product['category'], { icon: any; gradient: string;
     gradient: 'linear-gradient(135deg, #A78BFA 0%, #818CF8 100%)',
     glow: 'rgba(167,139,250,0.25)',
   },
+  // Stessa coppia indaco/violetto del Metabolic Calculator (Clinical
+  // Toolkit / Phygo Life) — segnala visivamente che questi prodotti
+  // supportano quella funzione, non una categoria scollegata.
+  'Body Composition': {
+    icon: Scale,
+    gradient: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+    glow: 'rgba(99,102,241,0.25)',
+  },
+  Nutrition: {
+    icon: Apple,
+    gradient: 'linear-gradient(135deg, #FB923C 0%, #EA580C 100%)',
+    glow: 'rgba(251,146,60,0.25)',
+  },
 }
 
 export default function ShopPage() {
+  const ui = useUiStrings()
+  const { lang } = useLanguage()
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
+
+  const products = useMemo(() => getProducts(lang), [lang])
 
   const filteredProducts = activeCategory
     ? products.filter((p) => p.category === activeCategory)
@@ -75,21 +95,21 @@ export default function ShopPage() {
                 style={{ background: 'linear-gradient(90deg, #4F7CFF, #32D6A0)' }}
               />
               <p className="text-xs font-semibold tracking-[0.25em] uppercase text-[#4F7CFF]">
-                Equipment
+                {ui.shop.eyebrow}
               </p>
             </div>
             <h1 className="font-display text-5xl font-bold tracking-tight leading-none text-ink dark:text-white">
-              Shop
+              {ui.shop.heading}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]">.</span>
             </h1>
             <p className="text-base text-ink/40 dark:text-white/40 mt-3 max-w-md">
-              Equipment picks you can recommend straight from a session.
+              {ui.shop.subtitle}
             </p>
           </div>
           <div className="flex items-center gap-2 rounded-full border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl px-4 py-2.5">
             <Sparkles size={13} className="text-[#4F7CFF]" />
             <span className="text-xs font-semibold text-ink/60 dark:text-white/60">
-              {products.length} curated picks
+              {products.length} {ui.shop.curatedPicksSuffix}
             </span>
           </div>
         </motion.div>
@@ -104,7 +124,7 @@ export default function ShopPage() {
             }`}
             style={activeCategory === null ? { background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
           >
-            All · {products.length}
+            {ui.shop.allLabel} · {products.length}
           </button>
           {categories.map((cat) => {
             const style = CATEGORY_STYLE[cat]
@@ -124,7 +144,7 @@ export default function ShopPage() {
                     : undefined
                 }
               >
-                {cat} · {countFor(cat)}
+                {ui.shop.categoryLabels[cat]} · {countFor(cat)}
               </button>
             )
           })}
@@ -166,7 +186,7 @@ export default function ShopPage() {
                   <div className="flex items-center gap-1.5 mb-2">
                     <span className="h-1.5 w-1.5 rounded-full" style={{ background: style.gradient }} />
                     <span className="text-[10px] font-bold uppercase tracking-wider text-ink/40 dark:text-white/40">
-                      {product.category}
+                      {ui.shop.categoryLabels[product.category]}
                     </span>
                   </div>
                   <p className="text-sm font-bold text-ink dark:text-white mb-1.5 leading-snug">
@@ -191,7 +211,7 @@ export default function ShopPage() {
                     className="flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-semibold text-white transition-transform hover:scale-[1.02]"
                     style={{ background: style.gradient }}
                   >
-                    View on Amazon
+                    {ui.shop.viewOnAmazonCta}
                     <ExternalLink size={12} />
                   </a>
                 </div>

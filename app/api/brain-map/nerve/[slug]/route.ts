@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getTranslatedCondition, type SupportedLang } from '@/lib/conditionTranslation';
+import { translateContent, type AppLang } from '@/lib/contentTranslation';
+import { NERVE_FIELD_ORDER } from '@/lib/brainMapFields';
+
+function parseLang(value: string | null): AppLang {
+  return value === 'en' || value === 'es' || value === 'fr' ? value : 'it';
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +21,7 @@ export async function GET(
 ) {
   try {
     const { slug } = params;
+    const lang = parseLang(new URL(req.url).searchParams.get('lang'));
 
     const { data: nerve, error: nerveErr } = await adminSupabase
       .from('peripheral_nerves')
@@ -41,9 +49,44 @@ export async function GET(
         )
         .in('id', conditionIds);
       conditions = conds || [];
+
+      if (lang !== 'it' && conditions.length > 0) {
+        conditions = await Promise.all(
+          conditions.map(async (c) => (await getTranslatedCondition(c.id, lang as SupportedLang)) ?? c)
+        );
+      }
     }
 
-    return NextResponse.json({ nerve, conditions });
+    let translatedNerve = nerve;
+    if (lang !== 'it') {
+      const { fields } = await translateContent(
+        'peripheral_nerve',
+        nerve.id,
+        {
+          name: nerve.name,
+          origin: nerve.origin,
+          anatomy: nerve.anatomy,
+          motor_function: nerve.motor_function,
+          sensory_function: nerve.sensory_function,
+          compression_site: nerve.compression_site,
+          clinical_sign: nerve.clinical_sign,
+        },
+        NERVE_FIELD_ORDER,
+        lang
+      );
+      translatedNerve = {
+        ...nerve,
+        name: fields.name || nerve.name,
+        origin: nerve.origin ? fields.origin || nerve.origin : nerve.origin,
+        anatomy: nerve.anatomy ? fields.anatomy || nerve.anatomy : nerve.anatomy,
+        motor_function: nerve.motor_function ? fields.motor_function || nerve.motor_function : nerve.motor_function,
+        sensory_function: nerve.sensory_function ? fields.sensory_function || nerve.sensory_function : nerve.sensory_function,
+        compression_site: nerve.compression_site ? fields.compression_site || nerve.compression_site : nerve.compression_site,
+        clinical_sign: nerve.clinical_sign ? fields.clinical_sign || nerve.clinical_sign : nerve.clinical_sign,
+      };
+    }
+
+    return NextResponse.json({ nerve: translatedNerve, conditions });
   } catch (err) {
     console.error('nerve detail error:', err);
     return NextResponse.json({ error: 'Failed to load nerve' }, { status: 500 });

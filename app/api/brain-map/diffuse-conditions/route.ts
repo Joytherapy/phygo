@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getTranslatedCondition, type SupportedLang } from '@/lib/conditionTranslation';
+import type { AppLang } from '@/lib/contentTranslation';
+
+function parseLang(value: string | null): AppLang {
+  return value === 'en' || value === 'es' || value === 'fr' ? value : 'it';
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -12,8 +18,10 @@ const adminSupabase = createClient(
 // (es. Guillain-Barré, CIDP, Charcot-Marie-Tooth, neuropatia da chemioterapia) che non
 // sono legate a un singolo nervo nominato, quindi non passano per la tabella nerve_conditions
 // (nerve_id singolo) ma per il ponte dedicato peripheral_nerve_diffuse_conditions.
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const lang = parseLang(new URL(req.url).searchParams.get('lang'));
+
     const { data: links, error: linksErr } = await adminSupabase
       .from('peripheral_nerve_diffuse_conditions')
       .select('condition_id');
@@ -40,6 +48,12 @@ export async function GET() {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
       conditions = data ?? [];
+
+      if (lang !== 'it' && conditions.length > 0) {
+        conditions = await Promise.all(
+          conditions.map(async (c) => (await getTranslatedCondition(c.id, lang as SupportedLang)) ?? c)
+        );
+      }
     }
 
     return NextResponse.json({ conditions });

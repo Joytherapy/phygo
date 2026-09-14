@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { motion, useMotionValueEvent, useScroll, AnimatePresence } from "framer-motion";
-import { Menu, X, Moon, Sun, User, LogOut, Search } from "lucide-react";
+import { Menu, X, Moon, Sun, User, LogOut, Search, Globe } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import MagneticButton from "./MagneticButton";
 import { usePatientContext } from "@/contexts/PatientContext";
+import { useLanguage, useUiStrings } from "@/contexts/LanguageContext";
+import { APP_LANGS } from "@/lib/i18n/uiStrings";
 import SearchModal from "./SearchModal";
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,24 +18,34 @@ const supabase = createBrowserClient(
 const linksBeforeLibrary = [
   { label: "Live demo", href: "/#demo" },
   { label: "Features", href: "/#features" },
+  { label: "Library", href: "/library/condition" },
   { label: "Trust", href: "/#trust" },
   { label: "Pricing", href: "/#pricing" },
 ];
 
 const faqLink = { label: "FAQ", href: "/#faq" };
 
-const libraryLinks = [
-  { label: "Science", href: "/dashboard/science", description: "Latest research summaries" },
-  { label: "Body Map", href: "/dashboard/body-map", description: "Interactive anatomy explorer" },
-  { label: "Neurology", href: "/dashboard/brain-map", description: "Brain, nerves & pathways" },
-{ label: "Pelvic Floor", href: "/dashboard/pelvic-floor", description: "Anatomy, conditions & rehab" },
-  { label: "Cardiopulmonary", href: "/dashboard/cardiopulmonary", description: "Anatomy, conditions & rehab" },
-    { label: "Oncology", href: "/dashboard/oncology", description: "Anatomy, conditions & rehab" },
-  { label: "First Aid", href: "/dashboard/first-aid", description: "Protocols by country" },
-  { label: "BLSD", href: "/dashboard/bls", description: "CPR, AED & choking relief" },
-  { label: "Clinical Tools", href: "/dashboard/clinical-tools", description: "Assessment scales & tests" },
-  { label: "Shop", href: "/dashboard/shop", description: "Equipment picks to recommend" },
-];
+// Hrefs are stable across languages; labels/descriptions come from
+// UI_STRINGS[lang].libraryLinks[key] so the submenu follows the account's
+// preferred language (see contexts/LanguageContext.tsx).
+const libraryLinkHrefs = [
+  { key: "bodyMap", href: "/dashboard/body-map" },
+  { key: "neurology", href: "/dashboard/brain-map" },
+  { key: "pelvicFloor", href: "/dashboard/pelvic-floor" },
+  { key: "cardiopulmonary", href: "/dashboard/cardiopulmonary" },
+  { key: "oncology", href: "/dashboard/oncology" },
+  { key: "firstAid", href: "/dashboard/first-aid" },
+  { key: "blsd", href: "/dashboard/bls" },
+  { key: "clinicalTools", href: "/dashboard/clinical-tools" },
+] as const;
+
+// Phygo World groups the broader ecosystem (research, events, shop) apart
+// from the clinical/professional Library dropdown above.
+const worldLinkHrefs = [
+  { key: "science", href: "/dashboard/science" },
+  { key: "events", href: "/dashboard/world/events" },
+  { key: "shop", href: "/dashboard/shop" },
+] as const;
 
 const getInitials = (name: string) => {
   const parts = name.trim().split(/\s+/);
@@ -48,11 +60,18 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
     const [libraryOpen, setLibraryOpen] = useState(false);
+  const [worldOpen, setWorldOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { currentPatient, setCurrentPatient } = usePatientContext();
   const pathname = usePathname();
   const isDashboard = pathname?.startsWith("/dashboard");
+  // Falls back to Italian defaults when rendered outside /dashboard (no
+  // LanguageProvider there) — usePatientContext's own defaultValue fallback
+  // is the precedent for this pattern in this file.
+  const { lang, setLang } = useLanguage();
+  const ui = useUiStrings();
   const [initials, setInitials] = useState("··");
   const [dark, setDark] = useState(() => {
     if (typeof window === "undefined") return true;
@@ -140,7 +159,7 @@ export default function Navbar() {
               href="/dashboard"
               className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors group"
             >
-              Patients
+              {ui.nav.patients}
               <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/60 transition-all duration-300 group-hover:w-full" />
             </a>
           )}
@@ -152,7 +171,7 @@ export default function Navbar() {
               onMouseLeave={() => setLibraryOpen(false)}
             >
               <button className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors flex items-center gap-1">
-                Library
+                {ui.nav.library}
                 <svg
                   width="10"
                   height="6"
@@ -172,14 +191,14 @@ export default function Navbar() {
                     className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-64"
                   >
                     <div className="glass-strong rounded-xl2 shadow-soft p-2">
-                      {libraryLinks.map((l) => (
+                      {libraryLinkHrefs.map((l) => (
                         <a
                           key={l.href}
                           href={l.href}
                           className="block rounded-xl px-3 py-2.5 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
                         >
-                          <p className="text-sm font-semibold text-ink dark:text-white">{l.label}</p>
-                          <p className="text-xs text-ink/50 dark:text-white/50 mt-0.5">{l.description}</p>
+                          <p className="text-sm font-semibold text-ink dark:text-white">{ui.libraryLinks[l.key].label}</p>
+                          <p className="text-xs text-ink/50 dark:text-white/50 mt-0.5">{ui.libraryLinks[l.key].description}</p>
                         </a>
                       ))}
                     </div>
@@ -194,9 +213,53 @@ export default function Navbar() {
               href="/dashboard/agenda"
               className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors group"
             >
-              Schedule
+              {ui.nav.schedule}
               <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/60 transition-all duration-300 group-hover:w-full" />
             </a>
+          )}
+
+          {isDashboard && (
+            <div
+              className="relative"
+              onMouseEnter={() => setWorldOpen(true)}
+              onMouseLeave={() => setWorldOpen(false)}
+            >
+              <button className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors flex items-center gap-1">
+                {ui.nav.world}
+                <svg
+                  width="10"
+                  height="6"
+                  viewBox="0 0 10 6"
+                  fill="none"
+                  className={`transition-transform ${worldOpen ? "rotate-180" : ""}`}
+                >
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </button>
+              <AnimatePresence>
+                {worldOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-64"
+                  >
+                    <div className="glass-strong rounded-xl2 shadow-soft p-2">
+                      {worldLinkHrefs.map((l) => (
+                        <a
+                          key={l.href}
+                          href={l.href}
+                          className="block rounded-xl px-3 py-2.5 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+                        >
+                          <p className="text-sm font-semibold text-ink dark:text-white">{ui.worldLinks[l.key].label}</p>
+                          <p className="text-xs text-ink/50 dark:text-white/50 mt-0.5">{ui.worldLinks[l.key].description}</p>
+                        </a>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           )}
 
           {!isDashboard && (
@@ -241,6 +304,50 @@ export default function Navbar() {
             </button>
           )}
 
+          {isDashboard && (
+            <div
+              className="relative hidden sm:block"
+              onMouseEnter={() => setLangOpen(true)}
+              onMouseLeave={() => setLangOpen(false)}
+            >
+              <button
+                aria-label="Change language"
+                data-cursor-hover
+                className="flex items-center gap-1 h-9 px-2.5 rounded-full text-ink/60 hover:text-ink hover:bg-ink/5 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/10 transition-colors text-[11px] font-bold uppercase tracking-wide"
+              >
+                <Globe size={15} />
+                {lang}
+              </button>
+              <AnimatePresence>
+                {langOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    className="absolute top-full right-0 pt-3 w-40"
+                  >
+                    <div className="glass-strong rounded-xl2 shadow-soft p-1.5 flex items-center gap-1">
+                      {APP_LANGS.map((l) => (
+                        <button
+                          key={l}
+                          onClick={() => setLang(l)}
+                          aria-current={l === lang ? "true" : undefined}
+                          className={`flex-1 rounded-lg py-1.5 text-[10px] font-bold uppercase tracking-wide transition-colors ${
+                            l === lang
+                              ? "bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white"
+                              : "text-ink/40 dark:text-white/40 hover:text-ink dark:hover:text-white"
+                          }`}
+                        >
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
           <button
             aria-label="Toggle dark mode"
             onClick={() => setDark((d) => !d)}
@@ -276,14 +383,14 @@ export default function Navbar() {
                         className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 dark:text-white/70 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
                       >
                         <User size={14} />
-                        Profile
+                        {ui.nav.profile}
                       </a>
                       <button
                         onClick={handleSignOut}
                         className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 dark:text-white/70 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
                       >
                         <LogOut size={14} />
-                        Sign out
+                        {ui.nav.signOut}
                       </button>
                     </div>
                   </motion.div>
@@ -313,7 +420,7 @@ export default function Navbar() {
       {currentPatient && (
         <div className="sm:hidden absolute top-16 left-4 right-4 flex items-center justify-center gap-1.5 rounded-full py-1.5 bg-[#4F7CFF]/10 text-[#4F7CFF]">
           <User size={12} />
-          <span className="text-xs font-semibold">Current patient: {currentPatient.name}</span>
+          <span className="text-xs font-semibold">{ui.nav.currentPatient}: {currentPatient.name}</span>
           <button
             aria-label="Clear current patient"
             onClick={() => setCurrentPatient(null)}
@@ -348,21 +455,35 @@ export default function Navbar() {
               onClick={() => setOpen(false)}
               className="text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
             >
-              Patients
+              {ui.nav.patients}
             </a>
           )}
 
           {isDashboard && <div className="h-px bg-ink/10 dark:bg-white/10 my-1" />}
 
           {isDashboard &&
-            libraryLinks.map((l) => (
+            libraryLinkHrefs.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
                 className="text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
               >
-                {l.label}
+                {ui.libraryLinks[l.key].label}
+              </a>
+            ))}
+
+          {isDashboard && <div className="h-px bg-ink/10 dark:bg-white/10 my-1" />}
+
+          {isDashboard &&
+            worldLinkHrefs.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className="text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
+              >
+                {ui.worldLinks[l.key].label}
               </a>
             ))}
 
@@ -374,8 +495,30 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 className="text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
               >
-                Schedule
+                {ui.nav.schedule}
               </a>
+            </>
+          )}
+
+          {isDashboard && (
+            <>
+              <div className="h-px bg-ink/10 dark:bg-white/10 my-1" />
+              <div className="flex items-center gap-1">
+                {APP_LANGS.map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => setLang(l)}
+                    aria-current={l === lang ? "true" : undefined}
+                    className={`flex-1 rounded-lg py-1.5 text-[10px] font-bold uppercase tracking-wide transition-colors ${
+                      l === lang
+                        ? "bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white"
+                        : "text-ink/40 dark:text-white/40"
+                    }`}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
             </>
           )}
 
@@ -401,7 +544,7 @@ export default function Navbar() {
               className="flex items-center gap-2 rounded-full bg-ink dark:bg-white text-white dark:text-ink text-sm font-semibold px-4 py-2 mt-1"
             >
               <LogOut size={14} />
-              Sign out
+              {ui.nav.signOut}
             </button>
           ) : (
             <a

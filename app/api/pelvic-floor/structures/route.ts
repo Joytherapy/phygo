@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { translateContent, type AppLang } from '@/lib/contentTranslation';
+import { STRUCTURE_FIELD_ORDER } from '@/lib/pelvicFloorFields';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,11 +10,17 @@ const adminSupabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function GET() {
+function parseLang(value: string | null): AppLang {
+  return value === 'en' || value === 'es' || value === 'fr' ? value : 'it';
+}
+
+export async function GET(req: Request) {
   try {
+    const lang = parseLang(new URL(req.url).searchParams.get('lang'));
+
     const { data, error } = await adminSupabase
       .from('pelvic_floor_structures')
-      .select('id, slug, name, category, diagram_image')
+      .select('*')
       .order('name', { ascending: true });
 
     if (error) {
@@ -20,7 +28,14 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ structures: data ?? [] });
+    const structures = await Promise.all(
+      (data ?? []).map(async (s) => {
+        const { fields } = await translateContent('pelvic_floor_structure', s.id, s, STRUCTURE_FIELD_ORDER, lang);
+        return { ...s, ...fields };
+      })
+    );
+
+    return NextResponse.json({ structures }, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
   } catch (err) {
     console.error('pelvic floor structures list error:', err);
     return NextResponse.json({ error: 'Failed to load structures' }, { status: 500 });

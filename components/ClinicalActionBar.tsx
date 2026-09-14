@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { Plus, Check, Loader2, Search, User } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 import { usePatientContext } from '@/contexts/PatientContext'
+import { useUiStrings } from '@/contexts/LanguageContext'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,27 +14,33 @@ const supabase = createBrowserClient(
 
 type ContentType = 'exercise' | 'clinical_test' | 'questionnaire' | 'condition' | 'anatomical_zone' | 'product'
 
-const ACTION_LABELS: Record<ContentType, string> = {
-  exercise: 'Add to Treatment Plan',
-  clinical_test: 'Use with Patient',
-  questionnaire: 'Start for Patient',
-  condition: 'Use as Clinical Reference',
-  anatomical_zone: 'Use with Patient',
-  product: 'Recommend to Patient',
-}
-
 type PatientOption = { id: string; name: string }
 
 export default function ClinicalActionBar({
   contentType,
   contentId,
   payload,
+  label,
+  section,
 }: {
   contentType: ContentType
   contentId: string
   payload?: Record<string, any>
+  /** Human-readable name of the item being referenced (e.g. condition name, exercise title). Stored so the patient's history timeline can show it without re-resolving IDs across many source tables. */
+  label?: string
+  /** Which part of Phygo this reference came from (e.g. "Body Map", "Manual Therapy"). Shown alongside the label in the patient's history timeline. */
+  section?: string
 }) {
   const { currentPatient, setCurrentPatient } = usePatientContext()
+  const ui = useUiStrings()
+  const ACTION_LABELS: Record<ContentType, string> = {
+    exercise: ui.clinicalActionBar.addToTreatmentPlan,
+    clinical_test: ui.clinicalActionBar.useWithPatient,
+    questionnaire: ui.clinicalActionBar.startForPatient,
+    condition: ui.clinicalActionBar.useAsClinicalReference,
+    anatomical_zone: ui.clinicalActionBar.useWithPatient,
+    product: ui.clinicalActionBar.recommendToPatient,
+  }
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [showPicker, setShowPicker] = useState(false)
   const [query, setQuery] = useState('')
@@ -94,11 +101,13 @@ export default function ClinicalActionBar({
 
   const saveReference = async (patientId: string) => {
     setStatus('saving')
+    const mergedPayload =
+      label || section ? { ...(payload || {}), label, section } : payload || null
     const { error } = await supabase.from('patient_clinical_references').insert({
       patient_id: patientId,
       content_type: contentType,
       content_id: contentId,
-      payload: payload || null,
+      payload: mergedPayload,
     })
     if (!error) {
       setStatus('saved')
@@ -139,10 +148,12 @@ export default function ClinicalActionBar({
         {status === 'saved' && <Check size={12} />}
         {status === 'idle' && <Plus size={12} />}
         {status === 'saved'
-          ? `Added${currentPatient ? ` for ${currentPatient.name}` : ''}`
+          ? currentPatient
+            ? ui.clinicalActionBar.addedFor.replace('{name}', currentPatient.name)
+            : ui.clinicalActionBar.added
           : currentPatient
           ? ACTION_LABELS[contentType]
-          : 'Select patient'}
+          : ui.clinicalActionBar.selectPatient}
       </button>
 
       {mounted && showPicker &&
@@ -159,17 +170,17 @@ export default function ClinicalActionBar({
                 type="text"
                 value={query}
                 onChange={(e) => searchPatients(e.target.value)}
-                placeholder="Search patient..."
+                placeholder={ui.clinicalActionBar.searchPlaceholder}
                 className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 pl-8 pr-2 py-2 outline-none focus:border-[#4F7CFF]"
               />
             </div>
 
             {searching && (
-              <p className="text-[11px] text-ink/40 dark:text-white/40 px-1 py-1">Searching...</p>
+              <p className="text-[11px] text-ink/40 dark:text-white/40 px-1 py-1">{ui.clinicalActionBar.searching}</p>
             )}
 
             {!searching && query && results.length === 0 && (
-              <p className="text-[11px] text-ink/40 dark:text-white/40 px-1 py-1">No patients found.</p>
+              <p className="text-[11px] text-ink/40 dark:text-white/40 px-1 py-1">{ui.clinicalActionBar.noPatientsFound}</p>
             )}
 
             {results.length > 0 && (

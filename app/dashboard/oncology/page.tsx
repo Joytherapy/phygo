@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
+import ClinicalActionBar from '@/components/ClinicalActionBar';
 import { X, Sparkles, Loader2, Maximize2 } from 'lucide-react';
+import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 
 type SubView = 'anatomy' | 'conditions' | 'treatments' | 'assessment' | 'rehab';
 
@@ -59,28 +61,37 @@ interface TreatmentItem {
   evidence_note?: string;
 }
 
-const CATEGORY_LABEL: Record<string, string> = {
-  mammario: 'Mammario',
-  linfatico: 'Sistema Linfatico',
-  'neuro-oncologico': 'Neuro-Oncologico',
-  sistemico: 'Sistemico',
-};
+type RegionKey =
+  | 'tumor-biology'
+  | 'lymphatic-general'
+  | 'breast'
+  | 'gynecological'
+  | 'prostate'
+  | 'bladder'
+  | 'lung'
+  | 'brain'
+  | 'head-neck'
+  | 'colorectal'
+  | 'systemic';
 
-const REGION_BY_SLUG: Record<string, string> = {
-  'cancerogenesi-danno-dna': 'Biologia del Tumore',
-  'cancerogenesi-invasione-metastasi': 'Biologia del Tumore',
-  'cancerogenesi-microambiente-angiogenesi': 'Biologia del Tumore',
-  'sistema-linfatico-generale': 'Sistema Linfatico Generale',
-  'anatomia-vascolarizzazione-mammella': 'Mammella',
-  'drenaggio-linfatico-ascellare': 'Mammella',
-  'drenaggio-linfatico-pelvico-ginecologico': 'Ginecologico',
-  'drenaggio-linfatico-prostatico': 'Prostata',
-  'drenaggio-linfatico-vescicale': 'Vescica',
-  'drenaggio-linfatico-polmonare': 'Polmone',
-  'metastasi-cerebrali-mappa': 'Cervello',
-  'drenaggio-linfatico-testa-collo': 'Testa-Collo',
-  'drenaggio-linfatico-colon-rettale': 'Colon-Retto',
-  'meccanismo-diffusione-sistemica': 'Sistemico',
+// Purely frontend grouping map for the Anatomy sub-tab — not a DB column, so
+// these keys are language-independent; display text comes from
+// ui.oncology.regionLabels.
+const REGION_BY_SLUG: Record<string, RegionKey> = {
+  'cancerogenesi-danno-dna': 'tumor-biology',
+  'cancerogenesi-invasione-metastasi': 'tumor-biology',
+  'cancerogenesi-microambiente-angiogenesi': 'tumor-biology',
+  'sistema-linfatico-generale': 'lymphatic-general',
+  'anatomia-vascolarizzazione-mammella': 'breast',
+  'drenaggio-linfatico-ascellare': 'breast',
+  'drenaggio-linfatico-pelvico-ginecologico': 'gynecological',
+  'drenaggio-linfatico-prostatico': 'prostate',
+  'drenaggio-linfatico-vescicale': 'bladder',
+  'drenaggio-linfatico-polmonare': 'lung',
+  'metastasi-cerebrali-mappa': 'brain',
+  'drenaggio-linfatico-testa-collo': 'head-neck',
+  'drenaggio-linfatico-colon-rettale': 'colorectal',
+  'meccanismo-diffusione-sistemica': 'systemic',
 };
 
 const REGION_SLUG_ORDER: Record<string, number> = {
@@ -91,58 +102,28 @@ const REGION_SLUG_ORDER: Record<string, number> = {
   'drenaggio-linfatico-ascellare': 1,
 };
 
-const REGION_ORDER = [
-  'Biologia del Tumore',
-  'Sistema Linfatico Generale',
-  'Mammella',
-  'Ginecologico',
-  'Prostata',
-  'Vescica',
-  'Polmone',
-  'Cervello',
-  'Testa-Collo',
-  'Colon-Retto',
-  'Sistemico',
+const REGION_ORDER: RegionKey[] = [
+  'tumor-biology',
+  'lymphatic-general',
+  'breast',
+  'gynecological',
+  'prostate',
+  'bladder',
+  'lung',
+  'brain',
+  'head-neck',
+  'colorectal',
+  'systemic',
 ];
-const SYSTEM_LABEL: Record<string, string> = {
-  mammario: 'Carcinoma Mammario',
-  ginecologico: 'Tumori Ginecologici',
-  prostatico: 'Carcinoma Prostatico',
-  vescicale: 'Carcinoma della Vescica',
-  'neuro-oncologico': 'Tumori Cerebrali',
-  'colon-retto': 'Carcinoma del Colon-Retto',
-  polmonare: 'Carcinoma del Polmone',
-  'testa-collo': 'Tumori Testa-Collo',
-  sarcoma: 'Sarcomi',
-  ematologico: 'Neoplasie Ematologiche',
-  sistemico: 'Complicanze Sistemiche',
-};
 
+// The keys below match actual `system`/`category` values in the oncology_*
+// tables (used for filtering), so they must stay exactly as stored — only
+// the display label is translated, via ui.oncology.*Labels.
 const SYSTEM_ORDER = ['mammario', 'ginecologico', 'prostatico', 'vescicale', 'neuro-oncologico', 'colon-retto', 'polmonare', 'testa-collo', 'sarcoma', 'ematologico', 'sistemico'];
-
-const TEST_CATEGORY_LABEL: Record<string, string> = {
-  performance_status: 'Performance Status',
-  lymphedema_assessment: 'Valutazione del Linfedema',
-  red_flag_screening: 'Screening Pre-Esercizio',
-};
 
 const TEST_CATEGORY_ORDER = ['performance_status', 'lymphedema_assessment', 'red_flag_screening'];
 
-const REHAB_CATEGORY_LABEL: Record<string, string> = {
-  linfedema: 'Gestione del Linfedema',
-  complicanze_specifiche: 'Complicanze Specifiche',
-  esercizio: 'Esercizio in Oncologia',
-};
-
 const REHAB_CATEGORY_ORDER = ['linfedema', 'complicanze_specifiche', 'esercizio'];
-
-const TREATMENT_CATEGORY_LABEL: Record<string, string> = {
-  per_tipo_tumore: 'Percorsi per Tipo di Tumore',
-  diagnostica: 'Diagnostica e Stadiazione',
-  chirurgia: 'Chirurgia',
-  farmacologico: 'Trattamenti Farmacologici',
-  fisico: 'Trattamenti Fisici',
-};
 
 const TREATMENT_CATEGORY_ORDER = ['per_tipo_tumore', 'diagnostica', 'chirurgia', 'farmacologico', 'fisico'];
 
@@ -155,6 +136,9 @@ const IMAGE_BASE =
   'https://dckmumxswheamyymerea.supabase.co/storage/v1/object/public/library-images';
 
 export default function OncologyPage() {
+  const { lang } = useLanguage();
+  const ui = useUiStrings();
+
   const [subView, setSubView] = useState<SubView>('anatomy');
 
   const [structures, setStructures] = useState<StructureItem[]>([]);
@@ -191,25 +175,33 @@ export default function OncologyPage() {
   const [askError, setAskError] = useState<string | null>(null);
 
   useEffect(() => {
+    setHasFetchedStructures(false);
+    setHasFetchedConditions(false);
+    setHasFetchedTests(false);
+    setHasFetchedRehab(false);
+    setHasFetchedTreatments(false);
+  }, [lang]);
+
+  useEffect(() => {
     if (subView !== 'anatomy' || hasFetchedStructures) return;
     const fetchStructures = async () => {
       setStructuresLoading(true);
       setStructuresError(null);
       try {
-        const res = await fetch('/api/oncology/structures');
+        const res = await fetch(`/api/oncology/structures?lang=${lang}`);
         if (!res.ok) throw new Error('Errore nel recupero delle strutture');
         const data = await res.json();
         setStructures(data.structures ?? []);
         setHasFetchedStructures(true);
       } catch (err) {
-        setStructuresError('Impossibile caricare le strutture anatomiche.');
+        setStructuresError(ui.oncology.errorLoadingStructures);
         console.error(err);
       } finally {
         setStructuresLoading(false);
       }
     };
     fetchStructures();
-  }, [subView, hasFetchedStructures]);
+  }, [subView, hasFetchedStructures, lang, ui]);
 
   useEffect(() => {
     if (subView !== 'conditions' || hasFetchedConditions) return;
@@ -217,20 +209,20 @@ export default function OncologyPage() {
       setConditionsLoading(true);
       setConditionsError(null);
       try {
-        const res = await fetch('/api/oncology/conditions');
+        const res = await fetch(`/api/oncology/conditions?lang=${lang}`);
         if (!res.ok) throw new Error('Errore nel recupero delle patologie');
         const data = await res.json();
         setConditions(data.conditions ?? []);
         setHasFetchedConditions(true);
       } catch (err) {
-        setConditionsError('Impossibile caricare le patologie.');
+        setConditionsError(ui.oncology.errorLoadingConditions);
         console.error(err);
       } finally {
         setConditionsLoading(false);
       }
     };
     fetchConditions();
-  }, [subView, hasFetchedConditions]);
+  }, [subView, hasFetchedConditions, lang, ui]);
 
   useEffect(() => {
     if (subView !== 'assessment' || hasFetchedTests) return;
@@ -238,20 +230,20 @@ export default function OncologyPage() {
       setTestsLoading(true);
       setTestsError(null);
       try {
-        const res = await fetch('/api/oncology/tests');
+        const res = await fetch(`/api/oncology/tests?lang=${lang}`);
         if (!res.ok) throw new Error('Errore nel recupero dei test');
         const data = await res.json();
         setTests(data.tests ?? []);
         setHasFetchedTests(true);
       } catch (err) {
-        setTestsError('Impossibile caricare i test di valutazione.');
+        setTestsError(ui.oncology.errorLoadingTests);
         console.error(err);
       } finally {
         setTestsLoading(false);
       }
     };
     fetchTests();
-  }, [subView, hasFetchedTests]);
+  }, [subView, hasFetchedTests, lang, ui]);
 
   useEffect(() => {
     if (subView !== 'rehab' || hasFetchedRehab) return;
@@ -259,20 +251,20 @@ export default function OncologyPage() {
       setRehabLoading(true);
       setRehabError(null);
       try {
-        const res = await fetch('/api/oncology/rehab');
+        const res = await fetch(`/api/oncology/rehab?lang=${lang}`);
         if (!res.ok) throw new Error('Errore nel recupero dei contenuti riabilitativi');
         const data = await res.json();
         setRehab(data.rehab ?? []);
         setHasFetchedRehab(true);
       } catch (err) {
-        setRehabError('Impossibile caricare i contenuti riabilitativi.');
+        setRehabError(ui.oncology.errorLoadingRehab);
         console.error(err);
       } finally {
         setRehabLoading(false);
       }
     };
     fetchRehab();
-  }, [subView, hasFetchedRehab]);
+  }, [subView, hasFetchedRehab, lang, ui]);
 
   useEffect(() => {
     if (subView !== 'treatments' || hasFetchedTreatments) return;
@@ -280,20 +272,20 @@ export default function OncologyPage() {
       setTreatmentsLoading(true);
       setTreatmentsError(null);
       try {
-        const res = await fetch('/api/oncology/treatments');
+        const res = await fetch(`/api/oncology/treatments?lang=${lang}`);
         if (!res.ok) throw new Error('Errore nel recupero dei trattamenti');
         const data = await res.json();
         setTreatments(data.treatments ?? []);
         setHasFetchedTreatments(true);
       } catch (err) {
-        setTreatmentsError('Impossibile caricare i trattamenti.');
+        setTreatmentsError(ui.oncology.errorLoadingTreatments);
         console.error(err);
       } finally {
         setTreatmentsLoading(false);
       }
     };
     fetchTreatments();
-  }, [subView, hasFetchedTreatments]);
+  }, [subView, hasFetchedTreatments, lang, ui]);
 
   const handleAskPhygo = async () => {
     if (!askQuery.trim() || askLoading) return;
@@ -324,11 +316,11 @@ export default function OncologyPage() {
   };
 
   const SUB_TABS: { key: SubView; label: string }[] = [
-    { key: 'anatomy', label: 'Anatomia' },
-    { key: 'conditions', label: 'Patologie' },
-    { key: 'treatments', label: 'Trattamenti' },
-    { key: 'assessment', label: 'Valutazione' },
-    { key: 'rehab', label: 'Riabilitazione' },
+    { key: 'anatomy', label: ui.oncology.subTabs.anatomy },
+    { key: 'conditions', label: ui.oncology.subTabs.conditions },
+    { key: 'treatments', label: ui.oncology.subTabs.treatments },
+    { key: 'assessment', label: ui.oncology.subTabs.assessment },
+    { key: 'rehab', label: ui.oncology.subTabs.rehab },
   ];
 
   return (
@@ -346,14 +338,14 @@ export default function OncologyPage() {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT.gradient }} />
-            Oncology Atlas
+            {ui.oncology.atlasBadge}
           </div>
           <h1 className="font-display text-6xl font-bold tracking-tight">
             <span
               className="bg-clip-text text-transparent"
               style={{ backgroundImage: ACCENT.gradient }}
             >
-              Oncology
+              {ui.oncology.heading}
             </span>
           </h1>
         </div>
@@ -380,20 +372,20 @@ export default function OncologyPage() {
         {subView === 'anatomy' && (
           <div>
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-              Oncology Anatomy
+              {ui.oncology.anatomyHeading}
             </h2>
             <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
-              Anatomia e drenaggio linfatico rilevanti per la comprensione delle principali neoplasie e delle loro complicanze riabilitative.
+              {ui.oncology.anatomyHint}
             </p>
 
-                        <div className="mb-10 rounded-2xl border p-6" style={{ borderColor: `${ACCENT.solid}33`, background: `${ACCENT.solid}0D` }}>
+            <div className="mb-10 rounded-2xl border p-6" style={{ borderColor: `${ACCENT.solid}33`, background: `${ACCENT.solid}0D` }}>
               <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">
-                Questa sezione parte dai meccanismi biologici e molecolari con cui una cellula normale si trasforma in cellula tumorale — un passaggio spesso trascurato ma utile per capire perché un tumore si comporta come si comporta. Segue poi l&apos;anatomia del drenaggio linfatico regionale, organo per organo: è la mappa più rilevante per la pratica fisioterapica, perché gran parte delle complicanze riabilitative post-chirurgiche (in primis il linfedema) dipende da quali vie linfatiche sono state interrotte.
+                {ui.oncology.anatomyIntro}
               </p>
             </div>
 
             {structuresLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">Caricamento...</p>
+              <p className="text-sm text-ink/40 dark:text-white/40">{ui.oncology.loading}</p>
             )}
             {structuresError && <p className="text-sm text-red-500">{structuresError}</p>}
 
@@ -410,7 +402,7 @@ export default function OncologyPage() {
                         className="text-xs font-bold uppercase tracking-wide mb-3"
                         style={{ color: ACCENT.solid }}
                       >
-                        {region}
+                        {ui.oncology.regionLabels[region]}
                       </h3>
                       <div className="space-y-3">
                         {items.map((s) => (
@@ -440,17 +432,17 @@ export default function OncologyPage() {
                               <p className="text-sm font-semibold text-ink dark:text-white mb-3">{s.name}</p>
                               {s.anatomy && (
                                 <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
-                                  <span className="font-semibold">Anatomia: </span>{s.anatomy}
+                                  <span className="font-semibold">{ui.anatomy.anatomy}: </span>{s.anatomy}
                                 </p>
                               )}
                               {s.function && (
                                 <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
-                                  <span className="font-semibold">Funzione: </span>{s.function}
+                                  <span className="font-semibold">{ui.anatomy.function}: </span>{s.function}
                                 </p>
                               )}
                               {s.clinical_relevance && (
                                 <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed">
-                                  <span className="font-semibold">Rilevanza clinica: </span>{s.clinical_relevance}
+                                  <span className="font-semibold">{ui.anatomy.clinicalRelevance}: </span>{s.clinical_relevance}
                                 </p>
                               )}
                             </div>
@@ -468,14 +460,14 @@ export default function OncologyPage() {
         {subView === 'conditions' && (
           <div>
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-              Related Conditions
+              {ui.oncology.conditionsHeading}
             </h2>
             <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
-              Patologie oncologiche organizzate per sistema. Tocca una card per obiettivi, test clinici, red flag ed esercizi tipici.
+              {ui.oncology.conditionsHint}
             </p>
 
             {conditionsLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">Caricamento...</p>
+              <p className="text-sm text-ink/40 dark:text-white/40">{ui.oncology.loading}</p>
             )}
             {conditionsError && <p className="text-sm text-red-500">{conditionsError}</p>}
 
@@ -490,7 +482,7 @@ export default function OncologyPage() {
                         className="text-xs font-bold uppercase tracking-wide mb-3"
                         style={{ color: ACCENT.solid }}
                       >
-                        {SYSTEM_LABEL[sys] ?? sys}
+                        {ui.oncology.systemLabels[sys as keyof typeof ui.oncology.systemLabels] ?? sys}
                       </h3>
                       <div className="grid sm:grid-cols-2 gap-3">
                         {items.map((c) => (
@@ -502,7 +494,7 @@ export default function OncologyPage() {
                             <p className="text-sm font-semibold text-ink dark:text-white">{c.condition_name}</p>
                             {c.evidence_level && (
                               <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/40 dark:text-white/40">
-                                Evidence: {c.evidence_level.split(' - ')[0]}
+                                {ui.fields.evidence}: {c.evidence_level.split(' - ')[0]}
                               </span>
                             )}
                           </button>
@@ -518,7 +510,7 @@ export default function OncologyPage() {
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles size={16} style={{ color: ACCENT.solid }} />
                 <p className="text-sm font-semibold text-ink dark:text-white">
-                  Non trovi la patologia che cerchi? Chiedi a Phygo
+                  {ui.oncology.askPhygoPrompt}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -527,7 +519,7 @@ export default function OncologyPage() {
                   value={askQuery}
                   onChange={(e) => setAskQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAskPhygo()}
-                  placeholder="es. linfoma, melanoma, sarcoma dei tessuti molli..."
+                  placeholder={ui.oncology.askPhygoPlaceholder}
                   className="flex-1 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] px-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none focus:border-[#A855F7]/40"
                 />
                 <button
@@ -536,7 +528,7 @@ export default function OncologyPage() {
                   className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50 transition-opacity"
                   style={{ background: ACCENT.gradient }}
                 >
-                  {askLoading ? <Loader2 size={16} className="animate-spin" /> : 'Chiedi'}
+                  {askLoading ? <Loader2 size={16} className="animate-spin" /> : ui.oncology.askButton}
                 </button>
               </div>
               {askError && (
@@ -556,14 +548,14 @@ export default function OncologyPage() {
         {subView === 'treatments' && (
           <div>
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-              Oncology Treatments
+              {ui.oncology.treatmentsHeading}
             </h2>
             <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
-              Percorsi diagnostico-terapeutici per tipo di tumore e modalita di trattamento generali, con le relative implicazioni fisioterapiche.
+              {ui.oncology.treatmentsHint}
             </p>
 
             {treatmentsLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">Caricamento...</p>
+              <p className="text-sm text-ink/40 dark:text-white/40">{ui.oncology.loading}</p>
             )}
             {treatmentsError && <p className="text-sm text-red-500">{treatmentsError}</p>}
 
@@ -578,7 +570,7 @@ export default function OncologyPage() {
                         className="text-xs font-bold uppercase tracking-wide mb-3"
                         style={{ color: ACCENT.solid }}
                       >
-                        {TREATMENT_CATEGORY_LABEL[cat] ?? cat}
+                        {ui.oncology.treatmentCategoryLabels[cat as keyof typeof ui.oncology.treatmentCategoryLabels] ?? cat}
                       </h3>
                       <div className="space-y-3">
                         {items.map((t) => (
@@ -595,7 +587,7 @@ export default function OncologyPage() {
                             {t.pt_implications && (
                               <div className="rounded-xl bg-black/[0.02] dark:bg-white/[0.03] p-3 mb-3">
                                 <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-1">
-                                  Implicazioni Fisioterapiche
+                                  {ui.oncology.ptImplicationsLabel}
                                 </p>
                                 <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
                                   {t.pt_implications}
@@ -621,14 +613,14 @@ export default function OncologyPage() {
         {subView === 'assessment' && (
           <div>
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-              Clinical Assessment
+              {ui.oncology.assessmentHeading}
             </h2>
             <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
-              Scale di performance status e strumenti di valutazione specifici per il paziente oncologico.
+              {ui.oncology.assessmentHint}
             </p>
 
             {testsLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">Caricamento...</p>
+              <p className="text-sm text-ink/40 dark:text-white/40">{ui.oncology.loading}</p>
             )}
             {testsError && <p className="text-sm text-red-500">{testsError}</p>}
 
@@ -643,7 +635,7 @@ export default function OncologyPage() {
                         className="text-xs font-bold uppercase tracking-wide mb-3"
                         style={{ color: ACCENT.solid }}
                       >
-                        {TEST_CATEGORY_LABEL[cat] ?? cat}
+                        {ui.oncology.testCategoryLabels[cat as keyof typeof ui.oncology.testCategoryLabels] ?? cat}
                       </h3>
                       <div className="space-y-3">
                         {items.map((t) => (
@@ -654,12 +646,12 @@ export default function OncologyPage() {
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{t.name}</p>
                             {t.procedure && (
                               <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
-                                <span className="font-semibold">Procedura: </span>{t.procedure}
+                                <span className="font-semibold">{ui.oncology.procedureLabel}: </span>{t.procedure}
                               </p>
                             )}
                             {t.interpretation && (
                               <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
-                                <span className="font-semibold">Interpretazione: </span>{t.interpretation}
+                                <span className="font-semibold">{ui.oncology.interpretationLabel}: </span>{t.interpretation}
                               </p>
                             )}
                           </div>
@@ -676,14 +668,14 @@ export default function OncologyPage() {
         {subView === 'rehab' && (
           <div>
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-              Rehabilitation
+              {ui.oncology.rehabHeading}
             </h2>
             <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
-              Protocolli di gestione del linfedema (incluso il linfodrenaggio manuale passo-passo), esercizio in oncologia e gestione delle complicanze specifiche.
+              {ui.oncology.rehabHint}
             </p>
 
             {rehabLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">Caricamento...</p>
+              <p className="text-sm text-ink/40 dark:text-white/40">{ui.oncology.loading}</p>
             )}
             {rehabError && <p className="text-sm text-red-500">{rehabError}</p>}
 
@@ -698,7 +690,7 @@ export default function OncologyPage() {
                         className="text-xs font-bold uppercase tracking-wide mb-3"
                         style={{ color: ACCENT.solid }}
                       >
-                        {REHAB_CATEGORY_LABEL[cat] ?? cat}
+                        {ui.oncology.rehabCategoryLabels[cat as keyof typeof ui.oncology.rehabCategoryLabels] ?? cat}
                       </h3>
                       <div className="space-y-3">
                         {items.map((r) => (
@@ -715,7 +707,7 @@ export default function OncologyPage() {
                             {r.protocol && (
                               <div className="rounded-xl bg-black/[0.02] dark:bg-white/[0.03] p-3 mb-3">
                                 <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-1">
-                                  Protocollo
+                                  {ui.oncology.protocolLabel}
                                 </p>
                                 <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
                                   {r.protocol}
@@ -767,41 +759,45 @@ export default function OncologyPage() {
                 </button>
               </div>
 
+              <div className="mb-4">
+                <ClinicalActionBar contentType="condition" contentId={String(selectedCondition.id)} label={selectedCondition.condition_name} section="Oncology" />
+              </div>
+
               <div className="space-y-4 text-sm">
                 {selectedCondition.goals && (
                   <div>
-                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Obiettivi</p>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">{ui.fields.goals}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.goals}</p>
                   </div>
                 )}
                 {selectedCondition.clinical_tests && (
                   <div>
-                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Test clinici</p>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">{ui.fields.clinicalTests}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.clinical_tests}</p>
                   </div>
                 )}
                 {selectedCondition.typical_exercises && (
                   <div>
-                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Esercizi tipici</p>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">{ui.fields.typicalExercises}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.typical_exercises}</p>
                   </div>
                 )}
                 {selectedCondition.red_flags && (
                   <div>
-                    <p className="font-semibold text-red-500 mb-1">Red flags</p>
+                    <p className="font-semibold text-red-500 mb-1">{ui.fields.redFlags}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.red_flags}</p>
                   </div>
                 )}
                 {selectedCondition.contraindications && (
                   <div>
-                    <p className="font-semibold text-red-500 mb-1">Controindicazioni</p>
+                    <p className="font-semibold text-red-500 mb-1">{ui.fields.contraindications}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.contraindications}</p>
                   </div>
                 )}
                 {selectedCondition.evidence_level && (
                   <div className="pt-2 border-t border-black/[0.06] dark:border-white/10">
                     <p className="text-xs text-ink/40 dark:text-white/40">
-                      Evidence: {selectedCondition.evidence_level}
+                      {ui.fields.evidence}: {selectedCondition.evidence_level}
                     </p>
                   </div>
                 )}

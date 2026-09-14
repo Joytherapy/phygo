@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
+import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 
 interface TopicItem {
   id: string;
@@ -14,17 +15,6 @@ interface TopicItem {
   image_url?: string;
 }
 
-const CATEGORY_LABEL: Record<string, string> = {
-  rianimazione: 'Rianimazione',
-  neurologico: 'Neurologico',
-  cardiovascolare: 'Cardiovascolare',
-  allergologico: 'Allergologico',
-  trauma: 'Trauma',
-  ambientale: 'Ambientale',
-  tossicologico: 'Tossicologico',
-  organizzazione: 'Organizzazione',
-};
-
 const ACCENT = {
   gradient: 'linear-gradient(90deg, #EF4444 0%, #F97316 100%)',
   solid: '#EF4444',
@@ -32,33 +22,33 @@ const ACCENT = {
 
 export default function FirstAidPage() {
   const router = useRouter();
+  const { lang } = useLanguage();
+  const ui = useUiStrings();
 
   const [topics, setTopics] = useState<TopicItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasFetched, setHasFetched] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
   useEffect(() => {
-    if (hasFetched) return;
     const fetchTopics = async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch('/api/first-aid/topics');
+        const res = await fetch(`/api/first-aid/topics?lang=${lang}`);
         if (!res.ok) throw new Error('Errore nel recupero degli argomenti');
         const data = await res.json();
         setTopics(data.topics ?? []);
-        setHasFetched(true);
       } catch (err) {
-        setError('Impossibile caricare gli argomenti di primo soccorso.');
+        setError(ui.firstAid.errorLoadingTopics);
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
     fetchTopics();
-  }, [hasFetched]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   const categories = Array.from(new Set(topics.map((t) => t.category))).filter(Boolean);
   const filteredTopics =
@@ -79,21 +69,21 @@ export default function FirstAidPage() {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT.solid }} />
-            First Aid Atlas
+            {ui.firstAid.badge}
           </div>
           <h1 className="font-display text-6xl font-bold tracking-tight">
             <span className="bg-gradient-to-r from-[#EF4444] to-[#F97316] bg-clip-text text-transparent">
-              Primo Soccorso
+              {ui.firstAid.heading}
             </span>
           </h1>
                     <p className="text-sm text-ink/50 dark:text-white/50 mt-4 max-w-xl mx-auto">
-            Protocolli confrontati tra Italia, Francia, Regno Unito, Spagna e USA — perché le linee guida non sono sempre le stesse ovunque.
+            {ui.firstAid.subtitle}
           </p>
         </div>
 
                 <div className="mb-10 rounded-2xl border p-6" style={{ borderColor: `${ACCENT.solid}33`, background: `${ACCENT.solid}0D` }}>
           <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">
-            Ogni scheda riporta, per ciascun paese, il numero di emergenza da chiamare, l'ente sanitario di riferimento, il protocollo pratico da seguire e la fonte ufficiale consultata — così da poter passare rapidamente da un paese all'altro senza perdere accuratezza.
+            {ui.firstAid.infoBox}
           </p>
         </div>
         <div className="flex justify-center flex-wrap gap-2 mb-10">
@@ -106,7 +96,7 @@ export default function FirstAidPage() {
             }`}
             style={categoryFilter === 'all' ? { background: ACCENT.gradient } : undefined}
           >
-            Tutti
+            {ui.firstAid.allFilter}
           </button>
           {categories.map((c) => (
             <button
@@ -119,12 +109,12 @@ export default function FirstAidPage() {
               }`}
               style={categoryFilter === c ? { background: ACCENT.gradient } : undefined}
             >
-              {CATEGORY_LABEL[c] ?? c}
+              {ui.firstAid.categoryLabels[c as keyof typeof ui.firstAid.categoryLabels] ?? c}
             </button>
           ))}
         </div>
 
-        {loading && <p className="text-center text-sm text-ink/40 dark:text-white/40">Caricamento argomenti...</p>}
+        {loading && <p className="text-center text-sm text-ink/40 dark:text-white/40">{ui.firstAid.loadingTopics}</p>}
         {error && <p className="text-center text-sm text-red-500">{error}</p>}
 
         {!loading && !error && (
@@ -152,7 +142,7 @@ export default function FirstAidPage() {
                     className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full text-white mb-2"
                     style={{ background: ACCENT.gradient }}
                   >
-                    {CATEGORY_LABEL[topic.category] ?? topic.category}
+                    {ui.firstAid.categoryLabels[topic.category as keyof typeof ui.firstAid.categoryLabels] ?? topic.category}
                   </span>
                   <p className="text-sm font-semibold text-ink dark:text-white">{topic.name}</p>
                   {topic.description && (

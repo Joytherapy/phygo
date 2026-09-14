@@ -5,6 +5,8 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import type { ThreeEvent } from '@react-three/fiber';
 import { OrbitControls, Html, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+import { useUiStrings } from '@/contexts/LanguageContext';
+import { APP_LANGS, UI_STRINGS } from '@/lib/i18n/uiStrings';
 
 // ============================================================================
 // MODELLO — v4: sostituzione completa del modello 3D visivo.
@@ -108,28 +110,17 @@ const ZONE_OBJECT_MAP: Record<string, string[]> = {
   'ankle-foot': ['Legs_Muscle18', 'Legs_Muscle19', 'Legs_Muscle27'],
 };
 
-const ZONE_NAMES: Record<string, string> = {
-  'cervical-spine': 'Cervical Spine',
-  trapezius: 'Trapezius / Upper Trap',
-  shoulder: 'Shoulder',
-  chest: 'Chest / Pectorals',
-  biceps: 'Biceps',
-  triceps: 'Triceps',
-  elbow: 'Elbow',
-  forearm: 'Forearm',
-  'wrist-hand': 'Wrist / Hand',
-  'core-abdomen': 'Core / Abdomen',
-  'thoracic-spine': 'Thoracic Spine / Upper Back',
-  'lumbar-spine': 'Lumbar Spine / Lower Back',
-  hip: 'Hip',
-  glutes: 'Glutes',
-  quadriceps: 'Quadriceps',
-  hamstrings: 'Hamstrings',
-  knee: 'Knee',
-  calf: 'Calf',
-  'ankle-foot': 'Ankle / Foot',
-};
+// Zone display names are localized (see ui.bodyMap.zoneNames in
+// lib/i18n/uiStrings.ts) and passed in as props — this used to be a
+// hardcoded English-only map, which is why zone labels never translated.
 const ZONE_ORDER = Object.keys(ZONE_OBJECT_MAP);
+
+// Every language's zone names, precomputed once, so search matches a zone
+// typed in any of the 4 languages regardless of which one is currently
+// displayed (e.g. typing "cadera" still finds the hip zone in English UI).
+const ALL_LANG_ZONE_NAMES: Record<string, string>[] = APP_LANGS.map(
+  (l) => UI_STRINGS[l].bodyMap.zoneNames as Record<string, string>
+);
 
 // Sinonimi italiani per zona, usati solo dalla ricerca (i nomi mostrati sopra
 // la mesh restano quelli in ZONE_NAMES, invariati). Aiuta chi digita in
@@ -160,7 +151,7 @@ function zoneMatchesQuery(slug: string, query: string): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return false;
   if (slug.toLowerCase().includes(q)) return true;
-  if (ZONE_NAMES[slug].toLowerCase().includes(q)) return true;
+  if (ALL_LANG_ZONE_NAMES.some((names) => names[slug]?.toLowerCase().includes(q))) return true;
   return (ZONE_SEARCH_ALIASES[slug] || []).some((alias) => alias.toLowerCase().includes(q));
 }
 
@@ -208,23 +199,13 @@ const BONE_GROUPS: Record<string, string[]> = {
   'bone-tibia-perone': ['Legs_bone1', 'Legs_bone2'],
   'bone-piede': ['Legs_bone3', 'Legs_bone4', 'Legs_bone5', 'Legs_bone6', 'Legs_bone7', 'Legs_bone8'],
 };
-const BONE_NAMES: Record<string, string> = {
-  'bone-cranio': 'Skull',
-  'bone-clavicola-scapola': 'Clavicle & Scapula',
-  'bone-coste-sterno': 'Ribs & Sternum',
-  'bone-omero': 'Humerus',
-  'bone-radio-ulna': 'Radius & Ulna',
-  'bone-mano': 'Hand Bones',
-  'bone-bacino': 'Pelvis',
-  'bone-sacro': 'Sacrum & Coccyx',
-  'bone-femore': 'Femur',
-  'bone-tibia-perone': 'Tibia & Fibula',
-  'bone-piede': 'Foot Bones',
-  'bone-cervicale': 'Cervical Vertebrae',
-  'bone-dorsale': 'Thoracic Vertebrae',
-  'bone-lombare': 'Lumbar Vertebrae',
-};
-const BONE_ORDER = Object.keys(BONE_NAMES);
+// Bone display names are localized (see ui.bodyMap.boneNames in
+// lib/i18n/uiStrings.ts) and passed in as props — same fix as ZONE_NAMES
+// above. BONE_ORDER is derived independently of any name map: the 11
+// BONE_GROUPS keys, followed by the 3 BONE_SPINE_BANDS keys (cervical/
+// thoracic/lumbar vertebrae, sliced from the spine mesh by height band —
+// see BONE_SPINE_BANDS below).
+const BONE_ORDER = [...Object.keys(BONE_GROUPS), 'bone-cervicale', 'bone-dorsale', 'bone-lombare'];
 
 // Le 3 mesh "Spine_vertebra_bone*" (vedi sotto) non hanno un confine pulito
 // per livello, quindi per avere 3 zone cliccabili separate (cervicale /
@@ -508,11 +489,11 @@ function RegionHighlight({
   );
 }
 
-function LoadingFallback() {
+function LoadingFallback({ text }: { text: string }) {
   return (
     <Html center>
       <div className="whitespace-nowrap px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 text-xs text-white/60">
-        Caricamento modello 3D...
+        {text}
       </div>
     </Html>
   );
@@ -556,6 +537,8 @@ function BodyScene({
   debugMode,
   onDebugMeshClick,
   xrayMode,
+  zoneNames,
+  boneNames,
 }: {
   onSelectZone: (slug: string) => void;
   hoveredSlug: string | null;
@@ -563,6 +546,8 @@ function BodyScene({
   debugMode: boolean;
   onDebugMeshClick: (name: string) => void;
   xrayMode: boolean;
+  zoneNames: Record<string, string>;
+  boneNames: Record<string, string>;
 }) {
   const { scene } = useGLTF('/models/body-v2/model.glb');
   const [transform, setTransform] = useState<{ scale: number; offset: THREE.Vector3 } | null>(null);
@@ -704,7 +689,7 @@ function BodyScene({
                 onLeave={() => setHoveredSlug(null)}
                 onClick={() => onSelectZone(slug)}
               />
-              <ZoneLabel name={ZONE_NAMES[slug]} position={labelPos} color={color} hovered={hovered} />
+              <ZoneLabel name={zoneNames[slug]} position={labelPos} color={color} hovered={hovered} />
             </Fragment>
           );
         })}
@@ -732,7 +717,7 @@ function BodyScene({
                 onLeave={() => setHoveredSlug(null)}
                 onClick={() => onSelectZone(slug)}
               />
-              <ZoneLabel name={BONE_NAMES[slug]} position={labelPos} color={color} hovered={hovered} />
+              <ZoneLabel name={boneNames[slug]} position={labelPos} color={color} hovered={hovered} />
             </Fragment>
           );
         })}
@@ -751,9 +736,15 @@ useGLTF.preload('/models/body-v2/model.glb');
 function ZoneSearch({
   onSelectZone,
   setHoveredSlug,
+  zoneNames,
+  placeholder,
+  noResultsText,
 }: {
   onSelectZone: (slug: string) => void;
   setHoveredSlug: (slug: string | null) => void;
+  zoneNames: Record<string, string>;
+  placeholder: string;
+  noResultsText: string;
 }) {
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
@@ -789,14 +780,14 @@ function ZoneSearch({
             (e.target as HTMLInputElement).blur();
           }
         }}
-        placeholder="Cerca zona..."
+        placeholder={placeholder}
         className="w-full px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 text-xs text-white placeholder:text-white/35 outline-none focus:border-white/25"
       />
 
       {showDropdown && (
         <div className="mt-1.5 rounded-2xl bg-black/85 backdrop-blur-xl border border-white/10 overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
           {results.length === 0 ? (
-            <p className="px-3 py-2 text-xs text-white/40">Nessuna zona trovata</p>
+            <p className="px-3 py-2 text-xs text-white/40">{noResultsText}</p>
           ) : (
             results.map((slug) => (
               <button
@@ -811,7 +802,7 @@ function ZoneSearch({
                 }}
                 className="block w-full text-left px-3 py-1.5 text-xs text-white/90 hover:bg-white/10 transition-colors"
               >
-                {ZONE_NAMES[slug]}
+                {zoneNames[slug]}
               </button>
             ))
           )}
@@ -867,6 +858,8 @@ export default function BodyMap3D({
   onSelectZone: (slug: string) => void;
   calibrate?: boolean;
 }) {
+  const ui = useUiStrings();
+  const bm = ui.bodyMap;
   const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
   const [debugMeshName, setDebugMeshName] = useState<string | null>(null);
   const [xrayMode, setXrayMode] = useState(false);
@@ -878,7 +871,7 @@ export default function BodyMap3D({
         <directionalLight position={[3, 4, 2]} intensity={1.3} color="#fff2e6" />
         <directionalLight position={[-3, -1, -3]} intensity={0.45} color="#ffffff" />
         <pointLight position={[0, 1.5, 3]} intensity={0.5} color="#ffffff" />
-        <Suspense fallback={<LoadingFallback />}>
+        <Suspense fallback={<LoadingFallback text={bm.loadingModel} />}>
           <BodyScene
             onSelectZone={onSelectZone}
             hoveredSlug={hoveredSlug}
@@ -886,13 +879,15 @@ export default function BodyMap3D({
             debugMode={calibrate}
             onDebugMeshClick={setDebugMeshName}
             xrayMode={xrayMode}
+            zoneNames={bm.zoneNames}
+            boneNames={bm.boneNames}
           />
         </Suspense>
         <AutoRotateControls />
       </Canvas>
 
       <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 text-[11px] text-white/40">
-        Trascina per ruotare · scorri per zoom
+        {bm.dragRotateZoom}
       </p>
 
       {!calibrate && (
@@ -906,16 +901,24 @@ export default function BodyMap3D({
               : 'bg-black/60 text-white/80 border-white/10 hover:border-white/25'
           }`}
         >
-          Raggi-X {xrayMode ? 'ON' : 'OFF'}
+          {bm.xrayLabel} {xrayMode ? 'ON' : 'OFF'}
         </button>
       )}
 
-      {!calibrate && <ZoneSearch onSelectZone={onSelectZone} setHoveredSlug={setHoveredSlug} />}
+      {!calibrate && (
+        <ZoneSearch
+          onSelectZone={onSelectZone}
+          setHoveredSlug={setHoveredSlug}
+          zoneNames={bm.zoneNames}
+          placeholder={bm.searchPlaceholder}
+          noResultsText={bm.noZoneFound}
+        />
+      )}
 
       {/* Licenza TurboSquid Standard: uso commerciale/derivati inclusi, nessun
           obbligo di attribuzione — credito lasciato per trasparenza interna. */}
       <span className="absolute bottom-1 right-2 text-[9px] text-white/20">
-        Modello 3D: TurboSquid #1398841 (Standard License)
+        {bm.modelCreditPrefix} TurboSquid #1398841 (Standard License)
       </span>
 
       {calibrate && <DebugPanel meshName={debugMeshName} />}

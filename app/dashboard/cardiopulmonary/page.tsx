@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
+import ClinicalActionBar from '@/components/ClinicalActionBar';
 import { X } from 'lucide-react';
+import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 
 type SubView = 'anatomy' | 'conditions' | 'assessment' | 'rehab' | 'airway-clearance';
 interface StructureItem {
@@ -61,46 +63,6 @@ interface AirwayClearanceItem {
   image_url?: string | null;
 }
 
-const CATEGORY_LABEL: Record<string, string> = {
-  cardiac: 'Cardiaco',
-  respiratory: 'Respiratorio',
-  circulatory: 'Circolatorio',
-  thoracic_mechanics: 'Meccanica Toracica',
-  concept: 'Concetti Chiave',
-};
-
-const SYSTEM_LABEL: Record<string, string> = {
-  cardiac: 'Condizioni Cardiache',
-  respiratory: 'Condizioni Respiratorie',
-  mixed_systemic: 'Condizioni Sistemiche/Miste',
-};
-
-const TEST_CATEGORY_LABEL: Record<string, string> = {
-  functional_capacity: 'Capacità Funzionale',
-  dyspnea_scale: 'Scale della Dispnea',
-  strength: 'Forza',
-  vital_signs: 'Parametri Vitali',
-  consciousness: 'Stato di Coscienza',
-};
-
-const REHAB_CATEGORY_LABEL: Record<string, string> = {
-  aerobic_training: 'Allenamento Aerobico',
-  resistance_training: 'Allenamento alla Forza',
-  post_surgical: 'Post-Chirurgico',
-  heart_failure: 'Scompenso Cardiaco',
-  respiratory_specific: 'Specifico Respiratorio',
-};
-
-const AIRWAY_CATEGORY_LABEL: Record<string, string> = {
-  postural_drainage: 'Drenaggio Posturale',
-  manual: 'Tecniche Manuali',
-  active_breathing: 'Respirazione Attiva',
-  device_dependent: 'Dispositivi (PEP)',
-  machine_dependent: 'Dispositivi Meccanici',
-  ventilation_support: 'Supporto Ventilatorio',
-  dyspnoea_technique: 'Tecniche per la Dispnea',
-};
-
 const AIRWAY_CATEGORY_ORDER = ['postural_drainage', 'manual', 'active_breathing', 'device_dependent', 'machine_dependent', 'ventilation_support', 'dyspnoea_technique'];
 
 const ACCENT = {
@@ -113,6 +75,8 @@ const IMAGE_BASE =
 
 export default function CardiopulmonaryPage() {
   const router = useRouter();
+  const { lang } = useLanguage();
+  const ui = useUiStrings();
   const [subView, setSubView] = useState<SubView>('anatomy');
 
   const [structures, setStructures] = useState<StructureItem[]>([]);
@@ -131,7 +95,7 @@ export default function CardiopulmonaryPage() {
   const [testsError, setTestsError] = useState<string | null>(null);
   const [hasFetchedTests, setHasFetchedTests] = useState(false);
 
-    const [rehab, setRehab] = useState<RehabItem[]>([]);
+  const [rehab, setRehab] = useState<RehabItem[]>([]);
   const [rehabLoading, setRehabLoading] = useState(false);
   const [rehabError, setRehabError] = useState<string | null>(null);
   const [hasFetchedRehab, setHasFetchedRehab] = useState(false);
@@ -145,25 +109,33 @@ export default function CardiopulmonaryPage() {
   const [expandedImage, setExpandedImage] = useState<{ file: string; label: string } | null>(null);
 
   useEffect(() => {
+    setHasFetchedStructures(false);
+    setHasFetchedConditions(false);
+    setHasFetchedTests(false);
+    setHasFetchedRehab(false);
+    setHasFetchedAirway(false);
+  }, [lang]);
+
+  useEffect(() => {
     if (subView !== 'anatomy' || hasFetchedStructures) return;
     const fetchStructures = async () => {
       setStructuresLoading(true);
       setStructuresError(null);
       try {
-        const res = await fetch('/api/cardiopulmonary/structures');
+        const res = await fetch(`/api/cardiopulmonary/structures?lang=${lang}`);
         if (!res.ok) throw new Error('Errore nel recupero delle strutture');
         const data = await res.json();
         setStructures(data.structures ?? []);
         setHasFetchedStructures(true);
       } catch (err) {
-        setStructuresError('Impossibile caricare le strutture anatomiche.');
+        setStructuresError(ui.cardiopulmonary.errorLoadingStructures);
         console.error(err);
       } finally {
         setStructuresLoading(false);
       }
     };
     fetchStructures();
-  }, [subView, hasFetchedStructures]);
+  }, [subView, hasFetchedStructures, lang, ui]);
 
   useEffect(() => {
     if (subView !== 'conditions' || hasFetchedConditions) return;
@@ -171,20 +143,20 @@ export default function CardiopulmonaryPage() {
       setConditionsLoading(true);
       setConditionsError(null);
       try {
-        const res = await fetch('/api/cardiopulmonary/conditions');
+        const res = await fetch(`/api/cardiopulmonary/conditions?lang=${lang}`);
         if (!res.ok) throw new Error('Errore nel recupero delle patologie');
         const data = await res.json();
         setConditions(data.conditions ?? []);
         setHasFetchedConditions(true);
       } catch (err) {
-        setConditionsError('Impossibile caricare le patologie.');
+        setConditionsError(ui.cardiopulmonary.errorLoadingConditions);
         console.error(err);
       } finally {
         setConditionsLoading(false);
       }
     };
     fetchConditions();
-  }, [subView, hasFetchedConditions]);
+  }, [subView, hasFetchedConditions, lang, ui]);
 
   useEffect(() => {
     if (subView !== 'assessment' || hasFetchedTests) return;
@@ -192,41 +164,41 @@ export default function CardiopulmonaryPage() {
       setTestsLoading(true);
       setTestsError(null);
       try {
-        const res = await fetch('/api/cardiopulmonary/tests');
+        const res = await fetch(`/api/cardiopulmonary/tests?lang=${lang}`);
         if (!res.ok) throw new Error('Errore nel recupero dei test');
         const data = await res.json();
         setTests(data.tests ?? []);
         setHasFetchedTests(true);
       } catch (err) {
-        setTestsError('Impossibile caricare i test di valutazione.');
+        setTestsError(ui.cardiopulmonary.errorLoadingTests);
         console.error(err);
       } finally {
         setTestsLoading(false);
       }
     };
     fetchTests();
-  }, [subView, hasFetchedTests]);
+  }, [subView, hasFetchedTests, lang, ui]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (subView !== 'rehab' || hasFetchedRehab) return;
     const fetchRehab = async () => {
       setRehabLoading(true);
       setRehabError(null);
       try {
-        const res = await fetch('/api/cardiopulmonary/rehab');
+        const res = await fetch(`/api/cardiopulmonary/rehab?lang=${lang}`);
         if (!res.ok) throw new Error('Errore nel recupero dei contenuti riabilitativi');
         const data = await res.json();
         setRehab(data.rehab ?? []);
         setHasFetchedRehab(true);
       } catch (err) {
-        setRehabError('Impossibile caricare i contenuti riabilitativi.');
+        setRehabError(ui.cardiopulmonary.errorLoadingRehab);
         console.error(err);
       } finally {
         setRehabLoading(false);
       }
     };
     fetchRehab();
-  }, [subView, hasFetchedRehab]);
+  }, [subView, hasFetchedRehab, lang, ui]);
 
   useEffect(() => {
     if (subView !== 'airway-clearance' || hasFetchedAirway) return;
@@ -234,28 +206,35 @@ export default function CardiopulmonaryPage() {
       setAirwayLoading(true);
       setAirwayError(null);
       try {
-        const res = await fetch('/api/cardiopulmonary/airway-clearance');
+        const res = await fetch(`/api/cardiopulmonary/airway-clearance?lang=${lang}`);
         if (!res.ok) throw new Error('Errore nel recupero delle tecniche di disostruzione');
         const data = await res.json();
         setAirwayTechniques(data.techniques ?? []);
         setHasFetchedAirway(true);
       } catch (err) {
-        setAirwayError('Impossibile caricare le tecniche di disostruzione.');
+        setAirwayError(ui.cardiopulmonary.errorLoadingAirway);
         console.error(err);
       } finally {
         setAirwayLoading(false);
       }
     };
     fetchAirway();
-  }, [subView, hasFetchedAirway]);
+  }, [subView, hasFetchedAirway, lang, ui]);
 
-    const SUB_TABS: { key: SubView; label: string }[] = [
-    { key: 'anatomy', label: 'Anatomia' },
-    { key: 'conditions', label: 'Patologie' },
-    { key: 'assessment', label: 'Valutazione' },
-    { key: 'rehab', label: 'Riabilitazione' },
-    { key: 'airway-clearance', label: 'Disostruzione' },
+  const SUB_TABS: { key: SubView; label: string }[] = [
+    { key: 'anatomy', label: ui.cardiopulmonary.subTabs.anatomy },
+    { key: 'conditions', label: ui.cardiopulmonary.subTabs.conditions },
+    { key: 'assessment', label: ui.cardiopulmonary.subTabs.assessment },
+    { key: 'rehab', label: ui.cardiopulmonary.subTabs.rehab },
+    { key: 'airway-clearance', label: ui.cardiopulmonary.subTabs.airwayClearance },
   ];
+
+  const ageGroupLabel = (group?: string) => {
+    if (group === 'both') return ui.cardiopulmonary.ageGroupLabels.both;
+    if (group === 'adult') return ui.cardiopulmonary.ageGroupLabels.adult;
+    if (group === 'paediatric') return ui.cardiopulmonary.ageGroupLabels.paediatric;
+    return null;
+  };
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
@@ -272,14 +251,14 @@ export default function CardiopulmonaryPage() {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT.gradient }} />
-            Cardiopulmonary Atlas
+            {ui.cardiopulmonary.atlasBadge}
           </div>
           <h1 className="font-display text-6xl font-bold tracking-tight">
             <span
               className="bg-clip-text text-transparent"
               style={{ backgroundImage: ACCENT.gradient }}
             >
-              Cardiopulmonary
+              {ui.cardiopulmonary.heading}
             </span>
           </h1>
         </div>
@@ -306,20 +285,20 @@ export default function CardiopulmonaryPage() {
         {subView === 'anatomy' && (
           <div>
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-              Cardiopulmonary Anatomy
+              {ui.cardiopulmonary.anatomyHeading}
             </h2>
             <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
-              Cuore, circolo, apparato respiratorio e meccanica toracica: come funzionano come sistema integrato.
+              {ui.cardiopulmonary.anatomyHint}
             </p>
 
             <div className="mb-10 rounded-2xl border p-6" style={{ borderColor: `${ACCENT.solid}33`, background: `${ACCENT.solid}0D` }}>
               <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">
-                Il sistema cardiorespiratorio integra funzione cardiaca, circolatoria e polmonare: una compromissione in uno di questi ambiti si ripercuote quasi sempre sugli altri. La valutazione fisioterapica considera insieme meccanica toracica, capacità di esercizio e parametri vitali, poiché sono strettamente interdipendenti. Le sezioni sottostanti approfondiscono anatomia cardiaca, sistema vascolare, apparato respiratorio, meccanica/cinematica toracica e il concetto chiave di VO2max/riserva cardiaca, che orienta la prescrizione dell'esercizio.
+                {ui.cardiopulmonary.anatomyIntro}
               </p>
             </div>
 
             {structuresLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">Caricamento...</p>
+              <p className="text-sm text-ink/40 dark:text-white/40">{ui.cardiopulmonary.loading}</p>
             )}
             {structuresError && <p className="text-sm text-red-500">{structuresError}</p>}
 
@@ -334,7 +313,7 @@ export default function CardiopulmonaryPage() {
                         className="text-xs font-bold uppercase tracking-wide mb-3"
                         style={{ color: ACCENT.solid }}
                       >
-                        {CATEGORY_LABEL[cat] ?? cat}
+                        {ui.cardiopulmonary.categoryLabels[cat] ?? cat}
                       </h3>
                       <div className="space-y-3">
                         {items.map((s) => (
@@ -347,7 +326,7 @@ export default function CardiopulmonaryPage() {
                                 onClick={() => setExpandedImage({ file: s.diagram_image as string, label: s.name })}
                                 className="group relative w-full bg-[#08090b] overflow-hidden block"
                               >
-                                                                <img
+                                <img
                                   src={`${IMAGE_BASE}/${s.diagram_image}`}
                                   alt={s.name}
                                   className="w-full h-auto group-hover:scale-105 transition-transform duration-300"
@@ -358,17 +337,17 @@ export default function CardiopulmonaryPage() {
                               <p className="text-sm font-semibold text-ink dark:text-white mb-3">{s.name}</p>
                               {s.anatomy && (
                                 <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
-                                  <span className="font-semibold">Anatomia: </span>{s.anatomy}
+                                  <span className="font-semibold">{ui.anatomy.anatomy}: </span>{s.anatomy}
                                 </p>
                               )}
                               {s.function && (
                                 <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
-                                  <span className="font-semibold">Funzione: </span>{s.function}
+                                  <span className="font-semibold">{ui.anatomy.function}: </span>{s.function}
                                 </p>
                               )}
                               {s.clinical_relevance && (
                                 <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed">
-                                  <span className="font-semibold">Rilevanza clinica: </span>{s.clinical_relevance}
+                                  <span className="font-semibold">{ui.anatomy.clinicalRelevance}: </span>{s.clinical_relevance}
                                 </p>
                               )}
                             </div>
@@ -386,14 +365,14 @@ export default function CardiopulmonaryPage() {
         {subView === 'conditions' && (
           <div>
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-              Related Conditions
+              {ui.cardiopulmonary.conditionsHeading}
             </h2>
             <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
-              Patologie organizzate per sistema. Tocca una card per obiettivi, test clinici ed esercizi.
+              {ui.cardiopulmonary.conditionsHint}
             </p>
 
             {conditionsLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">Caricamento...</p>
+              <p className="text-sm text-ink/40 dark:text-white/40">{ui.cardiopulmonary.loading}</p>
             )}
             {conditionsError && <p className="text-sm text-red-500">{conditionsError}</p>}
 
@@ -408,7 +387,7 @@ export default function CardiopulmonaryPage() {
                         className="text-xs font-bold uppercase tracking-wide mb-3"
                         style={{ color: ACCENT.solid }}
                       >
-                        {SYSTEM_LABEL[sys] ?? sys}
+                        {ui.cardiopulmonary.systemLabels[sys] ?? sys}
                       </h3>
                       <div className="grid sm:grid-cols-2 gap-3">
                         {items.map((c) => (
@@ -432,14 +411,14 @@ export default function CardiopulmonaryPage() {
         {subView === 'assessment' && (
           <div>
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-              Clinical Assessment
+              {ui.cardiopulmonary.assessmentHeading}
             </h2>
             <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
-              Test clinici e scale di valutazione cardiorespiratoria.
+              {ui.cardiopulmonary.assessmentHint}
             </p>
 
             {testsLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">Caricamento...</p>
+              <p className="text-sm text-ink/40 dark:text-white/40">{ui.cardiopulmonary.loading}</p>
             )}
             {testsError && <p className="text-sm text-red-500">{testsError}</p>}
 
@@ -454,7 +433,7 @@ export default function CardiopulmonaryPage() {
                         className="text-xs font-bold uppercase tracking-wide mb-3"
                         style={{ color: ACCENT.solid }}
                       >
-                        {TEST_CATEGORY_LABEL[cat] ?? cat}
+                        {ui.cardiopulmonary.testCategoryLabels[cat] ?? cat}
                       </h3>
                       <div className="space-y-3">
                         {items.map((t) => (
@@ -465,12 +444,12 @@ export default function CardiopulmonaryPage() {
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{t.name}</p>
                             {t.procedure && (
                               <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
-                                <span className="font-semibold">Procedura: </span>{t.procedure}
+                                <span className="font-semibold">{ui.cardiopulmonary.procedureLabel}: </span>{t.procedure}
                               </p>
                             )}
                             {t.interpretation && (
                               <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
-                                <span className="font-semibold">Interpretazione: </span>{t.interpretation}
+                                <span className="font-semibold">{ui.cardiopulmonary.interpretationLabel}: </span>{t.interpretation}
                               </p>
                             )}
                           </div>
@@ -487,14 +466,14 @@ export default function CardiopulmonaryPage() {
         {subView === 'rehab' && (
           <div>
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-              Rehabilitation
+              {ui.cardiopulmonary.rehabHeading}
             </h2>
             <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
-              Protocolli FITT, gestione post-chirurgica e specifici per scompenso cardiaco e patologie respiratorie.
+              {ui.cardiopulmonary.rehabHint}
             </p>
 
             {rehabLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">Caricamento...</p>
+              <p className="text-sm text-ink/40 dark:text-white/40">{ui.cardiopulmonary.loading}</p>
             )}
             {rehabError && <p className="text-sm text-red-500">{rehabError}</p>}
 
@@ -509,7 +488,7 @@ export default function CardiopulmonaryPage() {
                         className="text-xs font-bold uppercase tracking-wide mb-3"
                         style={{ color: ACCENT.solid }}
                       >
-                        {REHAB_CATEGORY_LABEL[cat] ?? cat}
+                        {ui.cardiopulmonary.rehabCategoryLabels[cat] ?? cat}
                       </h3>
                       <div className="space-y-3">
                         {items.map((r) => (
@@ -526,7 +505,7 @@ export default function CardiopulmonaryPage() {
                             {r.protocol && (
                               <div className="rounded-xl bg-black/[0.02] dark:bg-white/[0.03] p-3 mb-3">
                                 <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-1">
-                                  Protocollo
+                                  {ui.cardiopulmonary.protocolLabel}
                                 </p>
                                 <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
                                   {r.protocol}
@@ -547,19 +526,19 @@ export default function CardiopulmonaryPage() {
               </div>
             )}
           </div>
-               )}
+        )}
 
         {subView === 'airway-clearance' && (
           <div>
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
-              Airway Clearance Techniques
+              {ui.cardiopulmonary.airwayHeading}
             </h2>
             <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
-              Tecniche di disostruzione bronchiale: drenaggio posturale, tecniche manuali, PEP, respirazione attiva, supporto ventilatorio. Tocca una card per la procedura completa.
+              {ui.cardiopulmonary.airwayHint}
             </p>
 
             {airwayLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">Caricamento...</p>
+              <p className="text-sm text-ink/40 dark:text-white/40">{ui.cardiopulmonary.loading}</p>
             )}
             {airwayError && <p className="text-sm text-red-500">{airwayError}</p>}
 
@@ -574,7 +553,7 @@ export default function CardiopulmonaryPage() {
                         className="text-xs font-bold uppercase tracking-wide mb-3"
                         style={{ color: ACCENT.solid }}
                       >
-                        {AIRWAY_CATEGORY_LABEL[cat] ?? cat}
+                        {ui.cardiopulmonary.airwayCategoryLabels[cat as keyof typeof ui.cardiopulmonary.airwayCategoryLabels] ?? cat}
                       </h3>
                       <div className="grid sm:grid-cols-2 gap-3">
                         {items.map((t) => (
@@ -586,7 +565,7 @@ export default function CardiopulmonaryPage() {
                             <p className="text-sm font-semibold text-ink dark:text-white">{t.name}</p>
                             {t.age_group && (
                               <span className="inline-block mt-2 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-ink/50 dark:text-white/50">
-                                {t.age_group === 'both' ? 'Adulti e bambini' : t.age_group === 'adult' ? 'Adulti' : 'Pediatrico'}
+                                {ageGroupLabel(t.age_group)}
                               </span>
                             )}
                           </button>
@@ -629,34 +608,38 @@ export default function CardiopulmonaryPage() {
                 </button>
               </div>
 
+              <div className="mb-4">
+                <ClinicalActionBar contentType="condition" contentId={String(selectedCondition.id)} label={selectedCondition.condition_name} section="Cardiopulmonary" />
+              </div>
+
               <div className="space-y-4 text-sm">
                 {selectedCondition.goals && (
                   <div>
-                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Obiettivi</p>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">{ui.fields.goals}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.goals}</p>
                   </div>
                 )}
                 {selectedCondition.clinical_tests && (
                   <div>
-                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Test clinici</p>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">{ui.fields.clinicalTests}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.clinical_tests}</p>
                   </div>
                 )}
                 {selectedCondition.typical_exercises && (
                   <div>
-                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Esercizi tipici</p>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">{ui.fields.typicalExercises}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.typical_exercises}</p>
                   </div>
                 )}
                 {selectedCondition.red_flags && (
                   <div>
-                    <p className="font-semibold text-red-500 mb-1">Red flags</p>
+                    <p className="font-semibold text-red-500 mb-1">{ui.fields.redFlags}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.red_flags}</p>
                   </div>
                 )}
                 {selectedCondition.contraindications && (
                   <div>
-                    <p className="font-semibold text-red-500 mb-1">Controindicazioni</p>
+                    <p className="font-semibold text-red-500 mb-1">{ui.fields.contraindications}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedCondition.contraindications}</p>
                   </div>
                 )}
@@ -664,7 +647,7 @@ export default function CardiopulmonaryPage() {
             </motion.div>
           </motion.div>
         )}
-            </AnimatePresence>
+      </AnimatePresence>
 
       <AnimatePresence>
         {selectedTechnique && (
@@ -694,6 +677,10 @@ export default function CardiopulmonaryPage() {
                 </button>
               </div>
 
+              <div className="mb-4">
+                <ClinicalActionBar contentType="exercise" contentId={selectedTechnique.id} label={selectedTechnique.name} section="Cardiopulmonary" />
+              </div>
+
               {selectedTechnique.image_url && (
                 <button
                   onClick={() => setExpandedImage({ file: selectedTechnique.image_url as string, label: selectedTechnique.name })}
@@ -710,31 +697,31 @@ export default function CardiopulmonaryPage() {
               <div className="space-y-4 text-sm">
                 {selectedTechnique.patient_position && (
                   <div>
-                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Posizione paziente</p>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">{ui.cardiopulmonary.patientPositionLabel}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedTechnique.patient_position}</p>
                   </div>
                 )}
                 {selectedTechnique.procedure && (
                   <div>
-                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Procedura</p>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">{ui.cardiopulmonary.procedureLabel}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedTechnique.procedure}</p>
                   </div>
                 )}
                 {selectedTechnique.indications && (
                   <div>
-                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Indicazioni</p>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">{ui.cardiopulmonary.indicationsLabel}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedTechnique.indications}</p>
                   </div>
                 )}
                 {selectedTechnique.contraindications_precautions && (
                   <div>
-                    <p className="font-semibold text-red-500 mb-1">Controindicazioni/Precauzioni</p>
+                    <p className="font-semibold text-red-500 mb-1">{ui.cardiopulmonary.contraindicationsPrecautionsLabel}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedTechnique.contraindications_precautions}</p>
                   </div>
                 )}
                 {selectedTechnique.evidence_note && (
                   <div>
-                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Evidenza</p>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">{ui.fields.evidence}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selectedTechnique.evidence_note}</p>
                   </div>
                 )}

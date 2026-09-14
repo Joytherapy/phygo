@@ -2,6 +2,31 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import { getTranslatedCondition, type SupportedLang } from '@/lib/conditionTranslation';
+import { translateContent, type AppLang } from '@/lib/contentTranslation';
+import { ZONE_ANATOMY } from '@/lib/bodyMapAnatomy';
+
+function parseLang(value: string | null): AppLang {
+  return value === 'en' || value === 'es' || value === 'fr' ? value : 'it';
+}
+
+const ANATOMY_FIELD_ORDER = ['anatomy', 'innervation', 'biomechanics', 'clinicalRelevance'] as const;
+
+/** Looks up ZONE_ANATOMY[slug] and translates it (cached) when lang !== 'it'. Returns undefined if this slug has no anatomy narrative at all. */
+async function getZoneAnatomy(slug: string, lang: AppLang) {
+  const source = ZONE_ANATOMY[slug];
+  if (!source) return undefined;
+  if (lang === 'it') return source;
+
+  const { fields } = await translateContent(
+    'body_map_zone_anatomy',
+    slug,
+    source,
+    ANATOMY_FIELD_ORDER,
+    lang
+  );
+  return fields;
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -545,6 +570,7 @@ export async function GET(
 ) {
   try {
     const { slug } = params;
+    const lang = parseLang(new URL(req.url).searchParams.get('lang'));
 
     const { data: zone, error: zoneErr } = await adminSupabase
       .from('body_zones')
@@ -554,12 +580,49 @@ export async function GET(
 
     if (zoneErr || !zone) {
       if (BONE_NAMES[slug]) {
+        // BONE_NAMES is already written in English — no translation needed there.
+        const rawBoneConditions = BONE_CONDITIONS[slug] || [];
+        const boneConditions =
+          lang === 'it'
+            ? rawBoneConditions
+            : await Promise.all(
+                rawBoneConditions.map(async (c) => {
+                  const { fields, failed } = await translateContent(
+                    'body_map_bone_condition',
+                    c.id,
+                    {
+                      condition_name: c.condition_name,
+                      goals: c.goals,
+                      clinical_tests: c.clinical_tests,
+                      red_flags: c.red_flags,
+                      contraindications: c.contraindications,
+                      typical_exercises: c.typical_exercises,
+                      progression_criteria: c.progression_criteria,
+                    },
+                    [
+                      'condition_name',
+                      'goals',
+                      'clinical_tests',
+                      'red_flags',
+                      'contraindications',
+                      'typical_exercises',
+                      'progression_criteria',
+                    ] as const,
+                    lang
+                  );
+                  return { ...c, ...fields, _translationFailed: failed || undefined };
+                })
+              );
+
+        const anatomy = await getZoneAnatomy(slug, lang);
+
         return NextResponse.json({
           zone: { id: slug, name: BONE_NAMES[slug], slug },
           exercises: [],
           totalExercises: 0,
-          conditions: BONE_CONDITIONS[slug] || [],
+          conditions: boneConditions,
           plan: 'free',
+          anatomy,
         });
       }
       return NextResponse.json({ error: 'Zone not found' }, { status: 404 });
@@ -627,14 +690,39 @@ export async function GET(
         )
         .in('id', conditionIds);
       conditions = conds || [];
+
+      // Same lazy-translate-and-cache engine already used by the public
+      // Clinical Library (lib/conditionTranslation.ts) — these are the same
+      // knowledge_base rows, so a condition translated once (from either
+      // place) is cached for both.
+      if (lang !== 'it' && conditions.length > 0) {
+        conditions = await Promise.all(
+          conditions.map(async (c) => (await getTranslatedCondition(c.id, lang as SupportedLang)) ?? c)
+        );
+      }
     }
 
+    let translatedZone = zone;
+    if (lang !== 'it') {
+      const { fields } = await translateContent(
+        'body_zone_name',
+        zone.id,
+        { name: zone.name },
+        ['name'] as const,
+        lang
+      );
+      translatedZone = { ...zone, name: fields.name || zone.name };
+    }
+
+    const anatomy = await getZoneAnatomy(zone.slug, lang);
+
     return NextResponse.json({
-      zone,
+      zone: translatedZone,
       exercises: featuredExercises,
       totalExercises: exercises.length,
       conditions,
       plan,
+      anatomy,
     });
   } catch (err) {
     console.error('body-map zone error:', err);

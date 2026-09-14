@@ -5,9 +5,13 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import type { ThreeEvent } from '@react-three/fiber';
 import { OrbitControls, Html, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+import { useUiStrings } from '@/contexts/LanguageContext';
 
 interface Zone3D {
   slug: string;
+  // Nome italiano di riserva, usato solo se lo slug non è presente in
+  // ui.brainMap.zoneNames (non dovrebbe capitare) — il nome mostrato viene
+  // normalmente risolto in base alla lingua attiva, vedi zoneNames prop più sotto.
   name: string;
   // Posizione come FRAZIONE (0..1) del bounding box reale del modello caricato —
   // così il marker resta sempre "dentro" il modello. [0,0,0] = angolo min del box,
@@ -24,12 +28,12 @@ interface Zone3D {
 //   rispettive mesh nel file (questo modello le ha come mesh separate);
 // - i 4 lobi: calibrati a mano con click-to-place direttamente sul modello.
 const BRAIN_ZONES_3D: Zone3D[] = [
-  { slug: 'brainstem', name: 'Brainstem', fraction: [0.510924641237057, 0.20527322624610528, 0.40305727334594926] },
-  { slug: 'cerebellum', name: 'Cerebellum', fraction: [0.5106993637898103, 0.4037981609334596, 0.26031870482883745] },
-  { slug: 'frontal-lobe', name: 'Frontal Lobe', fraction: [0.5784839052407639, 0.8431434388276089, 0.8960610040389682] },
-  { slug: 'parietal-lobe', name: 'Parietal Lobe', fraction: [0.5748233978129051, 0.9784274277289939, 0.38598979098606834] },
-  { slug: 'temporal-lobe', name: 'Temporal Lobe', fraction: [0.020449440939476458, 0.5330341800015003, 0.549918955076177] },
-  { slug: 'occipital-lobe', name: 'Occipital Lobe', fraction: [0.6003032195498839, 0.5148566587676869, 0.016457367837172512] },
+  { slug: 'brainstem', name: 'Tronco Encefalico', fraction: [0.510924641237057, 0.20527322624610528, 0.40305727334594926] },
+  { slug: 'cerebellum', name: 'Cervelletto', fraction: [0.5106993637898103, 0.4037981609334596, 0.26031870482883745] },
+  { slug: 'frontal-lobe', name: 'Lobo Frontale', fraction: [0.5784839052407639, 0.8431434388276089, 0.8960610040389682] },
+  { slug: 'parietal-lobe', name: 'Lobo Parietale', fraction: [0.5748233978129051, 0.9784274277289939, 0.38598979098606834] },
+  { slug: 'temporal-lobe', name: 'Lobo Temporale', fraction: [0.020449440939476458, 0.5330341800015003, 0.549918955076177] },
+  { slug: 'occipital-lobe', name: 'Lobo Occipitale', fraction: [0.6003032195498839, 0.5148566587676869, 0.016457367837172512] },
 ];
 
 interface BoxInfo {
@@ -326,10 +330,12 @@ function BrainScene({
   onSelectZone,
   hoveredSlug,
   setHoveredSlug,
+  zoneNames,
 }: {
   onSelectZone: (slug: string) => void;
   hoveredSlug: string | null;
   setHoveredSlug: (slug: string | null) => void;
+  zoneNames: Record<string, string>;
 }) {
   const { scene } = useGLTF('/models/brain/scene.gltf');
   const [transform, setTransform] = useState<{ scale: number; offset: THREE.Vector3 } | null>(null);
@@ -407,7 +413,7 @@ function BrainScene({
               />
             )}
             <ZoneMarker
-              name={zone.name}
+              name={zoneNames[zone.slug] ?? zone.name}
               position={localPos}
               haloRadius={haloRadius}
               hasRegion={!!region}
@@ -426,11 +432,11 @@ function BrainScene({
 
 useGLTF.preload('/models/brain/scene.gltf');
 
-function LoadingFallback() {
+function LoadingFallback({ text }: { text: string }) {
   return (
     <Html center>
       <div className="whitespace-nowrap px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 text-xs text-white/60">
-        Caricamento modello 3D...
+        {text}
       </div>
     </Html>
   );
@@ -583,6 +589,8 @@ function AutoRotateControls() {
 
 export default function BrainMap3D({ onSelectZone }: { onSelectZone: (slug: string) => void }) {
   const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
+  const ui = useUiStrings();
+  const bm = ui.brainMap;
 
   return (
     <div className="relative w-full h-[520px] sm:h-[760px] rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden">
@@ -591,14 +599,14 @@ export default function BrainMap3D({ onSelectZone }: { onSelectZone: (slug: stri
         <directionalLight position={[3, 4, 2]} intensity={1.3} color="#fff2e6" />
         <directionalLight position={[-3, -1, -3]} intensity={0.45} color="#ffffff" />
         <pointLight position={[0, 1.5, 3]} intensity={0.5} color="#ffffff" />
-        <Suspense fallback={<LoadingFallback />}>
-          <BrainScene onSelectZone={onSelectZone} hoveredSlug={hoveredSlug} setHoveredSlug={setHoveredSlug} />
+        <Suspense fallback={<LoadingFallback text={bm.loading3DModel} />}>
+          <BrainScene onSelectZone={onSelectZone} hoveredSlug={hoveredSlug} setHoveredSlug={setHoveredSlug} zoneNames={bm.zoneNames} />
         </Suspense>
         <AutoRotateControls />
       </Canvas>
 
       <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 text-[11px] text-white/40">
-        Trascina per ruotare · scorri per zoom
+        {bm.dragRotateZoom}
       </p>
 
       {/* Credito CC-BY-4.0 richiesto dalla licenza del modello "Human Brain" di agher08
@@ -609,7 +617,7 @@ export default function BrainMap3D({ onSelectZone }: { onSelectZone: (slug: stri
         rel="noopener noreferrer"
         className="absolute bottom-1 right-2 text-[9px] text-white/20 hover:text-white/40 transition-colors"
       >
-        Modello 3D: agher08 (CC BY 4.0)
+        {bm.modelCreditPrefix} agher08 (CC BY 4.0)
       </a>
     </div>
   );

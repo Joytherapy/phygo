@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, User, Users, FileText, Activity, Search, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
+import { useUiStrings } from '@/contexts/LanguageContext'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,6 +42,7 @@ const STAT_STYLES = [
 ]
 
 export default function DashboardPage() {
+  const ui = useUiStrings()
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -49,19 +51,20 @@ export default function DashboardPage() {
   const [condition, setCondition] = useState('')
   const [gender, setGender] = useState('')
   const [saving, setSaving] = useState(false)
-  const [greeting, setGreeting] = useState('Welcome back')
+  const [greeting, setGreeting] = useState<{ time: string | null; name: string | null }>({ time: null, name: null })
   const [search, setSearch] = useState('')
 
   useEffect(() => {
     const hour = new Date().getHours()
     const timeGreeting =
-      hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
+      hour < 12 ? ui.patients.greetingMorning : hour < 18 ? ui.patients.greetingAfternoon : ui.patients.greetingEvening
 
     supabase.auth.getUser().then(({ data: { user } }) => {
       const displayName = user?.user_metadata?.display_name
-      setGreeting(displayName ? `${timeGreeting}, ${displayName}` : timeGreeting)
+      setGreeting({ time: timeGreeting, name: displayName || null })
     })
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ui])
 
   const loadPatients = async () => {
     setLoading(true)
@@ -146,14 +149,14 @@ export default function DashboardPage() {
                 style={{ background: 'linear-gradient(90deg, #4F7CFF, #32D6A0)' }}
               />
               <p className="text-xs font-semibold tracking-[0.25em] uppercase text-[#4F7CFF]">
-                Dashboard
+                {ui.patients.eyebrow}
               </p>
             </div>
-            <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight leading-tight text-ink dark:text-white">              {greeting}
+            <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight leading-tight text-ink dark:text-white">              {greeting.time ? (greeting.name ? `${greeting.time}, ${greeting.name}` : greeting.time) : ui.patients.greetingDefault}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]">.</span>
             </h1>
             <p className="text-base text-ink/40 dark:text-white/40 mt-3">
-              Here's your patient roster
+              {ui.patients.subtitle}
             </p>
           </div>
                    <div className="hidden sm:flex items-center gap-2">
@@ -165,7 +168,7 @@ export default function DashboardPage() {
               }}
             >
               {showForm ? <X size={16} /> : <Plus size={16} />}
-              {showForm ? 'Cancel' : 'New patient'}
+              {showForm ? ui.patients.cancel : ui.patients.newPatient}
             </button>
           </div>
         </motion.div>
@@ -177,9 +180,9 @@ export default function DashboardPage() {
           className="grid grid-cols-3 gap-4 mb-8"
         >
           {[
-            { icon: Users, label: 'Patients', value: patients.length },
-            { icon: FileText, label: 'Notes this month', value: 0 },
-            { icon: Activity, label: 'Active plans', value: patients.length },
+            { icon: Users, label: ui.patients.statPatients, value: patients.length },
+            { icon: FileText, label: ui.patients.statNotesThisMonth, value: 0 },
+            { icon: Activity, label: ui.patients.statActivePlans, value: patients.length },
           ].map((stat, i) => (
             <div
               key={i}
@@ -210,7 +213,7 @@ export default function DashboardPage() {
             style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
           >
             {showForm ? <X size={16} /> : <Plus size={16} />}
-            {showForm ? 'Cancel' : 'New patient'}
+            {showForm ? ui.patients.cancel : ui.patients.newPatient}
           </button>
         </div>
 
@@ -220,7 +223,7 @@ export default function DashboardPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search patients by name..."
+            placeholder={ui.patients.searchPlaceholder}
             className="w-full rounded-full border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl pl-11 pr-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
           />
         </div>
@@ -237,7 +240,7 @@ export default function DashboardPage() {
             >
               <div>
                 <label className="text-sm font-medium text-ink/50 dark:text-white/50">
-                  Name
+                  {ui.patients.formNameLabel}
                 </label>
                 <input
                   type="text"
@@ -249,13 +252,13 @@ export default function DashboardPage() {
               </div>
               <div>
                 <label className="text-sm font-medium text-ink/50 dark:text-white/50">
-                  Gender
+                  {ui.patients.formGenderLabel}
                 </label>
                 <div className="flex gap-2 mt-1.5">
                   {[
-                    { value: 'male', label: 'Male' },
-                    { value: 'female', label: 'Female' },
-                    { value: '', label: 'Not specified' },
+                    { value: 'male', label: ui.patients.genderMale },
+                    { value: 'female', label: ui.patients.genderFemale },
+                    { value: '', label: ui.patients.genderNotSpecified },
                   ].map((opt) => (
                     <button
                       key={opt.label}
@@ -279,7 +282,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <label className="text-sm font-medium text-ink/50 dark:text-white/50">
-                  Age
+                  {ui.patients.formAgeLabel}
                 </label>
                 <input
                   type="number"
@@ -290,7 +293,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <label className="text-sm font-medium text-ink/50 dark:text-white/50">
-                  Main condition
+                  {ui.patients.formConditionLabel}
                 </label>
                 <input
                   type="text"
@@ -307,24 +310,24 @@ export default function DashboardPage() {
                   background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)',
                 }}
               >
-                {saving ? 'Saving...' : 'Save patient'}
+                {saving ? ui.patients.savingButton : ui.patients.savePatientButton}
               </button>
             </motion.form>
           )}
         </AnimatePresence>
 
         {loading ? (
-          <p className="text-ink/40 dark:text-white/40">Loading...</p>
+          <p className="text-ink/40 dark:text-white/40">{ui.common.loading}</p>
         ) : patients.length === 0 ? (
           <div className="rounded-[28px] border border-dashed border-black/10 dark:border-white/15 py-20 text-center">
             <p className="text-ink/40 dark:text-white/40">
-              No patients yet. Add one to get started.
+              {ui.patients.noPatientsYet}
             </p>
           </div>
         ) : filteredPatients.length === 0 ? (
           <div className="rounded-[28px] border border-dashed border-black/10 dark:border-white/15 py-16 text-center">
             <p className="text-ink/40 dark:text-white/40">
-              No patients match "{search}".
+              {ui.patients.noPatientsMatch.replace('{search}', search)}
             </p>
           </div>
         ) : (
@@ -351,7 +354,7 @@ export default function DashboardPage() {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-ink dark:text-white truncate">{patient.name}</p>
                       <p className="text-xs text-ink/50 dark:text-white/40 truncate">
-                        {patient.age ? `${patient.age} years old` : ''}
+                        {patient.age ? ui.patients.yearsOld.replace('{age}', String(patient.age)) : ''}
                         {patient.age && patient.main_condition ? ' · ' : ''}
                         {patient.main_condition || ''}
                       </p>

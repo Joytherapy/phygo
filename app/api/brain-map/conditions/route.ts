@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getTranslatedCondition, type SupportedLang } from '@/lib/conditionTranslation';
+import { translateContent, type AppLang } from '@/lib/contentTranslation';
+
+function parseLang(value: string | null): AppLang {
+  return value === 'en' || value === 'es' || value === 'fr' ? value : 'it';
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -11,8 +17,10 @@ const adminSupabase = createClient(
 // Aggrega tutte le patologie collegate a QUALSIASI zona cerebrale (brain_zone_conditions),
 // con l'elenco delle zone a cui ciascuna è collegata — per la tab "Conditions" della
 // vista Brain, che finora esponeva le patologie solo cliccando i singoli hotspot.
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const lang = parseLang(new URL(req.url).searchParams.get('lang'));
+
     const { data: zones, error: zonesErr } = await adminSupabase
       .from('brain_zones')
       .select('id, slug, name');
@@ -22,7 +30,21 @@ export async function GET() {
       return NextResponse.json({ error: zonesErr.message }, { status: 500 });
     }
 
-    const zoneById = new Map((zones || []).map((z) => [z.id, { slug: z.slug, name: z.name }]));
+    let zoneNameBySlug = new Map<string, string>();
+    if (lang !== 'it' && (zones || []).length > 0) {
+      await Promise.all(
+        (zones || []).map(async (z) => {
+          const { fields } = await translateContent('brain_zone_name', z.id, { name: z.name }, ['name'] as const, lang);
+          zoneNameBySlug.set(z.slug, fields.name || z.name);
+        })
+      );
+    } else {
+      for (const z of zones || []) zoneNameBySlug.set(z.slug, z.name);
+    }
+
+    const zoneById = new Map<number, { slug: string; name: string }>(
+      (zones || []).map((z) => [z.id, { slug: z.slug, name: zoneNameBySlug.get(z.slug) ?? z.name }])
+    );
 
     const { data: links, error: linksErr } = await adminSupabase
       .from('brain_zone_conditions')
@@ -59,7 +81,14 @@ export async function GET() {
         return NextResponse.json({ error: condsErr.message }, { status: 500 });
       }
 
-      conditions = (conds || []).map((c) => ({
+      let translatedConds = conds || [];
+      if (lang !== 'it' && translatedConds.length > 0) {
+        translatedConds = await Promise.all(
+          translatedConds.map(async (c) => (await getTranslatedCondition(c.id, lang as SupportedLang)) ?? c)
+        );
+      }
+
+      conditions = translatedConds.map((c) => ({
         ...c,
         zones: zonesByCondition.get(c.id) ?? [],
       }));

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { ArrowLeft } from 'lucide-react';
+import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 
 interface TopicDetail {
   id: string;
@@ -43,6 +44,8 @@ export default function FirstAidDetailPage() {
   const router = useRouter();
   const params = useParams();
   const slug = params?.slug as string;
+  const { lang } = useLanguage();
+  const ui = useUiStrings();
 
   const [topic, setTopic] = useState<TopicDetail | null>(null);
   const [protocols, setProtocols] = useState<CountryProtocol[]>([]);
@@ -56,7 +59,7 @@ export default function FirstAidDetailPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/first-aid/${slug}`);
+        const res = await fetch(`/api/first-aid/${slug}?lang=${lang}`);
         if (!res.ok) throw new Error('Errore nel recupero dell\'argomento');
         const data = await res.json();
         setTopic(data.topic ?? null);
@@ -65,14 +68,15 @@ export default function FirstAidDetailPage() {
           setActiveCountry(data.protocols[0].country);
         }
       } catch (err) {
-        setError('Impossibile caricare questo argomento di primo soccorso.');
+        setError(ui.firstAid.errorLoadingTopic);
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
     fetchDetail();
-  }, [slug]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug, lang]);
 
   const activeProtocol = protocols.find((p) => p.country === activeCountry);
 
@@ -93,10 +97,10 @@ export default function FirstAidDetailPage() {
           className="inline-flex items-center gap-2 text-sm text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
         >
           <ArrowLeft size={16} />
-          Tutti gli argomenti
+          {ui.firstAid.backToTopics}
         </button>
 
-        {loading && <p className="text-sm text-ink/40 dark:text-white/40">Caricamento...</p>}
+        {loading && <p className="text-sm text-ink/40 dark:text-white/40">{ui.common.loading}</p>}
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         {!loading && !error && topic && (
@@ -127,7 +131,7 @@ export default function FirstAidDetailPage() {
                   style={activeCountry === p.country ? { background: ACCENT.gradient } : undefined}
                 >
                   <span>{COUNTRY_FLAG[p.country] ?? ''}</span>
-                  {p.country}
+                  {ui.firstAid.countryLabels[p.country as keyof typeof ui.firstAid.countryLabels] ?? p.country}
                 </button>
               ))}
             </div>
@@ -145,13 +149,13 @@ export default function FirstAidDetailPage() {
                   <div className="flex flex-wrap gap-4 text-xs text-ink/50 dark:text-white/50">
                     {activeProtocol.emergency_number && (
                       <div>
-                        <span className="font-semibold text-ink/70 dark:text-white/70">Numero di emergenza: </span>
+                        <span className="font-semibold text-ink/70 dark:text-white/70">{ui.firstAid.emergencyNumberLabel}</span>
                         {activeProtocol.emergency_number}
                       </div>
                     )}
                     {activeProtocol.governing_body && (
                       <div>
-                        <span className="font-semibold text-ink/70 dark:text-white/70">Ente di riferimento: </span>
+                        <span className="font-semibold text-ink/70 dark:text-white/70">{ui.firstAid.governingBodyLabel}</span>
                         {activeProtocol.governing_body}
                       </div>
                     )}
@@ -159,7 +163,7 @@ export default function FirstAidDetailPage() {
 
                   {activeProtocol.protocol && (
                     <div>
-                      <p className="text-sm font-semibold text-ink dark:text-white mb-1.5">Protocollo</p>
+                      <p className="text-sm font-semibold text-ink dark:text-white mb-1.5">{ui.firstAid.protocolLabel}</p>
                       <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">
                         {activeProtocol.protocol}
                       </p>
@@ -168,7 +172,7 @@ export default function FirstAidDetailPage() {
 
                   {activeProtocol.notes_on_differences && (
                     <div>
-                      <p className="text-sm font-semibold text-[#F97316] mb-1.5">Note sulle differenze</p>
+                      <p className="text-sm font-semibold text-[#F97316] mb-1.5">{ui.firstAid.notesLabel}</p>
                       <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">
                         {activeProtocol.notes_on_differences}
                       </p>
@@ -178,7 +182,7 @@ export default function FirstAidDetailPage() {
                   {activeProtocol.key_source && (
                     <div className="pt-3 border-t border-black/[0.06] dark:border-white/10">
                       <p className="text-xs text-ink/40 dark:text-white/40">
-                        Fonte: {activeProtocol.key_source}
+                        {ui.firstAid.sourceLabel}{activeProtocol.key_source}
                       </p>
                     </div>
                   )}

@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Camera, Plus, X, Loader2, Check, Award } from 'lucide-react'
+import { ArrowLeft, Camera, Plus, X, Loader2, Check, Award, BadgeCheck } from 'lucide-react'
 import Navbar from '@/components/Navbar'
+import { useUiStrings } from '@/contexts/LanguageContext'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,6 +18,9 @@ type Credential = { id: string; label: string }
 export default function ProfilePage() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const ui = useUiStrings()
+  const t = ui.profilePage
+  const common = ui.common
 
   const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -27,6 +31,7 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState('')
   const [bio, setBio] = useState('')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [registrationNumber, setRegistrationNumber] = useState('')
   const [credentials, setCredentials] = useState<Credential[]>([])
   const [newCredential, setNewCredential] = useState('')
 
@@ -41,7 +46,7 @@ export default function ProfilePage() {
 
       const { data } = await supabase
         .from('profiles')
-        .select('display_name, bio, avatar_url, credentials')
+        .select('display_name, bio, avatar_url, credentials, registration_number')
         .eq('id', user.id)
         .single()
 
@@ -49,6 +54,7 @@ export default function ProfilePage() {
         setDisplayName(data.display_name || user.user_metadata?.display_name || '')
         setBio(data.bio || '')
         setAvatarUrl(data.avatar_url || null)
+        setRegistrationNumber(data.registration_number || '')
         setCredentials(Array.isArray(data.credentials) ? data.credentials : [])
       }
       setLoading(false)
@@ -95,6 +101,7 @@ export default function ProfilePage() {
         display_name: displayName || null,
         bio: bio || null,
         avatar_url: avatarUrl,
+        registration_number: registrationNumber || null,
         credentials,
       })
       .eq('id', userId)
@@ -118,7 +125,7 @@ export default function ProfilePage() {
     return (
       <div className="relative min-h-screen bg-white dark:bg-[#08090b]">
         <Navbar />
-        <div className="pt-40 text-center text-ink/40 dark:text-white/40">Loading...</div>
+        <div className="pt-40 text-center text-ink/40 dark:text-white/40">{common.loading}</div>
       </div>
     )
   }
@@ -140,7 +147,7 @@ export default function ProfilePage() {
           className="flex items-center gap-1.5 text-sm text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
         >
           <ArrowLeft size={15} />
-          Back to patients
+          {common.backToPatients}
         </motion.button>
 
         <motion.div
@@ -149,12 +156,15 @@ export default function ProfilePage() {
           transition={{ duration: 0.5 }}
           className="mb-10"
         >
-          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#4F7CFF] mb-2">
-            Your profile
-          </p>
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-[#4F7CFF]/20 dark:border-[#4F7CFF]/25 bg-gradient-to-r from-[#4F7CFF]/[0.07] to-[#32D6A0]/[0.07] backdrop-blur-xl text-[11px] font-semibold tracking-[0.15em] uppercase mb-3">
+            <span className="bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] bg-clip-text text-transparent">{t.eyebrow}</span>
+          </div>
           <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white">
-            Profile
+            {t.heading}
           </h1>
+          <p className="mt-2 text-sm text-ink/50 dark:text-white/50 max-w-md leading-relaxed">
+            {t.subtitle}
+          </p>
         </motion.div>
 
         <div className="flex items-center gap-5 mb-10">
@@ -189,41 +199,56 @@ export default function ProfilePage() {
             />
           </div>
           <div>
-            <p className="text-sm font-semibold text-ink dark:text-white">Profile photo</p>
-            <p className="text-xs text-ink/40 dark:text-white/40">Visible to your patients</p>
+            <p className="text-sm font-semibold text-ink dark:text-white">{t.photoLabel}</p>
+            <p className="text-xs text-ink/40 dark:text-white/40">{t.photoHint}</p>
           </div>
         </div>
 
         <div className="space-y-6">
           <div>
             <label className="text-sm font-medium text-ink/50 dark:text-white/50">
-              Display name
+              {t.displayNameLabel}
             </label>
             <input
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Dr. Andrea Stilfer"
+              placeholder={t.displayNamePlaceholder}
               className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
             />
           </div>
 
           <div>
             <label className="text-sm font-medium text-ink/50 dark:text-white/50">
-              Short bio
+              {t.bioLabel}
             </label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               rows={4}
-              placeholder="A few lines about your approach and experience..."
+              placeholder={t.bioPlaceholder}
               className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white resize-none"
             />
           </div>
 
           <div>
+            <label className="text-sm font-medium text-ink/50 dark:text-white/50 flex items-center gap-1.5">
+              <BadgeCheck size={14} className="text-[#4F7CFF]" />
+              {t.registrationNumberLabel}
+            </label>
+            <input
+              type="text"
+              value={registrationNumber}
+              onChange={(e) => setRegistrationNumber(e.target.value)}
+              placeholder={t.registrationNumberPlaceholder}
+              className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+            />
+            <p className="mt-1.5 text-xs text-ink/40 dark:text-white/40">{t.registrationNumberHint}</p>
+          </div>
+
+          <div>
             <label className="text-sm font-medium text-ink/50 dark:text-white/50 mb-2 block">
-              Courses & certifications
+              {t.credentialsLabel}
             </label>
             <div className="space-y-2 mb-3">
               {credentials.map((c) => (
@@ -248,7 +273,7 @@ export default function ProfilePage() {
                 value={newCredential}
                 onChange={(e) => setNewCredential(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addCredential()}
-                placeholder="e.g. Master in Pelvic Floor Rehabilitation"
+                placeholder={t.credentialPlaceholder}
                 className="flex-1 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-2.5 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
               />
               <button
@@ -256,7 +281,7 @@ export default function ProfilePage() {
                 className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold text-[#4F7CFF] border border-[#4F7CFF]/30 hover:bg-[#4F7CFF]/10 transition-colors"
               >
                 <Plus size={14} />
-                Add
+                {t.add}
               </button>
             </div>
           </div>
@@ -269,7 +294,7 @@ export default function ProfilePage() {
           >
             {saving && <Loader2 size={14} className="animate-spin" />}
             {saved && <Check size={14} />}
-            {saved ? 'Saved' : saving ? 'Saving...' : 'Save profile'}
+            {saved ? common.saved : saving ? common.saving : t.saveProfile}
           </button>
         </div>
       </div>

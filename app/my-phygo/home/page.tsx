@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
-import { FileText, Calendar, Dumbbell, ClipboardList, ShoppingBag, ExternalLink, ArrowRight } from 'lucide-react'
+import { FileText, Calendar, Dumbbell, ClipboardList, ShoppingBag, ExternalLink, ArrowRight, Flame } from 'lucide-react'
 import VideoCallPanel from '@/components/VideoCallPanel'
 import AppointmentScheduler from '@/components/AppointmentScheduler'
 const supabase = createBrowserClient(
@@ -130,6 +130,22 @@ export default function MyPhygoHomePage() {
       <div className="mb-8">
         <VideoCallPanel patientId={patient.id} canStart={false} />
       </div>
+
+      <a
+        href="/my-phygo/life/metabolic"
+        className="mb-3 flex items-center justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#6366F1]/30 transition-colors group"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#6366F1]/10 text-[#6366F1]">
+            <Flame size={16} />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-ink dark:text-white">Metabolic profile</p>
+            <p className="text-xs text-ink/40 dark:text-white/40">Your calorie target and macros for today</p>
+          </div>
+        </div>
+        <ArrowRight size={16} className="text-ink/30 dark:text-white/30 group-hover:translate-x-1 transition-transform" />
+      </a>
 
       <a
         href="/my-phygo/shop"

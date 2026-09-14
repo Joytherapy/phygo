@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { MousePointerClick, ScanLine, Search, ArrowRight, Move3d } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import BodyMap3D from '@/components/BodyMap3D';
+import { useUiStrings } from '@/contexts/LanguageContext';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -16,31 +17,18 @@ const fadeUp = {
   }),
 };
 
-const HOW_IT_WORKS = [
-  {
-    icon: MousePointerClick,
-    color: '#32D6A0',
-    label: 'Clicca una zona',
-    text: 'Ogni regione evidenziata apre la sua pagina dedicata: anatomia, biomeccanica, test clinici e protocolli riabilitativi.',
-  },
-  {
-    icon: ScanLine,
-    color: '#bcd7ff',
-    label: 'Attiva i raggi-X',
-    text: 'Passa alla modalità scheletrica per esplorare 14 gruppi ossei, con le loro fratture e patologie più frequenti.',
-  },
-  {
-    icon: Search,
-    color: '#4F7CFF',
-    label: 'Cerca una zona',
-    text: 'Per le aree piccole (polso, caviglia, gomito) è più rapido digitare il nome nella barra di ricerca che centrarle col mouse.',
-  },
-] as const;
-
 function BodyMapContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const calibrate = searchParams.get('calibrate') === '1';
+  const ui = useUiStrings();
+  const bm = ui.bodyMap;
+
+  const HOW_IT_WORKS = [
+    { icon: MousePointerClick, color: '#32D6A0', label: bm.howItWorks.clickZone.label, text: bm.howItWorks.clickZone.text },
+    { icon: ScanLine, color: '#bcd7ff', label: bm.howItWorks.xray.label, text: bm.howItWorks.xray.text },
+    { icon: Search, color: '#4F7CFF', label: bm.howItWorks.search.label, text: bm.howItWorks.search.text },
+  ] as const;
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
@@ -69,7 +57,7 @@ function BodyMapContent() {
             className="inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-xs font-semibold tracking-wide text-ink/75 dark:text-white/75 shadow-soft mb-5"
           >
             <span className="h-2 w-2 rounded-full bg-emerald animate-pulse" />
-            {calibrate ? 'Calibration Mode — click the model' : 'Interactive 3D Body Map'}
+            {calibrate ? bm.calibrationBadge : bm.badge}
           </motion.div>
 
           <motion.h1
@@ -97,7 +85,7 @@ function BodyMapContent() {
             variants={fadeUp}
             className="mt-5 text-ink/55 dark:text-white/55 text-lg max-w-xl mx-auto text-balance"
           >
-            Ruota, ingrandisci ed esplora il modello anatomico 3D — clicca su una zona per aprire condizioni, test e protocolli specifici.
+            {bm.subtitle}
           </motion.p>
         </div>
 
@@ -124,15 +112,15 @@ function BodyMapContent() {
           >
             <span className="inline-flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-emerald" />
-              Zone muscolari
+              {bm.legendMuscleZones}
             </span>
             <span className="inline-flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: '#bcd7ff' }} />
-              Zone ossee (raggi-X)
+              {bm.legendBoneZones}
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Move3d size={12} />
-              Trascina per ruotare, scorri per zoom
+              {bm.legendDragScroll}
             </span>
           </motion.div>
         )}
@@ -163,11 +151,22 @@ function BodyMapContent() {
         )}
 
         {!calibrate && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 1.25 }}
+            className="mt-6 text-center text-[11px] text-ink/35 dark:text-white/35"
+          >
+            {bm.clinicalFooter}
+          </motion.p>
+        )}
+
+        {!calibrate && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.4 }}
-            className="flex justify-center mt-12"
+            className="flex justify-center mt-8"
           >
             <motion.button
               whileHover={{ scale: 1.03 }}
@@ -175,7 +174,7 @@ function BodyMapContent() {
               onClick={() => router.push('/dashboard/body-map/whole-body')}
               className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-electric to-emerald px-7 py-3.5 text-sm font-semibold text-white shadow-glow transition-shadow hover:shadow-lift shimmer-sweep"
             >
-              Whole Body / Balance &amp; Gait
+              {bm.ctaWholeBody}
               <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
             </motion.button>
           </motion.div>

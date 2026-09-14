@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   ArrowLeft,
@@ -12,6 +12,8 @@ import {
   Move3d,
   HeartPulse,
   Sparkles,
+  Scale,
+  Apple,
 } from 'lucide-react'
 import { products, categories, type Product } from '@/lib/products'
 
@@ -41,11 +43,40 @@ const CATEGORY_STYLE: Record<Product['category'], { icon: any; gradient: string;
     gradient: 'linear-gradient(135deg, #A78BFA 0%, #818CF8 100%)',
     glow: 'rgba(167,139,250,0.25)',
   },
+  // Stessa coppia indaco/violetto del Metabolic Calculator (Clinical
+  // Toolkit / Phygo Life) — segnala visivamente che questi prodotti
+  // supportano quella funzione, non una categoria scollegata.
+  'Body Composition': {
+    icon: Scale,
+    gradient: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+    glow: 'rgba(99,102,241,0.25)',
+  },
+  Nutrition: {
+    icon: Apple,
+    gradient: 'linear-gradient(135deg, #FB923C 0%, #EA580C 100%)',
+    glow: 'rgba(251,146,60,0.25)',
+  },
 }
 
 export default function PatientShopPage() {
+  return (
+    <Suspense fallback={null}>
+      <PatientShopPageInner />
+    </Suspense>
+  )
+}
+
+// Legge ?category= per pre-filtrare (es. il link "Vedi bilance consigliate"
+// dalla pagina Metabolic Profile) — deve stare in un componente separato
+// avvolto in <Suspense>, stesso pattern gia' usato da clinical-tools/page.tsx
+// per useSearchParams in App Router.
+function PatientShopPageInner() {
   const router = useRouter()
-  const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const initialCategory = searchParams.get('category')
+  const [activeCategory, setActiveCategory] = useState<string | null>(
+    (initialCategory && categories.includes(initialCategory as Product['category'])) ? initialCategory : null
+  )
 
   const filteredProducts = activeCategory
     ? products.filter((p) => p.category === activeCategory)

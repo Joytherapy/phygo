@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { X } from 'lucide-react';
+import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 
 interface BLSProcedure {
   id: string;
@@ -18,15 +19,6 @@ interface BLSProcedure {
   image_url?: string;
 }
 
-const CATEGORY_LABEL: Record<string, string> = {
-  adult_cpr: 'RCP Adulto',
-  child_cpr: 'RCP Pediatrica',
-  infant_cpr: 'RCP Infantile',
-  choking: 'Disostruzione Vie Aeree',
-  aed: 'DAE',
-  team_dynamics: 'Dinamiche di Team',
-};
-
 const CATEGORY_ORDER = ['adult_cpr', 'child_cpr', 'infant_cpr', 'choking', 'aed', 'team_dynamics'];
 
 const ACCENT = {
@@ -35,32 +27,32 @@ const ACCENT = {
 };
 
 export default function BLSPage() {
+  const { lang } = useLanguage();
+  const ui = useUiStrings();
   const [procedures, setProcedures] = useState<BLSProcedure[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasFetched, setHasFetched] = useState(false);
   const [selected, setSelected] = useState<BLSProcedure | null>(null);
   const [expandedImage, setExpandedImage] = useState<{ url: string; label: string } | null>(null);
   useEffect(() => {
-    if (hasFetched) return;
     const fetchProcedures = async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch('/api/bls/procedures');
+        const res = await fetch(`/api/bls/procedures?lang=${lang}`);
         if (!res.ok) throw new Error('Errore nel recupero delle procedure');
         const data = await res.json();
         setProcedures(data.procedures ?? []);
-        setHasFetched(true);
       } catch (err) {
-        setError('Impossibile caricare le procedure BLSD.');
+        setError(ui.bls.errorLoading);
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
     fetchProcedures();
-  }, [hasFetched]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
@@ -77,28 +69,28 @@ export default function BLSPage() {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT.solid }} />
-            BLSD
+            {ui.bls.badge}
           </div>
           <h1 className="font-display text-6xl font-bold tracking-tight">
             <span
               className="bg-clip-text text-transparent"
               style={{ backgroundImage: ACCENT.gradient }}
             >
-              Basic Life Support
+              {ui.bls.heading}
             </span>
           </h1>
                     <p className="text-sm text-ink/50 dark:text-white/50 mt-4 max-w-xl mx-auto">
-            RCP, DAE e disostruzione delle vie aeree — verificato con le linee guida AHA 2025 (American Heart Association).
+            {ui.bls.subtitle}
           </p>
         </div>
 
         <div className="mb-10 rounded-2xl border p-6" style={{ borderColor: `${ACCENT.solid}33`, background: `${ACCENT.solid}0D` }}>
           <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">
-            Il BLSD (Basic Life Support Defibrillation) è l'insieme delle manovre salvavita di base — rianimazione cardiopolmonare, uso del defibrillatore e disostruzione delle vie aeree — che ogni operatore sanitario dovrebbe saper eseguire in autonomia prima dell'arrivo del soccorso avanzato. Ogni scheda qui sotto riporta la procedura completa, i parametri tecnici chiave (frequenza, profondità, rapporto compressioni/ventilazioni) e le precauzioni specifiche per fascia d'età, con le eventuali variazioni introdotte dalle linee guida più recenti.
+            {ui.bls.infoBox}
           </p>
         </div>
 
-        {loading && <p className="text-center text-sm text-ink/40 dark:text-white/40">Caricamento...</p>}
+        {loading && <p className="text-center text-sm text-ink/40 dark:text-white/40">{ui.common.loading}</p>}
         {error && <p className="text-center text-sm text-red-500">{error}</p>}
 
         {!loading && !error && (
@@ -112,7 +104,7 @@ export default function BLSPage() {
                     className="text-xs font-bold uppercase tracking-wide mb-3"
                     style={{ color: ACCENT.solid }}
                   >
-                    {CATEGORY_LABEL[cat] ?? cat}
+                    {ui.bls.categoryLabels[cat as keyof typeof ui.bls.categoryLabels] ?? cat}
                   </h3>
                   <div className="grid sm:grid-cols-2 gap-3">
                     {items.map((p) => (
@@ -180,31 +172,31 @@ export default function BLSPage() {
               <div className="space-y-4 text-sm">
                 {selected.patient_position && (
                   <div>
-                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Posizione</p>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">{ui.bls.positionLabel}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selected.patient_position}</p>
                   </div>
                 )}
                 {selected.procedure && (
                   <div>
-                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Procedura</p>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">{ui.bls.procedureLabel}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selected.procedure}</p>
                   </div>
                 )}
                 {selected.key_parameters && (
                   <div>
-                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Parametri Chiave</p>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">{ui.bls.keyParametersLabel}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selected.key_parameters}</p>
                   </div>
                 )}
                 {selected.precautions && (
                   <div>
-                    <p className="font-semibold text-red-500 mb-1">Precauzioni</p>
+                    <p className="font-semibold text-red-500 mb-1">{ui.bls.precautionsLabel}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selected.precautions}</p>
                   </div>
                 )}
                 {selected.evidence_note && (
                   <div>
-                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">Evidenza</p>
+                    <p className="font-semibold text-ink/70 dark:text-white/70 mb-1">{ui.bls.evidenceLabel}</p>
                     <p className="text-ink/60 dark:text-white/60 leading-relaxed">{selected.evidence_note}</p>
                   </div>
                 )}
