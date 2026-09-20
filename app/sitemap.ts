@@ -9,6 +9,17 @@ const adminSupabase = createClient(
 
 export const revalidate = 3600;
 
+// Some knowledge_base rows have a source_date that isn't a parseable date
+// (free-text citation, partial year, etc.) — new Date() on those yields an
+// "Invalid Date", and Next.js's sitemap serializer throws a RangeError when
+// it calls .toISOString() on it. Guard against that instead of trusting
+// truthiness alone.
+function safeDate(value: string | null | undefined): Date | undefined {
+  if (!value) return undefined;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? undefined : d;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, changeFrequency: 'weekly', priority: 1 },
@@ -30,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const conditionEntries: MetadataRoute.Sitemap = data.map((c) => ({
       url: `${SITE_URL}${buildConditionPath(c.id, c.condition_name)}`,
-      lastModified: c.source_date ? new Date(c.source_date) : undefined,
+      lastModified: safeDate(c.source_date),
       changeFrequency: 'monthly',
       priority: 0.7,
     }));
@@ -40,19 +51,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // language just to build a sitemap.
     const conditionEntriesEN: MetadataRoute.Sitemap = data.map((c) => ({
       url: `${SITE_URL}/en/library/condition/${c.id}`,
-      lastModified: c.source_date ? new Date(c.source_date) : undefined,
+      lastModified: safeDate(c.source_date),
       changeFrequency: 'monthly',
       priority: 0.6,
     }));
     const conditionEntriesES: MetadataRoute.Sitemap = data.map((c) => ({
       url: `${SITE_URL}/es/library/condition/${c.id}`,
-      lastModified: c.source_date ? new Date(c.source_date) : undefined,
+      lastModified: safeDate(c.source_date),
       changeFrequency: 'monthly',
       priority: 0.6,
     }));
     const conditionEntriesFR: MetadataRoute.Sitemap = data.map((c) => ({
       url: `${SITE_URL}/fr/library/condition/${c.id}`,
-      lastModified: c.source_date ? new Date(c.source_date) : undefined,
+      lastModified: safeDate(c.source_date),
       changeFrequency: 'monthly',
       priority: 0.6,
     }));
