@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, type MouseEvent as ReactMouseEvent } from 'react';
+import { Suspense, useState, useRef, useEffect, type MouseEvent as ReactMouseEvent } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -100,6 +100,14 @@ const BRAIN_ZONES: Zone[] = [
 ];
 
 export default function BrainMapPage() {
+  return (
+    <Suspense fallback={null}>
+      <BrainMapPageInner />
+    </Suspense>
+  );
+}
+
+function BrainMapPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const containerRef = useRef<HTMLDivElement>(null);
