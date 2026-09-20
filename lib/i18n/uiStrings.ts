@@ -497,6 +497,8 @@ interface UiDict {
     categoryLabels: Record<'organ' | 'physiology', string>;
     testCategoryLabels: Record<'imaging' | 'metabolic' | 'renal_function' | 'urinalysis', string>;
     rehabCategoryLabels: Record<'renal_training' | 'sports_nephrology', string>;
+    conditionGroupLabels: Record<'renal' | 'bladder', string>;
+    bladderCrossRefNote: string;
   };
   physiology: {
     atlasBadge: string;
@@ -1037,6 +1039,7 @@ interface UiDict {
     badge: string;
     heading: string;
     subTabs: { anatomy: string; conditions: string; assessment: string; rehab: string };
+    sexTabs: { common: string; female: string; male: string };
     anatomyHeading: string;
     anatomyIntro: string;
     overviewIntro: string;
@@ -1675,6 +1678,8 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
         renal_training: 'Allenamento in Nefropatia',
         sports_nephrology: 'Nefrologia dello Sport',
       },
+      conditionGroupLabels: { renal: 'Renale', bladder: 'Vescicale e Continenza' },
+      bladderCrossRefNote: 'Queste condizioni sono trattate anche nella sezione Pavimento Pelvico.',
     },
     physiology: {
       atlasBadge: 'Atlante Fisiologia',
@@ -2386,6 +2391,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       badge: 'Atlante del Pavimento Pelvico',
       heading: 'Pavimento Pelvico',
       subTabs: { anatomy: 'Anatomia', conditions: 'Patologie', assessment: 'Valutazione', rehab: 'Riabilitazione' },
+      sexTabs: { common: 'Comune', female: 'Femminile', male: 'Maschile' },
       anatomyHeading: 'Anatomia del Pavimento Pelvico',
       anatomyIntro:
         'Muscoli, fasce, legamenti e concetti chiave che spiegano come il pavimento pelvico funziona come sistema integrato.',
@@ -3032,6 +3038,8 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
         renal_training: 'Renal Disease Training',
         sports_nephrology: 'Sports Nephrology',
       },
+      conditionGroupLabels: { renal: 'Renal', bladder: 'Bladder & Continence' },
+      bladderCrossRefNote: 'These conditions are also covered in the Pelvic Floor section.',
     },
     physiology: {
       atlasBadge: 'Physiology Atlas',
@@ -3743,6 +3751,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       badge: 'Pelvic Health Atlas',
       heading: 'Pelvic Floor',
       subTabs: { anatomy: 'Anatomy', conditions: 'Conditions', assessment: 'Assessment', rehab: 'Rehabilitation' },
+      sexTabs: { common: 'Common', female: 'Female', male: 'Male' },
       anatomyHeading: 'Pelvic Floor Anatomy',
       anatomyIntro:
         'Muscles, fasciae, ligaments and key concepts explaining how the pelvic floor works as an integrated system.',
@@ -4389,6 +4398,8 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
         renal_training: 'Entrenamiento en Nefropatía',
         sports_nephrology: 'Nefrología del Deporte',
       },
+      conditionGroupLabels: { renal: 'Renal', bladder: 'Vesical y Continencia' },
+      bladderCrossRefNote: 'Estas condiciones también se tratan en la sección de Suelo Pélvico.',
     },
     physiology: {
       atlasBadge: 'Atlas de Fisiología',
@@ -5100,6 +5111,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       badge: 'Atlas de Salud Pélvica',
       heading: 'Suelo Pélvico',
       subTabs: { anatomy: 'Anatomía', conditions: 'Patologías', assessment: 'Evaluación', rehab: 'Rehabilitación' },
+      sexTabs: { common: 'Común', female: 'Femenino', male: 'Masculino' },
       anatomyHeading: 'Anatomía del Suelo Pélvico',
       anatomyIntro:
         'Músculos, fascias, ligamentos y conceptos clave que explican cómo el suelo pélvico funciona como sistema integrado.',
@@ -5746,6 +5758,8 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
         renal_training: 'Entraînement en Néphropathie',
         sports_nephrology: 'Néphrologie du Sport',
       },
+      conditionGroupLabels: { renal: 'Rénal', bladder: 'Vessie et Continence' },
+      bladderCrossRefNote: 'Ces pathologies sont également traitées dans la section Plancher Pelvien.',
     },
     physiology: {
       atlasBadge: 'Atlas de Physiologie',
@@ -6457,6 +6471,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       badge: 'Atlas de Santé Pelvienne',
       heading: 'Plancher Pelvien',
       subTabs: { anatomy: 'Anatomie', conditions: 'Pathologies', assessment: 'Évaluation', rehab: 'Rééducation' },
+      sexTabs: { common: 'Commun', female: 'Féminin', male: 'Masculin' },
       anatomyHeading: 'Anatomie du Plancher Pelvien',
       anatomyIntro:
         'Muscles, fascias, ligaments et concepts clés qui expliquent comment le plancher pelvien fonctionne comme un système intégré.',

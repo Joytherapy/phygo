@@ -10,6 +10,8 @@ import EvidenceBadge, { SourceCitation } from '@/components/EvidenceBadge';
 
 type SubView = 'anatomy' | 'conditions' | 'assessment' | 'rehab';
 
+type SexView = 'common' | 'female' | 'male';
+
 interface StructureItem {
   id: string;
   slug: string;
@@ -20,6 +22,7 @@ interface StructureItem {
   clinical_relevance?: string;
   evidence_level?: string;
   diagram_image?: string;
+  applies_to: 'both' | 'female' | 'male';
 }
 
 interface ConditionItem {
@@ -35,6 +38,7 @@ interface ConditionItem {
   source?: string;
   source_date?: string;
   compartment: string;
+  applies_to: 'both' | 'female' | 'male';
 }
 
 interface TestItem {
@@ -86,6 +90,7 @@ export default function PelvicFloorPage() {
   const ui = useUiStrings();
   const t = ui.pelvicFloorAtlas;
   const [subView, setSubView] = useState<SubView>('anatomy');
+  const [sexView, setSexView] = useState<SexView>('common');
 
   const [structures, setStructures] = useState<StructureItem[]>([]);
   const [structuresLoading, setStructuresLoading] = useState(false);
@@ -110,12 +115,6 @@ export default function PelvicFloorPage() {
 
   const [expandedImage, setExpandedImage] = useState<{ file: string; label: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-
-  const OVERVIEW_IMAGES = [
-    { file: 'pelvic-floor-female-sagittal.png', label: t.imageLabels.femaleSagittal },
-    { file: 'pelvic-floor-male-sagittal.png', label: t.imageLabels.maleSagittal },
-    { file: 'pelvic-floor-inferior-view.png', label: t.imageLabels.inferiorView },
-  ];
 
   useEffect(() => {
     if (subView !== 'anatomy' || hasFetchedStructures) return;
@@ -220,6 +219,9 @@ export default function PelvicFloorPage() {
     setSearchQuery('');
   }, [subView]);
 
+  const appliesToSexView = (appliesTo: 'both' | 'female' | 'male') =>
+    sexView === 'common' ? appliesTo === 'both' : appliesTo === sexView;
+
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const matchesStructure = (s: StructureItem) =>
     normalizedQuery === '' ||
@@ -249,9 +251,9 @@ export default function PelvicFloorPage() {
 
   const hasAnyMatchCurrent =
     subView === 'anatomy'
-      ? structures.some(matchesStructure)
+      ? structures.some((s) => matchesStructure(s) && appliesToSexView(s.applies_to))
       : subView === 'conditions'
-      ? conditions.some(matchesCondition)
+      ? conditions.some((c) => matchesCondition(c) && appliesToSexView(c.applies_to))
       : subView === 'assessment'
       ? tests.some(matchesTest)
       : rehab.some(matchesRehab);
@@ -321,6 +323,27 @@ export default function PelvicFloorPage() {
           )}
         </div>
 
+        {(subView === 'anatomy' || subView === 'conditions') && (
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex rounded-full border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
+              {(['common', 'female', 'male'] as const).map((sv) => (
+                <button
+                  key={sv}
+                  onClick={() => setSexView(sv)}
+                  className={`px-4 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                    sexView === sv
+                      ? 'text-white'
+                      : 'text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
+                  }`}
+                  style={sexView === sv ? { background: ACCENT.solid } : undefined}
+                >
+                  {t.sexTabs[sv]}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {subView === 'anatomy' && (
           <div>
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
@@ -330,12 +353,17 @@ export default function PelvicFloorPage() {
               {t.anatomyIntro}
             </p>
 
-            <div className="grid sm:grid-cols-2 gap-3 mb-3">
-              {OVERVIEW_IMAGES.filter((img) => img.file !== 'pelvic-floor-inferior-view.png').map((img) => (
+            <div className="mb-8">
+              {(sexView === 'common'
+                ? [{ file: 'pelvic-floor-inferior-view.png', label: t.imageLabels.inferiorViewFull }]
+                : sexView === 'female'
+                ? [{ file: 'pelvic-floor-female-sagittal.png', label: t.imageLabels.femaleSagittal }]
+                : [{ file: 'pelvic-floor-male-sagittal.png', label: t.imageLabels.maleSagittal }]
+              ).map((img) => (
                 <button
                   key={img.file}
                   onClick={() => setExpandedImage(img)}
-                  className="group relative rounded-2xl border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-pink-500/10 transition-shadow"
+                  className="group relative w-full rounded-2xl border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-pink-500/10 transition-shadow"
                 >
                   <img
                     src={`${IMAGE_BASE}/${img.file}`}
@@ -347,22 +375,6 @@ export default function PelvicFloorPage() {
                   </div>
                 </button>
               ))}
-            </div>
-
-            <div className="mb-8">
-              <button
-                onClick={() => setExpandedImage({ file: 'pelvic-floor-inferior-view.png', label: t.imageLabels.inferiorViewFull })}
-                className="group relative w-full rounded-2xl border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-pink-500/10 transition-shadow"
-              >
-                <img
-                  src={`${IMAGE_BASE}/pelvic-floor-inferior-view.png`}
-                  alt={t.imageLabels.inferiorViewFull}
-                  className="w-full h-auto group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                  <p className="text-xs font-semibold text-white">{t.imageLabels.inferiorViewFull}</p>
-                </div>
-              </button>
             </div>
 
             <div className="mb-10 rounded-2xl border border-pink-400/20 bg-pink-400/5 p-6">
@@ -383,7 +395,9 @@ export default function PelvicFloorPage() {
             {!structuresLoading && !structuresError && (
               <div className="space-y-8">
                 {(['muscle', 'fascia_ligament', 'nerve', 'concept'] as const).map((cat) => {
-                  const items = structures.filter((s) => s.category === cat && matchesStructure(s));
+                  const items = structures.filter(
+                    (s) => s.category === cat && matchesStructure(s) && appliesToSexView(s.applies_to)
+                  );
                   if (items.length === 0) return null;
                   const Icon = STRUCTURE_CATEGORY_ICON[cat];
                   return (
@@ -469,7 +483,9 @@ export default function PelvicFloorPage() {
             {!conditionsLoading && !conditionsError && (
               <div className="space-y-8">
                 {(['anterior', 'central', 'posterior', 'systemic'] as const).map((comp) => {
-                  const items = conditions.filter((c) => c.compartment === comp && matchesCondition(c));
+                  const items = conditions.filter(
+                    (c) => c.compartment === comp && matchesCondition(c) && appliesToSexView(c.applies_to)
+                  );
                   if (items.length === 0) return null;
                   return (
                     <div key={comp}>

@@ -400,18 +400,39 @@ export default function UrinaryPage() {
               <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
-            {!conditionsLoading && !conditionsError && conditions.filter(matchesCondition).length > 0 && (
-              <div className="grid sm:grid-cols-2 gap-3">
-                {conditions.filter(matchesCondition).map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => setSelectedCondition(c)}
-                    className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-colors hover:border-[#22D3EE]/40"
-                  >
-                    <p className="text-sm font-semibold text-ink dark:text-white mb-2">{c.condition_name}</p>
-                    <EvidenceBadge level={c.evidence_level} />
-                  </button>
-                ))}
+            {!conditionsLoading && !conditionsError && (
+              <div className="space-y-8">
+                {(['urinary', 'bladder'] as const).map((sys) => {
+                  const items = conditions.filter((c) => c.system === sys && matchesCondition(c));
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={sys}>
+                      <h3
+                        className="text-xs font-bold uppercase tracking-wide mb-1"
+                        style={{ color: ACCENT.solid }}
+                      >
+                        {ui.urinary.conditionGroupLabels[sys === 'urinary' ? 'renal' : 'bladder']}
+                      </h3>
+                      {sys === 'bladder' && (
+                        <p className="text-[11px] text-ink/40 dark:text-white/40 mb-3">
+                          {ui.urinary.bladderCrossRefNote}
+                        </p>
+                      )}
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        {items.map((c) => (
+                          <button
+                            key={c.id}
+                            onClick={() => setSelectedCondition(c)}
+                            className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-colors hover:border-[#22D3EE]/40"
+                          >
+                            <p className="text-sm font-semibold text-ink dark:text-white mb-2">{c.condition_name}</p>
+                            <EvidenceBadge level={c.evidence_level} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

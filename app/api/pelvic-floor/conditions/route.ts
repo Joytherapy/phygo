@@ -19,7 +19,7 @@ export async function GET(req: Request) {
 
     const { data: tags, error: tagsErr } = await adminSupabase
       .from('pelvic_floor_condition_tags')
-      .select('condition_id, compartment');
+      .select('condition_id, compartment, applies_to');
 
     if (tagsErr) {
       console.error('pelvic floor conditions error:', tagsErr);
@@ -63,9 +63,11 @@ export async function GET(req: Request) {
     }
 
     const compartmentMap = new Map((tags || []).map((t) => [t.condition_id, t.compartment]));
+    const appliesToMap = new Map((tags || []).map((t) => [t.condition_id, t.applies_to]));
     const enriched = conditions.map((c) => ({
       ...c,
       compartment: compartmentMap.get(c.id) ?? 'systemic',
+      applies_to: appliesToMap.get(c.id) ?? 'both',
     }));
 
     return NextResponse.json({ conditions: enriched }, { headers: { 'Cache-Control': 'no-store, max-age=0' } });

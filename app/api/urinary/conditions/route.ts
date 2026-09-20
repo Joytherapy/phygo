@@ -17,12 +17,13 @@ export async function GET(req: Request) {
   try {
     const lang = parseLang(new URL(req.url).searchParams.get('lang'));
 
-    // Unlike Cardiopulmonary, every row in `urinary_condition_tags` has
-    // `system = 'urinary'` — there is no sub-system split here — so we only
-    // need the condition ids, not the tag rows themselves.
+    // `system` distinguishes purely renal conditions ('urinary') from the
+    // bladder/continence conditions cross-tagged in from Pelvic Floor
+    // ('bladder') — those stay owned by Pelvic Floor but also surface here
+    // since they're urinary-function conditions too.
     const { data: tags, error: tagsError } = await adminSupabase
       .from('urinary_condition_tags')
-      .select('condition_id');
+      .select('condition_id, system');
 
     if (tagsError) {
       console.error('urinary conditions tags error:', tagsError);
@@ -65,7 +66,8 @@ export async function GET(req: Request) {
       }
     }
 
-    const merged = conditions.map((c) => ({ ...c, system: 'urinary' as const }));
+    const systemMap = new Map((tags ?? []).map((t) => [t.condition_id, t.system]));
+    const merged = conditions.map((c) => ({ ...c, system: systemMap.get(c.id) ?? 'urinary' }));
 
     return NextResponse.json({ conditions: merged });
   } catch (err) {
