@@ -20,7 +20,7 @@ export async function GET(req: Request) {
 
     const { data, error } = await adminSupabase
       .from('pelvic_floor_structures')
-      .select('*')
+      .select('id, slug, name, category, anatomy, function, clinical_relevance, diagram_image, created_at, evidence_level, applies_to')
       .order('name', { ascending: true });
 
     if (error) {
