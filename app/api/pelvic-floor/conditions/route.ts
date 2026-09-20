@@ -34,14 +34,16 @@ export async function GET(req: Request) {
         const { data: conds } = await adminSupabase
           .from('knowledge_base')
           .select(
-            'id, condition_name, goals, clinical_tests, red_flags, contraindications, typical_exercises, progression_criteria, evidence_level'
+            'id, condition_name, goals, clinical_tests, red_flags, contraindications, typical_exercises, progression_criteria, evidence_level, source, source_date'
           )
           .in('id', conditionIds);
         conditions = conds || [];
       } else {
-        const translated = await Promise.all(
-          conditionIds.map((id) => getTranslatedCondition(id, lang))
-        );
+        const [translated, sourcesRes] = await Promise.all([
+          Promise.all(conditionIds.map((id) => getTranslatedCondition(id, lang))),
+          adminSupabase.from('knowledge_base').select('id, source, source_date').in('id', conditionIds),
+        ]);
+        const sourceMap = new Map((sourcesRes.data || []).map((s) => [s.id, s]));
         conditions = translated
           .filter((c): c is NonNullable<typeof c> => c !== null)
           .map((c) => ({
@@ -54,6 +56,8 @@ export async function GET(req: Request) {
             typical_exercises: c.typical_exercises,
             progression_criteria: c.progression_criteria,
             evidence_level: c.evidence_level,
+            source: sourceMap.get(c.id)?.source ?? null,
+            source_date: sourceMap.get(c.id)?.source_date ?? null,
           }));
       }
     }

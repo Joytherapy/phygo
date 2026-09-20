@@ -249,7 +249,11 @@ export default function MetabolicCalculator({
           {/* Intestazione visibile SOLO in stampa — trasforma i risultati in un referto stampabile/PDF */}
           <div className="hidden print:flex items-center justify-between mb-8 pb-4 border-b border-black/10">
             <div className="flex items-center gap-2 font-display font-bold text-lg text-ink">
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-white text-sm font-bold">P</span>
+              <img
+                src="/logo-mark.png"
+                alt="Phygo"
+                className="h-8 w-8 rounded-lg object-cover"
+              />
               Phygo — {ui.resultsHeading}
             </div>
             <div className="text-right text-xs text-ink/50">

@@ -17,7 +17,7 @@ const supabase = createBrowserClient(
 
 const linksBeforeLibrary = [
   { label: "Live demo", href: "/#demo" },
-  { label: "Features", href: "/#features" },
+  { label: "Platform", href: "/#features" },
   { label: "Library", href: "/library/condition" },
   { label: "Trust", href: "/#trust" },
   { label: "Pricing", href: "/#pricing" },
@@ -31,8 +31,16 @@ const faqLink = { label: "FAQ", href: "/#faq" };
 const libraryLinkHrefs = [
   { key: "bodyMap", href: "/dashboard/body-map" },
   { key: "neurology", href: "/dashboard/brain-map" },
+  { key: "physiology", href: "/dashboard/physiology" },
+  { key: "sportsMedicine", href: "/dashboard/sports-medicine" },
   { key: "pelvicFloor", href: "/dashboard/pelvic-floor" },
   { key: "cardiopulmonary", href: "/dashboard/cardiopulmonary" },
+  { key: "endocrine", href: "/dashboard/endocrine" },
+  { key: "fascia", href: "/dashboard/fascia" },
+  { key: "urinary", href: "/dashboard/urinary" },
+  { key: "gastrointestinal", href: "/dashboard/gastrointestinal" },
+  { key: "immune", href: "/dashboard/immune" },
+  { key: "hematology", href: "/dashboard/hematology" },
   { key: "oncology", href: "/dashboard/oncology" },
   { key: "firstAid", href: "/dashboard/first-aid" },
   { key: "blsd", href: "/dashboard/bls" },
@@ -135,9 +143,11 @@ export default function Navbar() {
           href={isDashboard ? "/dashboard" : "/"}
           className="flex items-center gap-2.5 font-display font-semibold text-lg tracking-tight text-ink dark:text-white"
         >
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-electric to-emerald text-white text-base font-bold">
-            P
-          </span>
+          <img
+            src="/logo-mark.png"
+            alt="Phygo"
+            className="h-10 w-10 rounded-lg object-cover shadow-soft"
+          />
           Phygo
         </a>
 

@@ -31,7 +31,7 @@ export default function FinalCTA() {
           transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
           className="relative mt-5 text-white/50 max-w-md mx-auto"
         >
-          Join practitioners who reclaimed an hour of their day, starting today.
+          Reclaim an hour of your day, starting today.
         </motion.p>
 
         <motion.div

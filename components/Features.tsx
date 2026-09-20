@@ -2,14 +2,13 @@
 
 import { motion } from "framer-motion";
 import {
-  AudioLines,
-  BrainCircuit,
-  History,
-  FileDown,
-  MessageCircle,
-  Dumbbell,
-  CalendarClock,
-  CloudUpload,
+  Stethoscope,
+  FlaskConical,
+  Smartphone,
+  Users,
+  PersonStanding,
+  BookOpen,
+  ShoppingBag,
 } from "lucide-react";
 import { useRef } from "react";
 import { useTilt } from "./useTilt";
@@ -63,89 +62,90 @@ function TiltCard({
   );
 }
 
+const toolkitPills = ["Functional Scales", "Orthopedic Tests", "Pelvic Floor", "Manual Therapy", "Metabolic Calculator"];
+
 const smallFeatures = [
-  { icon: History, title: "Patient History", description: "Every session organized and searchable over time." },
-  { icon: FileDown, title: "Automatic PDF", description: "Polished reports ready to print or share instantly." },
-  { icon: Dumbbell, title: "Exercise Library", description: "Attach the right exercises with one tap." },
-  { icon: CalendarClock, title: "Appointments", description: "Scheduling that stays in sync with your notes." },
-  { icon: CloudUpload, title: "Cloud Storage", description: "Encrypted, backed up, accessible from anywhere." },
+  { icon: Users, title: "Patients & Sessions", description: "Full history, notes and treatment plans for every patient, always searchable." },
+  { icon: PersonStanding, title: "Body Map & Anatomy", description: "Interactive 2D/3D anatomy across musculoskeletal, neurological, cardiopulmonary and oncology systems, linked straight to conditions." },
+  { icon: BookOpen, title: "Clinical Knowledge", description: "Conditions, assessment, reasoning, rehab phases and exercises — ask Phygo directly and get sourced answers while you work." },
+  { icon: ShoppingBag, title: "Shop", description: "Curated equipment recommendations, matched to what you're actually treating." },
 ];
 
-export default function Features() {
+export default function Ecosystem() {
   return (
     <section id="features" className="relative py-28 sm:py-36 bg-mist/60 dark:bg-white/[0.03]">
       <div className="mx-auto max-w-7xl px-6">
         <div className="max-w-2xl mb-16">
-          <p className="eyebrow text-electric mb-4">Features</p>
+          <p className="eyebrow text-electric mb-4">Platform</p>
           <h2 className="font-display font-semibold text-ink dark:text-white text-3xl sm:text-5xl tracking-tight text-balance">
-            Everything a modern practice needs.
+            One platform, not one feature.
           </h2>
+          <p className="mt-4 text-base text-ink/55 dark:text-white/55 leading-relaxed">
+            The AI session note is the entry point. Behind it is a complete clinical
+            practice — patients, tools, evidence and knowledge on one connected record.
+          </p>
         </div>
 
         <div className="tilt-perspective grid lg:grid-cols-3 gap-5">
-          {/* Large hero feature: voice recording with live waveform */}
+          {/* Large hero card: the clinical toolkit */}
           <TiltCard
             strength={4}
-            className="lg:col-span-2 rounded-xl3 bg-white dark:bg-ink-soft p-8 sm:p-10 shadow-soft hover:shadow-glow transition-shadow duration-300 flex flex-col sm:flex-row items-start sm:items-center gap-8"
+            className="lg:col-span-2 rounded-xl3 bg-white dark:bg-ink-soft p-8 sm:p-10 shadow-soft hover:shadow-glow transition-shadow duration-300"
           >
-            <div className="flex-1">
-              <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-electric to-emerald text-white mb-5 shadow-soft">
-                <AudioLines size={19} />
-              </div>
-              <h3 className="font-display font-semibold text-xl text-ink dark:text-white mb-2">
-                Voice Recording
-              </h3>
-              <p className="text-sm text-ink/55 dark:text-white/55 leading-relaxed max-w-sm">
-                Capture sessions in natural speech, in any language, with studio-grade
-                clarity — no dictation training required.
-              </p>
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-electric to-emerald text-white mb-5 shadow-soft">
+              <Stethoscope size={19} />
             </div>
-            <div className="flex items-end gap-1 h-16 shrink-0">
-              {Array.from({ length: 20 }).map((_, i) => (
-                <motion.span
-                  key={i}
-                  className="w-1.5 rounded-full bg-gradient-to-t from-electric to-emerald"
-                  animate={{ height: [8, 14 + ((i * 6) % 48), 8] }}
-                  transition={{
-                    duration: 1.1 + (i % 5) * 0.15,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: i * 0.04,
-                  }}
-                />
+            <h3 className="font-display font-semibold text-xl text-ink dark:text-white mb-2">
+              Clinical Tools
+            </h3>
+            <p className="text-sm text-ink/55 dark:text-white/55 leading-relaxed max-w-sm mb-5">
+              A full clinical toolkit alongside the AI engine — not a separate app to switch to.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {toolkitPills.map((p) => (
+                <span
+                  key={p}
+                  className="rounded-full bg-electric/8 dark:bg-white/5 px-3 py-1.5 text-xs font-medium text-ink/65 dark:text-white/65"
+                >
+                  {p}
+                </span>
               ))}
             </div>
           </TiltCard>
 
-          {/* Large feature: AI clinical notes */}
+          {/* Dark accent card: scientific evidence */}
           <TiltCard
             strength={4}
             dark
             className="rounded-xl3 bg-ink text-white p-8 shadow-soft hover:shadow-glow transition-shadow duration-300"
           >
             <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white mb-5">
-              <BrainCircuit size={19} />
+              <FlaskConical size={19} />
             </div>
-            <h3 className="font-display font-semibold text-xl mb-2">AI Clinical Notes</h3>
+            <h3 className="font-display font-semibold text-xl mb-2">Scientific Evidence</h3>
             <p className="text-sm text-white/55 leading-relaxed">
-              Structured, professional notes generated automatically from what you say.
+              Published research, summarized for physiotherapy practice and surfaced right
+              inside your clinical notes — not a separate library to remember to check.
             </p>
           </TiltCard>
 
-          {/* Wide feature: WhatsApp integration */}
+          {/* Wide card: My Phygo patient portal */}
           <TiltCard
             strength={4}
-            className="rounded-xl3 bg-white dark:bg-ink-soft p-8 shadow-soft hover:shadow-glow transition-shadow duration-300"
+            className="lg:col-span-2 rounded-xl3 bg-white dark:bg-ink-soft p-8 shadow-soft hover:shadow-glow transition-shadow duration-300 flex flex-col sm:flex-row items-start sm:items-center gap-6"
           >
-            <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald/15 to-emerald/5 text-emerald-dark mb-5">
-              <MessageCircle size={19} />
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald/15 to-emerald/5 text-emerald-dark shrink-0">
+              <Smartphone size={19} />
             </div>
-            <h3 className="font-display font-semibold text-lg text-ink dark:text-white mb-2">
-              WhatsApp Integration
-            </h3>
-            <p className="text-sm text-ink/55 dark:text-white/55 leading-relaxed">
-              Send follow-ups where your patients already are.
-            </p>
+            <div>
+              <h3 className="font-display font-semibold text-lg text-ink dark:text-white mb-2">
+                My Phygo — Patient Portal
+              </h3>
+              <p className="text-sm text-ink/55 dark:text-white/55 leading-relaxed">
+                Patients see their program, book appointments, join video calls and track
+                progress — reached from the same note you just approved.
+              </p>
+            </div>
           </TiltCard>
 
           {smallFeatures.map((f) => (

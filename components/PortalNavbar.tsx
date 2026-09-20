@@ -21,9 +21,11 @@ export default function PortalNavbar() {
     <header className="fixed top-0 inset-x-0 z-50 flex justify-center px-4 pt-4">
       <nav className="w-full max-w-2xl flex items-center justify-between rounded-xl2 px-4 sm:px-6 py-3 glass-strong shadow-soft">
         <div className="flex items-center gap-2.5 font-display font-semibold text-lg tracking-tight text-ink dark:text-white">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-electric to-emerald text-white text-base font-bold">
-            P
-          </span>
+          <img
+            src="/logo-mark.png"
+            alt="Phygo"
+            className="h-10 w-10 rounded-lg object-cover shadow-soft"
+          />
           My Phygo
         </div>
 

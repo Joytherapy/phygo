@@ -57,11 +57,20 @@ interface UiDict {
     neurology: { label: string; description: string };
     pelvicFloor: { label: string; description: string };
     cardiopulmonary: { label: string; description: string };
+    endocrine: { label: string; description: string };
+    fascia: { label: string; description: string };
+    urinary: { label: string; description: string };
+    physiology: { label: string; description: string };
+    sportsMedicine: { label: string; description: string };
+    gastrointestinal: { label: string; description: string };
+    immune: { label: string; description: string };
+    hematology: { label: string; description: string };
     oncology: { label: string; description: string };
     firstAid: { label: string; description: string };
     blsd: { label: string; description: string };
     clinicalTools: { label: string; description: string };
   };
+  physiologyCrossLink: { question: string; cta: string };
   worldLinks: {
     science: { label: string; description: string };
     events: { label: string; description: string };
@@ -167,6 +176,13 @@ interface UiDict {
     connections: string;
     vascularSupply: string;
     function: string;
+  };
+  evidenceLevels: {
+    high: string;
+    strong: string;
+    moderate: string;
+    low: string;
+    limited: string;
   };
   common: {
     loading: string;
@@ -371,6 +387,236 @@ interface UiDict {
       string
     >;
     ageGroupLabels: Record<'adult' | 'paediatric' | 'both', string>;
+  };
+  endocrine: {
+    atlasBadge: string;
+    heading: string;
+    subTabs: { anatomy: string; conditions: string; assessment: string; rehab: string };
+    anatomyHeading: string;
+    anatomyHint: string;
+    anatomyIntro: string;
+    conditionsHeading: string;
+    conditionsHint: string;
+    assessmentHeading: string;
+    assessmentHint: string;
+    rehabHeading: string;
+    rehabHint: string;
+    loading: string;
+    errorLoadingStructures: string;
+    errorLoadingConditions: string;
+    errorLoadingTests: string;
+    errorLoadingRehab: string;
+    procedureLabel: string;
+    interpretationLabel: string;
+    protocolLabel: string;
+    categoryLabels: Record<'axis' | 'concept' | 'gland', string>;
+    testCategoryLabels: Record<'hormonal' | 'metabolic' | 'structural', string>;
+    rehabCategoryLabels: Record<
+      'bone_health' | 'fall_prevention' | 'hormone_replacement' | 'metabolic_training' | 'nutritional_support',
+      string
+    >;
+  };
+  fascia: {
+    atlasBadge: string;
+    heading: string;
+    subTabs: { structures: string; function: string; treatments: string; rehab: string };
+    structuresHeading: string;
+    structuresHint: string;
+    structuresIntro: string;
+    functionHeading: string;
+    functionHint: string;
+    treatmentsHeading: string;
+    treatmentsHint: string;
+    rehabHeading: string;
+    rehabHint: string;
+    loading: string;
+    errorLoadingStructures: string;
+    errorLoadingFunction: string;
+    errorLoadingTreatments: string;
+    errorLoadingRehab: string;
+    ptImplicationsLabel: string;
+    protocolLabel: string;
+    askPhygoPrompt: string;
+    askPhygoPlaceholder: string;
+    askButton: string;
+    structureCategoryLabels: Record<
+      | 'anatomia_generale'
+      | 'istologia'
+      | 'innervazione'
+      | 'vascolarizzazione'
+      | 'regolazione_ormonale'
+      | 'contrattilita_miofibroblasti'
+      | 'metodi_di_studio',
+      string
+    >;
+    functionCategoryLabels: Record<
+      'biotensegrita' | 'carico_e_nutrizione' | 'capacita_di_allungamento' | 'cammino_e_locomozione' | 'valutazione_posturale',
+      string
+    >;
+    treatmentCategoryLabels: Record<
+      | 'integrazione_strutturale'
+      | 'terapia_dei_punti_trigger'
+      | 'manipolazione_fasciale'
+      | 'fascial_stretch_therapy'
+      | 'gestione_delle_cicatrici'
+      | 'riabilitazione_oncologica_fasciale'
+      | 'auto_trattamento_miofasciale'
+      | 'movimento_e_rieducazione_fasciale',
+      string
+    >;
+    rehabCategoryLabels: Record<
+      | 'post_surgical_scar_management'
+      | 'progressive_loading'
+      | 'movement_reeducation'
+      | 'sports_performance'
+      | 'chronic_pain_management',
+      string
+    >;
+  };
+  urinary: {
+    atlasBadge: string;
+    heading: string;
+    subTabs: { anatomy: string; conditions: string; assessment: string; rehab: string };
+    anatomyHeading: string;
+    anatomyHint: string;
+    anatomyIntro: string;
+    conditionsHeading: string;
+    conditionsHint: string;
+    assessmentHeading: string;
+    assessmentHint: string;
+    rehabHeading: string;
+    rehabHint: string;
+    loading: string;
+    errorLoadingStructures: string;
+    errorLoadingConditions: string;
+    errorLoadingTests: string;
+    errorLoadingRehab: string;
+    procedureLabel: string;
+    interpretationLabel: string;
+    protocolLabel: string;
+    categoryLabels: Record<'organ' | 'physiology', string>;
+    testCategoryLabels: Record<'imaging' | 'metabolic' | 'renal_function' | 'urinalysis', string>;
+    rehabCategoryLabels: Record<'renal_training' | 'sports_nephrology', string>;
+  };
+  physiology: {
+    atlasBadge: string;
+    heading: string;
+    systemTabs: { muscular: string; neurological: string; cellular: string };
+    sectionHint: string;
+    loading: string;
+    errorLoading: string;
+    clinicalRelevanceLabel: string;
+    categoryLabels: Record<'contraction_mechanics' | 'fiber_types' | 'mechanics' | 'motor_control' | 'exercise_adaptation' | 'neuromuscular' | 'smooth_cardiac' | 'cellular_basics' | 'reflexes' | 'sensory' | 'plasticity' | 'autonomic' | 'membrane_transport' | 'chemical_messengers' | 'homeostasis' | 'energy_metabolism', string>;
+  };
+  sportsMedicine: {
+    atlasBadge: string;
+    heading: string;
+    sectionHint: string;
+    loading: string;
+    errorLoading: string;
+    clinicalRelevanceLabel: string;
+    categoryLabels: Record<'injury_classification' | 'tissue_healing' | 'clinical_reasoning' | 'therapeutic_modalities' | 'on_field_emergency_rtp' | 'rehabilitation_programming', string>;
+  };
+  librarySearchPlaceholder: string;
+  librarySearchNoResults: string;
+  gastrointestinal: {
+    atlasBadge: string;
+    heading: string;
+    subTabs: { anatomy: string; conditions: string; assessment: string; rehab: string };
+    anatomyHeading: string;
+    anatomyHint: string;
+    anatomyIntro: string;
+    conditionsHeading: string;
+    conditionsHint: string;
+    assessmentHeading: string;
+    assessmentHint: string;
+    rehabHeading: string;
+    rehabHint: string;
+    loading: string;
+    errorLoadingStructures: string;
+    errorLoadingConditions: string;
+    errorLoadingTests: string;
+    errorLoadingRehab: string;
+    procedureLabel: string;
+    interpretationLabel: string;
+    protocolLabel: string;
+    categoryLabels: Record<'organ' | 'system_overview', string>;
+    testCategoryLabels: Record<
+      'blood_panel' | 'endoscopy' | 'functional_test' | 'imaging' | 'serology' | 'stool_marker',
+      string
+    >;
+    rehabCategoryLabels: Record<
+      'chronic_disease_management' | 'gi_disease_management' | 'post_surgical' | 'sports_nutrition',
+      string
+    >;
+  };
+  immune: {
+    atlasBadge: string;
+    heading: string;
+    subTabs: { anatomy: string; conditions: string; assessment: string; rehab: string };
+    anatomyHeading: string;
+    anatomyHint: string;
+    anatomyIntro: string;
+    conditionsHeading: string;
+    conditionsHint: string;
+    assessmentHeading: string;
+    assessmentHint: string;
+    rehabHeading: string;
+    rehabHint: string;
+    loading: string;
+    errorLoadingStructures: string;
+    errorLoadingConditions: string;
+    errorLoadingTests: string;
+    errorLoadingRehab: string;
+    procedureLabel: string;
+    interpretationLabel: string;
+    protocolLabel: string;
+    categoryLabels: Record<
+      | 'cell_mediated_immunity'
+      | 'humoral_immunity'
+      | 'innate_immunity'
+      | 'lymphatic_drainage'
+      | 'primary_lymphoid_organ'
+      | 'secondary_lymphoid_organ',
+      string
+    >;
+    testCategoryLabels: Record<'functional' | 'hematologic' | 'immunologic' | 'inflammatory_marker', string>;
+    rehabCategoryLabels: Record<
+      | 'exercise_immunology'
+      | 'immunosuppression_precautions'
+      | 'inflammatory_arthritis_training'
+      | 'lymphedema_management'
+      | 'post_viral_rehabilitation',
+      string
+    >;
+  };
+  hematology: {
+    atlasBadge: string;
+    heading: string;
+    subTabs: { anatomy: string; conditions: string; assessment: string; rehab: string };
+    anatomyHeading: string;
+    anatomyHint: string;
+    anatomyIntro: string;
+    conditionsHeading: string;
+    conditionsHint: string;
+    assessmentHeading: string;
+    assessmentHint: string;
+    rehabHeading: string;
+    rehabHint: string;
+    loading: string;
+    errorLoadingStructures: string;
+    errorLoadingConditions: string;
+    errorLoadingTests: string;
+    errorLoadingRehab: string;
+    procedureLabel: string;
+    interpretationLabel: string;
+    protocolLabel: string;
+    categoryLabels: Record<'cell_line' | 'fluid' | 'molecule' | 'process', string>;
+    testCategoryLabels: Record<'coagulation' | 'diagnostic' | 'general' | 'metabolic', string>;
+    rehabCategoryLabels: Record<
+      'condition_specific' | 'exercise_prescription' | 'post_surgical' | 'precaution_protocol',
+      string
+    >;
   };
   clinicalToolkit: {
     badge: string;
@@ -882,13 +1128,22 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     libraryLinks: {
       bodyMap: { label: 'Mappa del Corpo', description: 'Esploratore anatomico interattivo' },
       neurology: { label: 'Neurologia', description: 'Encefalo, nervi e vie nervose' },
+      physiology: { label: 'Fisiologia', description: 'Meccanismi muscolari e neurologici di base' },
+      sportsMedicine: { label: 'Medicina dello Sport', description: 'Scienza della lesione sportiva e ritorno allo sport' },
       pelvicFloor: { label: 'Pavimento Pelvico', description: 'Anatomia, condizioni e riabilitazione' },
       cardiopulmonary: { label: 'Cardiopolmonare', description: 'Anatomia, condizioni e riabilitazione' },
+      endocrine: { label: 'Endocrino', description: 'Anatomia, condizioni e riabilitazione' },
+      fascia: { label: 'Fascia', description: 'Anatomia, funzione e applicazioni cliniche' },
+      urinary: { label: 'Urinario', description: 'Anatomia, condizioni e riabilitazione' },
+      gastrointestinal: { label: 'Gastrointestinale', description: 'Anatomia, condizioni e riabilitazione' },
+      immune: { label: 'Immunitario', description: 'Anatomia, condizioni e riabilitazione' },
+      hematology: { label: 'Ematologia', description: 'Anatomia, condizioni e riabilitazione' },
       oncology: { label: 'Oncologia', description: 'Anatomia, condizioni e riabilitazione' },
       firstAid: { label: 'Primo Soccorso', description: 'Protocolli per paese' },
       blsd: { label: 'BLSD', description: 'RCP, DAE e disostruzione vie aeree' },
       clinicalTools: { label: 'Strumenti Clinici', description: 'Scale di valutazione e test' },
     },
+    physiologyCrossLink: { question: 'Vuoi capire come funziona?', cta: 'Vai a Fisiologia' },
     worldLinks: {
       science: { label: 'Evidence Hub', description: 'Sintesi delle ultime ricerche' },
       events: { label: 'Eventi', description: 'Congressi, corsi e webinar nel mondo della salute' },
@@ -1002,6 +1257,13 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       connections: 'Connessioni',
       vascularSupply: 'Vascolarizzazione',
       function: 'Funzione',
+    },
+    evidenceLevels: {
+      high: 'Alta',
+      strong: 'Alta',
+      moderate: 'Moderata',
+      low: 'Bassa',
+      limited: 'Bassa',
     },
     common: {
       loading: 'Caricamento...',
@@ -1263,6 +1525,341 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
         adult: 'Adulti',
         paediatric: 'Pediatrico',
         both: 'Adulti e bambini',
+      },
+    },
+    endocrine: {
+      atlasBadge: 'Atlante Endocrino',
+      heading: 'Sistema Endocrino',
+      subTabs: {
+        anatomy: 'Anatomia',
+        conditions: 'Patologie',
+        assessment: 'Valutazione',
+        rehab: 'Riabilitazione',
+      },
+      anatomyHeading: 'Anatomia Endocrina',
+      anatomyHint: 'Ghiandole, assi ormonali e concetti chiave: come il sistema endocrino regola metabolismo, crescita e omeostasi.',
+      anatomyIntro:
+        "Il sistema endocrino coordina la comunicazione ormonale tra ghiandole e organi bersaglio, regolando metabolismo, crescita, composizione corporea, densità ossea e funzione riproduttiva. Una disfunzione endocrina si ripercuote spesso su tolleranza all'esercizio, forza muscolare, salute ossea ed equilibrio, rendendo la valutazione fisioterapica interdipendente dal quadro ormonale del paziente. Le sezioni sottostanti approfondiscono le principali ghiandole (tiroide, surrene, paratiroidi, pancreas endocrino), gli assi ormonali chiave (ipotalamo-ipofisario, GH/IGF-1, gonadico) e il ruolo dell'osso come organo bersaglio ed endocrino.",
+      conditionsHeading: 'Patologie Collegate',
+      conditionsHint: 'Le principali endocrinopatie di interesse fisioterapico. Tocca una card per obiettivi, test clinici ed esercizi.',
+      assessmentHeading: 'Valutazione Clinica',
+      assessmentHint: 'Esami ormonali, metabolici e strutturali rilevanti per l\'inquadramento fisioterapico del paziente endocrino.',
+      rehabHeading: 'Riabilitazione',
+      rehabHint: 'Protocolli per salute ossea, prevenzione delle cadute, terapia ormonale sostitutiva, allenamento metabolico e supporto nutrizionale.',
+      loading: 'Caricamento...',
+      errorLoadingStructures: 'Impossibile caricare le strutture anatomiche.',
+      errorLoadingConditions: 'Impossibile caricare le patologie.',
+      errorLoadingTests: 'Impossibile caricare i test di valutazione.',
+      errorLoadingRehab: 'Impossibile caricare i contenuti riabilitativi.',
+      procedureLabel: 'Procedura',
+      interpretationLabel: 'Interpretazione',
+      protocolLabel: 'Protocollo',
+      categoryLabels: {
+        axis: 'Assi Ormonali',
+        concept: 'Concetti Chiave',
+        gland: 'Ghiandole',
+      },
+      testCategoryLabels: {
+        hormonal: 'Ormonale',
+        metabolic: 'Metabolico',
+        structural: 'Strutturale',
+      },
+      rehabCategoryLabels: {
+        bone_health: 'Salute Ossea',
+        fall_prevention: 'Prevenzione delle Cadute',
+        hormone_replacement: 'Terapia Ormonale Sostitutiva',
+        metabolic_training: 'Allenamento Metabolico',
+        nutritional_support: 'Supporto Nutrizionale',
+      },
+    },
+    fascia: {
+      atlasBadge: 'Atlante della Fascia',
+      heading: 'Fascia',
+      subTabs: {
+        structures: 'Anatomia',
+        function: 'Funzione',
+        treatments: 'Applicazioni Cliniche',
+        rehab: 'Riabilitazione',
+      },
+      structuresHeading: 'Anatomia e Fisiologia della Fascia',
+      structuresHint: 'Struttura, istologia, innervazione e regolazione del sistema fasciale — la base per comprendere il suo ruolo clinico.',
+      structuresIntro: 'Questa sezione descrive la fascia come organo di senso e di trasmissione di forza a sé stante: dalla sua composizione istologica alla ricca innervazione meccanocettiva e nocicettiva, fino ai meccanismi ormonali e cellulari che ne regolano le proprietà nel tempo.',
+      functionHeading: 'Funzione Fasciale',
+      functionHint: 'Biotensegrità, risposta al carico, proprietà viscoelastiche e ruolo della fascia nel movimento e nella postura.',
+      treatmentsHeading: 'Applicazioni Cliniche',
+      treatmentsHint: 'Approcci manuali e programmi di esercizio orientati alla fascia, con le relative implicazioni fisioterapiche e il livello di evidenza disponibile.',
+      rehabHeading: 'Riabilitazione',
+      rehabHint: 'Protocolli di riabilitazione strutturati per il sistema fasciale, con il livello di evidenza scientifica disponibile per ciascun approccio.',
+      loading: 'Caricamento...',
+      errorLoadingStructures: 'Impossibile caricare i contenuti di anatomia e fisiologia.',
+      errorLoadingFunction: 'Impossibile caricare i contenuti sulla funzione fasciale.',
+      errorLoadingTreatments: 'Impossibile caricare le applicazioni cliniche.',
+      errorLoadingRehab: 'Impossibile caricare i contenuti riabilitativi.',
+      ptImplicationsLabel: 'Implicazioni Fisioterapiche',
+      protocolLabel: 'Protocollo',
+      askPhygoPrompt: 'Non trovi quello che cerchi sulla fascia? Chiedi a Phygo',
+      askPhygoPlaceholder: 'es. fascia toraco-lombare, cupping, densificazione fasciale...',
+      askButton: 'Chiedi',
+      structureCategoryLabels: {
+        anatomia_generale: 'Anatomia Generale',
+        istologia: 'Istologia',
+        innervazione: 'Innervazione',
+        vascolarizzazione: 'Vascolarizzazione',
+        regolazione_ormonale: 'Regolazione Ormonale',
+        contrattilita_miofibroblasti: 'Contrattilità e Miofibroblasti',
+        metodi_di_studio: 'Metodi di Studio',
+      },
+      functionCategoryLabels: {
+        biotensegrita: 'Biotensegrità',
+        carico_e_nutrizione: 'Carico e Nutrizione',
+        capacita_di_allungamento: 'Capacità di Allungamento',
+        cammino_e_locomozione: 'Cammino e Locomozione',
+        valutazione_posturale: 'Valutazione Posturale',
+      },
+      treatmentCategoryLabels: {
+        integrazione_strutturale: 'Integrazione Strutturale',
+        terapia_dei_punti_trigger: 'Terapia dei Punti Trigger',
+        manipolazione_fasciale: 'Manipolazione Fasciale',
+        fascial_stretch_therapy: 'Fascial Stretch Therapy',
+        gestione_delle_cicatrici: 'Gestione delle Cicatrici',
+        riabilitazione_oncologica_fasciale: 'Riabilitazione Oncologica',
+        auto_trattamento_miofasciale: 'Auto-Trattamento Miofasciale',
+        movimento_e_rieducazione_fasciale: 'Movimento e Rieducazione',
+      },
+      rehabCategoryLabels: {
+        post_surgical_scar_management: 'Gestione Cicatrici Post-Chirurgiche',
+        progressive_loading: 'Carico Progressivo',
+        movement_reeducation: 'Rieducazione del Movimento',
+        sports_performance: 'Performance Sportiva',
+        chronic_pain_management: 'Gestione del Dolore Cronico',
+      },
+    },
+    urinary: {
+      atlasBadge: 'Atlante Urinario',
+      heading: 'Sistema Urinario/Renale',
+      subTabs: {
+        anatomy: 'Anatomia',
+        conditions: 'Patologie',
+        assessment: 'Valutazione',
+        rehab: 'Riabilitazione',
+      },
+      anatomyHeading: 'Anatomia Renale e Urinaria',
+      anatomyHint: 'Rene, nefrone e basso tratto urinario: struttura e fisiologia della filtrazione, del riassorbimento e dell\'equilibrio idro-elettrolitico.',
+      anatomyIntro:
+        "Il rene regola volume e composizione dei liquidi corporei attraverso filtrazione glomerulare, riassorbimento e secrezione tubulare, il sistema renina-angiotensina-aldosterone e il controllo dell'equilibrio acido-base. Una compromissione della funzione renale si ripercuote su elettroliti, pressione arteriosa, stato di idratazione e tolleranza all'esercizio, rendendo la valutazione fisioterapica interdipendente dai parametri metabolici e cardiovascolari del paziente. Le sezioni sottostanti approfondiscono l'anatomia del rene e della vescica e i principali processi fisiologici — filtrazione glomerulare, funzione tubulare, RAAS, bilancio idrico ed elettrolitico, equilibrio acido-base — che orientano la gestione clinica e la prescrizione dell'esercizio.",
+      conditionsHeading: 'Patologie Collegate',
+      conditionsHint: 'Patologie nefrologiche e urologiche rilevanti per la pratica fisioterapica. Tocca una card per obiettivi, test clinici ed esercizi.',
+      assessmentHeading: 'Valutazione Clinica',
+      assessmentHint: 'Esami di funzione renale, analisi delle urine, parametri metabolici e diagnostica per immagini.',
+      rehabHeading: 'Riabilitazione',
+      rehabHint: 'Prescrizione dell\'esercizio nella malattia renale cronica, in dialisi, post-trapianto e nella nefrologia dello sport.',
+      loading: 'Caricamento...',
+      errorLoadingStructures: 'Impossibile caricare le strutture anatomiche.',
+      errorLoadingConditions: 'Impossibile caricare le patologie.',
+      errorLoadingTests: 'Impossibile caricare i test di valutazione.',
+      errorLoadingRehab: 'Impossibile caricare i contenuti riabilitativi.',
+      procedureLabel: 'Procedura',
+      interpretationLabel: 'Interpretazione',
+      protocolLabel: 'Protocollo',
+      categoryLabels: {
+        organ: 'Organo',
+        physiology: 'Fisiologia',
+      },
+      testCategoryLabels: {
+        imaging: 'Diagnostica per Immagini',
+        metabolic: 'Metabolico',
+        renal_function: 'Funzione Renale',
+        urinalysis: 'Analisi delle Urine',
+      },
+      rehabCategoryLabels: {
+        renal_training: 'Allenamento in Nefropatia',
+        sports_nephrology: 'Nefrologia dello Sport',
+      },
+    },
+    physiology: {
+      atlasBadge: 'Atlante Fisiologia',
+      heading: 'Fisiologia di Base',
+      systemTabs: { muscular: 'Muscolare', neurological: 'Neurologico', cellular: 'Cellulare' },
+      sectionHint: 'I meccanismi fisiologici alla base del movimento e del sistema nervoso — non l\'anatomia di una zona specifica, ma come funzionano davvero i tessuti e i circuiti che la sostengono, con la rilevanza clinica per la pratica fisioterapica.',
+      loading: 'Caricamento...',
+      errorLoading: 'Impossibile caricare i contenuti di fisiologia.',
+      clinicalRelevanceLabel: 'Rilevanza Clinica',
+      categoryLabels: {
+        contraction_mechanics: 'Meccanismi della Contrazione',
+        fiber_types: 'Tipi di Fibre',
+        mechanics: 'Meccanica Muscolare',
+        motor_control: 'Controllo Motorio',
+        exercise_adaptation: 'Adattamento all\'Esercizio',
+        neuromuscular: 'Giunzione Neuromuscolare',
+        smooth_cardiac: 'Muscolo Liscio e Cardiaco',
+        cellular_basics: 'Fisiologia Cellulare',
+        reflexes: 'Riflessi',
+        sensory: 'Sistemi Sensoriali',
+        plasticity: 'Plasticità e Apprendimento',
+        autonomic: 'Sistema Nervoso Autonomo',
+        membrane_transport: 'Trasporto di Membrana',
+        chemical_messengers: 'Messaggeri Chimici',
+        homeostasis: 'Omeostasi e Controllo',
+        energy_metabolism: 'Metabolismo Energetico',
+      },
+    },
+    sportsMedicine: {
+      atlasBadge: 'Atlante Medicina dello Sport',
+      heading: 'Medicina dello Sport',
+      sectionHint: 'La scienza di base della lesione sportiva e del recupero — classificazione, guarigione tissutale, ragionamento clinico e modalità terapeutiche, con le linee guida più aggiornate per un ritorno allo sport sicuro ed efficace.',
+      loading: 'Caricamento...',
+      errorLoading: 'Impossibile caricare i contenuti di medicina dello sport.',
+      clinicalRelevanceLabel: 'Rilevanza Clinica',
+      categoryLabels: {
+        injury_classification: 'Classificazione delle Lesioni',
+        tissue_healing: 'Guarigione Tissutale',
+        clinical_reasoning: 'Ragionamento Clinico',
+        therapeutic_modalities: 'Modalità Terapeutiche',
+        on_field_emergency_rtp: 'Trauma sul Campo e Ritorno allo Sport',
+        rehabilitation_programming: 'Riabilitazione e Ricondizionamento',
+      },
+    },
+    librarySearchPlaceholder: 'Cerca in questa sezione...',
+    librarySearchNoResults: 'Nessun risultato per la tua ricerca.',
+    gastrointestinal: {
+      atlasBadge: 'Atlante Gastrointestinale',
+      heading: 'Sistema Gastrointestinale',
+      subTabs: {
+        anatomy: 'Anatomia',
+        conditions: 'Patologie',
+        assessment: 'Valutazione',
+        rehab: 'Riabilitazione',
+      },
+      anatomyHeading: 'Anatomia Gastrointestinale',
+      anatomyHint: 'Motilità del tratto digerente, stomaco, intestino tenue, fegato, pancreas esocrino, colon e microbiota: come funzionano come sistema integrato.',
+      anatomyIntro:
+        "Il sistema gastrointestinale integra motilità, secrezione, digestione e assorbimento lungo tutto il tratto digerente: una disfunzione in un tratto (ad esempio motoria a livello gastrico o infiammatoria a livello colico) si ripercuote spesso su nutrizione, energia disponibile per l'esercizio e tolleranza allo sforzo. La valutazione fisioterapica in ambito gastrointestinale considera la storia clinica digestiva, i test di laboratorio e funzionali disponibili e l'impatto della patologia sulla capacità di allenarsi e sulla qualità di vita. Le sezioni sottostanti approfondiscono il tratto digerente nel suo insieme, i singoli organi (stomaco, intestino tenue, fegato, pancreas, colon) e l'asse intestino-muscolo mediato dal microbiota, centrale per la prescrizione dell'esercizio in questi pazienti.",
+      conditionsHeading: 'Patologie Collegate',
+      conditionsHint: 'Le principali condizioni gastrointestinali rilevanti per la pratica fisioterapica. Tocca una card per obiettivi, test clinici ed esercizi.',
+      assessmentHeading: 'Valutazione Clinica',
+      assessmentHint: 'Esami ematochimici, marker fecali, sierologia, test funzionali, imaging ed endoscopia utili a inquadrare il paziente gastroenterologico.',
+      rehabHeading: 'Riabilitazione',
+      rehabHint: 'Protocolli di esercizio terapeutico per malattie infiammatorie intestinali, epatopatie croniche, chirurgia bariatrica, stomie e sport di endurance.',
+      loading: 'Caricamento...',
+      errorLoadingStructures: 'Impossibile caricare le strutture anatomiche.',
+      errorLoadingConditions: 'Impossibile caricare le patologie.',
+      errorLoadingTests: 'Impossibile caricare i test di valutazione.',
+      errorLoadingRehab: 'Impossibile caricare i contenuti riabilitativi.',
+      procedureLabel: 'Procedura',
+      interpretationLabel: 'Interpretazione',
+      protocolLabel: 'Protocollo',
+      categoryLabels: {
+        organ: 'Organi',
+        system_overview: 'Panoramica di Sistema',
+      },
+      testCategoryLabels: {
+        blood_panel: 'Pannello Ematico',
+        endoscopy: 'Endoscopia',
+        functional_test: 'Test Funzionali',
+        imaging: 'Imaging',
+        serology: 'Sierologia',
+        stool_marker: 'Marker Fecali',
+      },
+      rehabCategoryLabels: {
+        chronic_disease_management: 'Gestione Malattie Croniche',
+        gi_disease_management: 'Gestione Patologie Gastrointestinali',
+        post_surgical: 'Post-Chirurgico',
+        sports_nutrition: 'Nutrizione Sportiva',
+      },
+    },
+    immune: {
+      atlasBadge: 'Atlante Immunitario',
+      heading: 'Sistema Immunitario',
+      subTabs: {
+        anatomy: 'Anatomia',
+        conditions: 'Patologie',
+        assessment: 'Valutazione',
+        rehab: 'Riabilitazione',
+      },
+      anatomyHeading: 'Anatomia del Sistema Immunitario',
+      anatomyHint: 'Organi linfoidi primari e secondari, drenaggio linfatico periferico e le tre linee di difesa immunitaria.',
+      anatomyIntro:
+        "Il sistema immunitario integra organi linfoidi primari (midollo osseo e timo), dove le cellule immunitarie maturano, e organi linfoidi secondari (linfonodi, milza, MALT), dove viene innescata la risposta immunitaria. Il drenaggio linfatico periferico veicola liquidi, antigeni e cellule immunitarie verso questi organi, mentre immunità innata, umorale e cellulo-mediata rappresentano le tre modalità con cui l'organismo riconosce e neutralizza le minacce. Una compromissione di una qualsiasi di queste componenti — per patologia, farmaci immunosoppressori o overtraining — ha ricadute dirette sulla capacità dell'organismo di rispondere a infezioni, infiammazione cronica ed esercizio fisico.",
+      conditionsHeading: 'Patologie Collegate',
+      conditionsHint: 'Condizioni immunitarie, autoimmuni e post-infettive. Tocca una card per obiettivi, test clinici ed esercizi.',
+      assessmentHeading: 'Valutazione Clinica',
+      assessmentHint: 'Esami ematologici, immunologici e marker infiammatori utilizzati nella valutazione fisioterapica.',
+      rehabHeading: 'Riabilitazione',
+      rehabHint: 'Dosaggio dell\'esercizio, precauzioni in immunosoppressione, gestione del linfedema e riabilitazione post-virale.',
+      loading: 'Caricamento...',
+      errorLoadingStructures: 'Impossibile caricare le strutture anatomiche.',
+      errorLoadingConditions: 'Impossibile caricare le patologie.',
+      errorLoadingTests: 'Impossibile caricare i test di valutazione.',
+      errorLoadingRehab: 'Impossibile caricare i contenuti riabilitativi.',
+      procedureLabel: 'Procedura',
+      interpretationLabel: 'Interpretazione',
+      protocolLabel: 'Protocollo',
+      categoryLabels: {
+        cell_mediated_immunity: 'Immunità Cellulo-Mediata',
+        humoral_immunity: 'Immunità Umorale',
+        innate_immunity: 'Immunità Innata',
+        lymphatic_drainage: 'Drenaggio Linfatico',
+        primary_lymphoid_organ: 'Organi Linfoidi Primari',
+        secondary_lymphoid_organ: 'Organi Linfoidi Secondari',
+      },
+      testCategoryLabels: {
+        functional: 'Test Funzionali',
+        hematologic: 'Ematologico',
+        immunologic: 'Immunologico',
+        inflammatory_marker: 'Marker Infiammatori',
+      },
+      rehabCategoryLabels: {
+        exercise_immunology: 'Immunologia dell\'Esercizio',
+        immunosuppression_precautions: 'Precauzioni in Immunosoppressione',
+        inflammatory_arthritis_training: 'Allenamento nelle Artriti Infiammatorie',
+        lymphedema_management: 'Gestione del Linfedema',
+        post_viral_rehabilitation: 'Riabilitazione Post-Virale',
+      },
+    },
+    hematology: {
+      atlasBadge: 'Atlante Ematologico',
+      heading: 'Sangue / Ematologia',
+      subTabs: {
+        anatomy: 'Anatomia',
+        conditions: 'Patologie',
+        assessment: 'Valutazione',
+        rehab: 'Riabilitazione',
+      },
+      anatomyHeading: 'Anatomia e Fisiologia del Sangue',
+      anatomyHint: 'Linee cellulari, plasma, emoglobina ed emostasi: i componenti e i processi che regolano trasporto di ossigeno, difesa immunitaria e coagulazione.',
+      anatomyIntro:
+        'Il sangue è un tessuto connettivo liquido che assolve funzioni di trasporto (ossigeno, nutrienti, ormoni), difesa immunitaria ed emostasi. La componente cellulare (eritrociti, leucociti, piastrine) e quella plasmatica lavorano in equilibrio dinamico: un\'alterazione della linea rossa, della cascata coagulativa o della composizione del plasma ha ricadute dirette sulla tolleranza allo sforzo e sulla sicurezza dell\'esercizio terapeutico. Le sezioni sottostanti approfondiscono eritrociti ed eritropoiesi, leucociti, plasma, emoglobina/trasporto dell\'ossigeno ed emostasi/coagulazione.',
+      conditionsHeading: 'Patologie Collegate',
+      conditionsHint: 'Patologie ematologiche di interesse fisioterapico. Tocca una card per obiettivi, test clinici ed esercizi.',
+      assessmentHeading: 'Valutazione Clinica',
+      assessmentHint: 'Esami di laboratorio e test ematologici rilevanti per la pratica fisioterapica.',
+      rehabHeading: 'Riabilitazione',
+      rehabHint: 'Prescrizione dell\'esercizio, prevenzione del tromboembolismo, precauzioni in terapia anticoagulante e protocolli condizione-specifici.',
+      loading: 'Caricamento...',
+      errorLoadingStructures: 'Impossibile caricare le strutture ematologiche.',
+      errorLoadingConditions: 'Impossibile caricare le patologie.',
+      errorLoadingTests: 'Impossibile caricare i test di valutazione.',
+      errorLoadingRehab: 'Impossibile caricare i contenuti riabilitativi.',
+      procedureLabel: 'Procedura',
+      interpretationLabel: 'Interpretazione',
+      protocolLabel: 'Protocollo',
+      categoryLabels: {
+        cell_line: 'Linee Cellulari',
+        fluid: 'Componente Fluida',
+        molecule: 'Molecole',
+        process: 'Processi',
+      },
+      testCategoryLabels: {
+        coagulation: 'Coagulazione',
+        diagnostic: 'Diagnostica',
+        general: 'Esami Generali',
+        metabolic: 'Metabolico',
+      },
+      rehabCategoryLabels: {
+        condition_specific: 'Condizione-Specifico',
+        exercise_prescription: 'Prescrizione dell\'Esercizio',
+        post_surgical: 'Post-Chirurgico',
+        precaution_protocol: 'Protocolli di Precauzione',
       },
     },
     clinicalToolkit: {
@@ -1888,13 +2485,22 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     libraryLinks: {
       bodyMap: { label: 'Body Map', description: 'Interactive anatomy explorer' },
       neurology: { label: 'Neurology', description: 'Brain, nerves & neural pathways' },
+      physiology: { label: 'Physiology', description: 'Foundational muscular & neurological mechanisms' },
+      sportsMedicine: { label: 'Sports Medicine', description: 'Sports injury science and return-to-play' },
       pelvicFloor: { label: 'Pelvic Floor', description: 'Anatomy, conditions & rehabilitation' },
       cardiopulmonary: { label: 'Cardiopulmonary', description: 'Anatomy, conditions & rehabilitation' },
+      endocrine: { label: 'Endocrine', description: 'Anatomy, conditions & rehabilitation' },
+      fascia: { label: 'Fascia', description: 'Anatomy, function & clinical applications' },
+      urinary: { label: 'Urinary', description: 'Anatomy, conditions & rehabilitation' },
+      gastrointestinal: { label: 'Gastrointestinal', description: 'Anatomy, conditions & rehabilitation' },
+      immune: { label: 'Immune', description: 'Anatomy, conditions & rehabilitation' },
+      hematology: { label: 'Hematology', description: 'Anatomy, conditions & rehabilitation' },
       oncology: { label: 'Oncology', description: 'Anatomy, conditions & rehabilitation' },
       firstAid: { label: 'First Aid', description: 'Protocols by country' },
       blsd: { label: 'BLSD', description: 'CPR, AED & airway obstruction relief' },
       clinicalTools: { label: 'Clinical Tools', description: 'Assessment scales & tests' },
     },
+    physiologyCrossLink: { question: 'Want to understand how it works?', cta: 'Go to Physiology' },
     worldLinks: {
       science: { label: 'Evidence Hub', description: 'Latest research summaries' },
       events: { label: 'Events', description: 'Congresses, courses & webinars in health' },
@@ -2008,6 +2614,13 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       connections: 'Connections',
       vascularSupply: 'Vascular Supply',
       function: 'Function',
+    },
+    evidenceLevels: {
+      high: 'High',
+      strong: 'High',
+      moderate: 'Moderate',
+      low: 'Low',
+      limited: 'Low',
     },
     common: {
       loading: 'Loading...',
@@ -2269,6 +2882,341 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
         adult: 'Adults',
         paediatric: 'Paediatric',
         both: 'Adults and children',
+      },
+    },
+    endocrine: {
+      atlasBadge: 'Endocrine Atlas',
+      heading: 'Endocrine System',
+      subTabs: {
+        anatomy: 'Anatomy',
+        conditions: 'Conditions',
+        assessment: 'Assessment',
+        rehab: 'Rehabilitation',
+      },
+      anatomyHeading: 'Endocrine Anatomy',
+      anatomyHint: 'Glands, hormonal axes and key concepts: how the endocrine system regulates metabolism, growth and homeostasis.',
+      anatomyIntro:
+        'The endocrine system coordinates hormonal communication between glands and target organs, regulating metabolism, growth, body composition, bone density and reproductive function. Endocrine dysfunction often affects exercise tolerance, muscle strength, bone health and balance, making physiotherapy assessment closely tied to the patient\'s hormonal status. The sections below cover the main glands (thyroid, adrenal, parathyroid, endocrine pancreas), the key hormonal axes (hypothalamic-pituitary, GH/IGF-1, gonadal) and the role of bone as both a target and an endocrine organ.',
+      conditionsHeading: 'Related Conditions',
+      conditionsHint: 'The main endocrinopathies of physiotherapy interest. Tap a card for goals, clinical tests and exercises.',
+      assessmentHeading: 'Clinical Assessment',
+      assessmentHint: 'Hormonal, metabolic and structural tests relevant to the physiotherapy assessment of the endocrine patient.',
+      rehabHeading: 'Rehabilitation',
+      rehabHint: 'Protocols for bone health, fall prevention, hormone replacement therapy, metabolic training and nutritional support.',
+      loading: 'Loading...',
+      errorLoadingStructures: 'Unable to load anatomical structures.',
+      errorLoadingConditions: 'Unable to load conditions.',
+      errorLoadingTests: 'Unable to load assessment tests.',
+      errorLoadingRehab: 'Unable to load rehabilitation content.',
+      procedureLabel: 'Procedure',
+      interpretationLabel: 'Interpretation',
+      protocolLabel: 'Protocol',
+      categoryLabels: {
+        axis: 'Hormonal Axes',
+        concept: 'Key Concepts',
+        gland: 'Glands',
+      },
+      testCategoryLabels: {
+        hormonal: 'Hormonal',
+        metabolic: 'Metabolic',
+        structural: 'Structural',
+      },
+      rehabCategoryLabels: {
+        bone_health: 'Bone Health',
+        fall_prevention: 'Fall Prevention',
+        hormone_replacement: 'Hormone Replacement Therapy',
+        metabolic_training: 'Metabolic Training',
+        nutritional_support: 'Nutritional Support',
+      },
+    },
+    fascia: {
+      atlasBadge: 'Fascia Atlas',
+      heading: 'Fascia',
+      subTabs: {
+        structures: 'Anatomy',
+        function: 'Function',
+        treatments: 'Clinical Applications',
+        rehab: 'Rehabilitation',
+      },
+      structuresHeading: 'Fascial Anatomy & Physiology',
+      structuresHint: 'Structure, histology, innervation and regulation of the fascial system — the foundation for understanding its clinical role.',
+      structuresIntro: 'This section describes fascia as a sensory organ and force-transmission structure in its own right: from its histological composition to its rich mechanoreceptive and nociceptive innervation, through to the hormonal and cellular mechanisms that regulate its properties over time.',
+      functionHeading: 'Fascial Function',
+      functionHint: 'Biotensegrity, load response, viscoelastic properties and the role of fascia in movement and posture.',
+      treatmentsHeading: 'Clinical Applications',
+      treatmentsHint: 'Manual approaches and fascia-oriented exercise programmes, with their physiotherapy implications and the available level of evidence.',
+      rehabHeading: 'Rehabilitation',
+      rehabHint: 'Structured rehabilitation protocols for the fascial system, with the available level of scientific evidence for each approach.',
+      loading: 'Loading...',
+      errorLoadingStructures: 'Unable to load anatomy and physiology content.',
+      errorLoadingFunction: 'Unable to load fascial function content.',
+      errorLoadingTreatments: 'Unable to load clinical applications.',
+      errorLoadingRehab: 'Unable to load rehabilitation content.',
+      ptImplicationsLabel: 'Physiotherapy Implications',
+      protocolLabel: 'Protocol',
+      askPhygoPrompt: "Can't find what you're looking for on fascia? Ask Phygo",
+      askPhygoPlaceholder: 'e.g. thoracolumbar fascia, cupping, fascial densification...',
+      askButton: 'Ask',
+      structureCategoryLabels: {
+        anatomia_generale: 'General Anatomy',
+        istologia: 'Histology',
+        innervazione: 'Innervation',
+        vascolarizzazione: 'Vascularization',
+        regolazione_ormonale: 'Hormonal Regulation',
+        contrattilita_miofibroblasti: 'Contractility & Myofibroblasts',
+        metodi_di_studio: 'Study Methods',
+      },
+      functionCategoryLabels: {
+        biotensegrita: 'Biotensegrity',
+        carico_e_nutrizione: 'Loading & Nutrition',
+        capacita_di_allungamento: 'Stretch Capacity',
+        cammino_e_locomozione: 'Gait & Locomotion',
+        valutazione_posturale: 'Postural Assessment',
+      },
+      treatmentCategoryLabels: {
+        integrazione_strutturale: 'Structural Integration',
+        terapia_dei_punti_trigger: 'Trigger Point Therapy',
+        manipolazione_fasciale: 'Fascial Manipulation',
+        fascial_stretch_therapy: 'Fascial Stretch Therapy',
+        gestione_delle_cicatrici: 'Scar Management',
+        riabilitazione_oncologica_fasciale: 'Oncology Rehabilitation',
+        auto_trattamento_miofasciale: 'Self Myofascial Release',
+        movimento_e_rieducazione_fasciale: 'Movement & Re-education',
+      },
+      rehabCategoryLabels: {
+        post_surgical_scar_management: 'Post-Surgical Scar Management',
+        progressive_loading: 'Progressive Loading',
+        movement_reeducation: 'Movement Re-education',
+        sports_performance: 'Sports Performance',
+        chronic_pain_management: 'Chronic Pain Management',
+      },
+    },
+    urinary: {
+      atlasBadge: 'Urinary Atlas',
+      heading: 'Urinary/Renal System',
+      subTabs: {
+        anatomy: 'Anatomy',
+        conditions: 'Conditions',
+        assessment: 'Assessment',
+        rehab: 'Rehabilitation',
+      },
+      anatomyHeading: 'Renal and Urinary Anatomy',
+      anatomyHint: 'Kidney, nephron and lower urinary tract: the structure and physiology of filtration, reabsorption and fluid-electrolyte balance.',
+      anatomyIntro:
+        "The kidney regulates the volume and composition of body fluids through glomerular filtration, tubular reabsorption and secretion, the renin-angiotensin-aldosterone system, and acid-base control. Impaired renal function affects electrolytes, blood pressure, hydration status and exercise tolerance, making physiotherapy assessment closely interdependent with the patient's metabolic and cardiovascular parameters. The sections below cover kidney and bladder anatomy and the key physiological processes — glomerular filtration, tubular function, RAAS, fluid and electrolyte balance, acid-base balance — that guide clinical management and exercise prescription.",
+      conditionsHeading: 'Related Conditions',
+      conditionsHint: 'Nephrological and urological conditions relevant to physiotherapy practice. Tap a card for goals, clinical tests and exercises.',
+      assessmentHeading: 'Clinical Assessment',
+      assessmentHint: 'Renal function tests, urinalysis, metabolic parameters and imaging.',
+      rehabHeading: 'Rehabilitation',
+      rehabHint: 'Exercise prescription in chronic kidney disease, dialysis, post-transplant care and sports nephrology.',
+      loading: 'Loading...',
+      errorLoadingStructures: 'Unable to load anatomical structures.',
+      errorLoadingConditions: 'Unable to load conditions.',
+      errorLoadingTests: 'Unable to load assessment tests.',
+      errorLoadingRehab: 'Unable to load rehabilitation content.',
+      procedureLabel: 'Procedure',
+      interpretationLabel: 'Interpretation',
+      protocolLabel: 'Protocol',
+      categoryLabels: {
+        organ: 'Organ',
+        physiology: 'Physiology',
+      },
+      testCategoryLabels: {
+        imaging: 'Imaging',
+        metabolic: 'Metabolic',
+        renal_function: 'Renal Function',
+        urinalysis: 'Urinalysis',
+      },
+      rehabCategoryLabels: {
+        renal_training: 'Renal Disease Training',
+        sports_nephrology: 'Sports Nephrology',
+      },
+    },
+    physiology: {
+      atlasBadge: 'Physiology Atlas',
+      heading: 'Foundational Physiology',
+      systemTabs: { muscular: 'Muscular', neurological: 'Neurological', cellular: 'Cellular' },
+      sectionHint: 'The physiological mechanisms behind movement and the nervous system — not the anatomy of a single zone, but how the underlying tissues and circuits actually work, with clinical relevance for physiotherapy practice.',
+      loading: 'Loading...',
+      errorLoading: 'Unable to load physiology content.',
+      clinicalRelevanceLabel: 'Clinical Relevance',
+      categoryLabels: {
+        contraction_mechanics: 'Contraction Mechanisms',
+        fiber_types: 'Fiber Types',
+        mechanics: 'Muscle Mechanics',
+        motor_control: 'Motor Control',
+        exercise_adaptation: 'Exercise Adaptation',
+        neuromuscular: 'Neuromuscular Junction',
+        smooth_cardiac: 'Smooth & Cardiac Muscle',
+        cellular_basics: 'Cellular Physiology',
+        reflexes: 'Reflexes',
+        sensory: 'Sensory Systems',
+        plasticity: 'Plasticity & Learning',
+        autonomic: 'Autonomic Nervous System',
+        membrane_transport: 'Membrane Transport',
+        chemical_messengers: 'Chemical Messengers',
+        homeostasis: 'Homeostasis & Control',
+        energy_metabolism: 'Energy Metabolism',
+      },
+    },
+    sportsMedicine: {
+      atlasBadge: 'Sports Medicine Atlas',
+      heading: 'Sports Medicine',
+      sectionHint: 'The foundational science of sports injury and recovery — classification, tissue healing, clinical reasoning and therapeutic modalities, with the latest guidelines for a safe and effective return to sport.',
+      loading: 'Loading...',
+      errorLoading: 'Unable to load sports medicine content.',
+      clinicalRelevanceLabel: 'Clinical Relevance',
+      categoryLabels: {
+        injury_classification: 'Injury Classification',
+        tissue_healing: 'Tissue Healing',
+        clinical_reasoning: 'Clinical Reasoning',
+        therapeutic_modalities: 'Therapeutic Modalities',
+        on_field_emergency_rtp: 'On-Field Emergency & Return to Play',
+        rehabilitation_programming: 'Rehabilitation Programming',
+      },
+    },
+    librarySearchPlaceholder: 'Search this section...',
+    librarySearchNoResults: 'No results found for your search.',
+    gastrointestinal: {
+      atlasBadge: 'Gastrointestinal Atlas',
+      heading: 'Gastrointestinal System',
+      subTabs: {
+        anatomy: 'Anatomy',
+        conditions: 'Conditions',
+        assessment: 'Assessment',
+        rehab: 'Rehabilitation',
+      },
+      anatomyHeading: 'Gastrointestinal Anatomy',
+      anatomyHint: 'Motility of the digestive tract, stomach, small intestine, liver, exocrine pancreas, colon and microbiota: how they work as an integrated system.',
+      anatomyIntro:
+        "The gastrointestinal system integrates motility, secretion, digestion and absorption along the entire digestive tract: dysfunction in one segment (for example gastric dysmotility or colonic inflammation) often affects nutrition, energy available for exercise and exertion tolerance. Physiotherapy assessment in the gastrointestinal field considers the digestive clinical history, available laboratory and functional tests, and the impact of the condition on exercise capacity and quality of life. The sections below cover the digestive tract as a whole, individual organs (stomach, small intestine, liver, pancreas, colon) and the gut-muscle axis mediated by the microbiota, which is central to exercise prescription in these patients.",
+      conditionsHeading: 'Related Conditions',
+      conditionsHint: 'The main gastrointestinal conditions relevant to physiotherapy practice. Tap a card for goals, clinical tests and exercises.',
+      assessmentHeading: 'Clinical Assessment',
+      assessmentHint: 'Blood panels, stool markers, serology, functional tests, imaging and endoscopy used to work up the gastroenterology patient.',
+      rehabHeading: 'Rehabilitation',
+      rehabHint: 'Therapeutic exercise protocols for inflammatory bowel disease, chronic liver disease, bariatric surgery, ostomies and endurance sports.',
+      loading: 'Loading...',
+      errorLoadingStructures: 'Unable to load anatomical structures.',
+      errorLoadingConditions: 'Unable to load conditions.',
+      errorLoadingTests: 'Unable to load assessment tests.',
+      errorLoadingRehab: 'Unable to load rehabilitation content.',
+      procedureLabel: 'Procedure',
+      interpretationLabel: 'Interpretation',
+      protocolLabel: 'Protocol',
+      categoryLabels: {
+        organ: 'Organs',
+        system_overview: 'System Overview',
+      },
+      testCategoryLabels: {
+        blood_panel: 'Blood Panel',
+        endoscopy: 'Endoscopy',
+        functional_test: 'Functional Tests',
+        imaging: 'Imaging',
+        serology: 'Serology',
+        stool_marker: 'Stool Markers',
+      },
+      rehabCategoryLabels: {
+        chronic_disease_management: 'Chronic Disease Management',
+        gi_disease_management: 'GI Disease Management',
+        post_surgical: 'Post-Surgical',
+        sports_nutrition: 'Sports Nutrition',
+      },
+    },
+    immune: {
+      atlasBadge: 'Immune System Atlas',
+      heading: 'Immune System',
+      subTabs: {
+        anatomy: 'Anatomy',
+        conditions: 'Conditions',
+        assessment: 'Assessment',
+        rehab: 'Rehabilitation',
+      },
+      anatomyHeading: 'Immune System Anatomy',
+      anatomyHint: 'Primary and secondary lymphoid organs, peripheral lymphatic drainage, and the three lines of immune defense.',
+      anatomyIntro:
+        'The immune system integrates primary lymphoid organs (bone marrow and thymus), where immune cells mature, and secondary lymphoid organs (lymph nodes, spleen, MALT), where the immune response is triggered. Peripheral lymphatic drainage carries fluid, antigens and immune cells toward these organs, while innate, humoral and cell-mediated immunity represent the three ways the body recognizes and neutralizes threats. An impairment in any of these components — from disease, immunosuppressive medication or overtraining — has direct consequences for the body\'s ability to respond to infection, chronic inflammation and exercise.',
+      conditionsHeading: 'Related Conditions',
+      conditionsHint: 'Immune, autoimmune and post-infectious conditions. Tap a card for goals, clinical tests and exercises.',
+      assessmentHeading: 'Clinical Assessment',
+      assessmentHint: 'Haematological, immunological and inflammatory marker tests used in physiotherapy assessment.',
+      rehabHeading: 'Rehabilitation',
+      rehabHint: 'Exercise dosing, immunosuppression precautions, lymphedema management and post-viral rehabilitation.',
+      loading: 'Loading...',
+      errorLoadingStructures: 'Unable to load anatomical structures.',
+      errorLoadingConditions: 'Unable to load conditions.',
+      errorLoadingTests: 'Unable to load assessment tests.',
+      errorLoadingRehab: 'Unable to load rehabilitation content.',
+      procedureLabel: 'Procedure',
+      interpretationLabel: 'Interpretation',
+      protocolLabel: 'Protocol',
+      categoryLabels: {
+        cell_mediated_immunity: 'Cell-Mediated Immunity',
+        humoral_immunity: 'Humoral Immunity',
+        innate_immunity: 'Innate Immunity',
+        lymphatic_drainage: 'Lymphatic Drainage',
+        primary_lymphoid_organ: 'Primary Lymphoid Organs',
+        secondary_lymphoid_organ: 'Secondary Lymphoid Organs',
+      },
+      testCategoryLabels: {
+        functional: 'Functional Tests',
+        hematologic: 'Haematologic',
+        immunologic: 'Immunologic',
+        inflammatory_marker: 'Inflammatory Markers',
+      },
+      rehabCategoryLabels: {
+        exercise_immunology: 'Exercise Immunology',
+        immunosuppression_precautions: 'Immunosuppression Precautions',
+        inflammatory_arthritis_training: 'Inflammatory Arthritis Training',
+        lymphedema_management: 'Lymphedema Management',
+        post_viral_rehabilitation: 'Post-Viral Rehabilitation',
+      },
+    },
+    hematology: {
+      atlasBadge: 'Hematology Atlas',
+      heading: 'Blood / Hematology',
+      subTabs: {
+        anatomy: 'Anatomy',
+        conditions: 'Conditions',
+        assessment: 'Assessment',
+        rehab: 'Rehabilitation',
+      },
+      anatomyHeading: 'Blood Anatomy and Physiology',
+      anatomyHint: 'Cell lines, plasma, hemoglobin and hemostasis: the components and processes governing oxygen transport, immune defense and coagulation.',
+      anatomyIntro:
+        'Blood is a liquid connective tissue with transport (oxygen, nutrients, hormones), immune defense and hemostatic functions. The cellular component (erythrocytes, leukocytes, platelets) and the plasma component work in dynamic equilibrium: an alteration of the red cell line, the coagulation cascade or plasma composition directly affects exercise tolerance and the safety of therapeutic exercise. The sections below cover erythrocytes and erythropoiesis, leukocytes, plasma, hemoglobin/oxygen transport, and hemostasis/coagulation.',
+      conditionsHeading: 'Related Conditions',
+      conditionsHint: 'Hematological conditions of relevance to physiotherapy practice. Tap a card for goals, clinical tests and exercises.',
+      assessmentHeading: 'Clinical Assessment',
+      assessmentHint: 'Laboratory tests and hematological assessments relevant to physiotherapy practice.',
+      rehabHeading: 'Rehabilitation',
+      rehabHint: 'Exercise prescription, venous thromboembolism prevention, anticoagulant therapy precautions, and condition-specific protocols.',
+      loading: 'Loading...',
+      errorLoadingStructures: 'Unable to load hematological structures.',
+      errorLoadingConditions: 'Unable to load conditions.',
+      errorLoadingTests: 'Unable to load assessment tests.',
+      errorLoadingRehab: 'Unable to load rehabilitation content.',
+      procedureLabel: 'Procedure',
+      interpretationLabel: 'Interpretation',
+      protocolLabel: 'Protocol',
+      categoryLabels: {
+        cell_line: 'Cell Lines',
+        fluid: 'Fluid Component',
+        molecule: 'Molecules',
+        process: 'Processes',
+      },
+      testCategoryLabels: {
+        coagulation: 'Coagulation',
+        diagnostic: 'Diagnostics',
+        general: 'General Tests',
+        metabolic: 'Metabolic',
+      },
+      rehabCategoryLabels: {
+        condition_specific: 'Condition-Specific',
+        exercise_prescription: 'Exercise Prescription',
+        post_surgical: 'Post-Surgical',
+        precaution_protocol: 'Precaution Protocols',
       },
     },
     clinicalToolkit: {
@@ -2894,13 +3842,22 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     libraryLinks: {
       bodyMap: { label: 'Mapa Corporal', description: 'Explorador anatómico interactivo' },
       neurology: { label: 'Neurología', description: 'Cerebro, nervios y vías nerviosas' },
+      physiology: { label: 'Fisiología', description: 'Mecanismos musculares y neurológicos fundamentales' },
+      sportsMedicine: { label: 'Medicina Deportiva', description: 'Ciencia de la lesión deportiva y retorno al deporte' },
       pelvicFloor: { label: 'Suelo Pélvico', description: 'Anatomía, condiciones y rehabilitación' },
       cardiopulmonary: { label: 'Cardiopulmonar', description: 'Anatomía, condiciones y rehabilitación' },
+      endocrine: { label: 'Endocrino', description: 'Anatomía, condiciones y rehabilitación' },
+      fascia: { label: 'Fascia', description: 'Anatomía, función y aplicaciones clínicas' },
+      urinary: { label: 'Urinario', description: 'Anatomía, condiciones y rehabilitación' },
+      gastrointestinal: { label: 'Gastrointestinal', description: 'Anatomía, condiciones y rehabilitación' },
+      immune: { label: 'Inmunitario', description: 'Anatomía, condiciones y rehabilitación' },
+      hematology: { label: 'Hematología', description: 'Anatomía, condiciones y rehabilitación' },
       oncology: { label: 'Oncología', description: 'Anatomía, condiciones y rehabilitación' },
       firstAid: { label: 'Primeros Auxilios', description: 'Protocolos por país' },
       blsd: { label: 'RCP/DEA', description: 'RCP, DEA y desobstrucción de vía aérea' },
       clinicalTools: { label: 'Herramientas Clínicas', description: 'Escalas de valoración y pruebas' },
     },
+    physiologyCrossLink: { question: '¿Quieres entender cómo funciona?', cta: 'Ir a Fisiología' },
     worldLinks: {
       science: { label: 'Evidence Hub', description: 'Resúmenes de las últimas investigaciones' },
       events: { label: 'Eventos', description: 'Congresos, cursos y webinars de salud' },
@@ -3014,6 +3971,13 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       connections: 'Conexiones',
       vascularSupply: 'Vascularización',
       function: 'Función',
+    },
+    evidenceLevels: {
+      high: 'Alta',
+      strong: 'Alta',
+      moderate: 'Moderada',
+      low: 'Baja',
+      limited: 'Baja',
     },
     common: {
       loading: 'Cargando...',
@@ -3275,6 +4239,341 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
         adult: 'Adultos',
         paediatric: 'Pediátrico',
         both: 'Adultos y niños',
+      },
+    },
+    endocrine: {
+      atlasBadge: 'Atlas Endocrino',
+      heading: 'Sistema Endocrino',
+      subTabs: {
+        anatomy: 'Anatomía',
+        conditions: 'Patologías',
+        assessment: 'Evaluación',
+        rehab: 'Rehabilitación',
+      },
+      anatomyHeading: 'Anatomía Endocrina',
+      anatomyHint: 'Glándulas, ejes hormonales y conceptos clave: cómo el sistema endocrino regula el metabolismo, el crecimiento y la homeostasis.',
+      anatomyIntro:
+        'El sistema endocrino coordina la comunicación hormonal entre glándulas y órganos diana, regulando el metabolismo, el crecimiento, la composición corporal, la densidad ósea y la función reproductiva. Una disfunción endocrina suele repercutir en la tolerancia al ejercicio, la fuerza muscular, la salud ósea y el equilibrio, por lo que la evaluación fisioterapéutica está estrechamente ligada al perfil hormonal del paciente. Las siguientes secciones profundizan en las principales glándulas (tiroides, suprarrenal, paratiroides, páncreas endocrino), los ejes hormonales clave (hipotálamo-hipofisario, GH/IGF-1, gonadal) y el papel del hueso como órgano diana y endocrino.',
+      conditionsHeading: 'Patologías Relacionadas',
+      conditionsHint: 'Las principales endocrinopatías de interés fisioterapéutico. Toca una tarjeta para ver objetivos, pruebas clínicas y ejercicios.',
+      assessmentHeading: 'Evaluación Clínica',
+      assessmentHint: 'Pruebas hormonales, metabólicas y estructurales relevantes para la evaluación fisioterapéutica del paciente endocrino.',
+      rehabHeading: 'Rehabilitación',
+      rehabHint: 'Protocolos de salud ósea, prevención de caídas, terapia hormonal sustitutiva, entrenamiento metabólico y apoyo nutricional.',
+      loading: 'Cargando...',
+      errorLoadingStructures: 'No se pudieron cargar las estructuras anatómicas.',
+      errorLoadingConditions: 'No se pudieron cargar las patologías.',
+      errorLoadingTests: 'No se pudieron cargar las pruebas de evaluación.',
+      errorLoadingRehab: 'No se pudo cargar el contenido de rehabilitación.',
+      procedureLabel: 'Procedimiento',
+      interpretationLabel: 'Interpretación',
+      protocolLabel: 'Protocolo',
+      categoryLabels: {
+        axis: 'Ejes Hormonales',
+        concept: 'Conceptos Clave',
+        gland: 'Glándulas',
+      },
+      testCategoryLabels: {
+        hormonal: 'Hormonal',
+        metabolic: 'Metabólico',
+        structural: 'Estructural',
+      },
+      rehabCategoryLabels: {
+        bone_health: 'Salud Ósea',
+        fall_prevention: 'Prevención de Caídas',
+        hormone_replacement: 'Terapia Hormonal Sustitutiva',
+        metabolic_training: 'Entrenamiento Metabólico',
+        nutritional_support: 'Apoyo Nutricional',
+      },
+    },
+    fascia: {
+      atlasBadge: 'Atlas de la Fascia',
+      heading: 'Fascia',
+      subTabs: {
+        structures: 'Anatomía',
+        function: 'Función',
+        treatments: 'Aplicaciones Clínicas',
+        rehab: 'Rehabilitación',
+      },
+      structuresHeading: 'Anatomía y Fisiología de la Fascia',
+      structuresHint: 'Estructura, histología, inervación y regulación del sistema fascial — la base para comprender su papel clínico.',
+      structuresIntro: 'Esta sección describe la fascia como un órgano sensorial y de transmisión de fuerza por derecho propio: desde su composición histológica hasta su rica inervación mecanorreceptiva y nociceptiva, pasando por los mecanismos hormonales y celulares que regulan sus propiedades a lo largo del tiempo.',
+      functionHeading: 'Función Fascial',
+      functionHint: 'Biotensegridad, respuesta a la carga, propiedades viscoelásticas y el papel de la fascia en el movimiento y la postura.',
+      treatmentsHeading: 'Aplicaciones Clínicas',
+      treatmentsHint: 'Enfoques manuales y programas de ejercicio orientados a la fascia, con sus implicaciones fisioterapéuticas y el nivel de evidencia disponible.',
+      rehabHeading: 'Rehabilitación',
+      rehabHint: 'Protocolos de rehabilitación estructurados para el sistema fascial, con el nivel de evidencia científica disponible para cada enfoque.',
+      loading: 'Cargando...',
+      errorLoadingStructures: 'No se pudieron cargar los contenidos de anatomía y fisiología.',
+      errorLoadingFunction: 'No se pudieron cargar los contenidos sobre la función fascial.',
+      errorLoadingTreatments: 'No se pudieron cargar las aplicaciones clínicas.',
+      errorLoadingRehab: 'No se pudieron cargar los contenidos de rehabilitación.',
+      ptImplicationsLabel: 'Implicaciones Fisioterapéuticas',
+      protocolLabel: 'Protocolo',
+      askPhygoPrompt: '¿No encuentras lo que buscas sobre la fascia? Pregunta a Phygo',
+      askPhygoPlaceholder: 'ej. fascia toracolumbar, cupping, densificación fascial...',
+      askButton: 'Preguntar',
+      structureCategoryLabels: {
+        anatomia_generale: 'Anatomía General',
+        istologia: 'Histología',
+        innervazione: 'Inervación',
+        vascolarizzazione: 'Vascularización',
+        regolazione_ormonale: 'Regulación Hormonal',
+        contrattilita_miofibroblasti: 'Contractilidad y Miofibroblastos',
+        metodi_di_studio: 'Métodos de Estudio',
+      },
+      functionCategoryLabels: {
+        biotensegrita: 'Biotensegridad',
+        carico_e_nutrizione: 'Carga y Nutrición',
+        capacita_di_allungamento: 'Capacidad de Elongación',
+        cammino_e_locomozione: 'Marcha y Locomoción',
+        valutazione_posturale: 'Evaluación Postural',
+      },
+      treatmentCategoryLabels: {
+        integrazione_strutturale: 'Integración Estructural',
+        terapia_dei_punti_trigger: 'Terapia de Puntos Gatillo',
+        manipolazione_fasciale: 'Manipulación Fascial',
+        fascial_stretch_therapy: 'Fascial Stretch Therapy',
+        gestione_delle_cicatrici: 'Manejo de Cicatrices',
+        riabilitazione_oncologica_fasciale: 'Rehabilitación Oncológica',
+        auto_trattamento_miofasciale: 'Auto-liberación Miofascial',
+        movimento_e_rieducazione_fasciale: 'Movimiento y Reeducación',
+      },
+      rehabCategoryLabels: {
+        post_surgical_scar_management: 'Gestión de Cicatrices Postquirúrgicas',
+        progressive_loading: 'Carga Progresiva',
+        movement_reeducation: 'Reeducación del Movimiento',
+        sports_performance: 'Rendimiento Deportivo',
+        chronic_pain_management: 'Gestión del Dolor Crónico',
+      },
+    },
+    urinary: {
+      atlasBadge: 'Atlas Urinario',
+      heading: 'Sistema Urinario/Renal',
+      subTabs: {
+        anatomy: 'Anatomía',
+        conditions: 'Patologías',
+        assessment: 'Evaluación',
+        rehab: 'Rehabilitación',
+      },
+      anatomyHeading: 'Anatomía Renal y Urinaria',
+      anatomyHint: 'Riñón, nefrona y tracto urinario inferior: estructura y fisiología de la filtración, la reabsorción y el equilibrio hidroelectrolítico.',
+      anatomyIntro:
+        'El riñón regula el volumen y la composición de los líquidos corporales mediante la filtración glomerular, la reabsorción y secreción tubular, el sistema renina-angiotensina-aldosterona y el control del equilibrio ácido-base. Un deterioro de la función renal repercute en los electrolitos, la presión arterial, el estado de hidratación y la tolerancia al ejercicio, por lo que la evaluación fisioterapéutica está estrechamente ligada a los parámetros metabólicos y cardiovasculares del paciente. Las secciones siguientes profundizan en la anatomía del riñón y la vejiga, y en los principales procesos fisiológicos —filtración glomerular, función tubular, SRAA, equilibrio hídrico y electrolítico, equilibrio ácido-base— que orientan el manejo clínico y la prescripción del ejercicio.',
+      conditionsHeading: 'Patologías Relacionadas',
+      conditionsHint: 'Patologías nefrológicas y urológicas relevantes para la práctica fisioterapéutica. Toca una tarjeta para ver objetivos, pruebas clínicas y ejercicios.',
+      assessmentHeading: 'Evaluación Clínica',
+      assessmentHint: 'Pruebas de función renal, análisis de orina, parámetros metabólicos y diagnóstico por imagen.',
+      rehabHeading: 'Rehabilitación',
+      rehabHint: 'Prescripción del ejercicio en la enfermedad renal crónica, en diálisis, post-trasplante y en nefrología del deporte.',
+      loading: 'Cargando...',
+      errorLoadingStructures: 'No se pudieron cargar las estructuras anatómicas.',
+      errorLoadingConditions: 'No se pudieron cargar las patologías.',
+      errorLoadingTests: 'No se pudieron cargar las pruebas de evaluación.',
+      errorLoadingRehab: 'No se pudo cargar el contenido de rehabilitación.',
+      procedureLabel: 'Procedimiento',
+      interpretationLabel: 'Interpretación',
+      protocolLabel: 'Protocolo',
+      categoryLabels: {
+        organ: 'Órgano',
+        physiology: 'Fisiología',
+      },
+      testCategoryLabels: {
+        imaging: 'Diagnóstico por Imagen',
+        metabolic: 'Metabólico',
+        renal_function: 'Función Renal',
+        urinalysis: 'Análisis de Orina',
+      },
+      rehabCategoryLabels: {
+        renal_training: 'Entrenamiento en Nefropatía',
+        sports_nephrology: 'Nefrología del Deporte',
+      },
+    },
+    physiology: {
+      atlasBadge: 'Atlas de Fisiología',
+      heading: 'Fisiología Fundamental',
+      systemTabs: { muscular: 'Muscular', neurological: 'Neurológico', cellular: 'Celular' },
+      sectionHint: 'Los mecanismos fisiológicos que sustentan el movimiento y el sistema nervioso — no la anatomía de una zona específica, sino cómo funcionan realmente los tejidos y circuitos subyacentes, con su relevancia clínica para la práctica fisioterapéutica.',
+      loading: 'Cargando...',
+      errorLoading: 'No se pudo cargar el contenido de fisiología.',
+      clinicalRelevanceLabel: 'Relevancia Clínica',
+      categoryLabels: {
+        contraction_mechanics: 'Mecanismos de Contracción',
+        fiber_types: 'Tipos de Fibras',
+        mechanics: 'Mecánica Muscular',
+        motor_control: 'Control Motor',
+        exercise_adaptation: 'Adaptación al Ejercicio',
+        neuromuscular: 'Unión Neuromuscular',
+        smooth_cardiac: 'Músculo Liso y Cardíaco',
+        cellular_basics: 'Fisiología Celular',
+        reflexes: 'Reflejos',
+        sensory: 'Sistemas Sensoriales',
+        plasticity: 'Plasticidad y Aprendizaje',
+        autonomic: 'Sistema Nervioso Autónomo',
+        membrane_transport: 'Transporte de Membrana',
+        chemical_messengers: 'Mensajeros Químicos',
+        homeostasis: 'Homeostasis y Control',
+        energy_metabolism: 'Metabolismo Energético',
+      },
+    },
+    sportsMedicine: {
+      atlasBadge: 'Atlas de Medicina Deportiva',
+      heading: 'Medicina Deportiva',
+      sectionHint: 'La ciencia fundamental de la lesión deportiva y la recuperación — clasificación, curación tisular, razonamiento clínico y modalidades terapéuticas, con las guías más actuales para un retorno al deporte seguro y eficaz.',
+      loading: 'Cargando...',
+      errorLoading: 'No se pudo cargar el contenido de medicina deportiva.',
+      clinicalRelevanceLabel: 'Relevancia Clínica',
+      categoryLabels: {
+        injury_classification: 'Clasificación de Lesiones',
+        tissue_healing: 'Curación Tisular',
+        clinical_reasoning: 'Razonamiento Clínico',
+        therapeutic_modalities: 'Modalidades Terapéuticas',
+        on_field_emergency_rtp: 'Emergencia en Campo y Retorno al Deporte',
+        rehabilitation_programming: 'Programación de la Rehabilitación',
+      },
+    },
+    librarySearchPlaceholder: 'Buscar en esta sección...',
+    librarySearchNoResults: 'No se han encontrado resultados para tu búsqueda.',
+    gastrointestinal: {
+      atlasBadge: 'Atlas Gastrointestinal',
+      heading: 'Sistema Gastrointestinal',
+      subTabs: {
+        anatomy: 'Anatomía',
+        conditions: 'Patologías',
+        assessment: 'Evaluación',
+        rehab: 'Rehabilitación',
+      },
+      anatomyHeading: 'Anatomía Gastrointestinal',
+      anatomyHint: 'Motilidad del tracto digestivo, estómago, intestino delgado, hígado, páncreas exocrino, colon y microbiota: cómo funcionan como sistema integrado.',
+      anatomyIntro:
+        'El sistema gastrointestinal integra motilidad, secreción, digestión y absorción a lo largo de todo el tracto digestivo: una disfunción en un tramo (por ejemplo motora a nivel gástrico o inflamatoria a nivel colónico) suele repercutir en la nutrición, la energía disponible para el ejercicio y la tolerancia al esfuerzo. La evaluación fisioterapéutica en el ámbito gastrointestinal considera la historia clínica digestiva, los estudios de laboratorio y funcionales disponibles, y el impacto de la patología sobre la capacidad de ejercicio y la calidad de vida. Las secciones siguientes profundizan en el tracto digestivo en su conjunto, los órganos individuales (estómago, intestino delgado, hígado, páncreas, colon) y el eje intestino-músculo mediado por la microbiota, central para la prescripción de ejercicio en estos pacientes.',
+      conditionsHeading: 'Patologías Relacionadas',
+      conditionsHint: 'Las principales condiciones gastrointestinales relevantes para la práctica fisioterapéutica. Toca una tarjeta para ver objetivos, pruebas clínicas y ejercicios.',
+      assessmentHeading: 'Evaluación Clínica',
+      assessmentHint: 'Análisis de sangre, marcadores fecales, serología, pruebas funcionales, imagen y endoscopia útiles para valorar al paciente gastroenterológico.',
+      rehabHeading: 'Rehabilitación',
+      rehabHint: 'Protocolos de ejercicio terapéutico para enfermedad inflamatoria intestinal, hepatopatías crónicas, cirugía bariátrica, ostomías y deportes de resistencia.',
+      loading: 'Cargando...',
+      errorLoadingStructures: 'No se pudieron cargar las estructuras anatómicas.',
+      errorLoadingConditions: 'No se pudieron cargar las patologías.',
+      errorLoadingTests: 'No se pudieron cargar las pruebas de evaluación.',
+      errorLoadingRehab: 'No se pudieron cargar los contenidos de rehabilitación.',
+      procedureLabel: 'Procedimiento',
+      interpretationLabel: 'Interpretación',
+      protocolLabel: 'Protocolo',
+      categoryLabels: {
+        organ: 'Órganos',
+        system_overview: 'Panorama del Sistema',
+      },
+      testCategoryLabels: {
+        blood_panel: 'Panel Sanguíneo',
+        endoscopy: 'Endoscopia',
+        functional_test: 'Pruebas Funcionales',
+        imaging: 'Imagenología',
+        serology: 'Serología',
+        stool_marker: 'Marcadores Fecales',
+      },
+      rehabCategoryLabels: {
+        chronic_disease_management: 'Manejo de Enfermedades Crónicas',
+        gi_disease_management: 'Manejo de Patologías Gastrointestinales',
+        post_surgical: 'Post-Quirúrgico',
+        sports_nutrition: 'Nutrición Deportiva',
+      },
+    },
+    immune: {
+      atlasBadge: 'Atlas del Sistema Inmunitario',
+      heading: 'Sistema Inmunitario',
+      subTabs: {
+        anatomy: 'Anatomía',
+        conditions: 'Patologías',
+        assessment: 'Evaluación',
+        rehab: 'Rehabilitación',
+      },
+      anatomyHeading: 'Anatomía del Sistema Inmunitario',
+      anatomyHint: 'Órganos linfoides primarios y secundarios, drenaje linfático periférico y las tres líneas de defensa inmunitaria.',
+      anatomyIntro:
+        'El sistema inmunitario integra órganos linfoides primarios (médula ósea y timo), donde maduran las células inmunitarias, y órganos linfoides secundarios (ganglios linfáticos, bazo, MALT), donde se desencadena la respuesta inmunitaria. El drenaje linfático periférico transporta líquido, antígenos y células inmunitarias hacia estos órganos, mientras que la inmunidad innata, humoral y celular representan las tres formas en que el organismo reconoce y neutraliza las amenazas. Una alteración en cualquiera de estos componentes —por enfermedad, fármacos inmunosupresores o sobreentrenamiento— repercute directamente en la capacidad del organismo para responder a infecciones, inflamación crónica y ejercicio físico.',
+      conditionsHeading: 'Patologías Relacionadas',
+      conditionsHint: 'Condiciones inmunitarias, autoinmunes y posinfecciosas. Toca una tarjeta para ver objetivos, pruebas clínicas y ejercicios.',
+      assessmentHeading: 'Evaluación Clínica',
+      assessmentHint: 'Pruebas hematológicas, inmunológicas y marcadores inflamatorios utilizados en la evaluación fisioterapéutica.',
+      rehabHeading: 'Rehabilitación',
+      rehabHint: 'Dosificación del ejercicio, precauciones en inmunosupresión, manejo del linfedema y rehabilitación posviral.',
+      loading: 'Cargando...',
+      errorLoadingStructures: 'No se pudieron cargar las estructuras anatómicas.',
+      errorLoadingConditions: 'No se pudieron cargar las patologías.',
+      errorLoadingTests: 'No se pudieron cargar las pruebas de evaluación.',
+      errorLoadingRehab: 'No se pudo cargar el contenido de rehabilitación.',
+      procedureLabel: 'Procedimiento',
+      interpretationLabel: 'Interpretación',
+      protocolLabel: 'Protocolo',
+      categoryLabels: {
+        cell_mediated_immunity: 'Inmunidad Celular',
+        humoral_immunity: 'Inmunidad Humoral',
+        innate_immunity: 'Inmunidad Innata',
+        lymphatic_drainage: 'Drenaje Linfático',
+        primary_lymphoid_organ: 'Órganos Linfoides Primarios',
+        secondary_lymphoid_organ: 'Órganos Linfoides Secundarios',
+      },
+      testCategoryLabels: {
+        functional: 'Pruebas Funcionales',
+        hematologic: 'Hematológico',
+        immunologic: 'Inmunológico',
+        inflammatory_marker: 'Marcadores Inflamatorios',
+      },
+      rehabCategoryLabels: {
+        exercise_immunology: 'Inmunología del Ejercicio',
+        immunosuppression_precautions: 'Precauciones en Inmunosupresión',
+        inflammatory_arthritis_training: 'Entrenamiento en Artritis Inflamatorias',
+        lymphedema_management: 'Manejo del Linfedema',
+        post_viral_rehabilitation: 'Rehabilitación Posviral',
+      },
+    },
+    hematology: {
+      atlasBadge: 'Atlas Hematológico',
+      heading: 'Sangre / Hematología',
+      subTabs: {
+        anatomy: 'Anatomía',
+        conditions: 'Patologías',
+        assessment: 'Evaluación',
+        rehab: 'Rehabilitación',
+      },
+      anatomyHeading: 'Anatomía y Fisiología de la Sangre',
+      anatomyHint: 'Líneas celulares, plasma, hemoglobina y hemostasia: los componentes y procesos que regulan el transporte de oxígeno, la defensa inmunitaria y la coagulación.',
+      anatomyIntro:
+        'La sangre es un tejido conectivo líquido con funciones de transporte (oxígeno, nutrientes, hormonas), defensa inmunitaria y hemostasia. El componente celular (eritrocitos, leucocitos, plaquetas) y el componente plasmático trabajan en equilibrio dinámico: una alteración de la serie roja, de la cascada de coagulación o de la composición del plasma repercute directamente en la tolerancia al esfuerzo y en la seguridad del ejercicio terapéutico. Las siguientes secciones profundizan en eritrocitos y eritropoyesis, leucocitos, plasma, hemoglobina/transporte de oxígeno y hemostasia/coagulación.',
+      conditionsHeading: 'Patologías Relacionadas',
+      conditionsHint: 'Patologías hematológicas de interés fisioterapéutico. Toca una tarjeta para ver objetivos, pruebas clínicas y ejercicios.',
+      assessmentHeading: 'Evaluación Clínica',
+      assessmentHint: 'Pruebas de laboratorio y evaluaciones hematológicas relevantes para la práctica fisioterapéutica.',
+      rehabHeading: 'Rehabilitación',
+      rehabHint: 'Prescripción del ejercicio, prevención del tromboembolismo venoso, precauciones en terapia anticoagulante y protocolos específicos por condición.',
+      loading: 'Cargando...',
+      errorLoadingStructures: 'No se pudieron cargar las estructuras hematológicas.',
+      errorLoadingConditions: 'No se pudieron cargar las patologías.',
+      errorLoadingTests: 'No se pudieron cargar las pruebas de evaluación.',
+      errorLoadingRehab: 'No se pudo cargar el contenido de rehabilitación.',
+      procedureLabel: 'Procedimiento',
+      interpretationLabel: 'Interpretación',
+      protocolLabel: 'Protocolo',
+      categoryLabels: {
+        cell_line: 'Líneas Celulares',
+        fluid: 'Componente Líquido',
+        molecule: 'Moléculas',
+        process: 'Procesos',
+      },
+      testCategoryLabels: {
+        coagulation: 'Coagulación',
+        diagnostic: 'Diagnóstico',
+        general: 'Pruebas Generales',
+        metabolic: 'Metabólico',
+      },
+      rehabCategoryLabels: {
+        condition_specific: 'Específico por Condición',
+        exercise_prescription: 'Prescripción del Ejercicio',
+        post_surgical: 'Post-Quirúrgico',
+        precaution_protocol: 'Protocolos de Precaución',
       },
     },
     clinicalToolkit: {
@@ -3900,13 +5199,22 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     libraryLinks: {
       bodyMap: { label: 'Carte du Corps', description: 'Explorateur anatomique interactif' },
       neurology: { label: 'Neurologie', description: 'Cerveau, nerfs et voies nerveuses' },
+      physiology: { label: 'Physiologie', description: 'Mécanismes musculaires et neurologiques fondamentaux' },
+      sportsMedicine: { label: 'Médecine du Sport', description: 'Science de la blessure sportive et retour au sport' },
       pelvicFloor: { label: 'Plancher Pelvien', description: 'Anatomie, pathologies et rééducation' },
       cardiopulmonary: { label: 'Cardiopulmonaire', description: 'Anatomie, pathologies et rééducation' },
+      endocrine: { label: 'Endocrinien', description: 'Anatomie, pathologies et rééducation' },
+      fascia: { label: 'Fascia', description: 'Anatomie, fonction et applications cliniques' },
+      urinary: { label: 'Urinaire', description: 'Anatomie, pathologies et rééducation' },
+      gastrointestinal: { label: 'Gastro-intestinal', description: 'Anatomie, pathologies et rééducation' },
+      immune: { label: 'Immunitaire', description: 'Anatomie, pathologies et rééducation' },
+      hematology: { label: 'Hématologie', description: 'Anatomie, pathologies et rééducation' },
       oncology: { label: 'Oncologie', description: 'Anatomie, pathologies et rééducation' },
       firstAid: { label: 'Premiers Secours', description: 'Protocoles par pays' },
       blsd: { label: 'RCP/DEA', description: 'RCP, DEA et désobstruction des voies aériennes' },
       clinicalTools: { label: 'Outils Cliniques', description: "Échelles d'évaluation et tests" },
     },
+    physiologyCrossLink: { question: 'Vous voulez comprendre comment ça marche ?', cta: 'Aller à Physiologie' },
     worldLinks: {
       science: { label: 'Evidence Hub', description: 'Résumés des dernières recherches' },
       events: { label: 'Événements', description: 'Congrès, cours et webinaires santé' },
@@ -4020,6 +5328,13 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       connections: 'Connexions',
       vascularSupply: 'Vascularisation',
       function: 'Fonction',
+    },
+    evidenceLevels: {
+      high: 'Élevé',
+      strong: 'Élevé',
+      moderate: 'Modéré',
+      low: 'Faible',
+      limited: 'Faible',
     },
     common: {
       loading: 'Chargement...',
@@ -4281,6 +5596,341 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
         adult: 'Adultes',
         paediatric: 'Pédiatrique',
         both: 'Adultes et enfants',
+      },
+    },
+    endocrine: {
+      atlasBadge: 'Atlas Endocrinien',
+      heading: 'Système Endocrinien',
+      subTabs: {
+        anatomy: 'Anatomie',
+        conditions: 'Pathologies',
+        assessment: 'Évaluation',
+        rehab: 'Rééducation',
+      },
+      anatomyHeading: 'Anatomie Endocrinienne',
+      anatomyHint: 'Glandes, axes hormonaux et concepts clés : comment le système endocrinien régule le métabolisme, la croissance et l\'homéostasie.',
+      anatomyIntro:
+        "Le système endocrinien coordonne la communication hormonale entre les glandes et les organes cibles, régulant le métabolisme, la croissance, la composition corporelle, la densité osseuse et la fonction reproductive. Une dysfonction endocrinienne se répercute souvent sur la tolérance à l'effort, la force musculaire, la santé osseuse et l'équilibre, ce qui rend l'évaluation en kinésithérapie étroitement liée au profil hormonal du patient. Les sections ci-dessous approfondissent les principales glandes (thyroïde, surrénale, parathyroïdes, pancréas endocrine), les axes hormonaux clés (hypothalamo-hypophysaire, GH/IGF-1, gonadique) et le rôle de l'os en tant qu'organe cible et endocrinien.",
+      conditionsHeading: 'Pathologies Liées',
+      conditionsHint: 'Les principales endocrinopathies d\'intérêt en kinésithérapie. Touchez une carte pour les objectifs, tests cliniques et exercices.',
+      assessmentHeading: 'Évaluation Clinique',
+      assessmentHint: 'Examens hormonaux, métaboliques et structurels pertinents pour l\'évaluation en kinésithérapie du patient endocrinien.',
+      rehabHeading: 'Rééducation',
+      rehabHint: 'Protocoles de santé osseuse, prévention des chutes, hormonothérapie substitutive, entraînement métabolique et soutien nutritionnel.',
+      loading: 'Chargement...',
+      errorLoadingStructures: 'Impossible de charger les structures anatomiques.',
+      errorLoadingConditions: 'Impossible de charger les pathologies.',
+      errorLoadingTests: 'Impossible de charger les tests d\'évaluation.',
+      errorLoadingRehab: 'Impossible de charger le contenu de rééducation.',
+      procedureLabel: 'Procédure',
+      interpretationLabel: 'Interprétation',
+      protocolLabel: 'Protocole',
+      categoryLabels: {
+        axis: 'Axes Hormonaux',
+        concept: 'Concepts Clés',
+        gland: 'Glandes',
+      },
+      testCategoryLabels: {
+        hormonal: 'Hormonal',
+        metabolic: 'Métabolique',
+        structural: 'Structurel',
+      },
+      rehabCategoryLabels: {
+        bone_health: 'Santé Osseuse',
+        fall_prevention: 'Prévention des Chutes',
+        hormone_replacement: 'Hormonothérapie Substitutive',
+        metabolic_training: 'Entraînement Métabolique',
+        nutritional_support: 'Soutien Nutritionnel',
+      },
+    },
+    fascia: {
+      atlasBadge: 'Atlas du Fascia',
+      heading: 'Fascia',
+      subTabs: {
+        structures: 'Anatomie',
+        function: 'Fonction',
+        treatments: 'Applications Cliniques',
+        rehab: 'Rééducation',
+      },
+      structuresHeading: 'Anatomie et Physiologie du Fascia',
+      structuresHint: 'Structure, histologie, innervation et régulation du système fascial — la base pour comprendre son rôle clinique.',
+      structuresIntro: "Cette section décrit le fascia comme un organe sensoriel et de transmission de force à part entière : de sa composition histologique à sa riche innervation mécanoréceptive et nociceptive, en passant par les mécanismes hormonaux et cellulaires qui régulent ses propriétés dans le temps.",
+      functionHeading: 'Fonction Fasciale',
+      functionHint: 'Biotenségrité, réponse à la charge, propriétés viscoélastiques et rôle du fascia dans le mouvement et la posture.',
+      treatmentsHeading: 'Applications Cliniques',
+      treatmentsHint: "Approches manuelles et programmes d'exercice orientés vers le fascia, avec leurs implications kinésithérapiques et le niveau de preuve disponible.",
+      rehabHeading: 'Rééducation',
+      rehabHint: 'Protocoles de rééducation structurés pour le système fascial, avec le niveau de preuve scientifique disponible pour chaque approche.',
+      loading: 'Chargement...',
+      errorLoadingStructures: "Impossible de charger le contenu d'anatomie et de physiologie.",
+      errorLoadingFunction: 'Impossible de charger le contenu sur la fonction fasciale.',
+      errorLoadingTreatments: 'Impossible de charger les applications cliniques.',
+      errorLoadingRehab: 'Impossible de charger le contenu de rééducation.',
+      ptImplicationsLabel: 'Implications Kinésithérapiques',
+      protocolLabel: 'Protocole',
+      askPhygoPrompt: 'Vous ne trouvez pas ce que vous cherchez sur le fascia ? Demandez à Phygo',
+      askPhygoPlaceholder: 'ex. fascia thoraco-lombaire, cupping, densification fasciale...',
+      askButton: 'Demander',
+      structureCategoryLabels: {
+        anatomia_generale: 'Anatomie Générale',
+        istologia: 'Histologie',
+        innervazione: 'Innervation',
+        vascolarizzazione: 'Vascularisation',
+        regolazione_ormonale: 'Régulation Hormonale',
+        contrattilita_miofibroblasti: 'Contractilité et Myofibroblastes',
+        metodi_di_studio: "Méthodes d'Étude",
+      },
+      functionCategoryLabels: {
+        biotensegrita: 'Biotenségrité',
+        carico_e_nutrizione: 'Charge et Nutrition',
+        capacita_di_allungamento: "Capacité d'Étirement",
+        cammino_e_locomozione: 'Marche et Locomotion',
+        valutazione_posturale: 'Évaluation Posturale',
+      },
+      treatmentCategoryLabels: {
+        integrazione_strutturale: 'Intégration Structurale',
+        terapia_dei_punti_trigger: 'Thérapie des Points Trigger',
+        manipolazione_fasciale: 'Manipulation Fasciale',
+        fascial_stretch_therapy: 'Fascial Stretch Therapy',
+        gestione_delle_cicatrici: 'Gestion des Cicatrices',
+        riabilitazione_oncologica_fasciale: 'Rééducation Oncologique',
+        auto_trattamento_miofasciale: 'Auto-libération Myofasciale',
+        movimento_e_rieducazione_fasciale: 'Mouvement et Rééducation',
+      },
+      rehabCategoryLabels: {
+        post_surgical_scar_management: 'Gestion des Cicatrices Post-Chirurgicales',
+        progressive_loading: 'Charge Progressive',
+        movement_reeducation: 'Rééducation du Mouvement',
+        sports_performance: 'Performance Sportive',
+        chronic_pain_management: 'Gestion de la Douleur Chronique',
+      },
+    },
+    urinary: {
+      atlasBadge: 'Atlas Urinaire',
+      heading: 'Système Urinaire/Rénal',
+      subTabs: {
+        anatomy: 'Anatomie',
+        conditions: 'Pathologies',
+        assessment: 'Évaluation',
+        rehab: 'Rééducation',
+      },
+      anatomyHeading: 'Anatomie Rénale et Urinaire',
+      anatomyHint: 'Rein, néphron et voies urinaires basses : structure et physiologie de la filtration, de la réabsorption et de l\'équilibre hydro-électrolytique.',
+      anatomyIntro:
+        "Le rein régule le volume et la composition des liquides corporels grâce à la filtration glomérulaire, à la réabsorption et à la sécrétion tubulaires, au système rénine-angiotensine-aldostérone et au contrôle de l'équilibre acido-basique. Une altération de la fonction rénale se répercute sur les électrolytes, la pression artérielle, l'état d'hydratation et la tolérance à l'effort, ce qui rend l'évaluation en kinésithérapie étroitement liée aux paramètres métaboliques et cardiovasculaires du patient. Les sections ci-dessous détaillent l'anatomie du rein et de la vessie, ainsi que les principaux processus physiologiques — filtration glomérulaire, fonction tubulaire, SRAA, équilibre hydrique et électrolytique, équilibre acido-basique — qui orientent la prise en charge clinique et la prescription de l'exercice.",
+      conditionsHeading: 'Pathologies Liées',
+      conditionsHint: 'Pathologies néphrologiques et urologiques pertinentes pour la pratique en kinésithérapie. Touchez une carte pour les objectifs, tests cliniques et exercices.',
+      assessmentHeading: 'Évaluation Clinique',
+      assessmentHint: 'Tests de fonction rénale, analyse d\'urine, paramètres métaboliques et imagerie.',
+      rehabHeading: 'Rééducation',
+      rehabHint: 'Prescription de l\'exercice dans l\'insuffisance rénale chronique, en dialyse, après transplantation et en néphrologie du sport.',
+      loading: 'Chargement...',
+      errorLoadingStructures: 'Impossible de charger les structures anatomiques.',
+      errorLoadingConditions: 'Impossible de charger les pathologies.',
+      errorLoadingTests: 'Impossible de charger les tests d\'évaluation.',
+      errorLoadingRehab: 'Impossible de charger le contenu de rééducation.',
+      procedureLabel: 'Procédure',
+      interpretationLabel: 'Interprétation',
+      protocolLabel: 'Protocole',
+      categoryLabels: {
+        organ: 'Organe',
+        physiology: 'Physiologie',
+      },
+      testCategoryLabels: {
+        imaging: 'Imagerie',
+        metabolic: 'Métabolique',
+        renal_function: 'Fonction Rénale',
+        urinalysis: 'Analyse d\'Urine',
+      },
+      rehabCategoryLabels: {
+        renal_training: 'Entraînement en Néphropathie',
+        sports_nephrology: 'Néphrologie du Sport',
+      },
+    },
+    physiology: {
+      atlasBadge: 'Atlas de Physiologie',
+      heading: 'Physiologie Fondamentale',
+      systemTabs: { muscular: 'Musculaire', neurological: 'Neurologique', cellular: 'Cellulaire' },
+      sectionHint: 'Les mécanismes physiologiques à la base du mouvement et du système nerveux — non l\'anatomie d\'une zone spécifique, mais le fonctionnement réel des tissus et circuits sous-jacents, avec leur pertinence clinique pour la pratique en kinésithérapie.',
+      loading: 'Chargement...',
+      errorLoading: 'Impossible de charger le contenu de physiologie.',
+      clinicalRelevanceLabel: 'Pertinence Clinique',
+      categoryLabels: {
+        contraction_mechanics: 'Mécanismes de la Contraction',
+        fiber_types: 'Types de Fibres',
+        mechanics: 'Mécanique Musculaire',
+        motor_control: 'Contrôle Moteur',
+        exercise_adaptation: 'Adaptation à l\'Exercice',
+        neuromuscular: 'Jonction Neuromusculaire',
+        smooth_cardiac: 'Muscle Lisse et Cardiaque',
+        cellular_basics: 'Physiologie Cellulaire',
+        reflexes: 'Réflexes',
+        sensory: 'Systèmes Sensoriels',
+        plasticity: 'Plasticité et Apprentissage',
+        autonomic: 'Système Nerveux Autonome',
+        membrane_transport: 'Transport Membranaire',
+        chemical_messengers: 'Messagers Chimiques',
+        homeostasis: 'Homéostasie et Contrôle',
+        energy_metabolism: 'Métabolisme Énergétique',
+      },
+    },
+    sportsMedicine: {
+      atlasBadge: 'Atlas de Médecine du Sport',
+      heading: 'Médecine du Sport',
+      sectionHint: 'La science fondamentale de la blessure sportive et de la récupération — classification, cicatrisation tissulaire, raisonnement clinique et modalités thérapeutiques, avec les directives les plus actuelles pour un retour au sport sûr et efficace.',
+      loading: 'Chargement...',
+      errorLoading: 'Impossible de charger le contenu de médecine du sport.',
+      clinicalRelevanceLabel: 'Pertinence Clinique',
+      categoryLabels: {
+        injury_classification: 'Classification des Blessures',
+        tissue_healing: 'Cicatrisation Tissulaire',
+        clinical_reasoning: 'Raisonnement Clinique',
+        therapeutic_modalities: 'Modalités Thérapeutiques',
+        on_field_emergency_rtp: 'Urgence sur le Terrain et Retour au Sport',
+        rehabilitation_programming: 'Programmation de la Rééducation',
+      },
+    },
+    librarySearchPlaceholder: 'Rechercher dans cette section...',
+    librarySearchNoResults: 'Aucun résultat trouvé pour votre recherche.',
+    gastrointestinal: {
+      atlasBadge: 'Atlas Gastro-intestinal',
+      heading: 'Système Gastro-intestinal',
+      subTabs: {
+        anatomy: 'Anatomie',
+        conditions: 'Pathologies',
+        assessment: 'Évaluation',
+        rehab: 'Rééducation',
+      },
+      anatomyHeading: 'Anatomie Gastro-intestinale',
+      anatomyHint: 'Motilité du tube digestif, estomac, intestin grêle, foie, pancréas exocrine, côlon et microbiote : comment ils fonctionnent comme un système intégré.',
+      anatomyIntro:
+        "Le système gastro-intestinal intègre motilité, sécrétion, digestion et absorption sur tout le tube digestif : un dysfonctionnement d'un segment (par exemple moteur au niveau gastrique ou inflammatoire au niveau colique) se répercute souvent sur la nutrition, l'énergie disponible pour l'exercice et la tolérance à l'effort. L'évaluation kinésithérapique dans le domaine gastro-intestinal prend en compte l'anamnèse digestive, les examens de laboratoire et fonctionnels disponibles, ainsi que l'impact de la pathologie sur la capacité à l'exercice et la qualité de vie. Les sections ci-dessous détaillent le tube digestif dans son ensemble, les organes individuels (estomac, intestin grêle, foie, pancréas, côlon) et l'axe intestin-muscle médié par le microbiote, central dans la prescription d'exercice chez ces patients.",
+      conditionsHeading: 'Pathologies Associées',
+      conditionsHint: 'Les principales pathologies gastro-intestinales pertinentes pour la pratique kinésithérapique. Touchez une carte pour les objectifs, tests cliniques et exercices.',
+      assessmentHeading: 'Évaluation Clinique',
+      assessmentHint: 'Bilans sanguins, marqueurs fécaux, sérologie, tests fonctionnels, imagerie et endoscopie utiles pour évaluer le patient en gastro-entérologie.',
+      rehabHeading: 'Rééducation',
+      rehabHint: "Protocoles d'exercice thérapeutique pour les maladies inflammatoires chroniques de l'intestin, les hépatopathies chroniques, la chirurgie bariatrique, les stomies et les sports d'endurance.",
+      loading: 'Chargement...',
+      errorLoadingStructures: 'Impossible de charger les structures anatomiques.',
+      errorLoadingConditions: 'Impossible de charger les pathologies.',
+      errorLoadingTests: "Impossible de charger les tests d'évaluation.",
+      errorLoadingRehab: 'Impossible de charger les contenus de rééducation.',
+      procedureLabel: 'Procédure',
+      interpretationLabel: 'Interprétation',
+      protocolLabel: 'Protocole',
+      categoryLabels: {
+        organ: 'Organes',
+        system_overview: "Vue d'Ensemble du Système",
+      },
+      testCategoryLabels: {
+        blood_panel: 'Bilan Sanguin',
+        endoscopy: 'Endoscopie',
+        functional_test: 'Tests Fonctionnels',
+        imaging: 'Imagerie',
+        serology: 'Sérologie',
+        stool_marker: 'Marqueurs Fécaux',
+      },
+      rehabCategoryLabels: {
+        chronic_disease_management: 'Gestion des Maladies Chroniques',
+        gi_disease_management: 'Gestion des Pathologies Gastro-intestinales',
+        post_surgical: 'Post-Chirurgical',
+        sports_nutrition: 'Nutrition Sportive',
+      },
+    },
+    immune: {
+      atlasBadge: 'Atlas du Système Immunitaire',
+      heading: 'Système Immunitaire',
+      subTabs: {
+        anatomy: 'Anatomie',
+        conditions: 'Pathologies',
+        assessment: 'Évaluation',
+        rehab: 'Rééducation',
+      },
+      anatomyHeading: 'Anatomie du Système Immunitaire',
+      anatomyHint: 'Organes lymphoïdes primaires et secondaires, drainage lymphatique périphérique et les trois lignes de défense immunitaire.',
+      anatomyIntro:
+        "Le système immunitaire associe les organes lymphoïdes primaires (moelle osseuse et thymus), où les cellules immunitaires arrivent à maturité, et les organes lymphoïdes secondaires (ganglions lymphatiques, rate, MALT), où la réponse immunitaire est déclenchée. Le drainage lymphatique périphérique achemine liquide, antigènes et cellules immunitaires vers ces organes, tandis que l'immunité innée, humorale et cellulaire constituent les trois modalités par lesquelles l'organisme reconnaît et neutralise les menaces. Une altération de l'un de ces composants — maladie, traitement immunosuppresseur ou surentraînement — a des répercussions directes sur la capacité de l'organisme à répondre aux infections, à l'inflammation chronique et à l'exercice physique.",
+      conditionsHeading: 'Pathologies Associées',
+      conditionsHint: 'Pathologies immunitaires, auto-immunes et post-infectieuses. Touchez une carte pour les objectifs, tests cliniques et exercices.',
+      assessmentHeading: 'Évaluation Clinique',
+      assessmentHint: 'Examens hématologiques, immunologiques et marqueurs inflammatoires utilisés dans l\'évaluation kinésithérapique.',
+      rehabHeading: 'Rééducation',
+      rehabHint: 'Dosage de l\'exercice, précautions en immunosuppression, prise en charge du lymphœdème et rééducation post-virale.',
+      loading: 'Chargement...',
+      errorLoadingStructures: 'Impossible de charger les structures anatomiques.',
+      errorLoadingConditions: 'Impossible de charger les pathologies.',
+      errorLoadingTests: 'Impossible de charger les tests d\'évaluation.',
+      errorLoadingRehab: 'Impossible de charger le contenu de rééducation.',
+      procedureLabel: 'Procédure',
+      interpretationLabel: 'Interprétation',
+      protocolLabel: 'Protocole',
+      categoryLabels: {
+        cell_mediated_immunity: 'Immunité à Médiation Cellulaire',
+        humoral_immunity: 'Immunité Humorale',
+        innate_immunity: 'Immunité Innée',
+        lymphatic_drainage: 'Drainage Lymphatique',
+        primary_lymphoid_organ: 'Organes Lymphoïdes Primaires',
+        secondary_lymphoid_organ: 'Organes Lymphoïdes Secondaires',
+      },
+      testCategoryLabels: {
+        functional: 'Tests Fonctionnels',
+        hematologic: 'Hématologique',
+        immunologic: 'Immunologique',
+        inflammatory_marker: 'Marqueurs Inflammatoires',
+      },
+      rehabCategoryLabels: {
+        exercise_immunology: 'Immunologie de l\'Exercice',
+        immunosuppression_precautions: 'Précautions en Immunosuppression',
+        inflammatory_arthritis_training: 'Entraînement dans les Arthrites Inflammatoires',
+        lymphedema_management: 'Prise en Charge du Lymphœdème',
+        post_viral_rehabilitation: 'Rééducation Post-Virale',
+      },
+    },
+    hematology: {
+      atlasBadge: 'Atlas Hématologique',
+      heading: 'Sang / Hématologie',
+      subTabs: {
+        anatomy: 'Anatomie',
+        conditions: 'Pathologies',
+        assessment: 'Évaluation',
+        rehab: 'Rééducation',
+      },
+      anatomyHeading: 'Anatomie et Physiologie du Sang',
+      anatomyHint: 'Lignées cellulaires, plasma, hémoglobine et hémostase : les composants et processus qui régissent le transport de l\'oxygène, la défense immunitaire et la coagulation.',
+      anatomyIntro:
+        'Le sang est un tissu conjonctif liquide assurant des fonctions de transport (oxygène, nutriments, hormones), de défense immunitaire et d\'hémostase. La composante cellulaire (érythrocytes, leucocytes, plaquettes) et la composante plasmatique fonctionnent en équilibre dynamique : une altération de la lignée rouge, de la cascade de coagulation ou de la composition du plasma se répercute directement sur la tolérance à l\'effort et sur la sécurité de l\'exercice thérapeutique. Les sections ci-dessous approfondissent les érythrocytes et l\'érythropoïèse, les leucocytes, le plasma, l\'hémoglobine/le transport de l\'oxygène et l\'hémostase/la coagulation.',
+      conditionsHeading: 'Pathologies Liées',
+      conditionsHint: 'Pathologies hématologiques d\'intérêt en kinésithérapie. Touchez une carte pour les objectifs, tests cliniques et exercices.',
+      assessmentHeading: 'Évaluation Clinique',
+      assessmentHint: 'Examens de laboratoire et évaluations hématologiques pertinents pour la pratique en kinésithérapie.',
+      rehabHeading: 'Rééducation',
+      rehabHint: 'Prescription de l\'exercice, prévention de la thromboembolie veineuse, précautions sous traitement anticoagulant et protocoles spécifiques par pathologie.',
+      loading: 'Chargement...',
+      errorLoadingStructures: 'Impossible de charger les structures hématologiques.',
+      errorLoadingConditions: 'Impossible de charger les pathologies.',
+      errorLoadingTests: 'Impossible de charger les tests d\'évaluation.',
+      errorLoadingRehab: 'Impossible de charger le contenu de rééducation.',
+      procedureLabel: 'Procédure',
+      interpretationLabel: 'Interprétation',
+      protocolLabel: 'Protocole',
+      categoryLabels: {
+        cell_line: 'Lignées Cellulaires',
+        fluid: 'Composante Liquide',
+        molecule: 'Molécules',
+        process: 'Processus',
+      },
+      testCategoryLabels: {
+        coagulation: 'Coagulation',
+        diagnostic: 'Diagnostic',
+        general: 'Examens Généraux',
+        metabolic: 'Métabolique',
+      },
+      rehabCategoryLabels: {
+        condition_specific: 'Spécifique par Pathologie',
+        exercise_prescription: 'Prescription de l\'Exercice',
+        post_surgical: 'Post-Chirurgical',
+        precaution_protocol: 'Protocoles de Précaution',
       },
     },
     clinicalToolkit: {

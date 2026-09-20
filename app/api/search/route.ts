@@ -42,6 +42,11 @@ const IT_EN_TRANSLATIONS: Record<string, string> = {
   massaggio: 'massage', mobilizzazione: 'mobilization', manipolazione: 'manipulation',
   pediatrico: 'pediatric', infantile: 'infant', adulto: 'adult', anziano: 'elderly',
   acuto: 'acute', cronico: 'chronic', bilaterale: 'bilateral', unilaterale: 'unilateral',
+  tiroide: 'thyroid', surrene: 'adrenal', ipofisi: 'pituitary', paratiroidi: 'parathyroid',
+  milza: 'spleen', midollo: 'marrow', piastrine: 'platelets', coagulazione: 'coagulation',
+  stomaco: 'stomach', esofago: 'esophagus', urina: 'urine', nefrone: 'nephron',
+  endocrino: 'endocrine', immunitario: 'immune', ematologia: 'hematology',
+  gastrointestinale: 'gastrointestinal', glomerulo: 'glomerulus', tubulo: 'tubule',
 };
 const EN_IT_TRANSLATIONS: Record<string, string> = Object.fromEntries(
   Object.entries(IT_EN_TRANSLATIONS).map(([it, en]) => [en, it])
@@ -116,6 +121,13 @@ export async function GET(request: Request) {
       neuroTests, brainZones, firstAidTopics, bodyZones, libraryItems,
       cardioConditions, oncologyConditions, pelvicConditions,
       bodyZoneConditions, brainZoneConditions,
+      endoStructures, endoTests, endoRehab,
+      urinaryStructures, urinaryTests, urinaryRehab,
+      giStructures, giTests, giRehab,
+      immuneStructures, immuneTests, immuneRehab,
+      hemStructures, hemTests, hemRehab,
+      endoConditions, urinaryConditions, giConditions, immuneConditions, hemConditions,
+      physioMuscular, physioNeuro,
     ] = await Promise.all([
       adminSupabase.from('manual_therapy_techniques').select('id, name, joint_region').or(orName).limit(8),
       adminSupabase.from('manual_therapy_concepts').select('id, name, category').or(orName).limit(4),
@@ -141,6 +153,28 @@ export async function GET(request: Request) {
       adminSupabase.from('pelvic_floor_condition_tags').select('condition_id, system, knowledge_base:condition_id(id, condition_name)').limit(80),
       adminSupabase.from('body_zone_conditions').select('zone_id, condition_id, body_zones:zone_id(name, slug), knowledge_base:condition_id(id, condition_name)').limit(100),
       adminSupabase.from('brain_zone_conditions').select('zone_id, condition_id, brain_zones:zone_id(name, slug), knowledge_base:condition_id(id, condition_name)').limit(100),
+      adminSupabase.from('endocrine_structures').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('endocrine_tests').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('endocrine_rehab').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('urinary_structures').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('urinary_tests').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('urinary_rehab').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('gastrointestinal_structures').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('gastrointestinal_tests').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('gastrointestinal_rehab').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('immune_structures').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('immune_tests').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('immune_rehab').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('hematology_structures').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('hematology_tests').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('hematology_rehab').select('id, name, category').or(orName).limit(6),
+      adminSupabase.from('endocrine_condition_tags').select('condition_id, system, knowledge_base:condition_id(id, condition_name)').limit(80),
+      adminSupabase.from('urinary_condition_tags').select('condition_id, system, knowledge_base:condition_id(id, condition_name)').limit(80),
+      adminSupabase.from('gastrointestinal_condition_tags').select('condition_id, system, knowledge_base:condition_id(id, condition_name)').limit(80),
+      adminSupabase.from('immune_condition_tags').select('condition_id, system, knowledge_base:condition_id(id, condition_name)').limit(80),
+      adminSupabase.from('hematology_condition_tags').select('condition_id, system, knowledge_base:condition_id(id, condition_name)').limit(80),
+      adminSupabase.from('physiology_concepts').select('id, name, category').eq('system', 'muscular').or(orName).limit(6),
+      adminSupabase.from('physiology_concepts').select('id, name, category').eq('system', 'neurological').or(orName).limit(6),
     ]);
 
     const push = (items: any[] | null, prefix: string, section: string, sectionLabel: string, href: string, subtitleField?: string) => {
@@ -166,6 +200,24 @@ export async function GET(request: Request) {
     push(neuroTests.data, 'neuro-te', 'neurology', 'Neurology — Test', '/dashboard/brain-map');
     push(brainZones.data, 'brain', 'neurology', 'Neurology — Anatomia', '/dashboard/brain-map');
 
+    push(endoStructures.data, 'endo-s', 'endocrine', 'Endocrine — Anatomia', '/dashboard/endocrine');
+    push(endoTests.data, 'endo-te', 'endocrine', 'Endocrine — Valutazione', '/dashboard/endocrine');
+    push(endoRehab.data, 'endo-r', 'endocrine', 'Endocrine — Riabilitazione', '/dashboard/endocrine');
+    push(urinaryStructures.data, 'uri-s', 'urinary', 'Urinary — Anatomia', '/dashboard/urinary');
+    push(urinaryTests.data, 'uri-te', 'urinary', 'Urinary — Valutazione', '/dashboard/urinary');
+    push(urinaryRehab.data, 'uri-r', 'urinary', 'Urinary — Riabilitazione', '/dashboard/urinary');
+    push(giStructures.data, 'gi-s', 'gastrointestinal', 'Gastrointestinal — Anatomia', '/dashboard/gastrointestinal');
+    push(giTests.data, 'gi-te', 'gastrointestinal', 'Gastrointestinal — Valutazione', '/dashboard/gastrointestinal');
+    push(giRehab.data, 'gi-r', 'gastrointestinal', 'Gastrointestinal — Riabilitazione', '/dashboard/gastrointestinal');
+    push(immuneStructures.data, 'imm-s', 'immune', 'Immune — Anatomia', '/dashboard/immune');
+    push(immuneTests.data, 'imm-te', 'immune', 'Immune — Valutazione', '/dashboard/immune');
+    push(immuneRehab.data, 'imm-r', 'immune', 'Immune — Riabilitazione', '/dashboard/immune');
+    push(hemStructures.data, 'hem-s', 'hematology', 'Hematology — Anatomia', '/dashboard/hematology');
+    push(hemTests.data, 'hem-te', 'hematology', 'Hematology — Valutazione', '/dashboard/hematology');
+    push(hemRehab.data, 'hem-r', 'hematology', 'Hematology — Riabilitazione', '/dashboard/hematology');
+    push(physioMuscular.data, 'phys-m', 'physiology', 'Fisiologia — Muscolare', '/dashboard/physiology?system=muscular');
+    push(physioNeuro.data, 'phys-n', 'physiology', 'Fisiologia — Neurologico', '/dashboard/physiology?system=neurological');
+
     (firstAidTopics.data ?? []).forEach((t: any) =>
       results.push({ id: `fa-${t.id}`, title: t.name, section: 'first-aid', sectionLabel: 'First Aid', href: `/dashboard/first-aid/${t.slug}` })
     );
@@ -186,6 +238,11 @@ export async function GET(request: Request) {
     pushConditions(cardioConditions.data, 'cardio-c', 'cardiopulmonary', 'Cardiopulmonary — Patologie', '/dashboard/cardiopulmonary');
     pushConditions(oncologyConditions.data, 'onc-c', 'oncology', 'Oncology — Patologie', '/dashboard/oncology');
     pushConditions(pelvicConditions.data, 'pf-c', 'pelvic-floor', 'Pelvic Floor — Patologie', '/dashboard/pelvic-floor');
+    pushConditions(endoConditions.data, 'endo-c', 'endocrine', 'Endocrine — Patologie', '/dashboard/endocrine');
+    pushConditions(urinaryConditions.data, 'uri-c', 'urinary', 'Urinary — Patologie', '/dashboard/urinary');
+    pushConditions(giConditions.data, 'gi-c', 'gastrointestinal', 'Gastrointestinal — Patologie', '/dashboard/gastrointestinal');
+    pushConditions(immuneConditions.data, 'imm-c', 'immune', 'Immune — Patologie', '/dashboard/immune');
+    pushConditions(hemConditions.data, 'hem-c', 'hematology', 'Hematology — Patologie', '/dashboard/hematology');
 
     (bodyZoneConditions.data ?? []).forEach((c: any) => {
       const name = c.knowledge_base?.condition_name;

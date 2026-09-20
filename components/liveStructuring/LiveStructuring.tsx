@@ -20,6 +20,8 @@ import {
   Plus,
   Search,
   X,
+  BookOpen,
+  ExternalLink,
 
 } from "lucide-react";
 
@@ -78,6 +80,8 @@ export default function LiveStructuring({
   const [clinicalInsight, setClinicalInsight] = useState<any>(null);
   const [rehabPhases, setRehabPhases] = useState<any[]>([]);
   const [evidenceLevel, setEvidenceLevel] = useState<string | null>(null);
+const [relevantPapers, setRelevantPapers] = useState<any[]>([]);
+const [papersLoading, setPapersLoading] = useState(false);
 const [matchedKeyword, setMatchedKeyword] = useState<string | null>(null);
 const [showWhy, setShowWhy] = useState(false);
 const [showAskPhygo, setShowAskPhygo] = useState(false);
@@ -101,6 +105,13 @@ const [exerciseSearchResults, setExerciseSearchResults] = useState<any[]>([]);
 const [exerciseSearching, setExerciseSearching] = useState(false);
 
 const [textInput, setTextInput] = useState("");
+
+// Salvataggio sul paziente: esplicito, non automatico. Il fisioterapista
+// deve rivedere (ed eventualmente modificare testo/esercizi) prima di
+// premere "Save to Patient" — niente scrittura silenziosa sul referto del
+// paziente prima che l'output AI sia stato controllato.
+const [noteSaveStatus, setNoteSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+const savedNoteIdRef = useRef<string | null>(null);
 
 const submitTextInput = () => {
   const raw = textInput.trim();
@@ -250,6 +261,12 @@ const [recordingLang, setRecordingLang] = useState("it-IT");
     setShowAddExercise(false);
     setExerciseSearchQuery("");
     setExerciseSearchResults([]);
+
+    setNoteSaveStatus("idle");
+    savedNoteIdRef.current = null;
+
+    setRelevantPapers([]);
+    setPapersLoading(false);
   };
 
   const runFlyPhase = useCallback((finalPhrases: Phrase[]) => {
@@ -399,6 +416,28 @@ if (!res.ok) {
         const note = data.note ?? {};
         setFinalNote(note);
 
+        // Evidenze scientifiche rilevanti dalla libreria Scienza/PubMed già
+        // esistente in Phygo — parte in parallelo (non await) così non
+        // aggiunge latenza alla generazione di assessment/piano/esercizi.
+        if (note.primaryCondition || note.assessment) {
+          setPapersLoading(true);
+          fetch("/api/science/relevant", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              primaryCondition: note.primaryCondition,
+              assessment: note.assessment,
+            }),
+          })
+            .then((r) => r.json())
+            .then((d) => setRelevantPapers(Array.isArray(d.papers) ? d.papers : []))
+            .catch((err) => {
+              console.error("science/relevant failed:", err);
+              setRelevantPapers([]);
+            })
+            .finally(() => setPapersLoading(false));
+        }
+
         let rehabPhasesLocal: any[] = [];
 
         if (note.assessment) {
@@ -426,27 +465,15 @@ rehabPhasesLocal = kbData.phases || [];
                 let planText = note.plan;
         let exercisesArr: any = note.exercises;
         let exerciseEntriesArr: any[] = [];
+        // Nota: qui prima veniva chiamato anche /api/refine-plan, ma quella
+        // chiamata era un no-op silenzioso — mandava "planDraft" a una route
+        // che si aspettava "exercisesDraft", e leggeva "refineData.plan" da
+        // una risposta che restituisce solo "exercises". Il risultato non è
+        // mai stato usato: era una chiamata OpenAI pagata e inutile ad ogni
+        // sessione. Rimossa; refine-plan/route.ts (identico a
+        // refine-exercises/route.ts) non è più chiamato da nessuna parte —
+        // può essere eliminato dal progetto.
         if (rehabPhasesLocal.length > 0) {
-          try {
-            const refineRes = await fetch("/api/refine-plan", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                transcript: raw,
-                assessment: note.assessment,
-                planDraft: note.plan,
-                phases: rehabPhasesLocal,
-                lang: note.language || recordingLang,
-              }),
-            });
-            const refineData = await refineRes.json();
-            if (refineData.plan) {
-              planText = refineData.plan;
-            }
-          } catch (refineErr) {
-            console.error("Errore refine-plan:", refineErr);
-          }
-if (rehabPhasesLocal.length > 0) {
   try {
     const exRes = await fetch("/api/refine-exercises", {
       method: "POST",
@@ -493,27 +520,10 @@ setExerciseEntries(exerciseEntriesArr);
 setFinalNote((prev: any) =>
   prev ? { ...prev, plan: planText, exercises: exercisesArr } : prev
 );
-        }
 
-        if (patientId) {
-          try {
-            const { data: { user } } = await supabase.auth.getUser();
-            await supabase.from("notes").insert({
-              patient_id: patientId,
-              user_id: user?.id,
-              subjective: note.subjective || null,
-              objective: note.objective || null,
-              assessment: note.assessment || null,
-              plan: planText || null,
-              exercises: exercisesArr || null,
-              summary_for_patient: note.summaryForPatient || null,
-              language: note.language || recordingLang,
-            });
-            onSaved?.();
-          } catch (saveErr) {
-            console.error("Errore salvataggio nota:", saveErr);
-          }
-        }
+        // Nota: NON salviamo più qui in automatico. Il fisioterapista rivede
+        // (ed eventualmente modifica testo ed esercizi) nella fase "done",
+        // poi salva esplicitamente con saveNoteToPatient() — vedi sotto.
 
         const built: Phrase[] = [];
         const fieldMap: Record<string, string> = {};
@@ -667,6 +677,7 @@ recognition.lang = recordingLang;
     const field = phraseFields[phraseId];
     if (field) {
       setFinalNote((prev: any) => (prev ? { ...prev, [field]: newText } : prev));
+      setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
     }
   };
 
@@ -682,12 +693,14 @@ recognition.lang = recordingLang;
         return { ...ex, dosing: { ...ex.dosing, [field]: parsedValue } };
       })
     );
+    setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
   };
 
   const removeExercise = (key: string) => {
     setExerciseEntries((prev) =>
       prev.filter((ex: any, i: number) => (ex.internal_id || String(i)) !== key)
     );
+    setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
   };
 
   const searchExerciseDb = async (query: string) => {
@@ -729,6 +742,59 @@ recognition.lang = recordingLang;
     setShowAddExercise(false);
     setExerciseSearchQuery("");
     setExerciseSearchResults([]);
+    setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+  };
+
+  // Salva (o aggiorna, se già salvata in questa sessione) la nota sul
+  // paziente. Usa lo stato CORRENTE — finalNote riflette eventuali modifiche
+  // fatte col testo editabile (updatePhraseText), ed exerciseEntries riflette
+  // aggiunte/rimozioni/dosaggi fatti nella review. Se exerciseEntries è
+  // popolato (il caso normale quando ci sono fasi riabilitative note) lo
+  // salviamo così com'è: è la stessa forma oggetto (name, dosing, ecc.) che
+  // My Phygo (lato paziente) si aspetta già di leggere.
+  const saveNoteToPatient = async () => {
+    if (!patientId || !finalNote) return;
+    setNoteSaveStatus("saving");
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const exercisesToSave =
+        exerciseEntries.length > 0 ? exerciseEntries : finalNote.exercises || null;
+
+      const payload = {
+        patient_id: patientId,
+        user_id: user?.id,
+        subjective: finalNote.subjective || null,
+        objective: finalNote.objective || null,
+        assessment: finalNote.assessment || null,
+        plan: finalNote.plan || null,
+        exercises: exercisesToSave,
+        summary_for_patient: finalNote.summaryForPatient || null,
+        language: finalNote.language || recordingLang,
+        clinical_reasoning: finalNote.clinicalReasoning || null,
+      };
+
+      if (savedNoteIdRef.current) {
+        const { error } = await supabase
+          .from("notes")
+          .update(payload)
+          .eq("id", savedNoteIdRef.current);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from("notes")
+          .insert(payload)
+          .select("id")
+          .single();
+        if (error) throw error;
+        savedNoteIdRef.current = data?.id ?? null;
+      }
+
+      setNoteSaveStatus("saved");
+      onSaved?.();
+    } catch (saveErr) {
+      console.error("Errore salvataggio nota:", saveErr);
+      setNoteSaveStatus("error");
+    }
   };
 
 const askPhygoAI = async () => {
@@ -1148,14 +1214,42 @@ className="text-[11px] rounded-lg border border-black/15 dark:border-white/10 bg
                 </div>
 
                 {isLiveVoice && finalNote && (
-                  <button
-                    onClick={downloadPdf}
-                    data-cursor-hover
-                    className="mt-1 inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-[11px] font-semibold text-white transition-transform hover:scale-[1.03] dark:bg-white dark:text-ink"
-                  >
-                    <Download size={13} />
-                    Download PDF
-                  </button>
+                  <div className="mt-1 flex flex-wrap items-center justify-center gap-2">
+                    <button
+                      onClick={downloadPdf}
+                      data-cursor-hover
+                      className="inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-[11px] font-semibold text-white transition-transform hover:scale-[1.03] dark:bg-white dark:text-ink"
+                    >
+                      <Download size={13} />
+                      Download PDF
+                    </button>
+
+                    {patientId && (
+                      <button
+                        onClick={saveNoteToPatient}
+                        disabled={noteSaveStatus === "saving"}
+                        data-cursor-hover
+                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold text-white transition-transform hover:scale-[1.03] disabled:opacity-60 disabled:hover:scale-100 ${
+                          noteSaveStatus === "error" ? "bg-red-500" : "bg-gradient-to-r from-electric to-emerald"
+                        }`}
+                      >
+                        <CheckCircle2 size={13} />
+                        {noteSaveStatus === "saving"
+                          ? "Saving..."
+                          : noteSaveStatus === "saved"
+                          ? "Saved to Patient ✓"
+                          : noteSaveStatus === "error"
+                          ? "Couldn't save — retry"
+                          : "Save to Patient"}
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {patientId && noteSaveStatus === "idle" && (
+                  <p className="max-w-[280px] text-[11px] leading-relaxed text-ink/40 dark:text-white/40">
+                    Review the note and exercises below, edit anything you like, then save to the patient's chart.
+                  </p>
                 )}
 
               </motion.div>
@@ -1255,6 +1349,94 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
   })}
 
 </div>
+
+{/* Ragionamento clinico — distinto dal campo "assessment" (che resta una
+    prosa unica): qui l'AI mostra ipotesi/differenziali/elementi a
+    favore-contro/informazioni mancanti come voci separate, sempre con
+    linguaggio cauto ("possibile", "considera"), mai come diagnosi
+    autonoma. I red flags/precauzioni sono sempre presenti (mai omessi
+    per silenzio) e messi in evidenza. */}
+{finalNote?.clinicalReasoning && (
+  <motion.div
+    initial={{ opacity: 0, y: 12 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4 }}
+    className="mt-4 rounded-[24px] border border-black/5 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-sm"
+  >
+    <div className="flex items-center gap-2 mb-4">
+      <Target size={15} className="text-electric" />
+      <span className="eyebrow text-ink/40 dark:text-white/40">
+        Clinical Reasoning
+      </span>
+    </div>
+
+    {Array.isArray(finalNote.clinicalReasoning.hypotheses) && finalNote.clinicalReasoning.hypotheses.length > 0 && (
+      <div className="mb-4">
+        <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1.5">Clinical Hypotheses</p>
+        <ul className="space-y-1">
+          {finalNote.clinicalReasoning.hypotheses.map((h: string, i: number) => (
+            <li key={i} className="text-sm text-ink/70 dark:text-white/70 leading-relaxed flex gap-2">
+              <span className="shrink-0 text-electric font-semibold">{i === 0 ? "①" : i === 1 ? "②" : "③"}</span>
+              {h}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {Array.isArray(finalNote.clinicalReasoning.differentials) && finalNote.clinicalReasoning.differentials.length > 0 && (
+      <div className="mb-4">
+        <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1.5">Differential Considerations</p>
+        <ul className="space-y-1">
+          {finalNote.clinicalReasoning.differentials.map((d: string, i: number) => (
+            <li key={i} className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">— {d}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+      {finalNote.clinicalReasoning.supportingFindings && (
+        <div>
+          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Supporting Findings</p>
+          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{finalNote.clinicalReasoning.supportingFindings}</p>
+        </div>
+      )}
+      {finalNote.clinicalReasoning.findingsAgainst && (
+        <div>
+          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Findings Against</p>
+          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{finalNote.clinicalReasoning.findingsAgainst}</p>
+        </div>
+      )}
+      {finalNote.clinicalReasoning.missingInformation && (
+        <div>
+          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Missing Information</p>
+          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{finalNote.clinicalReasoning.missingInformation}</p>
+        </div>
+      )}
+      {finalNote.clinicalReasoning.suggestedAssessments && (
+        <div>
+          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Suggested Additional Assessments</p>
+          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{finalNote.clinicalReasoning.suggestedAssessments}</p>
+        </div>
+      )}
+    </div>
+
+    {finalNote.clinicalReasoning.redFlagsPrecautions && (
+      <div className="flex gap-3 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-4">
+        <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-500" />
+        <div>
+          <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-1">Red Flags / Precautions</p>
+          <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">{finalNote.clinicalReasoning.redFlagsPrecautions}</p>
+        </div>
+      </div>
+    )}
+
+    <p className="mt-4 pt-3 border-t border-black/5 dark:border-white/10 text-[11px] text-ink/40 dark:text-white/40">
+      Clinical decision support only — not an autonomous diagnosis. Clinical judgment and final decisions remain with the treating professional.
+    </p>
+  </motion.div>
+)}
 
             {clinicalInsight && (
   <motion.div
@@ -1368,6 +1550,91 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
         </div>
       )}
     </div>
+  </motion.div>
+)}
+
+{/* Evidenze scientifiche rilevanti — dalla libreria Scienza/PubMed già
+    esistente (research_papers + research_summaries), non un elenco
+    generico: filtrate per parola chiave sulla condizione primaria e solo
+    tra i paper con status "published" (già passati da revisione editoriale
+    in science/admin/review). Mai il testo dell'abstract, solo la sintesi
+    strutturata già scritta per questo scopo (why_it_matters). */}
+{(papersLoading || relevantPapers.length > 0) && (
+  <motion.div
+    initial={{ opacity: 0, y: 12 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4, delay: 0.025 }}
+    className="mt-4 rounded-[24px] border border-black/5 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-sm"
+  >
+    <div className="flex items-center gap-2 mb-4">
+      <BookOpen size={15} className="text-electric" />
+      <span className="eyebrow text-ink/40 dark:text-white/40">
+        Relevant Scientific Evidence
+      </span>
+    </div>
+
+    {papersLoading && (
+      <p className="text-xs text-ink/40 dark:text-white/40">Searching the evidence library...</p>
+    )}
+
+    {!papersLoading && relevantPapers.length === 0 && (
+      <p className="text-xs text-ink/40 dark:text-white/40">
+        No matching published paper found in the Phygo Science library for this case.
+      </p>
+    )}
+
+    {!papersLoading && relevantPapers.length > 0 && (
+      <div className="space-y-4">
+        {relevantPapers.map((paper: any) => (
+          <div
+            key={paper.id}
+            className="rounded-2xl bg-mist/50 dark:bg-white/[0.04] p-4"
+          >
+            <div className="flex items-start justify-between gap-3 mb-1.5">
+              <p className="text-sm font-semibold text-ink dark:text-white leading-snug">
+                {paper.title}
+              </p>
+              {paper.study_type && (
+                <span className="shrink-0 rounded-full bg-electric/10 px-2.5 py-0.5 text-[10px] font-semibold text-electric">
+                  {paper.study_type}
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] text-ink/45 dark:text-white/45 mb-2">
+              {[
+                paper.authors,
+                paper.journal,
+                paper.publication_date ? String(paper.publication_date).slice(0, 4) : null,
+                paper.pmid ? `PMID ${paper.pmid}` : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+            {paper.why_it_matters && (
+              <p className="text-xs text-ink/65 dark:text-white/65 leading-relaxed mb-2">
+                <span className="font-semibold text-ink/80 dark:text-white/80">Why it's relevant: </span>
+                {paper.why_it_matters}
+              </p>
+            )}
+            {paper.original_url && (
+              <a
+                href={paper.original_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-electric hover:underline"
+              >
+                View source
+                <ExternalLink size={10} />
+              </a>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+
+    <p className="mt-4 pt-3 border-t border-black/5 dark:border-white/10 text-[11px] text-ink/40 dark:text-white/40">
+      Showing a paper here does not by itself validate a treatment — clinical judgment remains with the treating professional.
+    </p>
   </motion.div>
 )}
 

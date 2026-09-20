@@ -3,10 +3,11 @@
 import { useState, useRef, useEffect, type MouseEvent as ReactMouseEvent } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import ClinicalActionBar from '@/components/ClinicalActionBar';
-import { X, Maximize2, Sparkles, Loader2 } from 'lucide-react';
+import { X, Maximize2, Sparkles, Loader2, Search } from 'lucide-react';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 import {
   PATHWAYS,
@@ -148,6 +149,16 @@ export default function BrainMapPage() {
   const [brainConditionsError, setBrainConditionsError] = useState<string | null>(null);
   const [hasFetchedBrainConditions, setHasFetchedBrainConditions] = useState(false);
   const [brainConditionsSearch, setBrainConditionsSearch] = useState('');
+  // Ricerca testuale per le sotto-schede che prima non ne avevano nessuna —
+  // una per sotto-scheda, resettate al cambio vista/sotto-vista (vedi effect più sotto).
+  const [nervesAtlasSearch, setNervesAtlasSearch] = useState('');
+  const [seddonSearch, setSeddonSearch] = useState('');
+  const [conductionSearch, setConductionSearch] = useState('');
+  const [peripheralConditionsSearch, setPeripheralConditionsSearch] = useState('');
+  const [diffuseSearch, setDiffuseSearch] = useState('');
+  const [pathwaysSearch, setPathwaysSearch] = useState('');
+  const [gaitSearch, setGaitSearch] = useState('');
+  const [localizationSearch, setLocalizationSearch] = useState('');
 
   // Contenuti di riferimento hardcoded (Pathways, Gait, Localization,
   // classificazione Seddon, conduzione nervosa) — tradotti e messi in cache
@@ -214,9 +225,16 @@ export default function BrainMapPage() {
     fetchBrainConditions();
   }, [view, brainSubView, hasFetchedBrainConditions, lang]);
 
-  const filteredBrainConditions = brainConditions.filter((c) =>
-    c.condition_name.toLowerCase().includes(brainConditionsSearch.trim().toLowerCase())
-  );
+  const filteredBrainConditions = brainConditions.filter((c) => {
+    const q = brainConditionsSearch.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      c.condition_name.toLowerCase().includes(q) ||
+      (c.evidence_level ?? '').toLowerCase().includes(q) ||
+      (c.goals ?? '').toLowerCase().includes(q) ||
+      c.zones.some((z) => z.name.toLowerCase().includes(q))
+    );
+  });
   const [pathwaySubView, setPathwaySubView] = useState<'circuits' | 'gait' | 'localization'>('circuits');
   const [pathwayCategoryFilter, setPathwayCategoryFilter] = useState<'long-tracts' | 'brain-circuits'>('long-tracts');
   const [nervesSubView, setNervesSubView] = useState<'atlas' | 'seddon' | 'conduction' | 'conditions' | 'diffuse'>('atlas');
@@ -350,6 +368,80 @@ export default function BrainMapPage() {
 
   const filteredPathways = pathways.filter((p) => p.category === pathwayCategoryFilter);
 
+  // Reset di tutte le ricerche testuali quando si cambia vista/sotto-vista,
+  // così una query digitata in una scheda non resta invisibilmente attiva
+  // filtrando il contenuto quando si torna su quella scheda in seguito.
+  useEffect(() => {
+    setBrainConditionsSearch('');
+    setNervesAtlasSearch('');
+    setSeddonSearch('');
+    setConductionSearch('');
+    setPeripheralConditionsSearch('');
+    setDiffuseSearch('');
+    setPathwaysSearch('');
+    setGaitSearch('');
+    setLocalizationSearch('');
+  }, [view, brainSubView, nervesSubView, pathwaySubView]);
+
+  const normalizedNervesAtlasSearch = nervesAtlasSearch.trim().toLowerCase();
+  const matchesNerve = (n: NerveListItem) =>
+    !normalizedNervesAtlasSearch ||
+    n.name.toLowerCase().includes(normalizedNervesAtlasSearch) ||
+    (n.compression_site ?? '').toLowerCase().includes(normalizedNervesAtlasSearch);
+
+  const normalizedSeddonSearch = seddonSearch.trim().toLowerCase();
+  const matchesNerveInjuryType = (t: NerveInjuryType) =>
+    !normalizedSeddonSearch ||
+    t.name.toLowerCase().includes(normalizedSeddonSearch) ||
+    t.description.toLowerCase().includes(normalizedSeddonSearch) ||
+    t.severity.toLowerCase().includes(normalizedSeddonSearch);
+
+  const normalizedConductionSearch = conductionSearch.trim().toLowerCase();
+  const matchesConductionFiberType = (f: ConductionFiberType) =>
+    !normalizedConductionSearch ||
+    f.name.toLowerCase().includes(normalizedConductionSearch) ||
+    f.diameter.toLowerCase().includes(normalizedConductionSearch) ||
+    f.myelination.toLowerCase().includes(normalizedConductionSearch) ||
+    f.velocity.toLowerCase().includes(normalizedConductionSearch) ||
+    f.function.toLowerCase().includes(normalizedConductionSearch);
+
+  const normalizedPeripheralConditionsSearch = peripheralConditionsSearch.trim().toLowerCase();
+  const matchesPeripheralCondition = (c: PeripheralCondition) =>
+    !normalizedPeripheralConditionsSearch ||
+    c.condition_name.toLowerCase().includes(normalizedPeripheralConditionsSearch) ||
+    (c.goals ?? '').toLowerCase().includes(normalizedPeripheralConditionsSearch) ||
+    (c.clinical_tests ?? '').toLowerCase().includes(normalizedPeripheralConditionsSearch) ||
+    (c.evidence_level ?? '').toLowerCase().includes(normalizedPeripheralConditionsSearch);
+
+  const normalizedDiffuseSearch = diffuseSearch.trim().toLowerCase();
+  const matchesDiffuseCondition = (c: PeripheralCondition) =>
+    !normalizedDiffuseSearch ||
+    c.condition_name.toLowerCase().includes(normalizedDiffuseSearch) ||
+    (c.goals ?? '').toLowerCase().includes(normalizedDiffuseSearch) ||
+    (c.clinical_tests ?? '').toLowerCase().includes(normalizedDiffuseSearch) ||
+    (c.evidence_level ?? '').toLowerCase().includes(normalizedDiffuseSearch);
+
+  const normalizedPathwaysSearch = pathwaysSearch.trim().toLowerCase();
+  const matchesPathway = (p: Pathway) =>
+    !normalizedPathwaysSearch ||
+    p.title.toLowerCase().includes(normalizedPathwaysSearch) ||
+    p.subtitle.toLowerCase().includes(normalizedPathwaysSearch) ||
+    p.route.toLowerCase().includes(normalizedPathwaysSearch) ||
+    p.description.toLowerCase().includes(normalizedPathwaysSearch);
+
+  const normalizedGaitSearch = gaitSearch.trim().toLowerCase();
+  const matchesGaitType = (g: GaitType) =>
+    !normalizedGaitSearch ||
+    g.name.toLowerCase().includes(normalizedGaitSearch) ||
+    g.origin.toLowerCase().includes(normalizedGaitSearch) ||
+    g.description.toLowerCase().includes(normalizedGaitSearch);
+
+  const normalizedLocalizationSearch = localizationSearch.trim().toLowerCase();
+  const matchesLocalizationPrinciple = (lp: LocalizationPrinciple) =>
+    !normalizedLocalizationSearch ||
+    lp.title.toLowerCase().includes(normalizedLocalizationSearch) ||
+    lp.content.toLowerCase().includes(normalizedLocalizationSearch);
+
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
@@ -387,6 +479,18 @@ export default function BrainMapPage() {
           <p className="text-sm sm:text-base text-ink/50 dark:text-white/40 max-w-lg mx-auto leading-relaxed">
             {ui.brainMap.subtitle}
           </p>
+        </div>
+
+        <div className="flex justify-center mb-8">
+          <Link
+            href="/dashboard/physiology?system=neurological"
+            className="group inline-flex items-center gap-2 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl px-4 py-2 text-xs font-medium text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white hover:border-[#4F7CFF]/40 transition-colors"
+          >
+            {ui.physiologyCrossLink.question}
+            <span className="font-semibold" style={{ color: '#4F7CFF' }}>
+              {ui.physiologyCrossLink.cta} →
+            </span>
+          </Link>
         </div>
 
         <div className="flex justify-center mb-8">
@@ -476,21 +580,21 @@ export default function BrainMapPage() {
                 <div className="flex flex-col gap-4">
                   <div className="group rounded-2xl overflow-hidden border border-black/[0.06] dark:border-white/10 transition-all duration-300 hover:border-[#4F7CFF]/30 hover:shadow-xl hover:shadow-[#4F7CFF]/10">
                     <img
-                      src="/images/brain-lateral-view.png"
+                      src={`${IMAGE_BASE}/brain-lateral-view.png`}
                       alt="Brain — Lateral View"
                       className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                   </div>
                   <div className="group rounded-2xl overflow-hidden border border-black/[0.06] dark:border-white/10 transition-all duration-300 hover:border-[#4F7CFF]/30 hover:shadow-xl hover:shadow-[#4F7CFF]/10">
                     <img
-                      src="/images/brain-sagittal-view.png"
+                      src={`${IMAGE_BASE}/brain-sagittal-view.png`}
                       alt="Brain — Sagittal View"
                       className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                   </div>
                   <div className="group rounded-2xl overflow-hidden border border-black/[0.06] dark:border-white/10 transition-all duration-300 hover:border-[#4F7CFF]/30 hover:shadow-xl hover:shadow-[#4F7CFF]/10">
                     <img
-                      src="/images/brain-coronal-view.png"
+                      src={`${IMAGE_BASE}/brain-coronal-view.png`}
                       alt="Brain — Coronal View"
                       className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
                     />
@@ -662,6 +766,17 @@ export default function BrainMapPage() {
                   {ui.brainMap.peripheralAtlasHint}
                 </p>
 
+                <div className="relative mb-6">
+                  <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
+                  <input
+                    type="text"
+                    value={nervesAtlasSearch}
+                    onChange={(e) => setNervesAtlasSearch(e.target.value)}
+                    placeholder={ui.librarySearchPlaceholder}
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
+                  />
+                </div>
+
                 {nervesLoading && (
                   <p className="text-sm text-ink/40 dark:text-white/40">{ui.brainMap.loadingNerves}</p>
                 )}
@@ -686,11 +801,15 @@ export default function BrainMapPage() {
                       ))}
                     </div>
 
+                    {allNerves.filter((n) => (nerveRegionFilter === 'all' || n.region === nerveRegionFilter) && matchesNerve(n)).length === 0 && (
+                      <p className="text-sm text-ink/40 dark:text-white/40 mb-6">{ui.librarySearchNoResults}</p>
+                    )}
+
                     <div className="space-y-8">
                       {(['plexus', 'cranial', 'upper_limb', 'lower_limb'] as const)
                         .filter((region) => nerveRegionFilter === 'all' || nerveRegionFilter === region)
                         .map((region) => {
-                          const nervesInRegion = allNerves.filter((n) => n.region === region);
+                          const nervesInRegion = allNerves.filter((n) => n.region === region && matchesNerve(n));
                           if (nervesInRegion.length === 0) return null;
                           return (
                             <div key={region}>
@@ -770,6 +889,17 @@ export default function BrainMapPage() {
                   {ui.brainMap.nerveInjuryHint}
                 </p>
 
+                <div className="relative mb-6">
+                  <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
+                  <input
+                    type="text"
+                    value={seddonSearch}
+                    onChange={(e) => setSeddonSearch(e.target.value)}
+                    placeholder={ui.librarySearchPlaceholder}
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
+                  />
+                </div>
+
                 <button
                   onClick={() => setExpandedPathway({
                     title: 'Nerve Injury Classification (Seddon)',
@@ -790,8 +920,11 @@ export default function BrainMapPage() {
                   </div>
                 </button>
 
+                {nerveInjuryTypes.filter(matchesNerveInjuryType).length === 0 && (
+                  <p className="text-sm text-ink/40 dark:text-white/40 mb-4">{ui.librarySearchNoResults}</p>
+                )}
                 <div className="grid sm:grid-cols-3 gap-4">
-                  {nerveInjuryTypes.map((t) => (
+                  {nerveInjuryTypes.filter(matchesNerveInjuryType).map((t) => (
                     <div
                       key={t.slug}
                       className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
@@ -821,6 +954,17 @@ export default function BrainMapPage() {
                   {ui.brainMap.nerveConductionHint}
                 </p>
 
+                <div className="relative mb-6">
+                  <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
+                  <input
+                    type="text"
+                    value={conductionSearch}
+                    onChange={(e) => setConductionSearch(e.target.value)}
+                    placeholder={ui.librarySearchPlaceholder}
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
+                  />
+                </div>
+
                 <button
                   onClick={() => setExpandedPathway({
                     title: 'Nerve Conduction Velocity',
@@ -841,8 +985,11 @@ export default function BrainMapPage() {
                   </div>
                 </button>
 
+                {conductionFiberTypes.filter(matchesConductionFiberType).length === 0 && (
+                  <p className="text-sm text-ink/40 dark:text-white/40 mb-4">{ui.librarySearchNoResults}</p>
+                )}
                 <div className="grid sm:grid-cols-2 gap-4">
-                  {conductionFiberTypes.map((f) => (
+                  {conductionFiberTypes.filter(matchesConductionFiberType).map((f) => (
                     <div
                       key={f.slug}
                       className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
@@ -880,6 +1027,17 @@ export default function BrainMapPage() {
                   {ui.brainMap.snpConditionsHint}
                 </p>
 
+                <div className="relative mb-6">
+                  <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
+                  <input
+                    type="text"
+                    value={peripheralConditionsSearch}
+                    onChange={(e) => setPeripheralConditionsSearch(e.target.value)}
+                    placeholder={ui.librarySearchPlaceholder}
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
+                  />
+                </div>
+
                 {conditionsLoading && (
                   <p className="text-sm text-ink/40 dark:text-white/40">{ui.brainMap.loadingConditions}</p>
                 )}
@@ -888,9 +1046,13 @@ export default function BrainMapPage() {
                   <p className="text-sm text-red-500">{conditionsError}</p>
                 )}
 
+                {!conditionsLoading && !conditionsError && peripheralConditions.filter(matchesPeripheralCondition).length === 0 && (
+                  <p className="text-sm text-ink/40 dark:text-white/40">{ui.librarySearchNoResults}</p>
+                )}
+
                 {!conditionsLoading && !conditionsError && (
                   <div className="grid sm:grid-cols-2 gap-4">
-                    {peripheralConditions.map((c) => (
+                    {peripheralConditions.filter(matchesPeripheralCondition).map((c) => (
                       <button
                         key={c.id}
                         onClick={() => setSelectedCondition(c)}
@@ -920,6 +1082,17 @@ export default function BrainMapPage() {
                   {ui.brainMap.diffuseHint}
                 </p>
 
+                <div className="relative mb-6">
+                  <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
+                  <input
+                    type="text"
+                    value={diffuseSearch}
+                    onChange={(e) => setDiffuseSearch(e.target.value)}
+                    placeholder={ui.librarySearchPlaceholder}
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
+                  />
+                </div>
+
                 {diffuseLoading && (
                   <p className="text-sm text-ink/40 dark:text-white/40">{ui.brainMap.loadingDiffuse}</p>
                 )}
@@ -928,9 +1101,13 @@ export default function BrainMapPage() {
                   <p className="text-sm text-red-500">{diffuseError}</p>
                 )}
 
+                {!diffuseLoading && !diffuseError && diffuseConditions.filter(matchesDiffuseCondition).length === 0 && (
+                  <p className="text-sm text-ink/40 dark:text-white/40">{ui.librarySearchNoResults}</p>
+                )}
+
                 {!diffuseLoading && !diffuseError && (
                   <div className="grid sm:grid-cols-2 gap-4">
-                    {diffuseConditions.map((c) => (
+                    {diffuseConditions.filter(matchesDiffuseCondition).map((c) => (
                       <button
                         key={c.id}
                         onClick={() => setSelectedCondition(c)}
@@ -984,6 +1161,16 @@ export default function BrainMapPage() {
 
             {pathwaySubView === 'circuits' && (
               <div>
+                <div className="relative mb-6 max-w-md mx-auto">
+                  <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
+                  <input
+                    type="text"
+                    value={pathwaysSearch}
+                    onChange={(e) => setPathwaysSearch(e.target.value)}
+                    placeholder={ui.librarySearchPlaceholder}
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#A855F7]/40"
+                  />
+                </div>
                                                <div className="flex justify-center gap-2 mb-8">
                   {(['long-tracts', 'brain-circuits'] as const).map((cat) => (
                     <button
@@ -1001,8 +1188,11 @@ export default function BrainMapPage() {
                   ))}
                 </div>
 
+                {filteredPathways.filter(matchesPathway).length === 0 && (
+                  <p className="text-sm text-ink/40 dark:text-white/40 text-center mb-6">{ui.librarySearchNoResults}</p>
+                )}
                 <div className="space-y-6">
-                  {filteredPathways.map((p) => (
+                  {filteredPathways.filter(matchesPathway).map((p) => (
                     <div
                       key={p.slug}
                       className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden transition-all duration-300 hover:border-[#A855F7]/30 hover:shadow-xl hover:shadow-[#A855F7]/10"
@@ -1047,8 +1237,21 @@ export default function BrainMapPage() {
                 <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
                   {ui.brainMap.gaitHint}
                 </p>
+                <div className="relative mb-6 max-w-md">
+                  <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
+                  <input
+                    type="text"
+                    value={gaitSearch}
+                    onChange={(e) => setGaitSearch(e.target.value)}
+                    placeholder={ui.librarySearchPlaceholder}
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#A855F7]/40"
+                  />
+                </div>
+                {gaitTypes.filter(matchesGaitType).length === 0 && (
+                  <p className="text-sm text-ink/40 dark:text-white/40 mb-4">{ui.librarySearchNoResults}</p>
+                )}
                 <div className="grid sm:grid-cols-2 gap-4">
-                  {gaitTypes.map((g) => (
+                  {gaitTypes.filter(matchesGaitType).map((g) => (
                     <div
                       key={g.slug}
                       className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
@@ -1074,8 +1277,21 @@ export default function BrainMapPage() {
                 <p className="text-sm text-ink/50 dark:text-white/50 mb-8 max-w-2xl">
                   {ui.brainMap.localizationHint}
                 </p>
+                <div className="relative mb-6 max-w-md">
+                  <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
+                  <input
+                    type="text"
+                    value={localizationSearch}
+                    onChange={(e) => setLocalizationSearch(e.target.value)}
+                    placeholder={ui.librarySearchPlaceholder}
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#A855F7]/40"
+                  />
+                </div>
+                {localizationPrinciples.filter(matchesLocalizationPrinciple).length === 0 && (
+                  <p className="text-sm text-ink/40 dark:text-white/40 mb-4">{ui.librarySearchNoResults}</p>
+                )}
                 <div className="space-y-4">
-                  {localizationPrinciples.map((lp, i) => (
+                  {localizationPrinciples.filter(matchesLocalizationPrinciple).map((lp, i) => (
                     <div
                       key={lp.slug}
                       className="group relative rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-6 overflow-hidden transition-all duration-300 hover:border-[#A855F7]/30 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#A855F7]/10"

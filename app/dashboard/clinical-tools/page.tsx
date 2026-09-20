@@ -7,7 +7,7 @@ import ClinicalActionBar from '@/components/ClinicalActionBar';
 import {
   ClipboardList, Activity, Bone, Waves, Brain, Hand,
   Footprints, HandHeart, Gauge, HeartPulse, Zap, PersonStanding,
-  Droplets, ClipboardCheck, Sparkles, ArrowRight, PenLine, Flame,
+  Droplets, ClipboardCheck, Sparkles, ArrowRight, PenLine, Flame, Search,
 } from 'lucide-react';
 import MetabolicCalculator from '@/components/MetabolicCalculator';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
@@ -1450,6 +1450,10 @@ function ClinicalToolsPageInner() {
     const [mtConcepts, setMtConcepts] = useState<MTConcept[] | null>(null);
   const [openConcept, setOpenConcept] = useState<string | null>(null);
   const [activeMTType, setActiveMTType] = useState<string>('all');
+  const [mtSearchQuery, setMtSearchQuery] = useState('');
+  useEffect(() => {
+    setMtSearchQuery('');
+  }, [category]);
   useEffect(() => {
     if (category !== 'pelvic-floor' || pelvicFloorTests !== null || pelvicFloorLoading) return;
     setPelvicFloorLoading(true);
@@ -1582,7 +1586,18 @@ function ClinicalToolsPageInner() {
     ([a], [b]) => NEURO_CATEGORY_ORDER.indexOf(a) - NEURO_CATEGORY_ORDER.indexOf(b)
   );
 
-    const mtFilteredByRegion = (mtTechniques ?? []).filter((t) => t.joint_region === activeMTRegion && (activeMTType === 'all' || t.technique_type === activeMTType));
+    const normalizedMtSearch = mtSearchQuery.trim().toLowerCase();
+  const matchesTechnique = (t: MTTechnique) =>
+    !normalizedMtSearch ||
+    t.name.toLowerCase().includes(normalizedMtSearch) ||
+    t.technique_type.toLowerCase().includes(normalizedMtSearch) ||
+    (t.grade ?? '').toLowerCase().includes(normalizedMtSearch) ||
+    (t.patient_position ?? '').toLowerCase().includes(normalizedMtSearch) ||
+    (t.direction ?? '').toLowerCase().includes(normalizedMtSearch) ||
+    (t.indications ?? '').toLowerCase().includes(normalizedMtSearch) ||
+    (t.contraindications ?? '').toLowerCase().includes(normalizedMtSearch) ||
+    (t.procedure ?? '').toLowerCase().includes(normalizedMtSearch);
+    const mtFilteredByRegion = (mtTechniques ?? []).filter((t) => t.joint_region === activeMTRegion && (activeMTType === 'all' || t.technique_type === activeMTType) && matchesTechnique(t));
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
@@ -1933,6 +1948,17 @@ function ClinicalToolsPageInner() {
                 </div>
               </div>
             )}
+
+                        <div className="relative mb-6 max-w-md mx-auto">
+              <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
+              <input
+                type="text"
+                value={mtSearchQuery}
+                onChange={(e) => setMtSearchQuery(e.target.value)}
+                placeholder={ui.librarySearchPlaceholder}
+                className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#6366F1]/40"
+              />
+            </div>
 
                         <div className="flex flex-wrap justify-center gap-2 mb-4">
               {MT_REGION_ORDER.map((r) => (

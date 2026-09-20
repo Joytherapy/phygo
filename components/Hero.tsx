@@ -9,11 +9,11 @@ import LiveDemo from "./liveDemoV2/LiveDemo";
 
 const headlineWords = [
   "The",
-  "AI",
-  "Assistant",
-  "Every",
-  "Therapist",
-  "Deserves.",
+  "Clinical",
+  "Intelligence",
+  "Platform",
+  "for",
+  "Physiotherapy.",
 ];
 
 const container = {
@@ -107,7 +107,7 @@ export default function Hero() {
             className="font-display font-semibold tracking-[-0.045em] text-ink dark:text-white text-[3.1rem] leading-[1.02] sm:text-[5rem] sm:leading-none"
           >
             {headlineWords.map((w, i) =>
-              w === "Therapist" ? (
+              w === "Intelligence" ? (
                 <motion.span
                   key={w + i}
                   variants={word}
@@ -173,9 +173,10 @@ export default function Hero() {
             custom={0}
             className="mt-8 max-w-xl mx-auto text-lg leading-8 text-ink/65 dark:text-white/65 text-balance"
           >
-            Transform every patient conversation into structured clinical notes,
-            treatment plans, home exercise programs and professional PDF reports
-            in seconds. No typing. No templates. Just focus on your patient.
+            Speak for 30 seconds. Phygo generates a structured clinical note, a
+            documented reasoning trail, and an evidence-based rehab plan — you
+            review and approve every word before it reaches your patient. Built
+            specifically for physiotherapy, not adapted from it.
           </motion.p>
 
           <motion.div
@@ -213,7 +214,7 @@ export default function Hero() {
             custom={2}
             className="mt-14 flex flex-wrap items-center justify-center gap-6 text-xs eyebrow text-ink/45 dark:text-white/45"
           >
-            <span>Free forever plan</span>
+            <span>Cancel anytime</span>
 
             <span className="h-1 w-1 rounded-full bg-ink/20 dark:bg-white/20" />
 
@@ -222,6 +223,10 @@ export default function Hero() {
             <span className="h-1 w-1 rounded-full bg-ink/20 dark:bg-white/20" />
 
             <span>No credit card required</span>
+
+            <span className="h-1 w-1 rounded-full bg-ink/20 dark:bg-white/20" />
+
+            <span>Available in 4 languages</span>
           </motion.div>
         </motion.div>
       </div>
@@ -241,7 +246,7 @@ export default function Hero() {
       </motion.div>
 
       <motion.a
-        href="#logos"
+        href="#how-it-works"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2.2, duration: 0.8 }}

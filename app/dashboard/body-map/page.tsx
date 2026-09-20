@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { MousePointerClick, ScanLine, Search, ArrowRight, Move3d } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -54,9 +55,9 @@ function BodyMapContent() {
             animate="show"
             custom={0}
             variants={fadeUp}
-            className="inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-xs font-semibold tracking-wide text-ink/75 dark:text-white/75 shadow-soft mb-5"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase text-ink/75 dark:text-white/75 mb-4"
           >
-            <span className="h-2 w-2 rounded-full bg-emerald animate-pulse" />
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald animate-pulse" />
             {calibrate ? bm.calibrationBadge : bm.badge}
           </motion.div>
 
@@ -65,15 +66,9 @@ function BodyMapContent() {
             animate="show"
             custom={1}
             variants={fadeUp}
-            className="relative font-display font-semibold tracking-[-0.03em] text-6xl sm:text-8xl leading-[1.02] sm:leading-none"
+            className="font-display font-semibold tracking-tight text-5xl sm:text-6xl"
           >
-            <span
-              aria-hidden
-              className="absolute inset-0 bg-gradient-to-r from-electric via-[#6D8FFF] to-emerald bg-clip-text text-transparent blur-2xl opacity-50 select-none"
-            >
-              Anatomical Navigator
-            </span>
-            <span className="relative bg-gradient-to-r from-electric via-[#6D8FFF] to-emerald bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-electric via-[#6D8FFF] to-emerald bg-clip-text text-transparent">
               Anatomical Navigator
             </span>
           </motion.h1>
@@ -83,10 +78,22 @@ function BodyMapContent() {
             animate="show"
             custom={2}
             variants={fadeUp}
-            className="mt-5 text-ink/55 dark:text-white/55 text-lg max-w-xl mx-auto text-balance"
+            className="mt-4 text-ink/55 dark:text-white/55 text-lg max-w-xl mx-auto text-balance"
           >
             {bm.subtitle}
           </motion.p>
+        </div>
+
+        <div className="flex justify-center mb-10">
+          <Link
+            href="/dashboard/physiology?system=muscular"
+            className="group inline-flex items-center gap-2 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl px-4 py-2 text-xs font-medium text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white hover:border-emerald/40 transition-colors"
+          >
+            {ui.physiologyCrossLink.question}
+            <span className="font-semibold" style={{ color: '#32D6A0' }}>
+              {ui.physiologyCrossLink.cta} →
+            </span>
+          </Link>
         </div>
 
         <motion.div

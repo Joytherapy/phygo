@@ -3,9 +3,11 @@ export default function Footer() {
     <footer className="relative border-t border-ink/5 dark:border-white/5 py-12">
       <div className="mx-auto max-w-7xl px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
         <a href="/" className="flex items-center gap-2 font-display font-semibold text-ink dark:text-white">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-electric to-emerald text-white text-xs font-bold">
-            P
-          </span>
+          <img
+            src="/logo-mark.png"
+            alt="Phygo"
+            className="h-7 w-7 rounded-md object-cover"
+          />
           Phygo
         </a>
 

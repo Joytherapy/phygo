@@ -29,10 +29,12 @@ export const metadata: Metadata = {
     icon: "/image.png",
   },
 
-  title: "Phygo — The AI Assistant Every Therapist Deserves",
+  title: "Phygo — The Clinical Intelligence Platform for Physiotherapy",
   description:
-    "Turn your voice into professional clinical notes, patient reports, WhatsApp follow-ups and PDF summaries in seconds.",
+    "Talk for 30 seconds. Phygo turns it into a structured clinical note, a reasoning trail, and an evidence-backed rehab plan — reviewed by you, delivered to your patient.",
   keywords: [
+    "clinical intelligence platform",
+    "physiotherapy AI",
     "clinical notes AI",
     "therapist software",
     "voice to notes",
@@ -40,17 +42,17 @@ export const metadata: Metadata = {
     "AI medical documentation",
   ],
   openGraph: {
-    title: "Phygo — The AI Assistant Every Therapist Deserves",
+    title: "Phygo — The Clinical Intelligence Platform for Physiotherapy",
     description:
-      "Turn your voice into professional clinical notes, patient reports, WhatsApp follow-ups and PDF summaries in seconds.",
+      "Talk for 30 seconds. Phygo turns it into a structured clinical note, a reasoning trail, and an evidence-backed rehab plan — reviewed by you, delivered to your patient.",
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Phygo — The AI Assistant Every Therapist Deserves",
+    title: "Phygo — The Clinical Intelligence Platform for Physiotherapy",
     description:
-      "Turn your voice into professional clinical notes, patient reports, WhatsApp follow-ups and PDF summaries in seconds.",
+      "Talk for 30 seconds. Phygo turns it into a structured clinical note, a reasoning trail, and an evidence-backed rehab plan — reviewed by you, delivered to your patient.",
   },
 };
 
@@ -66,7 +68,7 @@ export default function RootLayout({
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description:
-      "AI assistant for therapists, physiotherapists, and osteopaths that turns voice into clinical notes, patient reports, WhatsApp follow-ups, and PDF summaries.",
+      "Clinical intelligence platform for physiotherapists: turns a spoken or written session note into a structured clinical assessment, an evidence-backed rehab plan, and a program delivered to the patient.",
     offers: {
       "@type": "Offer",
       price: "19",

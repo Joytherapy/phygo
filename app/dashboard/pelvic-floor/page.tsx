@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
-import { X, Dumbbell, Layers, Lightbulb, Activity, Zap, Droplets, Baby, Users } from 'lucide-react';
+import { X, Search, Dumbbell, Layers, Lightbulb, Activity, Zap, Droplets, Baby, Users } from 'lucide-react';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
+import EvidenceBadge, { SourceCitation } from '@/components/EvidenceBadge';
 
 type SubView = 'anatomy' | 'conditions' | 'assessment' | 'rehab';
 
@@ -14,6 +15,10 @@ interface StructureItem {
   slug: string;
   name: string;
   category: string;
+  anatomy?: string;
+  function?: string;
+  clinical_relevance?: string;
+  evidence_level?: string;
   diagram_image?: string;
 }
 
@@ -27,6 +32,8 @@ interface ConditionItem {
   typical_exercises?: string;
   progression_criteria?: string;
   evidence_level?: string;
+  source?: string;
+  source_date?: string;
   compartment: string;
 }
 
@@ -47,6 +54,7 @@ interface RehabItem {
   description?: string;
   protocol?: string;
   evidence_note?: string;
+  evidence_level?: string;
 }
 
 const STRUCTURE_CATEGORY_ICON: Record<string, typeof Dumbbell> = {
@@ -101,6 +109,7 @@ export default function PelvicFloorPage() {
   const [hasFetchedRehab, setHasFetchedRehab] = useState(false);
 
   const [expandedImage, setExpandedImage] = useState<{ file: string; label: string } | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const OVERVIEW_IMAGES = [
     { file: 'pelvic-floor-female-sagittal.png', label: t.imageLabels.femaleSagittal },
@@ -207,6 +216,46 @@ export default function PelvicFloorPage() {
     { key: 'rehab', label: t.subTabs.rehab },
   ];
 
+  useEffect(() => {
+    setSearchQuery('');
+  }, [subView]);
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const matchesStructure = (s: StructureItem) =>
+    normalizedQuery === '' ||
+    s.name.toLowerCase().includes(normalizedQuery) ||
+    (s.anatomy ?? '').toLowerCase().includes(normalizedQuery) ||
+    (s.function ?? '').toLowerCase().includes(normalizedQuery) ||
+    (s.clinical_relevance ?? '').toLowerCase().includes(normalizedQuery);
+  const matchesCondition = (c: ConditionItem) =>
+    normalizedQuery === '' ||
+    c.condition_name.toLowerCase().includes(normalizedQuery) ||
+    (c.goals ?? '').toLowerCase().includes(normalizedQuery) ||
+    (c.clinical_tests ?? '').toLowerCase().includes(normalizedQuery) ||
+    (c.typical_exercises ?? '').toLowerCase().includes(normalizedQuery) ||
+    (c.red_flags ?? '').toLowerCase().includes(normalizedQuery) ||
+    (c.contraindications ?? '').toLowerCase().includes(normalizedQuery);
+  const matchesTest = (t2: TestItem) =>
+    normalizedQuery === '' ||
+    t2.name.toLowerCase().includes(normalizedQuery) ||
+    (t2.procedure ?? '').toLowerCase().includes(normalizedQuery) ||
+    (t2.interpretation ?? '').toLowerCase().includes(normalizedQuery);
+  const matchesRehab = (r: RehabItem) =>
+    normalizedQuery === '' ||
+    r.name.toLowerCase().includes(normalizedQuery) ||
+    (r.description ?? '').toLowerCase().includes(normalizedQuery) ||
+    (r.protocol ?? '').toLowerCase().includes(normalizedQuery) ||
+    (r.evidence_note ?? '').toLowerCase().includes(normalizedQuery);
+
+  const hasAnyMatchCurrent =
+    subView === 'anatomy'
+      ? structures.some(matchesStructure)
+      : subView === 'conditions'
+      ? conditions.some(matchesCondition)
+      : subView === 'assessment'
+      ? tests.some(matchesTest)
+      : rehab.some(matchesRehab);
+
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
@@ -251,6 +300,25 @@ export default function PelvicFloorPage() {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="max-w-md mx-auto mb-10 relative">
+          <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-ink/30 dark:text-white/30" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={ui.librarySearchPlaceholder}
+            className="w-full pl-11 pr-10 py-2.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-sm text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 focus:outline-none focus:border-black/20 dark:focus:border-white/20 transition-colors"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full text-ink/30 dark:text-white/30 hover:text-ink dark:hover:text-white transition-colors"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
 
         {subView === 'anatomy' && (
@@ -308,10 +376,14 @@ export default function PelvicFloorPage() {
             )}
             {structuresError && <p className="text-sm text-red-500">{structuresError}</p>}
 
+            {!structuresLoading && !structuresError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
+              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+            )}
+
             {!structuresLoading && !structuresError && (
               <div className="space-y-8">
                 {(['muscle', 'fascia_ligament', 'nerve', 'concept'] as const).map((cat) => {
-                  const items = structures.filter((s) => s.category === cat);
+                  const items = structures.filter((s) => s.category === cat && matchesStructure(s));
                   if (items.length === 0) return null;
                   const Icon = STRUCTURE_CATEGORY_ICON[cat];
                   return (
@@ -323,15 +395,49 @@ export default function PelvicFloorPage() {
                         <Icon size={13} />
                         {t.structureCategoryLabels[cat] ?? cat}
                       </h3>
-                      <div className="grid sm:grid-cols-2 gap-3">
+                      <div className="space-y-5">
                         {items.map((s) => (
-                          <button
+                          <div
                             key={s.id}
-                            onClick={() => router.push(`/dashboard/pelvic-floor/structure/${s.slug}`)}
-                            className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-pink-400/40 hover:-translate-y-0.5 transition-all"
+                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-sm shadow-black/5 dark:shadow-black/40"
                           >
-                            <p className="text-sm font-semibold text-ink dark:text-white">{s.name}</p>
-                          </button>
+                            {s.diagram_image && (
+                              <button
+                                onClick={() => setExpandedImage({ file: s.diagram_image as string, label: s.name })}
+                                className="group relative w-full bg-[#08090b] overflow-hidden block"
+                              >
+                                <img
+                                  src={`${IMAGE_BASE}/${s.diagram_image}`}
+                                  alt={s.name}
+                                  className="w-full h-auto group-hover:scale-105 transition-transform duration-300"
+                                />
+                              </button>
+                            )}
+                            <div className="p-5 pt-4">
+                              <div className="flex items-center justify-between gap-2.5 mb-3">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <span className="w-1 h-4 rounded-full shrink-0" style={{ backgroundColor: ACCENT.solid }} />
+                                  <p className="text-sm font-semibold text-ink dark:text-white truncate">{s.name}</p>
+                                </div>
+                                <EvidenceBadge level={s.evidence_level} className="shrink-0" />
+                              </div>
+                              {s.anatomy && (
+                                <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
+                                  <span className="font-semibold">{ui.anatomy.anatomy}: </span>{s.anatomy}
+                                </p>
+                              )}
+                              {s.function && (
+                                <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
+                                  <span className="font-semibold">{ui.anatomy.function}: </span>{s.function}
+                                </p>
+                              )}
+                              {s.clinical_relevance && (
+                                <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed">
+                                  <span className="font-semibold">{ui.anatomy.clinicalRelevance}: </span>{s.clinical_relevance}
+                                </p>
+                              )}
+                            </div>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -356,10 +462,14 @@ export default function PelvicFloorPage() {
             )}
             {conditionsError && <p className="text-sm text-red-500">{conditionsError}</p>}
 
+            {!conditionsLoading && !conditionsError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
+              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+            )}
+
             {!conditionsLoading && !conditionsError && (
               <div className="space-y-8">
                 {(['anterior', 'central', 'posterior', 'systemic'] as const).map((comp) => {
-                  const items = conditions.filter((c) => c.compartment === comp);
+                  const items = conditions.filter((c) => c.compartment === comp && matchesCondition(c));
                   if (items.length === 0) return null;
                   return (
                     <div key={comp}>
@@ -376,12 +486,8 @@ export default function PelvicFloorPage() {
                             onClick={() => setSelectedCondition(c)}
                             className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-pink-400/40 hover:-translate-y-0.5 transition-all"
                           >
-                            <p className="text-sm font-semibold text-ink dark:text-white">{c.condition_name}</p>
-                            {c.evidence_level && (
-                              <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/40 dark:text-white/40">
-                                {ui.fields.evidence}: {c.evidence_level}
-                              </span>
-                            )}
+                            <p className="text-sm font-semibold text-ink dark:text-white mb-2">{c.condition_name}</p>
+                            <EvidenceBadge level={c.evidence_level} />
                           </button>
                         ))}
                       </div>
@@ -423,10 +529,14 @@ export default function PelvicFloorPage() {
             )}
             {testsError && <p className="text-sm text-red-500">{testsError}</p>}
 
+            {!testsLoading && !testsError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
+              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+            )}
+
             {!testsLoading && !testsError && (
               <div className="space-y-8">
                 {(['neuropathy', 'manual_assessment', 'urodynamic', 'questionnaire'] as const).map((cat) => {
-                  const items = tests.filter((t2) => t2.category === cat);
+                  const items = tests.filter((t2) => t2.category === cat && matchesTest(t2));
                   if (items.length === 0) return null;
                   return (
                     <div key={cat}>
@@ -478,10 +588,14 @@ export default function PelvicFloorPage() {
             )}
             {rehabError && <p className="text-sm text-red-500">{rehabError}</p>}
 
+            {!rehabLoading && !rehabError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
+              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+            )}
+
             {!rehabLoading && !rehabError && (
               <div className="space-y-8">
                 {(['kegel', 'biofeedback_electrostim', 'bladder_training', 'postpartum', 'special_population'] as const).map((cat) => {
-                  const items = rehab.filter((r) => r.category === cat);
+                  const items = rehab.filter((r) => r.category === cat && matchesRehab(r));
                   if (items.length === 0) return null;
                   const Icon = REHAB_CATEGORY_ICON[cat];
                   return (
@@ -499,7 +613,10 @@ export default function PelvicFloorPage() {
                             key={r.id}
                             className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
                           >
-                            <p className="text-sm font-semibold text-ink dark:text-white mb-2">{r.name}</p>
+                            <div className="flex items-center justify-between gap-2.5 mb-2">
+                              <p className="text-sm font-semibold text-ink dark:text-white truncate">{r.name}</p>
+                              <EvidenceBadge level={r.evidence_level} className="shrink-0" />
+                            </div>
                             {r.description && (
                               <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-3">
                                 {r.description}
@@ -599,9 +716,8 @@ export default function PelvicFloorPage() {
                 )}
                 {selectedCondition.evidence_level && (
                   <div className="pt-2 border-t border-black/[0.06] dark:border-white/10">
-                    <p className="text-xs text-ink/40 dark:text-white/40">
-                      {ui.fields.evidence}: {selectedCondition.evidence_level}
-                    </p>
+                    <EvidenceBadge level={selectedCondition.evidence_level} />
+                    <SourceCitation source={selectedCondition.source} sourceDate={selectedCondition.source_date} />
                   </div>
                 )}
               </div>

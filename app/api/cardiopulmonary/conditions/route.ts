@@ -33,7 +33,7 @@ export async function GET(req: Request) {
       if (lang === 'it') {
         const { data, error } = await adminSupabase
           .from('knowledge_base')
-          .select('id, condition_name, goals, clinical_tests, red_flags, typical_exercises, contraindications')
+          .select('id, condition_name, goals, clinical_tests, red_flags, typical_exercises, contraindications, evidence_level, source, source_date')
           .in('id', conditionIds);
 
         if (error) {
@@ -55,6 +55,9 @@ export async function GET(req: Request) {
             red_flags: c.red_flags,
             typical_exercises: c.typical_exercises,
             contraindications: c.contraindications,
+            evidence_level: c.evidence_level,
+            source: c.source,
+            source_date: c.source_date,
           }));
       }
     }

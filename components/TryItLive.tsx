@@ -13,9 +13,8 @@ export default function TryItLive() {
           Talk to it. Really.
         </h2>
         <p className="text-ink/60 dark:text-white/60 mb-14 max-w-md mx-auto">
-          This isn't a video. Tap the mic and describe a session out loud —
-          your browser transcribes it, and you'll watch it get structured in
-          front of you.
+          Not a video. Tap the mic, describe a real session out loud, and
+          watch your browser transcribe and structure it live.
         </p>
 
         <motion.div

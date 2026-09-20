@@ -7,23 +7,23 @@ import { Plus } from "lucide-react";
 const faqs = [
   {
     q: "Is patient data actually secure?",
-    a: "Yes. Recordings and notes are encrypted in transit and at rest, and you can delete any session's audio the moment its report is generated — nothing lingers longer than you want it to.",
+    a: "Yes. Recordings and notes are encrypted in transit and at rest. You can delete any session's audio the moment the report is generated.",
   },
   {
     q: "What if the AI gets something wrong?",
-    a: "Every generated note is fully editable before it's sent or saved. Think of it as a first draft written by someone who was in the room — you always have the final word.",
+    a: "Every note is a draft until you approve it. Nothing is saved or sent to a patient without your review — you always have the final word.",
   },
   {
     q: "Do I need to change how I run sessions?",
-    a: "No. Speak the way you already talk to a colleague or to yourself while working. There's no required structure, keywords, or dictation training.",
+    a: "No. Speak naturally, as you would to a colleague. No required structure, keywords, or dictation training.",
   },
   {
     q: "Which languages are supported?",
-    a: "Phygo follows natural speech in most major languages and matches the language you speak in your report output automatically.",
+    a: "Italian, English, Spanish and French — spoken and written, matched automatically to your report language.",
   },
   {
     q: "Can I cancel anytime?",
-    a: "Yes — plans are month-to-month with no lock-in contracts. Annual billing is optional and simply reflects the discount.",
+    a: "Yes. Plans are month-to-month with no lock-in. Annual billing is optional and reflects the discount.",
   },
 ];
 

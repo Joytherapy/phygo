@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import ClinicalActionBar from '@/components/ClinicalActionBar';
-import { X, Sparkles, Loader2, Maximize2 } from 'lucide-react';
+import { X, Sparkles, Loader2, Maximize2, Search } from 'lucide-react';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 
 type SubView = 'anatomy' | 'conditions' | 'treatments' | 'assessment' | 'rehab';
@@ -174,6 +174,8 @@ export default function OncologyPage() {
   const [askLoading, setAskLoading] = useState(false);
   const [askError, setAskError] = useState<string | null>(null);
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   useEffect(() => {
     setHasFetchedStructures(false);
     setHasFetchedConditions(false);
@@ -181,6 +183,10 @@ export default function OncologyPage() {
     setHasFetchedRehab(false);
     setHasFetchedTreatments(false);
   }, [lang]);
+
+  useEffect(() => {
+    setSearchQuery('');
+  }, [subView]);
 
   useEffect(() => {
     if (subView !== 'anatomy' || hasFetchedStructures) return;
@@ -323,6 +329,51 @@ export default function OncologyPage() {
     { key: 'rehab', label: ui.oncology.subTabs.rehab },
   ];
 
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const matchesStructure = (s: StructureItem) =>
+    normalizedQuery === '' ||
+    s.name.toLowerCase().includes(normalizedQuery) ||
+    (s.anatomy ?? '').toLowerCase().includes(normalizedQuery) ||
+    (s.function ?? '').toLowerCase().includes(normalizedQuery) ||
+    (s.clinical_relevance ?? '').toLowerCase().includes(normalizedQuery);
+  const matchesCondition = (c: ConditionItem) =>
+    normalizedQuery === '' ||
+    c.condition_name.toLowerCase().includes(normalizedQuery) ||
+    (c.goals ?? '').toLowerCase().includes(normalizedQuery) ||
+    (c.clinical_tests ?? '').toLowerCase().includes(normalizedQuery) ||
+    (c.typical_exercises ?? '').toLowerCase().includes(normalizedQuery) ||
+    (c.red_flags ?? '').toLowerCase().includes(normalizedQuery) ||
+    (c.contraindications ?? '').toLowerCase().includes(normalizedQuery) ||
+    (c.evidence_level ?? '').toLowerCase().includes(normalizedQuery);
+  const matchesTest = (t: TestItem) =>
+    normalizedQuery === '' ||
+    t.name.toLowerCase().includes(normalizedQuery) ||
+    (t.procedure ?? '').toLowerCase().includes(normalizedQuery) ||
+    (t.interpretation ?? '').toLowerCase().includes(normalizedQuery);
+  const matchesRehab = (r: RehabItem) =>
+    normalizedQuery === '' ||
+    r.name.toLowerCase().includes(normalizedQuery) ||
+    (r.description ?? '').toLowerCase().includes(normalizedQuery) ||
+    (r.protocol ?? '').toLowerCase().includes(normalizedQuery) ||
+    (r.evidence_note ?? '').toLowerCase().includes(normalizedQuery);
+  const matchesTreatment = (t: TreatmentItem) =>
+    normalizedQuery === '' ||
+    t.name.toLowerCase().includes(normalizedQuery) ||
+    (t.description ?? '').toLowerCase().includes(normalizedQuery) ||
+    (t.pt_implications ?? '').toLowerCase().includes(normalizedQuery) ||
+    (t.evidence_note ?? '').toLowerCase().includes(normalizedQuery);
+
+  const hasAnyMatchCurrent =
+    subView === 'anatomy'
+      ? structures.some(matchesStructure)
+      : subView === 'conditions'
+      ? conditions.some(matchesCondition)
+      : subView === 'treatments'
+      ? treatments.some(matchesTreatment)
+      : subView === 'assessment'
+      ? tests.some(matchesTest)
+      : rehab.some(matchesRehab);
+
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
@@ -350,7 +401,7 @@ export default function OncologyPage() {
           </h1>
         </div>
 
-        <div className="flex justify-center mb-10">
+        <div className="flex justify-center mb-6">
           <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
             {SUB_TABS.map((t) => (
               <button
@@ -367,6 +418,25 @@ export default function OncologyPage() {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="max-w-md mx-auto mb-10 relative">
+          <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-ink/30 dark:text-white/30" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={ui.librarySearchPlaceholder}
+            className="w-full pl-11 pr-10 py-2.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-sm text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 focus:outline-none focus:border-black/20 dark:focus:border-white/20 transition-colors"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full text-ink/30 dark:text-white/30 hover:text-ink dark:hover:text-white transition-colors"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
 
         {subView === 'anatomy' && (
@@ -389,11 +459,15 @@ export default function OncologyPage() {
             )}
             {structuresError && <p className="text-sm text-red-500">{structuresError}</p>}
 
+            {!structuresLoading && !structuresError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
+              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+            )}
+
             {!structuresLoading && !structuresError && (
               <div className="space-y-8">
                 {REGION_ORDER.map((region) => {
                   const items = structures
-                    .filter((s) => REGION_BY_SLUG[s.slug] === region)
+                    .filter((s) => REGION_BY_SLUG[s.slug] === region && matchesStructure(s))
                     .sort((a, b) => (REGION_SLUG_ORDER[a.slug] ?? 99) - (REGION_SLUG_ORDER[b.slug] ?? 99));
                   if (items.length === 0) return null;
                   return (
@@ -404,11 +478,11 @@ export default function OncologyPage() {
                       >
                         {ui.oncology.regionLabels[region]}
                       </h3>
-                      <div className="space-y-3">
+                      <div className="space-y-5">
                         {items.map((s) => (
                           <div
                             key={s.id}
-                            className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden"
+                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-sm shadow-black/5 dark:shadow-black/40"
                           >
                             {s.diagram_image && (
                               <button
@@ -428,8 +502,11 @@ export default function OncologyPage() {
                                 </div>
                               </button>
                             )}
-                            <div className="p-5">
-                              <p className="text-sm font-semibold text-ink dark:text-white mb-3">{s.name}</p>
+                            <div className="p-5 pt-4">
+                              <div className="flex items-center gap-2.5 mb-3">
+                                <span className="w-1 h-4 rounded-full shrink-0" style={{ backgroundColor: ACCENT.solid }} />
+                                <p className="text-sm font-semibold text-ink dark:text-white">{s.name}</p>
+                              </div>
                               {s.anatomy && (
                                 <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
                                   <span className="font-semibold">{ui.anatomy.anatomy}: </span>{s.anatomy}
@@ -471,10 +548,14 @@ export default function OncologyPage() {
             )}
             {conditionsError && <p className="text-sm text-red-500">{conditionsError}</p>}
 
+            {!conditionsLoading && !conditionsError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
+              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+            )}
+
             {!conditionsLoading && !conditionsError && (
               <div className="space-y-8">
                 {SYSTEM_ORDER.map((sys) => {
-                  const items = conditions.filter((c) => c.system === sys);
+                  const items = conditions.filter((c) => c.system === sys && matchesCondition(c));
                   if (items.length === 0) return null;
                   return (
                     <div key={sys}>
@@ -559,10 +640,14 @@ export default function OncologyPage() {
             )}
             {treatmentsError && <p className="text-sm text-red-500">{treatmentsError}</p>}
 
+            {!treatmentsLoading && !treatmentsError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
+              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+            )}
+
             {!treatmentsLoading && !treatmentsError && (
               <div className="space-y-8">
                 {TREATMENT_CATEGORY_ORDER.map((cat) => {
-                  const items = treatments.filter((t) => t.category === cat);
+                  const items = treatments.filter((t) => t.category === cat && matchesTreatment(t));
                   if (items.length === 0) return null;
                   return (
                     <div key={cat}>
@@ -624,10 +709,14 @@ export default function OncologyPage() {
             )}
             {testsError && <p className="text-sm text-red-500">{testsError}</p>}
 
+            {!testsLoading && !testsError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
+              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+            )}
+
             {!testsLoading && !testsError && (
               <div className="space-y-8">
                 {TEST_CATEGORY_ORDER.map((cat) => {
-                  const items = tests.filter((t) => t.category === cat);
+                  const items = tests.filter((t) => t.category === cat && matchesTest(t));
                   if (items.length === 0) return null;
                   return (
                     <div key={cat}>
@@ -679,10 +768,14 @@ export default function OncologyPage() {
             )}
             {rehabError && <p className="text-sm text-red-500">{rehabError}</p>}
 
+            {!rehabLoading && !rehabError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
+              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+            )}
+
             {!rehabLoading && !rehabError && (
               <div className="space-y-8">
                 {REHAB_CATEGORY_ORDER.map((cat) => {
-                  const items = rehab.filter((r) => r.category === cat);
+                  const items = rehab.filter((r) => r.category === cat && matchesRehab(r));
                   if (items.length === 0) return null;
                   return (
                     <div key={cat}>
