@@ -107,7 +107,7 @@ interface UiDict {
     audienceLabels: Record<'professionals' | 'students' | 'public' | 'both', string>;
     levelLabels: Record<'student' | 'beginner' | 'intermediate' | 'advanced' | 'expert', string>;
     statusLabels: Record<'upcoming' | 'updated' | 'dateChanged' | 'locationChanged' | 'cancelled' | 'soldOut' | 'registrationOpen' | 'registrationClosed' | 'completed', string>;
-    verificationLabels: Record<'unverified' | 'sourceVerified' | 'organizerVerified' | 'phygoVerified', string>;
+    verificationLabels: Record<'unverified' | 'source_verified' | 'organizer_verified' | 'phygo_verified', string>;
     verificationExplainer: string;
     organizerLabel: string;
     timeLabel: string;
@@ -1180,7 +1180,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       audienceLabels: { professionals: 'Professionisti', students: 'Studenti', public: 'Pazienti / Pubblico', both: 'Tutti' },
       levelLabels: { student: 'Studente', beginner: 'Principiante', intermediate: 'Intermedio', advanced: 'Avanzato', expert: 'Esperto' },
       statusLabels: { upcoming: 'In Programma', updated: 'Aggiornato', dateChanged: 'Data Modificata', locationChanged: 'Sede Modificata', cancelled: 'Annullato', soldOut: 'Esaurito', registrationOpen: 'Iscrizioni Aperte', registrationClosed: 'Iscrizioni Chiuse', completed: 'Concluso' },
-      verificationLabels: { unverified: 'Non Verificato', sourceVerified: 'Fonte Verificata', organizerVerified: 'Organizzatore Verificato', phygoVerified: 'Verificato da Phygo' },
+      verificationLabels: { unverified: 'Non Verificato', source_verified: 'Fonte Verificata', organizer_verified: 'Organizzatore Verificato', phygo_verified: 'Verificato da Phygo' },
       verificationExplainer: 'La verifica riguarda l\'accuratezza della fonte, non un giudizio di Phygo sulla qualità scientifica dell\'evento.',
       organizerLabel: 'Organizzatore',
       timeLabel: 'Orario',
@@ -2537,7 +2537,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       audienceLabels: { professionals: 'Professionals', students: 'Students', public: 'Patients / Public', both: 'Everyone' },
       levelLabels: { student: 'Student', beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced', expert: 'Expert' },
       statusLabels: { upcoming: 'Upcoming', updated: 'Updated', dateChanged: 'Date Changed', locationChanged: 'Location Changed', cancelled: 'Cancelled', soldOut: 'Sold Out', registrationOpen: 'Registration Open', registrationClosed: 'Registration Closed', completed: 'Completed' },
-      verificationLabels: { unverified: 'Unverified', sourceVerified: 'Source Verified', organizerVerified: 'Organizer Verified', phygoVerified: 'Phygo Verified' },
+      verificationLabels: { unverified: 'Unverified', source_verified: 'Source Verified', organizer_verified: 'Organizer Verified', phygo_verified: 'Phygo Verified' },
       verificationExplainer: 'Verification reflects source accuracy, not a Phygo endorsement of the event\'s scientific quality.',
       organizerLabel: 'Organizer',
       timeLabel: 'Time',
@@ -3894,7 +3894,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       audienceLabels: { professionals: 'Profesionales', students: 'Estudiantes', public: 'Pacientes / Público', both: 'Todos' },
       levelLabels: { student: 'Estudiante', beginner: 'Principiante', intermediate: 'Intermedio', advanced: 'Avanzado', expert: 'Experto' },
       statusLabels: { upcoming: 'Próximo', updated: 'Actualizado', dateChanged: 'Fecha Modificada', locationChanged: 'Ubicación Modificada', cancelled: 'Cancelado', soldOut: 'Agotado', registrationOpen: 'Inscripciones Abiertas', registrationClosed: 'Inscripciones Cerradas', completed: 'Finalizado' },
-      verificationLabels: { unverified: 'No Verificado', sourceVerified: 'Fuente Verificada', organizerVerified: 'Organizador Verificado', phygoVerified: 'Verificado por Phygo' },
+      verificationLabels: { unverified: 'No Verificado', source_verified: 'Fuente Verificada', organizer_verified: 'Organizador Verificado', phygo_verified: 'Verificado por Phygo' },
       verificationExplainer: 'La verificación refleja la precisión de la fuente, no un respaldo de Phygo a la calidad científica del evento.',
       organizerLabel: 'Organizador',
       timeLabel: 'Hora',
@@ -5251,7 +5251,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       audienceLabels: { professionals: 'Professionnels', students: 'Étudiants', public: 'Patients / Public', both: 'Tous' },
       levelLabels: { student: 'Étudiant', beginner: 'Débutant', intermediate: 'Intermédiaire', advanced: 'Avancé', expert: 'Expert' },
       statusLabels: { upcoming: 'À Venir', updated: 'Mis à Jour', dateChanged: 'Date Modifiée', locationChanged: 'Lieu Modifié', cancelled: 'Annulé', soldOut: 'Complet', registrationOpen: 'Inscriptions Ouvertes', registrationClosed: 'Inscriptions Fermées', completed: 'Terminé' },
-      verificationLabels: { unverified: 'Non Vérifié', sourceVerified: 'Source Vérifiée', organizerVerified: 'Organisateur Vérifié', phygoVerified: 'Vérifié par Phygo' },
+      verificationLabels: { unverified: 'Non Vérifié', source_verified: 'Source Vérifiée', organizer_verified: 'Organisateur Vérifié', phygo_verified: 'Vérifié par Phygo' },
       verificationExplainer: "La vérification reflète l'exactitude de la source, non une approbation de Phygo sur la qualité scientifique de l'événement.",
       organizerLabel: 'Organisateur',
       timeLabel: 'Horaire',
