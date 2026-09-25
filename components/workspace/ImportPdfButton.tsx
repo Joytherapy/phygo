@@ -110,7 +110,18 @@ export default function ImportPdfButton({
       <input
         ref={inputRef}
         type="file"
-        accept="application/pdf,.pdf"
+        // Extension-only filter — deliberately NOT combined with a MIME type
+        // (e.g. "application/pdf"). On macOS, Chrome translates an
+        // accept list that includes a MIME type into a native file-picker
+        // filter keyed on the file's Spotlight/LaunchServices UTI. Large,
+        // scanner-produced PDFs (the "heavy books" case) frequently aren't
+        // tagged with the public.pdf UTI in that index, so the OS picker
+        // greys them out as unselectable even though they're valid PDFs —
+        // this reproduces exactly ("non sono selezionabili", "solo su
+        // Phygo"). Extension-only accept avoids the UTI check entirely; the
+        // existing MIME-or-extension validation in handleFile() below is
+        // what actually enforces "must be a PDF" and is unaffected.
+        accept=".pdf"
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0]
