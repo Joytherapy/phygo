@@ -213,6 +213,17 @@ interface WorkspaceDict {
       hematology: string
     }
   }
+  // SELECT TEXT → Copy / Highlight / Add to Notes (PHYGO Student Experience
+  // audit PART 9/11/13) — the small action row TextSelectionPopup shows
+  // alongside its existing "Explore with PHYGO" button whenever the user
+  // selects real PDF text.
+  selectionPopup: {
+    copy: string
+    copied: string
+    highlight: string
+    addToNotes: string
+    addedToNotes: string
+  }
 }
 
 const it: WorkspaceDict = {
@@ -314,6 +325,9 @@ const it: WorkspaceDict = {
       hematology: 'Ematologia',
     },
   },
+  selectionPopup: {
+    copy: 'Copia', copied: 'Copiato', highlight: 'Evidenzia', addToNotes: 'Aggiungi alle note', addedToNotes: 'Aggiunto alle note',
+  },
   ask: {
     button: 'Chiedi a PHYGO', title: 'Chiedi a PHYGO', placeholder: 'Fai una domanda su questo documento…', send: 'Invia',
     thinking: 'PHYGO sta pensando…', limitReached: 'Hai raggiunto il limite di domande per il tuo piano. Riprova più tardi o passa a un piano superiore.',
@@ -413,6 +427,9 @@ const en: WorkspaceDict = {
       immune: 'Immune',
       hematology: 'Hematology',
     },
+  },
+  selectionPopup: {
+    copy: 'Copy', copied: 'Copied', highlight: 'Highlight', addToNotes: 'Add to notes', addedToNotes: 'Added to notes',
   },
   ask: {
     button: 'Ask PHYGO', title: 'Ask PHYGO', placeholder: 'Ask a question about this document…', send: 'Send',
@@ -514,6 +531,9 @@ const es: WorkspaceDict = {
       hematology: 'Hematología',
     },
   },
+  selectionPopup: {
+    copy: 'Copiar', copied: 'Copiado', highlight: 'Resaltar', addToNotes: 'Añadir a notas', addedToNotes: 'Añadido a notas',
+  },
   ask: {
     button: 'Preguntar a PHYGO', title: 'Preguntar a PHYGO', placeholder: 'Haz una pregunta sobre este documento…', send: 'Enviar',
     thinking: 'PHYGO está pensando…', limitReached: 'Has alcanzado el límite de preguntas de tu plan. Inténtalo más tarde o mejora tu plan.',
@@ -613,6 +633,9 @@ const fr: WorkspaceDict = {
       immune: 'Immunitaire',
       hematology: 'Hématologie',
     },
+  },
+  selectionPopup: {
+    copy: 'Copier', copied: 'Copié', highlight: 'Surligner', addToNotes: 'Ajouter aux notes', addedToNotes: 'Ajouté aux notes',
   },
   ask: {
     button: 'Demander à PHYGO', title: 'Demander à PHYGO', placeholder: 'Posez une question sur ce document…', send: 'Envoyer',

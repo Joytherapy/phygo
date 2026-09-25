@@ -13,8 +13,12 @@ import { X, GripVertical } from 'lucide-react'
 import type { AnnotationTool, TextAnnotationData, WorkspaceAnnotation } from '@/lib/workspace/types'
 import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
 
-const DEFAULT_FONT_SIZE = 14
-const DEFAULT_BOX_WIDTH = 0.26 // normalized fraction of page width for a fresh note
+// Exported so TextSelectionPopup's "Add to Notes" action (SELECT TEXT → ADD
+// TO NOTES, PHYGO Student Experience audit PART 9/13) can create a text
+// annotation with the exact same defaults a manually-placed note gets,
+// instead of guessing its own values.
+export const DEFAULT_FONT_SIZE = 14
+export const DEFAULT_BOX_WIDTH = 0.26 // normalized fraction of page width for a fresh note
 
 export default function TextAnnotationLayer({
   annotations,

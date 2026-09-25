@@ -35,7 +35,7 @@ import { useAsk } from '@/contexts/AskContext'
 import { useStudyPanelDocumentBridge } from '@/contexts/StudyPanelContext'
 import AnnotationCanvas from './AnnotationCanvas'
 import AnnotationToolbar from './AnnotationToolbar'
-import TextAnnotationLayer from './TextAnnotationLayer'
+import TextAnnotationLayer, { DEFAULT_FONT_SIZE, DEFAULT_BOX_WIDTH } from './TextAnnotationLayer'
 import ImageAnnotationLayer from './ImageAnnotationLayer'
 import KnowledgeCardAnnotationLayer from './KnowledgeCardAnnotationLayer'
 import TextSelectionPopup from './TextSelectionPopup'
@@ -476,10 +476,24 @@ export default function PdfViewer({
                   onDelete={onDeleteAnnotation}
                 />
 
-                {/* The "Explore with PHYGO" trigger — watches for a text
-                    selection inside this page and offers to open the Smart
-                    Study Panel on it. Never auto-opens anything itself. */}
-                <TextSelectionPopup containerRef={pageWrapRef} enabled={selectionEnabled} />
+                {/* SELECT TEXT action row — Copy / Highlight / Add to Notes /
+                    "Explore with PHYGO" (see TextSelectionPopup.tsx). Watches
+                    for a text selection inside this page; never auto-opens
+                    or auto-creates anything itself. */}
+                <TextSelectionPopup
+                  containerRef={pageWrapRef}
+                  enabled={selectionEnabled}
+                  highlightColor={markerColor}
+                  onHighlight={(rects, text) =>
+                    onCreateAnnotation(pageNumber, { type: 'highlight', data: { color: markerColor, rects, text } })
+                  }
+                  onAddToNotes={(x, y, text) =>
+                    onCreateAnnotation(pageNumber, {
+                      type: 'text',
+                      data: { x, y, body: text, color: textColor, fontSize: DEFAULT_FONT_SIZE, width: DEFAULT_BOX_WIDTH, backgroundColor: textBackground },
+                    })
+                  }
+                />
               </div>
             </div>
           </div>

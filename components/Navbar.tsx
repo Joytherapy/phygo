@@ -13,7 +13,7 @@ import { useRoleUi } from "@/lib/i18n/roleStrings";
 import { useRoleTheme } from "@/contexts/RoleThemeContext";
 import { useQuizUi } from "@/lib/i18n/quizStrings";
 import SearchModal from "./SearchModal";
-import LibraryNavMenu from "./LibraryNavMenu";
+import LibraryNavMenu, { libraryLinkHrefs } from "./LibraryNavMenu";
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -80,6 +80,44 @@ export default function Navbar() {
   // one shared fetch instead of Navbar keeping its own copy.
   const { practiceStage } = useRoleTheme();
   const isStudent = isDashboard && practiceStage === "student";
+
+  // ACTIVE NAV STATE (Student navbar audit — "verifica active state della
+  // voce selezionata"): none of the primary nav items previously reflected
+  // the current route at all, desktop or mobile. Workspace/Quiz are single
+  // routes so a simple startsWith check is enough; Library and World are
+  // dropdown triggers whose "active" state means the current page is one of
+  // the pages *inside* that dropdown, checked against each menu's own real
+  // href list so this never drifts out of sync with what's actually in the
+  // dropdown.
+  const isWorkspaceNavActive = pathname?.startsWith("/dashboard/workspace") ?? false;
+  const isQuizNavActive = pathname?.startsWith("/dashboard/quiz") ?? false;
+  const isLibraryNavActive = libraryLinkHrefs.some((l) => pathname?.startsWith(l.href));
+  const isWorldNavActive = worldLinkHrefs.some((l) => pathname?.startsWith(l.href));
+  const isScheduleNavActive = pathname?.startsWith("/dashboard/agenda") ?? false;
+  const isPatientsNavActive = pathname === "/dashboard";
+  // Desktop underlined-link style: shared by Workspace/Quiz/Patients/Schedule
+  // — the underline is permanently drawn in for the active route instead of
+  // only appearing on hover.
+  const desktopLinkClass = (active: boolean) =>
+    `relative text-sm font-medium transition-colors group ${
+      active ? "text-ink dark:text-white" : "text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white"
+    }`;
+  const desktopUnderlineClass = (active: boolean) =>
+    `absolute -bottom-1 left-0 h-px bg-ink/60 dark:bg-white/60 transition-all duration-300 ${
+      active ? "w-full" : "w-0 group-hover:w-full"
+    }`;
+  // Same idea for the Library/World dropdown trigger buttons, which don't
+  // use the underline treatment (they have a chevron instead).
+  const desktopDropdownTriggerClass = (active: boolean) =>
+    `relative text-sm font-medium transition-colors flex items-center gap-1 ${
+      active ? "text-ink dark:text-white" : "text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white"
+    }`;
+  // Mobile menu rows: no underline space, so active is a filled dot + full
+  // opacity/weight instead.
+  const mobileLinkClass = (active: boolean) =>
+    `flex items-center gap-2 text-sm py-1.5 transition-colors ${
+      active ? "font-semibold text-ink dark:text-white" : "font-medium text-ink/80 dark:text-white/80"
+    }`;
   const [dark, setDark] = useState(() => {
     if (typeof window === "undefined") return true;
     const stored = window.localStorage.getItem("phygo-theme");
@@ -173,32 +211,23 @@ export default function Navbar() {
             ))}
 
           {isDashboard && isStudent && (
-            <a
-              href="/dashboard/workspace"
-              className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors group"
-            >
+            <a href="/dashboard/workspace" aria-current={isWorkspaceNavActive ? "page" : undefined} className={desktopLinkClass(isWorkspaceNavActive)}>
               {roleUi.nav.workspace}
-              <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/60 transition-all duration-300 group-hover:w-full" />
+              <span className={desktopUnderlineClass(isWorkspaceNavActive)} />
             </a>
           )}
 
           {isDashboard && isStudent && (
-            <a
-              href="/dashboard/quiz"
-              className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors group"
-            >
+            <a href="/dashboard/quiz" aria-current={isQuizNavActive ? "page" : undefined} className={desktopLinkClass(isQuizNavActive)}>
               {quizUi.navLabel}
-              <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/60 transition-all duration-300 group-hover:w-full" />
+              <span className={desktopUnderlineClass(isQuizNavActive)} />
             </a>
           )}
 
           {isDashboard && !isStudent && (
-            <a
-              href="/dashboard"
-              className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors group"
-            >
+            <a href="/dashboard" aria-current={isPatientsNavActive ? "page" : undefined} className={desktopLinkClass(isPatientsNavActive)}>
               {ui.nav.patients}
-              <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/60 transition-all duration-300 group-hover:w-full" />
+              <span className={desktopUnderlineClass(isPatientsNavActive)} />
             </a>
           )}
 
@@ -208,7 +237,7 @@ export default function Navbar() {
               onMouseEnter={() => setLibraryOpen(true)}
               onMouseLeave={() => setLibraryOpen(false)}
             >
-              <button className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors flex items-center gap-1">
+              <button aria-current={isLibraryNavActive ? "page" : undefined} className={desktopDropdownTriggerClass(isLibraryNavActive)}>
                 {ui.nav.library}
                 <svg
                   width="10"
@@ -238,12 +267,9 @@ export default function Navbar() {
           )}
 
           {isDashboard && !isStudent && (
-            <a
-              href="/dashboard/agenda"
-              className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors group"
-            >
+            <a href="/dashboard/agenda" aria-current={isScheduleNavActive ? "page" : undefined} className={desktopLinkClass(isScheduleNavActive)}>
               {ui.nav.schedule}
-              <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/60 transition-all duration-300 group-hover:w-full" />
+              <span className={desktopUnderlineClass(isScheduleNavActive)} />
             </a>
           )}
 
@@ -253,7 +279,7 @@ export default function Navbar() {
               onMouseEnter={() => setWorldOpen(true)}
               onMouseLeave={() => setWorldOpen(false)}
             >
-              <button className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors flex items-center gap-1">
+              <button aria-current={isWorldNavActive ? "page" : undefined} className={desktopDropdownTriggerClass(isWorldNavActive)}>
                 {ui.nav.world}
                 <svg
                   width="10"
@@ -496,7 +522,8 @@ export default function Navbar() {
             <a
               href="/dashboard/workspace"
               onClick={() => setOpen(false)}
-              className="text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
+              aria-current={isWorkspaceNavActive ? "page" : undefined}
+              className={mobileLinkClass(isWorkspaceNavActive)}
             >
               {roleUi.nav.workspace}
             </a>
@@ -506,7 +533,8 @@ export default function Navbar() {
             <a
               href="/dashboard/quiz"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
+              aria-current={isQuizNavActive ? "page" : undefined}
+              className={mobileLinkClass(isQuizNavActive)}
             >
               <ListChecks size={14} />
               {quizUi.navLabel}
@@ -517,7 +545,8 @@ export default function Navbar() {
             <a
               href="/dashboard"
               onClick={() => setOpen(false)}
-              className="text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
+              aria-current={isPatientsNavActive ? "page" : undefined}
+              className={mobileLinkClass(isPatientsNavActive)}
             >
               {ui.nav.patients}
             </a>
@@ -530,16 +559,20 @@ export default function Navbar() {
           {isDashboard && <div className="h-px bg-ink/10 dark:bg-white/10 my-1" />}
 
           {isDashboard &&
-            worldLinkHrefs.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
-                onClick={() => setOpen(false)}
-                className="text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
-              >
-                {ui.worldLinks[l.key].label}
-              </a>
-            ))}
+            worldLinkHrefs.map((l) => {
+              const active = pathname?.startsWith(l.href) ?? false;
+              return (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  aria-current={active ? "page" : undefined}
+                  className={mobileLinkClass(active)}
+                >
+                  {ui.worldLinks[l.key].label}
+                </a>
+              );
+            })}
 
           {isDashboard && !isStudent && (
             <>
@@ -547,7 +580,8 @@ export default function Navbar() {
               <a
                 href="/dashboard/agenda"
                 onClick={() => setOpen(false)}
-                className="text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
+                aria-current={isScheduleNavActive ? "page" : undefined}
+                className={mobileLinkClass(isScheduleNavActive)}
               >
                 {ui.nav.schedule}
               </a>
@@ -560,7 +594,8 @@ export default function Navbar() {
               <a
                 href="/dashboard/workspace"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2 text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
+                aria-current={isWorkspaceNavActive ? "page" : undefined}
+                className={mobileLinkClass(isWorkspaceNavActive)}
               >
                 <BookOpen size={14} />
                 {roleUi.nav.workspace}

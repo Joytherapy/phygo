@@ -355,51 +355,70 @@ export default function WorkspaceHomePage() {
             </section>
           )}
 
-          <section>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide">
-                {ui.folder.folders}
-              </h2>
-            </div>
-            {folders.length === 0 && documents.length === 0 && notebooks.length === 0 ? (
-              <EmptyState icon={FolderOpen} title={ui.home.empty} />
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {folders.map((f) => (
-                  <FolderCard
-                    key={f.id}
-                    folder={f}
-                    onOpen={() => router.push(`/dashboard/workspace/folder/${f.id}`)}
-                    onRename={(name) => renameFolder(f, name)}
-                    onToggleStar={() => toggleFolderStar(f)}
-                    onDelete={() => deleteFolder(f)}
-                    onColorChange={(color) => changeFolderColor(f, color)}
-                  />
-                ))}
-                {notebooks.map((nb) => (
-                  <NotebookCard
-                    key={nb.id}
-                    notebook={nb}
-                    onOpen={() => router.push(`/dashboard/workspace/notebook/${nb.id}`)}
-                    onRename={(name) => renameNotebook(nb, name)}
-                    onToggleStar={() => toggleNotebookStar(nb)}
-                    onDelete={() => deleteNotebook(nb)}
-                  />
-                ))}
-                {documents.map((d) => (
-                  <DocumentCard
-                    key={d.id}
-                    document={d}
-                    onOpen={() => router.push(`/dashboard/workspace/document/${d.id}`)}
-                    onRename={(name) => renameDocument(d, name)}
-                    onToggleStar={() => toggleDocumentStar(d)}
-                    onDelete={() => deleteDocument(d)}
-                    onDownload={() => downloadDocument(d)}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
+          {folders.length === 0 && documents.length === 0 && notebooks.length === 0 ? (
+            <EmptyState icon={FolderOpen} title={ui.home.empty} />
+          ) : (
+            <>
+              {/* FOLDERS-FIRST DESIGN (Student Experience audit PART 10):
+                  folders used to be interleaved in the same grid as
+                  notebooks/documents under one "Folders" heading — visually
+                  a folder read as "just another file" with a slightly
+                  different icon. Split into two clearly separate, clearly
+                  labeled sections so a folder is immediately recognizable as
+                  a CONTAINER, never confused with the files inside it. */}
+              {folders.length > 0 && (
+                <section>
+                  <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
+                    {ui.folder.folders}
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {folders.map((f) => (
+                      <FolderCard
+                        key={f.id}
+                        folder={f}
+                        onOpen={() => router.push(`/dashboard/workspace/folder/${f.id}`)}
+                        onRename={(name) => renameFolder(f, name)}
+                        onToggleStar={() => toggleFolderStar(f)}
+                        onDelete={() => deleteFolder(f)}
+                        onColorChange={(color) => changeFolderColor(f, color)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {(notebooks.length > 0 || documents.length > 0) && (
+                <section>
+                  <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
+                    {ui.folder.documents}
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {notebooks.map((nb) => (
+                      <NotebookCard
+                        key={nb.id}
+                        notebook={nb}
+                        onOpen={() => router.push(`/dashboard/workspace/notebook/${nb.id}`)}
+                        onRename={(name) => renameNotebook(nb, name)}
+                        onToggleStar={() => toggleNotebookStar(nb)}
+                        onDelete={() => deleteNotebook(nb)}
+                      />
+                    ))}
+                    {documents.map((d) => (
+                      <DocumentCard
+                        key={d.id}
+                        document={d}
+                        onOpen={() => router.push(`/dashboard/workspace/document/${d.id}`)}
+                        onRename={(name) => renameDocument(d, name)}
+                        onToggleStar={() => toggleDocumentStar(d)}
+                        onDelete={() => deleteDocument(d)}
+                        onDownload={() => downloadDocument(d)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
+          )}
         </div>
       )}
     </WorkspaceShell>

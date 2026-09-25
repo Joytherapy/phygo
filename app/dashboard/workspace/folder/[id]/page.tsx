@@ -268,39 +268,62 @@ export default function WorkspaceFolderPage() {
       {filteredSubfolders.length === 0 && filteredDocuments.length === 0 && filteredNotebooks.length === 0 ? (
         <EmptyState icon={FolderOpen} title={ui.folder.empty} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {filteredSubfolders.map((f) => (
-            <FolderCard
-              key={f.id}
-              folder={f}
-              onOpen={() => router.push(`/dashboard/workspace/folder/${f.id}`)}
-              onRename={(name) => renameFolder(f, name)}
-              onToggleStar={() => toggleFolderStar(f)}
-              onDelete={() => deleteFolder(f)}
-              onColorChange={(color) => changeFolderColor(f, color)}
-            />
-          ))}
-          {filteredNotebooks.map((nb) => (
-            <NotebookCard
-              key={nb.id}
-              notebook={nb}
-              onOpen={() => router.push(`/dashboard/workspace/notebook/${nb.id}`)}
-              onRename={(name) => renameNotebook(nb, name)}
-              onToggleStar={() => toggleNotebookStar(nb)}
-              onDelete={() => deleteNotebook(nb)}
-            />
-          ))}
-          {filteredDocuments.map((d) => (
-            <DocumentCard
-              key={d.id}
-              document={d}
-              onOpen={() => router.push(`/dashboard/workspace/document/${d.id}`)}
-              onRename={(name) => renameDocument(d, name)}
-              onToggleStar={() => toggleDocumentStar(d)}
-              onDelete={() => deleteDocument(d)}
-              onDownload={() => downloadDocument(d)}
-            />
-          ))}
+        <div className="space-y-8">
+          {/* FOLDERS-FIRST DESIGN (Student Experience audit PART 10) — same
+              fix as the Workspace home page: subfolders get their own
+              labeled section instead of being interleaved with notebooks/
+              documents in one undifferentiated grid. */}
+          {filteredSubfolders.length > 0 && (
+            <section>
+              <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
+                {ui.folder.folders}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {filteredSubfolders.map((f) => (
+                  <FolderCard
+                    key={f.id}
+                    folder={f}
+                    onOpen={() => router.push(`/dashboard/workspace/folder/${f.id}`)}
+                    onRename={(name) => renameFolder(f, name)}
+                    onToggleStar={() => toggleFolderStar(f)}
+                    onDelete={() => deleteFolder(f)}
+                    onColorChange={(color) => changeFolderColor(f, color)}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {(filteredNotebooks.length > 0 || filteredDocuments.length > 0) && (
+            <section>
+              <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
+                {ui.folder.documents}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {filteredNotebooks.map((nb) => (
+                  <NotebookCard
+                    key={nb.id}
+                    notebook={nb}
+                    onOpen={() => router.push(`/dashboard/workspace/notebook/${nb.id}`)}
+                    onRename={(name) => renameNotebook(nb, name)}
+                    onToggleStar={() => toggleNotebookStar(nb)}
+                    onDelete={() => deleteNotebook(nb)}
+                  />
+                ))}
+                {filteredDocuments.map((d) => (
+                  <DocumentCard
+                    key={d.id}
+                    document={d}
+                    onOpen={() => router.push(`/dashboard/workspace/document/${d.id}`)}
+                    onRename={(name) => renameDocument(d, name)}
+                    onToggleStar={() => toggleDocumentStar(d)}
+                    onDelete={() => deleteDocument(d)}
+                    onDownload={() => downloadDocument(d)}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       )}
     </WorkspaceShell>
