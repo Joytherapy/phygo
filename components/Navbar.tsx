@@ -217,13 +217,6 @@ export default function Navbar() {
             </a>
           )}
 
-          {isDashboard && isStudent && (
-            <a href="/dashboard/quiz" aria-current={isQuizNavActive ? "page" : undefined} className={desktopLinkClass(isQuizNavActive)}>
-              {quizUi.navLabel}
-              <span className={desktopUnderlineClass(isQuizNavActive)} />
-            </a>
-          )}
-
           {isDashboard && !isStudent && (
             <a href="/dashboard" aria-current={isPatientsNavActive ? "page" : undefined} className={desktopLinkClass(isPatientsNavActive)}>
               {ui.nav.patients}
@@ -264,6 +257,17 @@ export default function Navbar() {
                 )}
               </AnimatePresence>
             </div>
+          )}
+
+          {/* Quiz sits AFTER Library per user request (Library first, then
+              Quiz) — moved here rather than reordered via CSS so the
+              Professional nav's Patients → Library → Schedule → World order
+              (untouched on purpose) never depends on this block's position. */}
+          {isDashboard && isStudent && (
+            <a href="/dashboard/quiz" aria-current={isQuizNavActive ? "page" : undefined} className={desktopLinkClass(isQuizNavActive)}>
+              {quizUi.navLabel}
+              <span className={desktopUnderlineClass(isQuizNavActive)} />
+            </a>
           )}
 
           {isDashboard && !isStudent && (
@@ -529,18 +533,6 @@ export default function Navbar() {
             </a>
           )}
 
-          {isDashboard && isStudent && (
-            <a
-              href="/dashboard/quiz"
-              onClick={() => setOpen(false)}
-              aria-current={isQuizNavActive ? "page" : undefined}
-              className={mobileLinkClass(isQuizNavActive)}
-            >
-              <ListChecks size={14} />
-              {quizUi.navLabel}
-            </a>
-          )}
-
           {isDashboard && !isStudent && (
             <a
               href="/dashboard"
@@ -555,6 +547,20 @@ export default function Navbar() {
           {isDashboard && <div className="h-px bg-ink/10 dark:bg-white/10 my-1" />}
 
           {isDashboard && <LibraryNavMenu variant="mobile" onNavigate={() => setOpen(false)} />}
+
+          {/* Quiz sits AFTER Library per user request — see the matching
+              comment in the desktop nav above. */}
+          {isDashboard && isStudent && (
+            <a
+              href="/dashboard/quiz"
+              onClick={() => setOpen(false)}
+              aria-current={isQuizNavActive ? "page" : undefined}
+              className={mobileLinkClass(isQuizNavActive)}
+            >
+              <ListChecks size={14} />
+              {quizUi.navLabel}
+            </a>
+          )}
 
           {isDashboard && <div className="h-px bg-ink/10 dark:bg-white/10 my-1" />}
 

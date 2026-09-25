@@ -87,6 +87,8 @@ interface WorkspaceDict {
     bookmarked: string
     focusMode: string
     exportPdf: string
+    loadError: string
+    retry: string
   }
   annotate: {
     select: string
@@ -258,6 +260,7 @@ const it: WorkspaceDict = {
     page: 'Pagina', of: 'di', zoomIn: 'Zoom avanti', zoomOut: 'Zoom indietro', fitWidth: 'Adatta larghezza', fitPage: 'Adatta pagina',
     thumbnails: 'Miniature', search: 'Cerca nel documento', searchPlaceholder: 'Cerca nel testo…', noResults: 'Nessun risultato',
     matches: 'risultati', bookmarkPage: 'Segna pagina', bookmarked: 'Pagina segnata', focusMode: 'Modalità focus', exportPdf: 'Esporta PDF',
+    loadError: 'Non è stato possibile aprire questo documento. Controlla la connessione e riprova.', retry: 'Riprova',
   },
   annotate: {
     select: 'Seleziona', pen: 'Penna', line: 'Linea', rectangle: 'Rettangolo', ellipse: 'Cerchio',
@@ -361,6 +364,7 @@ const en: WorkspaceDict = {
     page: 'Page', of: 'of', zoomIn: 'Zoom in', zoomOut: 'Zoom out', fitWidth: 'Fit width', fitPage: 'Fit page',
     thumbnails: 'Thumbnails', search: 'Search document', searchPlaceholder: 'Search text…', noResults: 'No results',
     matches: 'matches', bookmarkPage: 'Bookmark page', bookmarked: 'Page bookmarked', focusMode: 'Focus mode', exportPdf: 'Export PDF',
+    loadError: 'This document could not be opened. Check your connection and try again.', retry: 'Retry',
   },
   annotate: {
     select: 'Select', pen: 'Pen', line: 'Line', rectangle: 'Rectangle', ellipse: 'Circle',
@@ -464,6 +468,7 @@ const es: WorkspaceDict = {
     page: 'Página', of: 'de', zoomIn: 'Acercar', zoomOut: 'Alejar', fitWidth: 'Ajustar ancho', fitPage: 'Ajustar página',
     thumbnails: 'Miniaturas', search: 'Buscar en el documento', searchPlaceholder: 'Buscar texto…', noResults: 'Sin resultados',
     matches: 'resultados', bookmarkPage: 'Marcar página', bookmarked: 'Página marcada', focusMode: 'Modo enfoque', exportPdf: 'Exportar PDF',
+    loadError: 'No se pudo abrir este documento. Comprueba tu conexión e inténtalo de nuevo.', retry: 'Reintentar',
   },
   annotate: {
     select: 'Seleccionar', pen: 'Bolígrafo', line: 'Línea', rectangle: 'Rectángulo', ellipse: 'Círculo',
@@ -567,6 +572,7 @@ const fr: WorkspaceDict = {
     page: 'Page', of: 'sur', zoomIn: 'Zoomer', zoomOut: 'Dézoomer', fitWidth: 'Ajuster à la largeur', fitPage: 'Ajuster à la page',
     thumbnails: 'Miniatures', search: 'Rechercher dans le document', searchPlaceholder: 'Rechercher du texte…', noResults: 'Aucun résultat',
     matches: 'résultats', bookmarkPage: 'Marquer la page', bookmarked: 'Page marquée', focusMode: 'Mode focus', exportPdf: 'Exporter en PDF',
+    loadError: "Impossible d'ouvrir ce document. Vérifiez votre connexion et réessayez.", retry: 'Réessayer',
   },
   annotate: {
     select: 'Sélectionner', pen: 'Stylo', line: 'Ligne', rectangle: 'Rectangle', ellipse: 'Cercle',

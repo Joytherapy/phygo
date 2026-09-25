@@ -12,13 +12,15 @@ import { isQuizSubject, isQuizDifficulty, isQuizLanguage, QUIZ_SUBJECT_SCOPES, t
 const adminSupabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
-const TARGET_POOL_SIZE = 50 // cached questions kept on hand per subject+difficulty+language —
-// user asked for "at least 50 per subject"; since this is per difficulty tier too, a subject
-// with all three difficulties in use ends up with far more than 50 questions overall.
+const TARGET_POOL_SIZE = 100 // cached questions kept on hand per subject+difficulty+language —
+// raised from 50 to 100 per user request ("anatomia vorrei ci fossero almeno 100 domande");
+// since this is per difficulty tier too, a subject with all three difficulties in use ends up
+// with far more than 100 questions overall.
 const QUESTIONS_PER_QUIZ = 8
-const GENERATE_BATCH = 10 // how many new questions to ask the model for on each shortfall call —
-// kept modest so a single quiz-start request doesn't wait too long on OpenAI; the pool climbs
-// toward TARGET_POOL_SIZE a batch at a time across repeated plays, not all at once.
+const GENERATE_BATCH = 15 // how many new questions to ask the model for on each shortfall call —
+// raised from 10 alongside TARGET_POOL_SIZE so a pool climbing to 100 doesn't need twice as many
+// plays to fill; still modest enough that a single quiz-start request (generation call +
+// subject-purity validation call, see validateSubjectPurity below) doesn't wait too long on OpenAI.
 const EXISTING_QUESTIONS_SAMPLE = 50 // how many already-cached questions to show the model, so it avoids near-duplicates
 
 // Questions are generated in whichever of the site's four languages the
@@ -63,6 +65,10 @@ const BODY_SYSTEM_TABLES: Record<string, { struct: string; test: string }> = {
 }
 
 const ALL_STRUCTURE_TABLES = Object.values(BODY_SYSTEM_TABLES).map((t) => t.struct)
+
+// Subjects with no dedicated PHYGO content table to ground on — see the
+// NO-GROUNDING SUBJECTS notes in buildPrompt() and the POST handler below.
+const NO_GROUNDING_SUBJECTS = new Set<QuizSubject>(['biology', 'biochemistry'])
 
 async function fetchContentForSubject(subject: string): Promise<ContentRow[]> {
   if (subject === 'anatomy') {
@@ -142,6 +148,25 @@ function buildPrompt(
           .join('\n')}\n`
       : ''
 
+  // NO-GROUNDING SUBJECTS (biology, biochemistry — added per user request,
+  // "aggiungiamo biologia e biochimica"): PHYGO has no dedicated content
+  // table for these, so `content` is always empty for them. Rather than a
+  // separate/duplicated prompt template, this just swaps the paragraph that
+  // would otherwise point at PHYGO's own snippets for one that leans on the
+  // model's own solid, undergraduate-textbook-level knowledge instead —
+  // still governed by the same SCOPE block above and the same "don't
+  // fabricate uncertain specifics" guardrail as the grounded subjects.
+  const hasGrounding = content.length > 0
+  const specificitySource = hasGrounding ? 'presi dai contenuti forniti sotto' : 'presi dalle tue conoscenze di livello universitario sulla materia'
+  const contentBlock = hasGrounding
+    ? `I contenuti seguenti (forniti in italiano, tratti dal materiale didattico di PHYGO) sono la base di partenza obbligatoria — ogni domanda deve essere coerente con questi e non contraddirli mai:
+
+${snippets}
+${existingBlock}
+Oltre a questi contenuti, puoi integrare — solo per arricchire dettagli, cifre o meccanismi non contraddetti da quanto sopra — nozioni consolidate e ampiamente accettate di anatomia, fisiologia, biomeccanica e riabilitazione, del livello di un manuale universitario di fisioterapia (es. Kendall, Neumann, Kapandji, Stanfield, Hall) e di linee guida cliniche mainstream. NON introdurre invece: dati clinici incerti, studi specifici con numeri/percentuali/anni che non sei certo siano corretti, o affermazioni sperimentali/controverse — in caso di dubbio, resta sul contenuto fornito sopra invece di rischiare un'informazione inventata o imprecisa.`
+    : `PHYGO non ha ancora contenuti dedicati per questa materia, quindi basati direttamente su nozioni consolidate e ampiamente accettate, del livello di un manuale universitario di riferimento per la materia "${subject}" (per la biologia: testi come Alberts "Biologia molecolare della cellula"; per la biochimica: testi come Lehninger, Berg/Tymoczko/Stryer). NON introdurre invece: dati incerti, cifre/percentuali/anni che non sei certo siano corretti, o affermazioni sperimentali/controverse — in caso di dubbio, resta su concetti solidi e ben consolidati invece di rischiare un'informazione inventata o imprecisa.
+${existingBlock}`
+
   return `Sei un assistente didattico per studenti di fisioterapia. Genera esattamente ${count} domande a risposta multipla NUOVE e TRA LORO DIVERSE, scritte interamente in ${languageLabel.toUpperCase()} (testo della domanda, opzioni e spiegazione tutti in ${languageLabel}), sull'argomento "${subject}", livello di difficoltà "${difficulty}".
 
 AMBITO OBBLIGATORIO DELLA MATERIA "${subject}" (SCOPE — vincolo assoluto, più importante di qualunque altra istruzione in questo prompt):
@@ -151,13 +176,9 @@ Se un contenuto fornito sotto tocca un argomento fuori scopo, ignora quella part
 
 ${difficultyGuidance[difficulty] ?? ''}
 
-Le domande devono essere estremamente specifiche: cita nomi precisi (strutture, test, parametri, valori) presi dai contenuti forniti invece di formulazioni generiche o vaghe ("qual è vero riguardo a X" senza dettagli). Ogni domanda deve poter essere risposta correttamente solo da chi conosce davvero il dettaglio specifico citato nei contenuti, non per esclusione logica delle altre opzioni.
+Le domande devono essere estremamente specifiche: cita nomi precisi (strutture, test, parametri, valori) ${specificitySource} invece di formulazioni generiche o vaghe ("qual è vero riguardo a X" senza dettagli). Ogni domanda deve poter essere risposta correttamente solo da chi conosce davvero il dettaglio specifico citato, non per esclusione logica delle altre opzioni.
 
-I contenuti seguenti (forniti in italiano, tratti dal materiale didattico di PHYGO) sono la base di partenza obbligatoria — ogni domanda deve essere coerente con questi e non contraddirli mai:
-
-${snippets}
-${existingBlock}
-Oltre a questi contenuti, puoi integrare — solo per arricchire dettagli, cifre o meccanismi non contraddetti da quanto sopra — nozioni consolidate e ampiamente accettate di anatomia, fisiologia, biomeccanica e riabilitazione, del livello di un manuale universitario di fisioterapia (es. Kendall, Neumann, Kapandji, Stanfield, Hall) e di linee guida cliniche mainstream. NON introdurre invece: dati clinici incerti, studi specifici con numeri/percentuali/anni che non sei certo siano corretti, o affermazioni sperimentali/controverse — in caso di dubbio, resta sul contenuto fornito sopra invece di rischiare un'informazione inventata o imprecisa.
+${contentBlock}
 
 Rispondi SOLO con un array JSON valido (nessun testo fuori dall'array), con questa forma esatta per ciascun elemento:
 {"question": "...", "options": ["...", "...", "...", "..."], "correct_index": 0, "explanation": "..."}
@@ -271,7 +292,12 @@ export async function POST(req: NextRequest) {
       ])
       const existingQuestions = (existingRows.data ?? []).map((r) => r.question).filter(Boolean)
 
-      if (content.length > 0) {
+      // NO-GROUNDING SUBJECTS: biology/biochemistry always come back with
+      // `content.length === 0` (no PHYGO content table backs them), so the
+      // old `content.length > 0` gate would silently generate nothing for
+      // them forever. buildPrompt() already has a no-grounding branch (see
+      // above) for exactly this case.
+      if (content.length > 0 || NO_GROUNDING_SUBJECTS.has(subject)) {
         const completion = await openai.chat.completions.create({
           model: 'gpt-4o-mini',
           messages: [

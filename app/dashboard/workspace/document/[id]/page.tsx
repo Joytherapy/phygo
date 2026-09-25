@@ -53,63 +53,98 @@ export default function WorkspaceDocumentPage() {
   const savedTimeout = useRef<ReturnType<typeof setTimeout>>()
   const pageChangeTimeout = useRef<ReturnType<typeof setTimeout>>()
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+  // RACE-CONDITION FIX ("i libri mi dà errore... Cannot read properties of
+  // null (reading 'sendWithPromise')" — WorkerTransport.getPage): this page
+  // runs under React StrictMode (next.config.js), which deliberately
+  // double-invokes effects in dev — mount → cleanup → mount again. The old
+  // code had no guard against that: BOTH invocations called load(), each
+  // fetching its OWN fresh signed URL and calling setFileUrl with it. If the
+  // FIRST invocation's signed URL had already started loading in
+  // <Document file={...}> (react-pdf begins fetching/parsing immediately)
+  // by the time the SECOND invocation's setFileUrl landed, `file` changed
+  // out from under the mounted <Document> — react-pdf destroys the
+  // in-progress PDFDocumentProxy (nulling its internal worker transport) to
+  // start loading the new URL, and any of the many concurrent getPage()
+  // calls already in flight (main page + up to 31 thumbnail pages, see
+  // PdfViewer.tsx) against the now-destroyed proxy throw exactly this error
+  // when they try to message a transport that no longer exists.
+  //
+  // This was always a possible race, but a SMALL/fast-loading PDF usually
+  // finishes its first load before the second invocation's URL arrives,
+  // masking the bug — a HEAVY PDF takes long enough to fetch/parse that the
+  // window where a second load() can swap `file` out from under it opens
+  // much wider, which is exactly why this only showed up for "PDF pesanti".
+  //
+  // Fixed with the standard stale-effect guard: each load() call receives
+  // an `isStale()` check tied to ITS OWN effect run, and skips every
+  // setState call once its own run has been cleaned up — so only the LATEST
+  // effect invocation's fetch (never the discarded StrictMode dry-run, and
+  // never a stale one from fast in/out navigation) can ever set fileUrl.
+  const load = useCallback(
+    async (isStale: () => boolean) => {
+      setLoading(true)
+      setError(null)
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) {
-      router.push('/login')
-      return
-    }
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (isStale()) return
+      if (!user) {
+        router.push('/login')
+        return
+      }
 
-    const [docRes, urlRes] = await Promise.all([
-      fetch(`/api/workspace/documents/${params.id}`),
-      fetch(`/api/workspace/documents/${params.id}/signed-url`),
-    ])
-    const docJson = await docRes.json()
-    const urlJson = await urlRes.json()
+      const [docRes, urlRes] = await Promise.all([
+        fetch(`/api/workspace/documents/${params.id}`),
+        fetch(`/api/workspace/documents/${params.id}/signed-url`),
+      ])
+      const docJson = await docRes.json()
+      const urlJson = await urlRes.json()
+      if (isStale()) return
 
-    if (!docRes.ok) {
-      setError(docJson.error || 'Document not found.')
+      if (!docRes.ok) {
+        setError(docJson.error || 'Document not found.')
+        setLoading(false)
+        return
+      }
+      if (!urlRes.ok) {
+        setError(urlJson.error || 'Could not open this document.')
+        setLoading(false)
+        return
+      }
+
+      const [annRes, bmRes] = await Promise.all([
+        fetch(`/api/workspace/annotations?targetType=document&targetId=${params.id}`),
+        supabase
+          .from('workspace_bookmarks')
+          .select('id, page_number')
+          .eq('owner_id', user.id)
+          .eq('document_id', params.id),
+      ])
+      const annJson = await annRes.json()
+      if (isStale()) return
+
+      setDocument(docJson.document)
+      setFileUrl(urlJson.url)
+      setAnnotations(annRes.ok ? annJson.annotations : [])
+      setBookmarks(bmRes.data || [])
       setLoading(false)
-      return
-    }
-    if (!urlRes.ok) {
-      setError(urlJson.error || 'Could not open this document.')
-      setLoading(false)
-      return
-    }
 
-    const [annRes, bmRes] = await Promise.all([
-      fetch(`/api/workspace/annotations?targetType=document&targetId=${params.id}`),
-      supabase
-        .from('workspace_bookmarks')
-        .select('id, page_number')
-        .eq('owner_id', user.id)
-        .eq('document_id', params.id),
-    ])
-    const annJson = await annRes.json()
-
-    setDocument(docJson.document)
-    setFileUrl(urlJson.url)
-    setAnnotations(annRes.ok ? annJson.annotations : [])
-    setBookmarks(bmRes.data || [])
-    setLoading(false)
-
-    // Mark as opened "now" — the read side of Continue Studying / Recent.
-    fetch(`/api/workspace/documents/${params.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ touch_opened: true }),
-    })
-  }, [params.id, router, supabase])
+      // Mark as opened "now" — the read side of Continue Studying / Recent.
+      fetch(`/api/workspace/documents/${params.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ touch_opened: true }),
+      })
+    },
+    [params.id, router, supabase]
+  )
 
   useEffect(() => {
-    load()
+    let stale = false
+    load(() => stale)
     return () => {
+      stale = true
       clearTimeout(savedTimeout.current)
       clearTimeout(pageChangeTimeout.current)
     }
@@ -137,8 +172,39 @@ export default function WorkspaceDocumentPage() {
   // selection), pen stroke, straight line, rectangle, ellipse. Each one is
   // still its own row in workspace_annotations (type 'highlight'|'stroke'|
   // 'shape'), never a modification of the original PDF.
+  //
+  // OPTIMISTIC CREATE FIX ("draws it, then reloads it"): this used to wait
+  // for the full POST round-trip (300-500ms, per real logs) before calling
+  // setAnnotations — so AnnotationCanvas's live DOM-only preview (see its
+  // own SPEED/FLUIDITY PASS notes) would disappear the instant the pointer
+  // lifted, then the actual stroke wouldn't reappear until the network
+  // request resolved: a visible gap that read as "draw, then reload".
+  // handleDeleteAnnotation/handleUpdateAnnotation below were already
+  // optimistic; this brings create (and redo, right below) in line with
+  // them. A temp id renders immediately and is swapped for the server's
+  // real id once the request settles — or rolled back on failure. If the
+  // user undoes/deletes the stroke again before the server even confirmed
+  // it, the now-late server row is deleted right after it lands, so nothing
+  // reappears on the next reload.
   const handleCreateAnnotation = async (pageNumber: number, annotation: CreatableAnnotation) => {
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+    const optimistic: WorkspaceAnnotation = {
+      id: tempId,
+      owner_id: '',
+      target_type: 'document',
+      target_id: String(params.id),
+      page_number: pageNumber,
+      type: annotation.type,
+      data: annotation.data,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      deleted_at: null,
+    }
+    setAnnotations((prev) => [...prev, optimistic])
+    setUndoStack((prev) => [...prev, tempId])
+    setRedoStack([]) // a fresh action invalidates whatever could have been redone
     setSavingStatus('saving')
+
     const res = await fetch('/api/workspace/annotations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -152,12 +218,25 @@ export default function WorkspaceDocumentPage() {
     })
     const json = await res.json()
     if (res.ok) {
-      setAnnotations((prev) => [...prev, json.annotation])
-      setUndoStack((prev) => [...prev, json.annotation.id])
-      setRedoStack([]) // a fresh action invalidates whatever could have been redone
-      setSavingStatus('saved')
-      savedTimeout.current = setTimeout(() => setSavingStatus('idle'), 1200)
+      let stillPresent = true
+      setAnnotations((prev) => {
+        if (!prev.some((a) => a.id === tempId)) {
+          stillPresent = false
+          return prev
+        }
+        return prev.map((a) => (a.id === tempId ? json.annotation : a))
+      })
+      setUndoStack((prev) => prev.map((id) => (id === tempId ? json.annotation.id : id)))
+      if (!stillPresent) {
+        fetch(`/api/workspace/annotations/${json.annotation.id}`, { method: 'DELETE' })
+      } else {
+        setSavingStatus('saved')
+        clearTimeout(savedTimeout.current)
+        savedTimeout.current = setTimeout(() => setSavingStatus('idle'), 1200)
+      }
     } else {
+      setAnnotations((prev) => prev.filter((a) => a.id !== tempId))
+      setUndoStack((prev) => prev.filter((id) => id !== tempId))
       setSavingStatus('idle')
     }
   }
@@ -202,7 +281,21 @@ export default function WorkspaceDocumentPage() {
     if (redoStack.length === 0) return
     const annotation = redoStack[redoStack.length - 1]
     setRedoStack((prev) => prev.slice(0, -1))
+
+    // Same optimistic treatment as handleCreateAnnotation above — see its
+    // comment for why.
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+    const optimistic: WorkspaceAnnotation = {
+      ...annotation,
+      id: tempId,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      deleted_at: null,
+    }
+    setAnnotations((prev) => [...prev, optimistic])
+    setUndoStack((prev) => [...prev, tempId])
     setSavingStatus('saving')
+
     const res = await fetch('/api/workspace/annotations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -216,11 +309,25 @@ export default function WorkspaceDocumentPage() {
     })
     const json = await res.json()
     if (res.ok) {
-      setAnnotations((prev) => [...prev, json.annotation])
-      setUndoStack((prev) => [...prev, json.annotation.id])
-      setSavingStatus('saved')
-      savedTimeout.current = setTimeout(() => setSavingStatus('idle'), 1200)
+      let stillPresent = true
+      setAnnotations((prev) => {
+        if (!prev.some((a) => a.id === tempId)) {
+          stillPresent = false
+          return prev
+        }
+        return prev.map((a) => (a.id === tempId ? json.annotation : a))
+      })
+      setUndoStack((prev) => prev.map((id) => (id === tempId ? json.annotation.id : id)))
+      if (!stillPresent) {
+        fetch(`/api/workspace/annotations/${json.annotation.id}`, { method: 'DELETE' })
+      } else {
+        setSavingStatus('saved')
+        clearTimeout(savedTimeout.current)
+        savedTimeout.current = setTimeout(() => setSavingStatus('idle'), 1200)
+      }
     } else {
+      setAnnotations((prev) => prev.filter((a) => a.id !== tempId))
+      setUndoStack((prev) => prev.filter((id) => id !== tempId))
       setSavingStatus('idle')
     }
   }

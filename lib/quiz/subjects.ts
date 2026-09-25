@@ -21,6 +21,8 @@ import { APP_LANGS, type AppLang } from '@/lib/i18n/uiStrings'
 // systems already wired for the Smart Study Panel's own matching.
 export const QUIZ_SUBJECTS = [
   'anatomy',
+  'biology',
+  'biochemistry',
   'neurology',
   'physiology',
   'sportsMedicine',
@@ -74,6 +76,18 @@ export const QUIZ_SUBJECT_SCOPES: Record<QuizSubject, QuizSubjectScope> = {
       'Anatomia pura, di qualunque sistema corporeo: struttura, forma, posizione, origine/inserzione, rapporti anatomici, decorso, nomenclatura di ossa, muscoli, articolazioni, organi, vasi, nervi.',
     outOfScope:
       'Funzione fisiologica, meccanismi di regolazione, valori normali/di laboratorio, fisiologia dell\'esercizio, gestione clinica di patologie, riabilitazione — anche se riguardano una struttura anatomica nominata sopra, quelle domande appartengono ad altre materie (physiology, sportsMedicine, o il sistema corporeo specifico), non ad anatomy.',
+  },
+  biology: {
+    inScope:
+      'Biologia generale propedeutica alla fisioterapia: biologia cellulare (organelli, membrana, ciclo cellulare), genetica di base, biologia molecolare essenziale, istologia dei tessuti (epiteliale, connettivo, muscolare, nervoso), biologia dello sviluppo essenziale.',
+    outOfScope:
+      'Vie metaboliche e biomolecole nel dettaglio biochimico (biochemistry); anatomia macroscopica di organi/strutture (anatomy); fisiologia dei sistemi corporei (physiology o il sistema specifico).',
+  },
+  biochemistry: {
+    inScope:
+      'Biochimica: struttura e funzione delle biomolecole (proteine, carboidrati, lipidi, acidi nucleici), enzimi e cinetica enzimatica, vie metaboliche essenziali (glicolisi, ciclo di Krebs, fosforilazione ossidativa, sintesi/degradazione di glicogeno e lipidi), bioenergetica cellulare.',
+    outOfScope:
+      'Biologia cellulare generale non centrata su una via/molecola biochimica specifica (biology); fisiologia dell\'esercizio e adattamenti metabolici all\'allenamento (sportsMedicine); anatomia (anatomy).',
   },
   neurology: {
     inScope:

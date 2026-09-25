@@ -35,7 +35,10 @@ type ProgressBySubject = Record<
 type View = 'subjects' | 'difficulty' | 'quiz' | 'results'
 
 function subjectLabel(key: QuizSubject, ui: any, quizUi: ReturnType<typeof useQuizUi>) {
-  if (key === 'anatomy') return quizUi.subjects.anatomy
+  // 'anatomy'/'biology'/'biochemistry' are quiz-only subjects with no
+  // matching Library section, so they get their own label from quizStrings
+  // instead of ui.libraryLinks — see the interface comment there.
+  if (key === 'anatomy' || key === 'biology' || key === 'biochemistry') return quizUi.subjects[key]
   return ui.libraryLinks?.[key]?.label ?? key
 }
 

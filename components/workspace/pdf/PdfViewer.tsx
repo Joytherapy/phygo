@@ -95,6 +95,10 @@ export default function PdfViewer({
   // no askOpen/onToggleAsk props needed from the parent page anymore.
   const { open: askOpen, toggle: toggleAsk } = useAsk()
   const [numPages, setNumPages] = useState<number | null>(null)
+  // Only feeds the "Retry" button's reset below — react-pdf's own internal
+  // status is what actually decides whether the `error` prop's fallback UI
+  // shows, this doesn't gate that render itself.
+  const [, setLoadError] = useState(false)
   const [pageNumber, setPageNumber] = useState(Math.max(1, initialPage || 1))
   const [scale, setScale] = useState(1.1)
   const [fitWidth, setFitWidth] = useState(true)
@@ -357,10 +361,32 @@ export default function PdfViewer({
             setNumPages(n)
             onPageChange(pageNumber, n)
           }}
+          // Previously missing entirely — a failed load (expired/invalid
+          // signed URL, network error, an upload that never fully finished)
+          // had no visible fallback, just a document that silently never
+          // rendered. A heavy PDF is more likely to hit a real network
+          // hiccup mid-load simply because it takes longer, so this matters
+          // more for exactly the files this was reported against.
+          onLoadError={() => setLoadError(true)}
           className="flex-1 min-h-0 flex flex-col"
           loading={
             <div className="flex items-center justify-center py-24 text-ink/40 dark:text-white/40">
               <Loader2 size={18} className="animate-spin" />
+            </div>
+          }
+          error={
+            <div className="flex flex-col items-center justify-center gap-3 py-24 text-center">
+              <p className="text-sm text-ink/50 dark:text-white/50 max-w-xs">{ui.reader.loadError}</p>
+              <button
+                onClick={() => {
+                  setLoadError(false)
+                  window.location.reload()
+                }}
+                className="rounded-full px-4 py-2 text-xs font-semibold text-white shadow-soft transition-transform hover:scale-[1.02]"
+                style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+              >
+                {ui.reader.retry}
+              </button>
             </div>
           }
         >

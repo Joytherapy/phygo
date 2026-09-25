@@ -15,11 +15,13 @@ interface QuizDict {
   navLabel: string
   pageTitle: string
   pageSubtitle: string
-  // Only 'anatomy' needs its own label here — every other subject key
-  // already has a label in the shared ui.libraryLinks dictionary and is
-  // read from there instead, to avoid maintaining the same translation
-  // twice (see getQuizSubjectLabel in app/dashboard/quiz/page.tsx).
-  subjects: { anatomy: string }
+  // 'anatomy', 'biology' and 'biochemistry' need their own label here since
+  // they have no matching entry in the shared ui.libraryLinks dictionary
+  // (they're quiz-only subjects, not Library sections) — every other
+  // subject key already has a label there and is read from there instead,
+  // to avoid maintaining the same translation twice (see subjectLabel() in
+  // app/dashboard/quiz/page.tsx).
+  subjects: { anatomy: string; biology: string; biochemistry: string }
   difficulty: { easy: string; medium: string; hard: string }
   difficultyPrompt: string
   startButton: string
@@ -48,7 +50,7 @@ const it: QuizDict = {
   navLabel: 'Quiz',
   pageTitle: 'Quiz PHYGO',
   pageSubtitle: 'Mettiti alla prova sulle materie fondamentali, con domande generate dai contenuti PHYGO.',
-  subjects: { anatomy: 'Anatomia' },
+  subjects: { anatomy: 'Anatomia', biology: 'Biologia', biochemistry: 'Biochimica' },
   difficulty: { easy: 'Facile', medium: 'Medio', hard: 'Difficile' },
   difficultyPrompt: 'Scegli il livello',
   startButton: 'Inizia il quiz',
@@ -77,7 +79,7 @@ const en: QuizDict = {
   navLabel: 'Quiz',
   pageTitle: 'PHYGO Quizzes',
   pageSubtitle: 'Test yourself on the foundational subjects, with questions generated from PHYGO content.',
-  subjects: { anatomy: 'Anatomy' },
+  subjects: { anatomy: 'Anatomy', biology: 'Biology', biochemistry: 'Biochemistry' },
   difficulty: { easy: 'Easy', medium: 'Medium', hard: 'Hard' },
   difficultyPrompt: 'Choose a level',
   startButton: 'Start quiz',
@@ -106,7 +108,7 @@ const es: QuizDict = {
   navLabel: 'Quiz',
   pageTitle: 'Quiz de PHYGO',
   pageSubtitle: 'Ponte a prueba en las materias fundamentales, con preguntas generadas a partir de los contenidos de PHYGO.',
-  subjects: { anatomy: 'Anatomía' },
+  subjects: { anatomy: 'Anatomía', biology: 'Biología', biochemistry: 'Bioquímica' },
   difficulty: { easy: 'Fácil', medium: 'Medio', hard: 'Difícil' },
   difficultyPrompt: 'Elige el nivel',
   startButton: 'Iniciar quiz',
@@ -135,7 +137,7 @@ const fr: QuizDict = {
   navLabel: 'Quiz',
   pageTitle: 'Quiz PHYGO',
   pageSubtitle: 'Teste tes connaissances sur les matières fondamentales, avec des questions générées à partir des contenus PHYGO.',
-  subjects: { anatomy: 'Anatomie' },
+  subjects: { anatomy: 'Anatomie', biology: 'Biologie', biochemistry: 'Biochimie' },
   difficulty: { easy: 'Facile', medium: 'Moyen', hard: 'Difficile' },
   difficultyPrompt: 'Choisis un niveau',
   startButton: 'Commencer le quiz',
