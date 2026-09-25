@@ -8,8 +8,8 @@
 // — never a wall of buttons for every tool at once.
 
 import { useEffect, useRef, useState } from 'react'
-import { MousePointer2, Pencil, Highlighter, Eraser, Type, Minus, Square, Circle, MoreHorizontal, Undo2, Redo2 } from 'lucide-react'
-import { HIGHLIGHT_COLORS, PEN_COLORS, TEXT_COLORS, type AnnotationTool, type ImageAnnotationData } from '@/lib/workspace/types'
+import { MousePointer2, Pencil, Highlighter, Eraser, Type, Minus, Square, Circle, MoreHorizontal, Undo2, Redo2, Ban } from 'lucide-react'
+import { HIGHLIGHT_COLORS, PEN_COLORS, TEXT_COLORS, TEXT_BACKGROUND_COLORS, type AnnotationTool, type ImageAnnotationData } from '@/lib/workspace/types'
 import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
 import InsertImageButton from './InsertImageButton'
 
@@ -30,6 +30,8 @@ export default function AnnotationToolbar({
   onInkColorChange,
   textColor,
   onTextColorChange,
+  textBackground,
+  onTextBackgroundChange,
   markerColor,
   onMarkerColorChange,
   width,
@@ -51,6 +53,12 @@ export default function AnnotationToolbar({
   onInkColorChange: (c: string) => void
   textColor: string
   onTextColorChange: (c: string) => void
+  /** Optional text-box background — `null` means no background (the
+   *  default: a transparent box, per user request); a swatch from
+   *  TEXT_BACKGROUND_COLORS is something the user opts into, never
+   *  pre-set. */
+  textBackground: string | null
+  onTextBackgroundChange: (c: string | null) => void
   markerColor: string
   onMarkerColorChange: (c: string) => void
   width: number
@@ -290,6 +298,30 @@ export default function AnnotationToolbar({
                 onClick={() => onTextColorChange(c)}
                 aria-label={c}
                 className={`h-5 w-5 rounded-full border transition-transform ${textColor === c ? 'scale-110 border-ink dark:border-white' : 'border-black/10 dark:border-white/20'}`}
+                style={{ backgroundColor: c }}
+              />
+            ))}
+          </div>
+          {/* Background is opt-in, never pre-set — "None" (transparent) is
+              first and selected by default, matching a fresh text box. */}
+          <div className="mx-1 h-5 w-px bg-black/[0.08] dark:bg-white/10" />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => onTextBackgroundChange(null)}
+              aria-label={ui.annotate.noBackground}
+              title={ui.annotate.noBackground}
+              className={`flex h-5 w-5 items-center justify-center rounded-full border bg-[repeating-conic-gradient(#00000014_0%_25%,transparent_0%_50%)] bg-[length:6px_6px] transition-transform ${
+                textBackground === null ? 'scale-110 border-ink dark:border-white' : 'border-black/10 dark:border-white/20'
+              }`}
+            >
+              <Ban size={11} className="text-ink/40 dark:text-white/40" />
+            </button>
+            {TEXT_BACKGROUND_COLORS.map((c) => (
+              <button
+                key={c}
+                onClick={() => onTextBackgroundChange(c)}
+                aria-label={c}
+                className={`h-5 w-5 rounded-full border transition-transform ${textBackground === c ? 'scale-110 border-ink dark:border-white' : 'border-black/10 dark:border-white/20'}`}
                 style={{ backgroundColor: c }}
               />
             ))}

@@ -52,10 +52,11 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
   const ui = useUiStrings()
   const navUi = useLibraryNavUi()
   const [search, setSearch] = useState('')
-  // First category open by default (the largest/most-used group); a search
-  // temporarily force-opens whichever categories actually match, without
-  // disturbing this saved state once the search is cleared again.
-  const [expanded, setExpanded] = useState<Set<string>>(() => new Set([LIBRARY_CATEGORIES[0].id]))
+  // All categories start CLOSED (per user request — the user opens only the
+  // one they need, instead of the first category always taking up space); a
+  // search temporarily force-opens whichever categories actually match,
+  // without disturbing this saved state once the search is cleared again.
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set<string>())
 
   const linksByKey = useMemo(
     () => Object.fromEntries(libraryLinkHrefs.map((l) => [l.key, l])) as Record<LibraryLinkKey, (typeof libraryLinkHrefs)[number]>,

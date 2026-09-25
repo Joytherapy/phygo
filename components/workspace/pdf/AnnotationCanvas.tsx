@@ -174,6 +174,37 @@ function clamp01(n: number) {
   return Math.min(1, Math.max(0, n))
 }
 
+// HIGHLIGHTER STRAIGHT-LINE ASSIST (GoodNotes-style, per user request): a
+// highlighter is almost always used to mark a straight run of text — an
+// underline — so a drag that's already close to straight gets SNAPPED to a
+// perfectly straight segment instead of keeping the natural hand wobble a
+// freehand pen stroke is supposed to have. Only used for the highlighter
+// tool in finish() below; the pen keeps its full freehand fidelity.
+//
+// Measures the largest perpendicular distance from any sampled point to the
+// straight chord between the stroke's first and last point. A small amount
+// of deviation — relative to the stroke's own length, with a small absolute
+// floor so short strokes aren't judged too strictly — is treated as "trying
+// to draw straight" and snaps; a genuinely curved/zigzag drag is left alone.
+function isNearlyStraight(points: Point[]): boolean {
+  if (points.length < 3) return true
+  const p0 = points[0]
+  const p1 = points[points.length - 1]
+  const dx = p1.x - p0.x
+  const dy = p1.y - p0.y
+  const len = Math.hypot(dx, dy)
+  if (len < 0.002) return false // too short a drag to judge — keep it freehand
+  let maxDev = 0
+  for (let i = 1; i < points.length - 1; i++) {
+    const t = ((points[i].x - p0.x) * dx + (points[i].y - p0.y) * dy) / (len * len)
+    const projX = p0.x + t * dx
+    const projY = p0.y + t * dy
+    const dist = Math.hypot(points[i].x - projX, points[i].y - projY)
+    if (dist > maxDev) maxDev = dist
+  }
+  return maxDev < Math.max(0.004, len * 0.05)
+}
+
 // Catmull-Rom → cubic Bézier smoothing (see SMOOTHING/GEOMETRY note above).
 // Accepts either [x, y, pressure?] tuples (StrokeData.points' exact shape)
 // or {x, y} objects (the live in-progress point list) via a small normalizer.
@@ -509,7 +540,10 @@ export default function AnnotationCanvas({
     const { start, points, tool: activeTool } = state
     if (FREEHAND_TOOLS.includes(activeTool)) {
       if (points.length < 2) return
-      onCreateStroke({ tool: activeTool as 'pen' | 'highlighter', color, width, points: points.map((p): [number, number] => [p.x, p.y]) })
+      // See HIGHLIGHTER STRAIGHT-LINE ASSIST above — the pen is untouched,
+      // only the highlighter snaps.
+      const finalPoints = activeTool === 'highlighter' && isNearlyStraight(points) ? [points[0], points[points.length - 1]] : points
+      onCreateStroke({ tool: activeTool as 'pen' | 'highlighter', color, width, points: finalPoints.map((p): [number, number] => [p.x, p.y]) })
       return
     }
 

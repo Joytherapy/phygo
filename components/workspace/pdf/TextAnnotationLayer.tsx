@@ -20,6 +20,7 @@ export default function TextAnnotationLayer({
   annotations,
   tool,
   color,
+  backgroundColor,
   onCreate,
   onUpdate,
   onDelete,
@@ -27,6 +28,10 @@ export default function TextAnnotationLayer({
   annotations: WorkspaceAnnotation[] // this page's 'text' annotations only
   tool: AnnotationTool
   color: string
+  /** Currently selected toolbar background for a NEW note — `null` means no
+   *  background (the default). Existing notes each keep their own persisted
+   *  `data.backgroundColor` regardless of what's currently selected. */
+  backgroundColor: string | null
   onCreate: (data: TextAnnotationData) => void
   onUpdate: (id: string, data: Partial<TextAnnotationData>) => void
   onDelete: (id: string) => void
@@ -50,7 +55,7 @@ export default function TextAnnotationLayer({
     if (!draft) return
     const body = draft.body.trim()
     setDraft(null)
-    if (body) onCreate({ x: draft.x, y: draft.y, body, color, fontSize: DEFAULT_FONT_SIZE, width: DEFAULT_BOX_WIDTH })
+    if (body) onCreate({ x: draft.x, y: draft.y, body, color, fontSize: DEFAULT_FONT_SIZE, width: DEFAULT_BOX_WIDTH, backgroundColor })
   }
 
   const handleDragStart = (e: ReactPointerEvent, annotation: WorkspaceAnnotation) => {
@@ -93,17 +98,31 @@ export default function TextAnnotationLayer({
       {annotations.map((a) => {
         const data = a.data as TextAnnotationData
         const pos = dragPreview && dragPreview.id === a.id ? dragPreview : { x: data.x, y: data.y }
+        // NO BACKGROUND BY DEFAULT (per user request): a note with no
+        // persisted `backgroundColor` renders fully transparent — just the
+        // text floating over the page — with a border that only appears on
+        // hover/focus as an editing affordance, instead of the old hardcoded
+        // bg-white/90 dark:bg-[#171821]/90 box (which, combined with the
+        // default dark text color, was reading as near-invisible dark-on-
+        // dark text in dark mode). A note WITH a chosen background keeps a
+        // visible box at all times, exactly like a real sticky note.
+        const bg = data.backgroundColor ?? null
         return (
           <div
             key={a.id}
             onClick={(e) => e.stopPropagation()}
-            className="group absolute rounded-lg border border-black/10 dark:border-white/15 bg-white/90 dark:bg-[#171821]/90 backdrop-blur-sm shadow-soft"
+            className={`group absolute rounded-lg backdrop-blur-sm transition-colors ${
+              bg
+                ? 'border border-black/10 dark:border-white/15 shadow-soft'
+                : 'border border-transparent hover:border-black/10 dark:hover:border-white/15 focus-within:border-black/20 dark:focus-within:border-white/20'
+            }`}
             style={{
               left: `${pos.x * 100}%`,
               top: `${pos.y * 100}%`,
               width: `${(data.width ?? DEFAULT_BOX_WIDTH) * 100}%`,
               pointerEvents: boxesInteractive ? 'auto' : 'none',
               minWidth: 90,
+              backgroundColor: bg ?? 'transparent',
             }}
           >
             {boxesInteractive && (
@@ -142,8 +161,21 @@ export default function TextAnnotationLayer({
 
       {draft && (
         <div
-          className="absolute rounded-lg border border-[#4F7CFF]/40 bg-white/95 dark:bg-[#171821]/95 shadow-lift"
-          style={{ left: `${draft.x * 100}%`, top: `${draft.y * 100}%`, width: `${DEFAULT_BOX_WIDTH * 100}%`, pointerEvents: 'auto', minWidth: 90 }}
+          // Mirrors the currently-selected background so what's shown while
+          // typing matches what gets saved: a dashed outline (no fill) when
+          // no background is selected (the default), a solid preview box
+          // when the user picked one from the toolbar.
+          className={`absolute rounded-lg backdrop-blur-sm ${
+            backgroundColor ? 'border border-[#4F7CFF]/40 shadow-lift' : 'border border-dashed border-[#4F7CFF]/50'
+          }`}
+          style={{
+            left: `${draft.x * 100}%`,
+            top: `${draft.y * 100}%`,
+            width: `${DEFAULT_BOX_WIDTH * 100}%`,
+            pointerEvents: 'auto',
+            minWidth: 90,
+            backgroundColor: backgroundColor ?? 'transparent',
+          }}
         >
           <textarea
             autoFocus

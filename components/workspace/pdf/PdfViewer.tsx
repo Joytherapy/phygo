@@ -104,6 +104,8 @@ export default function PdfViewer({
   const [tool, setTool] = useState<AnnotationTool>('select')
   const [inkColor, setInkColor] = useState<string>(PEN_COLORS[0])
   const [textColor, setTextColor] = useState<string>(TEXT_COLORS[0])
+  // `null` = no background (the default — see TextAnnotationData.backgroundColor).
+  const [textBackground, setTextBackground] = useState<string | null>(null)
   const [markerColor, setMarkerColor] = useState<string>(HIGHLIGHT_COLORS[0])
   const [inkWidth, setInkWidth] = useState(3.5)
   const [markerWidth, setMarkerWidth] = useState(16)
@@ -320,6 +322,8 @@ export default function PdfViewer({
             onInkColorChange={setInkColor}
             textColor={textColor}
             onTextColorChange={setTextColor}
+            textBackground={textBackground}
+            onTextBackgroundChange={setTextBackground}
             markerColor={markerColor}
             onMarkerColorChange={setMarkerColor}
             width={inkWidth}
@@ -444,6 +448,7 @@ export default function PdfViewer({
                   annotations={pageText}
                   tool={tool}
                   color={textColor}
+                  backgroundColor={textBackground}
                   onCreate={(data) => onCreateAnnotation(pageNumber, { type: 'text', data })}
                   onUpdate={onUpdateAnnotation}
                   onDelete={onDeleteAnnotation}

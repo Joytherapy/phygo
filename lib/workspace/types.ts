@@ -103,7 +103,20 @@ export type StrokeData = {
   points: Array<[number, number, number?]> // normalized 0..1 x, y, optional pressure
 }
 
-export type TextAnnotationData = { x: number; y: number; body: string; color: string; fontSize?: number; width?: number }
+// `backgroundColor` is OPTIONAL and undefined/null by default — a text box
+// starts with NO background (fully transparent, floating over the page) and
+// the user opts into a solid "sticky note" background from the toolbar; see
+// TEXT_BACKGROUND_COLORS below and the NO-BACKGROUND-BY-DEFAULT fix in
+// TextAnnotationLayer.tsx.
+export type TextAnnotationData = {
+  x: number
+  y: number
+  body: string
+  color: string
+  fontSize?: number
+  width?: number
+  backgroundColor?: string | null
+}
 
 // An inserted/photographed image (PHYGO Workspace — "insert a photo like
 // GoodNotes"). Only `x`/`y`/`width` are normalized 0..1 page-fraction
@@ -207,7 +220,20 @@ export type WorkspaceItem =
 // result still read clearly as yellow/green/blue/pink/orange rather than
 // as five shades of "faint". See AnnotationCanvas's opacity constant for
 // the other half of this fix.
-export const HIGHLIGHT_COLORS = ['#FFE066', '#5CE488', '#4FC3FF', '#FF7FC0', '#FFAB4A'] as const
+// Expanded per user request ("aggiungi altri colori evidenziatore") — kept
+// the same genuinely-saturated-color rule as the original five (see the
+// comment above) so every added hue still reads clearly once multiply-
+// blended, instead of washing out like a pale pastel would.
+export const HIGHLIGHT_COLORS = [
+  '#FFE066', // yellow
+  '#5CE488', // green
+  '#4FC3FF', // blue
+  '#FF7FC0', // pink
+  '#FFAB4A', // orange
+  '#B583FF', // purple
+  '#2DD4BF', // teal
+  '#FF5C5C', // red/coral
+] as const
 
 // Pen/shape ink colors. IMPORTANT: PDF pages render on an opaque white
 // canvas background almost universally, regardless of PHYGO's own dark
@@ -219,6 +245,13 @@ export const HIGHLIGHT_COLORS = ['#FFE066', '#5CE488', '#4FC3FF', '#FF7FC0', '#F
 // "ink" color and reusing PHYGO's own brand accents for the rest.
 export const PEN_COLORS = ['#1E293B', '#4F7CFF', '#32D6A0', '#F97316', '#EF4444'] as const
 export const TEXT_COLORS = ['#0F172A', '#4F7CFF', '#32D6A0', '#F97316', '#EF4444'] as const
+
+// Optional "sticky note" backgrounds for the Text tool — NOT applied by
+// default (see TextAnnotationData.backgroundColor above); the user picks one
+// from the toolbar only if they actually want a filled note background. The
+// dark slate option exists so a background is still usable/legible for
+// light-colored text (see TEXT_COLORS / PEN_COLORS_ON_DARK).
+export const TEXT_BACKGROUND_COLORS = ['#FFFFFF', '#FEF3C7', '#DBEAFE', '#DCFCE7', '#1E293B'] as const
 
 // Predefined PHYGO folder colors — kept as a fixed, curated set (not a raw
 // color wheel) so the Workspace stays visually calm; see PHYGO Workspace

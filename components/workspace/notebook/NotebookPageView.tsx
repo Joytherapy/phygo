@@ -136,6 +136,8 @@ export default function NotebookPageView({
   // already chose themselves.
   const [inkColor, setInkColor] = useState<string>(paperIsDark ? PEN_COLORS_ON_DARK[0] : PEN_COLORS[0])
   const [textColor, setTextColor] = useState<string>(TEXT_COLORS[0])
+  // `null` = no background (the default — see TextAnnotationData.backgroundColor).
+  const [textBackground, setTextBackground] = useState<string | null>(null)
   const [markerColor, setMarkerColor] = useState<string>(HIGHLIGHT_COLORS[0])
   const [inkWidth, setInkWidth] = useState(3.5)
   const [markerWidth, setMarkerWidth] = useState(16)
@@ -357,6 +359,8 @@ export default function NotebookPageView({
           onInkColorChange={setInkColor}
           textColor={textColor}
           onTextColorChange={setTextColor}
+          textBackground={textBackground}
+          onTextBackgroundChange={setTextBackground}
           markerColor={markerColor}
           onMarkerColorChange={setMarkerColor}
           width={inkWidth}
@@ -403,6 +407,7 @@ export default function NotebookPageView({
             annotations={annotations.filter((a) => a.type === 'text')}
             tool={tool}
             color={textColor}
+            backgroundColor={textBackground}
             onCreate={(data) => onCreateAnnotation({ type: 'text', data })}
             onUpdate={onUpdateAnnotation}
             onDelete={onDeleteAnnotation}
