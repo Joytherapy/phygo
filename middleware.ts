@@ -49,6 +49,32 @@ if (user && request.nextUrl.pathname.startsWith('/dashboard')) {
     url.pathname = '/my-phygo/home'
     return NextResponse.redirect(url)
   }
+
+  // PHYGO Student / Professional modes (see sql/2026-09_role_aware.sql).
+  // Nav-level hiding (components/Navbar.tsx) is a UX convenience, not
+  // security — this is the actual server-side enforcement: a Student
+  // account is redirected away from the Professional clinical workflow
+  // (Patients, Agenda) even if it's linked or typed directly, and lands on
+  // Workspace (its home base) instead of the Patients dashboard root.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('practice_stage')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (profile?.practice_stage === 'student') {
+    const path = request.nextUrl.pathname
+    const isProfessionalOnlyRoute =
+      path === '/dashboard' ||
+      path.startsWith('/dashboard/patients') ||
+      path.startsWith('/dashboard/agenda')
+
+    if (isProfessionalOnlyRoute) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard/workspace'
+      return NextResponse.redirect(url)
+    }
+  }
 }
 
   return response

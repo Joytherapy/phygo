@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Camera, Plus, X, Loader2, Check, Award, BadgeCheck } from 'lucide-react'
+import { ArrowLeft, Camera, Plus, X, Loader2, Check, Award, BadgeCheck, GraduationCap, Stethoscope } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import { useUiStrings } from '@/contexts/LanguageContext'
+import { useRoleUi, type PracticeStage } from '@/lib/i18n/roleStrings'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,12 +22,22 @@ export default function ProfilePage() {
   const ui = useUiStrings()
   const t = ui.profilePage
   const common = ui.common
+  const roleUi = useRoleUi()
 
   const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [saved, setSaved] = useState(false)
+
+  // "Become a Professional" transition (see sql/2026-09_role_aware.sql) — a
+  // Student account keeps its whole Workspace, folders, documents, notebooks
+  // and preferences; only practice_stage changes, which unlocks Patients and
+  // Agenda in the main navigation (components/Navbar.tsx, middleware.ts).
+  const [practiceStage, setPracticeStage] = useState<PracticeStage>('professional')
+  const [confirmingActivate, setConfirmingActivate] = useState(false)
+  const [activating, setActivating] = useState(false)
+  const [activated, setActivated] = useState(false)
 
   const [displayName, setDisplayName] = useState('')
   const [bio, setBio] = useState('')
@@ -46,7 +57,7 @@ export default function ProfilePage() {
 
       const { data } = await supabase
         .from('profiles')
-        .select('display_name, bio, avatar_url, credentials, registration_number')
+        .select('display_name, bio, avatar_url, credentials, registration_number, practice_stage')
         .eq('id', user.id)
         .single()
 
@@ -56,6 +67,9 @@ export default function ProfilePage() {
         setAvatarUrl(data.avatar_url || null)
         setRegistrationNumber(data.registration_number || '')
         setCredentials(Array.isArray(data.credentials) ? data.credentials : [])
+        if (data.practice_stage === 'student' || data.practice_stage === 'professional') {
+          setPracticeStage(data.practice_stage)
+        }
       }
       setLoading(false)
     }
@@ -112,6 +126,23 @@ export default function ProfilePage() {
       setTimeout(() => setSaved(false), 2000)
     }
     setSaving(false)
+  }
+
+  const handleActivateProfessional = async () => {
+    if (!userId) return
+    setActivating(true)
+    const { error } = await supabase
+      .from('profiles')
+      .update({ practice_stage: 'professional' })
+      .eq('id', userId)
+
+    if (!error) {
+      setPracticeStage('professional')
+      setConfirmingActivate(false)
+      setActivated(true)
+      setTimeout(() => setActivated(false), 2500)
+    }
+    setActivating(false)
   }
 
   const getInitials = (name: string) => {
@@ -285,6 +316,57 @@ export default function ProfilePage() {
               </button>
             </div>
           </div>
+
+          {practiceStage === 'student' && (
+            <div className="rounded-2xl border border-[#32D6A0]/25 bg-[#32D6A0]/[0.05] p-5">
+              <label className="text-sm font-medium text-ink/60 dark:text-white/60 flex items-center gap-1.5">
+                <Stethoscope size={14} className="text-[#32D6A0]" />
+                {roleUi.transition.sectionTitle}
+              </label>
+              <p className="mt-2 text-sm text-ink/70 dark:text-white/70">{roleUi.transition.prompt}</p>
+
+              {!confirmingActivate ? (
+                <button
+                  onClick={() => setConfirmingActivate(true)}
+                  className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white shadow-soft transition-transform hover:scale-[1.02]"
+                  style={{ background: 'linear-gradient(90deg, #32D6A0 0%, #4F7CFF 100%)' }}
+                >
+                  <GraduationCap size={14} />
+                  {roleUi.transition.cta}
+                </button>
+              ) : (
+                <div className="mt-3 rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] p-4">
+                  <p className="text-sm font-semibold text-ink dark:text-white">{roleUi.transition.confirmTitle}</p>
+                  <p className="mt-1 text-xs text-ink/50 dark:text-white/50">{roleUi.transition.confirmBody}</p>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={handleActivateProfessional}
+                      disabled={activating}
+                      className="flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white disabled:opacity-60"
+                      style={{ background: 'linear-gradient(90deg, #32D6A0 0%, #4F7CFF 100%)' }}
+                    >
+                      {activating && <Loader2 size={12} className="animate-spin" />}
+                      {roleUi.transition.confirm}
+                    </button>
+                    <button
+                      onClick={() => setConfirmingActivate(false)}
+                      disabled={activating}
+                      className="rounded-full px-4 py-2 text-xs font-semibold text-ink/60 dark:text-white/60 border border-black/10 dark:border-white/10"
+                    >
+                      {roleUi.transition.cancel}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activated && (
+                <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-[#32D6A0]">
+                  <Check size={12} />
+                  {roleUi.transition.activated}
+                </p>
+              )}
+            </div>
+          )}
 
           <button
             onClick={handleSave}

@@ -19,6 +19,8 @@ import {
   User,
 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { useAgendaUi, localeForLang } from '@/lib/i18n/agendaStrings'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -42,19 +44,21 @@ const END_HOUR = 21
 const ROW_HEIGHT = 44
 const TOTAL_ROWS = (END_HOUR - START_HOUR) * 2
 
-const SLOTS = Array.from({ length: TOTAL_ROWS }, (_, i) => {
-  const totalMinutes = START_HOUR * 60 + i * 30
-  const hour = Math.floor(totalMinutes / 60)
-  const minute = totalMinutes % 60
-  const d = new Date()
-  d.setHours(hour, minute, 0, 0)
-  return {
-    hour,
-    minute,
-    isHour: minute === 0,
-    display: d.toLocaleTimeString(undefined, { hour: 'numeric', minute: minute === 0 ? undefined : '2-digit' }),
-  }
-})
+function buildSlots(locale: string) {
+  return Array.from({ length: TOTAL_ROWS }, (_, i) => {
+    const totalMinutes = START_HOUR * 60 + i * 30
+    const hour = Math.floor(totalMinutes / 60)
+    const minute = totalMinutes % 60
+    const d = new Date()
+    d.setHours(hour, minute, 0, 0)
+    return {
+      hour,
+      minute,
+      isHour: minute === 0,
+      display: d.toLocaleTimeString(locale, { hour: 'numeric', minute: minute === 0 ? undefined : '2-digit' }),
+    }
+  })
+}
 
 function getMonday(d: Date) {
   const date = new Date(d)
@@ -67,6 +71,10 @@ function getMonday(d: Date) {
 
 export default function AgendaPage() {
   const router = useRouter()
+  const { lang } = useLanguage()
+  const ui = useAgendaUi()
+  const locale = localeForLang(lang)
+  const SLOTS = buildSlots(locale)
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [weekOffset, setWeekOffset] = useState(0)
@@ -131,8 +139,8 @@ export default function AgendaPage() {
     const start = weekDays[0]
     const end = weekDays[6]
     const sameMonth = start.getMonth() === end.getMonth()
-    const startStr = start.toLocaleDateString(undefined, { day: 'numeric', month: sameMonth ? undefined : 'short' })
-    const endStr = end.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+    const startStr = start.toLocaleDateString(locale, { day: 'numeric', month: sameMonth ? undefined : 'short' })
+    const endStr = end.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
     return `${startStr} – ${endStr}`
   }
 
@@ -198,7 +206,7 @@ export default function AgendaPage() {
       setShowAddModal(false)
       await loadAppointments()
     } else {
-      setAddError('Could not save the appointment. Please try again.')
+      setAddError(ui.common.saveError)
     }
     setAddSaving(false)
   }
@@ -220,16 +228,16 @@ export default function AgendaPage() {
           className="flex items-center gap-1.5 text-sm text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
         >
           <ArrowLeft size={15} />
-          Back to patients
+          {ui.page.backToPatients}
         </motion.button>
 
         <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
           <div>
             <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#4F7CFF] mb-2">
-              Your schedule
+              {ui.page.eyebrow}
             </p>
             <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white">
-              Schedule
+              {ui.page.title}
             </h1>
           </div>
 
@@ -240,7 +248,7 @@ export default function AgendaPage() {
               style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
             >
               <Plus size={14} />
-              New appointment
+              {ui.page.newAppointment}
             </button>
             <button
               onClick={() => setWeekOffset(weekOffset - 1)}
@@ -272,7 +280,7 @@ export default function AgendaPage() {
             {pendingRequests.length > 0 && (
               <div className="mb-6">
                 <p className="text-xs font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400 mb-3">
-                  Pending requests
+                  {ui.page.pendingRequests}
                 </p>
                 <div className="space-y-2">
                   {pendingRequests.map((req) => (
@@ -282,13 +290,14 @@ export default function AgendaPage() {
                     >
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-ink dark:text-white truncate">
-                          {req.patients?.name || 'Patient'}
+                          {req.patients?.name || ui.common.patientFallback}
                         </p>
                         <p className="text-xs text-ink/50 dark:text-white/50">
-                          {new Date(req.scheduled_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} at{' '}
-                          {new Date(req.scheduled_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                          {new Date(req.scheduled_at).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}
                           {' · '}
-                          {req.session_type === 'video' ? 'Video call' : 'In person'}
+                          {new Date(req.scheduled_at).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })}
+                          {' · '}
+                          {req.session_type === 'video' ? ui.common.videoCall : ui.common.inPerson}
                         </p>
                       </div>
                       <div className="flex gap-2 shrink-0">
@@ -324,7 +333,7 @@ export default function AgendaPage() {
                         }`}
                       >
                         <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40">
-                          {d.toLocaleDateString(undefined, { weekday: 'short' })}
+                          {d.toLocaleDateString(locale, { weekday: 'short' })}
                         </p>
                         <p
                           className={`text-lg font-bold ${
@@ -396,10 +405,10 @@ export default function AgendaPage() {
                                 }}
                               >
                                 <p className="text-[11px] font-bold leading-tight truncate">
-                                  {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                                  {start.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })}
                                 </p>
                                 <p className="text-[11px] leading-tight truncate opacity-95">
-                                  {a.patients?.name || 'Patient'}
+                                  {a.patients?.name || ui.common.patientFallback}
                                 </p>
                               </button>
                             )
@@ -418,16 +427,16 @@ export default function AgendaPage() {
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ background: 'linear-gradient(135deg, #4F7CFF 0%, #6E8FFF 100%)' }}
                 />
-                <span className="text-xs text-ink/50 dark:text-white/50">Video call</span>
+                <span className="text-xs text-ink/50 dark:text-white/50">{ui.common.videoCall}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ background: 'linear-gradient(135deg, #32D6A0 0%, #22B888 100%)' }}
                 />
-                <span className="text-xs text-ink/50 dark:text-white/50">In person</span>
+                <span className="text-xs text-ink/50 dark:text-white/50">{ui.common.inPerson}</span>
               </div>
-              <span className="text-xs text-ink/30 dark:text-white/30">· Click an empty slot to add an appointment</span>
+              <span className="text-xs text-ink/30 dark:text-white/30">{ui.page.legendHint}</span>
             </div>
           </>
         )}
@@ -450,15 +459,15 @@ export default function AgendaPage() {
               className="w-full max-w-sm rounded-[24px] border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#12131a] shadow-2xl p-6"
             >
               <p className="text-xs font-semibold uppercase tracking-wide text-[#4F7CFF] mb-1">
-                New appointment
+                {ui.modal.newAppointmentEyebrow}
               </p>
               <p className="text-sm font-bold text-ink dark:text-white mb-4">
-                {addDay.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}
+                {addDay.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })}
               </p>
 
               <div className="mb-4">
                 <label className="text-xs font-medium text-ink/50 dark:text-white/50 mb-1.5 block">
-                  Time
+                  {ui.modal.timeLabel}
                 </label>
                 <select
                   value={addSlotIndex}
@@ -475,7 +484,7 @@ export default function AgendaPage() {
 
               <div className="mb-4">
                 <label className="text-xs font-medium text-ink/50 dark:text-white/50 mb-1.5 block">
-                  Patient
+                  {ui.modal.patientLabel}
                 </label>
                 {selectedPatient ? (
                   <div className="flex items-center gap-2 rounded-xl border border-[#4F7CFF]/30 bg-[#4F7CFF]/5 px-3 py-2.5">
@@ -500,14 +509,14 @@ export default function AgendaPage() {
                       type="text"
                       value={patientQuery}
                       onChange={(e) => searchPatients(e.target.value)}
-                      placeholder="Search patient..."
+                      placeholder={ui.modal.searchPlaceholder}
                       className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.03] pl-9 pr-3 py-2.5 text-sm outline-none focus:border-[#4F7CFF] text-ink dark:text-white"
                     />
                     {searchingPatients && (
-                      <p className="text-[11px] text-ink/40 dark:text-white/40 mt-1.5">Searching...</p>
+                      <p className="text-[11px] text-ink/40 dark:text-white/40 mt-1.5">{ui.modal.searching}</p>
                     )}
                     {!searchingPatients && patientQuery && patientResults.length === 0 && (
-                      <p className="text-[11px] text-ink/40 dark:text-white/40 mt-1.5">No patients found.</p>
+                      <p className="text-[11px] text-ink/40 dark:text-white/40 mt-1.5">{ui.modal.noPatientsFound}</p>
                     )}
                     {patientResults.length > 0 && (
                       <div className="mt-1.5 space-y-0.5 max-h-40 overflow-y-auto rounded-xl border border-black/10 dark:border-white/10 p-1">
@@ -542,7 +551,7 @@ export default function AgendaPage() {
                   }`}
                 >
                   <Video size={14} />
-                  Video
+                  {ui.common.video}
                 </button>
                 <button
                   onClick={() => setAddSessionType('in_person')}
@@ -553,19 +562,19 @@ export default function AgendaPage() {
                   }`}
                 >
                   <MapPin size={14} />
-                  In Person
+                  {ui.common.inPersonShort}
                 </button>
               </div>
 
               <div className="mb-4">
                 <label className="text-xs font-medium text-ink/50 dark:text-white/50 mb-1.5 block">
-                  Note (optional)
+                  {ui.modal.noteLabel}
                 </label>
                 <textarea
                   value={addNote}
                   onChange={(e) => setAddNote(e.target.value)}
                   rows={2}
-                  placeholder="Anything to remember about this session..."
+                  placeholder={ui.modal.notePlaceholder}
                   className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.03] px-3 py-2.5 text-sm outline-none focus:border-[#4F7CFF] text-ink dark:text-white resize-none"
                 />
               </div>
@@ -576,7 +585,7 @@ export default function AgendaPage() {
                   onClick={() => setShowAddModal(false)}
                   className="flex-1 rounded-full py-2.5 text-sm font-semibold text-ink/60 dark:text-white/60 border border-black/10 dark:border-white/10"
                 >
-                  Cancel
+                  {ui.common.cancel}
                 </button>
                 <button
                   onClick={handleConfirmAdd}
@@ -585,7 +594,7 @@ export default function AgendaPage() {
                   style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
                 >
                   {addSaving && <Loader2 size={14} className="animate-spin" />}
-                  Confirm
+                  {ui.common.confirm}
                 </button>
               </div>
             </motion.div>

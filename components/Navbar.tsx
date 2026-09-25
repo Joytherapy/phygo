@@ -2,14 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { motion, useMotionValueEvent, useScroll, AnimatePresence } from "framer-motion";
-import { Menu, X, Moon, Sun, User, LogOut, Search, Globe } from "lucide-react";
+import { Menu, X, Moon, Sun, User, LogOut, Search, Globe, BookOpen, ListChecks } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import MagneticButton from "./MagneticButton";
 import { usePatientContext } from "@/contexts/PatientContext";
 import { useLanguage, useUiStrings } from "@/contexts/LanguageContext";
 import { APP_LANGS } from "@/lib/i18n/uiStrings";
+import { useRoleUi } from "@/lib/i18n/roleStrings";
+import { useRoleTheme } from "@/contexts/RoleThemeContext";
+import { useQuizUi } from "@/lib/i18n/quizStrings";
 import SearchModal from "./SearchModal";
+import LibraryNavMenu from "./LibraryNavMenu";
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -25,27 +29,9 @@ const linksBeforeLibrary = [
 
 const faqLink = { label: "FAQ", href: "/#faq" };
 
-// Hrefs are stable across languages; labels/descriptions come from
-// UI_STRINGS[lang].libraryLinks[key] so the submenu follows the account's
-// preferred language (see contexts/LanguageContext.tsx).
-const libraryLinkHrefs = [
-  { key: "bodyMap", href: "/dashboard/body-map" },
-  { key: "neurology", href: "/dashboard/brain-map" },
-  { key: "physiology", href: "/dashboard/physiology" },
-  { key: "sportsMedicine", href: "/dashboard/sports-medicine" },
-  { key: "pelvicFloor", href: "/dashboard/pelvic-floor" },
-  { key: "cardiopulmonary", href: "/dashboard/cardiopulmonary" },
-  { key: "endocrine", href: "/dashboard/endocrine" },
-  { key: "fascia", href: "/dashboard/fascia" },
-  { key: "urinary", href: "/dashboard/urinary" },
-  { key: "gastrointestinal", href: "/dashboard/gastrointestinal" },
-  { key: "immune", href: "/dashboard/immune" },
-  { key: "hematology", href: "/dashboard/hematology" },
-  { key: "oncology", href: "/dashboard/oncology" },
-  { key: "firstAid", href: "/dashboard/first-aid" },
-  { key: "blsd", href: "/dashboard/bls" },
-  { key: "clinicalTools", href: "/dashboard/clinical-tools" },
-] as const;
+// The Library dropdown's own 16-section list + category grouping now lives
+// in components/LibraryNavMenu.tsx (it grew too long to scroll as a flat
+// list — see that file). Hrefs/labels are otherwise unchanged.
 
 // Phygo World groups the broader ecosystem (research, events, shop) apart
 // from the clinical/professional Library dropdown above.
@@ -80,7 +66,20 @@ export default function Navbar() {
   // is the precedent for this pattern in this file.
   const { lang, setLang } = useLanguage();
   const ui = useUiStrings();
+  const roleUi = useRoleUi();
+  const quizUi = useQuizUi();
   const [initials, setInitials] = useState("··");
+  // Profile photo chosen on the Profile page (profiles.avatar_url, a public
+  // Supabase Storage URL — see app/dashboard/profile/page.tsx). Falls back to
+  // the existing gradient-initials button whenever no photo has been set.
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  // Role-aware primary navigation (PHYGO Student/Professional modes — see
+  // sql/2026-09_role_aware.sql). practiceStage now comes from
+  // RoleThemeProvider (contexts/RoleThemeContext.tsx), which also drives the
+  // role-aware brand color (--brand-from/--brand-to, see app/globals.css) —
+  // one shared fetch instead of Navbar keeping its own copy.
+  const { practiceStage } = useRoleTheme();
+  const isStudent = isDashboard && practiceStage === "student";
   const [dark, setDark] = useState(() => {
     if (typeof window === "undefined") return true;
     const stored = window.localStorage.getItem("phygo-theme");
@@ -98,6 +97,15 @@ export default function Navbar() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       const displayName = user?.user_metadata?.display_name || user?.email || "";
       if (displayName) setInitials(getInitials(displayName));
+      if (!user) return;
+      supabase
+        .from("profiles")
+        .select("avatar_url")
+        .eq("id", user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+        });
     });
   }, [isDashboard]);
 
@@ -140,7 +148,7 @@ export default function Navbar() {
         }`}
       >
         <a
-          href={isDashboard ? "/dashboard" : "/"}
+          href={isDashboard ? (isStudent ? "/dashboard/workspace" : "/dashboard") : "/"}
           className="flex items-center gap-2.5 font-display font-semibold text-lg tracking-tight text-ink dark:text-white"
         >
           <img
@@ -164,7 +172,27 @@ export default function Navbar() {
               </a>
             ))}
 
-          {isDashboard && (
+          {isDashboard && isStudent && (
+            <a
+              href="/dashboard/workspace"
+              className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors group"
+            >
+              {roleUi.nav.workspace}
+              <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/60 transition-all duration-300 group-hover:w-full" />
+            </a>
+          )}
+
+          {isDashboard && isStudent && (
+            <a
+              href="/dashboard/quiz"
+              className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors group"
+            >
+              {quizUi.navLabel}
+              <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/60 transition-all duration-300 group-hover:w-full" />
+            </a>
+          )}
+
+          {isDashboard && !isStudent && (
             <a
               href="/dashboard"
               className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors group"
@@ -198,19 +226,10 @@ export default function Navbar() {
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
-                    className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-64"
+                    className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-72"
                   >
                     <div className="glass-strong rounded-xl2 shadow-soft p-2">
-                      {libraryLinkHrefs.map((l) => (
-                        <a
-                          key={l.href}
-                          href={l.href}
-                          className="block rounded-xl px-3 py-2.5 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
-                        >
-                          <p className="text-sm font-semibold text-ink dark:text-white">{ui.libraryLinks[l.key].label}</p>
-                          <p className="text-xs text-ink/50 dark:text-white/50 mt-0.5">{ui.libraryLinks[l.key].description}</p>
-                        </a>
-                      ))}
+                      <LibraryNavMenu variant="desktop" />
                     </div>
                   </motion.div>
                 )}
@@ -218,7 +237,7 @@ export default function Navbar() {
             </div>
           )}
 
-          {isDashboard && (
+          {isDashboard && !isStudent && (
             <a
               href="/dashboard/agenda"
               className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors group"
@@ -344,7 +363,7 @@ export default function Navbar() {
                           aria-current={l === lang ? "true" : undefined}
                           className={`flex-1 rounded-lg py-1.5 text-[10px] font-bold uppercase tracking-wide transition-colors ${
                             l === lang
-                              ? "bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white"
+                              ? "bg-gradient-to-r from-[var(--brand-from)] to-[var(--brand-to)] text-white brand-glow"
                               : "text-ink/40 dark:text-white/40 hover:text-ink dark:hover:text-white"
                           }`}
                         >
@@ -374,10 +393,15 @@ export default function Navbar() {
               onMouseLeave={() => setAccountOpen(false)}
             >
               <button
-                className="flex h-9 w-9 items-center justify-center rounded-full text-white text-xs font-bold shadow-soft"
-                style={{ background: "linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)" }}
+                className={`flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-white text-xs font-bold brand-glow ${avatarUrl ? "ring-2 ring-white/70 dark:ring-white/10" : ""}`}
+                style={avatarUrl ? undefined : { background: "linear-gradient(135deg, color-mix(in srgb, var(--brand-from) 100%, white 20%) 0%, var(--brand-from) 45%, var(--brand-to) 100%)" }}
               >
-                {initials}
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  initials
+                )}
               </button>
               <AnimatePresence>
                 {accountOpen && (
@@ -395,6 +419,15 @@ export default function Navbar() {
                         <User size={14} />
                         {ui.nav.profile}
                       </a>
+                      {!isStudent && (
+                        <a
+                          href="/dashboard/workspace"
+                          className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 dark:text-white/70 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+                        >
+                          <BookOpen size={14} />
+                          {roleUi.nav.workspace}
+                        </a>
+                      )}
                       <button
                         onClick={handleSignOut}
                         className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 dark:text-white/70 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
@@ -459,7 +492,28 @@ export default function Navbar() {
               </a>
             ))}
 
-          {isDashboard && (
+          {isDashboard && isStudent && (
+            <a
+              href="/dashboard/workspace"
+              onClick={() => setOpen(false)}
+              className="text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
+            >
+              {roleUi.nav.workspace}
+            </a>
+          )}
+
+          {isDashboard && isStudent && (
+            <a
+              href="/dashboard/quiz"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
+            >
+              <ListChecks size={14} />
+              {quizUi.navLabel}
+            </a>
+          )}
+
+          {isDashboard && !isStudent && (
             <a
               href="/dashboard"
               onClick={() => setOpen(false)}
@@ -471,17 +525,7 @@ export default function Navbar() {
 
           {isDashboard && <div className="h-px bg-ink/10 dark:bg-white/10 my-1" />}
 
-          {isDashboard &&
-            libraryLinkHrefs.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
-                onClick={() => setOpen(false)}
-                className="text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
-              >
-                {ui.libraryLinks[l.key].label}
-              </a>
-            ))}
+          {isDashboard && <LibraryNavMenu variant="mobile" onNavigate={() => setOpen(false)} />}
 
           {isDashboard && <div className="h-px bg-ink/10 dark:bg-white/10 my-1" />}
 
@@ -497,7 +541,7 @@ export default function Navbar() {
               </a>
             ))}
 
-          {isDashboard && (
+          {isDashboard && !isStudent && (
             <>
               <div className="h-px bg-ink/10 dark:bg-white/10 my-1" />
               <a
@@ -506,6 +550,20 @@ export default function Navbar() {
                 className="text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
               >
                 {ui.nav.schedule}
+              </a>
+            </>
+          )}
+
+          {isDashboard && !isStudent && (
+            <>
+              <div className="h-px bg-ink/10 dark:bg-white/10 my-1" />
+              <a
+                href="/dashboard/workspace"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 text-sm font-medium text-ink/80 dark:text-white/80 py-1.5"
+              >
+                <BookOpen size={14} />
+                {roleUi.nav.workspace}
               </a>
             </>
           )}
@@ -521,7 +579,7 @@ export default function Navbar() {
                     aria-current={l === lang ? "true" : undefined}
                     className={`flex-1 rounded-lg py-1.5 text-[10px] font-bold uppercase tracking-wide transition-colors ${
                       l === lang
-                        ? "bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] text-white"
+                        ? "bg-gradient-to-r from-[var(--brand-from)] to-[var(--brand-to)] text-white brand-glow"
                         : "text-ink/40 dark:text-white/40"
                     }`}
                   >

@@ -4,6 +4,41 @@
 
 :root {
   color-scheme: light;
+  /* PHYGO brand gradient, role-aware (Student vs Professional — see
+     contexts/RoleThemeContext.tsx, which sets data-role on <html> from
+     profiles.practice_stage). Professional keeps the original PHYGO
+     blue -> green; Student gets a distinct cyan -> violet pair already used
+     elsewhere in the app (Phygo World / Events, see EventCard.tsx) so the
+     two modes read as clearly different without inventing an untested
+     color. Consumed as color-mix(in srgb, var(--brand-from) N%, transparent)
+     wherever older code used an rgba() of the literal blue/green. */
+  --brand-from: #4f7cff;
+  --brand-to: #32d6a0;
+}
+
+html[data-role='student'] {
+  --brand-from: #22d3ee;
+  --brand-to: #a855f7;
+}
+
+/* Premium treatment for the role-aware brand gradient above: a soft, layered
+   colored shadow (the "glow" a plain flat gradient is missing) plus a
+   lightened highlight stop, both role-aware since they read the same
+   --brand-from/--brand-to. Used on the account avatar, active nav/language
+   states, and the Workspace icon badge — see Navbar.tsx / WorkspaceSidebar.tsx. */
+.brand-glow {
+  box-shadow:
+    0 10px 24px -6px color-mix(in srgb, var(--brand-from) 50%, transparent),
+    0 3px 10px -2px color-mix(in srgb, var(--brand-to) 35%, transparent);
+}
+
+.brand-gradient {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--brand-from) 100%, white 20%) 0%,
+    var(--brand-from) 45%,
+    var(--brand-to) 100%
+  );
 }
 
 html {

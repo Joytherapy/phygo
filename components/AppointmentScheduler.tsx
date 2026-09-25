@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Clock, Video, MapPin, Check, X, Loader2, Plus, Sparkles } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { useAgendaUi, localeForLang } from '@/lib/i18n/agendaStrings'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,6 +41,9 @@ export default function AppointmentScheduler({
   patientId: string
   mode: 'physio' | 'patient'
 }) {
+  const { lang } = useLanguage()
+  const ui = useAgendaUi()
+  const locale = localeForLang(lang)
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [showPicker, setShowPicker] = useState(false)
@@ -110,7 +115,7 @@ export default function AppointmentScheduler({
         setSelectedSlot(null)
       }, 1400)
     } else {
-      setError('Could not save the appointment. Please try again.')
+      setError(ui.common.saveError)
       setSaving(false)
     }
   }
@@ -133,10 +138,10 @@ export default function AppointmentScheduler({
     const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
     const isTomorrow = d.toDateString() === tomorrow.toDateString()
-    if (isToday) return { top: 'TODAY', bottom: d.getDate().toString() }
-    if (isTomorrow) return { top: 'TMRW', bottom: d.getDate().toString() }
+    if (isToday) return { top: ui.common.today.toUpperCase(), bottom: d.getDate().toString() }
+    if (isTomorrow) return { top: ui.common.tomorrow.toUpperCase(), bottom: d.getDate().toString() }
     return {
-      top: d.toLocaleDateString(undefined, { weekday: 'short' }).toUpperCase(),
+      top: d.toLocaleDateString(locale, { weekday: 'short' }).toUpperCase(),
       bottom: d.getDate().toString(),
     }
   }
@@ -165,19 +170,19 @@ export default function AppointmentScheduler({
             />
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={13} className="text-[#4F7CFF]" />
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#4F7CFF]">Next appointment</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#4F7CFF]">{ui.scheduler.nextAppointment}</p>
             </div>
             <p className="text-xl font-bold text-ink dark:text-white">
-              {new Date(nextAppointment.scheduled_at).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}
+              {new Date(nextAppointment.scheduled_at).toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
             <div className="flex items-center gap-4 mt-1.5 text-sm text-ink/60 dark:text-white/60">
               <span className="flex items-center gap-1.5">
                 <Clock size={13} />
-                {new Date(nextAppointment.scheduled_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                {new Date(nextAppointment.scheduled_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
               </span>
               <span className="flex items-center gap-1.5">
                 {nextAppointment.session_type === 'video' ? <Video size={13} /> : <MapPin size={13} />}
-                {nextAppointment.session_type === 'video' ? 'Video call' : 'In person'}
+                {nextAppointment.session_type === 'video' ? ui.common.videoCall : ui.common.inPerson}
               </span>
             </div>
           </div>
@@ -195,9 +200,9 @@ export default function AppointmentScheduler({
             >
               <div>
                 <p className="text-sm font-semibold text-ink dark:text-white">
-                  Requested: {new Date(req.scheduled_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} at {new Date(req.scheduled_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                  {ui.scheduler.requestedPrefix} {new Date(req.scheduled_at).toLocaleDateString(locale, { day: 'numeric', month: 'short' })} · {new Date(req.scheduled_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
                 </p>
-                <p className="text-xs text-ink/50 dark:text-white/50">{req.session_type === 'video' ? 'Video call' : 'In person'}</p>
+                <p className="text-xs text-ink/50 dark:text-white/50">{req.session_type === 'video' ? ui.common.videoCall : ui.common.inPerson}</p>
               </div>
               <div className="flex gap-2 shrink-0">
                 <button
@@ -230,7 +235,7 @@ export default function AppointmentScheduler({
               className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-ink/40 dark:text-white/40 hover:text-[#4F7CFF] transition-colors"
             >
               <Plus size={13} />
-              {mode === 'physio' ? 'Schedule another appointment' : 'Request another appointment'}
+              {mode === 'physio' ? ui.scheduler.scheduleAnother : ui.scheduler.requestAnother}
             </motion.button>
           ) : (
             <motion.button
@@ -243,7 +248,7 @@ export default function AppointmentScheduler({
               style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
             >
               <Plus size={16} />
-              {mode === 'physio' ? 'Schedule Appointment' : 'Request Appointment'}
+              {mode === 'physio' ? ui.scheduler.scheduleAppointment : ui.scheduler.requestAppointment}
             </motion.button>
           )
         ) : (
@@ -272,14 +277,14 @@ export default function AppointmentScheduler({
                     <Check size={26} strokeWidth={3} />
                   </motion.div>
                   <p className="text-sm font-semibold text-ink dark:text-white">
-                    {mode === 'physio' ? 'Appointment scheduled' : 'Request sent'}
+                    {mode === 'physio' ? ui.scheduler.appointmentScheduled : ui.scheduler.requestSent}
                   </p>
                 </motion.div>
               )}
             </AnimatePresence>
 
             <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-3">
-              Choose a day
+              {ui.scheduler.chooseADay}
             </p>
             <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
               {days.map((d) => {
@@ -304,7 +309,7 @@ export default function AppointmentScheduler({
             </div>
 
             <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-2">
-              Morning
+              {ui.scheduler.morning}
             </p>
             <div className="grid grid-cols-3 gap-2 mb-4">
               {MORNING_SLOTS.map((slot) => (
@@ -324,7 +329,7 @@ export default function AppointmentScheduler({
             </div>
 
             <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-2">
-              Afternoon
+              {ui.scheduler.afternoon}
             </p>
             <div className="grid grid-cols-3 gap-2 mb-5">
               {AFTERNOON_SLOTS.map((slot) => (
@@ -354,9 +359,9 @@ export default function AppointmentScheduler({
               >
                 <Video size={20} className={sessionType === 'video' ? 'text-[#4F7CFF]' : 'text-ink/40 dark:text-white/40'} />
                 <span className={`text-sm font-semibold ${sessionType === 'video' ? 'text-[#4F7CFF]' : 'text-ink/60 dark:text-white/60'}`}>
-                  Video
+                  {ui.common.video}
                 </span>
-                <span className="text-[10px] text-ink/40 dark:text-white/40">From anywhere</span>
+                <span className="text-[10px] text-ink/40 dark:text-white/40">{ui.scheduler.fromAnywhere}</span>
               </button>
               <button
                 onClick={() => setSessionType('in_person')}
@@ -368,16 +373,16 @@ export default function AppointmentScheduler({
               >
                 <MapPin size={20} className={sessionType === 'in_person' ? 'text-[#4F7CFF]' : 'text-ink/40 dark:text-white/40'} />
                 <span className={`text-sm font-semibold ${sessionType === 'in_person' ? 'text-[#4F7CFF]' : 'text-ink/60 dark:text-white/60'}`}>
-                  In Person
+                  {ui.common.inPersonShort}
                 </span>
-                <span className="text-[10px] text-ink/40 dark:text-white/40">At the clinic</span>
+                <span className="text-[10px] text-ink/40 dark:text-white/40">{ui.scheduler.atTheClinic}</span>
               </button>
             </div>
 
             {selectedSlot && (
               <div className="mb-4 rounded-xl bg-black/[0.03] dark:bg-white/5 px-4 py-2.5 text-center">
                 <p className="text-xs font-medium text-ink/70 dark:text-white/70">
-                  {isTodaySelected ? 'Today' : selectedDay.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}, {selectedSlot} · {sessionType === 'video' ? 'Video call' : 'In person'} · 30 min
+                  {isTodaySelected ? ui.common.today : selectedDay.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })}, {selectedSlot} · {sessionType === 'video' ? ui.common.videoCall : ui.common.inPerson} · 30 min
                 </p>
               </div>
             )}
@@ -389,7 +394,7 @@ export default function AppointmentScheduler({
                 onClick={() => { setShowPicker(false); setSelectedSlot(null); setError(null) }}
                 className="flex-1 rounded-full py-2.5 text-sm font-semibold text-ink/60 dark:text-white/60 border border-black/10 dark:border-white/10"
               >
-                Cancel
+                {ui.common.cancel}
               </button>
               <button
                 onClick={handleConfirmSlot}
@@ -398,7 +403,7 @@ export default function AppointmentScheduler({
                 style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
               >
                 {saving && <Loader2 size={14} className="animate-spin" />}
-                {mode === 'physio' ? 'Confirm' : 'Send Request'}
+                {mode === 'physio' ? ui.common.confirm : ui.scheduler.sendRequest}
               </button>
             </div>
           </motion.div>
@@ -407,7 +412,7 @@ export default function AppointmentScheduler({
 
       {history.length > 0 && (
         <div className="mt-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-2">History</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-2">{ui.scheduler.history}</p>
           <div className="space-y-1.5">
             {history.slice(0, 5).map((a) => (
               <div key={a.id} className="rounded-xl border border-black/[0.06] dark:border-white/10 px-3 py-2.5 flex items-center justify-between text-xs">
@@ -417,7 +422,7 @@ export default function AppointmentScheduler({
                       a.status === 'completed' ? 'bg-emerald-500' : a.status === 'confirmed' ? 'bg-[#4F7CFF]' : 'bg-ink/20 dark:bg-white/20'
                     }`}
                   />
-                  {new Date(a.scheduled_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} · {a.session_type === 'video' ? 'Video' : 'In person'}
+                  {new Date(a.scheduled_at).toLocaleDateString(locale, { day: 'numeric', month: 'short' })} · {a.session_type === 'video' ? ui.common.video : ui.common.inPersonShort}
                 </span>
                 <span className="text-ink/30 dark:text-white/30 capitalize">{a.status}</span>
               </div>
