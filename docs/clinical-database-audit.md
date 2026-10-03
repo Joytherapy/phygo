@@ -684,6 +684,29 @@ Note oneste su questo batch:
 
 **Stato attuale: 482 condizioni totali** (481 + 1 nuova del batch 31). **Mancano 318 per arrivare a 800.**
 
-Ritmo onesto confermato: la sezione Gastrointestinale resta la più sottile (9 condizioni taggate dopo oggi) — buona priorità per il prossimo batch, insieme a Pavimento Pelvico ed Ematologia se si vuole bilanciare meglio la copertura tra sistemi.
+**Batch 32 (3 condizioni, id 528-530):** proseguito su Pavimento Pelvico, Ematologia e Gastrointestinale. Candidato verificato e scartato: prolasso rettale — letteratura conservativa specifica debole/assente, non forzato. Genuinamente assenti e aggiunti in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Ragade anale cronica — fisioterapia del pavimento pelvico | Pavimento pelvico (posteriore/entrambi i sessi) | van Reijn-Baggen DA, Elzevier HW, Braak JPBM, Putter H, Pelger RCM, Han-Geurts IJM. Pelvic floor physical therapy in the treatment of chronic anal fissure (PAF trial): quality of life outcome. Techniques in Coloproctology | 2022 |
+| Mielofibrosi — attività fisica nelle neoplasie mieloproliferative | Ematologia (tag `hematology`) | Felser S, Rogahn J, le Coutre P, et al. Anxieties, age and motivation influence physical activity in patients with myeloproliferative neoplasms. Frontiers in Oncology | 2023 |
+| Pancreatite cronica — attività fisica e gestione del dimagrimento muscolare | Gastrointestinale (tag `gastrointestinal`) | Pancreatic disease and physical activity, Nutrition Interest Group of the Pancreatic Society of Great Britain and Ireland (NIGPS) | 2018 |
 
-Ritmo onesto: a questo passo (batch di poche condizioni realmente ricercate e verificate) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+Note oneste su questo batch:
+- **Ragade anale cronica**: tra i pochi RCT dedicati esistenti (il protocollo originale del 2021 segnalava "letteratura scarsa su questo argomento"); fonte citata = esito secondario di qualità di vita del PAF trial (miglioramento significativo in 9/9 domini RAND-36 a 20 settimane, dolore ridotto già a 8 settimane) — il tasso di guarigione della fissura come esito primario è riportato in una pubblicazione correlata dello stesso trial non pienamente accessibile per verifica diretta.
+- **Mielofibrosi**: fonte uno studio survey trasversale (non un trial d'intervento) — evidence_level "low" dichiarato esplicitamente; dato onesto interessante: i pazienti riducono l'attività fisica molto più di quanto il rischio reale giustifichi (trombosi solo nel 3% della coorte), quindi il contenuto centra su educazione piuttosto che restrizione.
+- **Pancreatite cronica**: fonte una guida professionale (NIGPS, non un RCT/revisione sistematica) — evidence_level "low" dichiarato esplicitamente; raccomandazioni generali (150 min/settimana, attenzione a ernie non trattate e fase post-chirurgica) più che un protocollo specifico per la pancreatite.
+
+**Stato attuale: 485 condizioni totali** (482 + 3 nuove del batch 32). **Mancano 315 per arrivare a 800.**
+
+**Batch 33 (1 condizione, id 531):** proseguito su Endocrinologia. Candidato verificato e scartato: iperparatiroidismo/ipoparatiroidismo — fonti reperite troppo deboli/indirette per costruire una scheda onesta, non forzato. Genuinamente assente e aggiunta in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Osteomalacia — esercizio terapeutico e gestione della debolezza muscolare | Endocrino (tag `endocrine`) | Osteomalacia, Versus Arthritis (organizzazione benefica britannica, contenuto a revisione medica) | 2024 |
+
+Nota onesta su questo batch:
+- **Osteomalacia**: fonte una pagina informativa per pazienti di un'organizzazione benefica britannica (contenuto a revisione medica, non uno studio clinico/linea guida peer-reviewed) — evidence_level "low" dichiarato esplicitamente. Contenuto centrato su due punti clinicamente solidi anche se la fonte è divulgativa: la caratteristica debolezza muscolare prossimale (cosce, cingolo scapolare) e l'attenzione alle pseudofratture di Looser durante la fase di guarigione, prima di riprendere esercizio in carico progressivo.
+- **Iperparatiroidismo/ipoparatiroidismo**: verificato come candidato ma scartato — le fonti reperite erano troppo deboli o indirette (nessun contenuto specifico su esercizio/riabilitazione da una fonte realmente autorevole); da ricontrollare in futuro se emergerà una fonte migliore.
+
+**Stato attuale: 486 condizioni totali** (485 + 1 nuova del batch 33). **Mancano 314 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
