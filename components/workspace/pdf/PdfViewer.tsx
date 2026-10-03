@@ -32,7 +32,7 @@ import {
 } from '@/lib/workspace/types'
 import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
 import { useAsk } from '@/contexts/AskContext'
-import { useStudyPanelDocumentBridge } from '@/contexts/StudyPanelContext'
+import { useStudyPanelDocumentBridge, type StudyPanelMatch } from '@/contexts/StudyPanelContext'
 import AnnotationCanvas from './AnnotationCanvas'
 import AnnotationToolbar from './AnnotationToolbar'
 import TextAnnotationLayer, { DEFAULT_FONT_SIZE, DEFAULT_BOX_WIDTH } from './TextAnnotationLayer'
@@ -180,7 +180,7 @@ export default function PdfViewer({
   // through the document page (see contexts/StudyPanelContext.tsx).
   useStudyPanelDocumentBridge(
     useCallback(
-      (match) => {
+      (match: StudyPanelMatch) => {
         onCreateAnnotation(pageNumber, {
           type: 'knowledge_card',
           data: {
