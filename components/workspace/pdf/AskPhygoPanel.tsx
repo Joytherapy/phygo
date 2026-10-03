@@ -22,11 +22,13 @@
 import { useState } from 'react'
 import { Sparkles, Send, X, Loader2 } from 'lucide-react'
 import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type Turn = { question: string; answer?: string; error?: string }
 
 export default function AskPhygoPanel({ contextLabel, onClose }: { contextLabel?: string | null; onClose: () => void }) {
   const ui = useWorkspaceUi()
+  const { lang } = useLanguage()
   const [question, setQuestion] = useState('')
   const [turns, setTurns] = useState<Turn[]>([])
   const [loading, setLoading] = useState(false)
@@ -42,7 +44,12 @@ export default function AskPhygoPanel({ contextLabel, onClose }: { contextLabel?
       const res = await fetch('/api/ask-phygo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: q, noteContext: contextLabel || 'Using PHYGO Workspace.' }),
+        // `lang` is the app's own current UI language (same value the rest
+        // of Workspace already uses, e.g. via StudyPanelContext) — the
+        // server uses it as a strong hint for which language to answer in,
+        // since without it the endpoint's own (English) system prompt used
+        // to bias gpt-4o-mini toward English even for an Italian question.
+        body: JSON.stringify({ question: q, noteContext: contextLabel || 'Using PHYGO Workspace.', lang }),
       })
       const json = await res.json()
       setTurns((prev) => {

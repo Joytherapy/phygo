@@ -23,6 +23,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { useLanguage } from '@/contexts/LanguageContext'
 
 export type StudyPanelSection = { key: string; body: string }
+export type StudyPanelRelatedItem = { knowledgeId: string; title: string }
 
 export type StudyPanelMatch = {
   knowledgeType: 'condition' | 'structure' | 'test'
@@ -34,6 +35,15 @@ export type StudyPanelMatch = {
   evidenceLevel: string | null
   source: string | null
   sections: StudyPanelSection[]
+  // Only ever present on a 'structure' (topic-mode) match — see the
+  // knowledge-resolve route's "TOPIC MODE" comment: selecting a general
+  // topic/organ name surfaces its anatomy/physiology PLUS these lists of
+  // related conditions/tests from the same system, instead of one single
+  // pick. Clicking one re-resolves by its exact title (guaranteed to win
+  // via the route's exact-match tier), which is how the panel drills down
+  // into that specific item without needing a second API shape.
+  relatedConditions?: StudyPanelRelatedItem[]
+  relatedTests?: StudyPanelRelatedItem[]
 }
 
 export type StudyPanelStatus = 'idle' | 'loading' | 'found' | 'empty' | 'error'

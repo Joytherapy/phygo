@@ -24,6 +24,12 @@ interface QuizDict {
   subjects: { anatomy: string; biology: string; biochemistry: string }
   difficulty: { easy: string; medium: string; hard: string }
   difficultyPrompt: string
+  // Shown under each difficulty button on the level-selection screen, and
+  // reused on the results screen — see poolRotationNote below. Added per
+  // user request to make the size of the question pool visible instead of
+  // only inferrable from noticing a replay shows different questions.
+  poolSizeLabel: string // use {count} placeholder
+  poolRotationNote: string // use {shown} and {total} placeholders
   startButton: string
   backToSubjects: string
   questionCounter: string // use {current} and {total} placeholders
@@ -53,6 +59,8 @@ const it: QuizDict = {
   subjects: { anatomy: 'Anatomia', biology: 'Biologia', biochemistry: 'Biochimica' },
   difficulty: { easy: 'Facile', medium: 'Medio', hard: 'Difficile' },
   difficultyPrompt: 'Scegli il livello',
+  poolSizeLabel: '{count} domande disponibili',
+  poolRotationNote: 'Hai visto {shown} domande su {total} disponibili in questo livello — rigioca per vederne di nuove.',
   startButton: 'Inizia il quiz',
   backToSubjects: 'Torna alle materie',
   questionCounter: 'Domanda {current} di {total}',
@@ -82,6 +90,8 @@ const en: QuizDict = {
   subjects: { anatomy: 'Anatomy', biology: 'Biology', biochemistry: 'Biochemistry' },
   difficulty: { easy: 'Easy', medium: 'Medium', hard: 'Hard' },
   difficultyPrompt: 'Choose a level',
+  poolSizeLabel: '{count} questions available',
+  poolRotationNote: 'You saw {shown} of {total} questions available at this level — play again to see new ones.',
   startButton: 'Start quiz',
   backToSubjects: 'Back to subjects',
   questionCounter: 'Question {current} of {total}',
@@ -111,6 +121,8 @@ const es: QuizDict = {
   subjects: { anatomy: 'Anatomía', biology: 'Biología', biochemistry: 'Bioquímica' },
   difficulty: { easy: 'Fácil', medium: 'Medio', hard: 'Difícil' },
   difficultyPrompt: 'Elige el nivel',
+  poolSizeLabel: '{count} preguntas disponibles',
+  poolRotationNote: 'Has visto {shown} de {total} preguntas disponibles en este nivel — vuelve a jugar para ver otras nuevas.',
   startButton: 'Iniciar quiz',
   backToSubjects: 'Volver a las materias',
   questionCounter: 'Pregunta {current} de {total}',
@@ -140,6 +152,8 @@ const fr: QuizDict = {
   subjects: { anatomy: 'Anatomie', biology: 'Biologie', biochemistry: 'Biochimie' },
   difficulty: { easy: 'Facile', medium: 'Moyen', hard: 'Difficile' },
   difficultyPrompt: 'Choisis un niveau',
+  poolSizeLabel: '{count} questions disponibles',
+  poolRotationNote: 'Tu as vu {shown} questions sur {total} disponibles à ce niveau — rejoue pour en voir de nouvelles.',
   startButton: 'Commencer le quiz',
   backToSubjects: 'Retour aux matières',
   questionCounter: 'Question {current} sur {total}',

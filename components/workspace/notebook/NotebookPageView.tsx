@@ -44,8 +44,9 @@ import {
 import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
 import AnnotationCanvas from '../pdf/AnnotationCanvas'
 import AnnotationToolbar from '../pdf/AnnotationToolbar'
-import TextAnnotationLayer from '../pdf/TextAnnotationLayer'
+import TextAnnotationLayer, { DEFAULT_FONT_SIZE } from '../pdf/TextAnnotationLayer'
 import ImageAnnotationLayer from '../pdf/ImageAnnotationLayer'
+import NoteSelectionPopup from './NoteSelectionPopup'
 
 export type NotebookCreatableAnnotation =
   | { type: 'stroke'; data: StrokeData }
@@ -138,6 +139,7 @@ export default function NotebookPageView({
   const [textColor, setTextColor] = useState<string>(TEXT_COLORS[0])
   // `null` = no background (the default — see TextAnnotationData.backgroundColor).
   const [textBackground, setTextBackground] = useState<string | null>(null)
+  const [textFontSize, setTextFontSize] = useState<number>(DEFAULT_FONT_SIZE)
   const [markerColor, setMarkerColor] = useState<string>(HIGHLIGHT_COLORS[0])
   const [inkWidth, setInkWidth] = useState(3.5)
   const [markerWidth, setMarkerWidth] = useState(16)
@@ -363,6 +365,8 @@ export default function NotebookPageView({
           onTextBackgroundChange={setTextBackground}
           markerColor={markerColor}
           onMarkerColorChange={setMarkerColor}
+          textFontSize={textFontSize}
+          onTextFontSizeChange={setTextFontSize}
           width={inkWidth}
           onWidthChange={setInkWidth}
           markerWidth={markerWidth}
@@ -408,6 +412,7 @@ export default function NotebookPageView({
             tool={tool}
             color={textColor}
             backgroundColor={textBackground}
+            fontSize={textFontSize}
             onCreate={(data) => onCreateAnnotation({ type: 'text', data })}
             onUpdate={onUpdateAnnotation}
             onDelete={onDeleteAnnotation}
@@ -418,6 +423,13 @@ export default function NotebookPageView({
             onUpdate={onUpdateAnnotation}
             onDelete={onDeleteAnnotation}
           />
+
+          {/* Selecting text INSIDE one of this page's own written notes
+              surfaces the same "Esplora con PHYGO" reference lookup the PDF
+              reader already has over its text — see NoteSelectionPopup.tsx
+              for why this needs its own (textarea-selection-based)
+              detection instead of reusing TextSelectionPopup. */}
+          <NoteSelectionPopup containerRef={paperWrapRef} enabled={tool === 'select'} />
         </div>
       </div>
     </div>

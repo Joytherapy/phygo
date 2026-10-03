@@ -36,6 +36,15 @@ interface UiDict {
     searching: string;
     noPatientsFound: string;
   };
+  bulkSelection: {
+    toggleOn: string;
+    toggleOff: string;
+    countLabel: string;
+    clearButton: string;
+    linkButton: string;
+    linking: string;
+    linkedSuccess: string;
+  };
   nav: {
     patients: string;
     library: string;
@@ -54,6 +63,7 @@ interface UiDict {
   };
   libraryLinks: {
     bodyMap: { label: string; description: string };
+    exerciseLibrary: { label: string; description: string };
     neurology: { label: string; description: string };
     pelvicFloor: { label: string; description: string };
     cardiopulmonary: { label: string; description: string };
@@ -1095,6 +1105,37 @@ interface UiDict {
     add: string;
     saveProfile: string;
   };
+  exerciseLibraryPage: {
+    headingPart1: string;
+    headingPart2: string;
+    eyebrowCount: string;
+    eyebrowDefault: string;
+    description: string;
+    searchPlaceholder: string;
+    hiitLabel: string;
+    moreFilters: string;
+    moreFiltersHint: string;
+    bodyZoneHeading: string;
+    categoryHeading: string;
+    equipmentHeading: string;
+    loginRequired: string;
+    loadError: string;
+    networkError: string;
+    noExercises: string;
+    noMatchPrefix: string;
+    noMatchFilterPart: string;
+    noMatchSearchPart: string;
+    exerciseSingular: string;
+    exercisePlural: string;
+    outOfTotal: string;
+    showMore: string;
+    ofTotal: string;
+    muscleUnspecified: string;
+    genericExercise: string;
+    instructionsLabel: string;
+    tipLabel: string;
+    zoneLabel: string;
+  };
 }
 
 export const UI_STRINGS: Record<AppLang, UiDict> = {
@@ -1111,6 +1152,15 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       searchPlaceholder: 'Cerca paziente...',
       searching: 'Ricerca in corso...',
       noPatientsFound: 'Nessun paziente trovato.',
+    },
+    bulkSelection: {
+      toggleOn: 'Seleziona più esercizi',
+      toggleOff: 'Esci dalla selezione',
+      countLabel: '{n} selezionati',
+      clearButton: 'Deseleziona tutto',
+      linkButton: 'Collega al paziente',
+      linking: 'Collegamento in corso...',
+      linkedSuccess: 'Collegati a {name}',
     },
     nav: {
       patients: 'Pazienti',
@@ -1130,6 +1180,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     },
     libraryLinks: {
       bodyMap: { label: 'Mappa del Corpo', description: 'Esploratore anatomico interattivo' },
+      exerciseLibrary: { label: 'Libreria Esercizi', description: 'Oltre 1.800 esercizi con video dimostrativo' },
       neurology: { label: 'Neurologia', description: 'Encefalo, nervi e vie nervose' },
       physiology: { label: 'Fisiologia', description: 'Meccanismi muscolari e neurologici di base' },
       sportsMedicine: { label: 'Medicina dello Sport', description: 'Scienza della lesione sportiva e ritorno allo sport' },
@@ -2457,6 +2508,37 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       add: 'Aggiungi',
       saveProfile: 'Salva profilo',
     },
+    exerciseLibraryPage: {
+      headingPart1: 'Libreria',
+      headingPart2: 'Esercizi',
+      eyebrowCount: '{count} esercizi con video',
+      eyebrowDefault: 'Esercizi con video',
+      description: 'Oltre 1.800 esercizi con video dimostrativo — filtra per zona del corpo o tipologia di allenamento, e collega tutto al paziente in un clic.',
+      searchPlaceholder: 'Cerca un esercizio per nome o muscolo...',
+      hiitLabel: 'HIIT',
+      moreFilters: 'Altri filtri',
+      moreFiltersHint: '(zona del corpo, attrezzatura)',
+      bodyZoneHeading: 'Zona del corpo',
+      categoryHeading: 'Tipologia di allenamento',
+      equipmentHeading: 'Attrezzatura',
+      loginRequired: 'Devi effettuare l’accesso per vedere questa pagina.',
+      loadError: 'Errore nel caricamento.',
+      networkError: 'Errore di rete nel caricamento.',
+      noExercises: 'Nessun esercizio trovato.',
+      noMatchPrefix: 'Nessun esercizio corrisponde',
+      noMatchFilterPart: 'al filtro "{filter}"',
+      noMatchSearchPart: 'alla ricerca',
+      exerciseSingular: 'esercizio',
+      exercisePlural: 'esercizi',
+      outOfTotal: 'su {total} totali',
+      showMore: 'Mostra altri {n}',
+      ofTotal: '(di {total} totali)',
+      muscleUnspecified: 'Muscolo non specificato',
+      genericExercise: 'Esercizio',
+      instructionsLabel: 'Istruzioni',
+      tipLabel: 'Suggerimento',
+      zoneLabel: 'Zona',
+    },
   },
   en: {
     clinicalActionBar: {
@@ -2471,6 +2553,15 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       searchPlaceholder: 'Search patient...',
       searching: 'Searching...',
       noPatientsFound: 'No patients found.',
+    },
+    bulkSelection: {
+      toggleOn: 'Select multiple exercises',
+      toggleOff: 'Exit selection',
+      countLabel: '{n} selected',
+      clearButton: 'Clear selection',
+      linkButton: 'Link to patient',
+      linking: 'Linking...',
+      linkedSuccess: 'Linked to {name}',
     },
     nav: {
       patients: 'Patients',
@@ -2490,6 +2581,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     },
     libraryLinks: {
       bodyMap: { label: 'Body Map', description: 'Interactive anatomy explorer' },
+      exerciseLibrary: { label: 'Exercise Library', description: 'Over 1,800 exercises with demo video' },
       neurology: { label: 'Neurology', description: 'Brain, nerves & neural pathways' },
       physiology: { label: 'Physiology', description: 'Foundational muscular & neurological mechanisms' },
       sportsMedicine: { label: 'Sports Medicine', description: 'Sports injury science and return-to-play' },
@@ -3817,6 +3909,37 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       add: 'Add',
       saveProfile: 'Save profile',
     },
+    exerciseLibraryPage: {
+      headingPart1: 'Exercise',
+      headingPart2: 'Library',
+      eyebrowCount: '{count} exercises with video',
+      eyebrowDefault: 'Exercises with video',
+      description: 'Over 1,800 exercises with demo video — filter by body zone or workout type, then add it all to a patient\'s plan in one click.',
+      searchPlaceholder: 'Search an exercise by name or muscle...',
+      hiitLabel: 'HIIT',
+      moreFilters: 'More filters',
+      moreFiltersHint: '(body zone, equipment)',
+      bodyZoneHeading: 'Body Zone',
+      categoryHeading: 'Workout Type',
+      equipmentHeading: 'Equipment',
+      loginRequired: 'You need to sign in to view this page.',
+      loadError: 'Loading error.',
+      networkError: 'Network error while loading.',
+      noExercises: 'No exercises found.',
+      noMatchPrefix: 'No exercise matches',
+      noMatchFilterPart: 'the filter "{filter}"',
+      noMatchSearchPart: 'the search',
+      exerciseSingular: 'exercise',
+      exercisePlural: 'exercises',
+      outOfTotal: 'out of {total} total',
+      showMore: 'Show {n} more',
+      ofTotal: '(of {total} total)',
+      muscleUnspecified: 'Muscle not specified',
+      genericExercise: 'Exercise',
+      instructionsLabel: 'Instructions',
+      tipLabel: 'Tip',
+      zoneLabel: 'Zone',
+    },
   },
   es: {
     clinicalActionBar: {
@@ -3831,6 +3954,15 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       searchPlaceholder: 'Buscar paciente...',
       searching: 'Buscando...',
       noPatientsFound: 'No se encontraron pacientes.',
+    },
+    bulkSelection: {
+      toggleOn: 'Seleccionar varios ejercicios',
+      toggleOff: 'Salir de la selección',
+      countLabel: '{n} seleccionados',
+      clearButton: 'Deseleccionar todo',
+      linkButton: 'Vincular al paciente',
+      linking: 'Vinculando...',
+      linkedSuccess: 'Vinculados a {name}',
     },
     nav: {
       patients: 'Pacientes',
@@ -3850,6 +3982,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     },
     libraryLinks: {
       bodyMap: { label: 'Mapa Corporal', description: 'Explorador anatómico interactivo' },
+      exerciseLibrary: { label: 'Biblioteca de Ejercicios', description: 'Más de 1.800 ejercicios con vídeo demostrativo' },
       neurology: { label: 'Neurología', description: 'Cerebro, nervios y vías nerviosas' },
       physiology: { label: 'Fisiología', description: 'Mecanismos musculares y neurológicos fundamentales' },
       sportsMedicine: { label: 'Medicina Deportiva', description: 'Ciencia de la lesión deportiva y retorno al deporte' },
@@ -5177,6 +5310,37 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       add: 'Añadir',
       saveProfile: 'Guardar perfil',
     },
+    exerciseLibraryPage: {
+      headingPart1: 'Biblioteca de',
+      headingPart2: 'Ejercicios',
+      eyebrowCount: '{count} ejercicios con vídeo',
+      eyebrowDefault: 'Ejercicios con vídeo',
+      description: 'Más de 1.800 ejercicios con vídeo demostrativo — filtra por zona del cuerpo o tipo de entrenamiento, y añádelo todo al plan del paciente en un clic.',
+      searchPlaceholder: 'Busca un ejercicio por nombre o músculo...',
+      hiitLabel: 'HIIT',
+      moreFilters: 'Más filtros',
+      moreFiltersHint: '(zona del cuerpo, equipamiento)',
+      bodyZoneHeading: 'Zona del cuerpo',
+      categoryHeading: 'Tipo de entrenamiento',
+      equipmentHeading: 'Equipamiento',
+      loginRequired: 'Debes iniciar sesión para ver esta página.',
+      loadError: 'Error al cargar.',
+      networkError: 'Error de red al cargar.',
+      noExercises: 'No se encontraron ejercicios.',
+      noMatchPrefix: 'Ningún ejercicio coincide con',
+      noMatchFilterPart: 'el filtro "{filter}"',
+      noMatchSearchPart: 'la búsqueda',
+      exerciseSingular: 'ejercicio',
+      exercisePlural: 'ejercicios',
+      outOfTotal: 'de {total} en total',
+      showMore: 'Mostrar {n} más',
+      ofTotal: '(de {total} en total)',
+      muscleUnspecified: 'Músculo no especificado',
+      genericExercise: 'Ejercicio',
+      instructionsLabel: 'Instrucciones',
+      tipLabel: 'Consejo',
+      zoneLabel: 'Zona',
+    },
   },
   fr: {
     clinicalActionBar: {
@@ -5191,6 +5355,15 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       searchPlaceholder: 'Rechercher un patient...',
       searching: 'Recherche en cours...',
       noPatientsFound: 'Aucun patient trouvé.',
+    },
+    bulkSelection: {
+      toggleOn: 'Sélectionner plusieurs exercices',
+      toggleOff: 'Quitter la sélection',
+      countLabel: '{n} sélectionnés',
+      clearButton: 'Tout désélectionner',
+      linkButton: 'Lier au patient',
+      linking: 'Liaison en cours...',
+      linkedSuccess: 'Liés à {name}',
     },
     nav: {
       patients: 'Patients',
@@ -5210,6 +5383,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     },
     libraryLinks: {
       bodyMap: { label: 'Carte du Corps', description: 'Explorateur anatomique interactif' },
+      exerciseLibrary: { label: 'Bibliothèque d’Exercices', description: 'Plus de 1 800 exercices avec vidéo de démonstration' },
       neurology: { label: 'Neurologie', description: 'Cerveau, nerfs et voies nerveuses' },
       physiology: { label: 'Physiologie', description: 'Mécanismes musculaires et neurologiques fondamentaux' },
       sportsMedicine: { label: 'Médecine du Sport', description: 'Science de la blessure sportive et retour au sport' },
@@ -6536,6 +6710,37 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       credentialPlaceholder: 'Ex. Master en Rééducation du Plancher Pelvien',
       add: 'Ajouter',
       saveProfile: 'Enregistrer le profil',
+    },
+    exerciseLibraryPage: {
+      headingPart1: "Bibliothèque d'",
+      headingPart2: 'Exercices',
+      eyebrowCount: '{count} exercices avec vidéo',
+      eyebrowDefault: 'Exercices avec vidéo',
+      description: 'Plus de 1 800 exercices avec vidéo de démonstration — filtrez par zone du corps ou type d\'entraînement, puis ajoutez le tout au plan du patient en un clic.',
+      searchPlaceholder: 'Rechercher un exercice par nom ou muscle...',
+      hiitLabel: 'HIIT',
+      moreFilters: 'Plus de filtres',
+      moreFiltersHint: '(zone du corps, équipement)',
+      bodyZoneHeading: 'Zone du corps',
+      categoryHeading: 'Type d\'entraînement',
+      equipmentHeading: 'Équipement',
+      loginRequired: 'Vous devez vous connecter pour voir cette page.',
+      loadError: 'Erreur de chargement.',
+      networkError: 'Erreur réseau lors du chargement.',
+      noExercises: 'Aucun exercice trouvé.',
+      noMatchPrefix: 'Aucun exercice ne correspond',
+      noMatchFilterPart: 'au filtre « {filter} »',
+      noMatchSearchPart: 'à la recherche',
+      exerciseSingular: 'exercice',
+      exercisePlural: 'exercices',
+      outOfTotal: 'sur {total} au total',
+      showMore: 'Afficher {n} de plus',
+      ofTotal: '(sur {total} au total)',
+      muscleUnspecified: 'Muscle non spécifié',
+      genericExercise: 'Exercice',
+      instructionsLabel: 'Instructions',
+      tipLabel: 'Conseil',
+      zoneLabel: 'Zone',
     },
   },
 };

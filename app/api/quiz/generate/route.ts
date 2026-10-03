@@ -16,7 +16,10 @@ const TARGET_POOL_SIZE = 100 // cached questions kept on hand per subject+diffic
 // raised from 50 to 100 per user request ("anatomia vorrei ci fossero almeno 100 domande");
 // since this is per difficulty tier too, a subject with all three difficulties in use ends up
 // with far more than 100 questions overall.
-const QUESTIONS_PER_QUIZ = 8
+const QUESTIONS_PER_QUIZ = 15 // raised from 8 per user request, after the pool-size fix above made
+// clear that pool size (how many distinct questions exist) and quiz length (how many are served
+// in one play) are two separate knobs — this is the second one. With TARGET_POOL_SIZE=100, a pool
+// of 15-question quizzes still gets ~6-7 non-repeating rounds before any question resurfaces.
 const GENERATE_BATCH = 15 // how many new questions to ask the model for on each shortfall call —
 // raised from 10 alongside TARGET_POOL_SIZE so a pool climbing to 100 doesn't need twice as many
 // plays to fill; still modest enough that a single quiz-start request (generation call +
@@ -157,15 +160,44 @@ function buildPrompt(
   // still governed by the same SCOPE block above and the same "don't
   // fabricate uncertain specifics" guardrail as the grounded subjects.
   const hasGrounding = content.length > 0
-  const specificitySource = hasGrounding ? 'presi dai contenuti forniti sotto' : 'presi dalle tue conoscenze di livello universitario sulla materia'
+
+  // ATLAS-STYLE ANATOMY (added per user request: "domande tipo dove ha la
+  // curvatura la clavicola... prese proprio da un atlante"). The existing
+  // PHYGO grounding for 'anatomy' (fetchContentForSubject above) only pulls
+  // the `anatomy` column of the 8 body-SYSTEM structure tables — i.e. organ
+  // anatomy (heart, lungs, kidneys...), not classic gross-anatomy/osteology
+  // atlas content (bone landmarks, curvatures, foramina, muscle origins/
+  // insertions). That thin, organ-only grounding is why generated anatomy
+  // questions skewed generic instead of atlas-precise. Rather than replace
+  // the grounding (still useful, kept as-is below), anatomy gets its own
+  // always-on instruction block — same "named real textbook" pattern already
+  // approved for biology/biochemistry — that explicitly directs generation
+  // toward osteology/arthrology/myology/angiology/peripheral-neuroanatomy
+  // detail, independent of whether PHYGO's own organ content is thin.
+  const isAnatomy = subject === 'anatomy'
+  const specificitySource = isAnatomy
+    ? "prese da un atlante anatomico standard (es. Netter's Atlas of Human Anatomy, Gray's Anatomy for Students, Moore's Clinically Oriented Anatomy) e, quando pertinente, dai contenuti forniti sotto"
+    : hasGrounding
+      ? 'presi dai contenuti forniti sotto'
+      : 'presi dalle tue conoscenze di livello universitario sulla materia'
+  const anatomyAtlasBlock = isAnatomy
+    ? `\nLIVELLO DI DETTAGLIO RICHIESTO — ANATOMIA DA ATLANTE: i contenuti PHYGO sotto (se presenti) coprono soprattutto l'anatomia funzionale degli organi interni — NON limitarti a quelli. Le domande di anatomia devono attingere principalmente alla tua conoscenza di un atlante anatomico standard (Netter, Gray's Anatomy for Students, Moore's Clinically Oriented Anatomy) e coprire, alternando tra queste categorie invece di concentrarti su una sola:
+- Osteologia: nomi precisi di ossa e loro reperi (processi, tubercoli, tuberosità, creste, forami, incisure, curvature, superfici articolari) — es. "dove si trova la curvatura della clavicola", "quale forame attraversa un dato nervo o vaso".
+- Artrologia: tipo di articolazione, superfici articolari coinvolte, legamenti specifici, gradi di libertà.
+- Miologia: origine, inserzione, innervazione e azione precisa dei muscoli principali (non solo il nome del muscolo).
+- Angiologia: decorso e rami dei vasi principali.
+- Neuroanatomia periferica: decorso dei nervi periferici e i forami/canali ossei che attraversano.
+Usa nomenclatura anatomica italiana precisa, come faresti citando direttamente un atlante.\n`
+    : ''
   const contentBlock = hasGrounding
-    ? `I contenuti seguenti (forniti in italiano, tratti dal materiale didattico di PHYGO) sono la base di partenza obbligatoria — ogni domanda deve essere coerente con questi e non contraddirli mai:
+    ? `I contenuti seguenti (forniti in italiano, tratti dal materiale didattico di PHYGO) sono materiale di riferimento aggiuntivo — restaci coerente quando li usi, ma non è la tua unica fonte:
 
 ${snippets}
 ${existingBlock}
-Oltre a questi contenuti, puoi integrare — solo per arricchire dettagli, cifre o meccanismi non contraddetti da quanto sopra — nozioni consolidate e ampiamente accettate di anatomia, fisiologia, biomeccanica e riabilitazione, del livello di un manuale universitario di fisioterapia (es. Kendall, Neumann, Kapandji, Stanfield, Hall) e di linee guida cliniche mainstream. NON introdurre invece: dati clinici incerti, studi specifici con numeri/percentuali/anni che non sei certo siano corretti, o affermazioni sperimentali/controverse — in caso di dubbio, resta sul contenuto fornito sopra invece di rischiare un'informazione inventata o imprecisa.`
+${anatomyAtlasBlock}Oltre a questi contenuti, puoi integrare — per arricchire dettagli, cifre o meccanismi non contraddetti da quanto sopra — nozioni consolidate e ampiamente accettate di anatomia, fisiologia, biomeccanica e riabilitazione, del livello di un manuale universitario di fisioterapia (es. Kendall, Neumann, Kapandji, Stanfield, Hall) e di linee guida cliniche mainstream. NON introdurre invece: dati clinici incerti, studi specifici con numeri/percentuali/anni che non sei certo siano corretti, o affermazioni sperimentali/controverse — in caso di dubbio, resta su contenuto solido e consolidato invece di rischiare un'informazione inventata o imprecisa.`
     : `PHYGO non ha ancora contenuti dedicati per questa materia, quindi basati direttamente su nozioni consolidate e ampiamente accettate, del livello di un manuale universitario di riferimento per la materia "${subject}" (per la biologia: testi come Alberts "Biologia molecolare della cellula"; per la biochimica: testi come Lehninger, Berg/Tymoczko/Stryer). NON introdurre invece: dati incerti, cifre/percentuali/anni che non sei certo siano corretti, o affermazioni sperimentali/controverse — in caso di dubbio, resta su concetti solidi e ben consolidati invece di rischiare un'informazione inventata o imprecisa.
-${existingBlock}`
+${existingBlock}
+${anatomyAtlasBlock}`
 
   return `Sei un assistente didattico per studenti di fisioterapia. Genera esattamente ${count} domande a risposta multipla NUOVE e TRA LORO DIVERSE, scritte interamente in ${languageLabel.toUpperCase()} (testo della domanda, opzioni e spiegazione tutti in ${languageLabel}), sull'argomento "${subject}", livello di difficoltà "${difficulty}".
 

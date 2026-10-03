@@ -21,6 +21,13 @@ const MARKER_WIDTHS = [10, 16, 24]
 // prop) — deliberately much larger than any ink width since it needs to
 // comfortably straddle a stroke to erase it, not just graze it.
 const ERASER_SIZES = [14, 26, 44]
+// Text-note font sizes — deliberately goes down to a genuinely tiny 9px (not
+// just a slightly-smaller "small"), since the ask that added this was
+// specifically "let me write even very small" for dense annotations that
+// need to fit in a tight margin. 14 (the pre-existing hardcoded default)
+// stays one of the presets so nothing changes for anyone who never touches
+// this control.
+const TEXT_SIZES = [9, 14, 20, 28]
 const MORE_TOOLS: AnnotationTool[] = ['line', 'rect', 'ellipse']
 
 export default function AnnotationToolbar({
@@ -34,6 +41,8 @@ export default function AnnotationToolbar({
   onTextBackgroundChange,
   markerColor,
   onMarkerColorChange,
+  textFontSize,
+  onTextFontSizeChange,
   width,
   onWidthChange,
   markerWidth,
@@ -61,6 +70,9 @@ export default function AnnotationToolbar({
   onTextBackgroundChange: (c: string | null) => void
   markerColor: string
   onMarkerColorChange: (c: string) => void
+  /** Font size (px) new text notes are created with — see TEXT_SIZES. */
+  textFontSize: number
+  onTextFontSizeChange: (s: number) => void
   width: number
   onWidthChange: (w: number) => void
   markerWidth: number
@@ -324,6 +336,26 @@ export default function AnnotationToolbar({
                 className={`h-5 w-5 rounded-full border transition-transform ${textBackground === c ? 'scale-110 border-ink dark:border-white' : 'border-black/10 dark:border-white/20'}`}
                 style={{ backgroundColor: c }}
               />
+            ))}
+          </div>
+          {/* Font size for a NEW note — literal "Aa" at each size so the
+              effect is obvious at a glance, same idea as the width dots
+              above rather than a plain numeric picker. */}
+          <div className="mx-1 h-5 w-px bg-black/[0.08] dark:bg-white/10" />
+          <div className="flex items-center gap-1">
+            {TEXT_SIZES.map((s) => (
+              <button
+                key={s}
+                onClick={() => onTextFontSizeChange(s)}
+                aria-label={`${ui.annotate.textSize} ${s}`}
+                title={`${ui.annotate.textSize} ${s}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg font-medium transition-colors ${
+                  textFontSize === s ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+                }`}
+                style={{ fontSize: Math.min(18, Math.max(9, s * 0.7)) }}
+              >
+                Aa
+              </button>
             ))}
           </div>
         </>

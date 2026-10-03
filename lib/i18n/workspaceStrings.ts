@@ -68,8 +68,11 @@ interface WorkspaceDict {
     button: string
     uploading: string
     processing: string
+    converting: string // shown for Word/PowerPoint/EPUB/image imports while the server-side PDF conversion runs
     failed: string
-    onlyPdf: string
+    unsupportedType: string
+    sofficeMissing: string // shown when a Word/PowerPoint import fails because LibreOffice isn't installed/reachable
+    calibreMissing: string // shown when an EPUB import fails because Calibre isn't installed/reachable
   }
   reader: {
     page: string
@@ -115,6 +118,7 @@ interface WorkspaceDict {
     redo: string
     clearPage: string
     noBackground: string
+    textSize: string
   }
   ask: {
     button: string
@@ -189,6 +193,8 @@ interface WorkspaceDict {
     addToConceptMap: string
     testMe: string
     comingSoon: string
+    relatedConditions: string
+    relatedTests: string
     sections: {
       goals: string
       clinical_tests: string
@@ -255,7 +261,16 @@ const it: WorkspaceDict = {
     confirmDeleteTitle: 'Spostare nel cestino?', confirmDeleteBody: 'Potrai ripristinarlo in qualsiasi momento dal Cestino.',
     cancel: 'Annulla', create: 'Crea', save: 'Salva', move: 'Sposta', delete: 'Sposta nel cestino',
   },
-  import: { button: 'Importa PDF', uploading: 'Caricamento…', processing: 'Elaborazione…', failed: 'Importazione non riuscita', onlyPdf: 'Per ora sono supportati solo file PDF' },
+  import: {
+    button: 'Importa documento',
+    uploading: 'Caricamento…',
+    processing: 'Elaborazione…',
+    converting: 'Conversione in PDF… può richiedere qualche secondo in più',
+    failed: 'Importazione non riuscita',
+    unsupportedType: 'Formati supportati: PDF, Word (.docx), PowerPoint (.pptx), EPUB, immagini (.jpg/.png)',
+    sofficeMissing: 'Per importare Word o PowerPoint serve LibreOffice installato sul computer — i PDF, le immagini e gli EPUB funzionano comunque.',
+    calibreMissing: 'Per importare EPUB serve Calibre installato sul computer — i PDF, le immagini, Word e PowerPoint funzionano comunque.',
+  },
   reader: {
     page: 'Pagina', of: 'di', zoomIn: 'Zoom avanti', zoomOut: 'Zoom indietro', fitWidth: 'Adatta larghezza', fitPage: 'Adatta pagina',
     thumbnails: 'Miniature', search: 'Cerca nel documento', searchPlaceholder: 'Cerca nel testo…', noResults: 'Nessun risultato',
@@ -265,7 +280,7 @@ const it: WorkspaceDict = {
   annotate: {
     select: 'Seleziona', pen: 'Penna', line: 'Linea', rectangle: 'Rettangolo', ellipse: 'Cerchio',
     highlighter: 'Evidenziatore', eraser: 'Gomma', eraserSize: 'Dimensione gomma', text: 'Testo', textPlaceholder: 'Scrivi una nota…', shape: 'Forma',
-    color: 'Colore', thickness: 'Spessore', undo: 'Annulla', redo: 'Ripeti', clearPage: 'Cancella annotazioni pagina', noBackground: 'Nessuno sfondo',
+    color: 'Colore', thickness: 'Spessore', undo: 'Annulla', redo: 'Ripeti', clearPage: 'Cancella annotazioni pagina', noBackground: 'Nessuno sfondo', textSize: 'Dimensione testo',
     insertImage: 'Inserisci immagine', uploadPhoto: 'Carica foto', takePhoto: 'Scatta foto', imageOnly: 'Seleziona un file immagine',
     fileTooLarge: 'File troppo grande (max {max}MB).', sessionExpired: 'Sessione scaduta — accedi di nuovo.',
   },
@@ -302,6 +317,8 @@ const it: WorkspaceDict = {
     addToConceptMap: 'Aggiungi alla mappa concettuale',
     testMe: 'Mettimi alla prova',
     comingSoon: 'Presto disponibile',
+    relatedConditions: 'Patologie correlate',
+    relatedTests: 'Test correlati',
     sections: {
       goals: 'Obiettivi',
       clinical_tests: 'Test clinici',
@@ -359,7 +376,16 @@ const en: WorkspaceDict = {
     confirmDeleteTitle: 'Move to trash?', confirmDeleteBody: 'You can restore it anytime from Trash.',
     cancel: 'Cancel', create: 'Create', save: 'Save', move: 'Move', delete: 'Move to trash',
   },
-  import: { button: 'Import PDF', uploading: 'Uploading…', processing: 'Processing…', failed: 'Import failed', onlyPdf: 'Only PDF files are supported for now' },
+  import: {
+    button: 'Import document',
+    uploading: 'Uploading…',
+    processing: 'Processing…',
+    converting: 'Converting to PDF… this can take a bit longer',
+    failed: 'Import failed',
+    unsupportedType: 'Supported formats: PDF, Word (.docx), PowerPoint (.pptx), EPUB, images (.jpg/.png)',
+    sofficeMissing: 'Importing Word or PowerPoint files needs LibreOffice installed on the computer — PDFs, images and EPUBs still work.',
+    calibreMissing: 'Importing EPUB files needs Calibre installed on the computer — PDFs, images, Word and PowerPoint still work.',
+  },
   reader: {
     page: 'Page', of: 'of', zoomIn: 'Zoom in', zoomOut: 'Zoom out', fitWidth: 'Fit width', fitPage: 'Fit page',
     thumbnails: 'Thumbnails', search: 'Search document', searchPlaceholder: 'Search text…', noResults: 'No results',
@@ -369,7 +395,7 @@ const en: WorkspaceDict = {
   annotate: {
     select: 'Select', pen: 'Pen', line: 'Line', rectangle: 'Rectangle', ellipse: 'Circle',
     highlighter: 'Highlighter', eraser: 'Eraser', eraserSize: 'Eraser size', text: 'Text', textPlaceholder: 'Write a note…', shape: 'Shape',
-    color: 'Color', thickness: 'Thickness', undo: 'Undo', redo: 'Redo', clearPage: 'Clear page annotations', noBackground: 'No background',
+    color: 'Color', thickness: 'Thickness', undo: 'Undo', redo: 'Redo', clearPage: 'Clear page annotations', noBackground: 'No background', textSize: 'Text size',
     insertImage: 'Insert image', uploadPhoto: 'Upload photo', takePhoto: 'Take photo', imageOnly: 'Please select an image file',
     fileTooLarge: 'File too large (max {max}MB).', sessionExpired: 'Session expired — please sign in again.',
   },
@@ -406,6 +432,8 @@ const en: WorkspaceDict = {
     addToConceptMap: 'Add to Concept Map',
     testMe: 'Test Me',
     comingSoon: 'Coming soon',
+    relatedConditions: 'Related conditions',
+    relatedTests: 'Related tests',
     sections: {
       goals: 'Goals',
       clinical_tests: 'Clinical tests',
@@ -463,7 +491,16 @@ const es: WorkspaceDict = {
     confirmDeleteTitle: '¿Mover a la papelera?', confirmDeleteBody: 'Podrás restaurarlo cuando quieras desde la Papelera.',
     cancel: 'Cancelar', create: 'Crear', save: 'Guardar', move: 'Mover', delete: 'Mover a la papelera',
   },
-  import: { button: 'Importar PDF', uploading: 'Subiendo…', processing: 'Procesando…', failed: 'Error al importar', onlyPdf: 'Por ahora solo se admiten archivos PDF' },
+  import: {
+    button: 'Importar documento',
+    uploading: 'Subiendo…',
+    processing: 'Procesando…',
+    converting: 'Convirtiendo a PDF… puede tardar un poco más',
+    failed: 'Error al importar',
+    unsupportedType: 'Formatos admitidos: PDF, Word (.docx), PowerPoint (.pptx), EPUB, imágenes (.jpg/.png)',
+    sofficeMissing: 'Para importar Word o PowerPoint hace falta tener LibreOffice instalado en el ordenador — los PDF, las imágenes y los EPUB siguen funcionando.',
+    calibreMissing: 'Para importar EPUB hace falta tener Calibre instalado en el ordenador — los PDF, las imágenes, Word y PowerPoint siguen funcionando.',
+  },
   reader: {
     page: 'Página', of: 'de', zoomIn: 'Acercar', zoomOut: 'Alejar', fitWidth: 'Ajustar ancho', fitPage: 'Ajustar página',
     thumbnails: 'Miniaturas', search: 'Buscar en el documento', searchPlaceholder: 'Buscar texto…', noResults: 'Sin resultados',
@@ -473,7 +510,7 @@ const es: WorkspaceDict = {
   annotate: {
     select: 'Seleccionar', pen: 'Bolígrafo', line: 'Línea', rectangle: 'Rectángulo', ellipse: 'Círculo',
     highlighter: 'Resaltador', eraser: 'Borrador', eraserSize: 'Tamaño del borrador', text: 'Texto', textPlaceholder: 'Escribe una nota…', shape: 'Forma',
-    color: 'Color', thickness: 'Grosor', undo: 'Deshacer', redo: 'Rehacer', clearPage: 'Borrar anotaciones de la página', noBackground: 'Sin fondo',
+    color: 'Color', thickness: 'Grosor', undo: 'Deshacer', redo: 'Rehacer', clearPage: 'Borrar anotaciones de la página', noBackground: 'Sin fondo', textSize: 'Tamaño del texto',
     insertImage: 'Insertar imagen', uploadPhoto: 'Subir foto', takePhoto: 'Tomar foto', imageOnly: 'Selecciona un archivo de imagen',
     fileTooLarge: 'Archivo demasiado grande (máx. {max}MB).', sessionExpired: 'Sesión caducada — inicia sesión de nuevo.',
   },
@@ -510,6 +547,8 @@ const es: WorkspaceDict = {
     addToConceptMap: 'Añadir al mapa conceptual',
     testMe: 'Ponme a prueba',
     comingSoon: 'Próximamente',
+    relatedConditions: 'Patologías relacionadas',
+    relatedTests: 'Pruebas relacionadas',
     sections: {
       goals: 'Objetivos',
       clinical_tests: 'Pruebas clínicas',
@@ -567,7 +606,16 @@ const fr: WorkspaceDict = {
     confirmDeleteTitle: 'Mettre à la corbeille ?', confirmDeleteBody: 'Vous pourrez le restaurer à tout moment depuis la Corbeille.',
     cancel: 'Annuler', create: 'Créer', save: 'Enregistrer', move: 'Déplacer', delete: 'Mettre à la corbeille',
   },
-  import: { button: 'Importer un PDF', uploading: 'Envoi…', processing: 'Traitement…', failed: "Échec de l'import", onlyPdf: 'Seuls les fichiers PDF sont pris en charge pour le moment' },
+  import: {
+    button: 'Importer un document',
+    uploading: 'Envoi…',
+    processing: 'Traitement…',
+    converting: 'Conversion en PDF… cela peut prendre un peu plus de temps',
+    failed: "Échec de l'import",
+    unsupportedType: 'Formats pris en charge : PDF, Word (.docx), PowerPoint (.pptx), EPUB, images (.jpg/.png)',
+    sofficeMissing: "Pour importer un fichier Word ou PowerPoint, LibreOffice doit être installé sur l'ordinateur — les PDF, les images et les EPUB fonctionnent toujours.",
+    calibreMissing: "Pour importer un fichier EPUB, Calibre doit être installé sur l'ordinateur — les PDF, les images, Word et PowerPoint fonctionnent toujours.",
+  },
   reader: {
     page: 'Page', of: 'sur', zoomIn: 'Zoomer', zoomOut: 'Dézoomer', fitWidth: 'Ajuster à la largeur', fitPage: 'Ajuster à la page',
     thumbnails: 'Miniatures', search: 'Rechercher dans le document', searchPlaceholder: 'Rechercher du texte…', noResults: 'Aucun résultat',
@@ -577,7 +625,7 @@ const fr: WorkspaceDict = {
   annotate: {
     select: 'Sélectionner', pen: 'Stylo', line: 'Ligne', rectangle: 'Rectangle', ellipse: 'Cercle',
     highlighter: 'Surligneur', eraser: 'Gomme', eraserSize: 'Taille de la gomme', text: 'Texte', textPlaceholder: 'Écrivez une note…', shape: 'Forme',
-    color: 'Couleur', thickness: 'Épaisseur', undo: 'Annuler', redo: 'Rétablir', clearPage: 'Effacer les annotations de la page', noBackground: 'Aucun fond',
+    color: 'Couleur', thickness: 'Épaisseur', undo: 'Annuler', redo: 'Rétablir', clearPage: 'Effacer les annotations de la page', noBackground: 'Aucun fond', textSize: 'Taille du texte',
     insertImage: 'Insérer une image', uploadPhoto: 'Importer une photo', takePhoto: 'Prendre une photo', imageOnly: 'Sélectionnez un fichier image',
     fileTooLarge: 'Fichier trop volumineux (max {max}Mo).', sessionExpired: 'Session expirée — veuillez vous reconnecter.',
   },
@@ -614,6 +662,8 @@ const fr: WorkspaceDict = {
     addToConceptMap: 'Ajouter à la carte conceptuelle',
     testMe: 'Teste-moi',
     comingSoon: 'Bientôt disponible',
+    relatedConditions: 'Pathologies associées',
+    relatedTests: 'Tests associés',
     sections: {
       goals: 'Objectifs',
       clinical_tests: 'Tests cliniques',

@@ -62,6 +62,13 @@ export default function QuizPage() {
   const [submitting, setSubmitting] = useState(false)
   const [results, setResults] = useState<{ totalQuestions: number; correctCount: number; results: SubmitResult[] } | null>(null)
 
+  // Pool sizes (how many questions actually exist per difficulty, not how
+  // many are served in one quiz) — fetched once per subject, shown under
+  // each difficulty button and again on the results screen. Added per user
+  // request so the size of the question bank is visible up front instead of
+  // only inferrable from noticing a replay shows different questions.
+  const [poolSizes, setPoolSizes] = useState<Record<QuizDifficulty, number> | null>(null)
+
   useEffect(() => {
     fetch('/api/quiz/progress')
       .then((r) => (r.ok ? r.json() : null))
@@ -74,6 +81,13 @@ export default function QuizPage() {
   const pickSubject = (s: QuizSubject) => {
     setSubject(s)
     setView('difficulty')
+    setPoolSizes(null)
+    fetch(`/api/quiz/pool-size?subject=${encodeURIComponent(s)}&language=${encodeURIComponent(lang)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.counts) setPoolSizes(data.counts)
+      })
+      .catch(() => {})
   }
 
   const pickDifficulty = async (d: QuizDifficulty) => {
@@ -224,6 +238,9 @@ export default function QuizPage() {
                   className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl px-5 py-6 text-center shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                 >
                   <p className="font-display text-lg font-bold text-ink dark:text-white">{quizUi.difficulty[d]}</p>
+                  <p className="text-xs text-ink/40 dark:text-white/40 mt-1.5">
+                    {poolSizes ? formatQuizString(quizUi.poolSizeLabel, { count: poolSizes[d] ?? 0 }) : ' '}
+                  </p>
                 </button>
               ))}
             </div>
@@ -347,6 +364,11 @@ export default function QuizPage() {
               <p className="text-sm text-ink/50 dark:text-white/50">
                 {formatQuizString(quizUi.scoreLabel, { correct: results.correctCount, total: results.totalQuestions })}
               </p>
+              {poolSizes && difficulty && poolSizes[difficulty] > results.totalQuestions && (
+                <p className="text-xs text-ink/40 dark:text-white/40 mt-2">
+                  {formatQuizString(quizUi.poolRotationNote, { shown: results.totalQuestions, total: poolSizes[difficulty] })}
+                </p>
+              )}
             </div>
 
             <p className="text-xs font-semibold tracking-wide uppercase text-ink/40 dark:text-white/40 mb-3">{quizUi.reviewTitle}</p>

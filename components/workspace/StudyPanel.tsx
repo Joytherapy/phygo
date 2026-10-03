@@ -14,7 +14,7 @@
 // save a personal reference to it independent of any document.
 
 import { useEffect, useState } from 'react'
-import { BookOpen, X, Loader2, ExternalLink, Check, Bookmark, BookmarkCheck, Pin } from 'lucide-react'
+import { BookOpen, X, Loader2, ExternalLink, Check, Bookmark, BookmarkCheck, Pin, ChevronRight } from 'lucide-react'
 import { useStudyPanel } from '@/contexts/StudyPanelContext'
 import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
 
@@ -25,6 +25,7 @@ export default function StudyPanel() {
     selectionText,
     status,
     match,
+    openWithSelection,
     close,
     canAddToDocument,
     addToDocument,
@@ -140,6 +141,46 @@ export default function StudyPanel() {
                     <p className="text-sm text-ink/70 dark:text-white/70 whitespace-pre-wrap">{s.body}</p>
                   </div>
                 ))}
+
+                {match.relatedConditions && match.relatedConditions.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-1.5">
+                      {ui.studyPanel.relatedConditions}
+                    </h3>
+                    <div className="flex flex-col gap-1">
+                      {match.relatedConditions.map((rc) => (
+                        <button
+                          key={rc.knowledgeId}
+                          onClick={() => openWithSelection(rc.title)}
+                          className="flex w-full items-center justify-between gap-2 rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.015] dark:bg-white/[0.03] px-3 py-2 text-left text-sm text-ink/80 dark:text-white/80 hover:border-[#4F7CFF]/30 hover:bg-[#4F7CFF]/5 transition-colors"
+                        >
+                          <span className="truncate">{rc.title}</span>
+                          <ChevronRight size={13} className="shrink-0 text-ink/25 dark:text-white/25" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {match.relatedTests && match.relatedTests.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-1.5">
+                      {ui.studyPanel.relatedTests}
+                    </h3>
+                    <div className="flex flex-col gap-1">
+                      {match.relatedTests.map((rt) => (
+                        <button
+                          key={rt.knowledgeId}
+                          onClick={() => openWithSelection(rt.title)}
+                          className="flex w-full items-center justify-between gap-2 rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.015] dark:bg-white/[0.03] px-3 py-2 text-left text-sm text-ink/80 dark:text-white/80 hover:border-[#4F7CFF]/30 hover:bg-[#4F7CFF]/5 transition-colors"
+                        >
+                          <span className="truncate">{rt.title}</span>
+                          <ChevronRight size={13} className="shrink-0 text-ink/25 dark:text-white/25" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {isSaved && (
                   <div className="pt-1">

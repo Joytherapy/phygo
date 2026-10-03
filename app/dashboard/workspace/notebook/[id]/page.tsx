@@ -120,9 +120,33 @@ export default function WorkspaceNotebookPageRoute() {
     return () => clearTimeout(lastPageTouch.current)
   }, [currentPage?.id, notebook, params.id])
 
+  // OPTIMISTIC CREATE FIX ("draws it, then reloads it") — same issue and
+  // same fix as the PDF document page's handleCreateAnnotation: this used
+  // to wait for the POST round-trip before adding the stroke to state, so
+  // AnnotationCanvas's instant DOM-only live preview would disappear on
+  // pointer-up and the real stroke wouldn't reappear until the network
+  // request resolved. A temp id renders immediately and is reconciled (or
+  // rolled back) once the request settles.
   const handleCreateAnnotation = async (annotation: NotebookCreatableAnnotation) => {
     if (!currentPage) return
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+    const optimistic: WorkspaceAnnotation = {
+      id: tempId,
+      owner_id: '',
+      target_type: 'notebook_page',
+      target_id: currentPage.id,
+      page_number: null,
+      type: annotation.type,
+      data: annotation.data,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      deleted_at: null,
+    }
+    setAnnotations((prev) => [...prev, optimistic])
+    setUndoStack((prev) => [...prev, tempId])
+    setRedoStack([])
     setSavingStatus('saving')
+
     const res = await fetch('/api/workspace/annotations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -135,13 +159,25 @@ export default function WorkspaceNotebookPageRoute() {
     })
     const json = await res.json()
     if (res.ok) {
-      setAnnotations((prev) => [...prev, json.annotation])
-      setUndoStack((prev) => [...prev, json.annotation.id])
-      setRedoStack([])
-      setSavingStatus('saved')
-      clearTimeout(savedTimeout.current)
-      savedTimeout.current = setTimeout(() => setSavingStatus('idle'), 1200)
+      let stillPresent = true
+      setAnnotations((prev) => {
+        if (!prev.some((a) => a.id === tempId)) {
+          stillPresent = false
+          return prev
+        }
+        return prev.map((a) => (a.id === tempId ? json.annotation : a))
+      })
+      setUndoStack((prev) => prev.map((id) => (id === tempId ? json.annotation.id : id)))
+      if (!stillPresent) {
+        fetch(`/api/workspace/annotations/${json.annotation.id}`, { method: 'DELETE' })
+      } else {
+        setSavingStatus('saved')
+        clearTimeout(savedTimeout.current)
+        savedTimeout.current = setTimeout(() => setSavingStatus('idle'), 1200)
+      }
     } else {
+      setAnnotations((prev) => prev.filter((a) => a.id !== tempId))
+      setUndoStack((prev) => prev.filter((id) => id !== tempId))
       setSavingStatus('idle')
     }
   }
@@ -182,7 +218,20 @@ export default function WorkspaceNotebookPageRoute() {
     if (redoStack.length === 0 || !currentPage) return
     const annotation = redoStack[redoStack.length - 1]
     setRedoStack((prev) => prev.slice(0, -1))
+
+    // Same optimistic treatment as handleCreateAnnotation above.
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+    const optimistic: WorkspaceAnnotation = {
+      ...annotation,
+      id: tempId,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      deleted_at: null,
+    }
+    setAnnotations((prev) => [...prev, optimistic])
+    setUndoStack((prev) => [...prev, tempId])
     setSavingStatus('saving')
+
     const res = await fetch('/api/workspace/annotations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -195,12 +244,25 @@ export default function WorkspaceNotebookPageRoute() {
     })
     const json = await res.json()
     if (res.ok) {
-      setAnnotations((prev) => [...prev, json.annotation])
-      setUndoStack((prev) => [...prev, json.annotation.id])
-      setSavingStatus('saved')
-      clearTimeout(savedTimeout.current)
-      savedTimeout.current = setTimeout(() => setSavingStatus('idle'), 1200)
+      let stillPresent = true
+      setAnnotations((prev) => {
+        if (!prev.some((a) => a.id === tempId)) {
+          stillPresent = false
+          return prev
+        }
+        return prev.map((a) => (a.id === tempId ? json.annotation : a))
+      })
+      setUndoStack((prev) => prev.map((id) => (id === tempId ? json.annotation.id : id)))
+      if (!stillPresent) {
+        fetch(`/api/workspace/annotations/${json.annotation.id}`, { method: 'DELETE' })
+      } else {
+        setSavingStatus('saved')
+        clearTimeout(savedTimeout.current)
+        savedTimeout.current = setTimeout(() => setSavingStatus('idle'), 1200)
+      }
     } else {
+      setAnnotations((prev) => prev.filter((a) => a.id !== tempId))
+      setUndoStack((prev) => prev.filter((id) => id !== tempId))
       setSavingStatus('idle')
     }
   }

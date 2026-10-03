@@ -22,6 +22,19 @@ import WorkspaceSidebar from './WorkspaceSidebar'
 // does not support requesting fullscreen on an arbitrary element at all, so
 // relying on that API alone would leave a person on an iPhone with no
 // bigger view. This one works identically on phone, tablet and computer.
+// Workspace-only forced dark theme (26/9): the rest of the dashboard keeps
+// its light/dark handled the normal way (Tailwind's `dark:` variant, driven
+// by a `dark` class that nothing in this app currently ever toggles onto
+// <html> — so in practice every `dark:` class already written across the
+// Workspace components has simply never fired). Rather than wiring up a
+// site-wide light/dark toggle nobody asked for, this puts the `dark` class
+// directly on WorkspaceShell's own root element instead: Tailwind's
+// `dark:` selector is just `.dark &` under the hood, so nesting it here
+// scopes the effect to this subtree only (Navbar included, since it renders
+// as a child of this div while inside Workspace) — Library/Quiz/the rest of
+// the dashboard are completely unaffected. No portals are used anywhere in
+// the Workspace component tree (menus/dialogs all render inline, verified
+// via grep), so every dropdown, color picker and dialog inherits this too.
 export default function WorkspaceShell({
   children,
   fullscreen = false,
@@ -31,12 +44,12 @@ export default function WorkspaceShell({
 }) {
   if (fullscreen) {
     return (
-      <div className="fixed inset-0 z-40 flex flex-col bg-white dark:bg-[#08090b] transition-colors">{children}</div>
+      <div className="dark fixed inset-0 z-40 flex flex-col bg-white dark:bg-[#08090b] transition-colors">{children}</div>
     )
   }
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="dark relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
       {/* Role-aware ambient glow: reads var(--brand-from)/var(--brand-to) from
@@ -63,8 +76,12 @@ export default function WorkspaceShell({
         }}
       />
 
-      <div className="relative max-w-6xl mx-auto pt-32 md:pt-36 pb-24 px-4 sm:px-6">
-        <div className="flex gap-6">
+      {/* Widened from max-w-6xl (1152px) to max-w-[1600px) — user feedback:
+          "la zona delle cartelle piu larga di come è adesso.. troppo stretta".
+          The cover-tile grids below now actually use the extra room (more
+          columns at wide viewports) instead of sitting capped at 2 columns. */}
+      <div className="relative max-w-[1600px] mx-auto pt-32 md:pt-36 pb-24 px-4 sm:px-6 lg:px-10">
+        <div className="flex gap-8">
           <WorkspaceSidebar />
           <main className="flex-1 min-w-0">{children}</main>
         </div>

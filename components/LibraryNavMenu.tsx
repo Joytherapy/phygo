@@ -18,6 +18,7 @@ import { useLibraryNavUi } from '@/lib/i18n/libraryNavStrings'
 // hrefs. Owned here now since this is the only place that uses it.
 export const libraryLinkHrefs = [
   { key: 'bodyMap', href: '/dashboard/body-map' },
+  { key: 'exerciseLibrary', href: '/dashboard/exercise-library' },
   { key: 'neurology', href: '/dashboard/brain-map' },
   { key: 'physiology', href: '/dashboard/physiology' },
   { key: 'sportsMedicine', href: '/dashboard/sports-medicine' },
@@ -44,7 +45,7 @@ const LIBRARY_CATEGORIES: { id: 'bodySystems' | 'anatomyMovement' | 'emergencyTo
     id: 'bodySystems',
     keys: ['cardiopulmonary', 'endocrine', 'urinary', 'gastrointestinal', 'immune', 'hematology', 'oncology', 'pelvicFloor'],
   },
-  { id: 'anatomyMovement', keys: ['bodyMap', 'neurology', 'physiology', 'fascia', 'sportsMedicine'] },
+  { id: 'anatomyMovement', keys: ['bodyMap', 'exerciseLibrary', 'neurology', 'physiology', 'fascia', 'sportsMedicine'] },
   { id: 'emergencyTools', keys: ['firstAid', 'blsd', 'clinicalTools'] },
 ]
 

@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { question, noteContext } = await request.json();
+    const { question, noteContext, lang } = await request.json();
 
     if (!question || typeof question !== "string") {
       return NextResponse.json(
@@ -129,6 +129,19 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // The app's current UI language (it/en/es/fr — same value the rest of
+    // Workspace already sends, e.g. via StudyPanelContext) is only a HINT:
+    // the instruction below tells the model to prefer matching the
+    // QUESTION's own language when the two disagree, rather than forcing a
+    // language onto text that isn't actually in it.
+    const LANGUAGE_NAMES: Record<string, string> = {
+      it: "Italian",
+      en: "English",
+      es: "Spanish",
+      fr: "French",
+    };
+    const languageName = LANGUAGE_NAMES[lang] || null;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -142,6 +155,10 @@ Answer with real clinical depth, not a generic overview. Concretely this means:
 - If the note context below mentions a specific condition, tailor the answer directly to that presentation — do not give a generic answer that could apply to any patient.
 - Where there are genuinely different clinical approaches or schools of thought, briefly mention the trade-off instead of picking one silently.
 - Structure longer answers with short paragraphs or a brief list when it improves clarity — do not pad with filler sentences.
+
+Language (important — do not skip this): ALWAYS answer in the same language the user's question below is written in.${
+            languageName ? ` The app's current interface language is ${languageName}, so if the question's language is ambiguous, default to ${languageName}.` : ""
+          } Never answer in English just because this system prompt is written in English — that has caused this assistant to wrongly answer Italian questions in English before, and it must not happen again.
 
 Content behavior (unchanged):
 - Do NOT cite specific studies, journals, statistics, or named research papers. Never invent citations.

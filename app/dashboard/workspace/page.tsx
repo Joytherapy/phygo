@@ -269,7 +269,7 @@ export default function WorkspaceHomePage() {
           {searchResults.folders.length === 0 && searchResults.documents.length === 0 && searchResults.notebooks.length === 0 ? (
             <p className="text-sm text-ink/40 dark:text-white/40">{ui.search.noResults}</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
               {searchResults.folders.map((f) => (
                 <FolderCard
                   key={f.id}
@@ -334,27 +334,6 @@ export default function WorkspaceHomePage() {
             </motion.section>
           )}
 
-          {recent.length > 0 && (
-            <section>
-              <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
-                {ui.home.recent}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {recent.map((d) => (
-                  <DocumentCard
-                    key={d.id}
-                    document={d}
-                    onOpen={() => router.push(`/dashboard/workspace/document/${d.id}`)}
-                    onRename={(name) => renameDocument(d, name)}
-                    onToggleStar={() => toggleDocumentStar(d)}
-                    onDelete={() => deleteDocument(d)}
-                    onDownload={() => downloadDocument(d)}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-
           {folders.length === 0 && documents.length === 0 && notebooks.length === 0 ? (
             <EmptyState icon={FolderOpen} title={ui.home.empty} />
           ) : (
@@ -371,7 +350,7 @@ export default function WorkspaceHomePage() {
                   <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
                     {ui.folder.folders}
                   </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
                     {folders.map((f) => (
                       <FolderCard
                         key={f.id}
@@ -392,7 +371,7 @@ export default function WorkspaceHomePage() {
                   <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
                     {ui.folder.documents}
                   </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
                     {notebooks.map((nb) => (
                       <NotebookCard
                         key={nb.id}

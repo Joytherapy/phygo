@@ -185,7 +185,7 @@ export default function WorkspaceStarredPage() {
       {folders.length === 0 && documents.length === 0 && notebooks.length === 0 ? (
         <EmptyState icon={Star} title={ui.nav.starred} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
           {folders.map((f) => (
             <FolderCard
               key={f.id}

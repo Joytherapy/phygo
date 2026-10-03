@@ -111,6 +111,10 @@ export default function PdfViewer({
   // `null` = no background (the default — see TextAnnotationData.backgroundColor).
   const [textBackground, setTextBackground] = useState<string | null>(null)
   const [markerColor, setMarkerColor] = useState<string>(HIGHLIGHT_COLORS[0])
+  // Font size a NEWLY created text note is written at — see AnnotationToolbar's
+  // TEXT_SIZES row (Text tool → "Aa" buttons). Starts at the pre-existing
+  // hardcoded default so nothing changes until the student actually touches it.
+  const [textFontSize, setTextFontSize] = useState<number>(DEFAULT_FONT_SIZE)
   const [inkWidth, setInkWidth] = useState(3.5)
   const [markerWidth, setMarkerWidth] = useState(16)
   const [eraserSize, setEraserSize] = useState(26)
@@ -330,6 +334,8 @@ export default function PdfViewer({
             onTextBackgroundChange={setTextBackground}
             markerColor={markerColor}
             onMarkerColorChange={setMarkerColor}
+            textFontSize={textFontSize}
+            onTextFontSizeChange={setTextFontSize}
             width={inkWidth}
             onWidthChange={setInkWidth}
             markerWidth={markerWidth}
@@ -415,19 +421,58 @@ export default function PdfViewer({
             )}
 
             <div className="flex-1 min-h-0 overflow-auto flex justify-center py-6 px-4">
-              <div ref={pageWrapRef} className="relative inline-block" style={{ userSelect: selectionEnabled ? 'auto' : 'none' }}>
-                <Page
-                  pageNumber={pageNumber}
-                  width={effectiveWidth}
-                  scale={effectiveScale}
-                  renderTextLayer
-                  renderAnnotationLayer={false}
-                  loading={
-                    <div className="flex items-center justify-center py-24 text-ink/40 dark:text-white/40">
-                      <Loader2 size={18} className="animate-spin" />
-                    </div>
-                  }
-                />
+              {/* self-start: the scroll container above is a flex row (`flex
+                  justify-center`), and a flex item with no explicit height
+                  defaults to align-items:stretch on the cross axis — it gets
+                  capped to the CONTAINER's visible height rather than sizing
+                  to its own content. For a page shorter than the viewport
+                  this was invisible (stretch ≈ content height anyway), but
+                  for a tall page (e.g. this 733-page Calibre-converted book,
+                  1193px rendered vs. ~474-538px of visible scroll height) it
+                  silently shrank this wrapper to 474px while the actual
+                  <Page> content inside kept rendering at its full 1193px and
+                  simply overflowed the shrunken box (still visible, since
+                  nothing here clips overflow). AnnotationCanvas's SVG overlay
+                  is sized to 100% of *this* div, so it only covered the top
+                  ~40% of the page — annotations silently did nothing below
+                  that line. self-start makes this div size to its own
+                  content instead of being stretched, so its height always
+                  matches the real rendered page and the overlay covers all
+                  of it. */}
+              <div ref={pageWrapRef} className="relative inline-block self-start" style={{ userSelect: selectionEnabled ? 'auto' : 'none' }}>
+                {/* z-0 here (position:relative + an explicit, non-auto
+                    z-index) matters more than it looks: pdf.js/react-pdf
+                    give the page's own text-selection layer an explicit
+                    `z-index: 2` (for its internal canvas/textLayer/
+                    annotationLayer stacking). `.react-pdf__Page` itself is
+                    only `position: relative` with z-index:auto, which does
+                    NOT establish a stacking context — so without this
+                    wrapper, that inner z-index:2 "leaks" out and is compared
+                    directly against our overlays below (AnnotationCanvas,
+                    TextAnnotationLayer, etc.), which all sit at the default
+                    z-index:auto. z-index:2 beats z-index:auto regardless of
+                    DOM order, so pdf.js's own text layer was silently
+                    sitting on top of and swallowing every click/drag meant
+                    for the pen, text notes, images and knowledge cards —
+                    this is why writing on a page did nothing even after the
+                    page-height fix above. Wrapping <Page> in its own
+                    stacking context (z-0) contains that z-index:2 inside it,
+                    so it can no longer outrank the overlay siblings that
+                    come after it in the DOM. */}
+                <div className="relative z-0">
+                  <Page
+                    pageNumber={pageNumber}
+                    width={effectiveWidth}
+                    scale={effectiveScale}
+                    renderTextLayer
+                    renderAnnotationLayer={false}
+                    loading={
+                      <div className="flex items-center justify-center py-24 text-ink/40 dark:text-white/40">
+                        <Loader2 size={18} className="animate-spin" />
+                      </div>
+                    }
+                  />
+                </div>
 
                 {/* Persisted highlights overlay, absolutely positioned from
                     normalized 0..1 rects so they stay correct across zoom. */}
@@ -475,6 +520,7 @@ export default function PdfViewer({
                   tool={tool}
                   color={textColor}
                   backgroundColor={textBackground}
+                  fontSize={textFontSize}
                   onCreate={(data) => onCreateAnnotation(pageNumber, { type: 'text', data })}
                   onUpdate={onUpdateAnnotation}
                   onDelete={onDeleteAnnotation}
@@ -516,7 +562,7 @@ export default function PdfViewer({
                   onAddToNotes={(x, y, text) =>
                     onCreateAnnotation(pageNumber, {
                       type: 'text',
-                      data: { x, y, body: text, color: textColor, fontSize: DEFAULT_FONT_SIZE, width: DEFAULT_BOX_WIDTH, backgroundColor: textBackground },
+                      data: { x, y, body: text, color: textColor, fontSize: textFontSize, width: DEFAULT_BOX_WIDTH, backgroundColor: textBackground },
                     })
                   }
                 />

@@ -278,7 +278,7 @@ export default function WorkspaceFolderPage() {
               <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
                 {ui.folder.folders}
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
                 {filteredSubfolders.map((f) => (
                   <FolderCard
                     key={f.id}
@@ -299,7 +299,7 @@ export default function WorkspaceFolderPage() {
               <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
                 {ui.folder.documents}
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
                 {filteredNotebooks.map((nb) => (
                   <NotebookCard
                     key={nb.id}
