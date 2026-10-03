@@ -1,0 +1,388 @@
+[
+  {
+    "display": "Cable Face Pull With Rope",
+    "externalId": "cable_face_pull_with_rope",
+    "slug": "cable-face-pull-with-rope",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Cable Pulley Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Kettlebell Upright Row",
+    "externalId": "kettlebell_upright_row",
+    "slug": "kettlebell-upright-row",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Alternating Single Arm Press",
+    "externalId": "landmine_alternating_single_arm_press",
+    "slug": "landmine-alternating-single-arm-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Half Kneeling Single Arm Overhead Press",
+    "externalId": "landmine_half_kneeling_single_arm_overhead_press",
+    "slug": "landmine-half-kneeling-single-arm-overhead-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Kneeling Alternating Overhead Press",
+    "externalId": "landmine_kneeling_alternating_overhead_press",
+    "slug": "landmine-kneeling-alternating-overhead-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Kneeling Overhead Press",
+    "externalId": "landmine_kneeling_overhead_press",
+    "slug": "landmine-kneeling-overhead-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Lateral Raise",
+    "externalId": "landmine_lateral_raise",
+    "slug": "landmine-lateral-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Overhead Press",
+    "externalId": "landmine_overhead_press",
+    "slug": "landmine-overhead-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Seated Alternating Overhead Press",
+    "externalId": "landmine_seated_alternating_overhead_press",
+    "slug": "landmine-seated-alternating-overhead-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Seated Overhead Press",
+    "externalId": "landmine_seated_overhead_press",
+    "slug": "landmine-seated-overhead-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Seated Single Arm Overhead Press",
+    "externalId": "landmine_seated_single_arm_overhead_press",
+    "slug": "landmine-seated-single-arm-overhead-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Single Arm Push Press",
+    "externalId": "landmine_single_arm_push_press",
+    "slug": "landmine-single-arm-push-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Single Arm Staggered Overhead Press",
+    "externalId": "landmine_single_arm_staggered_overhead_press",
+    "slug": "landmine-single-arm-staggered-overhead-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Laying Lateral Raise",
+    "externalId": "laying_lateral_raise",
+    "slug": "laying-lateral-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Plate Car Driver",
+    "externalId": "plate_car_driver",
+    "slug": "plate-car-driver",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Full Front Raise",
+    "externalId": "plate_full_front_raise",
+    "slug": "plate-full-front-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Halo",
+    "externalId": "plate_halo",
+    "slug": "plate-halo",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Internally Rotated Rear Delt Fly",
+    "externalId": "plate_internally_rotated_rear_delt_fly",
+    "slug": "plate-internally-rotated-rear-delt-fly",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Lateral Raise",
+    "externalId": "plate_lateral_raise",
+    "slug": "plate-lateral-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Overhead Press to Tricep Extension",
+    "externalId": "plate_overhead_press_to_tricep_extension",
+    "slug": "plate-overhead-press-to-tricep-extension",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Overhead Shrug",
+    "externalId": "plate_overhead_shrug",
+    "slug": "plate-overhead-shrug",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "trapezius",
+    "primary_muscle": "Trapezius",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Reach",
+    "externalId": "plate_reach",
+    "slug": "plate-reach",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Rear Delt Fly",
+    "externalId": "plate_rear_delt_fly",
+    "slug": "plate-rear-delt-fly",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Seated Dumbbell Neutral Grip Front Raises",
+    "externalId": "seated_dumbbell_neutral_grip_front_raises",
+    "slug": "seated-dumbbell-neutral-grip-front-raises",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Seated Dumbbell Neutral Grip Side Raises",
+    "externalId": "seated_dumbbell_neutral_grip_side_raises",
+    "slug": "seated-dumbbell-neutral-grip-side-raises",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Seated Dumbbell Shoulder Shrugs",
+    "externalId": "seated_dumbbell_shoulder_shrugs",
+    "slug": "seated-dumbbell-shoulder-shrugs",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "trapezius",
+    "primary_muscle": "Trapezius",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Seated Plate Bus Drivers",
+    "externalId": "seated_plate_bus_drivers",
+    "slug": "seated-plate-bus-drivers",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Seated Plate Front Raises",
+    "externalId": "seated_plate_front_raises",
+    "slug": "seated-plate-front-raises",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Seated Plate Side Raises",
+    "externalId": "seated_plate_side_raises",
+    "slug": "seated-plate-side-raises",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  }
+]

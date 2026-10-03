@@ -19,6 +19,7 @@ import { useLibraryNavUi } from '@/lib/i18n/libraryNavStrings'
 export const libraryLinkHrefs = [
   { key: 'bodyMap', href: '/dashboard/body-map' },
   { key: 'exerciseLibrary', href: '/dashboard/exercise-library' },
+  { key: 'conditionsLibrary', href: '/dashboard/conditions-library' },
   { key: 'neurology', href: '/dashboard/brain-map' },
   { key: 'physiology', href: '/dashboard/physiology' },
   { key: 'sportsMedicine', href: '/dashboard/sports-medicine' },
@@ -41,11 +42,11 @@ type LibraryLinkKey = (typeof libraryLinkHrefs)[number]['key']
 // A purely presentational grouping — doesn't touch any table or route, just
 // how the 16 existing sections are bucketed in this one menu.
 const LIBRARY_CATEGORIES: { id: 'bodySystems' | 'anatomyMovement' | 'emergencyTools'; keys: LibraryLinkKey[] }[] = [
+  { id: 'anatomyMovement', keys: ['bodyMap', 'exerciseLibrary', 'conditionsLibrary', 'physiology', 'fascia', 'sportsMedicine'] },
   {
     id: 'bodySystems',
-    keys: ['cardiopulmonary', 'endocrine', 'urinary', 'gastrointestinal', 'immune', 'hematology', 'oncology', 'pelvicFloor'],
+    keys: ['neurology', 'cardiopulmonary', 'endocrine', 'urinary', 'gastrointestinal', 'immune', 'hematology', 'oncology', 'pelvicFloor'],
   },
-  { id: 'anatomyMovement', keys: ['bodyMap', 'exerciseLibrary', 'neurology', 'physiology', 'fascia', 'sportsMedicine'] },
   { id: 'emergencyTools', keys: ['firstAid', 'blsd', 'clinicalTools'] },
 ]
 

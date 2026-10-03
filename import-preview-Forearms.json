@@ -1,0 +1,28 @@
+[
+  {
+    "display": "Kettlebell Wrist Curl",
+    "externalId": "kettlebell_wrist_curl",
+    "slug": "kettlebell-wrist-curl",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "forearm",
+    "primary_muscle": "Forearms",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Wrist Extension",
+    "externalId": "kettlebell_wrist_extension",
+    "slug": "kettlebell-wrist-extension",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "forearm",
+    "primary_muscle": "Forearms",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  }
+]

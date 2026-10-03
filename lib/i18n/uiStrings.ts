@@ -64,6 +64,7 @@ interface UiDict {
   libraryLinks: {
     bodyMap: { label: string; description: string };
     exerciseLibrary: { label: string; description: string };
+    conditionsLibrary: { label: string; description: string };
     neurology: { label: string; description: string };
     pelvicFloor: { label: string; description: string };
     cardiopulmonary: { label: string; description: string };
@@ -1181,6 +1182,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     libraryLinks: {
       bodyMap: { label: 'Mappa del Corpo', description: 'Esploratore anatomico interattivo' },
       exerciseLibrary: { label: 'Libreria Esercizi', description: 'Oltre 1.800 esercizi con video dimostrativo' },
+      conditionsLibrary: { label: 'Patologie', description: 'Oltre 480 condizioni cliniche con fonti verificate' },
       neurology: { label: 'Neurologia', description: 'Encefalo, nervi e vie nervose' },
       physiology: { label: 'Fisiologia', description: 'Meccanismi muscolari e neurologici di base' },
       sportsMedicine: { label: 'Medicina dello Sport', description: 'Scienza della lesione sportiva e ritorno allo sport' },
@@ -2582,6 +2584,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     libraryLinks: {
       bodyMap: { label: 'Body Map', description: 'Interactive anatomy explorer' },
       exerciseLibrary: { label: 'Exercise Library', description: 'Over 1,800 exercises with demo video' },
+      conditionsLibrary: { label: 'Conditions', description: 'Over 480 clinical conditions with verified sources' },
       neurology: { label: 'Neurology', description: 'Brain, nerves & neural pathways' },
       physiology: { label: 'Physiology', description: 'Foundational muscular & neurological mechanisms' },
       sportsMedicine: { label: 'Sports Medicine', description: 'Sports injury science and return-to-play' },
@@ -3983,6 +3986,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     libraryLinks: {
       bodyMap: { label: 'Mapa Corporal', description: 'Explorador anatómico interactivo' },
       exerciseLibrary: { label: 'Biblioteca de Ejercicios', description: 'Más de 1.800 ejercicios con vídeo demostrativo' },
+      conditionsLibrary: { label: 'Patologías', description: 'Más de 480 condiciones clínicas con fuentes verificadas' },
       neurology: { label: 'Neurología', description: 'Cerebro, nervios y vías nerviosas' },
       physiology: { label: 'Fisiología', description: 'Mecanismos musculares y neurológicos fundamentales' },
       sportsMedicine: { label: 'Medicina Deportiva', description: 'Ciencia de la lesión deportiva y retorno al deporte' },
@@ -5384,6 +5388,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     libraryLinks: {
       bodyMap: { label: 'Carte du Corps', description: 'Explorateur anatomique interactif' },
       exerciseLibrary: { label: 'Bibliothèque d’Exercices', description: 'Plus de 1 800 exercices avec vidéo de démonstration' },
+      conditionsLibrary: { label: 'Pathologies', description: 'Plus de 480 pathologies cliniques aux sources vérifiées' },
       neurology: { label: 'Neurologie', description: 'Cerveau, nerfs et voies nerveuses' },
       physiology: { label: 'Physiologie', description: 'Mécanismes musculaires et neurologiques fondamentaux' },
       sportsMedicine: { label: 'Médecine du Sport', description: 'Science de la blessure sportive et retour au sport' },

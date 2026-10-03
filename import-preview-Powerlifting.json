@@ -1,0 +1,388 @@
+[
+  {
+    "display": "Barbell Clean Pull",
+    "externalId": "barbell_clean_pull",
+    "slug": "barbell-clean-pull",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Clean and Jerk Split Squat",
+    "externalId": "barbell_clean_and_jerk_split_squat",
+    "slug": "barbell-clean-and-jerk-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Clean and Jerk",
+    "externalId": "barbell_clean_and_jerk",
+    "slug": "barbell-clean-and-jerk",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Clean and Press",
+    "externalId": "barbell_clean_and_press",
+    "slug": "barbell-clean-and-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Deadlift (Front Pov)",
+    "externalId": "barbell_deadlift_front_pov",
+    "slug": "barbell-deadlift-front-pov",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Deadlift (Side Pov)",
+    "externalId": "barbell_deadlift_side_pov",
+    "slug": "barbell-deadlift-side-pov",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Deadlift",
+    "externalId": "barbell_deadlift",
+    "slug": "barbell-deadlift",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Full Clean",
+    "externalId": "barbell_full_clean",
+    "slug": "barbell-full-clean",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Hang Clean",
+    "externalId": "barbell_hang_clean",
+    "slug": "barbell-hang-clean",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Muscle Clean",
+    "externalId": "barbell_muscle_clean",
+    "slug": "barbell-muscle-clean",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Power Clean From Blocks",
+    "externalId": "barbell_power_clean_from_blocks",
+    "slug": "barbell-power-clean-from-blocks",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Power Clean",
+    "externalId": "barbell_power_clean",
+    "slug": "barbell-power-clean",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Power Jerk",
+    "externalId": "barbell_power_jerk",
+    "slug": "barbell-power-jerk",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Power Snatch",
+    "externalId": "barbell_power_snatch",
+    "slug": "barbell-power-snatch",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Press Under",
+    "externalId": "barbell_press_under",
+    "slug": "barbell-press-under",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Rack Pull",
+    "externalId": "barbell_rack_pull",
+    "slug": "barbell-rack-pull",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Snatch Balance",
+    "externalId": "barbell_snatch_balance",
+    "slug": "barbell-snatch-balance",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Snatch From Blocks",
+    "externalId": "barbell_snatch_from_blocks",
+    "slug": "barbell-snatch-from-blocks",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Snatch Pull",
+    "externalId": "barbell_snatch_pull",
+    "slug": "barbell-snatch-pull",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Snatch",
+    "externalId": "barbell_snatch",
+    "slug": "barbell-snatch",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Split Clean",
+    "externalId": "barbell_split_clean",
+    "slug": "barbell-split-clean",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Split Jerk",
+    "externalId": "barbell_split_jerk",
+    "slug": "barbell-split-jerk",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Thruster",
+    "externalId": "barbell_thruster",
+    "slug": "barbell-thruster",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Cluster",
+    "externalId": "cluster",
+    "slug": "cluster",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Dumbbell Hang Power Clean",
+    "externalId": "dumbbell_hang_power_clean",
+    "slug": "dumbbell-hang-power-clean",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell One Arm Snatch",
+    "externalId": "dumbbell_one_arm_snatch",
+    "slug": "dumbbell-one-arm-snatch",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Clean and Press",
+    "externalId": "plate_clean_and_press",
+    "slug": "plate-clean-and-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Clean",
+    "externalId": "plate_clean",
+    "slug": "plate-clean",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Thruster",
+    "externalId": "plate_thruster",
+    "slug": "plate-thruster",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Sandbag Cleans",
+    "externalId": "sandbag_cleans",
+    "slug": "sandbag-cleans",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "whole-body",
+    "primary_muscle": "Full Body",
+    "equipment": [],
+    "category": "Bodyweight"
+  }
+]

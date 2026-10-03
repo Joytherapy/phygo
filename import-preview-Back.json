@@ -1,0 +1,255 @@
+[
+  {
+    "display": "Assisted Chin Up Close Grip",
+    "externalId": "assisted_chin_up_close_grip",
+    "slug": "assisted-chin-up-close-grip",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [
+      "Assisted Pull Up Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Assisted Close-Grip Underhand Chin-Up.mp4",
+    "externalId": "assisted_close_grip_underhand_chin_up_mp4",
+    "slug": "assisted-close-grip-underhand-chin-up-mp4",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [
+      "Assisted Pull Up Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Barbell Bent Over Row Pronate Grip",
+    "externalId": "barbell_bent_over_row_pronate_grip",
+    "slug": "barbell-bent-over-row-pronate-grip",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Good Mornings Resistance Band",
+    "externalId": "good_mornings_resistance_band",
+    "slug": "good-mornings-resistance-band",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Kipping Pull Up",
+    "externalId": "kipping_pull_up",
+    "slug": "kipping-pull-up",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Land Mine Row",
+    "externalId": "land_mine_row",
+    "slug": "land-mine-row",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Landmine Romanian Deadlift",
+    "externalId": "landmine_romanian_deadlift",
+    "slug": "landmine-romanian-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Lawnmower Row",
+    "externalId": "lawnmower_row",
+    "slug": "lawnmower-row",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Plate Alternating Deadstop Row",
+    "externalId": "plate_alternating_deadstop_row",
+    "slug": "plate-alternating-deadstop-row",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Glute Bridge to Pullover",
+    "externalId": "plate_glute_bridge_to_pullover",
+    "slug": "plate-glute-bridge-to-pullover",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Good Morning",
+    "externalId": "plate_good_morning",
+    "slug": "plate-good-morning",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Pinch Grip Deadlift",
+    "externalId": "plate_pinch_grip_deadlift",
+    "slug": "plate-pinch-grip-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Pinch Grip Row",
+    "externalId": "plate_pinch_grip_row",
+    "slug": "plate-pinch-grip-row",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Prone Bench Row Barbell Pronated Grip",
+    "externalId": "prone_bench_row_barbell_pronated_grip",
+    "slug": "prone-bench-row-barbell-pronated-grip",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Push Pull Chair Over Head Pull",
+    "externalId": "push_pull_chair_over_head_pull",
+    "slug": "push-pull-chair-over-head-pull",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [
+      "Chair"
+    ],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Seated Row Machine Rows",
+    "externalId": "seated_row_machine_rows",
+    "slug": "seated-row-machine-rows",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Straight Arm Cable Lat Pull Down",
+    "externalId": "straight_arm_cable_lat_pull_down",
+    "slug": "straight-arm-cable-lat-pull-down",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [
+      "Cable Pulley Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Superman Pulls Resistance Bands",
+    "externalId": "superman_pulls_resistance_bands",
+    "slug": "superman-pulls-resistance-bands",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Theraband Scapula Retraction",
+    "externalId": "theraband_scapula_retraction",
+    "slug": "theraband-scapula-retraction",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Weighted Back Extensions on Hyperextension Bench",
+    "externalId": "weighted_back_extensions_on_hyperextension_bench",
+    "slug": "weighted-back-extensions-on-hyperextension-bench",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [
+      "Hyperextension Bench"
+    ],
+    "category": "Bodyweight"
+  }
+]

@@ -1,0 +1,5076 @@
+[
+  {
+    "display": "4 Reverse Lunge and 4 Side Taps",
+    "externalId": "4_reverse_lunge_and_4_side_taps",
+    "slug": "4-reverse-lunge-and-4-side-taps",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Alternate Heel Touch Side Kick Squat",
+    "externalId": "alternate_heel_touch_side_kick_squat",
+    "slug": "alternate-heel-touch-side-kick-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Alternate Single Leg Raise Plank",
+    "externalId": "alternate_single_leg_raise_plank",
+    "slug": "alternate-single-leg-raise-plank",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "core-abdomen",
+    "primary_muscle": "Abdominals",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Alternating Step Out",
+    "externalId": "alternating_step_out",
+    "slug": "alternating-step-out",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Ankle Pumps",
+    "externalId": "ankle_pumps",
+    "slug": "ankle-pumps",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "ankle-foot",
+    "primary_muscle": "Ankle/Foot",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Assisted Bulgarian Split Squat",
+    "externalId": "assisted_bulgarian_split_squat",
+    "slug": "assisted-bulgarian-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Assisted Pistol Squats",
+    "externalId": "assisted_pistol_squats",
+    "slug": "assisted-pistol-squats",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Back Forward Leg Swings",
+    "externalId": "back_forward_leg_swings",
+    "slug": "back-forward-leg-swings",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Back and Forward Leg Swings",
+    "externalId": "back_and_forward_leg_swings",
+    "slug": "back-and-forward-leg-swings",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Balance Board (Version 2)",
+    "externalId": "balance_board_version_2",
+    "slug": "balance-board-version-2",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Ball Headlock Squat",
+    "externalId": "ball_headlock_squat",
+    "slug": "ball-headlock-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Band Bent-Over Hip Extension",
+    "externalId": "band_bent_over_hip_extension",
+    "slug": "band-bent-over-hip-extension",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Band Cross Abduction",
+    "externalId": "band_cross_abduction",
+    "slug": "band-cross-abduction",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Band Hip Adduction",
+    "externalId": "band_hip_adduction",
+    "slug": "band-hip-adduction",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Band Kneeling Rear Kick",
+    "externalId": "band_kneeling_rear_kick",
+    "slug": "band-kneeling-rear-kick",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Band Leg Press",
+    "externalId": "band_leg_press",
+    "slug": "band-leg-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Band Pullthrough",
+    "externalId": "band_pullthrough",
+    "slug": "band-pullthrough",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Band Single Leg Split Squat",
+    "externalId": "band_single_leg_split_squat",
+    "slug": "band-single-leg-split-squat",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Band Spanish Split Squat",
+    "externalId": "band_spanish_split_squat",
+    "slug": "band-spanish-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Band Spanish Split Squat_Fe",
+    "externalId": "band_spanish_split_squat_fe",
+    "slug": "band-spanish-split-squat-fe",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Band Standing Leg Curl",
+    "externalId": "band_standing_leg_curl",
+    "slug": "band-standing-leg-curl",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Band Two Legs Calf Raise - (Band Under Both Legs) Version 2",
+    "externalId": "band_two_legs_calf_raise_band_under_both_legs_version_2",
+    "slug": "band-two-legs-calf-raise-band-under-both-legs-version-2",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Banded Feet Elevated Hip Thrusters",
+    "externalId": "banded_feet_elevated_hip_thrusters",
+    "slug": "banded-feet-elevated-hip-thrusters",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Barbell Bench Lateral Step-Up",
+    "externalId": "barbell_bench_lateral_step_up",
+    "slug": "barbell-bench-lateral-step-up",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Bench Squat",
+    "externalId": "barbell_bench_squat",
+    "slug": "barbell-bench-squat",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Bench Squats",
+    "externalId": "barbell_bench_squats",
+    "slug": "barbell-bench-squats",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Box Squat",
+    "externalId": "barbell_box_squat",
+    "slug": "barbell-box-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Bulgarian Split Squat Left Front-Back View",
+    "externalId": "barbell_bulgarian_split_squat_left_front_back_view",
+    "slug": "barbell-bulgarian-split-squat-left-front-back-view",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Bulgarian Split Squat Left Side View",
+    "externalId": "barbell_bulgarian_split_squat_left_side_view",
+    "slug": "barbell-bulgarian-split-squat-left-side-view",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Bulgarian Split Squat",
+    "externalId": "barbell_bulgarian_split_squat",
+    "slug": "barbell-bulgarian-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Calf Jump",
+    "externalId": "barbell_calf_jump",
+    "slug": "barbell-calf-jump",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Clean-Grip Front Squat",
+    "externalId": "barbell_clean_grip_front_squat",
+    "slug": "barbell-clean-grip-front-squat",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Curtsy Lunge",
+    "externalId": "barbell_curtsy_lunge",
+    "slug": "barbell-curtsy-lunge",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Curtsy Lunges",
+    "externalId": "barbell_curtsy_lunges",
+    "slug": "barbell-curtsy-lunges",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Feet Elevated Figure Four Glute Bridge",
+    "externalId": "barbell_feet_elevated_figure_four_glute_bridge",
+    "slug": "barbell-feet-elevated-figure-four-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Feet Elevated Glute Bridge",
+    "externalId": "barbell_feet_elevated_glute_bridge",
+    "slug": "barbell-feet-elevated-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Feet Elevated Single Leg Glute Bridge",
+    "externalId": "barbell_feet_elevated_single_leg_glute_bridge",
+    "slug": "barbell-feet-elevated-single-leg-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Feet Elevated Staggered Glute Bridge",
+    "externalId": "barbell_feet_elevated_staggered_glute_bridge",
+    "slug": "barbell-feet-elevated-staggered-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Front Bench Squat",
+    "externalId": "barbell_front_bench_squat",
+    "slug": "barbell-front-bench-squat",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Front Chest Bench Squat",
+    "externalId": "barbell_front_chest_bench_squat",
+    "slug": "barbell-front-chest-bench-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Front Chest Lunges",
+    "externalId": "barbell_front_chest_lunges",
+    "slug": "barbell-front-chest-lunges",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Front Chest Squat",
+    "externalId": "barbell_front_chest_squat",
+    "slug": "barbell-front-chest-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Front Lunges With Small Pause",
+    "externalId": "barbell_front_lunges_with_small_pause",
+    "slug": "barbell-front-lunges-with-small-pause",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Front Rack Lunge",
+    "externalId": "barbell_front_rack_lunge",
+    "slug": "barbell-front-rack-lunge",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Front Squat",
+    "externalId": "barbell_front_squat",
+    "slug": "barbell-front-squat",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Front Squats",
+    "externalId": "barbell_front_squats",
+    "slug": "barbell-front-squats",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Full Squat Side Pov",
+    "externalId": "barbell_full_squat_side_pov",
+    "slug": "barbell-full-squat-side-pov",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Full Squat Wide",
+    "externalId": "barbell_full_squat_wide",
+    "slug": "barbell-full-squat-wide",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Full Squat(back)",
+    "externalId": "barbell_full_squat_back",
+    "slug": "barbell-full-squat-back",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Full Squat(with Rack)",
+    "externalId": "barbell_full_squat_with_rack",
+    "slug": "barbell-full-squat-with-rack",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Full Squat",
+    "externalId": "barbell_full_squat",
+    "slug": "barbell-full-squat",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Full Zercher Squat",
+    "externalId": "barbell_full_zercher_squat",
+    "slug": "barbell-full-zercher-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Glute Bridge (Hands on Bar)",
+    "externalId": "barbell_glute_bridge_hands_on_bar",
+    "slug": "barbell-glute-bridge-hands-on-bar",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Glute Bridge",
+    "externalId": "barbell_glute_bridge",
+    "slug": "barbell-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Hip Thrust",
+    "externalId": "barbell_hip_thrust",
+    "slug": "barbell-hip-thrust",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Jefferson Split Squat",
+    "externalId": "barbell_jefferson_split_squat",
+    "slug": "barbell-jefferson-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Jefferson Squat",
+    "externalId": "barbell_jefferson_squat",
+    "slug": "barbell-jefferson-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Jump Squat",
+    "externalId": "barbell_jump_squat",
+    "slug": "barbell-jump-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Kas Glute Bridge",
+    "externalId": "barbell_kas_glute_bridge",
+    "slug": "barbell-kas-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Kneeling Squat",
+    "externalId": "barbell_kneeling_squat",
+    "slug": "barbell-kneeling-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Lateral Lunge",
+    "externalId": "barbell_lateral_lunge",
+    "slug": "barbell-lateral-lunge",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Lateral Lunges",
+    "externalId": "barbell_lateral_lunges",
+    "slug": "barbell-lateral-lunges",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Low Bar Squat",
+    "externalId": "barbell_low_bar_squat",
+    "slug": "barbell-low-bar-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Lunge",
+    "externalId": "barbell_lunge",
+    "slug": "barbell-lunge",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Lunges on the Spot",
+    "externalId": "barbell_lunges_on_the_spot",
+    "slug": "barbell-lunges-on-the-spot",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Lunges",
+    "externalId": "barbell_lunges",
+    "slug": "barbell-lunges",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Narrow Stance Full Squat",
+    "externalId": "barbell_narrow_stance_full_squat",
+    "slug": "barbell-narrow-stance-full-squat",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Narrow Stance Squat",
+    "externalId": "barbell_narrow_stance_squat",
+    "slug": "barbell-narrow-stance-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell One Leg Hip Thrust",
+    "externalId": "barbell_one_leg_hip_thrust",
+    "slug": "barbell-one-leg-hip-thrust",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Overhead Lunge",
+    "externalId": "barbell_overhead_lunge",
+    "slug": "barbell-overhead-lunge",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Overhead Lunges",
+    "externalId": "barbell_overhead_lunges",
+    "slug": "barbell-overhead-lunges",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Overhead Squat",
+    "externalId": "barbell_overhead_squat",
+    "slug": "barbell-overhead-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Pause Lunge",
+    "externalId": "barbell_pause_lunge",
+    "slug": "barbell-pause-lunge",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Quarter Squat",
+    "externalId": "barbell_quarter_squat",
+    "slug": "barbell-quarter-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Rear Lunge on Box",
+    "externalId": "barbell_rear_lunge_on_box",
+    "slug": "barbell-rear-lunge-on-box",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Rear Lunges",
+    "externalId": "barbell_rear_lunges",
+    "slug": "barbell-rear-lunges",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Seated on Knee Calve Raises",
+    "externalId": "barbell_seated_on_knee_calve_raises",
+    "slug": "barbell-seated-on-knee-calve-raises",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Side Split Squat",
+    "externalId": "barbell_side_split_squat",
+    "slug": "barbell-side-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Side Step Up",
+    "externalId": "barbell_side_step_up",
+    "slug": "barbell-side-step-up",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Single Leg Split Squat",
+    "externalId": "barbell_single_leg_split_squat",
+    "slug": "barbell-single-leg-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Split Squat",
+    "externalId": "barbell_split_squat",
+    "slug": "barbell-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Squat Back Pov",
+    "externalId": "barbell_squat_back_pov",
+    "slug": "barbell-squat-back-pov",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Squat With 2 Sec Hold",
+    "externalId": "barbell_squat_with_2_sec_hold",
+    "slug": "barbell-squat-with-2-sec-hold",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Squat to Grass",
+    "externalId": "barbell_squat_to_grass",
+    "slug": "barbell-squat-to-grass",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Staggered Deadlift",
+    "externalId": "barbell_staggered_deadlift",
+    "slug": "barbell-staggered-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Standing Leg Calf Raise",
+    "externalId": "barbell_standing_leg_calf_raise",
+    "slug": "barbell-standing-leg-calf-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Standing Leg Calf Raises",
+    "externalId": "barbell_standing_leg_calf_raises",
+    "slug": "barbell-standing-leg-calf-raises",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Step Up Balance on Box",
+    "externalId": "barbell_step_up_balance_on_box",
+    "slug": "barbell-step-up-balance-on-box",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Step Up on Bench",
+    "externalId": "barbell_step_up_on_bench",
+    "slug": "barbell-step-up-on-bench",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Stiff Leg Deadlift",
+    "externalId": "barbell_stiff_leg_deadlift",
+    "slug": "barbell-stiff-leg-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Straight Leg Deadlift",
+    "externalId": "barbell_straight_leg_deadlift",
+    "slug": "barbell-straight-leg-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Barbell Sumo Romanian Deadlift",
+    "externalId": "barbell_sumo_romanian_deadlift",
+    "slug": "barbell-sumo-romanian-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Bench Alternating Step Ups",
+    "externalId": "bench_alternating_step_ups",
+    "slug": "bench-alternating-step-ups",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bench Bulgarian Split Squats Left",
+    "externalId": "bench_bulgarian_split_squats_left",
+    "slug": "bench-bulgarian-split-squats-left",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bench Bulgarian Split Squats Right",
+    "externalId": "bench_bulgarian_split_squats_right",
+    "slug": "bench-bulgarian-split-squats-right",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bent Knee Back to Side Kick",
+    "externalId": "bent_knee_back_to_side_kick",
+    "slug": "bent-knee-back-to-side-kick",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bent Leg Side Kick (Kneeling)",
+    "externalId": "bent_leg_side_kick_kneeling",
+    "slug": "bent-leg-side-kick-kneeling",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Calf Raises",
+    "externalId": "bodyweight_calf_raises",
+    "slug": "bodyweight-calf-raises",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Feet Elevated Figure Four Glute Bridge",
+    "externalId": "bodyweight_feet_elevated_figure_four_glute_bridge",
+    "slug": "bodyweight-feet-elevated-figure-four-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Feet Elevated Staggered Glute Bridge",
+    "externalId": "bodyweight_feet_elevated_staggered_glute_bridge",
+    "slug": "bodyweight-feet-elevated-staggered-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Forward Lunge",
+    "externalId": "bodyweight_forward_lunge",
+    "slug": "bodyweight-forward-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Full Squat With Overhead Front Raise",
+    "externalId": "bodyweight_full_squat_with_overhead_front_raise",
+    "slug": "bodyweight-full-squat-with-overhead-front-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Full Squat With Overhead Press",
+    "externalId": "bodyweight_full_squat_with_overhead_press",
+    "slug": "bodyweight-full-squat-with-overhead-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Hip Thrust",
+    "externalId": "bodyweight_hip_thrust",
+    "slug": "bodyweight-hip-thrust",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Kneeling Hold to Stand",
+    "externalId": "bodyweight_kneeling_hold_to_stand",
+    "slug": "bodyweight-kneeling-hold-to-stand",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Kneeling Sissy Squat",
+    "externalId": "bodyweight_kneeling_sissy_squat",
+    "slug": "bodyweight-kneeling-sissy-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Lying Leg Curl",
+    "externalId": "bodyweight_lying_leg_curl",
+    "slug": "bodyweight-lying-leg-curl",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Overhead Squat",
+    "externalId": "bodyweight_overhead_squat",
+    "slug": "bodyweight-overhead-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Pulse Forward Lunge",
+    "externalId": "bodyweight_pulse_forward_lunge",
+    "slug": "bodyweight-pulse-forward-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Pulse Squat Arms to Chest",
+    "externalId": "bodyweight_pulse_squat_arms_to_chest",
+    "slug": "bodyweight-pulse-squat-arms-to-chest",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Pulse Squat",
+    "externalId": "bodyweight_pulse_squat",
+    "slug": "bodyweight-pulse-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Rear Lunge Front Raise",
+    "externalId": "bodyweight_rear_lunge_front_raise",
+    "slug": "bodyweight-rear-lunge-front-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Rear Lunge",
+    "externalId": "bodyweight_rear_lunge",
+    "slug": "bodyweight-rear-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Single Leg Deadlift",
+    "externalId": "bodyweight_single_leg_deadlift",
+    "slug": "bodyweight-single-leg-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Squat to Front Leg",
+    "externalId": "bodyweight_squat_to_front_leg",
+    "slug": "bodyweight-squat-to-front-leg",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Squat to Side Leg",
+    "externalId": "bodyweight_squat_to_side_leg",
+    "slug": "bodyweight-squat-to-side-leg",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Squat to Side to Front Leg",
+    "externalId": "bodyweight_squat_to_side_to_front_leg",
+    "slug": "bodyweight-squat-to-side-to-front-leg",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Squat",
+    "externalId": "bodyweight_squat",
+    "slug": "bodyweight-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Squats",
+    "externalId": "bodyweight_squats",
+    "slug": "bodyweight-squats",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Squats Hold",
+    "externalId": "bodyweight_squats_hold",
+    "slug": "bodyweight-squats-hold",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Standing Calf Raise",
+    "externalId": "bodyweight_standing_calf_raise",
+    "slug": "bodyweight-standing-calf-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Step-Up on Step Box",
+    "externalId": "bodyweight_step_up_on_step_box",
+    "slug": "bodyweight-step-up-on-step-box",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bodyweight Wall Squat",
+    "externalId": "bodyweight_wall_squat",
+    "slug": "bodyweight-wall-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Box Jump",
+    "externalId": "box_jump",
+    "slug": "box-jump",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Box Jump Squats",
+    "externalId": "box_jump_squats",
+    "slug": "box-jump-squats",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bulgarian Split Squat Bodyweight Left",
+    "externalId": "bulgarian_split_squat_bodyweight_left",
+    "slug": "bulgarian-split-squat-bodyweight-left",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bulgarian Split Squat Bodyweight Right",
+    "externalId": "bulgarian_split_squat_bodyweight_right",
+    "slug": "bulgarian-split-squat-bodyweight-right",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bulgarian Split Squat Cable Resistance Band",
+    "externalId": "bulgarian_split_squat_cable_resistance_band",
+    "slug": "bulgarian-split-squat-cable-resistance-band",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Bulgarian Split Squat Left Bodyweight Side View",
+    "externalId": "bulgarian_split_squat_left_bodyweight_side_view",
+    "slug": "bulgarian-split-squat-left-bodyweight-side-view",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bulgarian Split Squat Right Bodyweight Side View",
+    "externalId": "bulgarian_split_squat_right_bodyweight_side_view",
+    "slug": "bulgarian-split-squat-right-bodyweight-side-view",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Bulgarian Split Squat",
+    "externalId": "bulgarian_split_squat",
+    "slug": "bulgarian-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Burpee Squat",
+    "externalId": "burpee_squat",
+    "slug": "burpee-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Cable Assisted Inverse Leg Curl",
+    "externalId": "cable_assisted_inverse_leg_curl",
+    "slug": "cable-assisted-inverse-leg-curl",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Cable Pulley Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Cable Calve Raise",
+    "externalId": "cable_calve_raise",
+    "slug": "cable-calve-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Cable Pulley Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Cable Goblet Squat",
+    "externalId": "cable_goblet_squat",
+    "slug": "cable-goblet-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Cable Pulley Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Cable Hamstring Curl",
+    "externalId": "cable_hamstring_curl",
+    "slug": "cable-hamstring-curl",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Cable Pulley Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Cable Individual Glute Kickbacks",
+    "externalId": "cable_individual_glute_kickbacks",
+    "slug": "cable-individual-glute-kickbacks",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Cable Pulley Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Cable Narrow Chair Stand-Up",
+    "externalId": "cable_narrow_chair_stand_up",
+    "slug": "cable-narrow-chair-stand-up",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Cable Pulley Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Cable Pull Through",
+    "externalId": "cable_pull_through",
+    "slug": "cable-pull-through",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Cable Pulley Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Cable Single Leg Deadlift",
+    "externalId": "cable_single_leg_deadlift",
+    "slug": "cable-single-leg-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Cable Pulley Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Cable Split Squat",
+    "externalId": "cable_split_squat",
+    "slug": "cable-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Cable Pulley Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Cable Standing Leg Extension",
+    "externalId": "cable_standing_leg_extension",
+    "slug": "cable-standing-leg-extension",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Cable Pulley Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Calf Raise Clap",
+    "externalId": "calf_raise_clap",
+    "slug": "calf-raise-clap",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Calf Raise From Deficit With Chair Supported",
+    "externalId": "calf_raise_from_deficit_with_chair_supported",
+    "slug": "calf-raise-from-deficit-with-chair-supported",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Chair"
+    ],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Calf Raise Leg Press Machine",
+    "externalId": "calf_raise_leg_press_machine",
+    "slug": "calf-raise-leg-press-machine",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Calf Raise With Wall Support",
+    "externalId": "calf_raise_with_wall_support",
+    "slug": "calf-raise-with-wall-support",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Calf Raise on Hack Squat Machine",
+    "externalId": "calf_raise_on_hack_squat_machine",
+    "slug": "calf-raise-on-hack-squat-machine",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Chair Back Lunge Left Resistance Band",
+    "externalId": "chair_back_lunge_left_resistance_band",
+    "slug": "chair-back-lunge-left-resistance-band",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Chair Back Lunge Right Resistance Band",
+    "externalId": "chair_back_lunge_right_resistance_band",
+    "slug": "chair-back-lunge-right-resistance-band",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Chair Bulgarian Split Squats Bodyweight Left",
+    "externalId": "chair_bulgarian_split_squats_bodyweight_left",
+    "slug": "chair-bulgarian-split-squats-bodyweight-left",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Chair"
+    ],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Chair Bulgarian Split Squats Bodyweight Right",
+    "externalId": "chair_bulgarian_split_squats_bodyweight_right",
+    "slug": "chair-bulgarian-split-squats-bodyweight-right",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Chair"
+    ],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Chair Elevated Single Leg Glute Bridge",
+    "externalId": "chair_elevated_single_leg_glute_bridge",
+    "slug": "chair-elevated-single-leg-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Chair"
+    ],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Chair Feet Elevated Glute Bridge",
+    "externalId": "chair_feet_elevated_glute_bridge",
+    "slug": "chair-feet-elevated-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Chair"
+    ],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Chair Frog Feet Elevated Glute Bridge Bodyweight",
+    "externalId": "chair_frog_feet_elevated_glute_bridge_bodyweight",
+    "slug": "chair-frog-feet-elevated-glute-bridge-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Chair"
+    ],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Clamshell",
+    "externalId": "clamshell",
+    "slug": "clamshell",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Clap Curtsy Squat",
+    "externalId": "clap_curtsy_squat",
+    "slug": "clap-curtsy-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Cossack Squat",
+    "externalId": "cossack_squat",
+    "slug": "cossack-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Counterbalanced Skater Squat",
+    "externalId": "counterbalanced_skater_squat",
+    "slug": "counterbalanced-skater-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Crossed Arms Front Leg Kick",
+    "externalId": "crossed_arms_front_leg_kick",
+    "slug": "crossed-arms-front-leg-kick",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Curtsy Lunge Bodyweight",
+    "externalId": "curtsy_lunge_bodyweight",
+    "slug": "curtsy-lunge-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Curtsy Lunge Slide With Towel",
+    "externalId": "curtsy_lunge_slide_with_towel",
+    "slug": "curtsy-lunge-slide-with-towel",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Curtsy Lunges Resistance Band",
+    "externalId": "curtsy_lunges_resistance_band",
+    "slug": "curtsy-lunges-resistance-band",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Curtsy Squat",
+    "externalId": "curtsy_squat",
+    "slug": "curtsy-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Diagonal Lunge",
+    "externalId": "diagonal_lunge",
+    "slug": "diagonal-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Donkey Calf Raise",
+    "externalId": "donkey_calf_raise",
+    "slug": "donkey-calf-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Donkey Kicks Bodyweight",
+    "externalId": "donkey_kicks_bodyweight",
+    "slug": "donkey-kicks-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Double Jump Squat",
+    "externalId": "double_jump_squat",
+    "slug": "double-jump-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Dumbbell Bar Grip Sumo Squat",
+    "externalId": "dumbbell_bar_grip_sumo_squat",
+    "slug": "dumbbell-bar-grip-sumo-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Bench Squat",
+    "externalId": "dumbbell_bench_squat",
+    "slug": "dumbbell-bench-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Bulgarian Box Split Squat",
+    "externalId": "dumbbell_bulgarian_box_split_squat",
+    "slug": "dumbbell-bulgarian-box-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Bulgarian Split Squat",
+    "externalId": "dumbbell_bulgarian_split_squat",
+    "slug": "dumbbell-bulgarian-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Close Legs Deadlift",
+    "externalId": "dumbbell_close_legs_deadlift",
+    "slug": "dumbbell-close-legs-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Cossack Squats (Version 2)",
+    "externalId": "dumbbell_cossack_squats_version_2",
+    "slug": "dumbbell-cossack-squats-version-2",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Curtsy Lunge",
+    "externalId": "dumbbell_curtsy_lunge",
+    "slug": "dumbbell-curtsy-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Farmer Walks",
+    "externalId": "dumbbell_farmer_walks",
+    "slug": "dumbbell-farmer-walks",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Feet Elevated Figure Four Glute Bridge",
+    "externalId": "dumbbell_feet_elevated_figure_four_glute_bridge",
+    "slug": "dumbbell-feet-elevated-figure-four-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Feet Elevated Glute Bridge",
+    "externalId": "dumbbell_feet_elevated_glute_bridge",
+    "slug": "dumbbell-feet-elevated-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Feet Elevated Single Leg Glute Bridge",
+    "externalId": "dumbbell_feet_elevated_single_leg_glute_bridge",
+    "slug": "dumbbell-feet-elevated-single-leg-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Feet Elevated Staggered Glute Bridge",
+    "externalId": "dumbbell_feet_elevated_staggered_glute_bridge",
+    "slug": "dumbbell-feet-elevated-staggered-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Figure Four Glute Bridge",
+    "externalId": "dumbbell_figure_four_glute_bridge",
+    "slug": "dumbbell-figure-four-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Figure Four Hip Thrust",
+    "externalId": "dumbbell_figure_four_hip_thrust",
+    "slug": "dumbbell-figure-four-hip-thrust",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Frog Jumps",
+    "externalId": "dumbbell_frog_jumps",
+    "slug": "dumbbell-frog-jumps",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Front Rack Lunge",
+    "externalId": "dumbbell_front_rack_lunge",
+    "slug": "dumbbell-front-rack-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Front Squat",
+    "externalId": "dumbbell_front_squat",
+    "slug": "dumbbell-front-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Glute Bridge",
+    "externalId": "dumbbell_glute_bridge",
+    "slug": "dumbbell-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Goblet 2 Sec Hold Squat",
+    "externalId": "dumbbell_goblet_2_sec_hold_squat",
+    "slug": "dumbbell-goblet-2-sec-hold-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Goblet Curtsy Lunge",
+    "externalId": "dumbbell_goblet_curtsy_lunge",
+    "slug": "dumbbell-goblet-curtsy-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Goblet Forward Lunge",
+    "externalId": "dumbbell_goblet_forward_lunge",
+    "slug": "dumbbell-goblet-forward-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Goblet Reverse Lunge",
+    "externalId": "dumbbell_goblet_reverse_lunge",
+    "slug": "dumbbell-goblet-reverse-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Goblet Split Squat Front Foot Elevanted",
+    "externalId": "dumbbell_goblet_split_squat_front_foot_elevanted",
+    "slug": "dumbbell-goblet-split-squat-front-foot-elevanted",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Goblet Split Squat",
+    "externalId": "dumbbell_goblet_split_squat",
+    "slug": "dumbbell-goblet-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Goblet Squat",
+    "externalId": "dumbbell_goblet_squat",
+    "slug": "dumbbell-goblet-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Hip Thrust (Version 2)",
+    "externalId": "dumbbell_hip_thrust_version_2",
+    "slug": "dumbbell-hip-thrust-version-2",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Hip Thrust",
+    "externalId": "dumbbell_hip_thrust",
+    "slug": "dumbbell-hip-thrust",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Jumping Squat",
+    "externalId": "dumbbell_jumping_squat",
+    "slug": "dumbbell-jumping-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Kneeling Hold to Stand Clean Grip",
+    "externalId": "dumbbell_kneeling_hold_to_stand_clean_grip",
+    "slug": "dumbbell-kneeling-hold-to-stand-clean-grip",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Kneeling Squat",
+    "externalId": "dumbbell_kneeling_squat",
+    "slug": "dumbbell-kneeling-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Lunge Alternating on the Spot",
+    "externalId": "dumbbell_lunge_alternating_on_the_spot",
+    "slug": "dumbbell-lunge-alternating-on-the-spot",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Lunge Pulse",
+    "externalId": "dumbbell_lunge_pulse",
+    "slug": "dumbbell-lunge-pulse",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Lunge to Overhead Press",
+    "externalId": "dumbbell_lunge_to_overhead_press",
+    "slug": "dumbbell-lunge-to-overhead-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Narrow Stance Squats",
+    "externalId": "dumbbell_narrow_stance_squats",
+    "slug": "dumbbell-narrow-stance-squats",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Offset Squat",
+    "externalId": "dumbbell_offset_squat",
+    "slug": "dumbbell-offset-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Overhead Lunge",
+    "externalId": "dumbbell_overhead_lunge",
+    "slug": "dumbbell-overhead-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Press Squat",
+    "externalId": "dumbbell_press_squat",
+    "slug": "dumbbell-press-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Rear Lunge From Step",
+    "externalId": "dumbbell_rear_lunge_from_step",
+    "slug": "dumbbell-rear-lunge-from-step",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Rear Lunge",
+    "externalId": "dumbbell_rear_lunge",
+    "slug": "dumbbell-rear-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Reverse Lunge on the Spot",
+    "externalId": "dumbbell_reverse_lunge_on_the_spot",
+    "slug": "dumbbell-reverse-lunge-on-the-spot",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Reverse Lunges Pulses",
+    "externalId": "dumbbell_reverse_lunges_pulses",
+    "slug": "dumbbell-reverse-lunges-pulses",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Seated Calf Raise",
+    "externalId": "dumbbell_seated_calf_raise",
+    "slug": "dumbbell-seated-calf-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Seated One Leg Calf Raise Hammer Grip",
+    "externalId": "dumbbell_seated_one_leg_calf_raise_hammer_grip",
+    "slug": "dumbbell-seated-one-leg-calf-raise-hammer-grip",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Side Lunge Alternating",
+    "externalId": "dumbbell_side_lunge_alternating",
+    "slug": "dumbbell-side-lunge-alternating",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Side Lunge Left N Right",
+    "externalId": "dumbbell_side_lunge_left_n_right",
+    "slug": "dumbbell-side-lunge-left-n-right",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Side Lunge Single Leg",
+    "externalId": "dumbbell_side_lunge_single_leg",
+    "slug": "dumbbell-side-lunge-single-leg",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Side Squat Side to Side",
+    "externalId": "dumbbell_side_squat_side_to_side",
+    "slug": "dumbbell-side-squat-side-to-side",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Single Arm Overhead Lunge",
+    "externalId": "dumbbell_single_arm_overhead_lunge",
+    "slug": "dumbbell-single-arm-overhead-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Single Leg Calf Raise Wall Support",
+    "externalId": "dumbbell_single_leg_calf_raise_wall_support",
+    "slug": "dumbbell-single-leg-calf-raise-wall-support",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Single Leg Deadlift",
+    "externalId": "dumbbell_single_leg_deadlift",
+    "slug": "dumbbell-single-leg-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Single Leg Hip Thrust",
+    "externalId": "dumbbell_single_leg_hip_thrust",
+    "slug": "dumbbell-single-leg-hip-thrust",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Single Leg Single Arm Deadlift",
+    "externalId": "dumbbell_single_leg_single_arm_deadlift",
+    "slug": "dumbbell-single-leg-single-arm-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Single Leg Split Squat",
+    "externalId": "dumbbell_single_leg_split_squat",
+    "slug": "dumbbell-single-leg-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Single Leg Squat With Support (Pistol)",
+    "externalId": "dumbbell_single_leg_squat_with_support_pistol",
+    "slug": "dumbbell-single-leg-squat-with-support-pistol",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Single Leg Squat",
+    "externalId": "dumbbell_single_leg_squat",
+    "slug": "dumbbell-single-leg-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Single Leg Step-Up",
+    "externalId": "dumbbell_single_leg_step_up",
+    "slug": "dumbbell-single-leg-step-up",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Split Squat",
+    "externalId": "dumbbell_split_squat",
+    "slug": "dumbbell-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Squats",
+    "externalId": "dumbbell_squats",
+    "slug": "dumbbell-squats",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Squats to Shoulder Press",
+    "externalId": "dumbbell_squats_to_shoulder_press",
+    "slug": "dumbbell-squats-to-shoulder-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Staggered Deadlift",
+    "externalId": "dumbbell_staggered_deadlift",
+    "slug": "dumbbell-staggered-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Staggered Glute Bridge",
+    "externalId": "dumbbell_staggered_glute_bridge",
+    "slug": "dumbbell-staggered-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Staggered Hip Thrust",
+    "externalId": "dumbbell_staggered_hip_thrust",
+    "slug": "dumbbell-staggered-hip-thrust",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Standing Calf Raise on Step",
+    "externalId": "dumbbell_standing_calf_raise_on_step",
+    "slug": "dumbbell-standing-calf-raise-on-step",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Standing Calf Raise",
+    "externalId": "dumbbell_standing_calf_raise",
+    "slug": "dumbbell-standing-calf-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Standing Hip Abduction",
+    "externalId": "dumbbell_standing_hip_abduction",
+    "slug": "dumbbell-standing-hip-abduction",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Standing Single Leg Calf Raise",
+    "externalId": "dumbbell_standing_single_leg_calf_raise",
+    "slug": "dumbbell-standing-single-leg-calf-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Static Lunge",
+    "externalId": "dumbbell_static_lunge",
+    "slug": "dumbbell-static-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Step Up on Bench",
+    "externalId": "dumbbell_step_up_on_bench",
+    "slug": "dumbbell-step-up-on-bench",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Step-Up With Knee Raise",
+    "externalId": "dumbbell_step_up_with_knee_raise",
+    "slug": "dumbbell-step-up-with-knee-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Stiff Leg Deadlift",
+    "externalId": "dumbbell_stiff_leg_deadlift",
+    "slug": "dumbbell-stiff-leg-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Straight Leg Deadlift",
+    "externalId": "dumbbell_straight_leg_deadlift",
+    "slug": "dumbbell-straight-leg-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Suitcase Carry",
+    "externalId": "dumbbell_suitcase_carry",
+    "slug": "dumbbell-suitcase-carry",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Sumo Squat Off Benches",
+    "externalId": "dumbbell_sumo_squat_off_benches",
+    "slug": "dumbbell-sumo-squat-off-benches",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Dumbbell Supported Sissy Squat",
+    "externalId": "dumbbell_supported_sissy_squat",
+    "slug": "dumbbell-supported-sissy-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Elevated Standing Calf Raise",
+    "externalId": "elevated_standing_calf_raise",
+    "slug": "elevated-standing-calf-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Exercise Ball Leg Curl",
+    "externalId": "exercise_ball_leg_curl",
+    "slug": "exercise-ball-leg-curl",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Exercise Ball"
+    ],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Exercise Ball One Legged Diagonal Kick Hamstring Curl",
+    "externalId": "exercise_ball_one_legged_diagonal_kick_hamstring_curl",
+    "slug": "exercise-ball-one-legged-diagonal-kick-hamstring-curl",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Exercise Ball"
+    ],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Exercise Ball Wall Squat",
+    "externalId": "exercise_ball_wall_squat",
+    "slug": "exercise-ball-wall-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Exercise Ball"
+    ],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Feet Together Barbell Squats",
+    "externalId": "feet_together_barbell_squats",
+    "slug": "feet-together-barbell-squats",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Fire Hydrant Bodyweight",
+    "externalId": "fire_hydrant_bodyweight",
+    "slug": "fire-hydrant-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Fire Hydrant Circle Bodyweight",
+    "externalId": "fire_hydrant_circle_bodyweight",
+    "slug": "fire-hydrant-circle-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Frog Jumps",
+    "externalId": "frog_jumps",
+    "slug": "frog-jumps",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Front Squats Dumbbell Low",
+    "externalId": "front_squats_dumbbell_low",
+    "slug": "front-squats-dumbbell-low",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Front Squats Dumbbell Over Shoulders",
+    "externalId": "front_squats_dumbbell_over_shoulders",
+    "slug": "front-squats-dumbbell-over-shoulders",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Glute Bridge Bodyweight",
+    "externalId": "glute_bridge_bodyweight",
+    "slug": "glute-bridge-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Glute Bridge With Abduction Bodyweight",
+    "externalId": "glute_bridge_with_abduction_bodyweight",
+    "slug": "glute-bridge-with-abduction-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Goblet Kettlebell Squats",
+    "externalId": "goblet_kettlebell_squats",
+    "slug": "goblet-kettlebell-squats",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Good Mornings",
+    "externalId": "good_mornings",
+    "slug": "good-mornings",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Hack Squat Machine Squat",
+    "externalId": "hack_squat_machine_squat",
+    "slug": "hack-squat-machine-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Hack Squat Machine",
+    "externalId": "hack_squat_machine",
+    "slug": "hack-squat-machine",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Hammer Strength Iso-Lateral Leg Curl Alternating Legs",
+    "externalId": "hammer_strength_iso_lateral_leg_curl_alternating_legs",
+    "slug": "hammer-strength-iso-lateral-leg-curl-alternating-legs",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Hammer Strength Iso-Lateral Leg Curl Single Leg",
+    "externalId": "hammer_strength_iso_lateral_leg_curl_single_leg",
+    "slug": "hammer-strength-iso-lateral-leg-curl-single-leg",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Hammer Strength Iso-Lateral Leg Curl_Alternate Legs",
+    "externalId": "hammer_strength_iso_lateral_leg_curl_alternate_legs",
+    "slug": "hammer-strength-iso-lateral-leg-curl-alternate-legs",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Hammer Strength Iso-Lateral Leg Curl_Both Leg",
+    "externalId": "hammer_strength_iso_lateral_leg_curl_both_leg",
+    "slug": "hammer-strength-iso-lateral-leg-curl-both-leg",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Hammer Strength Iso-Lateral Leg Curl_Single Leg",
+    "externalId": "hammer_strength_iso_lateral_leg_curl_single_leg",
+    "slug": "hammer-strength-iso-lateral-leg-curl-single-leg",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Hip-Thrust in Smith Machine",
+    "externalId": "hip_thrust_in_smith_machine",
+    "slug": "hip-thrust-in-smith-machine",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Horizontal Leg Press Calf Raise Single Leg",
+    "externalId": "horizontal_leg_press_calf_raise_single_leg",
+    "slug": "horizontal-leg-press-calf-raise-single-leg",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Horizontal Leg Press Calf Raise",
+    "externalId": "horizontal_leg_press_calf_raise",
+    "slug": "horizontal-leg-press-calf-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Horizontal Leg Press Single Leg",
+    "externalId": "horizontal_leg_press_single_leg",
+    "slug": "horizontal-leg-press-single-leg",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Horizontal Leg Press",
+    "externalId": "horizontal_leg_press",
+    "slug": "horizontal-leg-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "In and Out Squats Jump Bodyweight",
+    "externalId": "in_and_out_squats_jump_bodyweight",
+    "slug": "in-and-out-squats-jump-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "In and Out Squats Jump Bodyweight (2)",
+    "externalId": "in_and_out_squats_jump_bodyweight_2",
+    "slug": "in-and-out-squats-jump-bodyweight-2",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "In and Out Squats",
+    "externalId": "in_and_out_squats",
+    "slug": "in-and-out-squats",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Jump Squats Bodyweight",
+    "externalId": "jump_squats_bodyweight",
+    "slug": "jump-squats-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Jumping Lunge",
+    "externalId": "jumping_lunge",
+    "slug": "jumping-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Jumping Pistol Squat",
+    "externalId": "jumping_pistol_squat",
+    "slug": "jumping-pistol-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Kettlebell Bulgarian Split Squat Right",
+    "externalId": "kettlebell_bulgarian_split_squat_right",
+    "slug": "kettlebell-bulgarian-split-squat-right",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Bulgarian Split Squat Right Side View",
+    "externalId": "kettlebell_bulgarian_split_squat_right_side_view",
+    "slug": "kettlebell-bulgarian-split-squat-right-side-view",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Calf Raise",
+    "externalId": "kettlebell_calf_raise",
+    "slug": "kettlebell-calf-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Glute Bridge",
+    "externalId": "kettlebell_glute_bridge",
+    "slug": "kettlebell-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Hip Thrusts With Bench",
+    "externalId": "kettlebell_hip_thrusts_with_bench",
+    "slug": "kettlebell-hip-thrusts-with-bench",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Hip Thrusts",
+    "externalId": "kettlebell_hip_thrusts",
+    "slug": "kettlebell-hip-thrusts",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Lateral Lunge",
+    "externalId": "kettlebell_lateral_lunge",
+    "slug": "kettlebell-lateral-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Reverse Lunge",
+    "externalId": "kettlebell_reverse_lunge",
+    "slug": "kettlebell-reverse-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Seated Calf Raise",
+    "externalId": "kettlebell_seated_calf_raise",
+    "slug": "kettlebell-seated-calf-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Single Leg Calf Raise",
+    "externalId": "kettlebell_single_leg_calf_raise",
+    "slug": "kettlebell-single-leg-calf-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Single Leg Deadlift",
+    "externalId": "kettlebell_single_leg_deadlift",
+    "slug": "kettlebell-single-leg-deadlift",
+    "hasMaleVideo": false,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Single Leg Glute Bridge",
+    "externalId": "kettlebell_single_leg_glute_bridge",
+    "slug": "kettlebell-single-leg-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Single Leg Hip Thrust",
+    "externalId": "kettlebell_single_leg_hip_thrust",
+    "slug": "kettlebell-single-leg-hip-thrust",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Single Leg Romanian Deadlifts",
+    "externalId": "kettlebell_single_leg_romanian_deadlifts",
+    "slug": "kettlebell-single-leg-romanian-deadlifts",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Split Squat",
+    "externalId": "kettlebell_split_squat",
+    "slug": "kettlebell-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Squats",
+    "externalId": "kettlebell_squats",
+    "slug": "kettlebell-squats",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Staggered Deadlift",
+    "externalId": "kettlebell_staggered_deadlift",
+    "slug": "kettlebell-staggered-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Step Up",
+    "externalId": "kettlebell_step_up",
+    "slug": "kettlebell-step-up",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Step-Up",
+    "externalId": "kettlebell_step_up",
+    "slug": "kettlebell-step-up",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Suitcase Squat",
+    "externalId": "kettlebell_suitcase_squat",
+    "slug": "kettlebell-suitcase-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Sumo Squat (Version 2)",
+    "externalId": "kettlebell_sumo_squat_version_2",
+    "slug": "kettlebell-sumo-squat-version-2",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Sumo Squat Off Stepbox",
+    "externalId": "kettlebell_sumo_squat_off_stepbox",
+    "slug": "kettlebell-sumo-squat-off-stepbox",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kettlebell Sumo Squat",
+    "externalId": "kettlebell_sumo_squat",
+    "slug": "kettlebell-sumo-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Kneeling Leg Curl Machine",
+    "externalId": "kneeling_leg_curl_machine",
+    "slug": "kneeling-leg-curl-machine",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Kneeling Squat Jumps Bodyweight",
+    "externalId": "kneeling_squat_jumps_bodyweight",
+    "slug": "kneeling-squat-jumps-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Landmine Calf Raise",
+    "externalId": "landmine_calf_raise",
+    "slug": "landmine-calf-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Curtsy Lunge",
+    "externalId": "landmine_curtsy_lunge",
+    "slug": "landmine-curtsy-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Glute Kick Back",
+    "externalId": "landmine_glute_kick_back",
+    "slug": "landmine-glute-kick-back",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Goblet Curtsy Lunge",
+    "externalId": "landmine_goblet_curtsy_lunge",
+    "slug": "landmine-goblet-curtsy-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Goblet Lateral Lunge",
+    "externalId": "landmine_goblet_lateral_lunge",
+    "slug": "landmine-goblet-lateral-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Hack Squat",
+    "externalId": "landmine_hack_squat",
+    "slug": "landmine-hack-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Lateral Lunge",
+    "externalId": "landmine_lateral_lunge",
+    "slug": "landmine-lateral-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Lunge to Overhead Press",
+    "externalId": "landmine_lunge_to_overhead_press",
+    "slug": "landmine-lunge-to-overhead-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Landmine Squat and Press",
+    "externalId": "landmine_squat_and_press",
+    "slug": "landmine-squat-and-press",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Barbell",
+      "Landmine Attachment"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Lateral Band Walks",
+    "externalId": "lateral_band_walks",
+    "slug": "lateral-band-walks",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Lateral Box Jump",
+    "externalId": "lateral_box_jump",
+    "slug": "lateral-box-jump",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Leg Press Machine Close Stance",
+    "externalId": "leg_press_machine_close_stance",
+    "slug": "leg-press-machine-close-stance",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Leg Press Machine Normal Stance",
+    "externalId": "leg_press_machine_normal_stance",
+    "slug": "leg-press-machine-normal-stance",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Leg Press Wide High Stance",
+    "externalId": "leg_press_wide_high_stance",
+    "slug": "leg-press-wide-high-stance",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Leg Press Wide High Stance Behind View",
+    "externalId": "leg_press_wide_high_stance_behind_view",
+    "slug": "leg-press-wide-high-stance-behind-view",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Lever Leg Extension",
+    "externalId": "lever_leg_extension",
+    "slug": "lever-leg-extension",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Lunge Front Kick",
+    "externalId": "lunge_front_kick",
+    "slug": "lunge-front-kick",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Lunge Pulses Bodyweight",
+    "externalId": "lunge_pulses_bodyweight",
+    "slug": "lunge-pulses-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Lunge Reverse With Resistance Band",
+    "externalId": "lunge_reverse_with_resistance_band",
+    "slug": "lunge-reverse-with-resistance-band",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Lunge Rotation Left and Right Bodyweight",
+    "externalId": "lunge_rotation_left_and_right_bodyweight",
+    "slug": "lunge-rotation-left-and-right-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Lunge to Knee Drive Left Bodyweight",
+    "externalId": "lunge_to_knee_drive_left_bodyweight",
+    "slug": "lunge-to-knee-drive-left-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Lunge to Knee Drive Right Bodyweight",
+    "externalId": "lunge_to_knee_drive_right_bodyweight",
+    "slug": "lunge-to-knee-drive-right-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Lunges Alternate Leg With Pause Bodyweight",
+    "externalId": "lunges_alternate_leg_with_pause_bodyweight",
+    "slug": "lunges-alternate-leg-with-pause-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Lunges Same Leg Side View Bodyweight",
+    "externalId": "lunges_same_leg_side_view_bodyweight",
+    "slug": "lunges-same-leg-side-view-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Lying Leg Curl Machine",
+    "externalId": "lying_leg_curl_machine",
+    "slug": "lying-leg-curl-machine",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Med Ball Front Squat Raise",
+    "externalId": "med_ball_front_squat_raise",
+    "slug": "med-ball-front-squat-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Medicine Ball Jumps",
+    "externalId": "medicine_ball_jumps",
+    "slug": "medicine-ball-jumps",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Mts Iso-Lateral Kneeling Leg Curl",
+    "externalId": "mts_iso_lateral_kneeling_leg_curl",
+    "slug": "mts-iso-lateral-kneeling-leg-curl",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Multi Hip Abduction",
+    "externalId": "multi_hip_abduction",
+    "slug": "multi-hip-abduction",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Multi Hip Adduction",
+    "externalId": "multi_hip_adduction",
+    "slug": "multi-hip-adduction",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Multi Hip Glute Extension",
+    "externalId": "multi_hip_glute_extension",
+    "slug": "multi-hip-glute-extension",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Narrow Stance Heels Elevated Dumbbell Goblet Squats",
+    "externalId": "narrow_stance_heels_elevated_dumbbell_goblet_squats",
+    "slug": "narrow-stance-heels-elevated-dumbbell-goblet-squats",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Nordic Hamstring Curl With Partner",
+    "externalId": "nordic_hamstring_curl_with_partner",
+    "slug": "nordic-hamstring-curl-with-partner",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Normal Squat Smith Machine",
+    "externalId": "normal_squat_smith_machine",
+    "slug": "normal-squat-smith-machine",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Pistol Squat to Box",
+    "externalId": "pistol_squat_to_box",
+    "slug": "pistol-squat-to-box",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Plate Curtsy Lunge",
+    "externalId": "plate_curtsy_lunge",
+    "slug": "plate-curtsy-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Deadlift",
+    "externalId": "plate_deadlift",
+    "slug": "plate-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Deficit Lunge",
+    "externalId": "plate_deficit_lunge",
+    "slug": "plate-deficit-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Forward Lunge",
+    "externalId": "plate_forward_lunge",
+    "slug": "plate-forward-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Good Morning Anterior",
+    "externalId": "plate_good_morning_anterior",
+    "slug": "plate-good-morning-anterior",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "thoracic-spine",
+    "primary_muscle": "Upper Back",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Lateral Lunge",
+    "externalId": "plate_lateral_lunge",
+    "slug": "plate-lateral-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Overhead Walking Lunge",
+    "externalId": "plate_overhead_walking_lunge",
+    "slug": "plate-overhead-walking-lunge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Single Leg Deadlift",
+    "externalId": "plate_single_leg_deadlift",
+    "slug": "plate-single-leg-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Single Leg Pinch Grip Deadlift",
+    "externalId": "plate_single_leg_pinch_grip_deadlift",
+    "slug": "plate-single-leg-pinch-grip-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Squat Hold Biceps Curl",
+    "externalId": "plate_squat_hold_biceps_curl",
+    "slug": "plate-squat-hold-biceps-curl",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Squat Hold Reach",
+    "externalId": "plate_squat_hold_reach",
+    "slug": "plate-squat-hold-reach",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Squat Hold",
+    "externalId": "plate_squat_hold",
+    "slug": "plate-squat-hold",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Squat Reach",
+    "externalId": "plate_squat_reach",
+    "slug": "plate-squat-reach",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Staggered Deadlift",
+    "externalId": "plate_staggered_deadlift",
+    "slug": "plate-staggered-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Staggered Pinch Grip Deadlift",
+    "externalId": "plate_staggered_pinch_grip_deadlift",
+    "slug": "plate-staggered-pinch-grip-deadlift",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Resistance Band Bent Leg Kickback (Kneeling)",
+    "externalId": "resistance_band_bent_leg_kickback_kneeling",
+    "slug": "resistance-band-bent-leg-kickback-kneeling",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "triceps",
+    "primary_muscle": "Triceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Calf Press Sitting on Chair",
+    "externalId": "resistance_band_calf_press_sitting_on_chair",
+    "slug": "resistance-band-calf-press-sitting-on-chair",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Clam",
+    "externalId": "resistance_band_clam",
+    "slug": "resistance-band-clam",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Hip Thrust (Version 2)",
+    "externalId": "resistance_band_hip_thrust_version_2",
+    "slug": "resistance-band-hip-thrust-version-2",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Hip Thrusts on Knees",
+    "externalId": "resistance_band_hip_thrusts_on_knees",
+    "slug": "resistance-band-hip-thrusts-on-knees",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Kneeling Leg Half Circle on Bench",
+    "externalId": "resistance_band_kneeling_leg_half_circle_on_bench",
+    "slug": "resistance-band-kneeling-leg-half-circle-on-bench",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Kneeling Leg Half Circle",
+    "externalId": "resistance_band_kneeling_leg_half_circle",
+    "slug": "resistance-band-kneeling-leg-half-circle",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Leg Curl",
+    "externalId": "resistance_band_leg_curl",
+    "slug": "resistance-band-leg-curl",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Leg Kickback",
+    "externalId": "resistance_band_leg_kickback",
+    "slug": "resistance-band-leg-kickback",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "triceps",
+    "primary_muscle": "Triceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Lying Abduction",
+    "externalId": "resistance_band_lying_abduction",
+    "slug": "resistance-band-lying-abduction",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Lying Bent Knee Hip Abduction",
+    "externalId": "resistance_band_lying_bent_knee_hip_abduction",
+    "slug": "resistance-band-lying-bent-knee-hip-abduction",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Lying Leg Raise",
+    "externalId": "resistance_band_lying_leg_raise",
+    "slug": "resistance-band-lying-leg-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band One Leg Glute Bridge",
+    "externalId": "resistance_band_one_leg_glute_bridge",
+    "slug": "resistance-band-one-leg-glute-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band One Leg Kickback (Bent Position)",
+    "externalId": "resistance_band_one_leg_kickback_bent_position",
+    "slug": "resistance-band-one-leg-kickback-bent-position",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "triceps",
+    "primary_muscle": "Triceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Reverse Hyper With Stability Ball on Flat Bench",
+    "externalId": "resistance_band_reverse_hyper_with_stability_ball_on_flat_bench",
+    "slug": "resistance-band-reverse-hyper-with-stability-ball-on-flat-bench",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Seated Bent Knee Abduction",
+    "externalId": "resistance_band_seated_bent_knee_abduction",
+    "slug": "resistance-band-seated-bent-knee-abduction",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Seated Hip Abduction",
+    "externalId": "resistance_band_seated_hip_abduction",
+    "slug": "resistance-band-seated-hip-abduction",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Side Plank Glute Raise",
+    "externalId": "resistance_band_side_plank_glute_raise",
+    "slug": "resistance-band-side-plank-glute-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Squat Jump",
+    "externalId": "resistance_band_squat_jump",
+    "slug": "resistance-band-squat-jump",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Squat",
+    "externalId": "resistance_band_squat",
+    "slug": "resistance-band-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Standing Balance Glute Kickback (Version 2)",
+    "externalId": "resistance_band_standing_balance_glute_kickback_version_2",
+    "slug": "resistance-band-standing-balance-glute-kickback-version-2",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Standing Balance Glute Kickback",
+    "externalId": "resistance_band_standing_balance_glute_kickback",
+    "slug": "resistance-band-standing-balance-glute-kickback",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "glutes",
+    "primary_muscle": "Glutes",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Standing Balance Hip Abduction",
+    "externalId": "resistance_band_standing_balance_hip_abduction",
+    "slug": "resistance-band-standing-balance-hip-abduction",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Resistance Band Standing Hip Abduction",
+    "externalId": "resistance_band_standing_hip_abduction",
+    "slug": "resistance-band-standing-hip-abduction",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Reverse Lunge Left Resistance Band",
+    "externalId": "reverse_lunge_left_resistance_band",
+    "slug": "reverse-lunge-left-resistance-band",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Seated Calf Machine",
+    "externalId": "seated_calf_machine",
+    "slug": "seated-calf-machine",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Seated Calf Raises Dumbbell on Knee",
+    "externalId": "seated_calf_raises_dumbbell_on_knee",
+    "slug": "seated-calf-raises-dumbbell-on-knee",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Seated Hip Abductor Machine",
+    "externalId": "seated_hip_abductor_machine",
+    "slug": "seated-hip-abductor-machine",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Seated Leg Curl Machine",
+    "externalId": "seated_leg_curl_machine",
+    "slug": "seated-leg-curl-machine",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Seated Leg Extension Single Leg",
+    "externalId": "seated_leg_extension_single_leg",
+    "slug": "seated-leg-extension-single-leg",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Seated Leg Extension_Alternate Legs",
+    "externalId": "seated_leg_extension_alternate_legs",
+    "slug": "seated-leg-extension-alternate-legs",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Seated Leg Extension_Both Legs",
+    "externalId": "seated_leg_extension_both_legs",
+    "slug": "seated-leg-extension-both-legs",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Seated Machine Hip Adductor",
+    "externalId": "seated_machine_hip_adductor",
+    "slug": "seated-machine-hip-adductor",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Side Lunges Bodyweight",
+    "externalId": "side_lunges_bodyweight",
+    "slug": "side-lunges-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Side Lying Leg Lift Left",
+    "externalId": "side_lying_leg_lift_left",
+    "slug": "side-lying-leg-lift-left",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Side Lying Leg Lift Right",
+    "externalId": "side_lying_leg_lift_right",
+    "slug": "side-lying-leg-lift-right",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Single Leg Calf Raise Leg Press Machine",
+    "externalId": "single_leg_calf_raise_leg_press_machine",
+    "slug": "single-leg-calf-raise-leg-press-machine",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Single Leg Incline 45 Degree Leg Press Machine",
+    "externalId": "single_leg_incline_45_degree_leg_press_machine",
+    "slug": "single-leg-incline-45-degree-leg-press-machine",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Single Leg Romanian Deadlift Dumbbell",
+    "externalId": "single_leg_romanian_deadlift_dumbbell",
+    "slug": "single-leg-romanian-deadlift-dumbbell",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Dumbbells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Single Leg Romanian Deadlifts Right Cable Resistance Band",
+    "externalId": "single_leg_romanian_deadlifts_right_cable_resistance_band",
+    "slug": "single-leg-romanian-deadlifts-right-cable-resistance-band",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "lumbar-spine",
+    "primary_muscle": "Lower Back",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Sissy Squat Bodyweight",
+    "externalId": "sissy_squat_bodyweight",
+    "slug": "sissy-squat-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Smith Machine Bulgarian Split Squat",
+    "externalId": "smith_machine_bulgarian_split_squat",
+    "slug": "smith-machine-bulgarian-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Smith Machine Calf Raise",
+    "externalId": "smith_machine_calf_raise",
+    "slug": "smith-machine-calf-raise",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Smith Machine Narrow Stance Heels Elevated Squats",
+    "externalId": "smith_machine_narrow_stance_heels_elevated_squats",
+    "slug": "smith-machine-narrow-stance-heels-elevated-squats",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Standing Cable Hip Flexion",
+    "externalId": "standing_cable_hip_flexion",
+    "slug": "standing-cable-hip-flexion",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Cable Pulley Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Standing Calf Raise Resistance Band",
+    "externalId": "standing_calf_raise_resistance_band",
+    "slug": "standing-calf-raise-resistance-band",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Standing Calf Raises Smith Machine",
+    "externalId": "standing_calf_raises_smith_machine",
+    "slug": "standing-calf-raises-smith-machine",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "calf",
+    "primary_muscle": "Calves",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Standing Side Leg Raises",
+    "externalId": "standing_side_leg_raises",
+    "slug": "standing-side-leg-raises",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Step Up on Chair Bodyweight",
+    "externalId": "step_up_on_chair_bodyweight",
+    "slug": "step-up-on-chair-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Chair"
+    ],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Sumo Squat Over Shoulder Resistance Band",
+    "externalId": "sumo_squat_over_shoulder_resistance_band",
+    "slug": "sumo-squat-over-shoulder-resistance-band",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Sumo Squat in Between Legs Resistance Band",
+    "externalId": "sumo_squat_in_between_legs_resistance_band",
+    "slug": "sumo-squat-in-between-legs-resistance-band",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Resistance Band"
+    ],
+    "category": "Resistance"
+  },
+  {
+    "display": "Suspension Trainer With Grips Hip Bridge",
+    "externalId": "suspension_trainer_with_grips_hip_bridge",
+    "slug": "suspension-trainer-with-grips-hip-bridge",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hip",
+    "primary_muscle": "Hips",
+    "equipment": [
+      "Suspension Trainer"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Suspension Trainer With Grips Leg Curl",
+    "externalId": "suspension_trainer_with_grips_leg_curl",
+    "slug": "suspension-trainer-with-grips-leg-curl",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Suspension Trainer"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Suspension Trainer With Grips Side Squat",
+    "externalId": "suspension_trainer_with_grips_side_squat",
+    "slug": "suspension-trainer-with-grips-side-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Suspension Trainer"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Suspension Trainer With Grips Split Squat",
+    "externalId": "suspension_trainer_with_grips_split_squat",
+    "slug": "suspension-trainer-with-grips-split-squat",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [
+      "Suspension Trainer"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Suspension Trainer With Grips Straight Hip Leg Curl",
+    "externalId": "suspension_trainer_with_grips_straight_hip_leg_curl",
+    "slug": "suspension-trainer-with-grips-straight-hip-leg-curl",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "hamstrings",
+    "primary_muscle": "Hamstrings",
+    "equipment": [
+      "Suspension Trainer"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Wall Sit Bodyweight",
+    "externalId": "wall_sit_bodyweight",
+    "slug": "wall-sit-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Wall Squat Bodyweight",
+    "externalId": "wall_squat_bodyweight",
+    "slug": "wall-squat-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  },
+  {
+    "display": "Wall Squat With Pause Bodyweight",
+    "externalId": "wall_squat_with_pause_bodyweight",
+    "slug": "wall-squat-with-pause-bodyweight",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": false,
+    "body_region": "quadriceps",
+    "primary_muscle": "Quadriceps",
+    "equipment": [],
+    "category": "Bodyweight"
+  }
+]

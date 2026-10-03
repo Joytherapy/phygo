@@ -350,11 +350,15 @@ export default function ExerciseLibraryPage() {
         {(regionCounts.length > 0 || categoryCounts.size > 0 || equipmentCounts.length > 0 || cardioHiitCount > 0) && (
           <div className="flex flex-wrap items-center gap-2.5 mb-10">
             {regionCounts.length > 0 && (
-              <div className="relative">
+              <div className="relative w-[250px] shrink-0">
+                <PersonStanding
+                  size={14}
+                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/40 dark:text-white/40"
+                />
                 <select
                   value={filter?.type === 'region' ? filter.value : ''}
                   onChange={(e) => setFilter(e.target.value ? { type: 'region', value: e.target.value } : null)}
-                  className={`appearance-none rounded-full border backdrop-blur-xl pl-4 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
+                  className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
                     filter?.type === 'region'
                       ? 'border-[#A855F7]/40 bg-[#A855F7]/10 text-ink dark:text-white'
                       : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
@@ -375,7 +379,11 @@ export default function ExerciseLibraryPage() {
             )}
 
             {(categoryCounts.size > 0 || cardioHiitCount > 0) && (
-              <div className="relative">
+              <div className="relative w-[250px] shrink-0">
+                <Dumbbell
+                  size={14}
+                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/40 dark:text-white/40"
+                />
                 <select
                   value={filter?.type === 'category' ? filter.value : filter?.type === 'tag' ? '__hiit__' : ''}
                   onChange={(e) => {
@@ -384,7 +392,7 @@ export default function ExerciseLibraryPage() {
                     else if (v === '__hiit__') setFilter({ type: 'tag', value: CARDIO_HIIT_TAG });
                     else setFilter({ type: 'category', value: v });
                   }}
-                  className={`appearance-none rounded-full border backdrop-blur-xl pl-4 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
+                  className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
                     filter?.type === 'category' || filter?.type === 'tag'
                       ? 'border-[#4F7CFF]/40 bg-[#4F7CFF]/10 text-ink dark:text-white'
                       : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
@@ -410,11 +418,15 @@ export default function ExerciseLibraryPage() {
             )}
 
             {equipmentCounts.length > 0 && (
-              <div className="relative">
+              <div className="relative w-[250px] shrink-0">
+                <Weight
+                  size={14}
+                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/40 dark:text-white/40"
+                />
                 <select
                   value={filter?.type === 'equipment' ? filter.value : ''}
                   onChange={(e) => setFilter(e.target.value ? { type: 'equipment', value: e.target.value } : null)}
-                  className={`appearance-none rounded-full border backdrop-blur-xl pl-4 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
+                  className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
                     filter?.type === 'equipment'
                       ? 'border-[#4F7CFF]/40 bg-[#4F7CFF]/10 text-ink dark:text-white'
                       : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
