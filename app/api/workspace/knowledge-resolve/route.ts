@@ -346,12 +346,13 @@ export async function GET(req: NextRequest) {
   // clinical term (a named condition, syndrome, or test) still scores
   // higher than a bare organ name via the exact-match tier, so it keeps
   // going through SPECIFIC MODE below untouched.
+  const structureMatch = bestStructure
   const structureIsTopic =
-    bestStructure && (!bestCondition || bestStructure.score >= bestCondition.score) && (!bestTest || bestStructure.score >= bestTest.score)
+    structureMatch && (!bestCondition || structureMatch.score >= bestCondition.score) && (!bestTest || structureMatch.score >= bestTest.score)
 
-  if (structureIsTopic && bestStructure) {
-    const row = bestStructure.row
-    const system = bestStructure.system
+  if (structureIsTopic && structureMatch) {
+    const row = structureMatch.row
+    const system = structureMatch.system
 
     // Related conditions: every OTHER condition tagged to the same system
     // that matches the selection at all (either direction), not just the
