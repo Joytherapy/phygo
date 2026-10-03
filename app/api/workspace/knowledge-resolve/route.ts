@@ -319,19 +319,25 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  STRUCTURE_TABLES.forEach((t, i) => {
+  // Plain for-loops (not .forEach callbacks) so TypeScript can track the
+  // bestStructure/bestTest reassignments below as part of this function's own
+  // control flow — a reassignment made inside a nested closure doesn't narrow
+  // the outer variable's type at all the places it's read afterwards.
+  for (let i = 0; i < STRUCTURE_TABLES.length; i++) {
+    const t = STRUCTURE_TABLES[i]
     for (const row of structureResults[i] ?? []) {
       const score = matchScore(selection, normalize(row.name))
       if (score > 0 && (!bestStructure || score > bestStructure.score)) bestStructure = { row, system: t.system, score }
     }
-  })
+  }
 
-  TEST_TABLES.forEach((t, i) => {
+  for (let i = 0; i < TEST_TABLES.length; i++) {
+    const t = TEST_TABLES[i]
     for (const row of testResults[i] ?? []) {
       const score = matchScore(selection, normalize(row.name))
       if (score > 0 && (!bestTest || score > bestTest.score)) bestTest = { row, system: t.system, score }
     }
-  })
+  }
 
   if (!bestCondition && !bestStructure && !bestTest) return NextResponse.json({ match: null })
 
