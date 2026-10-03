@@ -365,7 +365,10 @@ export default function WorkspaceDocumentPage() {
     return (
       <WorkspaceShell fullscreen>
         <div className="flex flex-1 items-center justify-center p-6">
-          <ErrorState message={error || 'Something went wrong while opening this document.'} onRetry={load} />
+          <ErrorState
+            message={error || 'Something went wrong while opening this document.'}
+            onRetry={() => load(() => false)}
+          />
         </div>
       </WorkspaceShell>
     )

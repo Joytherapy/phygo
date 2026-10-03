@@ -15,6 +15,7 @@ import {
   Flame,
   ListChecks,
   CheckCircle2,
+  ChevronDown,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
@@ -349,70 +350,88 @@ export default function ExerciseLibraryPage() {
         {(regionCounts.length > 0 || categoryCounts.size > 0 || equipmentCounts.length > 0 || cardioHiitCount > 0) && (
           <div className="flex flex-wrap items-center gap-2.5 mb-10">
             {regionCounts.length > 0 && (
-              <select
-                value={filter?.type === 'region' ? filter.value : ''}
-                onChange={(e) => setFilter(e.target.value ? { type: 'region', value: e.target.value } : null)}
-                className={`rounded-full border backdrop-blur-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
-                  filter?.type === 'region'
-                    ? 'border-[#A855F7]/40 bg-[#A855F7]/10 text-ink dark:text-white'
-                    : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
-                }`}
-              >
-                <option value="">{ui.bodyZoneHeading}</option>
-                {regionCounts.map((zone) => (
-                  <option key={zone.slug} value={zone.slug}>
-                    {zone.name} &middot; {zone.count}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={filter?.type === 'region' ? filter.value : ''}
+                  onChange={(e) => setFilter(e.target.value ? { type: 'region', value: e.target.value } : null)}
+                  className={`appearance-none rounded-full border backdrop-blur-xl pl-4 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
+                    filter?.type === 'region'
+                      ? 'border-[#A855F7]/40 bg-[#A855F7]/10 text-ink dark:text-white'
+                      : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
+                  }`}
+                >
+                  <option value="">{ui.bodyZoneHeading}</option>
+                  {regionCounts.map((zone) => (
+                    <option key={zone.slug} value={zone.slug}>
+                      {zone.name} &middot; {zone.count}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={14}
+                  className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-ink/40 dark:text-white/40"
+                />
+              </div>
             )}
 
             {(categoryCounts.size > 0 || cardioHiitCount > 0) && (
-              <select
-                value={filter?.type === 'category' ? filter.value : filter?.type === 'tag' ? '__hiit__' : ''}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (!v) setFilter(null);
-                  else if (v === '__hiit__') setFilter({ type: 'tag', value: CARDIO_HIIT_TAG });
-                  else setFilter({ type: 'category', value: v });
-                }}
-                className={`rounded-full border backdrop-blur-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
-                  filter?.type === 'category' || filter?.type === 'tag'
-                    ? 'border-[#4F7CFF]/40 bg-[#4F7CFF]/10 text-ink dark:text-white'
-                    : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
-                }`}
-              >
-                <option value="">{ui.categoryHeading}</option>
-                {cardioHiitCount > 0 && (
-                  <option value="__hiit__">
-                    {ui.hiitLabel} &middot; {cardioHiitCount}
-                  </option>
-                )}
-                {Array.from(categoryCounts.entries()).map(([cat, count]) => (
-                  <option key={cat} value={cat}>
-                    {cat} &middot; {count}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={filter?.type === 'category' ? filter.value : filter?.type === 'tag' ? '__hiit__' : ''}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (!v) setFilter(null);
+                    else if (v === '__hiit__') setFilter({ type: 'tag', value: CARDIO_HIIT_TAG });
+                    else setFilter({ type: 'category', value: v });
+                  }}
+                  className={`appearance-none rounded-full border backdrop-blur-xl pl-4 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
+                    filter?.type === 'category' || filter?.type === 'tag'
+                      ? 'border-[#4F7CFF]/40 bg-[#4F7CFF]/10 text-ink dark:text-white'
+                      : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
+                  }`}
+                >
+                  <option value="">{ui.categoryHeading}</option>
+                  {cardioHiitCount > 0 && (
+                    <option value="__hiit__">
+                      {ui.hiitLabel} &middot; {cardioHiitCount}
+                    </option>
+                  )}
+                  {Array.from(categoryCounts.entries()).map(([cat, count]) => (
+                    <option key={cat} value={cat}>
+                      {cat} &middot; {count}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={14}
+                  className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-ink/40 dark:text-white/40"
+                />
+              </div>
             )}
 
             {equipmentCounts.length > 0 && (
-              <select
-                value={filter?.type === 'equipment' ? filter.value : ''}
-                onChange={(e) => setFilter(e.target.value ? { type: 'equipment', value: e.target.value } : null)}
-                className={`rounded-full border backdrop-blur-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
-                  filter?.type === 'equipment'
-                    ? 'border-[#4F7CFF]/40 bg-[#4F7CFF]/10 text-ink dark:text-white'
-                    : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
-                }`}
-              >
-                <option value="">{ui.equipmentHeading}</option>
-                {equipmentCounts.map(([eq, count]) => (
-                  <option key={eq} value={eq}>
-                    {eq} &middot; {count}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={filter?.type === 'equipment' ? filter.value : ''}
+                  onChange={(e) => setFilter(e.target.value ? { type: 'equipment', value: e.target.value } : null)}
+                  className={`appearance-none rounded-full border backdrop-blur-xl pl-4 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
+                    filter?.type === 'equipment'
+                      ? 'border-[#4F7CFF]/40 bg-[#4F7CFF]/10 text-ink dark:text-white'
+                      : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
+                  }`}
+                >
+                  <option value="">{ui.equipmentHeading}</option>
+                  {equipmentCounts.map(([eq, count]) => (
+                    <option key={eq} value={eq}>
+                      {eq} &middot; {count}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={14}
+                  className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-ink/40 dark:text-white/40"
+                />
+              </div>
             )}
 
             {filter && (
