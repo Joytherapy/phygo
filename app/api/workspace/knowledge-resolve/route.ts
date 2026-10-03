@@ -347,8 +347,11 @@ export async function GET(req: NextRequest) {
   // higher than a bare organ name via the exact-match tier, so it keeps
   // going through SPECIFIC MODE below untouched.
   const structureMatch = bestStructure
+  const structureScore = structureMatch ? structureMatch.score : null
   const structureIsTopic =
-    structureMatch && (!bestCondition || structureMatch.score >= bestCondition.score) && (!bestTest || structureMatch.score >= bestTest.score)
+    structureScore !== null &&
+    (!bestCondition || structureScore >= bestCondition.score) &&
+    (!bestTest || structureScore >= bestTest.score)
 
   if (structureIsTopic && structureMatch) {
     const row = structureMatch.row
