@@ -709,4 +709,607 @@ Nota onesta su questo batch:
 
 **Stato attuale: 486 condizioni totali** (485 + 1 nuova del batch 33). **Mancano 314 per arrivare a 800.**
 
+**Batch 34 (2 condizioni, id 532-533):** proseguito sulle sezioni più scoperte — Gastrointestinale e Urinario. Candidato verificato e scartato: melanoma — nessuna linea guida di esercizio oncologico (incluso il consensus ACSM 2019, che nomina esplicitamente solo i tumori di mammella, colon e prostata) tratta il melanoma in modo specifico; l'unica fonte melanoma-specifica trovata è un protocollo di trial di fattibilità (non ancora pubblicato con risultati), quindi non abbastanza solido per una scheda dedicata. Genuinamente assenti e aggiunte in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Malattia diverticolare e diverticolite — attività fisica e prevenzione | Gastrointestinale (tag `gastrointestinal`) | Linea guida tedesca S3 "Diverticular Disease/Diverticulitis" Part 2 (DGVS/DGAV), raccomandazione 5.9; corroborata da Strate LL et al., Am J Gastroenterol, 2009, e Aune D et al., Eur J Nutr, 2017 | 2022 |
+| Rene policistico autosomico dominante (ADPKD) — attività fisica e gestione dell'esercizio | Urinario (tag `urinary`) | KDIGO 2025 Clinical Practice Guideline for ADPKD, capitolo 7; dettaglio supplementare da PKD Foundation | 2025 |
+
+Note oneste su questo batch:
+- **Malattia diverticolare**: fonte principale una linea guida formale (evidenza di livello 1, grado A, consenso forte) ma l'evidenza forte riguarda solo la **prevenzione** (ridurre il rischio di sviluppare diverticolite), non la fase acuta né la ripresa dopo trattamento conservativo/chirurgico — per questi ultimi due punti non esiste al momento una fonte con evidenza clinica, solo contenuti divulgativi generici non citabili; dichiarato esplicitamente nella scheda. Tutti gli studi di supporto sono osservazionali (coorti), non trial controllati.
+- **Rene policistico (ADPKD)**: fonte una linea guida nefrologica molto recente e autorevole (KDIGO 2025) con soglie numeriche chiare; la cautela sugli sport da collisione è esplicita ma generica ("vulnerabili a lesioni dirette dell'organo"), senza una soglia dimensionale precisa di rene/fegato oltre la quale evitare lo sport — l'individualizzazione resta quindi clinica, non algoritmica.
+
+**Stato attuale: 488 condizioni totali** (486 + 2 nuove del batch 34). **Mancano 312 per arrivare a 800.**
+
+**Batch 35 (1 condizione, id 534):** tre candidati verificati e scartati prima di trovare quello giusto — round di ricerca particolarmente onesto, utile documentarlo per intero:
+- **Feocromocitoma**: l'avviso comune "evitare esercizio intenso" (rischio di crisi ipertensiva da scarica di catecolamine) **non è supportato dalla linea guida di riferimento** (Endocrine Society Clinical Practice Guideline, Lenders JWM et al., *J Clin Endocrinol Metab*, 2014) — verificata per intero, non menziona mai l'esercizio fisico come fattore scatenante. L'avviso circola solo a livello di materiale divulgativo/case report, non di linea guida. **Scartato**: non abbastanza solido per una scheda dedicata senza travisare la fonte.
+- **Trombocitemia essenziale**: nessuna linea guida ematologica (ELN, NCCN) tratta il rapporto tra esercizio fisico e rischio trombotico in questa condizione. L'unica fonte reperita (Eckert RL et al., *Integrative Cancer Therapies*, 2017) riguarda le neoplasie mieloproliferative in generale ma **esplicitamente chiede future ricerche**, senza fornire risposte. **Scartato**: il vuoto di evidenza è reale, non solo difficile da trovare.
+- **Carenza di vitamina B12 / anemia perniciosa (degenerazione combinata subacuta)**: la fisiopatologia è solida (perdita di propriocezione → rischio di cadute, riportata in case report clinici) ma **nessuna fonte fornisce un protocollo o linee guida esplicite di riabilitazione dell'equilibrio** per questa condizione specifica. **Scartato**: utilizzabile come razionale di base, non come scheda sorgente.
+
+Genuinamente assente e aggiunta in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Linfoma (Hodgkin e non-Hodgkin) — esercizio aerobico durante la chemioterapia | Oncologia/Ematologia (tag `oncology` + `hematology`) | Courneya KS, Sellar CM, Stevinson C, et al., "Randomized Controlled Trial of the Effects of Aerobic Exercise on Physical Functioning and Quality of Life in Lymphoma Patients" (HELP trial), Journal of Clinical Oncology | 2009 |
+
+Nota onesta: il trial HELP è un RCT solido (livello 1) ma è **uno studio singolo**, non ancora ripreso da linee guida di esercizio oncologico specifiche per tipo di tumore — il roundtable ACSM 2019 nomina esplicitamente solo mammella, colon e prostata come tumori con evidenza di esercizio legata alla sopravvivenza, non il linfoma. Risultati riportati con onestà anche sul dato "nullo": l'esercizio non ha significativamente modificato il completamento della chemioterapia né il tasso di risposta al trattamento (dato rassicurante sulla sicurezza, non un beneficio aggiuntivo).
+
+**Stato attuale: 489 condizioni totali** (488 + 1 nuova del batch 35). **Mancano 311 per arrivare a 800.**
+
+**Batch 36 (1 condizione, id 535):** proseguito su Gastrointestinale (la sezione architettonicamente più scoperta, ora a quota 12). Verificato preventivamente che "pubalgia/ernia sportiva" (Sportsman's Hernia) fosse già presente (#152) — evitato un doppione. Genuinamente assente e aggiunta in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Ernia inguinale — riparazione chirurgica e ripresa dell'attività fisica | Gastrointestinale (tag `gastrointestinal`) | Harmankaya S, Öberg S, Rosenberg J. "Varying convalescence recommendations after inguinal hernia repair: a systematic scoping review." Hernia | 2022 |
+
+Nota onesta: la fonte è una revisione sistematica scoping che riporta ampia variabilità tra le istituzioni sulle tempistiche di ripresa — non esiste un'unica tabella universale, dichiarato esplicitamente nella scheda stessa (es. ripresa dello sport dopo tecnica open: range 0-29 giorni a seconda dello studio). Candidato correlato verificato ma scartato: ernia iatale — nessuna fonte gastroenterologica/chirurgica (controllate sia la linea guida ACG 2022 sul reflusso sia una revisione 2024 su classificazione/fisiopatologia dell'ernia iatale) tratta cautele specifiche sull'esercizio fisico o la pressione intra-addominale; gli avvisi che circolano online risalgono solo a blog divulgativi, non a letteratura clinica — scartato per non costruire una scheda su fonti non verificabili.
+
+**Stato attuale: 490 condizioni totali** (489 + 1 nuova del batch 36). **Mancano 310 per arrivare a 800.**
+
+**Batch 37 (1 condizione, id 536):** proseguito su Ematologia. Due candidati verificati e scartati prima di trovare quello giusto:
+- **Sindrome mielodisplastica (MDS)**: nessuna linea guida ematologica (NCCN, ASH) tratta l'esercizio fisico in modo specifico per MDS. Le soglie piastriniche a volte applicate a questa popolazione derivano da letteratura su altre neoplasie ematologiche (leucemia acuta/linfoma aggressivo, non MDS), e un singolo case report MDS dichiara esplicitamente che le soglie restano "in gran parte soggettive piuttosto che basate sull'evidenza". **Scartato come scheda dedicata** — ma l'evidenza trovata (anche se non MDS-specifica) era comunque solida abbastanza per costruire una scheda onesta più generale, vedi sotto.
+- **Anemia emolitica autoimmune (AIHA)**: nessuna fonte tratta la tolleranza all'esercizio durante emolisi attiva vs. remissione. L'unico dato reale e citabile riguarda la malattia da agglutinine fredde (variante specifica di AIHA) — una raccomandazione di evitare l'esposizione al freddo (testa, viso, estremità), ma dichiarata dagli stessi autori come basata su esperienza clinica, non trial controllati, e senza menzione esplicita dell'attività fisica all'aperto. **Scartato**: troppo indiretto per una scheda dedicata.
+
+Genuinamente assente e aggiunta in questo batch — non una singola malattia ma una scheda trasversale su un tema ricorrente (citopenia da trattamento ematologico attivo), utile proprio perché la scheda generale "Neoplasie Ematologiche" (#392) non include soglie numeriche specifiche:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Citopenia da neoplasia ematologica in trattamento attivo — soglie di sicurezza per l'esercizio | Ematologia (tag `hematology`) | Morishita S, Nakano J, Fu JB, Tsuji T. "Physical exercise is safe and feasible in thrombocytopenic patients with hematologic malignancies: a narrative review." Hematology (UK), 2020; soglie originarie da Elter T et al., Int J Hematol, 2009 | 2020 |
+
+Nota onesta: fonte una narrative review (non un RCT/linea guida formale) — evidence_level "low" dichiarato esplicitamente; le soglie numeriche (piastrine ≥50.000/µL, emoglobina ≥8 g/dL) sono dichiarate dagli stessi autori originali come opinione di esperti, non rigorosamente validate da trial controllati. Distinta esplicitamente nella scheda dalla Porpora trombocitopenica immune (#430), condizione autoimmune cronica con soglie proprie, per evitare confusione tra le due popolazioni di pazienti.
+
+**Stato attuale: 491 condizioni totali** (490 + 1 nuova del batch 37). **Mancano 309 per arrivare a 800.**
+
+**Batch 38 (1 condizione, id 537):** proseguito su Urinario/Pavimento Pelvico. Due candidati endocrini verificati e scartati prima di questo: iperaldosteronismo primario (nessuna delle due linee guida Endocrine Society, 2016 e aggiornamento 2025, menziona l'attività fisica — controllate entrambe per intero) e diabete insipido centrale (nessuna fonte endocrinologica tratta la gestione dei liquidi durante l'esercizio in modo specifico per questa condizione). Genuinamente assente e aggiunta in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Infezioni urinarie ricorrenti e disfunzione del pavimento pelvico — riabilitazione con biofeedback | Urinario + Pavimento pelvico (tag `urinary` + `pelvic_floor`, anteriore/femminile) | Tzelves L et al., Archives of Gynecology and Obstetrics, 2023; corroborato da Chiang CH et al., Scientific Reports, 2021 | 2023 |
+
+Nota onesta, la più importante di questo batch: **nessuna linea guida urologica (controllate sia AUA sia EAU per intero) avalla la fisioterapia del pavimento pelvico per le infezioni urinarie ricorrenti** — non è quindi un'indicazione riconosciuta ufficialmente. L'evidenza reale esiste solo a livello meccanicistico: due studi di coorte a braccio singolo, senza gruppo di controllo, senza RCT dedicato, che mostrano una riduzione del residuo post-minzionale e degli episodi di IVU dopo riallenamento con biofeedback. Dichiarato esplicitamente nella scheda come "evidenza emergente, non avallata da linee guida" — aggiunta comunque perché il nesso fisiopatologico (iperattività del pavimento pelvico → svuotamento incompleto → infezione ricorrente) è reale e di interesse diretto per la pratica fisioterapica, ma senza sovrastimare la forza dell'evidenza.
+
+**Stato attuale: 492 condizioni totali** (491 + 1 nuova del batch 38). **Mancano 308 per arrivare a 800.**
+
+**Batch 39 (1 condizione, id 538):** proseguito su Endocrinologia. Candidato verificato e scartato: ipoparatiroidismo — controllate per intero sia la linea guida ESE 2015 sia l'aggiornamento 2025, nessuna delle due tratta l'esercizio fisico in modo specifico (solo sintomi generali di ipocalcemia come crampi/parestesie, non legati all'esercizio). Genuinamente assente e aggiunta in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Diabete gestazionale — prescrizione dell'esercizio fisico | Endocrino (tag `endocrine`) | Jung AR, Seo Y, Lee J, Hwang JG, Yun S, Lee DT. "Recent Findings on Exercise Therapy for Blood Glucose Management in Patients with Gestational Diabetes." Journal of Clinical Medicine (sintesi delle linee guida ACOG e SOGC/CSEP) | 2024 |
+
+Nota onesta: fonte una review 2024 open access che sintetizza linee guida ufficiali (ACOG, SOGC/CSEP) con numeri precisi (volume, intensità, timing del cammino post-prandiale) — evidence_level "high" giustificato dalla solidità delle linee guida sottostanti. Gli stessi autori dichiarano però un vuoto reale: non esistono ancora linee guida specifiche sul diabete gestazionale per la prevenzione dell'ipoglicemia da esercizio o l'aggiustamento della dose di insulina attorno alla sessione — riportato onestamente nella scheda, non colmato con contenuto inventato.
+
+**Stato attuale: 493 condizioni totali** (492 + 1 nuova del batch 39). **Mancano 307 per arrivare a 800.**
+
+**Batch 40 (2 condizioni, id 539-540):** proseguito su Oncologia/Gastrointestinale, due tumori mai trattati finora (endometrio, stomaco). Genuinamente assenti e aggiunte in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Carcinoma dell'endometrio — esercizio fisico e gestione del rischio di linfedema | Oncologia (tag `oncology`) | Brown JC, John GM, Segal S, Chu CS, Schmitz KH, Med Sci Sports Exerc, 2013; Smits A et al. (EPEC-FAST), Cancers, 2022 | 2022 |
+| Riabilitazione dopo gastrectomia (tumore gastrico) — fisioterapia perioperatoria | Gastrointestinale + Oncologia (tag `gastrointestinal` + `oncology`) | Mortensen K et al. (ERAS Society), Br J Surg, 2014; Tukanova KH et al., Ann Surg Oncol, 2022; Färnqvist K et al., BMC Sports Sci Med Rehabil, 2025 | 2022 |
+
+Note oneste su questo batch:
+- **Carcinoma dell'endometrio**: evidenza di livello pilota/fattibilità (non RCT definitivi su recidiva) — evidence_level "moderate" dichiarato esplicitamente; il dato più solido e specifico riguarda il legame tra attività fisica e minor rischio di linfedema dell'arto inferiore dopo linfoadenectomia.
+- **Gastrectomia**: nota onesta particolarmente importante — una revisione del 2025 dichiara esplicitamente **"nessuno studio ha indagato specificamente l'esercizio fisico nel cancro gastrico"**: tutta l'evidenza di RCT sull'esercizio proviene da popolazioni con cancro esofageo, non gastrico. L'evidenza qui riportata su mobilizzazione/fisioterapia perioperatoria viene da una revisione sistematica che include insieme esofagectomia e gastrectomia, con qualità delle prove bassa (soprattutto coorti, non RCT) — evidence_level "low" dichiarato esplicitamente. Nessun RCT trovato sulla sindrome da dumping e l'esercizio.
+
+**Stato attuale: 495 condizioni totali** (493 + 2 nuove del batch 40). **Mancano 305 per arrivare a 800.**
+
+**Batch 41 (1 condizione, id 541):** proseguito su Ematologia. Candidato verificato e scartato: malattia di Gaucher — l'unica fonte peer-reviewed reperita (Hughes D et al., J Bone Miner Res, 2019) contiene solo un'indicazione generica sull'esercizio in carico per la salute ossea, non una raccomandazione specifica per Gaucher; i consigli più dettagliati trovati online provengono da un sito di advocacy per pazienti, non da letteratura clinica verificabile. **Scartato** come scheda dedicata. Genuinamente assente e aggiunta in questo batch — con un risultato controintuitivo, utile documentarlo per intero:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Sferocitosi ereditaria — attività fisica e gestione della splenomegalia | Ematologia (tag `hematology`) | Bolton-Maggs PHB, Langer JC, Iolascon A, Tittensor P, King M-J (British Society for Haematology). "Guidelines for the diagnosis and management of hereditary spherocytosis – 2011 update." British Journal of Haematology | 2011 |
+
+Nota onesta: contrariamente all'assunzione comune per analogia con la mononucleosi (evitare sport da contatto per milza ingrossata), **la linea guida di riferimento dichiara esplicitamente che non esiste evidenza a supporto della restrizione dell'attività fisica nella sferocitosi ereditaria**, né di un rischio di rottura splenica superiore alla popolazione generale — verificato tramite citazione diretta dal testo della linea guida. Per i pazienti splenectomizzati, la gestione riguarda la profilassi infettiva (vaccinazioni, scheda di splenectomia per il rischio life-long di sepsi fulminante), non la restrizione dell'attività fisica.
+
+**Stato attuale: 496 condizioni totali** (495 + 1 nuova del batch 41). **Mancano 304 per arrivare a 800.**
+
+**Batch 42 (1 condizione, id 542):** proseguito su Gastrointestinale (ancora la sezione più scoperta, ora a quota 14). Genuinamente assente e aggiunta in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Ulcera peptica (gastrica e duodenale) — attività fisica e fattori di rischio | Gastrointestinale (tag `gastrointestinal`) | Cheng Y, Macera CA, Davis DR, Blair SN, Br J Sports Med, 2000 (Aerobics Center Longitudinal Study); Rosenstock S et al., Gut, 2003 | 2003 |
+
+Nota onesta: evidenza reale ma datata (studi pre-2004) e **non uniforme** — l'effetto protettivo dell'attività fisica è risultato significativo solo per l'ulcera duodenale negli uomini (non nelle donne, non per l'ulcera gastrica) nello studio Aerobics Center, e condizionato alla positività per H. pylori nello studio danese. Evidence_level "low" dichiarato esplicitamente proprio per questa disomogeneità — molto più debole dell'evidenza sulla malattia diverticolare (batch 34), pur essendo lo stesso tipo di letteratura epidemiologica. Le linee guida ACG su ulcera peptica/FANS/H. pylori non trattano l'attività fisica come fattore di stile di vita, quindi nessuna raccomandazione formale esiste al riguardo.
+
+**Stato attuale: 497 condizioni totali** (496 + 1 nuova del batch 42). **Mancano 303 per arrivare a 800.**
+
+**Batch 43 (2 condizioni, id 543-544):** proseguito su Gastrointestinale. Genuinamente assenti e aggiunte in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Sindrome dell'intestino corto e nutrizione parenterale domiciliare — esercizio fisico | Gastrointestinale (tag `gastrointestinal`) | Graungaard S, Geisler L, Andersen JR, Rasmussen HH, Vinter-Jensen L, Holst M, Clinical Nutrition ESPEN, 2021 | 2021 |
+| Colite ischemica da esercizio intenso ("colite del corridore") — prevenzione e ripresa dell'attività | Gastrointestinale (tag `gastrointestinal`) | Grames C, Berry-Cabán CS, Case Reports in Gastrointestinal Medicine, 2012; Faress A et al., World Journal of Emergency Medicine, 2017; Murray B et al., Journal of Sport Rehabilitation, 2007 | 2017 |
+
+Note oneste su questo batch:
+- **Sindrome dell'intestino corto**: controllata per intero la linea guida ESPEN 2016 sull'insufficienza intestinale cronica — **non tratta l'attività fisica**. L'unica fonte esercizio-specifica è uno studio pilota di fattibilità (31 pazienti), che non analizza nello specifico precauzioni per il catetere venoso centrale durante l'esercizio, pur avendo registrato ricoveri (inclusi problemi al catetere) nel 46,7% dei partecipanti senza stabilire un nesso causale con l'attività fisica.
+- **Colite ischemica da esercizio**: nesso fisiopatologico reale (riduzione del flusso splancnico 60-80% durante esercizio intenso) e ben descritto in letteratura, ma **tutta l'evidenza è a livello di case report singoli** — nessun RCT, nessuna presa di posizione ufficiale di società scientifiche, nessun protocollo di ripresa dell'attività validato.
+
+**Stato attuale: 499 condizioni totali** (497 + 2 nuove del batch 43). **Mancano 301 per arrivare a 800.**
+
+**Batch 44 (1 condizione, id 545) — 🎉 QUOTA 500 RAGGIUNTA:** proseguito su Oncologia/Urinario. Candidato verificato e scartato: macroglobulinemia di Waldenström — nessuna fonte (controllate linee guida IWMF/IWWM e una review 2025 sulla sindrome da iperviscosità) tratta l'esercizio fisico come fattore di rischio o precauzione legata all'iperviscosità; evidenza dichiarata assente, non solo debole. Genuinamente assente e aggiunta in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Carcinoma renale e nefrectomia — ripresa dell'attività fisica e sport con rene singolo | Oncologia + Urinario (tag `oncology` + `urinary`) | Campbell KL et al., Med Sci Sports Exerc, 2019 (framework generale); Shephard RJ, Int J Applied Sports Sciences, 2015; EJC Paediatric Oncology, 2023 | 2023 |
+
+Nota onesta: framework di esercizio oncologico generico (Campbell 2019, non specifico per carcinoma renale) combinato con letteratura sul rene singolo che proviene prevalentemente da ambito pediatrico/urologico generale, non da trial specifici sul carcinoma renale — dichiarato esplicitamente nella scheda. Il dato di interesse principale: **non esistono dati solidi di incidenza di lesioni che giustifichino un divieto categorico degli sport da contatto** con rene singolo — le fonti argomentano per un counseling individualizzato piuttosto che restrizioni generalizzate.
+
+**Stato attuale: 500 condizioni totali** (499 + 1 nuova del batch 44). **Mancano 300 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola. Raggiunta oggi la metà esatta del percorso verso 800.
+
+**Batch 45 (2 condizioni, id 546-547) — primo giro con ricerche in parallelo:** per velocizzare il ritmo, da questo batch le ricerche di più candidati vengono lanciate contemporaneamente invece che una alla volta (nessun cambiamento al rigore del metodo, solo ai tempi). Sei candidati verificati in parallelo, quattro scartati:
+- **SIBO (sovracrescita batterica intestinale)**: evidenza solo a livello di review narrativa non peer-reviewed in senso clinico; il legame permeabilità intestinale/ischemia da esercizio intenso non menziona mai il SIBO per nome nella fonte più solida reperita. **Scartato**.
+- **Enterite da radiazioni**: la linea guida di riferimento (Andreyev HJN et al., Frontline Gastroenterology, 2015) sulla gestione pratica dei sintomi gastrointestinali da radioterapia pelvica, controllata per intero, **non contiene alcuna raccomandazione sull'attività fisica**. **Scartato** come scheda dedicata.
+- **Iperprolattinemia**: la linea guida Endocrine Society (Melmed S et al., 2011) cita l'esercizio solo come possibile causa di falso positivo diagnostico (elevazione transitoria della prolattina), non fornisce alcuna indicazione di sicurezza sull'esercizio per i pazienti con prolattinoma. **Scartato**.
+- **Ipofisite**: controllate le linee guida ESMO sulla tossicità da immunoterapia e una revisione sistematica 2023 — **nessuna delle due tratta l'esercizio fisico**. **Scartato**.
+
+Genuinamente assenti e aggiunte in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Anemia da carenza di ferro — capacità di esercizio e gestione | Ematologia (tag `hematology`) | Clénin G, Cordes M, Huber A, et al. "Iron deficiency in sports – definition, influence on performance and therapy." Swiss Medical Weekly, 2015 (consensus statement) | 2015 |
+| Cancro del testicolo — esercizio durante chemioterapia e sopravvivenza | Oncologia (tag `oncology`) | Walenkamp AME, van der Schoot GGF, Ormel HL, et al., J Cancer Res Clin Oncol, 2023; corroborato da Rovito MJ et al., scoping review, Ther Adv Urol, 2025 | 2023 |
+
+Note oneste: **carenza di ferro** — consensus statement solido della Società Svizzera di Medicina dello Sport con dati fisiologici concreti (massa di emoglobina, VO2max), ma nessuna fonte specifica su dosaggio dell'esercizio durante terapia marziale o gestione delle gambe senza riposo. **Cancro del testicolo** — RCT reale e specifico sull'esercizio durante chemioterapia BEP (preservazione della funzione polmonare/bleomicina), ma gli stessi autori della review 2025 dichiarano la base di evidenza ancora "sottile"; nessuna fonte di ricerca sulla neuropatia periferica chemio-indotta o sulla ripresa post-RPLND in questa popolazione.
+
+**Stato attuale: 502 condizioni totali** (500 + 2 nuove del batch 45). **Mancano 298 per arrivare a 800.**
+
+**Batch 46 (1 condizione, id 548) — giro con molte bocciature, documentato per intero per trasparenza:** sei candidati verificati in parallelo, cinque scartati:
+- **Poliposi adenomatosa familiare (FAP) post-colectomia/IPAA**: la linea guida ASCRS sulle sindromi poliposiche ereditarie, controllata per intero, non tratta l'attività fisica; l'unica fonte citabile (ERAS Society, 2019) è generica sulla chirurgia colorettale, non specifica per la pouch ileale. **Scartato** come scheda dedicata specifica.
+- **Idronefrosi**: nessuna linea guida tratta precauzioni sull'esercizio legate all'idronefrosi o la ripresa dopo pieloplastica. **Scartato**: evidenza sostanzialmente assente.
+- **Anemia di Fanconi**: le linee guida di riferimento (Fanconi Anemia Research Fund, 5ª edizione) controllate per intero, citano l'esercizio solo come generica voce di benessere, senza soglie legate alle citopenie né specificità per le anomalie scheletriche congenite tipiche di questa condizione. **Scartato**.
+- **Deficit di GH in età pediatrica**: nessuna linea guida pediatrica/endocrina prescrive un protocollo di esercizio specifico; un solo studio (Hoos MB et al., 2004) mostra dati di capacità di attività ma non una scheda completa. **Scartato** come scheda dedicata.
+- **Stenosi ureterale**: nessuna linea guida urologica (l'AUA ha una linea guida sulla stenosi *uretrale*, anatomicamente diversa, non su quella *ureterale*) — solo materiale informativo istituzionale per pazienti, non evidenza di ricerca. **Scartato**.
+
+Genuinamente assente e aggiunta in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Vescica neurogena da lesione del motoneurone inferiore (sacrale) — gestione riabilitativa | Urinario + Neurologia (tag `urinary` + `neurology`) | Consortium for Spinal Cord Medicine (Paralyzed Veterans of America). "Bladder Management for Adults with Spinal Cord Injury: A Clinical Practice Guideline for Health-Care Providers." 2006 | 2006 |
+
+Nota: linea guida solida e specifica, utile distinzione clinica dalla vescica neurogena sopra-pontina già presente (#124) — in particolare la disreflessia autonomica, temuta nelle lesioni midollari alte, non si applica alle lesioni sacrali/del motoneurone inferiore.
+
+**Stato attuale: 503 condizioni totali** (502 + 1 nuova del batch 46). **Mancano 297 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+**Batch 47 (3 condizioni, id 549-551):** sette candidati verificati in parallelo, quattro scartati:
+- **Colangite sclerosante primitiva (PSC)**: controllate per intero sia la AASLD Practice Guidance 2023 che le linee guida EASL 2022 — entrambe elencano la stanchezza come sintomo ma **nessuna delle due tratta l'attività fisica**. Non esiste alcun trial di esercizio specifico per PSC. L'unica fonte reale sull'esercizio in ambito epatologico è generica alla cirrosi di qualsiasi causa (Macías-Rodríguez RU et al., 2020) e non nomina mai la PSC. **Scartato** come scheda dedicata: presentare la raccomandazione generica sulla cirrosi come "evidenza per la PSC" sarebbe stato scorretto.
+- **Sindrome di Sheehan**: nessuna fonte tratta l'esercizio in modo specifico per questa sindrome. L'unica letteratura applicabile (Dineen R et al., Therapeutic Advances in Endocrinology and Metabolism, 2019) riguarda la prevenzione della crisi adrenalica in generale nell'insufficienza adrenalica secondaria — valida come fisiologia di base, ma non è evidenza specifica su Sheehan. **Scartato** come scheda dedicata per evitare di far passare un'estrapolazione generica come specifica.
+- **Iperplasia surrenalica congenita (CAH)**: controllata per intero la Endocrine Society Clinical Practice Guideline 2018 (Speiser PW et al.) — contiene indicazioni di stress-dosing solo per febbre, malattie gastrointestinali, chirurgia ed emergenze; **nessuna indicazione sull'esercizio fisico/sport**. Stesso problema di Sheehan: l'unica fonte applicabile è generica sull'insufficienza adrenalica, non specifica per CAH. **Scartato**.
+- **Linfangectasia intestinale primaria (malattia di Waldmann)**: la review di riferimento (Vignes S, Bellanger J, Orphanet Journal of Rare Diseases, 2008) è stata letta per intero — non contiene alcun riferimento a esercizio, attività fisica o precauzioni per palestra/piscina. Anche la linfopenia, pur presente, non è associata secondo questa fonte a un aumento significativo del rischio di infezioni piogeniche, quindi non si può costruire una scheda di "precauzioni da immunosoppressione" su questa base. L'unica fonte applicabile riguarda il linfedema periferico in generale (National Lymphedema Network, 2012), non la malattia specifica. **Scartato**: è una condizione rara con evidenza specifica realisticamente assente, non solo debole.
+
+Genuinamente assenti e aggiunte in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Porpora di Henoch-Schönlein / vasculite da IgA — attività fisica e monitoraggio renale | Immunologia + Urinario + Gastrointestinale (tag `immune` + `urinary` + `gastrointestinal`) | UK Kidney Association, Clinical Practice Guideline for the Initial Management of IgA Vasculitis (HSP) in Children and Young People, 2022; PRINTO, Henoch-Schönlein Purpura (informazione per pazienti), 2016 | 2022 |
+| Leucemia mieloide cronica (LMC) in trattamento con inibitori tirosin-chinasici (TKI) — attività fisica | Oncologia + Ematologia + Cardio-respiratorio (tag `oncology` + `hematology` + `cardiopulmonary`) | Janssen L et al., Haematologica, 2021; Janssen L et al., Blood Cancer Journal, 2023; Sacha T, Krawczyk K, Hematology Transfusion and Cell Therapy, 2025 | 2023 |
+| Tiroidite post-partum — attività fisica nelle due fasi ormonali | Endocrino (tag `endocrine`) | American Thyroid Association, Alexander EK et al., Thyroid, 2017 | 2017 |
+
+Note oneste su questo batch: **Henoch-Schönlein** — evidenza reale e utilizzabile su due fronti complementari (la linea guida UK Kidney Association per la parte medica/monitoraggio renale, PRINTO per il linguaggio pratico su riposo in fase acuta e ritorno allo sport), ma nessuna delle due fornisce un vero protocollo di riabilitazione graduata — il criterio di ripresa resta "lasciare che sia il dolore a fermare l'attività", non un protocollo per fasi. **LMC/TKI** — evidenza reale e specifica per popolazione (due studi dello stesso gruppo di ricerca olandese più una review su ponatinib/nilotinib), compresa una citazione diretta molto utile ("l'uso di TKI non dovrebbe essere un fattore limitante per l'attività fisica"), ma la base complessiva resta sottile (poche fonti, in parte dallo stesso gruppo). **Tiroidite post-partum** — evidence_level dichiarato "low": la linea guida ATA 2017 menziona solo "intolleranza allo sforzo" come sintomo della fase ipotiroidea, senza alcuna raccomandazione formale per fase; la cautela sulla fase ipertiroidea (rischio di tachicardia con esercizio intenso) è fisiologia di buon senso, non una raccomandazione da fonte citata — dichiarato esplicitamente come tale nella scheda.
+
+**Stato attuale: 506 condizioni totali** (503 + 3 nuove del batch 47). **Mancano 294 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+**Batch 48 (1 condizione, id 552) — giro con molte bocciature, documentato per intero per trasparenza:** sei candidati verificati in parallelo, cinque scartati:
+- **Iperparatiroidismo primario**: controllata per intero la linea guida di riferimento del 5° International Workshop (Bilezikian JP et al., Journal of Bone and Mineral Research, 2022) — gestisce la salute ossea solo con DXA/farmaci/paratiroidectomia, **nessuna indicazione sull'esercizio fisico**. Esiste un trial registrato specifico su carico meccanico in questa condizione (NCT01571843) ma non è stato possibile verificarne i risultati da questo ambiente. **Scartato** come scheda dedicata.
+- **Sindrome di Klinefelter**: nessun consensus (Gravholt et al. 2018, European Academy of Andrology 2021, review 2025 su Endocrine Reviews controllata per intero) contiene una raccomandazione di esercizio specifica — solo uno studio pilota osservazionale che collega bassa attività fisica e salute ossea, senza protocollo. **Scartato**.
+- **Gastroparesi**: la linea guida ACG 2022, controllata per intero, non menziona mai l'attività fisica. Il "camminare dopo i pasti" spesso consigliato è supportato da un solo studio su volontari sani (non su pazienti con gastroparesi) e senza beneficio sintomatico dimostrato. **Scartato** come scheda dedicata per non presentare un consiglio aneddotico come evidenza clinica.
+- **Acalasia esofagea**: controllate per intero sia la linea guida ACG 2020 sia quella ISDE 2018 — nessuna delle due tratta l'attività fisica, il ritorno allo sport dopo miotomia/POEM o il rischio di rigurgito durante l'esercizio. L'unico materiale trovato è informativo per pazienti (non di livello clinico/guideline). **Scartato**.
+- **Sindrome di Budd-Chiari**: la linea guida EASL 2016 sulle malattie vascolari del fegato, controllata per intero incluse le sezioni sull'anticoagulazione, non contiene alcuna indicazione sull'attività fisica o sul rischio sportivo durante terapia anticoagulante. **Scartato**.
+
+Genuinamente assente e aggiunta in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Tiroidite di Hashimoto / ipotiroidismo autoimmune — esercizio fisico e miopatia/fatica persistente | Endocrino (tag `endocrine`) | Duñabeitia I, González-Devesa D, Varela-Martínez S, Diz-Gómez JC, Ayán-Pérez C., Scandinavian Journal of Clinical and Laboratory Investigation, 2023 (revisione sistematica e meta-analisi); Jordan B et al., Journal of Neurology, 2021 | 2023 |
+
+Nota onesta: la revisione sistematica 2023 (10 studi, soprattutto ipotiroidismo subclinico) conferma che l'esercizio aerobico e di forza è sicuro e migliora esiti secondari (qualità di vita, salute mentale), ma **non ha effetto sui valori di TSH/FT3/FT4** — quindi va presentato come intervento funzionale, non come terapia della malattia. Lo studio di neurologia 2021 è il dato più utile per la pratica clinica: pazienti con Hashimoto euthyroidei (valori di laboratorio normalizzati in terapia) mostrano comunque una distanza ridotta al test del cammino di 6 minuti e più dolore/fatica rispetto ai controlli — quindi la persistenza di sintomi muscolari non va scambiata per terapia inefficace o simulazione, è un dato reale anche a valori normalizzati. Nessuna linea guida ufficiale (ATA) è stata trovata contenere raccomandazioni di esercizio specifiche: evidence_level dichiarato "moderate" sulla base dei due studi citati, non di una linea guida di società scientifica.
+
+**Stato attuale: 507 condizioni totali** (506 + 1 nuova del batch 48). **Mancano 293 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+**Batch 49 (3 condizioni, id 553-555):** sette candidati verificati in parallelo, quattro scartati:
+- **SIADH cronica (non da esercizio)**: nessuna fonte endocrinologica generale sulla gestione della SIADH cronica tratta l'attività fisica in modo specifico. **Scartato** come scheda dedicata — da non confondere con l'iponatremia da esercizio (voce separata aggiunta in questo batch, evidenza completamente diversa).
+- **Porpora trombotica trombocitopenica (TTP)**: controllate per intero le linee guida ISTH 2020 (e il relativo aggiornamento 2025) — nessuna contiene indicazioni sull'attività fisica o sul ritorno allo sport dopo remissione. L'unica fonte sulla sicurezza dell'esercizio in trombocitopenia riguarda le neoplasie ematologiche in chemioterapia, non la TTP immuno-mediata. **Scartato**.
+- **Emoglobinuria parossistica notturna (PNH)**: controllati per intero il consensus statement 2021 (Cançado et al.) e due review 2023 — nessuna tratta l'esercizio fisico, nonostante la fatica sia il sintomo dominante. **Scartato** come scheda dedicata.
+- **Sindrome nefrotica (adulti)**: controllata per intero la linea guida KDIGO 2021 sulle malattie glomerulari, inclusa la sezione su edema e tromboprofilassi — **nessun riferimento all'attività fisica in nessuna sezione**. **Scartato**.
+
+Genuinamente assenti e aggiunte in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Steatosi epatica metabolica (MASLD/MASH) — esercizio come terapia di prima linea | Gastrointestinale + Endocrino (tag `gastrointestinal` + `endocrine`) | EASL-EASD-EASO, Journal of Hepatology, 2024; AASLD Practice Guidance (Rinella et al.), Hepatology, 2023; Stine JG et al., American Journal of Gastroenterology, 2023 | 2024 |
+| Epatite virale cronica C — esercizio fisico ed enzimi epatici | Gastrointestinale (tag `gastrointestinal`) | Ali Ismail AM et al., Gastroenterology Review/Przegląd Gastroenterologiczny, 2024 (RCT) | 2024 |
+| Iponatremia da esercizio (EAH) in sport di endurance | Cardio-respiratorio (tag `cardiopulmonary`) | Hew-Butler T, Rosner MH, Fowkes-Godek S et al., British Journal of Sports Medicine, 2015 (3rd International EAH Consensus); Bennett BL, Hew-Butler T et al., Wilderness Medical Society Guidelines, aggiornamento riassunto in American Family Physician, 2021 | 2015 |
+
+Note oneste su questo batch: **MASLD/MASH** è la voce con l'evidenza più solida vista finora in questo batch — prescrizione numerica concreta (≥750 MET-min/settimana) da una revisione sistematica reale, coerente con le linee guida di società scientifiche che raccomandano l'esercizio come trattamento di prima linea, non solo coadiuvante. **Epatite C**: evidenza reale ma sottile — un solo RCT, specifico per l'epatite C (non la B), che mostra miglioramento di ALT/AST ma non misura la carica virale; dichiarato esplicitamente che la stratificazione del rischio emorragico per sport da contatto in presenza di cirrosi/varici non è coperta da alcuna linea guida. **Iponatremia da esercizio**: da non confondere con la SIADH cronica (scartata sopra) — sono due condizioni fisiopatologicamente diverse anche se producono lo stesso risultato di laboratorio; qui l'evidenza è un consensus internazionale solido e specifico per lo sport di endurance, con indicazioni pratiche dirette ("bere in base alla sete").
+
+**Stato attuale: 510 condizioni totali** (507 + 3 nuove del batch 49). **Mancano 290 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+**Batch 50 (3 condizioni, id 556-558):** sei candidati verificati in parallelo, tre scartati:
+- **Pielonefrite acuta/ricorrente**: controllata per intero la linea guida EAU 2023 sulle infezioni urologiche — nessuna menzione di attività fisica, riposo o ripresa dell'esercizio, né dell'attività come fattore di rischio/protezione per le forme ricorrenti. **Scartato**: evidenza realmente assente, non solo debole.
+- **Reflusso vescico-ureterale**: controllate per intero tre linee guida (AUA 2010/aggiornamenti, EAU/ESPU 2024, linee guida giapponesi 2020) — nessuna tratta l'attività fisica, né prima né dopo reimpianto ureterale. **Scartato**.
+- **Stenosi uretrale/uretroplastica**: controllata per intero la linea guida AUA 2023 (con amendment) — nessuna indicazione su sollevamento pesi, sforzo o ritorno allo sport dopo l intervento; quanto circola nella pratica clinica è opinione chirurgica, non linea guida verificabile. **Scartato** come scheda dedicata.
+
+Genuinamente assenti e aggiunte in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Neutropenia febbrile in pazienti oncologici/ematologici — soglie di sicurezza per l attività fisica | Oncologia + Ematologia (tag `oncology` + `hematology`) | Santa Mina D, Langelier D, Adams SC et al., Lancet Oncology, 2018 (Safety Reference Guide); Campbell KL et al., Medicine & Science in Sports & Exercise, 2019 | 2018 |
+| Porfiria acuta — riabilitazione dopo attacco acuto (neuropatia/tetraparesi) | Neurologia (tag `neurology`) | Valbuena Valecillos A, Yatham P, Alderman M et al., Cureus, 2023; van der Henrique G et al., caso clinico, Einstein (São Paulo), 2023 | 2023 |
+| Leucemia linfatica cronica (LLC) — attività fisica in watch-and-wait e in trattamento con inibitori BTK | Oncologia + Ematologia (tag `oncology` + `hematology`) | Brown FF, Oliver R, Eddy R et al., Frontiers in Oncology, 2024 (RCT pilota); Miles EE, Nicol JL, Fowler H et al., EJHaem, 2025 | 2024 |
+
+Note oneste su questo batch: **Neutropenia febbrile** — fonte solida e specifica (tabella di sicurezza con soglia numerica ANC<1.5×10⁹/L), ma non copre la decisione clinica "sospendere o continuare" un programma già in corso quando la neutropenia febbrile insorge durante il trattamento — dichiarato come lacuna. **Porfiria** — non esiste un programma di esercizio preventivo contro gli attacchi (l'unico fattore noto, il digiuno, non è legato all attività fisica); l evidenza reale riguarda la riabilitazione *dopo* un attacco con coinvolgimento neurologico, non la prevenzione — evidence_level "low" dichiarato per questo motivo, utile comunque alla pratica fisioterapica reale. **LLC** — a differenza della scheda generica "Neoplasie Ematologiche" già presente in banca dati (#392), qui l evidenza è specifica per sottotipo (trial pilota randomizzato proprio su pazienti LLC in watch-and-wait) — dichiarata esplicitamente la lacuna sulle soglie di intensità per il rischio aritmico/emorragico degli inibitori BTK, che nessuno studio ha ancora definito.
+
+**Stato attuale: 513 condizioni totali** (510 + 3 nuove del batch 50). **Mancano 287 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+**Batch 51 (1 condizione, id 559):** quattro candidati verificati in parallelo, tre scartati:
+- **Colecistectomia laparoscopica — ripresa dell attività**: controllata la linea guida SAGES 2010 sulla chirurgia biliare laparoscopica — nessun contenuto su attività/sollevamento pesi post-operatorio. L unica fonte reale sui limiti di sollevamento dopo chirurgia addominale (Schaaf S et al., Hernia, 2022) è un sondaggio tra esperti che conclude che il 90% dei limiti raccomandati nella pratica è basato su opinione, non evidenza, e non è specifica per colecistectomia. **Scartato** come scheda dedicata.
+- **Pouchitis (tasca ileale dopo proctocolectomia restaurativa)**: controllate per intero tre fonti ECCO/consensus, inclusa la più recente e completa (International Ileal Pouch Consortium, Lancet Gastroenterology & Hepatology, 2022) — nessuna tratta l attività fisica. **Scartato**.
+- **Gastrite atrofica autoimmune**: controllato per intero l AGA Clinical Practice Update 2021 — copre sorveglianza endoscopica, H. pylori, carenza di B12, sorveglianza dei tumori neuroendocrini gastrici, ma **nessun contenuto sull attività fisica** distinto dalla gestione generica della carenza di B12. **Scartato** come scheda dedicata specifica.
+
+Genuinamente assente e aggiunta in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Emorroidi — gestione di stitichezza, sforzo defecatorio e tempo da seduti | Gastrointestinale + Pavimento pelvico posteriore (tag `gastrointestinal` + `pelvic_floor`) | Davis BR, Lee-Kong SA, Migaly J, Feingold DL, Steele SR. ASCRS Clinical Practice Guidelines, Diseases of the Colon & Rectum, 2018; WorkSafeBC Evidence-Based Practice Group, 2023 | 2018 |
+
+Nota onesta: la linea guida ASCRS conferma realmente stitichezza, sforzo defecatorio e tempo prolungato sul water come fattori di rischio comportamentali — questa parte è solida e utile alla pratica fisioterapica (lavoro sulla dinamica defecatoria). Ma due convinzioni molto diffuse non hanno supporto: il nesso sollevamento pesi/Valsalva→emorroidi (una revisione sistematica dedicata del 2023 non ha trovato nessuno studio qualificante) e un timeline di ripresa dell esercizio dopo emorroidectomia (assente da qualunque fonte verificata) — entrambe dichiarate esplicitamente come prive di evidenza nella scheda, invece di essere presentate come fatto clinico accertato.
+
+**Stato attuale: 514 condizioni totali** (513 + 1 nuova del batch 51). **Mancano 286 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+**Batch 52 (1 condizione, id 560) — giro con molte bocciature, documentato per intero per trasparenza:** sei candidati verificati in parallelo, cinque scartati:
+- **Cistite emorragica da chemio/radioterapia**: controllate per intero le fonti di urologia oncologica e la linea guida "Exercise Is Medicine in Oncology" (Schmitz KH et al., CA Cancer J Clin, 2019) — nessuna tratta l ematuria o la cistite emorragica come fattore da considerare per l attività fisica. **Scartato**: lacuna reale, non debolezza.
+- **Nefropatia da contrasto (CI-AKI)**: controllate per intero le linee guida ACR/NKF 2020 e il riassunto KDIGO 2013 — i fattori di rischio elencati (creatinina, età, diabete, anemia, scompenso, ipotensione) non includono mai il livello di attività fisica/fitness. **Scartato**.
+- **Panipopituitarismo in età adulta (generale)**: controllata per intero la linea guida Endocrine Society 2016 (Fleseriu et al.) — stesso esito di Sheehan e CAH (batch 47): nessun contenuto sull esercizio fisico, solo un avvertimento contro l uso di GH per doping sportivo (non rivolto al paziente). **Scartato** per lo stesso motivo metodologico.
+- **Tiroidite subacuta di de Quervain**: controllata per intero la linea guida ATA 2016 su ipertiroidismo/tireotossicosi — gestisce la condizione con FANS/steroidi/beta-bloccanti ma non tratta mai l attività fisica, nemmeno per la fase dolorosa/tireotossica. **Scartato**.
+- **Anemia sideroblastica**: nessuna fonte specifica trovata. L estensione dalla letteratura su sovraccarico di ferro nella talassemia (cardiomiopatia da sovraccarico) è fisiologicamente plausibile ma non verificabile nel dettaglio in questa sessione (il capitolo specifico delle linee guida TIF 2021 su "Exercise and Sports" non è stato recuperabile per intero). **Scartato** per non presentare un estrapolazione non verificata come evidenza.
+
+Genuinamente assente e aggiunta in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Varicocele — dolore scrotale correlato all attività fisica | Urinario (tag `urinary`) | Ebiloglu T, Aydogmus Y, Kaya E, Oral E, Kaplan O, Kibar Y. Canadian Journal of Urology, 2016 | 2016 |
+
+Nota onesta: l unica fonte reale è uno studio monocentrico (non una linea guida di società scientifica) che documenta un peggioramento significativo del dolore da varicocele con l attività fisica (VAS da 3,1 a 7,65) — dato clinicamente utile ma di livello di evidenza basso. Nessuna soglia specifica per ciclismo/sollevamento pesi/stazione eretta prolungata né un timeline di ripresa dopo varicocelectomia sono verificabili da fonte alcuna — dichiarato esplicitamente nella scheda.
+
+**Stato attuale: 515 condizioni totali** (514 + 1 nuova del batch 52). **Mancano 285 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+**Batch 53 (3 condizioni, id 561-563):** quattro candidati verificati in parallelo, uno scartato:
+- **Malattia inflammatoria pelvica (PID)**: controllata per intero la sezione dedicata delle CDC STI Treatment Guidelines 2021 — copre solo terapia antibiotica, criteri di ospedalizzazione/chirurgia e trattamento del partner; **nessun contenuto sull attività fisica**. L unica evidenza su dolore pelvico cronico post-PID è generica (non specifica per PID) e di qualità dichiarata bassa. **Scartato** come scheda dedicata specifica per PID.
+
+Genuinamente assenti e aggiunte in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Fibromi/miomi uterini — attività fisica e gestione dei sintomi | Pavimento pelvico centrale, femminile (tag `pelvic_floor`) | Birolim MM, Souza SCS, Rodrigues R et al., Health Science Reports, 2025 (revisione sistematica e meta-analisi) | 2025 |
+| Malattia di Peyronie — terapia di trazione/stiramento peniena | Pavimento pelvico anteriore, maschile + Urinario (tag `pelvic_floor` + `urinary`) | García-Gómez B et al., Sexual Medicine, 2021 (ESSM position statement); Ziegelmann M et al. (RestoreX RCT); AUA Guideline, 2015/aggiornamento 2022 | 2021 |
+| Disfunzione erettile — allenamento del pavimento pelvico ed esercizio aerobico | Pavimento pelvico anteriore, maschile + Urinario (tag `pelvic_floor` + `urinary`) | Dorey G, Speakman MJ, Feneley RC et al., BJU International, 2005 (RCT); Myers C, Smith M, Physiotherapy, 2019 (revisione sistematica); Khera M, Bhattacharyya S, Miller LE, Journal of Sexual Medicine, 2023 (meta-analisi) | 2023 |
+
+Note oneste su questo batch: **Fibromi uterini** — la meta-analisi 2025 mostra che la sola frequenza di attività fisica non è associata a minor rischio di fibromi, ma l intensità medio-alta sì (dato reale ma con evidenza osservazionale, non RCT); l ACOG non tratta l attività fisica come raccomandazione, e nessun timeline di ripresa post-miomectomia è verificabile — dichiarato come lacuna. **Malattia di Peyronie**: qui la differenza rispetto ai batch precedenti è che l evidenza sulla trazione peniena esiste davvero (RCT multipli, position statement ESSM), ma va dichiarato con precisione che l AUA **non** le assegna un grado di raccomandazione specifico — scheda scritta per evitare l impressione che sia "raccomandata dalla linea guida" quando in realtà è "studiata con evidenza limitata/incoraggiante". **Disfunzione erettile**: la voce con l evidenza più solida di questo batch — RCT, revisione sistematica e meta-analisi recente (2023) convergono sul beneficio sia del pavimento pelvico che dell esercizio aerobico, con dati numerici concreti (IIEF-EF, percentuale di recupero).
+
+**Stato attuale: 518 condizioni totali** (515 + 3 nuove del batch 53). **Mancano 282 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+**Batch 54 (3 condizioni, id 564-566):** sei candidati verificati in parallelo, tre scartati:
+- **Esofagite eosinofila**: controllate per intero le linee guida ACG 2025 e AGA 2020 — nessuna tratta l attività fisica, il timing dei pasti rispetto all esercizio o la disfagia da sforzo. **Scartato**.
+- **Sindrome di Zollinger-Ellison (gastrinoma)**: nessun documento NANETS/ENETS con contenuto sull attività fisica trovato. **Scartato**: evidenza assente, non solo debole.
+- **Carcinoma tiroideo differenziato — survivorship**: controllata per intero la nuovissima linea guida ATA 2025 (sezione dedicata alla survivorship, R82) — tratta solo il carico psicosociale/finanziario, **nessun contenuto su mobilità di spalla/collo o fatica da sopressione del TSH**. L unica revisione sistematica dedicata (Ferrante M et al., Cancers, 2022) conclude che l evidenza è insufficiente per confermare un beneficio o definire un protocollo. **Scartato** come scheda dedicata specifica.
+
+Genuinamente assenti e aggiunte in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Ascite da cirrosi — adattamento dell attività fisica | Gastrointestinale (tag `gastrointestinal`) | Macías-Rodríguez RU, Ruiz-Margáin A, Rojas-Loureiro G et al., Revista de Gastroenterología de México (edizione inglese), 2019 | 2019 |
+| Encefalopatia epatica — ruolo dell esercizio e rischio di cadute | Gastrointestinale + Neurologia (tag `gastrointestinal` + `neurology`) | Vilstrup H, Amodio P, Bajaj J et al., AASLD/EASL Practice Guideline, Hepatology, 2014 (nessun contenuto sull esercizio, dichiarato); Aamann L, Tandon P, Bémeur C, Journal of Clinical and Experimental Hepatology, 2019 | 2019 |
+| Insufficienza ovarica precoce (POI) — attività fisica per salute ossea e cardiovascolare | Endocrino (tag `endocrine`) | Panay N, Anderson RA et al. (ESHRE/ASRM/CREWHIRL/IMS Guideline Group), Human Reproduction Open / Fertility and Sterility, 2024 | 2024 |
+
+Note oneste su questo batch: **correzione di citazione** — la fonte sulla prescrizione di esercizio nella cirrosi (Macías-Rodríguez et al.), citata nei batch 43 e 47 come "2020", è in realtà del **2019**: la correzione è riportata qui per trasparenza, la fonte e il contenuto citati restano corretti. **Ascite**: fonte reale letta per intero, confirma che il grado di ascite determina tipo/intensità dell esercizio e che limita deambulazione/respirazione — ma non tratta il rischio di ernia della parete addominale da sforzo né lega esplicitamente il rischio di caduta alla sola distensione addominale (questi due punti, spesso dati per scontati nella pratica clinica, sono dichiarati come non verificabili da fonte). **Encefalopatia epatica**: la linea guida ufficiale AASLD/EASL 2014 è silente sull esercizio — dichiarato esplicitamente; l evidenza reale è una revisione (non linea guida) sul razionale fisiologico sarcopenia-ammonio, utile alla pratica ma non ancora una raccomandazione formale. **POI**: le raccomandazioni ESHRE/ASRM 2024 esistono ma sono di livello "Good Practice Point" o condizionali, non basate su trial specifici per POI — dichiarato come estrapolazione dalle linee guida generali sulla menopausa, non come evidenza POI-specifica.
+
+**Stato attuale: 521 condizioni totali** (518 + 3 nuove del batch 54). **Mancano 279 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+**Batch 55 (2 condizioni, id 567-568):** quattro candidati verificati in parallelo, due scartati:
+- **Anemia emolitica autoimmune (AIHA)**: controllate le linee guida British Society for Haematology (2017 e aggiornamento su forme secondarie/da farmaci) — nessun contenuto sull attività fisica nella parte accessibile; nessun altra fonte reale trovata oltre a generiche considerazioni su fatica/anemia non specifiche per AIHA. **Scartato** come scheda dedicata specifica.
+- **Deficit di piruvato chinasi**: controllate per intero le review più recenti (Fattizzo B et al., Journal of Blood Medicine, 2022) e la scheda NORD — nessun contenuto sull esercizio oltre a un unica frase generica su vitamina D/calcio/esercizio per la salute ossea. **Scartato**: l estensione per analogia dalla sferocitosi ereditaria (già presente in banca dati) non è verificabile come evidenza specifica.
+
+Genuinamente assenti e aggiunte in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Ipoglicemia da esercizio nel diabete (tipo 1 e tipo 2 insulino-trattato) | Endocrino (tag `endocrine`) | Riddell MC, Gallen IW, Smart CE et al., consensus statement, Lancet Diabetes & Endocrinology, 2017 | 2017 |
+| Insulinoma — rischio di ipoglicemia indotta dall esercizio | Endocrino (tag `endocrine`) | Prídavková D, Samoš M, Kyčina R et al., World Journal of Clinical Cases, 2020 (case report); Habra MA et al., The Endocrinologist, 2006 (case report) | 2020 |
+
+Note oneste su questo batch: **Ipoglicemia da esercizio nel diabete** è probabilmente la voce con l evidenza più solida e operativamente dettagliata di tutto questo percorso di espansione — un consensus statement internazionale con target glicemici numerici precisi, dosaggi di carboidrati per fascia di durata e percentuali di riduzione del bolo insulinico, non principi generici. **Insulinoma**: qui l evidenza è reale ma di livello case report (non linea guida di società scientifica, che su questo tema è silente) — dichiarato esplicitamente nella scheda; utile comunque alla sicurezza clinica perché descrive un meccanismo fisiopatologico reale (ciclo di Cori) prima della risoluzione chirurgica.
+
+**Stato attuale: 523 condizioni totali** (521 + 2 nuove del batch 55). **Mancano 277 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+**Batch 56 (3 condizioni, id 569-571):** quattro candidati verificati in parallelo, uno scartato:
+- **Anemia perniciosa (deficit di B12 autoimmune)**: controllata per intero la linea guida British Society for Haematology (Devalia V, Hamilton MS, Molloy AM, 2014, riconfermata 2024) — copre solo diagnosi e terapia sostitutiva, **nessun contenuto su attività fisica, cadute, equilibrio o riabilitazione della neuropatia**. **Scartato** come scheda dedicata specifica (distinta dalla gestione generica dell anemia).
+
+Genuinamente assenti e aggiunte in questo batch:
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Emofilia — classificazione degli sport per rischio emorragico | Ematologia (tag `hematology`) | Howell C, Scott K, Patel DR, Translational Pediatrics, 2017; WFH Guidelines for the Management of Hemophilia, 3rd ed., Haemophilia, 2020 | 2020 |
+| Mastocitosi — esercizio come possibile trigger di degranulazione mastocitaria | Immunologia (tag `immune`) | Studio su istamina/triptasi post-esercizio in mastocitosi, J Allergy Clin Immunol Pract, 2018; ECNM-AIM User Guide, 2022 | 2018 |
+| Leucemia mieloide acuta (LMA) — esercizio durante chemioterapia intensiva/trapianto | Ematologia + Oncologia (tag `hematology` + `oncology`) | Elter T, Stipanov M, Heuser E et al., International Journal of Hematology, 2009; Alibhai SMH, Durbano S, Breunis H et al., Leukemia Research, 2015; Cochrane Database Syst Rev, CD009075.pub3 | 2015 |
+
+Note oneste su questo batch: **Emofilia** è una scheda distinta dall artropatia emofilica già presente (#408) — qui l argomento è la classificazione sportiva per rischio emorragico, non la riabilitazione articolare; il testo esatto della sezione WFH dedicata non è stato verificabile per intero in questa sessione, dichiarato esplicitamente, usando come fonte principale verificabile la review secondaria (Howell 2017) che la cita. **Mastocitosi**: il dato sul trigger (istamina/triptasi che aumentano realmente dopo sforzo in questi pazienti) è solido, ma non esiste un protocollo di esercizio sicuro formalmente validato — la scheda è scritta come gestione del rischio/trigger, non come prescrizione di esercizio. **LMA**: evidenza più ricca del previsto per una neoplasia ematologica acuta — uno studio di fattibilità sfida esplicitamente le soglie empiriche tradizionali di piastrine/emoglobina usate per sospendere l attività, ma nessuna soglia numerica è ancora di consenso formale (ACSM/ASCO/ONS) — dichiarato come tale.
+
+**Stato attuale: 526 condizioni totali** (523 + 3 nuove del batch 56). **Mancano 274 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+**Batch 57 — giro interamente di bocciature, documentato per trasparenza (0 condizioni aggiunte, id ancora fermo a 571):** due candidati verificati, entrambi scartati:
+- **Esofago di Barrett**: controllata per intero la linea guida ACG 2022 aggiornata — l obesità centrale è citata solo come fattore di rischio per la progressione a carcinoma, **nessun contenuto sull attività fisica** né una gestione diversa dal reflusso gastroesofageo standard (già presente in banca dati, #366). **Scartato** come scheda dedicata specifica.
+- **Colite microscopica (collagenosica e linfocitica)**: controllate per intero la linea guida AGA 2016 e la BSG 2018 sulla diarrea cronica — entrambe esclusivamente diagnostico/farmacologiche, **nessun contenuto sull attività fisica**. La linea guida europea UEG/EMCG 2021 non è stata verificabile per intero in questa sessione (accesso bloccato) — non citata per questo motivo. **Scartato**.
+
+Nessuna condizione aggiunta in questo batch — riportato comunque per mantenere la tracciabilità completa del metodo (ricerca → verifica → bocciatura onesta), coerente con l impostazione di tutti i batch precedenti.
+
+**Stato attuale: 526 condizioni totali** (nessuna variazione dal batch 56). **Mancano 274 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+**Batch 58 — secondo giro interamente di bocciature, documentato per trasparenza (0 condizioni aggiunte):** quattro candidati verificati, tutti scartati:
+- **Pancreatite acuta**: la linea guida ACG 2024, controllata per intero, non contiene alcun contenuto sull attività fisica. La nuova revisione IAP/APA 2025 (96 domande su 18 ambiti) non elenca l attività fisica tra i suoi ambiti secondo l abstract, ma il testo completo non è stato verificabile in questa sessione — dichiarato come "probabilmente assente, non confermato al 100%", a differenza dell ACG verificato per intero. **Scartato**.
+- **Fistola anale**: controllata per intero la linea guida ASCRS 2022 su ascesso anorettale/fistola — copre solo diagnosi e gestione chirurgica, **nessun contenuto sull attività fisica** (sollevamento, ciclismo, tempo da seduti dopo fistulotomia/seton). **Scartato**.
+- **Prolasso rettale**: la linea guida ASCRS 2011 non è stata accessibile per intero (paywall) — non verificabile né come presente né come assente il contenuto sull attività fisica; un consensus statement multidisciplinare 2026 su fisioterapia del pavimento pelvico in ODS/prolasso posteriore esiste ma il suo contenuto specifico non è stato verificabile. **Scartato** per non presentare un estrapolazione non confermata come evidenza.
+- **Colite da Clostridioides difficile**: controllate le linee guida IDSA/SHEA 2018 e l aggiornamento 2021 — nessuna tratta l attività fisica né le precauzioni igieniche per palestra/piscina. **Scartato**.
+
+Nessuna condizione aggiunta in questo batch.
+
+**Stato attuale: 526 condizioni totali** (nessuna variazione dal batch 57). **Mancano 274 per arrivare a 800.**
+
+**Batch 59 (2 condizioni, id 572-573):** dopo due batch consecutivi senza aggiunte, la ricerca si è spostata su endocrinologia/gastroenterologia metabolica, trovando due candidati solidi:
+
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Sindrome da dumping (post-gastrectomia/chirurgia bariatrica) | Gastrointestinale + Endocrino | Consensus panel internazionale su sindrome da dumping | 2020 |
+| Iperinsulinismo da esercizio (EIHI) — ipoglicemia indotta da sforzo anaerobico | Endocrino | Letteratura genetica su varianti SLC16A1/MCT1 | 2014-2023 |
+
+Note oneste: il panel sulla sindrome da dumping dichiara esso stesso che l'evidenza specifica sull'attività fisica è "carente" — solo il 55% degli esperti concorda sul consiglio di sdraiarsi dopo i pasti, quindi il livello di evidenza è stato impostato su "low" nonostante la fonte sia autorevole. L'EIHI è una forma genetica rara e distinta dall'iperinsulinismo congenito comune (variante SLC16A1/MCT1): qui è proprio l'esercizio fisico, soprattutto anaerobico, a scatenare l'ipoglicemia — una condizione rilevante proprio per un database orientato all'attività fisica. Scope limitato esplicitamente a questa variante, non all'iperinsulinismo congenito generico.
+
+**Stato attuale: 528 condizioni totali** (526 + 2 nuove del batch 59). **Mancano 272 per arrivare a 800.**
+
+**Batch 60 (2 condizioni aggiunte, id 574-575; 4 candidati scartati):**
+
+Scartati con motivazione documentata:
+- **Immunodeficienza Comune Variabile (CVID)**: la linea guida di riferimento (AAAAI/ACAAI/JCAAI Practice Parameter 2015, controllata per intero) è completamente silente sull'attività fisica. L'unica fonte peer-reviewed reperita è un survey descrittivo senza gruppo di controllo. **Scartato**.
+- **Diabete insipido**: le linee guida endocrinologiche ufficiali (European Society of Endocrinology, Society for Endocrinology UK) trattano solo la gestione idrica durante malattia febbrile o ondate di calore, mai durante l'esercizio fisico propriamente detto. **Scartato** per assenza di contenuto condizione-specifico sull'attività fisica.
+- **Trombocitemia essenziale**: le linee guida ematologiche di riferimento (ELN 2011, NCCN, British Society for Haematology) sono tutte silenti sull'esercizio fisico. L'unica fonte con contenuto pertinente è un sondaggio osservazionale, non una linea guida. **Scartato**.
+- **Sopravvivenza al tumore testicolare**: nessuna linea guida di exercise oncology (ACSM, ASCO, ESMO) tratta il tumore testicolare in modo specifico e dedicato — solo raccomandazioni generiche "pan-cancro" estrapolate, con le stesse fonti che dichiarano l'assenza di evidenza specifica per questo tumore. **Scartato** per evitare di presentare un'estrapolazione generica come linea guida dedicata.
+
+Genuinamente presenti e aggiunte in questo batch:
+
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Pectus excavatum/carinatum — riabilitazione pre/post-Nuss | Cardiopolmonare | Maagaard & Heiberg, Ann Cardiothorac Surg (review); Pandya et al., J Pediatr Surg (studio multicentrico) | 2016-2025 |
+| Deficit di alfa-1 antitripsina (AATD) con enfisema | Cardiopolmonare | Alwadani et al., Chronic Obstructive Pulmonary Diseases: Journal of the COPD Foundation; ERJ Open Research | 2023-2025 |
+
+Note oneste: per il pectus excavatum/carinatum, il timing di ripresa dell'attività dopo la procedura Nuss varia enormemente tra i centri ospedalieri (da 2 settimane a 3 mesi) — non esiste uno standard validato, solo uno studio multicentrico 2025 che inizia a mettere in discussione le restrizioni empiriche tradizionali; questo è stato dichiarato esplicitamente nel campo note. Per il deficit di alfa-1 antitripsina, l'evidenza è di qualità bassa (studi piccoli, quasi-sperimentali, nessuna linea guida GOLD/ATS-ERS dedicata che fornisca parametri FITT specifici) — i protocolli attuali sono un adattamento di quelli standard per la BPCO comune, con differenze fisiologiche documentate (maggiore desaturazione da esercizio, guadagno al 6MWT inferiore) che vengono segnalate nel campo controindicazioni.
+
+**Stato attuale: 530 condizioni totali** (528 + 2 nuove del batch 60). **Mancano 270 per arrivare a 800.**
+
+**Batch 61 (2 condizioni aggiunte, id 576-577; 4 candidati scartati):**
+
+Scartati con motivazione documentata:
+- **Sindrome di Eisenmenger**: le review cliniche più recenti e autorevoli (Heart 2020, JACC State-of-the-Art Review 2022) sono sostanzialmente silenti sull'attività fisica — menzionano solo la tolleranza all'esercizio come marker prognostico, senza raccomandazioni pratiche. Le uniche fonti che toccano il tema in modo esplicito sono generiche ("individualizzare in base al test da sforzo"). **Scartato** per evitare di costruire contenuto clinico dettagliato (soglie, criteri di progressione) oltre quanto le fonti dicono davvero.
+- **Discinesia ciliare primaria (PCD)**: le linee guida pneumologiche ufficiali (ERS Task Force 2017/2024-25, consensus NHS England 2025) trattano solo diagnosi e clearance delle secrezioni, dichiarando esse stesse che non c'è evidenza nemmeno sulla tecnica di clearance migliore. Nessuna fonte tratta riabilitazione polmonare o esercizio come intervento. **Scartato**.
+- **Ipoparatiroidismo**: le linee guida endocrinologiche ufficiali (ESE 2015, ESE rivista 2025, Consensus Canadese/Internazionale 2019) sono tutte silenti sull'attività fisica e il rischio di tetania da sforzo. Esiste solo una revisione narrativa non istituzionale (Bonavolontà et al. 2022) che dichiara essa stessa evidenza limitata. **Scartato** come voce da presentare con autorità di linea guida.
+- **Sindrome da attivazione mastocitaria (MCAS)**: i due consensus diagnostici di riferimento (Valent 2018, Afrin "consensus-2" 2021), controllati per intero, non menzionano l'esercizio fisico come trigger né danno precauzioni specifiche. L'unica fonte dedicata è una narrative review 2026 di rivista minore non indicizzata. **Scartato**.
+
+Genuinamente presenti e aggiunte in questo batch:
+
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Circolazione di Fontan — esercizio fisico e riabilitazione | Cardiopolmonare | Rychik J et al., AHA Scientific Statement, Circulation; Stout KK et al., AHA/ACC/HRS Guideline ACHD; Takken T et al., AEPC/EACPR/EHRA | 2011-2019 |
+| Sindrome di Prader-Willi — attività fisica e gestione multidisciplinare | Endocrino + Neurologia | Deal CL et al., GH Research Society Consensus; Bellicha A et al., systematic review J Clin Med; van Abswoude DH et al. | 2013-2023 |
+
+Note oneste: per la circolazione di Fontan, più fonti indipendenti concordano in modo coerente, ma i livelli di evidenza sottostanti restano consensus/expert opinion (classi C/C-LD), non RCT — dichiarato esplicitamente nel campo evidence_level. Per la sindrome di Prader-Willi, l'evidenza è solida per attività fisica generale/salute ossea (systematic review + consensus GH) ma nessuna fonte fornisce criteri di progressione o soglie di sforzo specifiche legate al rischio di morte improvvisa o alla scoliosi — questi campi sono stati dichiarati esplicitamente come "non definiti dalla letteratura" piuttosto che inventati.
+
+**Stato attuale: 532 condizioni totali** (530 + 2 nuove del batch 61). **Mancano 268 per arrivare a 800.**
+
+**Batch 62 (2 condizioni aggiunte, id 578-579; 4 candidati scartati):**
+
+Scartati con motivazione documentata:
+- **Febbre reumatica acuta / cardiopatia reumatica cronica**: le linee guida più autorevoli e recenti (WHO 2024, AHA Jones Criteria 2015) sono esplicitamente silenti su riposo/attività fisica — si concentrano solo su diagnosi e terapia farmacologica. Le raccomandazioni sportive sulle valvulopatie esistono ma sono generiche per gravità ecocardiografica, non specifiche per eziologia reumatica. **Scartato**.
+- **Granulomatosi con poliangioite (GPA)**: le linee guida reumatologiche ufficiali (EULAR, BSR 2025) non trattano attività fisica/fatica. La fonte Physiopedia dichiara essa stessa l'assenza di uno standard di cura basato su evidenze. L'unico studio interventistico è un pilota di fattibilità non conclusivo (n=43, aderenza solo 50%). **Scartato**.
+- **Nefropatia da IgA**: la linea guida di riferimento (KDIGO 2025) menziona "esercizio regolare" solo in un elenco generico di stile di vita, senza alcun dettaglio condizione-specifico. Il resto della letteratura è un piccolo studio del 2004 (n=10) e un abstract di congresso non verificabile in full-text. **Scartato** per evitare di costruire un protocollo non supportato.
+- **Arterite di Takayasu**: le due linee guida reumatologiche ufficiali (EULAR 2018, ACR/VF 2021) sono completamente silenti sull'attività fisica. L'unico contenuto reperito è una review narrativa che estrapola da linee guida cardiovascolari generali, basata su coorti di 1-6 pazienti per studio. **Scartato**.
+
+Genuinamente presenti e aggiunte in questo batch:
+
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Malattia di Kawasaki — esiti cardiaci a lungo termine | Cardiopolmonare | McCrindle BW et al., AHA Scientific Statement, Circulation | 2017 |
+| Malattia granulomatosa cronica (CGD) — precauzioni ambientali | Immunologia | GeneReviews NBK99496; AAAAI materiale educativo pazienti | aggiornamento periodico |
+
+Note oneste: per Kawasaki, il framework di stratificazione del rischio AHA 2017 è autorevole e confermato da fonti secondarie convergenti, ma non sono riuscito a verificare il testo integrale del documento primario (troppo lungo per i tool di fetch disponibili) — segnalato esplicitamente nel campo fonte perché chi ha accesso diretto a Circulation possa confermare la citazione esatta. Per la CGD, il contenuto inserito riguarda esclusivamente le precauzioni ambientali/infettive durante l'attività fisica (es. evitare acqua dolce/stagnante, pacciamatura, compostaggio) — non esiste in letteratura un protocollo di esercizio terapeutico strutturato per questa condizione, e questo è dichiarato esplicitamente nei campi progression_criteria/outcome_measures invece di essere inventato.
+
+**Stato attuale: 534 condizioni totali** (532 + 2 nuove del batch 62). **Mancano 266 per arrivare a 800.**
+
+**Batch 63 (5 condizioni aggiunte, id 580-584; 1 candidato scartato) — focus sulle canalopatie cardiache:**
+
+Scartato con motivazione documentata:
+- **Narcolessia**: la linea guida clinica di riferimento (AASM 2021, 22 raccomandazioni) è interamente farmacologica — nessuna menzione di esercizio fisico. La letteratura emergente (studio pilota 2026, studio qualitativo 2024) è preliminare e gli stessi autori dichiarano che il rischio di cataplessia/attacchi di sonno durante l'esercizio non è stato affrontato. **Scartato** per mancanza di una base di evidenza con adeguate garanzie di sicurezza.
+
+Genuinamente presenti e aggiunte in questo batch — le quattro canalopatie cardiache hanno tutte una solida base in linee guida multisocietarie (AHA/ACC Task Force 10, HRS/EHRA/APHRS, ESC) con raccomandazioni esplicite su sport ed esercizio:
+
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Sindrome del QT lungo (LQTS) | Cardiopolmonare | Ackerman MJ et al., AHA/ACC Task Force 10; Priori SG et al., ESC Guidelines; HRS/EHRA/APHRS Consensus | 2013-2020 |
+| Sindrome di Brugada | Cardiopolmonare | AHA/ACC Task Force 10; HRS/EHRA/APHRS; HRS Consensus 2024; SICSport 2025 | 2013-2025 |
+| Tachicardia ventricolare polimorfa catecolaminergica (CPVT) | Cardiopolmonare | AHA/ACC Task Force 10; HRS/EHRA/APHRS; Zeppenfeld K et al., ESC Guidelines 2022 | 2004-2022 |
+| Cardiomiopatia aritmogena del ventricolo destro (ARVC/ACM) | Cardiopolmonare | Towbin JA et al., HRS Expert Consensus 2019; James CA et al., JACC 2013 (studio Johns Hopkins) | 2013-2020 |
+| Telangiectasia emorragica ereditaria (HHT) — precauzioni | Cardiopolmonare + Ematologia | Faughnan ME et al., Second International Guidelines for HHT, Ann Intern Med | 2020 |
+
+Note oneste: per LQTS e ARVC l'evidenza è moderata (coorti longitudinali, relazione dose-risposta per ARVC). Per Brugada e CPVT le fonti stesse dichiarano un'evidenza bassa/bassa-moderata ("evidence scarce" per Brugada secondo le review 2025) nonostante la direzione delle raccomandazioni sia molto consistente tra le società scientifiche — dichiarato esplicitamente nel campo evidence_level invece di essere presentato come evidenza forte. Per la HHT, lo scope è stato limitato esclusivamente alle precauzioni (divieto di SCUBA diving con PAVM nota, intolleranza all'esercizio come red flag) perché non esiste in letteratura alcun protocollo di esercizio terapeutico strutturato per questa condizione — i campi relativi sono dichiarati "non definiti" piuttosto che inventati.
+
+**Stato attuale: 539 condizioni totali** (534 + 5 nuove del batch 63). **Mancano 261 per arrivare a 800.**
+
+**Batch 64 (3 condizioni aggiunte, id 585-587; 3 candidati scartati):**
+
+Scartati con motivazione documentata:
+- **Cefalea a grappolo**: le linee guida neurologiche ufficiali (EAN 2023, American Headache Society) sono interamente farmacologiche/procedurali — nessuna menzione di attività fisica, né come trigger né come terapia. L'unica fonte diretta è un case series di 7 pazienti senza gruppo di controllo. **Scartato**.
+- **Ischemia mesenterica cronica**: la linea guida vascolare più autorevole e recente (ESVS 2025, letta per intero) è completamente silente sull'attività fisica — il dolore è descritto come postprandiale, non legato all'esercizio, e non esiste alcun criterio di riabilitazione post-rivascolarizzazione. **Scartato**.
+- **Sindromi MEN1/MEN2 (feocromocitoma)**: la linea guida di riferimento (Endocrine Society 2014, letta per intero, 99 pagine) non menziona l'attività fisica come trigger o precauzione. L'unica menzione è aneddotica in una review secondaria. **Scartato** come voce di linea guida.
+
+Genuinamente presenti e aggiunte in questo batch:
+
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Sarcoma di Ewing — survivorship e attività fisica | Oncologia | COG Long-Term Follow-Up Guidelines v6; ACSM Consensus Statement, Med Sci Sports Exerc | 2014-2026 |
+| Osteosarcoma — survivorship e attività fisica | Oncologia | COG Long-Term Follow-Up Guidelines v6; Kendall et al., Current Oncology 2022 | 2022-2023 |
+| Idrocefalo normoteso (iNPH) — tap test ed esercizio | Neurologia | Japanese Society of NPH Guidelines 3a ed.; Rydja et al., RCT iNPhys, Frontiers in Neurology | 2021-2025 |
+
+Note oneste: per sarcoma di Ewing e osteosarcoma, il contenuto su screening di neuropatia/cardiotossicità ha base solida (linee guida COG), ma qualsiasi contenuto su esercizio terapeutico specifico per queste patologie è di qualità molto bassa (GRADE) — dichiarato esplicitamente, e corretta un'associazione farmacologica potenzialmente fuorviante (la neuropatia da vincristina riguarda il regime Ewing VDC-IE, non l'osteosarcoma che usa cisplatino nel regime MAP). Per l'idrocefalo normoteso, il protocollo del tap test ha un consensus clinico solido, ma è stato riportato onestamente anche l'esito negativo dell'unico RCT disponibile sull'esercizio aggiuntivo (nessun beneficio incrementale oltre alla sola derivazione) — un dato che aiuta a calibrare le aspettative cliniche invece di essere omesso.
+
+**Stato attuale: 542 condizioni totali** (539 + 3 nuove del batch 64). **Mancano 258 per arrivare a 800.**
+
+**Batch 65 (2 condizioni aggiunte, id 588-589; 4 candidati scartati):**
+
+Scartati con motivazione documentata:
+- **Sindrome di Tourette**: la linea guida neurologica ufficiale (AAN 2019) è silente sull'attività fisica. L'unica systematic review (Kim et al. 2018) si basa su 5/8 studi che sono case report, nessun RCT. **Scartato**.
+- **Emoglobinuria parossistica notturna (PNH/EPN)**: sia la guideline ematologica di riferimento (Onkopedia 2024) sia la review di gestione clinica più recente (Oliver & Patriquin 2023) sono completamente silenti sull'attività fisica, anche in rapporto al rischio trombotico o alla terapia con eculizumab/ravulizumab. **Scartato**.
+- **Rene a ferro di cavallo**: l'unica fonte specifica è un case report singolo che descrive solo il meccanismo anatomico di rischio, senza alcuna raccomandazione pratica sportiva. Le linee guida sul rene solitario esistono ma riguardano una condizione anatomicamente diversa (assenza di un rene, non fusione di due reni) e non sono state estrapolate per evitare di attribuire falsa specificità. **Scartato**.
+- **Sindrome della persona rigida (Stiff Person Syndrome)**: nessuna linea guida neurologica (es. AAN) tratta l'esercizio come intervento codificato. L'unico contenuto reperito è una revisione di 9 case report, senza RCT né consensus. **Scartato**.
+
+Genuinamente presenti e aggiunte in questo batch:
+
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Mielite trasversa — riabilitazione ed esercizio | Neurologia | Martin Ginis KA et al., International Scientific SCI Exercise Guidelines, Spinal Cord; Gupta A et al., Spinal Cord 2016 | 2016-2023 |
+| Paralisi supranucleare progressiva (PSP) — riabilitazione e rischio di caduta | Neurologia | Slade S et al., systematic review MDS Congress 2019; Matsuda N et al., pilot study, Frontiers in Neurology 2022 | 2019-2023 |
+
+Note oneste: per la mielite trasversa, il contenuto è esplicitamente etichettato come estrapolato dalle linee guida generali sulla lesione midollare non traumatica (SCI Exercise Guidelines) — non esiste una linea guida dedicata specificamente a questa condizione, e questo è dichiarato nel campo fonte invece di essere presentato come specifico. Per la PSP, non esiste un consensus/linea guida societaria dedicata alla riabilitazione — il contenuto proviene da una systematic review con rischio di bias moderato-alto e da un pilot study senza gruppo di controllo (n=20); è stato comunque incluso per il suo valore clinico pratico (gestione del rischio di caduta, molto elevato in questa patologia), ma etichettato esplicitamente come evidenza bassa-moderata.
+
+**Stato attuale: 544 condizioni totali** (542 + 2 nuove del batch 65). **Mancano 256 per arrivare a 800.**
+
+**Batch 66 (1 condizione aggiunta, id 590; 5 candidati scartati) — batch a prevalenza di scarti, documentato per trasparenza:**
+
+Scartati con motivazione documentata:
+- **CPPD/pseudogotta**: le linee guida EULAR (2011, Part I e II) non trattano l'esercizio come raccomandazione codificata — solo riposo/crioterapia/immobilizzazione in fase acuta. **Scartato**.
+- **Oftalmopatia di Graves (orbitopatia tiroidea)**: la linea guida di riferimento (EUGOGO 2021, letta per intero) è completamente silente su attività fisica/sport/traumi oculari — l'unica raccomandazione di stile di vita riguarda la cessazione del fumo. **Scartato**.
+- **Enteropatia proteino-disperdente**: le linee guida ESPEN (IBD 2017, nutrizione parenterale domiciliare 2023) sono silenti sull'esercizio fisico — il focus è esclusivamente nutrizionale. **Scartato**.
+- **Malattia di Whipple**: nessuna fonte infettivologica/gastroenterologica tratta riabilitazione/esercizio durante o dopo il trattamento antibiotico — condizione rarissima, letteratura dominata da case report. **Scartato**.
+- **Sindrome di Felty**: nessuna fonte tratta esplicitamente attività fisica in rapporto a neutropenia o splenomegalia in questa sindrome specifica; l'unica guideline strutturata (ACR 2022 per artrite reumatoide) è silente su questi aspetti. **Scartato**.
+
+Genuinamente presente e aggiunta in questo batch:
+
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Atresia biliare dopo intervento di Kasai — precauzioni sportive | Gastrointestinale | Waisbourd-Zinman O et al., survey epatologi pediatrici, J Pediatr Gastroenterol Nutr; Shneider BL et al., NASPGHAN/EPA Consensus | 2012-2018 |
+
+Note oneste: anche per questa unica voce aggiunta, l'evidenza è bassa — basata su una survey di opinione di esperti, non su una linea guida formale graduata. È stata inclusa perché riguarda un rischio clinico concreto e genuinamente rilevante per chi fa fisioterapia pediatrica (rottura splenica da trauma sportivo in ipertensione portale), dichiarando però onestamente il livello di evidenza invece di presentarla come consensus consolidato. Questo batch ha un rapporto scarti/aggiunte più sbilanciato del solito — segno che il pool di condizioni con evidenza verificabile si va riducendo nelle aree già esplorate a fondo.
+
+**Stato attuale: 545 condizioni totali** (544 + 1 nuova del batch 66). **Mancano 255 per arrivare a 800.**
+
+**Batch 67 (1 condizione aggiunta, id 591; 5 candidati scartati):**
+
+Scartati con motivazione documentata:
+- **Sindrome del nutcracker**: il Delphi consensus internazionale più recente (2025, 20 esperti vascolari) è completamente silente sull'attività fisica. L'unico contenuto reperito è un singolo case report aneddotico. **Scartato**.
+- **Granulomatosi eosinofila con poliangioite (EGPA)**: la linea guida EGPA-specifica più recente e autorevole (Vaglio et al. 2023) e l'EULAR 2022 update sono entrambe silenti sull'attività fisica. **Scartato**.
+- **Malattia correlata a IgG4**: il consensus internazionale di riferimento (Khosroshahi et al. 2015) non tratta attività fisica o gestione della fatica. **Scartato**.
+- **Iperaldosteronismo primario (sindrome di Conn)**: la linea guida Endocrine Society 2025 (la più recente, letta per intero) è completamente silente sull'attività fisica. **Scartato**.
+- **SIADH cronica**: la linea guida europea di riferimento (ESE/ESICM/ERA-EDTA 2014) tratta l'esercizio solo come causa elencata in una tabella, senza alcuna raccomandazione pratica di gestione. **Scartato**.
+
+Genuinamente presente e aggiunta in questo batch:
+
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Nevralgia del pudendo — fisioterapia del pavimento pelvico | Pavimento pelvico | Labat JJ et al., criteri di Nantes; StatPearls 2026; systematic review su ciclisti, J Functional Morphology and Kinesiology 2021 | 2008-2026 |
+
+Note oneste: per la nevralgia del pudendo, il consensus formale più autorevole sul tema (Levesque et al. 2021/2022) non è stato verificabile per intero in questa sessione per un blocco di accesso — dichiarato esplicitamente nel campo fonte come lacuna di verifica, non come assenza di contenuto. Il contenuto inserito proviene da criteri diagnostici consolidati (Nantes), una sintesi tertiaria aggiornata (StatPearls) e una systematic review specifica sui ciclisti — livello di evidenza dichiarato come basso/basso-moderato, non presentato come consensus di prima fascia.
+
+**Stato attuale: 546 condizioni totali** (545 + 1 nuova del batch 67). **Mancano 254 per arrivare a 800.**
+
+**Batch 68 (3 condizioni aggiunte, id 592-594; 3 candidati scartati):**
+
+Scartati con motivazione documentata:
+- **Macroglobulinemia di Waldenström**: la consensus ematologica più autorevole e recente (IWWM-10, Castillo JJ et al., Lancet Haematology 2020, letta per intero) è completamente silente su attività fisica/esercizio — centrata solo su protocolli farmacologici e gestione della sindrome da iperviscosità. Nessuna fonte NCCN o case report disponibile tratta il tema. **Scartato**.
+- **Malattia di Still dell'adulto (AOSD)**: la linea guida più recente e autorevole (EULAR/PReS 2024, Ann Rheum Dis, letta per intero) non contiene alcuna menzione di attività fisica o fisioterapia. Le EULAR 2018 su attività fisica nelle artriti inflammatorie esplicitamente NON includono l'AOSD nel loro ambito, quindi non sono estrapolabili come evidenza diretta. **Scartato**.
+- **Carcinoma a cellule di Merkel**: nessuna fonte oncologica — né NCCN v2.2025, né ESMO-EURACAN 2024, né letteratura dedicata — tratta l'attività fisica durante o dopo il trattamento. L'unico contenuto disponibile sono le raccomandazioni generiche NCCN Survivorship cross-cancer (non disease-specific), insufficienti per una voce dedicata onesta. **Scartato**.
+
+Genuinamente presenti e aggiunte in questo batch:
+
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Mesotelioma pleurico maligno — riabilitazione respiratoria e oncologica | Oncologia + Cardiopolmonare | Lippi, de Sire, Aprile et al., scoping review, Current Oncology 2024; Invernizzi, Lippi et al., studio pilota di fattibilità, Cancers (Basel) 2024 | 2024 |
+| Colangiocarcinoma — attività fisica in trattamento e perioperatorio | Oncologia + Gastrointestinale | De Lazzari et al., RCT "P-move", Support Care Cancer 2024; ERAS Society Liver Surgery Guidelines 2022 | 2022-2024 |
+| Carcinoma esofageo — riabilitazione post-esofagectomia | Oncologia + Gastrointestinale | ERAS Society Guidelines for Esophagectomy, World J Surg 2019; audit ACPRC 2023; PERFECT trial (Paesi Bassi) | 2019-2023 |
+
+Note oneste: per il mesotelioma, la linea guida oncologica ufficiale (ESMO) è silente sull'esercizio — il contenuto inserito si basa su un solo studio pilota di fattibilità (n=12, 7 completer, senza gruppo di controllo) e una scoping review, livello di evidenza dichiarato basso ed esplicitamente etichettato come esplorativo, non come raccomandazione da linea guida. Per il colangiocarcinoma, l'evidenza disease-specific diretta proviene da un singolo RCT monocentrico su pazienti in stadio IV avanzato (misto pancreas/vie biliari) più le raccomandazioni perioperatorie generiche ERAS per chirurgia epatica — evidenza dichiarata bassa, non consensus oncologico dedicato. Per il carcinoma esofageo post-esofagectomia, l'evidenza è la più solida dei tre (mobilizzazione precoce da consensus ERAS + RCT multicentrico PERFECT su esercizio supervisionato), ma un audit indipendente (ACPRC 2023) conferma che i target quantitativi di mobilizzazione variano ampiamente tra centri senza standardizzazione — evidenza dichiarata moderata, non alta. Questo batch ha di nuovo un rapporto scarti/aggiunte sbilanciato nelle aree ematologiche/reumatologiche rare già esplorate (Waldenström, Still), mentre l'area exercise-oncology su tumori solidi meno comuni (pleura, vie biliari, esofago) ha ancora margine di contenuto genuino, seppure a evidenza bassa/moderata.
+
+**Stato attuale: 549 condizioni totali** (546 + 3 nuove del batch 68). **Mancano 251 per arrivare a 800.**
+
+**Batch 69 (2 condizioni aggiunte, id 595-596; 4 candidati scartati):**
+
+Scartati con motivazione documentata:
+- **Malattia di Castleman (UCD/iMCD)**: i consensus ematologici di riferimento (van Rhee et al., Blood Advances 2020 per UCD; Blood 2018 per iMCD) sono completamente silenti su attività fisica/esercizio — solo diagnosi, terapia farmacologica e follow-up. Esiste solo una survey descrittiva sul carico di fatica (Mukherjee et al., eClinicalMedicine 2023), senza alcuna raccomandazione riabilitativa. **Scartato**.
+- **Fascite eosinofila (sindrome di Shulman)**: nessuna linea guida reumatologica dedicata esiste; le uniche fonti (PCDS 2023, MSD Manual) contengono solo una frase generica ("la fisioterapia aiuta con le contratture") senza protocolli, red flags o criteri di progressione verificabili. **Scartato**.
+- **Sindrome POEMS**: la review ematologica di riferimento (Dispenzieri, Am J Hematol 2023) non menziona l'esercizio. L'unica fonte con un accenno (Gonçalves et al., J Neurol Neurosurg Psychiatry 2026) offre solo una frase generica su riabilitazione multidisciplinare precoce, non operazionalizzabile in un protocollo. **Scartato**.
+- **Istiocitosi a cellule di Langerhans nell'adulto**: il consensus internazionale più autorevole e recente (Goyal et al., Blood 2022, letto per intero) è completamente silente su esercizio, carico su lesioni ossee litiche, rischio di frattura patologica o riabilitazione polmonare. **Scartato**.
+
+Genuinamente presenti e aggiunte in questo batch:
+
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Linfangioleiomiomatosi (LAM) — riabilitazione respiratoria | Cardiopolmonare | Araujo MS et al., studio clinico controllato, Eur Respir J 2016 | 2016 |
+| Sindrome di Dressler — pericardite post-infarto/post-cardiotomia | Cardiopolmonare | ESC 2015 Pericardial Diseases Guidelines; Berglund & Klein, Cleveland Clinic Journal of Medicine 2022; ACC 2022; EAPC 2019 | 2015-2022 |
+
+Note oneste: per la LAM, la linea guida ufficiale di società (ATS/JRS 2017) è silente sull'esercizio — il contenuto inserito proviene esclusivamente da un singolo studio clinico controllato non randomizzato (21 vs 19 pazienti), dichiarato esplicitamente come fonte primaria e non come raccomandazione di linea guida, evidenza moderata. Per la sindrome di Dressler, nessuna fonte tratta questa entità separatamente dalla pericardite acuta/post-cardiac injury syndrome generica: il contenuto è stato costruito come estrapolazione esplicita dalle linee guida generali sulla pericardite (ESC, EAPC, AHA/ACC), con evidenza dichiarata moderata e non Dressler-specifica. Questo batch confirma ulteriormente la tendenza osservata nei batch precedenti: le malattie ematologiche rare con consensus internazionali dedicati (Castleman, POEMS, istiocitosi) sono sistematicamente silenti sull'esercizio, mentre le malattie con una componente respiratoria o cardiologica più diretta offrono più spesso almeno uno studio primario dedicato.
+
+**Stato attuale: 551 condizioni totali** (549 + 2 nuove del batch 69). **Mancano 249 per arrivare a 800.**
+
+**Batch 70 (6 condizioni aggiunte, id 597-602; 0 candidati scartati, tutti inclusi con contenuto deliberatamente scoperto/limitato):**
+
+Questo batch è diverso dai precedenti: per tutte le 6 condizioni esiste almeno un contenuto genuino e verificabile, ma spesso molto più limitato del previsto — in diversi casi la fonte ufficiale di riferimento è silente proprio sull'aspetto più rilevante (es. precauzioni cardiologiche), e il contenuto inserito è stato intenzionalmente ristretto alla sola porzione verificata, con disclosure esplicita di cosa NON è coperto.
+
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Sindrome di Rett — scoliosi e mantenimento della deambulazione | Neurologia | Downs J et al., consensus internazionale, SPINE 2009; Fonzo M et al., systematic review, Brain Sciences 2020 | 2009-2020 |
+| Sindrome di Loeys-Dietz — gestione dell'attività fisica e rischio vascolare | Cardiopolmonare + genetico/connettivale | ACC/AHA Aortic Disease Guidelines 2022; AHA Scientific Statement 2024; Thijssen et al., review 2019 | 2019-2024 |
+| Sindrome di Noonan — fisioterapia per ipotonia e ritardo motorio | Neurologia | Romano AA et al., Pediatrics 2010; Rasopathies Network Guidelines; consensus JAMA Network Open 2024 | 2010-2024 |
+| Sindrome di Williams — gestione della laxity articolare con l'esercizio | Genetico/connettivale | Morris CA et al., linea guida AAP, Pediatrics 2020; Copes LE et al., Clinical Anatomy 2016 | 2016-2020 |
+| Malattia di Niemann-Pick (A/B/C) — mobilità, spasticità e precauzioni per splenomegalia | Neurologia + ematologia | Geberhiwot T et al., consensus NP-C, Orphanet J Rare Dis 2018; consensus ASMD, Orphanet J Rare Dis 2023 | 2018-2023 |
+| Displasia congenita dell'anca — riabilitazione post-osteotomia periacetabolare (PAO) | Ortopedico (non categorizzato per sistema) | Disantis A et al., Delphi consensus nordamericano, Int J Sports Phys Ther 2022 | 2022 |
+
+Note oneste (importanti per questo batch): per la sindrome di Rett, la componente su scoliosi/deambulazione ha evidenza moderata da un consensus solido, ma la gestione delle crisi epilettiche durante l'esercizio non è coperta da nessuna fonte Rett-specifica ed è stata esclusa. Per la sindrome di Loeys-Dietz, l'intero contenuto cardiovascolare è dichiaratamente estrapolato dalla sindrome di Marfan (Thijssen 2019 conferma l'assenza di studi primari su esercizio e dissezione specifici per Loeys-Dietz) — evidenza bassa. Per la sindrome di Noonan, il contenuto è stato deliberatamente limitato alla sola fisioterapia per ipotonia/ritardo motorio: nessuna fonte Noonan-specifica tratta precauzioni cardiologiche per l'esercizio (cardiomiopatia ipertrofica/stenosi polmonare), e questo è stato dichiarato esplicitamente invece di essere inventato. Per la sindrome di Williams, lo stesso vale in modo quasi identico: la linea guida ufficiale AAP 2020 copre solo laxity articolare/stretching, non restrizioni sportive cardiovascolari, e gli stessi autori della fonte sulla componente motoria dichiarano che le loro strategie sono generalizzate da altre condizioni, non evidenza empirica Williams-specifica. Per la malattia di Niemann-Pick, il contenuto è ristretto a due elementi verificati: valutazione di mobilità/spasticità (tipo C, consensus forza 1/evidenza B) e il divieto assoluto di sport di contatto con splenomegalia (tipo B) — nessun protocollo di esercizio strutturato esiste in letteratura. Per la displasia congenita dell'anca, la voce è stata limitata alla sola fase post-chirurgica (post-PAO, consensus Delphi solido), escludendo la fase pediatrica con tutore di Pavlik e la gestione dell'adulto con displasia residua non operata, per cui non esiste consensus ortopedico formale sull'attività fisica. Questo batch rappresenta un cambio di approccio rispetto a un rapporto scarti/aggiunte più povero: quando esiste un nucleo di evidenza genuino anche se circoscritto, si preferisce includerlo con disclosure onesta piuttosto che scartare l'intera condizione.
+
+**Stato attuale: 557 condizioni totali** (551 + 6 nuove del batch 70). **Mancano 243 per arrivare a 800.**
+
+**Batch 71 (4 condizioni aggiunte, id 603-606; 2 candidati scartati):**
+
+Scartati con motivazione documentata:
+- **Malattia di Tay-Sachs (forma infantile e late-onset)**: nessuna linea guida o consensus panel esiste per fisioterapia/esercizio in questa malattia. Le uniche fonti sono una review generalista (StatPearls, senza protocolli), un wiki non peer-reviewed (Physiopedia) e un singolo case report non generalizzabile. **Scartato**.
+- **Malattia di Krabbe**: il consensus disease-specific di riferimento (Kwon JM et al., Orphanet J Rare Dis 2018, letto per intero) è quasi completamente silente sulla fisioterapia — una sola voce di checklist ("Physical therapy consultation") senza alcun dettaglio. Il solo contenuto reale disponibile (GLIA Consortium consensus) è generico a tutte le leucodistrofie, non Krabbe-specifico, e sovrapponibile al contenuto già inserito per la leucodistrofia metacromatica — inserirlo separatamente avrebbe significato duplicare contenuto non disease-specific. **Scartato**.
+
+Genuinamente presenti e aggiunte in questo batch:
+
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Mucopolisaccaridosi tipo I (Hurler/Hurler-Scheie/Scheie) — precauzioni e mobilità | Non categorizzato per sistema (scheletrico/cervicale) | Clarke LA, GeneReviews; Gnasso R et al., scoping review, Orphanet J Rare Dis 2022 | 2009-2022 |
+| Mucopolisaccaridosi tipo IV A (Morquio A) — screening cervicale e precauzioni | Non categorizzato per sistema (scheletrico/cervicale) | Solanki GA et al., J Inherit Metab Dis 2013; Akyol MU et al., consensus Delphi, Orphanet J Rare Dis 2019 | 2013-2019 |
+| Mucopolisaccaridosi tipo III (sindrome di Sanfilippo) — mantenimento della funzione motoria | Neurologia | Muschol N et al., consensus internazionale, Orphanet J Rare Dis 2022 | 2022 |
+| Leucodistrofia metacromatica (MLD) — monitoraggio motorio e referral fisioterapico | Neurologia | Adang LA et al., consensus USA, Cytotherapy 2024 | 2024 |
+
+Note oneste: per la MPS I, non esiste un protocollo di esercizio validato da consensus formale (il vero consensus internazionale, Muenzer et al. 2009, non è stato verificabile per intero per blocco di accesso) — il contenuto inserito è di livello expert opinion, dichiarato come tale. Per la MPS IV A, la componente di screening/red flags/criteri chirurgici è solida (criteri numerici ADI/PADI da Solanki 2013), ma anche il consensus Delphi più recente e rigoroso (Akyol 2019) è esplicitamente silente su fisioterapia/esercizio — nessun protocollo è stato inventato per coprire questa lacuna. Per la sindrome di Sanfilippo, il consensus Muschol 2022 è autorevole (>100 clinici) ma va segnalato un possibile limite di indipendenza per supporto parziale di un'azienda farmaceutica (BioMarin). Per la leucodistrofia metacromatica, il consensus 2024 (pubblicato dopo l'approvazione della terapia genica Lenmeldy) è solido su referral e monitoraggio motorio, ma non specifica protocolli di esercizio o scale di outcome fisioterapiche standardizzate — disclosure esplicita nel campo fonte. Da notare: per la prima volta in questo progetto, due condizioni (MPS I e MPS IV A) non sono state assegnate a nessuna delle categorie di sistema esistenti nel database (cardiopulmonary/endocrine/neurology/immune/gastrointestinal/hematology/oncology/urinary/pelvic_floor) perché il loro contenuto clinico è prevalentemente scheletrico/cervicale — stessa scelta già fatta per le condizioni ortopediche pure (es. osteocondrite dissecante, Legg-Calvé-Perthes, displasia dell'anca).
+
+**Stato attuale: 561 condizioni totali** (557 + 4 nuove del batch 71). **Mancano 239 per arrivare a 800.**
+
+**Batch 72 (4 condizioni aggiunte, id 607-610; 2 candidati scartati):**
+
+Scartati con motivazione documentata:
+- **Degenerazione corticobasale (CBD/CBS)**: non esiste una linea guida/consensus formale validata da panel multidisciplinare sull'esercizio in questa sindrome parkinsoniana atipica. L'unica fonte con contenuto pratico è un handout di masterclass (PSP Association, non peer-reviewed) che dichiara esplicitamente "limited evidence to suggest physiotherapy is helpful in PSP & CBS". **Scartato**.
+- **Sindrome di Alpers-Huttenlocher**: nessuna fonte verificabile (linea guida, consensus, revisione sistematica) tratta esplicitamente la fisioterapia o l'esercizio fisico in questa malattia mitocondriale pediatrica con epilessia refrattaria. L'unica fonte (StatPearls) menziona la fisioterapia in una frase generica senza alcun dettaglio operativo. **Scartato**.
+
+Genuinamente presenti e aggiunte in questo batch:
+
+| Condizione | Categoria | Fonte reale | Anno |
+|---|---|---|---|
+| Sclerosi laterale primaria (PLS) — fisioterapia e gestione della spasticità | Neurologia | Irish MND/Hospice Foundation Guidelines 2014; Cochrane CD005229; Zhao C et al., Curr Treat Options Neurol 2020 | 2014-2020 |
+| Sindrome di Ondine (CCHS) — sicurezza nell'attività fisica | Cardiopolmonare | ATS Clinical Policy Statement 2010; Trang H et al., Orphanet J Rare Dis 2020 | 2010-2020 |
+| Malattia di Alexander (GFAP) — valutazione fisioterapica e gestione della spasticità | Neurologia | Srivastava S, Waldman A, Naidu S, GeneReviews 2020 | 2020-2025 |
+| Sindrome di Leigh — precauzioni per l'esercizio nella malattia mitocondriale pediatrica | Neurologia | Parikh S et al., consensus Mitochondrial Medicine Society, Genetics in Medicine 2017; The Lily Foundation | 2016-2017 |
+
+Note oneste: per la PLS, tutte le fonti (incluse quelle di Livello 1 su singole raccomandazioni) dichiarano esplicitamente che la gestione è estrapolata per analogia dall'ALS classica, poiché non esistono studi controllati dedicati alla PLS pura — evidenza dichiarata moderata con questo limite esplicito. Per la sindrome di Ondine, il contenuto è stato intenzionalmente limitato al principio di sicurezza centrale (assenza del segnale di allarme da ipossia/ipercapnia) e alla controindicazione nominata per le gare di apnea/nuoto subacqueo, senza inventare un protocollo di esercizio che le fonti non forniscono. Per la malattia di Alexander, la fonte (GeneReviews) è narrativa/expert-opinion, non RCT, e un abstract congressuale 2025 conferma che la valutazione motoria standardizzata in questa malattia è ancora oggetto di ricerca attiva, non di consensus pubblicato. Per la sindrome di Leigh, il contenuto è interamente estrapolato dal consensus generico sulla malattia mitocondriale dell'adulto (Mitochondrial Medicine Society 2017), poiché nessuna fonte tratta l'esercizio in modo Leigh-specifico — scelta di inclusione con disclosure piuttosto che scarto, coerente con il nuovo approccio adottato dal batch 70.
+
+**Stato attuale: 565 condizioni totali** (561 + 4 nuove del batch 72). **Mancano 235 per arrivare a 800.**
+
 Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
