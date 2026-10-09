@@ -41,7 +41,7 @@ function Card({ t, i }: { t: (typeof testimonials)[number]; i: number }) {
           >
             {t.initials}
           </span>
-          <p className="eyebrow text-ink/40 dark:text-white/40">{t.name}</p>
+          <p className="eyebrow text-ink/55 dark:text-white/40">{t.name}</p>
         </div>
       </motion.div>
     </motion.div>

@@ -32,7 +32,7 @@ function BodyMapContent() {
   ] as const;
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -115,7 +115,7 @@ function BodyMapContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.9 }}
-            className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-6 text-xs text-ink/40 dark:text-white/40"
+            className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-6 text-xs text-ink/55 dark:text-white/40"
           >
             <span className="inline-flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-emerald" />
@@ -188,7 +188,7 @@ function BodyMapContent() {
         )}
 
         {calibrate && (
-          <p className="text-ink/50 dark:text-white/50 text-sm text-center max-w-md mx-auto mt-8">
+          <p className="text-ink/60 dark:text-white/50 text-sm text-center max-w-md mx-auto mt-8">
             Clicca sui punti anatomici direttamente sul modello: ogni clic aggiunge una riga con la frazione [x, y, z] nel pannello in alto. Copiala qui in chat e sostituirò le coordinate definitive in BODY_ZONES_3D.
           </p>
         )}

@@ -32,7 +32,7 @@ export default function ItemMenu({ actions }: { actions: ItemMenuAction[] }) {
       <button
         aria-label="More actions"
         onClick={() => setOpen((o) => !o)}
-        className="flex h-7 w-7 items-center justify-center rounded-full text-ink/40 dark:text-white/40 hover:bg-ink/5 dark:hover:bg-white/10 hover:text-ink dark:hover:text-white transition-colors"
+        className="flex h-7 w-7 items-center justify-center rounded-full text-ink/55 dark:text-white/40 hover:bg-ink/5 dark:hover:bg-white/10 hover:text-ink dark:hover:text-white transition-colors"
       >
         <MoreHorizontal size={15} />
       </button>
@@ -42,7 +42,7 @@ export default function ItemMenu({ actions }: { actions: ItemMenuAction[] }) {
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            className="absolute right-0 top-full mt-1.5 w-44 z-20 rounded-xl2 border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#171821] shadow-lift p-1.5"
+            className="absolute right-0 top-full mt-1.5 w-44 z-20 rounded-xl2 border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#171821] shadow-lift p-1.5"
           >
             {actions.map((a) => (
               <button

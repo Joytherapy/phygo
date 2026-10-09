@@ -110,7 +110,7 @@ export default function AnnotationToolbar({
 
   const btn = (active: boolean) =>
     `flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-      active ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+      active ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
     }`
 
   const isInkTool = tool === 'pen' || tool === 'line' || tool === 'rect' || tool === 'ellipse'
@@ -122,7 +122,7 @@ export default function AnnotationToolbar({
   const moreLabel = tool === 'line' ? ui.annotate.line : tool === 'rect' ? ui.annotate.rectangle : tool === 'ellipse' ? ui.annotate.ellipse : null
 
   return (
-    <div className="flex items-center gap-1 border-b border-black/[0.06] dark:border-white/10 px-3 py-2 flex-wrap">
+    <div className="flex items-center gap-1 border-b border-black/[0.09] dark:border-white/10 px-3 py-2 flex-wrap">
       {/* Essential tools — always visible, desktop and mobile alike (§33) */}
       <button onClick={() => onToolChange('select')} aria-label={ui.annotate.select} title={ui.annotate.select} className={btn(tool === 'select')}>
         <MousePointer2 size={15} />
@@ -148,7 +148,7 @@ export default function AnnotationToolbar({
           <MoreHorizontal size={15} />
         </button>
         {moreOpen && (
-          <div className="absolute left-0 top-full z-40 mt-1 flex items-center gap-1 rounded-xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#171821] shadow-lift p-1">
+          <div className="absolute left-0 top-full z-40 mt-1 flex items-center gap-1 rounded-xl border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#171821] shadow-lift p-1">
             <button
               onClick={() => {
                 onToolChange('line')
@@ -326,7 +326,7 @@ export default function AnnotationToolbar({
                 textBackground === null ? 'scale-110 border-ink dark:border-white' : 'border-black/10 dark:border-white/20'
               }`}
             >
-              <Ban size={11} className="text-ink/40 dark:text-white/40" />
+              <Ban size={11} className="text-ink/55 dark:text-white/40" />
             </button>
             {TEXT_BACKGROUND_COLORS.map((c) => (
               <button
@@ -350,7 +350,7 @@ export default function AnnotationToolbar({
                 aria-label={`${ui.annotate.textSize} ${s}`}
                 title={`${ui.annotate.textSize} ${s}`}
                 className={`flex h-8 w-8 items-center justify-center rounded-lg font-medium transition-colors ${
-                  textFontSize === s ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+                  textFontSize === s ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
                 }`}
                 style={{ fontSize: Math.min(18, Math.max(9, s * 0.7)) }}
               >

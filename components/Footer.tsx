@@ -11,7 +11,7 @@ export default function Footer() {
           Phygo
         </a>
 
-        <div className="flex items-center gap-6 text-sm text-ink/50 dark:text-white/50">
+        <div className="flex items-center gap-6 text-sm text-ink/60 dark:text-white/50">
           <a href="/library/condition" className="hover:text-ink dark:hover:text-white transition-colors">Library</a>
           <a href="/privacy" className="hover:text-ink dark:hover:text-white transition-colors">Privacy</a>
           <a href="/terms" className="hover:text-ink dark:hover:text-white transition-colors">Terms</a>

@@ -201,7 +201,7 @@ export default function NotebookPageView({
         fullscreen ? 'fixed inset-0 z-[70]' : ''
       }`}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-black/[0.06] dark:border-white/10 px-3 py-2 flex-wrap shrink-0">
+      <div className="flex items-center justify-between gap-2 border-b border-black/[0.09] dark:border-white/10 px-3 py-2 flex-wrap shrink-0">
         <div className="flex items-center gap-1.5 text-sm text-ink/70 dark:text-white/70">
           <button
             onClick={onPrevPage}
@@ -229,7 +229,7 @@ export default function NotebookPageView({
             onClick={onAddPage}
             aria-label={ui.notebook.newPage}
             title={ui.notebook.newPage}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
           >
             <Plus size={15} />
           </button>
@@ -237,7 +237,7 @@ export default function NotebookPageView({
             onClick={onDuplicatePage}
             aria-label={ui.notebook.duplicatePage}
             title={ui.notebook.duplicatePage}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
           >
             <Copy size={15} />
           </button>
@@ -256,7 +256,7 @@ export default function NotebookPageView({
               </button>
               <button
                 onClick={() => setConfirmingDelete(false)}
-                className="rounded-md px-1.5 py-1 text-[11px] text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10"
+                className="rounded-md px-1.5 py-1 text-[11px] text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10"
               >
                 {ui.dialog.cancel}
               </button>
@@ -267,7 +267,7 @@ export default function NotebookPageView({
               disabled={pageCount <= 1}
               aria-label={ui.notebook.deletePage}
               title={ui.notebook.deletePage}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/50 dark:text-white/50 hover:bg-red-500/10 hover:text-red-500 disabled:opacity-30 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/60 dark:text-white/50 hover:bg-red-500/10 hover:text-red-500 disabled:opacity-30 transition-colors"
             >
               <Trash2 size={15} />
             </button>
@@ -279,15 +279,15 @@ export default function NotebookPageView({
               aria-label={ui.notebook.pageSettings}
               title={ui.notebook.pageSettings}
               className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                settingsOpen ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+                settingsOpen ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
               }`}
             >
               <Settings2 size={15} />
             </button>
             {settingsOpen && (
-              <div className="absolute right-0 top-full z-40 mt-1 w-64 rounded-xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#171821] shadow-lift p-3 space-y-3">
+              <div className="absolute right-0 top-full z-40 mt-1 w-64 rounded-xl border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#171821] shadow-lift p-3 space-y-3">
                 <div>
-                  <p className="text-[11px] font-medium text-ink/50 dark:text-white/50 mb-1.5">{ui.notebook.format}</p>
+                  <p className="text-[11px] font-medium text-ink/60 dark:text-white/50 mb-1.5">{ui.notebook.format}</p>
                   <div className="flex items-center gap-1.5">
                     {FORMATS.map((f) => (
                       <button
@@ -303,7 +303,7 @@ export default function NotebookPageView({
                   </div>
                 </div>
                 <div>
-                  <p className="text-[11px] font-medium text-ink/50 dark:text-white/50 mb-1.5">{ui.notebook.paperColor}</p>
+                  <p className="text-[11px] font-medium text-ink/60 dark:text-white/50 mb-1.5">{ui.notebook.paperColor}</p>
                   <div className="flex items-center gap-1.5">
                     {NOTEBOOK_PAGE_COLORS.map((c) => (
                       <button
@@ -319,7 +319,7 @@ export default function NotebookPageView({
                   </div>
                 </div>
                 <div>
-                  <p className="text-[11px] font-medium text-ink/50 dark:text-white/50 mb-1.5">{ui.notebook.template}</p>
+                  <p className="text-[11px] font-medium text-ink/60 dark:text-white/50 mb-1.5">{ui.notebook.template}</p>
                   <div className="flex items-center gap-1.5">
                     {TEMPLATES.map((t) => (
                       <button
@@ -341,7 +341,7 @@ export default function NotebookPageView({
           <button
             onClick={toggleFullscreen}
             aria-label="Fullscreen"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
           >
             {fullscreen ? <Minimize size={15} /> : <Maximize size={15} />}
           </button>

@@ -338,7 +338,7 @@ export default function WorkspaceNotebookPageRoute() {
   if (loading) {
     return (
       <WorkspaceShell fullscreen>
-        <div className="flex flex-1 items-center justify-center text-ink/40 dark:text-white/40">
+        <div className="flex flex-1 items-center justify-center text-ink/55 dark:text-white/40">
           <Loader2 size={18} className="animate-spin" />
         </div>
       </WorkspaceShell>
@@ -361,12 +361,12 @@ export default function WorkspaceNotebookPageRoute() {
   // NotebookPageView fills every remaining pixel below it.
   return (
     <WorkspaceShell fullscreen>
-      <div className="flex items-center gap-3 border-b border-black/[0.06] dark:border-white/10 px-3 sm:px-4 py-2.5 shrink-0">
+      <div className="flex items-center gap-3 border-b border-black/[0.09] dark:border-white/10 px-3 sm:px-4 py-2.5 shrink-0">
         <button
           onClick={() => router.push(notebook.folder_id ? `/dashboard/workspace/folder/${notebook.folder_id}` : '/dashboard/workspace')}
           aria-label={ui.nav.workspace}
           title={ui.nav.workspace}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
         >
           <ArrowLeft size={16} />
         </button>
@@ -377,7 +377,7 @@ export default function WorkspaceNotebookPageRoute() {
 
       <div className="flex-1 min-h-0">
         {pageLoading ? (
-          <div className="flex h-full items-center justify-center text-ink/40 dark:text-white/40">
+          <div className="flex h-full items-center justify-center text-ink/55 dark:text-white/40">
             <Loader2 size={18} className="animate-spin" />
           </div>
         ) : (

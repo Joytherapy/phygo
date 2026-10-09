@@ -35,7 +35,7 @@ export default function NotebookCard({
   return (
     <div
       onClick={() => !renaming && onOpen()}
-      className="group relative flex aspect-[3/4] flex-col overflow-hidden rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lift hover:border-black/[0.1] dark:hover:border-white/20"
+      className="group relative flex aspect-[3/4] flex-col overflow-hidden rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lift hover:border-black/[0.1] dark:hover:border-white/20"
     >
       <div className="relative flex flex-1 items-center justify-center">
         <span className="absolute left-0 top-3 bottom-3 w-1 rounded-r bg-[#4F7CFF]/30" />
@@ -60,7 +60,7 @@ export default function NotebookCard({
         />
       </div>
 
-      <div className="border-t border-black/[0.04] dark:border-white/[0.06] px-3 py-2.5">
+      <div className="border-t border-black/[0.08] dark:border-white/[0.06] px-3 py-2.5">
         {renaming ? (
           <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
             <input
@@ -76,14 +76,14 @@ export default function NotebookCard({
             <button onClick={commitRename} className="text-[#4F7CFF] shrink-0">
               <Check size={13} />
             </button>
-            <button onClick={() => setRenaming(false)} className="text-ink/40 dark:text-white/40 shrink-0">
+            <button onClick={() => setRenaming(false)} className="text-ink/55 dark:text-white/40 shrink-0">
               <X size={13} />
             </button>
           </div>
         ) : (
           <>
             <p className="text-sm font-medium text-ink dark:text-white truncate text-center">{notebook.name}</p>
-            {notebook.last_opened_at && <p className="text-[11px] text-ink/40 dark:text-white/40 text-center mt-0.5 truncate">{ui.item.lastOpened}</p>}
+            {notebook.last_opened_at && <p className="text-[11px] text-ink/55 dark:text-white/40 text-center mt-0.5 truncate">{ui.item.lastOpened}</p>}
           </>
         )}
       </div>

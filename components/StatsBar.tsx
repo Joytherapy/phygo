@@ -55,7 +55,7 @@ export default function StatsBar() {
             <div className="font-display text-4xl sm:text-5xl font-semibold tracking-tight bg-gradient-to-r from-ink to-ink/70 dark:from-white dark:to-white/70 bg-clip-text text-transparent">
               <Counter to={s.to} suffix={s.suffix} prefix={s.prefix ?? ""} />
             </div>
-            <p className="mt-2 text-sm text-ink/50 dark:text-white/50">{s.label}</p>
+            <p className="mt-2 text-sm text-ink/60 dark:text-white/50">{s.label}</p>
           </motion.div>
         ))}
       </div>

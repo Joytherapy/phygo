@@ -170,7 +170,7 @@ export default function QuizPage() {
   const hasAnsweredCurrent = currentQuestion ? answers[currentQuestion.id] !== undefined : false
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -188,7 +188,7 @@ export default function QuizPage() {
               <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-ink dark:text-white">
                 {quizUi.pageTitle}
               </h1>
-              <p className="text-base text-ink/40 dark:text-white/40 mt-3">{quizUi.pageSubtitle}</p>
+              <p className="text-base text-ink/55 dark:text-white/40 mt-3">{quizUi.pageSubtitle}</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -198,11 +198,11 @@ export default function QuizPage() {
                   <button
                     key={s}
                     onClick={() => pickSubject(s)}
-                    className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                    className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-soft hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                   >
                     <p className="font-display text-base font-bold text-ink dark:text-white">{subjectLabel(s, ui, quizUi)}</p>
                     {p ? (
-                      <p className="text-xs text-ink/40 dark:text-white/40 mt-1.5">
+                      <p className="text-xs text-ink/55 dark:text-white/40 mt-1.5">
                         {formatQuizString(quizUi.attemptsLabel, { count: p.attempts })} ·{' '}
                         {formatQuizString(quizUi.bestScoreLabel, { percent: p.bestPercentage })}
                       </p>
@@ -220,7 +220,7 @@ export default function QuizPage() {
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             <button
               onClick={restart}
-              className="flex items-center gap-1.5 text-sm text-ink/40 dark:text-white/40 hover:text-ink dark:hover:text-white transition-colors mb-8"
+              className="flex items-center gap-1.5 text-sm text-ink/55 dark:text-white/40 hover:text-ink dark:hover:text-white transition-colors mb-8"
             >
               <ChevronLeft size={16} />
               {quizUi.backToSubjects}
@@ -228,17 +228,17 @@ export default function QuizPage() {
             <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink dark:text-white mb-2">
               {subjectLabel(subject, ui, quizUi)}
             </h1>
-            <p className="text-sm text-ink/40 dark:text-white/40 mb-8">{quizUi.difficultyPrompt}</p>
+            <p className="text-sm text-ink/55 dark:text-white/40 mb-8">{quizUi.difficultyPrompt}</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {QUIZ_DIFFICULTIES.map((d) => (
                 <button
                   key={d}
                   onClick={() => pickDifficulty(d)}
-                  className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl px-5 py-6 text-center shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl px-5 py-6 text-center shadow-soft hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                 >
                   <p className="font-display text-lg font-bold text-ink dark:text-white">{quizUi.difficulty[d]}</p>
-                  <p className="text-xs text-ink/40 dark:text-white/40 mt-1.5">
+                  <p className="text-xs text-ink/55 dark:text-white/40 mt-1.5">
                     {poolSizes ? formatQuizString(quizUi.poolSizeLabel, { count: poolSizes[d] ?? 0 }) : ' '}
                   </p>
                 </button>
@@ -251,7 +251,7 @@ export default function QuizPage() {
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             <button
               onClick={restart}
-              className="flex items-center gap-1.5 text-sm text-ink/40 dark:text-white/40 hover:text-ink dark:hover:text-white transition-colors mb-8"
+              className="flex items-center gap-1.5 text-sm text-ink/55 dark:text-white/40 hover:text-ink dark:hover:text-white transition-colors mb-8"
             >
               <ChevronLeft size={16} />
               {quizUi.backToSubjects}
@@ -260,27 +260,27 @@ export default function QuizPage() {
             {loadingQuestions && (
               <div className="flex flex-col items-center justify-center py-24 text-center">
                 <Loader2 size={28} className="animate-spin text-[#4F7CFF] mb-4" />
-                <p className="text-sm text-ink/50 dark:text-white/50">{quizUi.loadingQuestions}</p>
+                <p className="text-sm text-ink/60 dark:text-white/50">{quizUi.loadingQuestions}</p>
                 <p className="text-xs text-ink/30 dark:text-white/30 mt-2">{quizUi.generatingNote}</p>
               </div>
             )}
 
             {!loadingQuestions && errorGenerating && (
               <div className="text-center py-24">
-                <p className="text-sm text-ink/50 dark:text-white/50">{quizUi.errorGenerating}</p>
+                <p className="text-sm text-ink/60 dark:text-white/50">{quizUi.errorGenerating}</p>
               </div>
             )}
 
             {!loadingQuestions && !errorGenerating && questions.length === 0 && (
               <div className="text-center py-24">
-                <p className="text-sm text-ink/50 dark:text-white/50">{quizUi.noQuestionsAvailable}</p>
+                <p className="text-sm text-ink/60 dark:text-white/50">{quizUi.noQuestionsAvailable}</p>
               </div>
             )}
 
             {!loadingQuestions && !errorGenerating && currentQuestion && (
               <div>
                 <div className="flex items-center justify-between mb-6">
-                  <p className="text-xs font-semibold tracking-wide uppercase text-ink/40 dark:text-white/40">
+                  <p className="text-xs font-semibold tracking-wide uppercase text-ink/55 dark:text-white/40">
                     {formatQuizString(quizUi.questionCounter, { current: currentIndex + 1, total: questions.length })}
                   </p>
                   <div className="flex-1 mx-4 h-1 rounded-full bg-black/[0.06] dark:bg-white/10 overflow-hidden">
@@ -316,7 +316,7 @@ export default function QuizPage() {
                             className={`w-full text-left rounded-xl border px-4 py-3.5 text-sm font-medium transition-all duration-200 ${
                               selected
                                 ? 'border-[#4F7CFF] bg-[#4F7CFF]/10 text-ink dark:text-white'
-                                : 'border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] text-ink/70 dark:text-white/70 hover:border-black/20 dark:hover:border-white/20'
+                                : 'border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] text-ink/70 dark:text-white/70 hover:border-black/20 dark:hover:border-white/20'
                             }`}
                           >
                             {opt}
@@ -355,28 +355,28 @@ export default function QuizPage() {
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             <div className="text-center mb-10">
               <div
-                className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-sm"
+                className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-soft"
                 style={{ background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' }}
               >
                 <Trophy size={22} />
               </div>
               <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink dark:text-white mb-2">{quizUi.resultsTitle}</h1>
-              <p className="text-sm text-ink/50 dark:text-white/50">
+              <p className="text-sm text-ink/60 dark:text-white/50">
                 {formatQuizString(quizUi.scoreLabel, { correct: results.correctCount, total: results.totalQuestions })}
               </p>
               {poolSizes && difficulty && poolSizes[difficulty] > results.totalQuestions && (
-                <p className="text-xs text-ink/40 dark:text-white/40 mt-2">
+                <p className="text-xs text-ink/55 dark:text-white/40 mt-2">
                   {formatQuizString(quizUi.poolRotationNote, { shown: results.totalQuestions, total: poolSizes[difficulty] })}
                 </p>
               )}
             </div>
 
-            <p className="text-xs font-semibold tracking-wide uppercase text-ink/40 dark:text-white/40 mb-3">{quizUi.reviewTitle}</p>
+            <p className="text-xs font-semibold tracking-wide uppercase text-ink/55 dark:text-white/40 mb-3">{quizUi.reviewTitle}</p>
             <div className="space-y-3 mb-10">
               {results.results.map((r) => (
                 <div
                   key={r.questionId}
-                  className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl p-5"
                 >
                   <div className="flex items-start gap-2.5 mb-3">
                     {r.isCorrect ? (
@@ -386,7 +386,7 @@ export default function QuizPage() {
                     )}
                     <p className="text-sm font-semibold text-ink dark:text-white leading-snug">{r.question}</p>
                   </div>
-                  <p className="text-xs text-ink/50 dark:text-white/50 ml-[26px]">
+                  <p className="text-xs text-ink/60 dark:text-white/50 ml-[26px]">
                     {quizUi.yourAnswerLabel}: {r.options[r.selectedIndex]}
                   </p>
                   {!r.isCorrect && (
@@ -394,7 +394,7 @@ export default function QuizPage() {
                       {quizUi.correctAnswerLabel}: {r.options[r.correctIndex]}
                     </p>
                   )}
-                  {r.explanation && <p className="text-xs text-ink/40 dark:text-white/40 ml-[26px] mt-2">{r.explanation}</p>}
+                  {r.explanation && <p className="text-xs text-ink/55 dark:text-white/40 ml-[26px] mt-2">{r.explanation}</p>}
                 </div>
               ))}
             </div>
@@ -410,7 +410,7 @@ export default function QuizPage() {
               </button>
               <button
                 onClick={restart}
-                className="rounded-full px-6 py-3 text-sm font-semibold text-ink/60 dark:text-white/60 border border-black/[0.06] dark:border-white/10 hover:text-ink dark:hover:text-white transition-colors"
+                className="rounded-full px-6 py-3 text-sm font-semibold text-ink/60 dark:text-white/60 border border-black/[0.09] dark:border-white/10 hover:text-ink dark:hover:text-white transition-colors"
               >
                 {quizUi.backToSubjects}
               </button>

@@ -111,7 +111,7 @@ function PhysiologyPageInner() {
   const hasAnyMatch = concepts.some(matchesQuery);
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -132,19 +132,19 @@ function PhysiologyPageInner() {
               {ui.physiology.heading}
             </span>
           </h1>
-          <p className="text-sm text-ink/50 dark:text-white/50 mt-4 max-w-xl mx-auto leading-relaxed">
+          <p className="text-sm text-ink/60 dark:text-white/50 mt-4 max-w-xl mx-auto leading-relaxed">
             {ui.physiology.sectionHint}
           </p>
         </div>
 
         <div className="flex justify-center mb-6">
-          <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
+          <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
             {(['muscular', 'neurological', 'cellular'] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => setSystem(s)}
                 className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                  system === s ? 'text-white' : 'text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
+                  system === s ? 'text-white' : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                 }`}
                 style={system === s ? { background: ACCENT.solid } : undefined}
               >
@@ -173,11 +173,11 @@ function PhysiologyPageInner() {
           )}
         </div>
 
-        {loading && <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.physiology.loading}</p>}
+        {loading && <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.physiology.loading}</p>}
         {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
         {!loading && !error && normalizedQuery !== '' && !hasAnyMatch && (
-          <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+          <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
         )}
 
         {!loading && !error && (
@@ -194,7 +194,7 @@ function PhysiologyPageInner() {
                     {items.map((c) => (
                       <div
                         key={c.id}
-                        className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-sm shadow-black/5 dark:shadow-black/40"
+                        className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-soft shadow-black/5 dark:shadow-black/40"
                       >
                         {c.diagram_image && (
                           <button

@@ -212,7 +212,7 @@ export default function WorkspaceFolderPage() {
   if (loading) {
     return (
       <WorkspaceShell>
-        <div className="flex items-center justify-center py-24 text-ink/40 dark:text-white/40">
+        <div className="flex items-center justify-center py-24 text-ink/55 dark:text-white/40">
           <Loader2 size={18} className="animate-spin" />
         </div>
       </WorkspaceShell>
@@ -229,7 +229,7 @@ export default function WorkspaceFolderPage() {
 
   return (
     <WorkspaceShell>
-      <nav className="flex items-center flex-wrap gap-1.5 text-sm text-ink/50 dark:text-white/50 mb-4">
+      <nav className="flex items-center flex-wrap gap-1.5 text-sm text-ink/60 dark:text-white/50 mb-4">
         <button onClick={() => router.push('/dashboard/workspace')} className="hover:text-ink dark:hover:text-white transition-colors">
           {ui.folder.root}
         </button>
@@ -275,7 +275,7 @@ export default function WorkspaceFolderPage() {
               documents in one undifferentiated grid. */}
           {filteredSubfolders.length > 0 && (
             <section>
-              <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
+              <h2 className="text-sm font-semibold text-ink/60 dark:text-white/50 uppercase tracking-wide mb-3">
                 {ui.folder.folders}
               </h2>
               <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
@@ -296,7 +296,7 @@ export default function WorkspaceFolderPage() {
 
           {(filteredNotebooks.length > 0 || filteredDocuments.length > 0) && (
             <section>
-              <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
+              <h2 className="text-sm font-semibold text-ink/60 dark:text-white/50 uppercase tracking-wide mb-3">
                 {ui.folder.documents}
               </h2>
               <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">

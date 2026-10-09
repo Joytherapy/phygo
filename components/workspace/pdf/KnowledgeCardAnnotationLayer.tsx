@@ -155,7 +155,7 @@ export default function KnowledgeCardAnnotationLayer({
               </div>
               <p className="text-xs font-semibold text-ink dark:text-white leading-snug">{data.title}</p>
               {data.href && (
-                <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-ink/40 dark:text-white/40">
+                <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-ink/55 dark:text-white/40">
                   {ui.studyPanel.openInPhygo} <ExternalLink size={9} />
                 </span>
               )}

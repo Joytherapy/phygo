@@ -43,29 +43,29 @@ export default function MyPhygoLoginPage() {
       <h1 className="font-display text-3xl font-bold tracking-tight text-ink dark:text-white mb-2">
         Welcome back
       </h1>
-      <p className="text-sm text-ink/50 dark:text-white/50 mb-8">
+      <p className="text-sm text-ink/60 dark:text-white/50 mb-8">
         Sign in to access your My Phygo portal.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-sm font-medium text-ink/50 dark:text-white/50">Email</label>
+          <label className="text-sm font-medium text-ink/60 dark:text-white/50">Email</label>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+            className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-ink/50 dark:text-white/50">Password</label>
+          <label className="text-sm font-medium text-ink/60 dark:text-white/50">Password</label>
           <input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+            className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
           />
         </div>
 

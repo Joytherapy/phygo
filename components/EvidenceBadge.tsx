@@ -12,7 +12,7 @@ const LEVEL_STYLES: Record<string, { bg: string; text: string; dot: string }> = 
   limited: { bg: 'bg-orange-500/10', text: 'text-orange-600 dark:text-orange-400', dot: 'bg-orange-500' },
 };
 
-const DEFAULT_STYLE = { bg: 'bg-black/5 dark:bg-white/10', text: 'text-ink/50 dark:text-white/50', dot: 'bg-ink/30 dark:bg-white/30' };
+const DEFAULT_STYLE = { bg: 'bg-black/5 dark:bg-white/10', text: 'text-ink/60 dark:text-white/50', dot: 'bg-ink/30 dark:bg-white/30' };
 
 /**
  * Uniform "evidence level" badge used across every section of the site
@@ -72,7 +72,7 @@ export function SourceCitation({
   if (!source) return null;
 
   return (
-    <p className={`text-[10px] text-ink/40 dark:text-white/40 leading-relaxed mt-2 pt-2 border-t border-black/[0.05] dark:border-white/[0.08] ${className}`}>
+    <p className={`text-[10px] text-ink/55 dark:text-white/40 leading-relaxed mt-2 pt-2 border-t border-black/[0.05] dark:border-white/[0.08] ${className}`}>
       <span className="font-semibold">{ui.fields.source}: </span>
       {source}
       {sourceDate ? ` (${sourceDate})` : ''}

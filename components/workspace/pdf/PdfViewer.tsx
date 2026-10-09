@@ -227,13 +227,13 @@ export default function PdfViewer({
           fullscreen ? 'fixed inset-0 z-[70]' : ''
         }`}
       >
-        <div className="flex items-center justify-between gap-2 border-b border-black/[0.06] dark:border-white/10 px-3 py-2 flex-wrap shrink-0">
+        <div className="flex items-center justify-between gap-2 border-b border-black/[0.09] dark:border-white/10 px-3 py-2 flex-wrap shrink-0">
           <div className="flex items-center gap-1">
             <button
               onClick={() => setShowThumbnails((v) => !v)}
               aria-label={ui.reader.thumbnails}
               className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                showThumbnails ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+                showThumbnails ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
               }`}
             >
               <PanelLeft size={15} />
@@ -241,7 +241,7 @@ export default function PdfViewer({
             <button
               onClick={() => onToggleBookmark(pageNumber)}
               aria-label={ui.reader.bookmarkPage}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
             >
               {bookmarkedPages.has(pageNumber) ? <BookmarkCheck size={15} className="text-[#4F7CFF]" /> : <Bookmark size={15} />}
             </button>
@@ -276,7 +276,7 @@ export default function PdfViewer({
                 setScale((s) => Math.max(MIN_SCALE, s - 0.15))
               }}
               aria-label={ui.reader.zoomOut}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
             >
               <ZoomOut size={15} />
             </button>
@@ -286,7 +286,7 @@ export default function PdfViewer({
                 setScale((s) => Math.min(MAX_SCALE, s + 0.15))
               }}
               aria-label={ui.reader.zoomIn}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
             >
               <ZoomIn size={15} />
             </button>
@@ -294,7 +294,7 @@ export default function PdfViewer({
               onClick={() => setFitWidth(true)}
               aria-label={ui.reader.fitWidth}
               className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                fitWidth ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+                fitWidth ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
               }`}
             >
               <StretchHorizontal size={15} />
@@ -302,7 +302,7 @@ export default function PdfViewer({
             <button
               onClick={toggleFullscreen}
               aria-label="Fullscreen"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
             >
               {fullscreen ? <Minimize size={15} /> : <Maximize size={15} />}
             </button>
@@ -310,7 +310,7 @@ export default function PdfViewer({
               onClick={toggleAsk}
               aria-label={ui.ask.button}
               className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                askOpen ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+                askOpen ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
               }`}
             >
               <Sparkles size={15} />
@@ -376,13 +376,13 @@ export default function PdfViewer({
           onLoadError={() => setLoadError(true)}
           className="flex-1 min-h-0 flex flex-col"
           loading={
-            <div className="flex items-center justify-center py-24 text-ink/40 dark:text-white/40">
+            <div className="flex items-center justify-center py-24 text-ink/55 dark:text-white/40">
               <Loader2 size={18} className="animate-spin" />
             </div>
           }
           error={
             <div className="flex flex-col items-center justify-center gap-3 py-24 text-center">
-              <p className="text-sm text-ink/50 dark:text-white/50 max-w-xs">{ui.reader.loadError}</p>
+              <p className="text-sm text-ink/60 dark:text-white/50 max-w-xs">{ui.reader.loadError}</p>
               <button
                 onClick={() => {
                   setLoadError(false)
@@ -398,7 +398,7 @@ export default function PdfViewer({
         >
           <div className="flex flex-1 min-h-0">
             {showThumbnails && numPages && (
-              <div className="hidden sm:block w-32 shrink-0 border-r border-black/[0.06] dark:border-white/10 h-full overflow-y-auto p-2 space-y-2">
+              <div className="hidden sm:block w-32 shrink-0 border-r border-black/[0.09] dark:border-white/10 h-full overflow-y-auto p-2 space-y-2">
                 {/* Windowed rather than every page at once — a 700-page
                     textbook should not mount 700 canvases simultaneously. */}
                 {Array.from({ length: Math.min(31, numPages) }, (_, i) => {
@@ -467,7 +467,7 @@ export default function PdfViewer({
                     renderTextLayer
                     renderAnnotationLayer={false}
                     loading={
-                      <div className="flex items-center justify-center py-24 text-ink/40 dark:text-white/40">
+                      <div className="flex items-center justify-center py-24 text-ink/55 dark:text-white/40">
                         <Loader2 size={18} className="animate-spin" />
                       </div>
                     }

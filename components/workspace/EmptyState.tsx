@@ -20,7 +20,7 @@ export default function EmptyState({
       </span>
       <p className="text-sm font-semibold text-ink dark:text-white">{title}</p>
       {description && (
-        <p className="mt-1.5 text-xs text-ink/50 dark:text-white/50 max-w-xs">{description}</p>
+        <p className="mt-1.5 text-xs text-ink/60 dark:text-white/50 max-w-xs">{description}</p>
       )}
       {action && <div className="mt-5">{action}</div>}
     </div>

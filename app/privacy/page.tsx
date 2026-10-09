@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 
 export default function PrivacyPage() {
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] transition-colors">
       <Navbar />
       <div className="relative max-w-2xl mx-auto pt-40 pb-24 px-6">
         <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#4F7CFF] mb-3">
@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         </h1>
 
         <div className="space-y-6 text-sm leading-relaxed text-ink/70 dark:text-white/70">
-          <p className="text-ink/40 dark:text-white/40 text-xs">
+          <p className="text-ink/55 dark:text-white/40 text-xs">
             Last updated: [date] — Draft pending legal review by a qualified data protection professional.
           </p>
 

@@ -47,14 +47,14 @@ export default function PhygoWorld() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                className="group flex items-center gap-4 rounded-xl2 bg-white/70 dark:bg-white/[0.04] backdrop-blur-sm p-5 shadow-soft hover:shadow-glow transition-shadow duration-300"
+                className="group flex items-center gap-4 rounded-xl2 bg-white/95 dark:bg-white/[0.04] backdrop-blur-sm p-5 shadow-soft hover:shadow-glow transition-shadow duration-300"
               >
                 <div className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-electric/15 to-emerald/15 text-electric">
                   <it.icon size={18} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-sm text-ink dark:text-white mb-0.5">{it.title}</h3>
-                  <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed">{it.description}</p>
+                  <p className="text-xs text-ink/60 dark:text-white/50 leading-relaxed">{it.description}</p>
                 </div>
                 <ArrowRight
                   size={15}

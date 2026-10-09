@@ -212,7 +212,7 @@ export default function AgendaPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -225,7 +225,7 @@ export default function AgendaPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-1.5 text-sm text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
         >
           <ArrowLeft size={15} />
           {ui.page.backToPatients}
@@ -292,7 +292,7 @@ export default function AgendaPage() {
                         <p className="text-sm font-semibold text-ink dark:text-white truncate">
                           {req.patients?.name || ui.common.patientFallback}
                         </p>
-                        <p className="text-xs text-ink/50 dark:text-white/50">
+                        <p className="text-xs text-ink/60 dark:text-white/50">
                           {new Date(req.scheduled_at).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}
                           {' · '}
                           {new Date(req.scheduled_at).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })}
@@ -320,19 +320,19 @@ export default function AgendaPage() {
               </div>
             )}
 
-            <div className="rounded-[24px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden">
+            <div className="rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden">
               <div className="overflow-x-auto">
                 <div style={{ minWidth: 900 }}>
-                  <div className="flex border-b border-black/[0.06] dark:border-white/10">
+                  <div className="flex border-b border-black/[0.09] dark:border-white/10">
                     <div className="w-16 shrink-0" />
                     {weekDays.map((d) => (
                       <div
                         key={d.toISOString()}
-                        className={`flex-1 text-center py-3 border-l border-black/[0.06] dark:border-white/10 ${
+                        className={`flex-1 text-center py-3 border-l border-black/[0.09] dark:border-white/10 ${
                           isToday(d) ? 'bg-[#4F7CFF]/5' : ''
                         }`}
                       >
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40">
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
                           {d.toLocaleDateString(locale, { weekday: 'short' })}
                         </p>
                         <p
@@ -367,14 +367,14 @@ export default function AgendaPage() {
                         <div
                           key={d.toISOString()}
                           onClick={(e) => handleColumnClick(d, e)}
-                          className={`flex-1 relative border-l border-black/[0.06] dark:border-white/10 cursor-pointer group/col ${
+                          className={`flex-1 relative border-l border-black/[0.09] dark:border-white/10 cursor-pointer group/col ${
                             isToday(d) ? 'bg-[#4F7CFF]/[0.03]' : ''
                           }`}
                         >
                           {SLOTS.map((_, i) => (
                             <div
                               key={i}
-                              className="absolute left-0 right-0 border-t border-black/[0.03] dark:border-white/[0.05] group-hover/col:bg-[#4F7CFF]/[0.02]"
+                              className="absolute left-0 right-0 border-t border-black/[0.05] dark:border-white/[0.05] group-hover/col:bg-[#4F7CFF]/[0.02]"
                               style={{ top: i * ROW_HEIGHT, height: ROW_HEIGHT }}
                             />
                           ))}
@@ -394,7 +394,7 @@ export default function AgendaPage() {
                                   e.stopPropagation()
                                   router.push(`/dashboard/patients/${a.patient_id}`)
                                 }}
-                                className="absolute left-1 right-1 rounded-lg px-2 py-1 text-left overflow-hidden text-white shadow-sm hover:shadow-md hover:scale-[1.02] transition-all z-10"
+                                className="absolute left-1 right-1 rounded-lg px-2 py-1 text-left overflow-hidden text-white shadow-soft hover:shadow-md hover:scale-[1.02] transition-all z-10"
                                 style={{
                                   top,
                                   height,
@@ -427,14 +427,14 @@ export default function AgendaPage() {
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ background: 'linear-gradient(135deg, #4F7CFF 0%, #6E8FFF 100%)' }}
                 />
-                <span className="text-xs text-ink/50 dark:text-white/50">{ui.common.videoCall}</span>
+                <span className="text-xs text-ink/60 dark:text-white/50">{ui.common.videoCall}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ background: 'linear-gradient(135deg, #32D6A0 0%, #22B888 100%)' }}
                 />
-                <span className="text-xs text-ink/50 dark:text-white/50">{ui.common.inPerson}</span>
+                <span className="text-xs text-ink/60 dark:text-white/50">{ui.common.inPerson}</span>
               </div>
               <span className="text-xs text-ink/30 dark:text-white/30">{ui.page.legendHint}</span>
             </div>
@@ -456,7 +456,7 @@ export default function AgendaPage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm rounded-[24px] border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#12131a] shadow-2xl p-6"
+              className="w-full max-w-sm rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#12131a] shadow-2xl p-6"
             >
               <p className="text-xs font-semibold uppercase tracking-wide text-[#4F7CFF] mb-1">
                 {ui.modal.newAppointmentEyebrow}
@@ -466,13 +466,13 @@ export default function AgendaPage() {
               </p>
 
               <div className="mb-4">
-                <label className="text-xs font-medium text-ink/50 dark:text-white/50 mb-1.5 block">
+                <label className="text-xs font-medium text-ink/60 dark:text-white/50 mb-1.5 block">
                   {ui.modal.timeLabel}
                 </label>
                 <select
                   value={addSlotIndex}
                   onChange={(e) => setAddSlotIndex(Number(e.target.value))}
-                  className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.03] px-3 py-2.5 text-sm outline-none focus:border-[#4F7CFF] text-ink dark:text-white"
+                  className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.03] px-3 py-2.5 text-sm outline-none focus:border-[#4F7CFF] text-ink dark:text-white"
                 >
                   {SLOTS.map((slot, i) => (
                     <option key={i} value={i}>
@@ -483,7 +483,7 @@ export default function AgendaPage() {
               </div>
 
               <div className="mb-4">
-                <label className="text-xs font-medium text-ink/50 dark:text-white/50 mb-1.5 block">
+                <label className="text-xs font-medium text-ink/60 dark:text-white/50 mb-1.5 block">
                   {ui.modal.patientLabel}
                 </label>
                 {selectedPatient ? (
@@ -510,13 +510,13 @@ export default function AgendaPage() {
                       value={patientQuery}
                       onChange={(e) => searchPatients(e.target.value)}
                       placeholder={ui.modal.searchPlaceholder}
-                      className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.03] pl-9 pr-3 py-2.5 text-sm outline-none focus:border-[#4F7CFF] text-ink dark:text-white"
+                      className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.03] pl-9 pr-3 py-2.5 text-sm outline-none focus:border-[#4F7CFF] text-ink dark:text-white"
                     />
                     {searchingPatients && (
-                      <p className="text-[11px] text-ink/40 dark:text-white/40 mt-1.5">{ui.modal.searching}</p>
+                      <p className="text-[11px] text-ink/55 dark:text-white/40 mt-1.5">{ui.modal.searching}</p>
                     )}
                     {!searchingPatients && patientQuery && patientResults.length === 0 && (
-                      <p className="text-[11px] text-ink/40 dark:text-white/40 mt-1.5">{ui.modal.noPatientsFound}</p>
+                      <p className="text-[11px] text-ink/55 dark:text-white/40 mt-1.5">{ui.modal.noPatientsFound}</p>
                     )}
                     {patientResults.length > 0 && (
                       <div className="mt-1.5 space-y-0.5 max-h-40 overflow-y-auto rounded-xl border border-black/10 dark:border-white/10 p-1">
@@ -547,7 +547,7 @@ export default function AgendaPage() {
                   className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold border transition-colors ${
                     addSessionType === 'video'
                       ? 'border-[#4F7CFF] text-[#4F7CFF] bg-[#4F7CFF]/10'
-                      : 'border-black/10 dark:border-white/10 text-ink/50 dark:text-white/50'
+                      : 'border-black/10 dark:border-white/10 text-ink/60 dark:text-white/50'
                   }`}
                 >
                   <Video size={14} />
@@ -558,7 +558,7 @@ export default function AgendaPage() {
                   className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold border transition-colors ${
                     addSessionType === 'in_person'
                       ? 'border-[#4F7CFF] text-[#4F7CFF] bg-[#4F7CFF]/10'
-                      : 'border-black/10 dark:border-white/10 text-ink/50 dark:text-white/50'
+                      : 'border-black/10 dark:border-white/10 text-ink/60 dark:text-white/50'
                   }`}
                 >
                   <MapPin size={14} />
@@ -567,7 +567,7 @@ export default function AgendaPage() {
               </div>
 
               <div className="mb-4">
-                <label className="text-xs font-medium text-ink/50 dark:text-white/50 mb-1.5 block">
+                <label className="text-xs font-medium text-ink/60 dark:text-white/50 mb-1.5 block">
                   {ui.modal.noteLabel}
                 </label>
                 <textarea
@@ -575,7 +575,7 @@ export default function AgendaPage() {
                   onChange={(e) => setAddNote(e.target.value)}
                   rows={2}
                   placeholder={ui.modal.notePlaceholder}
-                  className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.03] px-3 py-2.5 text-sm outline-none focus:border-[#4F7CFF] text-ink dark:text-white resize-none"
+                  className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.03] px-3 py-2.5 text-sm outline-none focus:border-[#4F7CFF] text-ink dark:text-white resize-none"
                 />
               </div>
 

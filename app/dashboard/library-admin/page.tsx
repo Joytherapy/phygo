@@ -122,7 +122,7 @@ export default function LibraryAdminPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] transition-colors">
       <Navbar />
 
       <div className="relative max-w-3xl mx-auto pt-40 pb-24 px-6">
@@ -132,7 +132,7 @@ export default function LibraryAdminPage() {
             <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white mb-2">
               Pro Library — Manage Items
             </h1>
-            <p className="text-sm text-ink/50 dark:text-white/50">{items.length} items total.</p>
+            <p className="text-sm text-ink/60 dark:text-white/50">{items.length} items total.</p>
           </div>
           <button
             onClick={() => setEditing(emptyItem())}
@@ -144,12 +144,12 @@ export default function LibraryAdminPage() {
         </div>
 
         {editing && (
-          <div className="mb-10 rounded-[24px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-6">
+          <div className="mb-10 rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-ink dark:text-white">
                 {editing.id ? 'Edit item' : 'New item'}
               </h2>
-              <button onClick={() => setEditing(null)} className="text-ink/40 dark:text-white/40">
+              <button onClick={() => setEditing(null)} className="text-ink/55 dark:text-white/40">
                 <X size={18} />
               </button>
             </div>
@@ -213,7 +213,7 @@ export default function LibraryAdminPage() {
               />
             </div>
 
-            <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-2 mt-4">Steps (3)</p>
+            <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-2 mt-4">Steps (3)</p>
             {editing.steps.map((step, i) => (
               <div key={i} className="grid grid-cols-3 gap-2 mb-2">
                 <input
@@ -270,17 +270,17 @@ export default function LibraryAdminPage() {
         )}
 
         {loading ? (
-          <p className="text-sm text-ink/50 dark:text-white/50">Loading…</p>
+          <p className="text-sm text-ink/60 dark:text-white/50">Loading…</p>
         ) : (
           <div className="grid gap-3">
             {items.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-4"
+                className="flex items-center justify-between rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4"
               >
                 <div>
                   <p className="text-sm font-semibold text-ink dark:text-white">{item.title}</p>
-                  <p className="text-xs text-ink/50 dark:text-white/50">
+                  <p className="text-xs text-ink/60 dark:text-white/50">
                     {item.level} · {item.body_position} · {item.equipment}
                   </p>
                 </div>

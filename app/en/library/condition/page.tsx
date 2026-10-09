@@ -36,7 +36,7 @@ export default async function ConditionLibraryIndexPageEN() {
   const conditions = await getTranslatedConditionNames('en');
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -58,7 +58,7 @@ export default async function ConditionLibraryIndexPageEN() {
             </span>{' '}
             clinical conditions
           </h1>
-          <p className="text-sm text-ink/50 dark:text-white/50 max-w-xl mx-auto">
+          <p className="text-sm text-ink/60 dark:text-white/50 max-w-xl mx-auto">
             Orthopedic, neurological, cardiopulmonary, oncological — every entry verified against clinical guidelines and up-to-date scientific literature, built for day-to-day physiotherapy practice.
           </p>
           <div className="flex justify-center mt-5">

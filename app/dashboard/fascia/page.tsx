@@ -300,7 +300,7 @@ export default function FasciaPage() {
       : rehab.some(matchesRehab);
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -324,7 +324,7 @@ export default function FasciaPage() {
         </div>
 
         <div className="flex justify-center mb-6">
-          <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
+          <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
             {SUB_TABS.map((t) => (
               <button
                 key={t.key}
@@ -332,7 +332,7 @@ export default function FasciaPage() {
                 className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   subView === t.key
                     ? 'text-white'
-                    : 'text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
+                    : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                 }`}
                 style={subView === t.key ? { background: ACCENT.solid } : undefined}
               >
@@ -366,7 +366,7 @@ export default function FasciaPage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {ui.fascia.structuresHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">{ui.fascia.structuresHint}</p>
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">{ui.fascia.structuresHint}</p>
 
             <div
               className="mb-10 rounded-2xl border p-6"
@@ -375,11 +375,11 @@ export default function FasciaPage() {
               <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{ui.fascia.structuresIntro}</p>
             </div>
 
-            {structuresLoading && <p className="text-sm text-ink/40 dark:text-white/40">{ui.fascia.loading}</p>}
+            {structuresLoading && <p className="text-sm text-ink/55 dark:text-white/40">{ui.fascia.loading}</p>}
             {structuresError && <p className="text-sm text-red-500">{structuresError}</p>}
 
             {!structuresLoading && !structuresError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!structuresLoading && !structuresError && (
@@ -396,7 +396,7 @@ export default function FasciaPage() {
                         {items.map((s) => (
                           <div
                             key={s.id}
-                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-sm shadow-black/5 dark:shadow-black/40"
+                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-soft shadow-black/5 dark:shadow-black/40"
                           >
                             {s.diagram_image && (
                               <button
@@ -431,7 +431,7 @@ export default function FasciaPage() {
                               </p>
                             )}
                             {s.clinical_relevance && (
-                              <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed">
+                              <p className="text-xs text-ink/60 dark:text-white/50 leading-relaxed">
                                 <span className="font-semibold">{ui.anatomy.clinicalRelevance}: </span>
                                 {s.clinical_relevance}
                               </p>
@@ -453,13 +453,13 @@ export default function FasciaPage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {ui.fascia.functionHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">{ui.fascia.functionHint}</p>
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">{ui.fascia.functionHint}</p>
 
-            {functionLoading && <p className="text-sm text-ink/40 dark:text-white/40">{ui.fascia.loading}</p>}
+            {functionLoading && <p className="text-sm text-ink/55 dark:text-white/40">{ui.fascia.loading}</p>}
             {functionError && <p className="text-sm text-red-500">{functionError}</p>}
 
             {!functionLoading && !functionError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!functionLoading && !functionError && (
@@ -476,7 +476,7 @@ export default function FasciaPage() {
                         {items.map((f) => (
                           <div
                             key={f.id}
-                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-sm shadow-black/5 dark:shadow-black/40"
+                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-soft shadow-black/5 dark:shadow-black/40"
                           >
                             {f.diagram_image && (
                               <button
@@ -504,7 +504,7 @@ export default function FasciaPage() {
                               </p>
                             )}
                             {f.clinical_relevance && (
-                              <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed">
+                              <p className="text-xs text-ink/60 dark:text-white/50 leading-relaxed">
                                 <span className="font-semibold">{ui.anatomy.clinicalRelevance}: </span>
                                 {f.clinical_relevance}
                               </p>
@@ -526,13 +526,13 @@ export default function FasciaPage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {ui.fascia.treatmentsHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">{ui.fascia.treatmentsHint}</p>
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">{ui.fascia.treatmentsHint}</p>
 
-            {treatmentsLoading && <p className="text-sm text-ink/40 dark:text-white/40">{ui.fascia.loading}</p>}
+            {treatmentsLoading && <p className="text-sm text-ink/55 dark:text-white/40">{ui.fascia.loading}</p>}
             {treatmentsError && <p className="text-sm text-red-500">{treatmentsError}</p>}
 
             {!treatmentsLoading && !treatmentsError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!treatmentsLoading && !treatmentsError && (
@@ -549,7 +549,7 @@ export default function FasciaPage() {
                         {items.map((t) => (
                           <div
                             key={t.id}
-                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-sm shadow-black/5 dark:shadow-black/40"
+                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-soft shadow-black/5 dark:shadow-black/40"
                           >
                             {t.diagram_image && (
                               <button
@@ -578,7 +578,7 @@ export default function FasciaPage() {
                             )}
                             {t.pt_implications && (
                               <div className="rounded-xl bg-black/[0.02] dark:bg-white/[0.03] p-3 mb-3">
-                                <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-1">
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-1">
                                   {ui.fascia.ptImplicationsLabel}
                                 </p>
                                 <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
@@ -587,7 +587,7 @@ export default function FasciaPage() {
                               </div>
                             )}
                             {t.evidence_note && (
-                              <p className="text-[10px] text-ink/40 dark:text-white/40 leading-relaxed">
+                              <p className="text-[10px] text-ink/55 dark:text-white/40 leading-relaxed">
                                 {t.evidence_note}
                               </p>
                             )}
@@ -616,7 +616,7 @@ export default function FasciaPage() {
                   onChange={(e) => setAskQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAskPhygo()}
                   placeholder={ui.fascia.askPhygoPlaceholder}
-                  className="flex-1 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] px-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none focus:border-[#D97706]/40"
+                  className="flex-1 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] px-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none focus:border-[#D97706]/40"
                 />
                 <button
                   onClick={handleAskPhygo}
@@ -629,7 +629,7 @@ export default function FasciaPage() {
               </div>
               {askError && <p className="text-sm text-red-500 mt-3">{askError}</p>}
               {askAnswer && (
-                <div className="mt-4 rounded-xl bg-white dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/10 p-4">
+                <div className="mt-4 rounded-xl bg-white dark:bg-white/[0.03] border border-black/[0.09] dark:border-white/10 p-4">
                   <p className="text-sm text-ink/80 dark:text-white/80 leading-relaxed whitespace-pre-line">
                     {askAnswer}
                   </p>
@@ -644,13 +644,13 @@ export default function FasciaPage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {ui.fascia.rehabHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">{ui.fascia.rehabHint}</p>
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">{ui.fascia.rehabHint}</p>
 
-            {rehabLoading && <p className="text-sm text-ink/40 dark:text-white/40">{ui.fascia.loading}</p>}
+            {rehabLoading && <p className="text-sm text-ink/55 dark:text-white/40">{ui.fascia.loading}</p>}
             {rehabError && <p className="text-sm text-red-500">{rehabError}</p>}
 
             {!rehabLoading && !rehabError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!rehabLoading && !rehabError && (
@@ -667,7 +667,7 @@ export default function FasciaPage() {
                         {items.map((r) => (
                           <div
                             key={r.id}
-                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-sm shadow-black/5 dark:shadow-black/40"
+                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-soft shadow-black/5 dark:shadow-black/40"
                           >
                             {r.diagram_image && (
                               <button
@@ -696,7 +696,7 @@ export default function FasciaPage() {
                             )}
                             {r.protocol && (
                               <div className="rounded-xl bg-black/[0.02] dark:bg-white/[0.03] p-3 mb-3">
-                                <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-1">
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-1">
                                   {ui.fascia.protocolLabel}
                                 </p>
                                 <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
@@ -705,7 +705,7 @@ export default function FasciaPage() {
                               </div>
                             )}
                             {r.evidence_note && (
-                              <p className="text-[10px] text-ink/40 dark:text-white/40 leading-relaxed">
+                              <p className="text-[10px] text-ink/55 dark:text-white/40 leading-relaxed">
                                 {r.evidence_note}
                               </p>
                             )}

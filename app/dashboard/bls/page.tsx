@@ -55,7 +55,7 @@ export default function BLSPage() {
   }, [lang]);
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -79,7 +79,7 @@ export default function BLSPage() {
               {ui.bls.heading}
             </span>
           </h1>
-                    <p className="text-sm text-ink/50 dark:text-white/50 mt-4 max-w-xl mx-auto">
+                    <p className="text-sm text-ink/60 dark:text-white/50 mt-4 max-w-xl mx-auto">
             {ui.bls.subtitle}
           </p>
         </div>
@@ -90,7 +90,7 @@ export default function BLSPage() {
           </p>
         </div>
 
-        {loading && <p className="text-center text-sm text-ink/40 dark:text-white/40">{ui.common.loading}</p>}
+        {loading && <p className="text-center text-sm text-ink/55 dark:text-white/40">{ui.common.loading}</p>}
         {error && <p className="text-center text-sm text-red-500">{error}</p>}
 
         {!loading && !error && (
@@ -111,11 +111,11 @@ export default function BLSPage() {
                       <button
                         key={p.id}
                         onClick={() => setSelected(p)}
-                        className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-colors hover:border-[#EF4444]/40"
+                        className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-colors hover:border-[#EF4444]/40"
                       >
                         <p className="text-sm font-semibold text-ink dark:text-white">{p.name}</p>
                         {p.age_group && (
-                          <span className="inline-block mt-2 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-ink/50 dark:text-white/50">
+                          <span className="inline-block mt-2 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-ink/60 dark:text-white/50">
                             {p.age_group}
                           </span>
                         )}
@@ -143,7 +143,7 @@ export default function BLSPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 p-8"
+              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.09] dark:border-white/10 p-8"
             >
                            <div className="flex items-start justify-between mb-4">
                 <h3 className="text-xl font-bold text-ink dark:text-white pr-6">

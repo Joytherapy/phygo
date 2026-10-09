@@ -67,7 +67,7 @@ export default function NewFolderDialog({
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-[24px] border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#12131a] shadow-2xl p-6"
+            className="w-full max-w-sm rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#12131a] shadow-2xl p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
@@ -78,7 +78,7 @@ export default function NewFolderDialog({
               </div>
               <button
                 onClick={onClose}
-                className="flex h-7 w-7 items-center justify-center rounded-full text-ink/40 dark:text-white/40 hover:bg-ink/5 dark:hover:bg-white/10"
+                className="flex h-7 w-7 items-center justify-center rounded-full text-ink/55 dark:text-white/40 hover:bg-ink/5 dark:hover:bg-white/10"
               >
                 <X size={14} />
               </button>
@@ -91,7 +91,7 @@ export default function NewFolderDialog({
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
               placeholder={ui.dialog.newFolderPlaceholder}
-              className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+              className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
             />
 
             <div className="mt-3 flex items-center gap-1.5">

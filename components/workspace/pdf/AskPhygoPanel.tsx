@@ -76,26 +76,26 @@ export default function AskPhygoPanel({ contextLabel, onClose }: { contextLabel?
   }
 
   return (
-    <div className="flex h-full w-full flex-col rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#0c0d12] overflow-hidden">
-      <div className="flex items-center justify-between gap-2 border-b border-black/[0.06] dark:border-white/10 px-4 py-3">
+    <div className="flex h-full w-full flex-col rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#0c0d12] overflow-hidden">
+      <div className="flex items-center justify-between gap-2 border-b border-black/[0.09] dark:border-white/10 px-4 py-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-ink dark:text-white">
           <Sparkles size={15} className="text-[#4F7CFF]" />
           {ui.ask.title}
         </div>
-        <button onClick={onClose} aria-label={ui.ask.close} className="flex h-7 w-7 items-center justify-center rounded-lg text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors">
+        <button onClick={onClose} aria-label={ui.ask.close} className="flex h-7 w-7 items-center justify-center rounded-lg text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors">
           <X size={14} />
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
-        {turns.length === 0 && <p className="text-sm text-ink/40 dark:text-white/40">{ui.ask.empty}</p>}
+        {turns.length === 0 && <p className="text-sm text-ink/55 dark:text-white/40">{ui.ask.empty}</p>}
         {turns.map((t, i) => (
           <div key={i} className="space-y-1.5">
             <p className="text-sm font-medium text-ink dark:text-white">{t.question}</p>
             {t.answer && <p className="text-sm text-ink/70 dark:text-white/70 whitespace-pre-wrap">{t.answer}</p>}
             {t.error && <p className="text-sm text-red-500">{t.error}</p>}
             {!t.answer && !t.error && loading && i === turns.length - 1 && (
-              <p className="flex items-center gap-1.5 text-sm text-ink/40 dark:text-white/40">
+              <p className="flex items-center gap-1.5 text-sm text-ink/55 dark:text-white/40">
                 <Loader2 size={12} className="animate-spin" /> {ui.ask.thinking}
               </p>
             )}
@@ -103,7 +103,7 @@ export default function AskPhygoPanel({ contextLabel, onClose }: { contextLabel?
         ))}
       </div>
 
-      <div className="border-t border-black/[0.06] dark:border-white/10 p-3">
+      <div className="border-t border-black/[0.09] dark:border-white/10 p-3">
         <div className="flex items-center gap-2">
           <input
             value={question}

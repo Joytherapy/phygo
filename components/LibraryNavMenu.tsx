@@ -94,7 +94,7 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={navUi.searchPlaceholder}
-          className="w-full rounded-lg border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/5 pl-8 pr-3 py-1.5 text-xs text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 outline-none focus:border-[#4F7CFF]/40 transition-colors"
+          className="w-full rounded-lg border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/5 pl-8 pr-3 py-1.5 text-xs text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 outline-none focus:border-[#4F7CFF]/40 transition-colors"
         />
       </div>
 
@@ -109,7 +109,7 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
               <button
                 type="button"
                 onClick={() => toggleCategory(cat.id)}
-                className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 hover:text-ink/70 dark:hover:text-white/70 transition-colors"
+                className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 hover:text-ink/70 dark:hover:text-white/70 transition-colors"
               >
                 {navUi.categories[cat.id]}
                 <ChevronDown size={11} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -145,7 +145,7 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
                             {ui.libraryLinks[key].label}
                           </p>
                           {variant === 'desktop' && (
-                            <p className="text-xs text-ink/50 dark:text-white/50 mt-0.5">{ui.libraryLinks[key].description}</p>
+                            <p className="text-xs text-ink/60 dark:text-white/50 mt-0.5">{ui.libraryLinks[key].description}</p>
                           )}
                         </a>
                       )
@@ -156,7 +156,7 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
             </div>
           )
         })}
-        {isSearching && !anyMatch && <p className="px-3 py-2 text-xs text-ink/40 dark:text-white/40">{navUi.noResults}</p>}
+        {isSearching && !anyMatch && <p className="px-3 py-2 text-xs text-ink/55 dark:text-white/40">{navUi.noResults}</p>}
       </div>
     </div>
   )

@@ -158,7 +158,7 @@ export default function EventsAdminPage() {
   const shown = filter === 'pending_review' ? events.filter((e) => e.moderation_status === 'pending_review') : events
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
       <div className="relative max-w-4xl mx-auto pt-40 pb-24 px-6">
@@ -181,7 +181,7 @@ export default function EventsAdminPage() {
         </div>
 
         {showForm && (
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 mb-8 grid sm:grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 mb-8 grid sm:grid-cols-2 gap-3">
             <input
               placeholder="Title"
               value={form.title}
@@ -310,15 +310,15 @@ export default function EventsAdminPage() {
         </div>
 
         {loading ? (
-          <p className="text-sm text-ink/50 dark:text-white/50">{ui.events.loadingEvents}</p>
+          <p className="text-sm text-ink/60 dark:text-white/50">{ui.events.loadingEvents}</p>
         ) : shown.length === 0 ? (
-          <div className="rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
-            <p className="text-sm text-ink/50 dark:text-white/50">Nothing here right now.</p>
+          <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
+            <p className="text-sm text-ink/60 dark:text-white/50">Nothing here right now.</p>
           </div>
         ) : (
           <div className="grid gap-3">
             {shown.map((event) => (
-              <div key={event.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5">
+              <div key={event.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5">
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-ink/60 dark:text-white/60">
                     {event.moderation_status}
@@ -334,7 +334,7 @@ export default function EventsAdminPage() {
                 </div>
 
                 <h2 className="text-base font-semibold text-ink dark:text-white mb-1">{event.title}</h2>
-                <p className="text-xs text-ink/50 dark:text-white/50 mb-4">
+                <p className="text-xs text-ink/60 dark:text-white/50 mb-4">
                   {new Date(event.start_date).toLocaleDateString()} · {event.city || event.country || event.location_type}
                 </p>
 

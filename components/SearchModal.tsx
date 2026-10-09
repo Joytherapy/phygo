@@ -75,17 +75,17 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.97, opacity: 0, y: -8 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-xl rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 shadow-2xl overflow-hidden"
+            className="w-full max-w-xl rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.09] dark:border-white/10 shadow-2xl overflow-hidden"
           >
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-black/[0.06] dark:border-white/10">
-              <Search size={18} className="text-ink/40 dark:text-white/40 shrink-0" />
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-black/[0.09] dark:border-white/10">
+              <Search size={18} className="text-ink/55 dark:text-white/40 shrink-0" />
               <input
                 ref={inputRef}
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Cerca tecniche, patologie, procedure..."
-                className="flex-1 bg-transparent outline-none text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40"
+                className="flex-1 bg-transparent outline-none text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40"
               />
               {loading && <Loader2 size={16} className="animate-spin text-ink/30 dark:text-white/30" />}
               <button
@@ -98,18 +98,18 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
 
             <div className="max-h-[60vh] overflow-y-auto p-2">
               {query.trim().length < 2 && (
-                <p className="text-center text-sm text-ink/40 dark:text-white/40 py-10">
+                <p className="text-center text-sm text-ink/55 dark:text-white/40 py-10">
                   Scrivi almeno 2 caratteri per cercare
                 </p>
               )}
               {query.trim().length >= 2 && !loading && results.length === 0 && (
-                <p className="text-center text-sm text-ink/40 dark:text-white/40 py-10">
+                <p className="text-center text-sm text-ink/55 dark:text-white/40 py-10">
                   Nessun risultato per &quot;{query}&quot;
                 </p>
               )}
               {Object.entries(grouped).map(([sectionLabel, items]) => (
                 <div key={sectionLabel} className="mb-2">
-                  <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-ink/40 dark:text-white/40">
+                  <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-ink/55 dark:text-white/40">
                     {sectionLabel}
                   </p>
                   {items.map((r) => (
@@ -120,7 +120,7 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
                     >
                       <span className="text-sm text-ink dark:text-white">{r.title}</span>
                       {r.subtitle && (
-                        <span className="text-xs text-ink/40 dark:text-white/40 shrink-0">{r.subtitle}</span>
+                        <span className="text-xs text-ink/55 dark:text-white/40 shrink-0">{r.subtitle}</span>
                       )}
                     </button>
                   ))}

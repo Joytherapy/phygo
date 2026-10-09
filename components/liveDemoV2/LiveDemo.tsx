@@ -159,7 +159,7 @@ export default function LiveDemo() {
         initial={{ opacity: 0, y: 14, scale: 0.985 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        className="overflow-hidden rounded-[22px] border border-black/5 dark:border-white/[0.075] bg-white/95 dark:bg-[#0e0f12]/85 shadow-[0_1px_1px_rgba(15,23,42,0.03),0_8px_24px_-8px_rgba(15,23,42,0.10),0_32px_64px_-24px_rgba(15,23,42,0.16)] dark:shadow-[0_1px_1px_rgba(0,0,0,0.4),0_20px_40px_-12px_rgba(79,124,255,0.16),0_48px_90px_-30px_rgba(0,0,0,0.65)] backdrop-blur-xl"
+        className="overflow-hidden rounded-[22px] border border-black/[0.08] dark:border-white/[0.075] bg-white/95 dark:bg-[#0e0f12]/85 shadow-[0_1px_1px_rgba(15,23,42,0.03),0_8px_24px_-8px_rgba(15,23,42,0.10),0_32px_64px_-24px_rgba(15,23,42,0.16)] dark:shadow-[0_1px_1px_rgba(0,0,0,0.4),0_20px_40px_-12px_rgba(79,124,255,0.16),0_48px_90px_-30px_rgba(0,0,0,0.65)] backdrop-blur-xl"
       >
         {/* window chrome */}
         <div className="relative flex items-center justify-center gap-2 py-3.5 px-4 border-b border-black/[0.055] dark:border-white/[0.06] bg-black/[0.012] dark:bg-white/[0.018]">
@@ -178,7 +178,7 @@ export default function LiveDemo() {
 
 
         {/* status + waveform */}
-        <div className="relative flex items-center gap-3.5 px-5 py-3.5 border-b border-black/[0.06] dark:border-white/[0.07] bg-black/[0.012] dark:bg-white/[0.018] overflow-hidden">
+        <div className="relative flex items-center gap-3.5 px-5 py-3.5 border-b border-black/[0.09] dark:border-white/[0.07] bg-black/[0.012] dark:bg-white/[0.018] overflow-hidden">
           {phase === "processing" && (
             <motion.div
               className="pointer-events-none absolute inset-y-0 w-2/5"
@@ -222,14 +222,14 @@ export default function LiveDemo() {
             ))}
           </div>
 
-          <span className="ml-auto font-mono text-[11px] tracking-wide text-ink/50 dark:text-white/50">
+          <span className="ml-auto font-mono text-[11px] tracking-wide text-ink/60 dark:text-white/50">
             {mm}:{ss}
           </span>
         </div>
 
         {/* transcript */}
         <div className="px-5 py-4">
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.08em] text-ink/50 dark:text-white/50">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.08em] text-ink/60 dark:text-white/50">
             Transcript
           </p>
           <p className="min-h-[2.6em] text-[14.5px] leading-relaxed text-ink dark:text-white/90">
@@ -257,7 +257,7 @@ export default function LiveDemo() {
               }
               transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
             >
-              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-ink/50 dark:text-white/50">
+              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-ink/60 dark:text-white/50">
                 {FIELDS[key].label}
               </p>
               <p
@@ -315,8 +315,8 @@ export default function LiveDemo() {
         </div>
 
         {/* footer */}
-        <div className="border-t border-black/[0.06] dark:border-white/[0.07] bg-black/[0.012] dark:bg-white/[0.018] px-5 py-2.5">
-          <span className="text-[11px] tracking-tight text-ink/50 dark:text-white/50">
+        <div className="border-t border-black/[0.09] dark:border-white/[0.07] bg-black/[0.012] dark:bg-white/[0.018] px-5 py-2.5">
+          <span className="text-[11px] tracking-tight text-ink/60 dark:text-white/50">
             Phygo writes the documentation as you talk.
           </span>
         </div>

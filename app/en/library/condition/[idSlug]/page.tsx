@@ -106,7 +106,7 @@ export default async function PublicConditionPageEN({
   };
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -124,7 +124,7 @@ export default async function PublicConditionPageEN({
         <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
           <a
             href="/en/library/condition"
-            className="inline-flex items-center gap-2 text-sm font-medium text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-medium text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white transition-colors"
           >
             <ArrowLeft size={16} />
             Clinical Library
@@ -209,7 +209,7 @@ export default async function PublicConditionPageEN({
         )}
 
         {condition.source && (
-          <div className="mb-10 flex items-start gap-2 text-xs text-ink/40 dark:text-white/40">
+          <div className="mb-10 flex items-start gap-2 text-xs text-ink/55 dark:text-white/40">
             <Quote size={13} className="shrink-0 mt-0.5" />
             <p>
               {condition.source}
@@ -218,7 +218,7 @@ export default async function PublicConditionPageEN({
           </div>
         )}
 
-        <div className="rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-gradient-to-br from-[#4F7CFF]/5 to-[#32D6A0]/5 p-8 text-center">
+        <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-gradient-to-br from-[#4F7CFF]/5 to-[#32D6A0]/5 p-8 text-center">
           <div className="flex justify-center mb-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#4F7CFF] to-[#32D6A0] text-white">
               <Sparkles size={18} />

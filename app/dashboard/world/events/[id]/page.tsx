@@ -119,18 +119,18 @@ export default function EventDetailPage() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen bg-white dark:bg-[#08090b] transition-colors">
+      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] transition-colors">
         <Navbar />
-        <div className="pt-40 text-center text-ink/40 dark:text-white/40">{ui.events.loadingEvents}</div>
+        <div className="pt-40 text-center text-ink/55 dark:text-white/40">{ui.events.loadingEvents}</div>
       </div>
     )
   }
 
   if (notFound || !event) {
     return (
-      <div className="relative min-h-screen bg-white dark:bg-[#08090b] transition-colors">
+      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] transition-colors">
         <Navbar />
-        <div className="pt-40 text-center text-ink/40 dark:text-white/40">{ui.events.eventNotFound}</div>
+        <div className="pt-40 text-center text-ink/55 dark:text-white/40">{ui.events.eventNotFound}</div>
       </div>
     )
   }
@@ -158,7 +158,7 @@ export default function EventDetailPage() {
       : '#8A93A6'
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -169,7 +169,7 @@ export default function EventDetailPage() {
       <div className="relative max-w-3xl mx-auto pt-36 pb-24 px-6">
         <button
           onClick={() => router.push('/dashboard/world/events')}
-          className="flex items-center gap-2 text-sm font-medium text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white transition-colors mb-8"
+          className="flex items-center gap-2 text-sm font-medium text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white transition-colors mb-8"
         >
           <ArrowLeft size={15} />
           {ui.events.backToEvents}
@@ -194,7 +194,7 @@ export default function EventDetailPage() {
           </h1>
 
           {event.organizer && (
-            <p className="flex items-center gap-1.5 text-sm text-ink/50 dark:text-white/50 mb-8">
+            <p className="flex items-center gap-1.5 text-sm text-ink/60 dark:text-white/50 mb-8">
               <Building2 size={14} />
               {ui.events.organizerLabel}: {event.organizer}
             </p>
@@ -212,21 +212,21 @@ export default function EventDetailPage() {
           </div>
 
           {event.registration_deadline && (
-            <p className="text-xs text-ink/40 dark:text-white/40 mb-8">
+            <p className="text-xs text-ink/55 dark:text-white/40 mb-8">
               {ui.events.registrationDeadlineLabel}: {new Date(event.registration_deadline).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
           )}
 
           {event.description && (
             <div className="mb-8">
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase text-ink/40 dark:text-white/40 mb-2">{ui.events.descriptionLabel}</p>
+              <p className="text-xs font-semibold tracking-[0.2em] uppercase text-ink/55 dark:text-white/40 mb-2">{ui.events.descriptionLabel}</p>
               <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed whitespace-pre-line">{event.description}</p>
             </div>
           )}
 
           {event.topics?.length > 0 && (
             <div className="mb-8">
-              <p className="flex items-center gap-1.5 text-xs font-semibold tracking-[0.2em] uppercase text-ink/40 dark:text-white/40 mb-2">
+              <p className="flex items-center gap-1.5 text-xs font-semibold tracking-[0.2em] uppercase text-ink/55 dark:text-white/40 mb-2">
                 <Tag size={12} />
                 {ui.events.topicsLabel}
               </p>
@@ -242,7 +242,7 @@ export default function EventDetailPage() {
 
           {event.speakers?.length > 0 && (
             <div className="mb-10">
-              <p className="flex items-center gap-1.5 text-xs font-semibold tracking-[0.2em] uppercase text-ink/40 dark:text-white/40 mb-2">
+              <p className="flex items-center gap-1.5 text-xs font-semibold tracking-[0.2em] uppercase text-ink/55 dark:text-white/40 mb-2">
                 <Users size={12} />
                 {ui.events.speakersLabel}
               </p>
@@ -287,10 +287,10 @@ export default function EventDetailPage() {
 
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3">
+    <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10">{icon}</div>
       <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">{label}</p>
         <p className="text-sm font-semibold text-ink dark:text-white truncate">{value}</p>
       </div>
     </div>

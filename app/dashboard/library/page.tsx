@@ -94,14 +94,14 @@ export default function LibraryPage() {
 
   if (forbidden) {
     return (
-      <div className="relative min-h-screen bg-white dark:bg-[#08090b] transition-colors">
+      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] transition-colors">
         <Navbar />
         <div className="relative max-w-lg mx-auto pt-48 pb-24 px-6 text-center">
           <Lock size={32} className="mx-auto mb-4 text-ink/30 dark:text-white/30" />
           <h1 className="font-display text-2xl font-bold text-ink dark:text-white mb-2">
             Pro Library is a Pro feature
           </h1>
-          <p className="text-sm text-ink/50 dark:text-white/50">
+          <p className="text-sm text-ink/60 dark:text-white/50">
             Upgrade your plan to unlock the full clinical content library.
           </p>
         </div>
@@ -110,7 +110,7 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -126,13 +126,13 @@ export default function LibraryPage() {
         <h1 className="font-display text-6xl font-bold tracking-tight mb-3 text-ink dark:text-white">
           Pro <span style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Library</span>
         </h1>
-        <p className="text-base text-ink/50 dark:text-white/50 mb-8 max-w-lg">
+        <p className="text-base text-ink/60 dark:text-white/50 mb-8 max-w-lg">
           Curated, clinically structured content — ready to bring straight into a session.
         </p>
 
 
         {loading ? (
-          <p className="text-sm text-ink/50 dark:text-white/50">Loading…</p>
+          <p className="text-sm text-ink/60 dark:text-white/50">Loading…</p>
         ) : (
           <>
             <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
@@ -165,7 +165,7 @@ export default function LibraryPage() {
                     className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold border transition-colors ${
                       activeSubcategory === sub.id
                         ? 'border-[#4F7CFF] text-[#4F7CFF] bg-[#4F7CFF]/10'
-                        : 'border-black/10 dark:border-white/15 text-ink/50 dark:text-white/50'
+                        : 'border-black/10 dark:border-white/15 text-ink/60 dark:text-white/50'
                     }`}
                   >
                     {sub.name}
@@ -183,7 +183,7 @@ export default function LibraryPage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search items…"
-                className="relative w-full text-sm rounded-full border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] pl-14 pr-4 py-3.5 outline-none focus:border-[#4F7CFF] text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40"
+                className="relative w-full text-sm rounded-full border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] pl-14 pr-4 py-3.5 outline-none focus:border-[#4F7CFF] text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40"
               />
             </div>
 
@@ -191,7 +191,7 @@ export default function LibraryPage() {
               {filteredItems.map((item) => (
                 <div
                   key={item.id}
-                  className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl hover:border-[#4F7CFF]/40 transition-colors"
+                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl hover:border-[#4F7CFF]/40 transition-colors"
                 >
                   <button
                     onClick={() => setOpenItem(item)}
@@ -215,7 +215,7 @@ export default function LibraryPage() {
                         {item.level}
                       </span>
                       <h3 className="text-base font-semibold text-ink dark:text-white mb-1">{item.title}</h3>
-                      <p className="text-xs text-ink/50 dark:text-white/50">
+                      <p className="text-xs text-ink/60 dark:text-white/50">
                         {item.body_position} · {item.equipment}
                       </p>
                     </div>
@@ -226,7 +226,7 @@ export default function LibraryPage() {
                 </div>
               ))}
               {filteredItems.length === 0 && (
-                <p className="text-sm text-ink/50 dark:text-white/50 col-span-2">No items yet in this category.</p>
+                <p className="text-sm text-ink/60 dark:text-white/50 col-span-2">No items yet in this category.</p>
               )}
             </div>
           </>
@@ -240,7 +240,7 @@ export default function LibraryPage() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-w-lg w-full max-h-[85vh] overflow-y-auto rounded-[24px] bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 p-6"
+            className="max-w-lg w-full max-h-[85vh] overflow-y-auto rounded-[24px] bg-white dark:bg-[#0e0f12] border border-black/[0.09] dark:border-white/10 p-6"
           >
             {openItem.image_url && (
               <div className="w-full aspect-video bg-white rounded-2xl overflow-hidden mb-4 flex items-center justify-center">
@@ -264,7 +264,7 @@ export default function LibraryPage() {
               <ClinicalActionBar contentType="exercise" contentId={openItem.id} />
             </div>
 
-            <div className="flex gap-4 text-xs text-ink/50 dark:text-white/50 mb-4">
+            <div className="flex gap-4 text-xs text-ink/60 dark:text-white/50 mb-4">
               <span>{openItem.body_position}</span>
               <span>{openItem.equipment}</span>
               {openItem.reps_duration && <span>{openItem.reps_duration}</span>}

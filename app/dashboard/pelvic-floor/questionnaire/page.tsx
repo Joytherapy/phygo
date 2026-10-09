@@ -62,7 +62,7 @@ export default function PelvicFloorQuestionnairePage() {
 
   if (loadError) {
     return (
-      <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white transition-colors">
+      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white transition-colors">
         <Navbar />
         <div className="relative max-w-2xl mx-auto px-6 pt-40 pb-24">
           <p className="text-center text-sm text-red-500 py-10">{ui.pelvicFloorAnamnesis.errorLoading}</p>
@@ -73,10 +73,10 @@ export default function PelvicFloorQuestionnairePage() {
 
   if (!data) {
     return (
-      <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white transition-colors">
+      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white transition-colors">
         <Navbar />
         <div className="relative max-w-2xl mx-auto px-6 pt-40 pb-24">
-          <p className="text-center text-sm text-ink/50 dark:text-white/50 py-10">{ui.pelvicFloorAnamnesis.loading}</p>
+          <p className="text-center text-sm text-ink/60 dark:text-white/50 py-10">{ui.pelvicFloorAnamnesis.loading}</p>
         </div>
       </div>
     );
@@ -110,7 +110,7 @@ export default function PelvicFloorQuestionnairePage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -271,7 +271,7 @@ export default function PelvicFloorQuestionnairePage() {
               {sections.map((s) => (
                 <div
                   key={s.key}
-                  className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
                 >
                   <p className="text-sm font-bold text-ink dark:text-white mb-3">{s.title}</p>
                   <div className="space-y-2">
@@ -285,7 +285,7 @@ export default function PelvicFloorQuestionnairePage() {
                         : resolveLabel(q, answer);
                       return (
                         <div key={q.id} className="text-xs">
-                          <span className="text-ink/50 dark:text-white/50">{q.text}: </span>
+                          <span className="text-ink/60 dark:text-white/50">{q.text}: </span>
                           <span className="text-ink/80 dark:text-white/80 font-medium">{labelText}</span>
                         </div>
                       );

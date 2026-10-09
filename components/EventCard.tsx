@@ -62,7 +62,7 @@ export default function EventCard({ event, onClick }: { event: EventRecord; onCl
   return (
     <button
       onClick={onClick}
-      className="group text-left relative rounded-[22px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden flex flex-col shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 w-full"
+      className="group text-left relative rounded-[22px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden flex flex-col shadow-soft hover:shadow-xl hover:-translate-y-1 transition-all duration-300 w-full"
     >
       <div
         className="relative h-28 flex items-center justify-center overflow-hidden"
@@ -77,10 +77,10 @@ export default function EventCard({ event, onClick }: { event: EventRecord; onCl
             style={{ background: 'linear-gradient(135deg, #22D3EE 0%, #A855F7 100%)' }}
           />
         )}
-        <span className="absolute top-2.5 left-2.5 rounded-full bg-white/90 dark:bg-black/60 backdrop-blur-sm px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-ink dark:text-white shadow-sm">
+        <span className="absolute top-2.5 left-2.5 rounded-full bg-white/90 dark:bg-black/60 backdrop-blur-sm px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-ink dark:text-white shadow-soft">
           {ui.events.categoryLabels[event.category as keyof typeof ui.events.categoryLabels] || event.category}
         </span>
-        <span className="absolute top-2.5 right-2.5 rounded-full bg-white/90 dark:bg-black/60 backdrop-blur-sm px-2.5 py-1 text-[11px] font-bold text-ink dark:text-white shadow-sm">
+        <span className="absolute top-2.5 right-2.5 rounded-full bg-white/90 dark:bg-black/60 backdrop-blur-sm px-2.5 py-1 text-[11px] font-bold text-ink dark:text-white shadow-soft">
           {priceLabel}
         </span>
       </div>
@@ -88,12 +88,12 @@ export default function EventCard({ event, onClick }: { event: EventRecord; onCl
       <div className="p-4 flex flex-col flex-1 gap-2">
         <p className="text-sm font-bold text-ink dark:text-white leading-snug line-clamp-2">{event.title}</p>
 
-        <div className="flex items-center gap-1.5 text-xs text-ink/50 dark:text-white/50">
+        <div className="flex items-center gap-1.5 text-xs text-ink/60 dark:text-white/50">
           <Calendar size={12} />
           {dateLabel}
         </div>
 
-        <div className="flex items-center gap-1.5 text-xs text-ink/50 dark:text-white/50">
+        <div className="flex items-center gap-1.5 text-xs text-ink/60 dark:text-white/50">
           {event.location_type === 'online' ? <Wifi size={12} /> : <MapPin size={12} />}
           {locationLabel}
           {place && ` · ${place}`}

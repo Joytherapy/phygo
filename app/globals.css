@@ -60,7 +60,10 @@ html {
 }
 
 body {
-  background: #ffffff;
+  /* Soft tinted canvas (matches the existing "mist" token in tailwind.config.js)
+     instead of pure white, so white/near-white cards read as elevated surfaces
+     with real depth rather than blending into the page in light mode. */
+  background: #f6f7f9;
   color: #0b0d12;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;

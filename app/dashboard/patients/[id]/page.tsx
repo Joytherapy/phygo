@@ -280,18 +280,18 @@ export default function PatientDetailPage() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen bg-white dark:bg-[#08090b]">
+      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b]">
         <Navbar />
-        <div className="pt-40 text-center text-ink/40 dark:text-white/40">{ui.common.loading}</div>
+        <div className="pt-40 text-center text-ink/55 dark:text-white/40">{ui.common.loading}</div>
       </div>
     )
   }
 
   if (!patient) {
     return (
-      <div className="relative min-h-screen bg-white dark:bg-[#08090b]">
+      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b]">
         <Navbar />
-        <div className="pt-40 text-center text-ink/40 dark:text-white/40">{ui.patients.patientNotFound}</div>
+        <div className="pt-40 text-center text-ink/55 dark:text-white/40">{ui.patients.patientNotFound}</div>
       </div>
     )
   }
@@ -299,7 +299,7 @@ export default function PatientDetailPage() {
   const lastSessionDate = notes.length > 0 ? new Date(notes[0].created_at) : null
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -322,7 +322,7 @@ export default function PatientDetailPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-1.5 text-sm text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
         >
           <ArrowLeft size={15} />
           {ui.common.backToPatients}
@@ -347,7 +347,7 @@ export default function PatientDetailPage() {
               </h1>
               <div className="flex items-center gap-2 mt-2 flex-wrap">
                 {patient.age && (
-                  <span className="text-sm text-ink/40 dark:text-white/40">
+                  <span className="text-sm text-ink/55 dark:text-white/40">
                     {ui.patients.yearsOld.replace('{age}', String(patient.age))}
                   </span>
                 )}
@@ -400,7 +400,7 @@ export default function PatientDetailPage() {
             {patient.patient_user_id && (
               <button
                 onClick={handleResetPortalAccess}
-                className="flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ink/40 dark:text-white/40 hover:text-red-500 transition-colors self-end"
+                className="flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ink/55 dark:text-white/40 hover:text-red-500 transition-colors self-end"
               >
                 <RotateCcw size={12} />
                 {ui.patients.resetPortalAccess}
@@ -418,7 +418,7 @@ export default function PatientDetailPage() {
             <p className="text-sm font-semibold text-ink dark:text-white mb-1">
               {ui.patients.inviteReadyHeading}
             </p>
-            <p className="text-xs text-ink/50 dark:text-white/50 mb-3">
+            <p className="text-xs text-ink/60 dark:text-white/50 mb-3">
               {ui.patients.inviteShareText.replace('{name}', patient.name)}
             </p>
             <div className="flex items-center gap-2">
@@ -449,20 +449,20 @@ export default function PatientDetailPage() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10"
         >
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
             <div className="flex items-center gap-2 mb-1.5">
               <ClipboardList size={13} className="text-[#4F7CFF]" />
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
                 {ui.patients.statSessions}
               </span>
             </div>
             <p className="text-2xl font-bold text-ink dark:text-white">{notes.length}</p>
           </div>
 
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
             <div className="flex items-center gap-2 mb-1.5">
               <Calendar size={13} className="text-[#32D6A0]" />
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
                 {ui.patients.statLastSession}
               </span>
             </div>
@@ -471,20 +471,20 @@ export default function PatientDetailPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
             <div className="flex items-center gap-2 mb-1.5">
               <Activity size={13} className="text-amber-500" />
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
                 {ui.patients.statPatientSince}
               </span>
             </div>
             <p className="text-2xl font-bold text-ink dark:text-white">{formatSince(patient.created_at, ui)}</p>
           </div>
 
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
             <div className="flex items-center gap-2 mb-1.5">
               <Dumbbell size={13} className="text-[#EC4899]" />
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
                 {ui.patients.statLinkedItems}
               </span>
             </div>
@@ -492,7 +492,7 @@ export default function PatientDetailPage() {
           </div>
         </motion.div>
 
-        <div className="rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
+        <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
           <div className="flex items-start justify-between gap-3 mb-6">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4F7CFF]/15 to-[#4F7CFF]/5 text-[#4F7CFF]">
@@ -502,7 +502,7 @@ export default function PatientDetailPage() {
                 <p className="text-sm font-bold text-ink dark:text-white">
                   {ui.patients.noteHistoryHeading}
                 </p>
-                <p className="text-xs text-ink/40 dark:text-white/40 mt-0.5">
+                <p className="text-xs text-ink/55 dark:text-white/40 mt-0.5">
                   {ui.patients.noteHistorySubtitle}
                 </p>
               </div>
@@ -520,7 +520,7 @@ export default function PatientDetailPage() {
                 <div className="absolute inset-0 rounded-full bg-[#4F7CFF]/20 blur-lg" />
                 <FileText size={20} className="relative" />
               </div>
-              <p className="text-ink/40 dark:text-white/40">
+              <p className="text-ink/55 dark:text-white/40">
                 {ui.patients.noNotesYet}
               </p>
               <p className="text-xs text-ink/30 dark:text-white/30">
@@ -535,13 +535,13 @@ export default function PatientDetailPage() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.35, delay: i * 0.05 }}
-                  className="group rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-start gap-4 shadow-sm hover:border-[#4F7CFF]/30 hover:shadow-md transition-all"
+                  className="group rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-start gap-4 shadow-soft hover:border-[#4F7CFF]/30 hover:shadow-md transition-all"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF] group-hover:scale-105 transition-transform">
                     <FileText size={16} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs text-ink/40 dark:text-white/40 mb-1">
+                    <p className="text-xs text-ink/55 dark:text-white/40 mb-1">
                       {new Date(note.created_at).toLocaleDateString(undefined, {
                         day: 'numeric',
                         month: 'short',
@@ -558,7 +558,7 @@ export default function PatientDetailPage() {
           )}
         </div>
 
-        <div className="mt-8 rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
+        <div className="mt-8 rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
           <div className="flex items-start justify-between gap-3 mb-6">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#32D6A0]/15 to-[#32D6A0]/5 text-[#32D6A0]">
@@ -568,7 +568,7 @@ export default function PatientDetailPage() {
                 <p className="text-sm font-bold text-ink dark:text-white">
                   {ui.patients.treatmentPlanHeading}
                 </p>
-                <p className="text-xs text-ink/40 dark:text-white/40 mt-0.5">
+                <p className="text-xs text-ink/55 dark:text-white/40 mt-0.5">
                   {ui.patients.treatmentPlanSubtitle}
                 </p>
               </div>
@@ -586,7 +586,7 @@ export default function PatientDetailPage() {
                 <div className="absolute inset-0 rounded-full bg-[#32D6A0]/20 blur-lg" />
                 <Dumbbell size={20} className="relative" />
               </div>
-              <p className="text-ink/40 dark:text-white/40">
+              <p className="text-ink/55 dark:text-white/40">
                 {ui.patients.nothingLinkedYet.replace('{name}', patient.name)}
               </p>
               <p className="text-xs text-ink/30 dark:text-white/30 max-w-sm">
@@ -619,7 +619,7 @@ export default function PatientDetailPage() {
                           }
                         : undefined
                     }
-                    className={`rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-start gap-4 shadow-sm transition-colors ${
+                    className={`rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-start gap-4 shadow-soft transition-colors ${
                       href
                         ? 'cursor-pointer hover:border-black/15 dark:hover:border-white/25 hover:bg-white/90 dark:hover:bg-white/[0.06]'
                         : 'hover:border-black/10 dark:hover:border-white/20'
@@ -636,7 +636,7 @@ export default function PatientDetailPage() {
                         <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: `${meta.color}1A`, color: meta.color }}>
                           {ref.payload?.section || refTypeLabel(ref.content_type, ui)}
                         </span>
-                        <span className="text-xs text-ink/40 dark:text-white/40">
+                        <span className="text-xs text-ink/55 dark:text-white/40">
                           {formatRefDate(ref.created_at)}
                         </span>
                       </div>
@@ -644,7 +644,7 @@ export default function PatientDetailPage() {
                         {ref.payload?.label || `${refTypeLabel(ref.content_type, ui)} #${ref.content_id}`}
                       </p>
                       {ref.payload?.result && (
-                        <p className="text-xs text-ink/50 dark:text-white/50 mt-0.5">
+                        <p className="text-xs text-ink/60 dark:text-white/50 mt-0.5">
                           {ref.payload.result}
                         </p>
                       )}
@@ -670,7 +670,7 @@ export default function PatientDetailPage() {
           )}
         </div>
 
-        <div className="mt-8 rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
+        <div className="mt-8 rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
           <div className="flex items-start justify-between gap-3 mb-6 flex-wrap">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6366F1]/15 to-[#6366F1]/5 text-[#6366F1]">
@@ -680,7 +680,7 @@ export default function PatientDetailPage() {
                 <p className="text-sm font-bold text-ink dark:text-white">
                   {ui.patients.nutritionHeading}
                 </p>
-                <p className="text-xs text-ink/40 dark:text-white/40 mt-0.5">
+                <p className="text-xs text-ink/55 dark:text-white/40 mt-0.5">
                   {ui.patients.nutritionSubtitle}
                 </p>
               </div>
@@ -701,7 +701,7 @@ export default function PatientDetailPage() {
                 <div className="absolute inset-0 rounded-full bg-[#6366F1]/20 blur-lg" />
                 <Flame size={20} className="relative" />
               </div>
-              <p className="text-ink/40 dark:text-white/40">
+              <p className="text-ink/55 dark:text-white/40">
                 {ui.patients.nutritionEmpty.replace('{name}', patient.name)}
               </p>
               <p className="text-xs text-ink/30 dark:text-white/30 max-w-sm">
@@ -716,35 +716,35 @@ export default function PatientDetailPage() {
                 return (
                   <div className="space-y-5">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-2">
                         {ui.patients.latestProfileLabel} · {formatRefDate(latestProfile.created_at)}
                       </p>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-3">
+                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
                           <p className="text-lg font-bold text-ink dark:text-white">{latestProfile.tdee}</p>
-                          <p className="text-[10px] text-ink/40 dark:text-white/40">TDEE</p>
+                          <p className="text-[10px] text-ink/55 dark:text-white/40">TDEE</p>
                         </div>
-                        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-3">
+                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
                           <p className="text-lg font-bold text-ink dark:text-white">{latestProfile.protein_g}g</p>
-                          <p className="text-[10px] text-ink/40 dark:text-white/40">{ui.metabolicCalculator.proteinLabel}</p>
+                          <p className="text-[10px] text-ink/55 dark:text-white/40">{ui.metabolicCalculator.proteinLabel}</p>
                         </div>
-                        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-3">
+                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
                           <p className="text-lg font-bold text-ink dark:text-white">{latestProfile.carbs_g}g</p>
-                          <p className="text-[10px] text-ink/40 dark:text-white/40">{ui.metabolicCalculator.carbsLabel}</p>
+                          <p className="text-[10px] text-ink/55 dark:text-white/40">{ui.metabolicCalculator.carbsLabel}</p>
                         </div>
-                        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-3">
+                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
                           <p className="text-lg font-bold text-ink dark:text-white">{latestProfile.fat_g}g</p>
-                          <p className="text-[10px] text-ink/40 dark:text-white/40">{ui.metabolicCalculator.fatLabel}</p>
+                          <p className="text-[10px] text-ink/55 dark:text-white/40">{ui.metabolicCalculator.fatLabel}</p>
                         </div>
                       </div>
                     </div>
 
                     {metabolicHistory.length >= 2 && (
                       <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-2">
                           {ui.patients.weightTrendHeading}
                         </p>
-                        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
                           <WeightTrendChart data={chronological.map((h) => ({ date: h.created_at, weightKg: h.weight_kg }))} height={120} />
                         </div>
                       </div>
@@ -764,7 +764,7 @@ export default function PatientDetailPage() {
                               <p className="text-xl font-bold text-ink dark:text-white">
                                 {metabolicAdaptive.insight.impliedTdee}
                               </p>
-                              <span className="text-xs font-semibold text-ink/40 dark:text-white/40">{ui.metabolicCalculator.kcalPerDaySuffix}</span>
+                              <span className="text-xs font-semibold text-ink/55 dark:text-white/40">{ui.metabolicCalculator.kcalPerDaySuffix}</span>
                               {metabolicAdaptive.insight.deltaFromFormula > 20 && (
                                 <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                                   <TrendingUp size={11} /> +{metabolicAdaptive.insight.deltaFromFormula}
@@ -776,10 +776,10 @@ export default function PatientDetailPage() {
                                 </span>
                               )}
                               {Math.abs(metabolicAdaptive.insight.deltaFromFormula) <= 20 && (
-                                <Minus size={11} className="text-ink/40 dark:text-white/40" />
+                                <Minus size={11} className="text-ink/55 dark:text-white/40" />
                               )}
                             </div>
-                            <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed">
+                            <p className="text-xs text-ink/60 dark:text-white/50 leading-relaxed">
                               {interpolate(ui.metabolicCalculator.adaptiveBasedOn, {
                                 days: metabolicAdaptive.insight.daysSpanned,
                                 entries: metabolicAdaptive.insight.entriesUsed,
@@ -787,7 +787,7 @@ export default function PatientDetailPage() {
                             </p>
                           </>
                         ) : (
-                          <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed">{ui.metabolicCalculator.adaptiveNotEnoughData}</p>
+                          <p className="text-xs text-ink/60 dark:text-white/50 leading-relaxed">{ui.metabolicCalculator.adaptiveNotEnoughData}</p>
                         )}
                       </div>
                     )}

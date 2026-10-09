@@ -71,7 +71,7 @@ export default function NerveDetailPage() {
   }, [slug, lang]);
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -91,7 +91,7 @@ export default function NerveDetailPage() {
         </button>
 
         {loading && (
-          <p className="text-sm text-ink/40 dark:text-white/40">{ui.common.loading}</p>
+          <p className="text-sm text-ink/55 dark:text-white/40">{ui.common.loading}</p>
         )}
 
         {error && <p className="text-sm text-red-500">{error}</p>}
@@ -106,12 +106,12 @@ export default function NerveDetailPage() {
                 {nerve.name}
               </h1>
               {nerve.origin && (
-                <p className="text-sm text-ink/50 dark:text-white/50 mt-3">{nerve.origin}</p>
+                <p className="text-sm text-ink/60 dark:text-white/50 mt-3">{nerve.origin}</p>
               )}
             </div>
 
             {nerve.diagram_image && (
-              <div className="mb-8 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden">
+              <div className="mb-8 rounded-2xl border border-black/[0.09] dark:border-white/10 bg-[#08090b] overflow-hidden">
                 <img
                   src={`${IMAGE_BASE}/${nerve.diagram_image}`}
                   alt={`${nerve.name} diagram`}
@@ -133,8 +133,8 @@ export default function NerveDetailPage() {
 
             <div className="grid sm:grid-cols-2 gap-4 mb-8">
               {nerve.motor_function && (
-                <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-2">
+                <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-2">
                     {ui.brainMap.nerve.motorFunction}
                   </p>
                   <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">
@@ -143,8 +143,8 @@ export default function NerveDetailPage() {
                 </div>
               )}
               {nerve.sensory_function && (
-                <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-2">
+                <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-2">
                     {ui.brainMap.nerve.sensoryFunction}
                   </p>
                   <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">
@@ -166,8 +166,8 @@ export default function NerveDetailPage() {
             )}
 
             {nerve.clinical_sign && (
-              <div className="mb-10 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-2">
+              <div className="mb-10 rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-2">
                   {ui.brainMap.nerve.clinicalSign}
                 </p>
                 <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">
@@ -181,7 +181,7 @@ export default function NerveDetailPage() {
                 {ui.brainMap.nerve.linkedConditions}
               </h2>
               {conditions.length === 0 && (
-                <p className="text-sm text-ink/40 dark:text-white/40">
+                <p className="text-sm text-ink/55 dark:text-white/40">
                   {ui.brainMap.nerve.noConditionsLinkedToNerve}
                 </p>
               )}
@@ -191,7 +191,7 @@ export default function NerveDetailPage() {
                     <button
                       key={c.id}
                       onClick={() => setSelectedCondition(c)}
-                      className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#F5A524]/40 transition-colors"
+                      className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#F5A524]/40 transition-colors"
                     >
                       <p className="text-sm font-semibold text-ink dark:text-white">
                         {c.condition_name}
@@ -219,7 +219,7 @@ export default function NerveDetailPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 p-8"
+              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.09] dark:border-white/10 p-8"
             >
               <div className="flex items-start justify-between mb-4">
                 <h3 className="text-xl font-bold text-ink dark:text-white pr-6">
@@ -271,8 +271,8 @@ export default function NerveDetailPage() {
                   </div>
                 )}
                 {selectedCondition.evidence_level && (
-                  <div className="pt-2 border-t border-black/[0.06] dark:border-white/10">
-                    <p className="text-xs text-ink/40 dark:text-white/40">
+                  <div className="pt-2 border-t border-black/[0.09] dark:border-white/10">
+                    <p className="text-xs text-ink/55 dark:text-white/40">
                       {ui.fields.evidence}: {selectedCondition.evidence_level}
                     </p>
                   </div>

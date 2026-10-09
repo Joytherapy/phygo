@@ -250,7 +250,7 @@ export default function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2.2, duration: 0.8 }}
-        className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 text-ink/30 transition-colors hover:text-ink/50 dark:text-white/30 dark:hover:text-white/50 sm:flex"
+        className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 text-ink/30 transition-colors hover:text-ink/60 dark:text-white/30 dark:hover:text-white/50 sm:flex"
         aria-label="Scroll to explore"
       >
         <span className="eyebrow">Scroll</span>

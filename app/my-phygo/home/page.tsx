@@ -87,14 +87,14 @@ export default function MyPhygoHomePage() {
 
   if (loading) {
     return (
-      <div className="relative pt-40 text-center text-ink/40 dark:text-white/40">Loading...</div>
+      <div className="relative pt-40 text-center text-ink/55 dark:text-white/40">Loading...</div>
     )
   }
 
   if (noAccount || !patient) {
     return (
       <div className="relative max-w-sm mx-auto pt-40 pb-20 px-6 text-center">
-        <p className="text-sm text-ink/50 dark:text-white/50">
+        <p className="text-sm text-ink/60 dark:text-white/50">
           Your account isn't linked to a patient record yet. Please contact your physiotherapist.
         </p>
       </div>
@@ -119,7 +119,7 @@ export default function MyPhygoHomePage() {
           {patient.name}
         </h1>
                 {patient.age && (
-          <p className="text-sm text-ink/50 dark:text-white/50 mt-2">{patient.age} years old</p>
+          <p className="text-sm text-ink/60 dark:text-white/50 mt-2">{patient.age} years old</p>
         )}
       </motion.div>
 
@@ -133,7 +133,7 @@ export default function MyPhygoHomePage() {
 
       <a
         href="/my-phygo/life/metabolic"
-        className="mb-3 flex items-center justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#6366F1]/30 transition-colors group"
+        className="mb-3 flex items-center justify-between rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#6366F1]/30 transition-colors group"
       >
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#6366F1]/10 text-[#6366F1]">
@@ -141,7 +141,7 @@ export default function MyPhygoHomePage() {
           </div>
           <div>
             <p className="text-sm font-semibold text-ink dark:text-white">Metabolic profile</p>
-            <p className="text-xs text-ink/40 dark:text-white/40">Your calorie target and macros for today</p>
+            <p className="text-xs text-ink/55 dark:text-white/40">Your calorie target and macros for today</p>
           </div>
         </div>
         <ArrowRight size={16} className="text-ink/30 dark:text-white/30 group-hover:translate-x-1 transition-transform" />
@@ -149,7 +149,7 @@ export default function MyPhygoHomePage() {
 
       <a
         href="/my-phygo/shop"
-        className="mb-8 flex items-center justify-between rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#4F7CFF]/30 transition-colors group"
+        className="mb-8 flex items-center justify-between rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#4F7CFF]/30 transition-colors group"
       >
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF]">
@@ -157,7 +157,7 @@ export default function MyPhygoHomePage() {
           </div>
           <div>
             <p className="text-sm font-semibold text-ink dark:text-white">Browse equipment</p>
-            <p className="text-xs text-ink/40 dark:text-white/40">Explore products that support your recovery</p>
+            <p className="text-xs text-ink/55 dark:text-white/40">Explore products that support your recovery</p>
           </div>
         </div>
         <ArrowRight size={16} className="text-ink/30 dark:text-white/30 group-hover:translate-x-1 transition-transform" />
@@ -167,7 +167,7 @@ export default function MyPhygoHomePage() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
             <ShoppingBag size={14} className="text-[#4F7CFF]" />
-            <p className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50">
               Recommended for you
             </p>
           </div>
@@ -179,7 +179,7 @@ export default function MyPhygoHomePage() {
                   href={ref.payload.amazonUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3 hover:border-[#4F7CFF]/30 transition-colors"
+                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3 hover:border-[#4F7CFF]/30 transition-colors"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF]">
                     <ShoppingBag size={16} />
@@ -188,7 +188,7 @@ export default function MyPhygoHomePage() {
                     <p className="text-sm font-semibold text-ink dark:text-white truncate">
                       {ref.payload.name}
                     </p>
-                    <p className="text-xs text-ink/40 dark:text-white/40">{ref.payload.price}</p>
+                    <p className="text-xs text-ink/55 dark:text-white/40">{ref.payload.price}</p>
                   </div>
                   <ExternalLink size={14} className="text-ink/30 dark:text-white/30 shrink-0" />
                 </a>
@@ -200,17 +200,17 @@ export default function MyPhygoHomePage() {
 
       {!latestNote ? (
         <div className="rounded-[28px] border border-dashed border-black/10 dark:border-white/15 py-16 text-center">
-          <p className="text-ink/40 dark:text-white/40">
+          <p className="text-ink/55 dark:text-white/40">
             Your physiotherapist hasn't added anything yet.
           </p>
         </div>
       ) : (
         <>
           {latestNote.summary_for_patient && (
-            <div className="mb-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5">
+            <div className="mb-6 rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5">
               <div className="flex items-center gap-2 mb-2">
                 <FileText size={14} className="text-[#4F7CFF]" />
-                <p className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50">
+                <p className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50">
                   From your last session
                 </p>
               </div>
@@ -224,7 +224,7 @@ export default function MyPhygoHomePage() {
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-3">
                 <Dumbbell size={14} className="text-[#32D6A0]" />
-                <p className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50">
+                <p className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50">
                   Your exercises
                 </p>
               </div>
@@ -232,13 +232,13 @@ export default function MyPhygoHomePage() {
                 {exercises.map((ex: any, i: number) => (
                   <div
                     key={ex.internal_id || i}
-                    className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-4"
+                    className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4"
                   >
                     <p className="text-sm font-semibold text-ink dark:text-white">
                       {ex.name || `Exercise ${i + 1}`}
                     </p>
                     {(ex.dosing?.sets || ex.dosing?.reps) && (
-                      <p className="text-xs text-ink/50 dark:text-white/50 mt-1">
+                      <p className="text-xs text-ink/60 dark:text-white/50 mt-1">
                         {ex.dosing?.sets && `${ex.dosing.sets} sets`}
                         {ex.dosing?.sets && ex.dosing?.reps && ' × '}
                         {ex.dosing?.reps && `${ex.dosing.reps} reps`}
@@ -253,7 +253,7 @@ export default function MyPhygoHomePage() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <ClipboardList size={14} className="text-amber-500" />
-              <p className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50">
                 Session history
               </p>
             </div>
@@ -261,11 +261,11 @@ export default function MyPhygoHomePage() {
               {notes.map((note) => (
                 <div
                   key={note.id}
-                  className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3"
+                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3"
                 >
                   <Calendar size={14} className="text-ink/30 dark:text-white/30 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-ink/40 dark:text-white/40">
+                    <p className="text-xs text-ink/55 dark:text-white/40">
                       {new Date(note.created_at).toLocaleDateString(undefined, {
                         day: 'numeric',
                         month: 'short',

@@ -80,8 +80,8 @@ export default function StudyPanel() {
           content without blocking it). */}
       <div className="fixed inset-0 z-[76] bg-black/20 sm:hidden" onClick={close} />
       <div className="fixed inset-y-0 right-0 z-[81] w-full sm:w-96 p-0 sm:p-4">
-        <div className="flex h-full w-full flex-col rounded-none sm:rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#0c0d12] overflow-hidden shadow-lift">
-          <div className="flex items-center justify-between gap-2 border-b border-black/[0.06] dark:border-white/10 px-4 py-3 shrink-0">
+        <div className="flex h-full w-full flex-col rounded-none sm:rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#0c0d12] overflow-hidden shadow-lift">
+          <div className="flex items-center justify-between gap-2 border-b border-black/[0.09] dark:border-white/10 px-4 py-3 shrink-0">
             <div className="flex items-center gap-2 text-sm font-semibold text-ink dark:text-white min-w-0">
               <BookOpen size={15} className="text-[#4F7CFF] shrink-0" />
               <span className="truncate">{ui.studyPanel.title}</span>
@@ -89,14 +89,14 @@ export default function StudyPanel() {
             <button
               onClick={close}
               aria-label={ui.studyPanel.close}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
             >
               <X size={14} />
             </button>
           </div>
 
           {selectionText && (
-            <div className="px-4 py-2.5 border-b border-black/[0.06] dark:border-white/10 shrink-0">
+            <div className="px-4 py-2.5 border-b border-black/[0.09] dark:border-white/10 shrink-0">
               <p className="text-[10px] uppercase tracking-wide text-ink/30 dark:text-white/30 mb-0.5">{ui.studyPanel.selectionLabel}</p>
               <p className="text-xs text-ink/60 dark:text-white/60 line-clamp-2 italic">&ldquo;{selectionText}&rdquo;</p>
             </div>
@@ -104,12 +104,12 @@ export default function StudyPanel() {
 
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
             {status === 'loading' && (
-              <p className="flex items-center gap-1.5 text-sm text-ink/40 dark:text-white/40">
+              <p className="flex items-center gap-1.5 text-sm text-ink/55 dark:text-white/40">
                 <Loader2 size={13} className="animate-spin" /> {ui.studyPanel.loading}
               </p>
             )}
 
-            {status === 'empty' && <p className="text-sm text-ink/40 dark:text-white/40">{ui.studyPanel.empty}</p>}
+            {status === 'empty' && <p className="text-sm text-ink/55 dark:text-white/40">{ui.studyPanel.empty}</p>}
             {status === 'error' && <p className="text-sm text-red-500">{ui.studyPanel.error}</p>}
 
             {status === 'found' && match && (
@@ -135,7 +135,7 @@ export default function StudyPanel() {
 
                 {match.sections.map((s) => (
                   <div key={s.key}>
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-1">
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-1">
                       {(ui.studyPanel.sections as Record<string, string>)[s.key] || s.key}
                     </h3>
                     <p className="text-sm text-ink/70 dark:text-white/70 whitespace-pre-wrap">{s.body}</p>
@@ -144,7 +144,7 @@ export default function StudyPanel() {
 
                 {match.relatedConditions && match.relatedConditions.length > 0 && (
                   <div>
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-1.5">
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-1.5">
                       {ui.studyPanel.relatedConditions}
                     </h3>
                     <div className="flex flex-col gap-1">
@@ -152,7 +152,7 @@ export default function StudyPanel() {
                         <button
                           key={rc.knowledgeId}
                           onClick={() => openWithSelection(rc.title)}
-                          className="flex w-full items-center justify-between gap-2 rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.015] dark:bg-white/[0.03] px-3 py-2 text-left text-sm text-ink/80 dark:text-white/80 hover:border-[#4F7CFF]/30 hover:bg-[#4F7CFF]/5 transition-colors"
+                          className="flex w-full items-center justify-between gap-2 rounded-xl border border-black/[0.09] dark:border-white/10 bg-black/[0.015] dark:bg-white/[0.03] px-3 py-2 text-left text-sm text-ink/80 dark:text-white/80 hover:border-[#4F7CFF]/30 hover:bg-[#4F7CFF]/5 transition-colors"
                         >
                           <span className="truncate">{rc.title}</span>
                           <ChevronRight size={13} className="shrink-0 text-ink/25 dark:text-white/25" />
@@ -164,7 +164,7 @@ export default function StudyPanel() {
 
                 {match.relatedTests && match.relatedTests.length > 0 && (
                   <div>
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-1.5">
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-1.5">
                       {ui.studyPanel.relatedTests}
                     </h3>
                     <div className="flex flex-col gap-1">
@@ -172,7 +172,7 @@ export default function StudyPanel() {
                         <button
                           key={rt.knowledgeId}
                           onClick={() => openWithSelection(rt.title)}
-                          className="flex w-full items-center justify-between gap-2 rounded-xl border border-black/[0.06] dark:border-white/10 bg-black/[0.015] dark:bg-white/[0.03] px-3 py-2 text-left text-sm text-ink/80 dark:text-white/80 hover:border-[#4F7CFF]/30 hover:bg-[#4F7CFF]/5 transition-colors"
+                          className="flex w-full items-center justify-between gap-2 rounded-xl border border-black/[0.09] dark:border-white/10 bg-black/[0.015] dark:bg-white/[0.03] px-3 py-2 text-left text-sm text-ink/80 dark:text-white/80 hover:border-[#4F7CFF]/30 hover:bg-[#4F7CFF]/5 transition-colors"
                         >
                           <span className="truncate">{rt.title}</span>
                           <ChevronRight size={13} className="shrink-0 text-ink/25 dark:text-white/25" />
@@ -184,7 +184,7 @@ export default function StudyPanel() {
 
                 {isSaved && (
                   <div className="pt-1">
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-1">{ui.studyPanel.myNote}</h3>
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-1">{ui.studyPanel.myNote}</h3>
                     <textarea
                       value={note}
                       onChange={(e) => {
@@ -204,7 +204,7 @@ export default function StudyPanel() {
           </div>
 
           {status === 'found' && match && (
-            <div className="border-t border-black/[0.06] dark:border-white/10 p-3 space-y-2 shrink-0">
+            <div className="border-t border-black/[0.09] dark:border-white/10 p-3 space-y-2 shrink-0">
               {canAddToDocument && (
                 <button
                   onClick={addToDocument}

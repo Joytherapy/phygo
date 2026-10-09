@@ -187,16 +187,16 @@ export default function ZoneHubPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#08090b] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] flex items-center justify-center">
         <Navbar />
-        <p className="text-ink/40 dark:text-white/40">{ui.common.loading}</p>
+        <p className="text-ink/55 dark:text-white/40">{ui.common.loading}</p>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#08090b] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] flex items-center justify-center">
         <Navbar />
         <div className="text-center">
           <p className="text-ink/60 dark:text-white/60 mb-4">{ui.bodyMap.zoneNotFound}</p>
@@ -219,7 +219,7 @@ export default function ZoneHubPage() {
   const isBoneZone = zone.slug.startsWith('bone-');
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -232,7 +232,7 @@ export default function ZoneHubPage() {
       <div className="relative max-w-4xl mx-auto px-6 pt-40 pb-24">
         <button
           onClick={() => router.push('/dashboard/body-map')}
-          className="inline-flex items-center gap-2 text-sm font-medium text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-medium text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
         >
           <ArrowLeft size={16} />
           {ui.bodyMap.backToBodyMap}
@@ -282,7 +282,7 @@ export default function ZoneHubPage() {
             ).map(({ key, label, icon: Icon, color }) => (
               <div
                 key={key}
-                className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-sm"
+                className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-soft"
               >
                 <div className="flex items-center gap-2 mb-3">
                   <span
@@ -303,7 +303,7 @@ export default function ZoneHubPage() {
           </div>
         )}
 
-        <div className="mt-10 pt-10 border-t border-black/[0.06] dark:border-white/10">
+        <div className="mt-10 pt-10 border-t border-black/[0.09] dark:border-white/10">
           {!askOpen ? (
             <button
               onClick={() => {
@@ -317,7 +317,7 @@ export default function ZoneHubPage() {
               {ui.bodyMap.askPhygoButton}
             </button>
           ) : (
-            <div className="rounded-[24px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 max-w-2xl">
+            <div className="rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 max-w-2xl">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles size={16} className="text-[#4F7CFF]" />
                 <p className="text-sm font-semibold">{ui.bodyMap.askPhygoHeadingPrefix.replace('{zone}', zoneDisplayName(zone.slug))}</p>
@@ -327,7 +327,7 @@ export default function ZoneHubPage() {
                   value={askQuestion}
                   onChange={(e) => setAskQuestion(e.target.value)}
                   rows={2}
-                  className="flex-1 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-3 py-2 text-sm outline-none focus:border-[#4F7CFF] resize-none"
+                  className="flex-1 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-3 py-2 text-sm outline-none focus:border-[#4F7CFF] resize-none"
                   placeholder={ui.bodyMap.askPlaceholder}
                 />
                 <button
@@ -343,7 +343,7 @@ export default function ZoneHubPage() {
                 <p className="text-xs text-red-500 mt-2">{askError}</p>
               )}
               {askAnswer && (
-                <div className="mt-4 pt-4 border-t border-black/[0.06] dark:border-white/10 text-sm text-ink/70 dark:text-white/70 leading-relaxed whitespace-pre-wrap">
+                <div className="mt-4 pt-4 border-t border-black/[0.09] dark:border-white/10 text-sm text-ink/70 dark:text-white/70 leading-relaxed whitespace-pre-wrap">
                   {askAnswer}
                 </div>
               )}
@@ -351,7 +351,7 @@ export default function ZoneHubPage() {
           )}
         </div>
 
-        <div className="mt-10 pt-10 border-t border-black/[0.06] dark:border-white/10">
+        <div className="mt-10 pt-10 border-t border-black/[0.09] dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/[0.12] text-[#4F7CFF]">
               <Activity size={14} />
@@ -362,7 +362,7 @@ export default function ZoneHubPage() {
           </div>
 
           {exercises.length === 0 ? (
-            <p className="text-sm text-ink/40 dark:text-white/40">
+            <p className="text-sm text-ink/55 dark:text-white/40">
               {ui.bodyMap.noExercisesLinked}
             </p>
           ) : (
@@ -370,7 +370,7 @@ export default function ZoneHubPage() {
               {exercises.map((ex) => (
                 <div
                   key={ex.id}
-                  className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl shadow-sm hover:shadow-md transition-all"
+                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl shadow-soft hover:shadow-md transition-all"
                 >
                   {ex.image_url && (
                     <div className="aspect-video bg-white flex items-center justify-center rounded-t-2xl overflow-hidden">
@@ -389,7 +389,7 @@ export default function ZoneHubPage() {
                       {ex.level}
                     </span>
                     <p className="text-sm font-semibold text-ink dark:text-white">{ex.title}</p>
-                    <p className="text-xs text-ink/40 dark:text-white/40 mt-0.5">
+                    <p className="text-xs text-ink/55 dark:text-white/40 mt-0.5">
                       {ex.body_position}
                       {ex.equipment ? ` \u00b7 ${ex.equipment}` : ''}
                     </p>
@@ -412,7 +412,7 @@ export default function ZoneHubPage() {
           )}
         </div>
 
-        <div className="mt-10 pt-10 border-t border-black/[0.06] dark:border-white/10">
+        <div className="mt-10 pt-10 border-t border-black/[0.09] dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#32D6A0]/[0.12] text-[#32D6A0]">
               <Stethoscope size={14} />
@@ -423,7 +423,7 @@ export default function ZoneHubPage() {
           </div>
 
           {conditions.length === 0 ? (
-            <p className="text-sm text-ink/40 dark:text-white/40">
+            <p className="text-sm text-ink/55 dark:text-white/40">
               {ui.bodyMap.noConditionsLinked}
             </p>
           ) : (
@@ -477,7 +477,7 @@ export default function ZoneHubPage() {
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 rounded-[28px] p-8 max-w-xl w-full max-h-[85vh] overflow-auto shadow-2xl"
+              className="bg-white dark:bg-[#0e0f12] border border-black/[0.09] dark:border-white/10 rounded-[28px] p-8 max-w-xl w-full max-h-[85vh] overflow-auto shadow-2xl"
             >
               <div className="flex items-start justify-between mb-4">
                 <h3 className="font-display text-2xl font-bold pr-4">
@@ -594,9 +594,9 @@ export default function ZoneHubPage() {
               </div>
 
               {selectedCondition.source && (
-                <div className="mt-5 pt-4 border-t border-black/[0.06] dark:border-white/10 flex items-start gap-2">
+                <div className="mt-5 pt-4 border-t border-black/[0.09] dark:border-white/10 flex items-start gap-2">
                   <Quote size={12} className="text-ink/30 dark:text-white/30 mt-0.5 shrink-0" />
-                  <p className="text-[11px] text-ink/40 dark:text-white/40 leading-relaxed italic">
+                  <p className="text-[11px] text-ink/55 dark:text-white/40 leading-relaxed italic">
                     {selectedCondition.source}
                     {selectedCondition.source_date ? ` (${selectedCondition.source_date})` : ''}
                   </p>

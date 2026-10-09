@@ -154,10 +154,10 @@ export default function MetabolicCalculator({
   return (
     <div className="max-w-3xl">
       {/* --- FORM (nascosto in stampa) --- */}
-      <div className="print:hidden rounded-[24px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-6">
+      <div className="print:hidden rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-5">
           <div>
-            <label className="block text-xs font-semibold text-ink/50 dark:text-white/50 mb-1.5">{ui.sexLabel}</label>
+            <label className="block text-xs font-semibold text-ink/60 dark:text-white/50 mb-1.5">{ui.sexLabel}</label>
             <div className="flex rounded-xl overflow-hidden border border-black/10 dark:border-white/15">
               {(['male', 'female'] as Sex[]).map((s) => (
                 <button
@@ -180,7 +180,7 @@ export default function MetabolicCalculator({
           <NumberField label={ui.heightLabel} value={heightCm} onChange={setHeightCm} />
           <NumberField label={`${ui.bodyFatLabel}`} value={bodyFatPct} onChange={setBodyFatPct} placeholder="—" step="0.1" />
           <div>
-            <label className="block text-xs font-semibold text-ink/50 dark:text-white/50 mb-1.5">{ui.activityLabel}</label>
+            <label className="block text-xs font-semibold text-ink/60 dark:text-white/50 mb-1.5">{ui.activityLabel}</label>
             <select
               value={activityLevel}
               onChange={(e) => setActivityLevel(e.target.value as ActivityLevel)}
@@ -194,11 +194,11 @@ export default function MetabolicCalculator({
             </select>
           </div>
         </div>
-        <p className="text-[11px] text-ink/40 dark:text-white/40 mb-5 -mt-3">{ui.bodyFatOptionalHint}</p>
+        <p className="text-[11px] text-ink/55 dark:text-white/40 mb-5 -mt-3">{ui.bodyFatOptionalHint}</p>
 
         <div className="grid sm:grid-cols-2 gap-4 mb-6">
           <div>
-            <label className="block text-xs font-semibold text-ink/50 dark:text-white/50 mb-1.5">{ui.goalLabel}</label>
+            <label className="block text-xs font-semibold text-ink/60 dark:text-white/50 mb-1.5">{ui.goalLabel}</label>
             <div className="grid grid-cols-2 gap-2">
               {(['maintain', 'fat_loss', 'muscle_gain', 'performance'] as Goal[]).map((g) => (
                 <button
@@ -217,7 +217,7 @@ export default function MetabolicCalculator({
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-ink/50 dark:text-white/50 mb-1.5">{ui.macroStrategyLabel}</label>
+            <label className="block text-xs font-semibold text-ink/60 dark:text-white/50 mb-1.5">{ui.macroStrategyLabel}</label>
             <select
               value={macroStrategy === 'custom' ? 'balanced' : macroStrategy}
               onChange={(e) => setMacroStrategy(e.target.value as MacroStrategy)}
@@ -256,7 +256,7 @@ export default function MetabolicCalculator({
               />
               Phygo — {ui.resultsHeading}
             </div>
-            <div className="text-right text-xs text-ink/50">
+            <div className="text-right text-xs text-ink/60">
               {patientNameForPrint && <p className="font-semibold">{ui.printedForLabel} {patientNameForPrint}</p>}
               <p>{ui.printedOnLabel} {printedOn}</p>
             </div>
@@ -272,7 +272,7 @@ export default function MetabolicCalculator({
             <h3 className="text-lg font-bold text-ink dark:text-white">{ui.resultsHeading}</h3>
             <button
               onClick={() => window.print()}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink/50 dark:text-white/50 hover:text-[#6366F1] transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink/60 dark:text-white/50 hover:text-[#6366F1] transition-colors"
             >
               <Printer size={13} />
               {ui.printCta}
@@ -292,7 +292,7 @@ export default function MetabolicCalculator({
               <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#6366F1] mb-1">{ui.tdeeLabel}</p>
               <p className="font-display text-6xl font-bold tracking-tight text-ink dark:text-white print:text-ink">
                 {result.tdee}
-                <span className="text-lg font-semibold text-ink/40 dark:text-white/40 ml-2">{ui.kcalPerDaySuffix}</span>
+                <span className="text-lg font-semibold text-ink/55 dark:text-white/40 ml-2">{ui.kcalPerDaySuffix}</span>
               </p>
             </div>
           </div>
@@ -313,7 +313,7 @@ export default function MetabolicCalculator({
           )}
 
           {/* Scenari calorici */}
-          <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-2">{ui.calorieScenariosHeading}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-2">{ui.calorieScenariosHeading}</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
             {(['maintain', 'fat_loss', 'muscle_gain', 'performance'] as Goal[]).map((g) => (
               <div
@@ -325,15 +325,15 @@ export default function MetabolicCalculator({
                     : { borderColor: 'rgba(0,0,0,0.06)' }
                 }
               >
-                <p className="text-[10px] font-semibold uppercase text-ink/40 dark:text-white/40">{ui.goals[g]}</p>
-                <p className="text-sm font-bold text-ink dark:text-white">{result.calorieTargets[g]} <span className="text-[10px] font-normal text-ink/40 dark:text-white/40">{ui.kcalPerDaySuffix}</span></p>
+                <p className="text-[10px] font-semibold uppercase text-ink/55 dark:text-white/40">{ui.goals[g]}</p>
+                <p className="text-sm font-bold text-ink dark:text-white">{result.calorieTargets[g]} <span className="text-[10px] font-normal text-ink/55 dark:text-white/40">{ui.kcalPerDaySuffix}</span></p>
               </div>
             ))}
           </div>
 
           {/* Macronutrienti */}
           <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40">{ui.macronutrientsHeading}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">{ui.macronutrientsHeading}</p>
             <div className="flex items-center gap-3 print:hidden">
               <button
                 onClick={() => setShowFoodExamples((v) => !v)}
@@ -368,7 +368,7 @@ export default function MetabolicCalculator({
             </div>
           </div>
 
-          <div className="rounded-[20px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] print:border-black/10 p-5">
+          <div className="rounded-[20px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] print:border-black/10 p-5">
             <MacroBar result={result} />
           </div>
 
@@ -377,7 +377,7 @@ export default function MetabolicCalculator({
               alimentare o un piano nutrizionale: valori generali per 100g,
               lista volutamente corta, disclaimer sempre visibile. */}
           {showFoodExamples && (
-            <div className="print:hidden relative overflow-hidden mt-4 rounded-[24px] border border-black/[0.06] dark:border-white/10 bg-gradient-to-b from-white to-[#FBFBFE] dark:from-white/[0.05] dark:to-white/[0.02] shadow-[0_1px_2px_rgba(16,24,40,0.04)] dark:shadow-none p-6">
+            <div className="print:hidden relative overflow-hidden mt-4 rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-gradient-to-b from-white to-[#FBFBFE] dark:from-white/[0.05] dark:to-white/[0.02] shadow-[0_1px_2px_rgba(16,24,40,0.04)] dark:shadow-none p-6">
               <div
                 className="pointer-events-none absolute -top-16 -right-16 w-[220px] h-[220px] rounded-full opacity-[0.07] dark:opacity-[0.12] blur-[70px]"
                 style={{ background: 'radial-gradient(circle, #6366F1 0%, #8B5CF6 100%)' }}
@@ -394,7 +394,7 @@ export default function MetabolicCalculator({
                   const color =
                     macro === 'protein' ? MACRO_COLOR.protein.light : macro === 'carbs' ? MACRO_COLOR.carbs.light : MACRO_COLOR.fat.light;
                   return (
-                    <div key={macro} className={i > 0 ? 'sm:border-l sm:border-black/[0.06] sm:dark:border-white/10 sm:pl-6' : ''}>
+                    <div key={macro} className={i > 0 ? 'sm:border-l sm:border-black/[0.09] sm:dark:border-white/10 sm:pl-6' : ''}>
                       <div className="flex items-baseline justify-between gap-2 mb-3">
                         <div className="flex items-center gap-1.5">
                           <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: color }} />
@@ -425,7 +425,7 @@ export default function MetabolicCalculator({
                 })}
               </div>
 
-              <p className="relative text-[11px] text-ink/40 dark:text-white/40 mt-5 pt-4 border-t border-black/[0.06] dark:border-white/10 italic">
+              <p className="relative text-[11px] text-ink/55 dark:text-white/40 mt-5 pt-4 border-t border-black/[0.09] dark:border-white/10 italic">
                 {ui.foodExamplesDisclaimer}
               </p>
             </div>
@@ -435,7 +435,7 @@ export default function MetabolicCalculator({
             <div className="print:hidden mt-4 grid grid-cols-3 gap-3">
               {(['protein', 'carbs', 'fat'] as const).map((k) => (
                 <div key={k}>
-                  <label className="block text-[11px] font-semibold text-ink/50 dark:text-white/50 mb-1">
+                  <label className="block text-[11px] font-semibold text-ink/60 dark:text-white/50 mb-1">
                     {k === 'protein' ? ui.proteinLabel : k === 'carbs' ? ui.carbsLabel : ui.fatLabel} %
                   </label>
                   <input
@@ -449,7 +449,7 @@ export default function MetabolicCalculator({
             </div>
           )}
 
-          <p className="text-[11px] text-ink/40 dark:text-white/40 mt-5 mb-6 print:text-ink/60">{ui.disclaimer}</p>
+          <p className="text-[11px] text-ink/55 dark:text-white/40 mt-5 mb-6 print:text-ink/60">{ui.disclaimer}</p>
 
           {/* Salvataggio (nascosto in stampa) */}
           <div className="relative print:hidden">
@@ -524,7 +524,7 @@ function NumberField({
 }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-ink/50 dark:text-white/50 mb-1.5">{label}</label>
+      <label className="block text-xs font-semibold text-ink/60 dark:text-white/50 mb-1.5">{label}</label>
       <input
         type="number"
         step={step ?? '1'}
@@ -551,13 +551,13 @@ function StatCard({
   accent: string;
 }) {
   return (
-    <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-gradient-to-b from-white to-[#FBFBFE] dark:from-white/[0.05] dark:to-white/[0.02] print:from-white print:to-white print:border-black/10 shadow-[0_1px_2px_rgba(16,24,40,0.04)] dark:shadow-none p-4">
+    <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-gradient-to-b from-white to-[#FBFBFE] dark:from-white/[0.05] dark:to-white/[0.02] print:from-white print:to-white print:border-black/10 shadow-[0_1px_2px_rgba(16,24,40,0.04)] dark:shadow-none p-4">
       <div className="flex h-8 w-8 items-center justify-center rounded-xl mb-2 print:hidden" style={{ background: `${accent}1f` }}>
         <Icon size={16} style={{ color: accent }} />
       </div>
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-0.5">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-0.5">{label}</p>
       <p className="text-xl font-bold text-ink dark:text-white leading-tight">{value}</p>
-      <p className="text-[10px] text-ink/40 dark:text-white/40">{suffix}</p>
+      <p className="text-[10px] text-ink/55 dark:text-white/40">{suffix}</p>
     </div>
   );
 }
@@ -616,7 +616,7 @@ function MacroBar({ result }: { result: MetabolicResult }) {
               <p className="text-sm font-bold text-ink dark:text-white">
                 {s.g} g <span className="text-xs font-normal text-ink/45 dark:text-white/45">({s.pct}%)</span>
               </p>
-              {s.extra && <p className="text-[10px] text-ink/40 dark:text-white/40">{s.extra}</p>}
+              {s.extra && <p className="text-[10px] text-ink/55 dark:text-white/40">{s.extra}</p>}
             </div>
           </div>
         ))}

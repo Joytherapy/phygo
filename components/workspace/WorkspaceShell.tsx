@@ -49,7 +49,7 @@ export default function WorkspaceShell({
   }
 
   return (
-    <div className="dark relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="dark relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
       {/* Role-aware ambient glow: reads var(--brand-from)/var(--brand-to) from

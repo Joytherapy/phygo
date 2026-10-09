@@ -58,7 +58,7 @@ export default function FolderCard({
   return (
     <div
       onClick={() => !renaming && onOpen()}
-      className="group relative flex aspect-[3/4] flex-col overflow-hidden rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lift hover:border-black/[0.1] dark:hover:border-white/20"
+      className="group relative flex aspect-[3/4] flex-col overflow-hidden rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lift hover:border-black/[0.1] dark:hover:border-white/20"
     >
       <div className="flex flex-1 items-center justify-center">
         <span className="flex h-14 w-14 items-center justify-center rounded-2xl" style={{ backgroundColor: `${iconColor}17` }}>
@@ -84,7 +84,7 @@ export default function FolderCard({
         {colorPickerOpen && (
           <div
             ref={colorPickerRef}
-            className="absolute right-0 top-full mt-1.5 z-30 flex items-center gap-1.5 rounded-xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#171821] shadow-lift p-2"
+            className="absolute right-0 top-full mt-1.5 z-30 flex items-center gap-1.5 rounded-xl border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#171821] shadow-lift p-2"
           >
             <button
               onClick={() => {
@@ -110,7 +110,7 @@ export default function FolderCard({
         )}
       </div>
 
-      <div className="border-t border-black/[0.04] dark:border-white/[0.06] px-3 py-2.5">
+      <div className="border-t border-black/[0.08] dark:border-white/[0.06] px-3 py-2.5">
         {renaming ? (
           <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
             <input
@@ -126,7 +126,7 @@ export default function FolderCard({
             <button onClick={commitRename} className="text-[#32D6A0] shrink-0">
               <Check size={13} />
             </button>
-            <button onClick={() => setRenaming(false)} className="text-ink/40 dark:text-white/40 shrink-0">
+            <button onClick={() => setRenaming(false)} className="text-ink/55 dark:text-white/40 shrink-0">
               <X size={13} />
             </button>
           </div>

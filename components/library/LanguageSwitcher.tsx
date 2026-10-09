@@ -33,7 +33,7 @@ export default function LanguageSwitcher({
             className={
               active
                 ? 'rounded-full px-2.5 py-1 text-[11px] font-semibold text-white bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]'
-                : 'rounded-full px-2.5 py-1 text-[11px] font-medium text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white transition-colors'
+                : 'rounded-full px-2.5 py-1 text-[11px] font-medium text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white transition-colors'
             }
           >
             {LANG_LABELS[lang]}

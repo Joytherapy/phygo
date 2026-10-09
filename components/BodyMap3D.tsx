@@ -865,7 +865,7 @@ export default function BodyMap3D({
   const [xrayMode, setXrayMode] = useState(false);
 
   return (
-    <div className="relative w-full h-[560px] sm:h-[820px] rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden">
+    <div className="relative w-full h-[560px] sm:h-[820px] rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-[#08090b] overflow-hidden">
       <Canvas camera={{ position: [0, 0.3, 3.4], fov: 42 }} dpr={[1, 2]}>
         <ambientLight intensity={0.7} />
         <directionalLight position={[3, 4, 2]} intensity={1.3} color="#fff2e6" />

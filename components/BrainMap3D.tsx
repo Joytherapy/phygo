@@ -593,7 +593,7 @@ export default function BrainMap3D({ onSelectZone }: { onSelectZone: (slug: stri
   const bm = ui.brainMap;
 
   return (
-    <div className="relative w-full h-[520px] sm:h-[760px] rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden">
+    <div className="relative w-full h-[520px] sm:h-[760px] rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-[#08090b] overflow-hidden">
       <Canvas camera={{ position: [1.9, 1.05, 2.7], fov: 42 }} dpr={[1, 2]}>
         <ambientLight intensity={0.7} />
         <directionalLight position={[3, 4, 2]} intensity={1.3} color="#fff2e6" />

@@ -237,7 +237,7 @@ function ButtonGroup({
 
 function ScaleDescription({ text }: { text: string }) {
   return (
-    <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] p-4 mb-4">
+    <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] p-4 mb-4">
       <p className="text-sm text-ink/60 dark:text-white/60 leading-relaxed">{text}</p>
     </div>
   );
@@ -366,7 +366,7 @@ function KatzScale({ content }: { content: FunctionalScalesData['katz'] }) {
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.key} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <div key={item.key} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={content.options} value={scores[item.key]} onChange={(v) => setScores((s) => ({ ...s, [item.key]: v }))} />
         </div>
@@ -382,7 +382,7 @@ function BarthelScale({ content }: { content: FunctionalScalesData['barthel'] })
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.key} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <div key={item.key} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={item.options} value={scores[item.key]} onChange={(v) => setScores((s) => ({ ...s, [item.key]: v }))} />
         </div>
@@ -399,7 +399,7 @@ function TinettiScale({ content }: { content: FunctionalScalesData['tinetti'] })
   const total = balanceTotal + gaitTotal;
   const renderItems = (items: FunctionalScalesData['tinetti']['balance']) =>
     items.map((item) => (
-      <div key={item.key} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div key={item.key} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{item.label}</p>
         <ButtonGroup options={Array.from({ length: item.max + 1 }, (_, v) => ({ v, l: String(v) }))} value={scores[item.key]} onChange={(v) => setScores((s) => ({ ...s, [item.key]: v }))} />
       </div>
@@ -407,11 +407,11 @@ function TinettiScale({ content }: { content: FunctionalScalesData['tinetti'] })
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.balanceHeading}</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.balanceHeading}</h3>
         <div className="space-y-3">{renderItems(content.balance)}</div>
       </div>
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.gaitHeading}</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.gaitHeading}</h3>
         <div className="space-y-3">{renderItems(content.gait)}</div>
       </div>
       <ResultBox saveKey="tinetti" score={total} max={28} interpretation={total >= 19 ? content.text.low : total >= 15 ? content.text.moderate : content.text.high} />
@@ -425,7 +425,7 @@ function ConleyScale({ content, ui }: { content: FunctionalScalesData['conley'];
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.key} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <div key={item.key} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup
             options={[{ v: 0, l: ui.clinicalToolkit.functional.noLabel }, { v: item.max, l: `${ui.clinicalToolkit.functional.yesLabel} (${item.max})` }]}
@@ -445,7 +445,7 @@ function BergBalanceScale({ content }: { content: FunctionalScalesData['berg'] }
   return (
     <div className="space-y-4">
       {content.items.map((label, i) => (
-        <div key={i} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <div key={i} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{i + 1}. {label}</p>
           <ButtonGroup options={[0, 1, 2, 3, 4].map((v) => ({ v, l: String(v) }))} value={scores[i]} onChange={(v) => setScores((s) => ({ ...s, [i]: v }))} />
         </div>
@@ -461,7 +461,7 @@ function MorseFallScale({ content }: { content: FunctionalScalesData['morse'] })
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.key} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <div key={item.key} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={item.options} value={scores[item.key]} onChange={(v) => setScores((s) => ({ ...s, [item.key]: v }))} />
         </div>
@@ -476,7 +476,7 @@ function AshworthScale({ content }: { content: FunctionalScalesData['ashworth'] 
   const selected = content.levels.find((l) => l.v === value);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.label}</p>
         <div className="space-y-2">
           {content.levels.map((l) => (
@@ -496,7 +496,7 @@ function NRSPainScale({ content }: { content: FunctionalScalesData['nrs'] }) {
   const [value, setValue] = useState<number | null>(null);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.label}</p>
         <div className="flex flex-wrap gap-2">
           {Array.from({ length: 11 }, (_, v) => (
@@ -519,15 +519,15 @@ function SPPBScale({ content }: { content: FunctionalScalesData['sppb'] }) {
   const answered = balance !== null && gait !== null && chair !== null;
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.balanceLabel}</p>
         <ButtonGroup options={content.balanceOptions} value={balance ?? undefined} onChange={setBalance} />
       </div>
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.gaitLabel}</p>
         <ButtonGroup options={content.gaitOptions} value={gait ?? undefined} onChange={setGait} />
       </div>
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.chairLabel}</p>
         <ButtonGroup options={content.chairOptions} value={chair ?? undefined} onChange={setChair} />
       </div>
@@ -540,7 +540,7 @@ function MMSEScale({ content }: { content: FunctionalScalesData['mmse'] }) {
   const [value, setValue] = useState<number | null>(null);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.label}</p>
         <div className="flex flex-wrap gap-2">
           {Array.from({ length: 31 }, (_, v) => (
@@ -563,15 +563,15 @@ function GCSScale({ content }: { content: FunctionalScalesData['gcs'] }) {
   const answered = eye !== null && verbal !== null && motor !== null;
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.eyeLabel}</p>
         <ButtonGroup options={content.eyeOptions} value={eye ?? undefined} onChange={setEye} />
       </div>
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.verbalLabel}</p>
         <ButtonGroup options={content.verbalOptions} value={verbal ?? undefined} onChange={setVerbal} />
       </div>
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.motorLabel}</p>
         <ButtonGroup options={content.motorOptions} value={motor ?? undefined} onChange={setMotor} />
       </div>
@@ -584,11 +584,11 @@ function TUGScale({ content, ui }: { content: FunctionalScalesData['tug']; ui: F
   const [seconds, setSeconds] = useState<number | null>(null);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.label}</p>
         <div className="flex items-center gap-3">
           <input type="number" step="0.1" value={seconds ?? ''} onChange={(e) => setSeconds(e.target.value ? parseFloat(e.target.value) : null)} placeholder="0.0" className="w-28 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm outline-none focus:border-[#6366F1]" />
-          <span className="text-sm text-ink/50 dark:text-white/50">{ui.clinicalToolkit.functional.secondsUnit}</span>
+          <span className="text-sm text-ink/60 dark:text-white/50">{ui.clinicalToolkit.functional.secondsUnit}</span>
         </div>
       </div>
       {seconds !== null && <ResultBox saveKey="tug" score={seconds} interpretation={seconds <= 10 ? content.text.normal : seconds <= 20 ? content.text.frailNormal : content.text.risk} />}
@@ -600,11 +600,11 @@ function SixMWTScale({ content, ui }: { content: FunctionalScalesData['sixmwt'];
   const [meters, setMeters] = useState<number | null>(null);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.label}</p>
         <div className="flex items-center gap-3">
           <input type="number" value={meters ?? ''} onChange={(e) => setMeters(e.target.value ? parseFloat(e.target.value) : null)} placeholder="0" className="w-28 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm outline-none focus:border-[#6366F1]" />
-          <span className="text-sm text-ink/50 dark:text-white/50">{ui.clinicalToolkit.functional.metersUnit}</span>
+          <span className="text-sm text-ink/60 dark:text-white/50">{ui.clinicalToolkit.functional.metersUnit}</span>
         </div>
       </div>
       {meters !== null && <ResultBox saveKey="sixmwt" score={meters} interpretation={content.text.interpretation} />}
@@ -624,7 +624,7 @@ function NIHSSScale({ content }: { content: FunctionalScalesData['nihss'] }) {
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={item.options} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
         </div>
@@ -641,7 +641,7 @@ function UPDRSPartIIIScale({ content }: { content: FunctionalScalesData['updrs3'
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={content.options} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
         </div>
@@ -660,7 +660,7 @@ function WOMACScale({ content }: { content: FunctionalScalesData['womac'] }) {
   const answeredCount = Object.keys(scores).length;
   const renderGroup = (items: FunctionalScalesData['womac']['pain']) =>
     items.map((item) => (
-      <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{item.label}</p>
         <ButtonGroup options={content.options} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
       </div>
@@ -668,28 +668,28 @@ function WOMACScale({ content }: { content: FunctionalScalesData['womac'] }) {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.painHeading}</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.painHeading}</h3>
         <div className="space-y-3">{renderGroup(content.pain)}</div>
       </div>
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.stiffnessHeading}</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.stiffnessHeading}</h3>
         <div className="space-y-3">{renderGroup(content.stiffness)}</div>
       </div>
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.functionHeading}</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.functionHeading}</h3>
         <div className="space-y-3">{renderGroup(content.function)}</div>
       </div>
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-xl bg-white/60 dark:bg-white/[0.04] p-3 text-center">
-          <p className="text-xs text-ink/50 dark:text-white/50">{content.text.painGridLabel}</p>
+        <div className="rounded-xl bg-white/90 dark:bg-white/[0.04] p-3 text-center">
+          <p className="text-xs text-ink/60 dark:text-white/50">{content.text.painGridLabel}</p>
           <p className="text-xl font-bold">{painTotal}/20</p>
         </div>
-        <div className="rounded-xl bg-white/60 dark:bg-white/[0.04] p-3 text-center">
-          <p className="text-xs text-ink/50 dark:text-white/50">{content.text.stiffnessGridLabel}</p>
+        <div className="rounded-xl bg-white/90 dark:bg-white/[0.04] p-3 text-center">
+          <p className="text-xs text-ink/60 dark:text-white/50">{content.text.stiffnessGridLabel}</p>
           <p className="text-xl font-bold">{stiffTotal}/8</p>
         </div>
-        <div className="rounded-xl bg-white/60 dark:bg-white/[0.04] p-3 text-center">
-          <p className="text-xs text-ink/50 dark:text-white/50">{content.text.functionGridLabel}</p>
+        <div className="rounded-xl bg-white/90 dark:bg-white/[0.04] p-3 text-center">
+          <p className="text-xs text-ink/60 dark:text-white/50">{content.text.functionGridLabel}</p>
           <p className="text-xl font-bold">{funcTotal}/68</p>
         </div>
       </div>
@@ -708,7 +708,7 @@ function DASHScale({ content }: { content: FunctionalScalesData['dash'] }) {
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={content.options} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
         </div>
@@ -735,7 +735,7 @@ function WMFTScale({ content, ui }: { content: FunctionalScalesData['wmft']; ui:
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <div className="flex items-center gap-3 mb-3">
             <input
@@ -747,21 +747,21 @@ function WMFTScale({ content, ui }: { content: FunctionalScalesData['wmft']; ui:
               placeholder="0.0"
               className="w-24 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm outline-none focus:border-[#6366F1]"
             />
-            <span className="text-xs text-ink/50 dark:text-white/50">{ui.clinicalToolkit.functional.secondsMax120Unit}</span>
+            <span className="text-xs text-ink/60 dark:text-white/50">{ui.clinicalToolkit.functional.secondsMax120Unit}</span>
           </div>
           <ButtonGroup options={content.options} value={fas[item.id]} onChange={(v) => setFas((f) => ({ ...f, [item.id]: v }))} />
         </div>
       ))}
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl bg-white/60 dark:bg-white/[0.04] p-4 text-center">
-          <p className="text-xs text-ink/50 dark:text-white/50 mb-1">{content.text.fasAverageLabel}</p>
+        <div className="rounded-xl bg-white/90 dark:bg-white/[0.04] p-4 text-center">
+          <p className="text-xs text-ink/60 dark:text-white/50 mb-1">{content.text.fasAverageLabel}</p>
           <p className="text-2xl font-bold">{avgFas !== null ? avgFas : '-'} / 5</p>
-          <p className="text-[10px] text-ink/40 dark:text-white/40">{content.text.countSuffixTemplate.replace('{count}', String(fasValues.length))}</p>
+          <p className="text-[10px] text-ink/55 dark:text-white/40">{content.text.countSuffixTemplate.replace('{count}', String(fasValues.length))}</p>
         </div>
-        <div className="rounded-xl bg-white/60 dark:bg-white/[0.04] p-4 text-center">
-          <p className="text-xs text-ink/50 dark:text-white/50 mb-1">{content.text.timeAverageLabel}</p>
+        <div className="rounded-xl bg-white/90 dark:bg-white/[0.04] p-4 text-center">
+          <p className="text-xs text-ink/60 dark:text-white/50 mb-1">{content.text.timeAverageLabel}</p>
           <p className="text-2xl font-bold">{avgTime !== null ? avgTime : '-'} s</p>
-          <p className="text-[10px] text-ink/40 dark:text-white/40">{content.text.countSuffixTemplate.replace('{count}', String(timeValues.length))}</p>
+          <p className="text-[10px] text-ink/55 dark:text-white/40">{content.text.countSuffixTemplate.replace('{count}', String(timeValues.length))}</p>
         </div>
       </div>
       <div className="flex justify-center">
@@ -782,7 +782,7 @@ function BoxBlockScale({ content }: { content: FunctionalScalesData['boxblock'] 
   const [nonDominant, setNonDominant] = useState<number | null>(null);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.dominantLabel}</p>
         <input
           type="number"
@@ -792,7 +792,7 @@ function BoxBlockScale({ content }: { content: FunctionalScalesData['boxblock'] 
           className="w-28 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm outline-none focus:border-[#6366F1]"
         />
       </div>
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.nonDominantLabel}</p>
         <input
           type="number"
@@ -819,7 +819,7 @@ function JebsenScale({ content, ui }: { content: FunctionalScalesData['jebsen'];
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-3">{item.label}</p>
           <div className="flex items-center gap-3">
             <input
@@ -831,7 +831,7 @@ function JebsenScale({ content, ui }: { content: FunctionalScalesData['jebsen'];
               placeholder="0.0"
               className="w-24 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm outline-none focus:border-[#6366F1]"
             />
-            <span className="text-xs text-ink/50 dark:text-white/50">{ui.clinicalToolkit.functional.secondsMax120Unit}</span>
+            <span className="text-xs text-ink/60 dark:text-white/50">{ui.clinicalToolkit.functional.secondsMax120Unit}</span>
           </div>
         </div>
       ))}
@@ -847,7 +847,7 @@ function TrunkControlScale({ content }: { content: FunctionalScalesData['tct'] }
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={content.options} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
         </div>
@@ -863,10 +863,10 @@ function EDSSScale({ content }: { content: FunctionalScalesData['edss'] }) {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.fsHeading}</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.fsHeading}</h3>
         <div className="space-y-3">
           {content.fsSystems.map((item) => (
-            <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+            <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
               <p className="text-sm font-semibold mb-2">{item.label}</p>
               <ButtonGroup options={content.options} value={fsScores[item.id]} onChange={(v) => setFsScores((s) => ({ ...s, [item.id]: v }))} />
             </div>
@@ -874,8 +874,8 @@ function EDSSScale({ content }: { content: FunctionalScalesData['edss'] }) {
         </div>
       </div>
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.stepHeading}</h3>
-        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.stepHeading}</h3>
+        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <div className="space-y-2">
             {content.steps.map((step) => (
               <button
@@ -901,7 +901,7 @@ function HoehnYahrScale({ content }: { content: FunctionalScalesData['hy'] }) {
   const selected = content.stages.find((s) => s.v === stage);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.label}</p>
         <div className="space-y-2">
           {content.stages.map((s) => (
@@ -928,7 +928,7 @@ function FSSScale({ content }: { content: FunctionalScalesData['fss'] }) {
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={content.options} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
         </div>
@@ -960,53 +960,53 @@ function HarrisHipScale({ content }: { content: FunctionalScalesData['hhs'] }) {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.painHeading}</h3>
-        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.painHeading}</h3>
+        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <ButtonGroup options={content.options.pain} value={pain} onChange={setPain} />
         </div>
       </div>
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.functionHeading}</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.functionHeading}</h3>
         <div className="space-y-3">
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.limpLabel}</p>
             <ButtonGroup options={content.options.limp} value={limp} onChange={setLimp} />
           </div>
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.supportLabel}</p>
             <ButtonGroup options={content.options.support} value={support} onChange={setSupport} />
           </div>
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.distanceLabel}</p>
             <ButtonGroup options={content.options.distance} value={distance} onChange={setDistance} />
           </div>
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.sittingLabel}</p>
             <ButtonGroup options={content.options.sitting} value={sitting} onChange={setSitting} />
           </div>
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.transportLabel}</p>
             <ButtonGroup options={content.options.transport} value={transport} onChange={setTransport} />
           </div>
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.stairsLabel}</p>
             <ButtonGroup options={content.options.stairs} value={stairs} onChange={setStairs} />
           </div>
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.shoesLabel}</p>
             <ButtonGroup options={content.options.shoes} value={shoes} onChange={setShoes} />
           </div>
         </div>
       </div>
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.deformityHeading}</h3>
-        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.deformityHeading}</h3>
+        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <ButtonGroup options={content.options.deformity} value={deformity} onChange={setDeformity} />
         </div>
       </div>
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.romHeading}</h3>
-        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.romHeading}</h3>
+        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <ButtonGroup options={content.options.rom} value={rom} onChange={setRom} />
         </div>
       </div>
@@ -1025,23 +1025,23 @@ function UCLAShoulderScale({ content }: { content: FunctionalScalesData['ucla'] 
   const total = (pain ?? 0) + (func ?? 0) + (flexion ?? 0) + (strength ?? 0) + (satisfaction ?? 0);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.painLabel}</p>
         <ButtonGroup options={content.options.pain} value={pain} onChange={setPain} />
       </div>
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.functionLabel}</p>
         <ButtonGroup options={content.options.function} value={func} onChange={setFunc} />
       </div>
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.flexionLabel}</p>
         <ButtonGroup options={content.options.flexion} value={flexion} onChange={setFlexion} />
       </div>
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.strengthLabel}</p>
         <ButtonGroup options={content.options.strength} value={strength} onChange={setStrength} />
       </div>
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.satisfactionLabel}</p>
         <ButtonGroup options={content.options.satisfaction} value={satisfaction} onChange={setSatisfaction} />
       </div>
@@ -1069,49 +1069,49 @@ function DRSScale({ content }: { content: FunctionalScalesData['drs'] }) {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.vigilanceHeading}</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.vigilanceHeading}</h3>
         <div className="space-y-3">
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.eyeLabel}</p>
             <ButtonGroup options={content.options.eye} value={eye} onChange={setEye} />
           </div>
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.commLabel}</p>
             <ButtonGroup options={content.options.comm} value={comm} onChange={setComm} />
           </div>
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.motorLabel}</p>
             <ButtonGroup options={content.options.motor} value={motor} onChange={setMotor} />
           </div>
         </div>
       </div>
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.selfcareHeading}</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.selfcareHeading}</h3>
         <div className="space-y-3">
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.feedingLabel}</p>
             <ButtonGroup options={content.options.selfcare} value={feeding} onChange={setFeeding} />
           </div>
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.toiletingLabel}</p>
             <ButtonGroup options={content.options.selfcare} value={toileting} onChange={setToileting} />
           </div>
-          <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.groomingLabel}</p>
             <ButtonGroup options={content.options.selfcare} value={grooming} onChange={setGrooming} />
           </div>
         </div>
       </div>
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.dependenceHeading}</h3>
-        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.dependenceHeading}</h3>
+        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{content.text.levelLabel}</p>
           <ButtonGroup options={content.options.level} value={level} onChange={setLevel} />
         </div>
       </div>
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{content.text.psychosocialHeading}</h3>
-        <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.psychosocialHeading}</h3>
+        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{content.text.employLabel}</p>
           <ButtonGroup options={content.options.employ} value={employ} onChange={setEmploy} />
         </div>
@@ -1227,13 +1227,13 @@ function SF36Scale({ data, ui }: { data: PFQuestionnaireData; ui: ReturnType<typ
     <div className="space-y-6">
       {data.sf36Sections.map((sec) => (
         <div key={sec.slug}>
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{sec.title}</h4>
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{sec.title}</h4>
           <div className="space-y-3">
             {sec.ids.map((id) => {
               const item = data.sf36Items.find((it) => it.id === id)!;
               const options = data.optionSets[item.optionSet] ?? [];
               return (
-                <div key={id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+                <div key={id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
                   <p className="text-sm font-semibold mb-2">{id}. {item.text}</p>
                   <ButtonGroup options={options} value={answers[id]} onChange={(v) => setAnswers((s) => ({ ...s, [id]: v }))} />
                 </div>
@@ -1247,10 +1247,10 @@ function SF36Scale({ data, ui }: { data: PFQuestionnaireData; ui: ReturnType<typ
         <p className="text-sm font-semibold mb-3">{scoreHeader}</p>
         <div className="grid grid-cols-2 gap-3">
           {domainScores.map((d) => (
-            <div key={d.domain} className="rounded-xl bg-white/60 dark:bg-white/[0.04] p-3">
-              <p className="text-xs text-ink/50 dark:text-white/50">{domainLabels[d.domain]}</p>
+            <div key={d.domain} className="rounded-xl bg-white/90 dark:bg-white/[0.04] p-3">
+              <p className="text-xs text-ink/60 dark:text-white/50">{domainLabels[d.domain]}</p>
               <p className="text-xl font-bold">{d.score !== null ? d.score : '—'}</p>
-              <p className="text-[10px] text-ink/40 dark:text-white/40">{d.answered}/{d.total} {ui.clinicalToolkit.pelvicFloor.sf36.responsesLabel}</p>
+              <p className="text-[10px] text-ink/55 dark:text-white/40">{d.answered}/{d.total} {ui.clinicalToolkit.pelvicFloor.sf36.responsesLabel}</p>
             </div>
           ))}
         </div>
@@ -1294,10 +1294,10 @@ function PFDI20Scale({ data, ui }: { data: PFQuestionnaireData; ui: ReturnType<t
     <div className="space-y-6">
       {subscales.map((s) => (
         <div key={s.key}>
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">{s.label}</h4>
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{s.label}</h4>
           <div className="space-y-3">
             {s.items.map((item) => (
-              <div key={item.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+              <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
                 <p className="text-sm font-semibold mb-2">{item.text}</p>
                 <ButtonGroup options={options} value={answers[item.id]} onChange={(v) => setAnswers((a) => ({ ...a, [item.id]: v }))} />
               </div>
@@ -1310,10 +1310,10 @@ function PFDI20Scale({ data, ui }: { data: PFQuestionnaireData; ui: ReturnType<t
         <p className="text-sm font-semibold mb-3">{scoreHeader}</p>
         <div className="grid grid-cols-3 gap-3 mb-3">
           {subscaleScores.map((s) => (
-            <div key={s.key} className="rounded-xl bg-white/60 dark:bg-white/[0.04] p-3">
-              <p className="text-xs text-ink/50 dark:text-white/50">{s.label}</p>
+            <div key={s.key} className="rounded-xl bg-white/90 dark:bg-white/[0.04] p-3">
+              <p className="text-xs text-ink/60 dark:text-white/50">{s.label}</p>
               <p className="text-xl font-bold">{s.score !== null ? s.score : '—'}</p>
-              <p className="text-[10px] text-ink/40 dark:text-white/40">{s.answered}/{s.items.length} {ui.clinicalToolkit.pelvicFloor.pfdi.responsesLabel}</p>
+              <p className="text-[10px] text-ink/55 dark:text-white/40">{s.answered}/{s.items.length} {ui.clinicalToolkit.pelvicFloor.pfdi.responsesLabel}</p>
             </div>
           ))}
         </div>
@@ -1342,15 +1342,15 @@ function ICIQScale({ data, ui }: { data: PFQuestionnaireData; ui: ReturnType<typ
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{data.iciqQuestions.frequency.text}</p>
         <ButtonGroup options={freqOptions} value={freq} onChange={setFreq} />
       </div>
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{data.iciqQuestions.amount.text}</p>
         <ButtonGroup options={amountOptions} value={amount} onChange={setAmount} />
       </div>
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{data.iciqQuestions.impact.text}</p>
         <div className="flex flex-wrap gap-2">
           {Array.from({ length: 11 }, (_, v) => (
@@ -1360,7 +1360,7 @@ function ICIQScale({ data, ui }: { data: PFQuestionnaireData; ui: ReturnType<typ
           ))}
         </div>
       </div>
-      <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{data.iciqQuestions.circumstancesLabel.text}</p>
         <div className="flex flex-wrap gap-2">
           {data.iciqCircumstances.map((c) => (
@@ -1599,12 +1599,12 @@ function ClinicalToolsPageInner() {
     (t.procedure ?? '').toLowerCase().includes(normalizedMtSearch);
     const mtFilteredByRegion = (mtTechniques ?? []).filter((t) => t.joint_region === activeMTRegion && (activeMTType === 'all' || t.technique_type === activeMTType) && matchesTechnique(t));
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
       <div className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]" style={{ background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)' }} />
       <div className="relative max-w-3xl mx-auto px-6 pt-40 pb-24">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#6366F1]/20 dark:border-[#6366F1]/25 bg-gradient-to-r from-[#6366F1]/[0.07] to-[#8B5CF6]/[0.07] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-5 shadow-sm shadow-[#6366F1]/10">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#6366F1]/20 dark:border-[#6366F1]/25 bg-gradient-to-r from-[#6366F1]/[0.07] to-[#8B5CF6]/[0.07] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-5 shadow-soft shadow-[#6366F1]/10">
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#8B5CF6] opacity-75" />
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#8B5CF6]" />
@@ -1663,11 +1663,11 @@ function ClinicalToolsPageInner() {
                           className={`text-left rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-0.5 ${
                             activeScale === key
                               ? 'border-transparent bg-gradient-to-br from-[#6366F1]/10 to-[#8B5CF6]/10 shadow-lg shadow-[#6366F1]/15 ring-1 ring-[#6366F1]/40'
-                              : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] hover:border-[#6366F1]/30 hover:shadow-md hover:shadow-[#6366F1]/5'
+                              : 'border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] hover:border-[#6366F1]/30 hover:shadow-md hover:shadow-[#6366F1]/5'
                           }`}
                         >
                           <p className="text-sm font-semibold">{SCALE_NAMES_BY_LANG[lang][key]}</p>
-                          <p className="text-xs text-ink/50 dark:text-white/50 mt-0.5">{functionalScalesData?.scaleSubtitles[key] ?? ''}</p>
+                          <p className="text-xs text-ink/60 dark:text-white/50 mt-0.5">{functionalScalesData?.scaleSubtitles[key] ?? ''}</p>
                         </button>
                       ))}
                     </div>
@@ -1677,7 +1677,7 @@ function ClinicalToolsPageInner() {
             </div>
 
             {!functionalScalesData ? (
-              <p className="text-center text-sm text-ink/50 dark:text-white/50 py-10">{ui.clinicalToolkit.functional.loading}</p>
+              <p className="text-center text-sm text-ink/60 dark:text-white/50 py-10">{ui.clinicalToolkit.functional.loading}</p>
             ) : (
               <>
                 <ScaleDescription text={functionalScalesData.scaleDescriptions[activeScale]} />
@@ -1696,7 +1696,7 @@ function ClinicalToolsPageInner() {
                 {activeScale === 'tug' && <TUGScale content={functionalScalesData.tug} ui={ui} />}
                 {activeScale === 'sixmwt' && <SixMWTScale content={functionalScalesData.sixmwt} ui={ui} />}
                 {activeScale === 'sf36' && (
-                  pfQuestionnaireData ? <SF36Scale data={pfQuestionnaireData} ui={ui} /> : <p className="text-center text-sm text-ink/50 dark:text-white/50 py-10">{ui.common.loading}</p>
+                  pfQuestionnaireData ? <SF36Scale data={pfQuestionnaireData} ui={ui} /> : <p className="text-center text-sm text-ink/60 dark:text-white/50 py-10">{ui.common.loading}</p>
                 )}
                 {activeScale === 'nihss' && <NIHSSScale content={functionalScalesData.nihss} />}
                 {activeScale === 'updrs3' && <UPDRSPartIIIScale content={functionalScalesData.updrs3} />}
@@ -1728,7 +1728,7 @@ function ClinicalToolsPageInner() {
             </div>
 
             {orthoLoading && (
-              <p className="text-center text-sm text-ink/50 dark:text-white/50 py-10">{ui.clinicalToolkit.orthopedic.loading}</p>
+              <p className="text-center text-sm text-ink/60 dark:text-white/50 py-10">{ui.clinicalToolkit.orthopedic.loading}</p>
             )}
 
             {orthoError && !orthoLoading && (
@@ -1738,13 +1738,13 @@ function ClinicalToolsPageInner() {
             {!orthoLoading && !orthoError && (
               <div className="space-y-4">
                 {(orthoTests?.[activeRegion] ?? []).map((t) => (
-                  <div key={t.slug} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-5">
+                  <div key={t.slug} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-5">
                     <p className="text-base font-semibold text-ink dark:text-white">{t.name}</p>
                     <p className="text-xs font-medium text-[#6366F1] mt-0.5 mb-3">{t.targets}</p>
                     <div className="space-y-2 text-sm text-ink/70 dark:text-white/70 leading-relaxed">
-                      <p><span className="font-semibold text-ink/50 dark:text-white/50">{ui.clinicalToolkit.orthopedic.procedureLabel}: </span>{t.procedure}</p>
-                      <p><span className="font-semibold text-ink/50 dark:text-white/50">{ui.clinicalToolkit.orthopedic.positiveLabel}: </span>{t.positive}</p>
-                      <p className="text-xs text-ink/50 dark:text-white/50 pt-1">{t.accuracy}</p>
+                      <p><span className="font-semibold text-ink/60 dark:text-white/50">{ui.clinicalToolkit.orthopedic.procedureLabel}: </span>{t.procedure}</p>
+                      <p><span className="font-semibold text-ink/60 dark:text-white/50">{ui.clinicalToolkit.orthopedic.positiveLabel}: </span>{t.positive}</p>
+                      <p className="text-xs text-ink/60 dark:text-white/50 pt-1">{t.accuracy}</p>
                     </div>
                   </div>
                 ))}
@@ -1779,7 +1779,7 @@ function ClinicalToolsPageInner() {
             </div>
 
             {pelvicFloorLoading && (
-              <p className="text-center text-sm text-ink/50 dark:text-white/50 py-10">{ui.clinicalToolkit.pelvicFloor.loading}</p>
+              <p className="text-center text-sm text-ink/60 dark:text-white/50 py-10">{ui.clinicalToolkit.pelvicFloor.loading}</p>
             )}
             {pelvicFloorError && (
               <p className="text-center text-sm text-red-500 py-10">{pelvicFloorError}</p>
@@ -1812,7 +1812,7 @@ function ClinicalToolsPageInner() {
                               className={`rounded-2xl border p-5 transition-colors ${
                                 match
                                   ? 'border-[#6366F1]/25 bg-gradient-to-br from-[#6366F1]/[0.04] to-[#8B5CF6]/[0.04]'
-                                  : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03]'
+                                  : 'border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03]'
                               }`}
                             >
                               <div className="flex items-start justify-between gap-3 mb-1">
@@ -1825,8 +1825,8 @@ function ClinicalToolsPageInner() {
                                 )}
                               </div>
                               <div className="space-y-2 text-sm text-ink/70 dark:text-white/70 leading-relaxed mt-3">
-                                <p><span className="font-semibold text-ink/50 dark:text-white/50">{ui.clinicalToolkit.pelvicFloor.procedureLabel}: </span>{t.procedure}</p>
-                                <p><span className="font-semibold text-ink/50 dark:text-white/50">{ui.clinicalToolkit.pelvicFloor.interpretationLabel}: </span>{t.interpretation}</p>
+                                <p><span className="font-semibold text-ink/60 dark:text-white/50">{ui.clinicalToolkit.pelvicFloor.procedureLabel}: </span>{t.procedure}</p>
+                                <p><span className="font-semibold text-ink/60 dark:text-white/50">{ui.clinicalToolkit.pelvicFloor.interpretationLabel}: </span>{t.interpretation}</p>
                               </div>
                               {match && (
                                 <>
@@ -1837,9 +1837,9 @@ function ClinicalToolsPageInner() {
                                     {isOpen ? ui.clinicalToolkit.pelvicFloor.hideQuestionnaireLabel : ui.clinicalToolkit.pelvicFloor.fillQuestionnaireLabel}
                                   </button>
                                   {isOpen && (
-                                    <div className="mt-5 pt-5 border-t border-black/[0.06] dark:border-white/10">
+                                    <div className="mt-5 pt-5 border-t border-black/[0.09] dark:border-white/10">
                                       {pfQuestionnaireLoading && (
-                                        <p className="text-center text-sm text-ink/50 dark:text-white/50 py-6">{ui.clinicalToolkit.pelvicFloor.loadingQuestionnaireContent}</p>
+                                        <p className="text-center text-sm text-ink/60 dark:text-white/50 py-6">{ui.clinicalToolkit.pelvicFloor.loadingQuestionnaireContent}</p>
                                       )}
                                       {pfQuestionnaireData && (
                                         <>
@@ -1882,7 +1882,7 @@ function ClinicalToolsPageInner() {
             </div>
 
             {neuroLoading && (
-              <p className="text-center text-sm text-ink/50 dark:text-white/50 py-10">{ui.clinicalToolkit.neuro.loading}</p>
+              <p className="text-center text-sm text-ink/60 dark:text-white/50 py-10">{ui.clinicalToolkit.neuro.loading}</p>
             )}
             {neuroError && (
               <p className="text-center text-sm text-red-500 py-10">{neuroError}</p>
@@ -1891,16 +1891,16 @@ function ClinicalToolsPageInner() {
               <div className="space-y-8">
                 {neuroGroupedSorted.map(([cat, tests]) => (
                   <div key={cat}>
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-3">
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">
                       {ui.clinicalToolkit.neuro.categoryLabels[cat as keyof typeof ui.clinicalToolkit.neuro.categoryLabels] ?? cat}
                     </h3>
                                         <div className="space-y-4">
                       {tests.map((t) => (
-                        <div key={t.slug} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-5">
+                        <div key={t.slug} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-5">
                           <p className="text-base font-semibold text-ink dark:text-white">{t.name}</p>
                           <div className="space-y-2 text-sm text-ink/70 dark:text-white/70 leading-relaxed mt-3">
-                            <p><span className="font-semibold text-ink/50 dark:text-white/50">{ui.clinicalToolkit.neuro.procedureLabel}: </span>{t.procedure}</p>
-                            <p><span className="font-semibold text-ink/50 dark:text-white/50">{ui.clinicalToolkit.neuro.interpretationLabel}: </span>{t.interpretation}</p>
+                            <p><span className="font-semibold text-ink/60 dark:text-white/50">{ui.clinicalToolkit.neuro.procedureLabel}: </span>{t.procedure}</p>
+                            <p><span className="font-semibold text-ink/60 dark:text-white/50">{ui.clinicalToolkit.neuro.interpretationLabel}: </span>{t.interpretation}</p>
                           </div>
                         </div>
                       ))}
@@ -1926,19 +1926,19 @@ function ClinicalToolsPageInner() {
                   {mtConcepts.map((c) => {
                     const isOpen = openConcept === c.id;
                     return (
-                      <div key={c.id} className="rounded-xl bg-white/70 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/10 overflow-hidden">
+                      <div key={c.id} className="rounded-xl bg-white/95 dark:bg-white/[0.04] border border-black/[0.09] dark:border-white/10 overflow-hidden">
                         <button
                           onClick={() => setOpenConcept(isOpen ? null : c.id)}
                           className="w-full text-left px-4 py-3 flex items-center justify-between gap-3"
                         >
                           <span>
                             <span className="text-sm font-semibold text-ink dark:text-white block">{c.name}</span>
-                            <span className="text-xs text-ink/50 dark:text-white/50">{c.summary}</span>
+                            <span className="text-xs text-ink/60 dark:text-white/50">{c.summary}</span>
                           </span>
                           <span className="text-xs text-[#6366F1] font-semibold shrink-0">{isOpen ? ui.clinicalToolkit.manualTherapy.closeLabel : ui.clinicalToolkit.manualTherapy.readLabel}</span>
                         </button>
                         {isOpen && (
-                          <div className="px-4 pb-4 pt-1 border-t border-black/[0.06] dark:border-white/10">
+                          <div className="px-4 pb-4 pt-1 border-t border-black/[0.09] dark:border-white/10">
                             <p className="text-xs text-ink/70 dark:text-white/70 leading-relaxed whitespace-pre-line">{c.content}</p>
                           </div>
                         )}
@@ -1956,7 +1956,7 @@ function ClinicalToolsPageInner() {
                 value={mtSearchQuery}
                 onChange={(e) => setMtSearchQuery(e.target.value)}
                 placeholder={ui.librarySearchPlaceholder}
-                className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#6366F1]/40"
+                className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#6366F1]/40"
               />
             </div>
 
@@ -1970,14 +1970,14 @@ function ClinicalToolsPageInner() {
 
             <div className="flex flex-wrap justify-center gap-2 mb-10">
               {MT_TYPE_ORDER.map((t) => (
-                <button key={t} onClick={() => setActiveMTType(t)} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${activeMTType === t ? 'bg-[#6366F1]/15 text-[#6366F1] border border-[#6366F1]/40' : 'bg-black/[0.03] dark:bg-white/[0.05] text-ink/50 dark:text-white/50 border border-transparent'}`}>
+                <button key={t} onClick={() => setActiveMTType(t)} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${activeMTType === t ? 'bg-[#6366F1]/15 text-[#6366F1] border border-[#6366F1]/40' : 'bg-black/[0.03] dark:bg-white/[0.05] text-ink/60 dark:text-white/50 border border-transparent'}`}>
                   {ui.clinicalToolkit.manualTherapy.typeLabels[t as keyof typeof ui.clinicalToolkit.manualTherapy.typeLabels] ?? MT_TYPE_LABELS[t]}
                 </button>
               ))}
             </div>
 
             {mtLoading && (
-              <p className="text-center text-sm text-ink/50 dark:text-white/50 py-10">{ui.clinicalToolkit.manualTherapy.loadingTechniques}</p>
+              <p className="text-center text-sm text-ink/60 dark:text-white/50 py-10">{ui.clinicalToolkit.manualTherapy.loadingTechniques}</p>
             )}
             {mtError && (
               <p className="text-center text-sm text-red-500 py-10">{mtError}</p>
@@ -1985,7 +1985,7 @@ function ClinicalToolsPageInner() {
             {!mtLoading && !mtError && (
               <div className="space-y-4">
                 {mtFilteredByRegion.map((t) => (
-                  <div key={t.id} className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] p-5">
+                  <div key={t.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-5">
                     <p className="text-base font-semibold text-ink dark:text-white">{t.name}</p>
                     <div className="flex flex-wrap gap-2 mt-1 mb-3">
                       <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#6366F1]/10 text-[#6366F1]">{t.technique_type}</span>
@@ -1995,16 +1995,16 @@ function ClinicalToolsPageInner() {
                       <ClinicalActionBar contentType="exercise" contentId={t.id} label={t.name} section="Manual Therapy" />
                     </div>
                     <div className="space-y-2 text-sm text-ink/70 dark:text-white/70 leading-relaxed">
-                      <p><span className="font-semibold text-ink/50 dark:text-white/50">{ui.clinicalToolkit.manualTherapy.patientPositionLabel}: </span>{t.patient_position}</p>
-                      <p><span className="font-semibold text-ink/50 dark:text-white/50">{ui.clinicalToolkit.manualTherapy.directionLabel}: </span>{t.direction}</p>
-                      <p><span className="font-semibold text-ink/50 dark:text-white/50">{ui.clinicalToolkit.manualTherapy.indicationsLabel}: </span>{t.indications}</p>
-                      <p><span className="font-semibold text-ink/50 dark:text-white/50">{ui.fields.contraindications}: </span>{t.contraindications}</p>
-                      <p><span className="font-semibold text-ink/50 dark:text-white/50">{ui.clinicalToolkit.manualTherapy.procedureLabel}: </span>{t.procedure}</p>
+                      <p><span className="font-semibold text-ink/60 dark:text-white/50">{ui.clinicalToolkit.manualTherapy.patientPositionLabel}: </span>{t.patient_position}</p>
+                      <p><span className="font-semibold text-ink/60 dark:text-white/50">{ui.clinicalToolkit.manualTherapy.directionLabel}: </span>{t.direction}</p>
+                      <p><span className="font-semibold text-ink/60 dark:text-white/50">{ui.clinicalToolkit.manualTherapy.indicationsLabel}: </span>{t.indications}</p>
+                      <p><span className="font-semibold text-ink/60 dark:text-white/50">{ui.fields.contraindications}: </span>{t.contraindications}</p>
+                      <p><span className="font-semibold text-ink/60 dark:text-white/50">{ui.clinicalToolkit.manualTherapy.procedureLabel}: </span>{t.procedure}</p>
                     </div>
                   </div>
                 ))}
                 {mtFilteredByRegion.length === 0 && (
-                  <p className="text-center text-sm text-ink/50 dark:text-white/50 py-10">{ui.clinicalToolkit.manualTherapy.noTechniquesFound}</p>
+                  <p className="text-center text-sm text-ink/60 dark:text-white/50 py-10">{ui.clinicalToolkit.manualTherapy.noTechniquesFound}</p>
                 )}
               </div>
             )}

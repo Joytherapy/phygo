@@ -138,14 +138,14 @@ export default function InsertImageButton({ onInsert }: { onInsert: (data: Image
         aria-label={ui.annotate.insertImage}
         title={ui.annotate.insertImage}
         className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-          menuOpen ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/50 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+          menuOpen ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
         } disabled:opacity-50`}
       >
         {busy ? <Loader2 size={15} className="animate-spin" /> : <ImagePlus size={15} />}
       </button>
 
       {menuOpen && (
-        <div className="absolute left-0 top-full z-40 mt-1 w-48 rounded-xl border border-black/[0.06] dark:border-white/10 bg-white dark:bg-[#171821] shadow-lift p-1">
+        <div className="absolute left-0 top-full z-40 mt-1 w-48 rounded-xl border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#171821] shadow-lift p-1">
           <button
             onClick={() => {
               setMenuOpen(false)

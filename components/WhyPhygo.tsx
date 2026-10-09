@@ -34,7 +34,7 @@ export default function WhyPhygo() {
             >
               <r.icon size={18} className="text-electric mb-3" />
               <h3 className="font-semibold text-[13px] text-ink dark:text-white mb-1">{r.title}</h3>
-              <p className="text-[12px] text-ink/50 dark:text-white/50 leading-relaxed">{r.description}</p>
+              <p className="text-[12px] text-ink/60 dark:text-white/50 leading-relaxed">{r.description}</p>
             </motion.div>
           ))}
         </div>

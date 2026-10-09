@@ -3,7 +3,7 @@ import { Mail } from "lucide-react";
 
 export default function ContactPage() {
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] transition-colors">
       <Navbar />
       <div className="relative max-w-lg mx-auto pt-40 pb-24 px-6 text-center">
         <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#4F7CFF] mb-3">

@@ -70,7 +70,7 @@ export default function SportsMedicinePage() {
   const hasAnyMatch = concepts.some(matchesQuery);
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -91,7 +91,7 @@ export default function SportsMedicinePage() {
               {ui.sportsMedicine.heading}
             </span>
           </h1>
-          <p className="text-sm text-ink/50 dark:text-white/50 mt-4 max-w-xl mx-auto leading-relaxed">
+          <p className="text-sm text-ink/60 dark:text-white/50 mt-4 max-w-xl mx-auto leading-relaxed">
             {ui.sportsMedicine.sectionHint}
           </p>
         </div>
@@ -115,11 +115,11 @@ export default function SportsMedicinePage() {
           )}
         </div>
 
-        {loading && <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.sportsMedicine.loading}</p>}
+        {loading && <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.sportsMedicine.loading}</p>}
         {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
         {!loading && !error && normalizedQuery !== '' && !hasAnyMatch && (
-          <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+          <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
         )}
 
         {!loading && !error && (
@@ -136,7 +136,7 @@ export default function SportsMedicinePage() {
                     {items.map((c) => (
                       <div
                         key={c.id}
-                        className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-sm shadow-black/5 dark:shadow-black/40"
+                        className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-soft shadow-black/5 dark:shadow-black/40"
                       >
                         {c.diagram_image && (
                           <button

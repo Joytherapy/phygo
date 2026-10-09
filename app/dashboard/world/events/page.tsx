@@ -170,7 +170,7 @@ export default function EventsPage() {
   const hasMore = events.length < total
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -191,7 +191,7 @@ export default function EventsPage() {
               {ui.events.heading}
             </span>
           </h1>
-          <p className="text-base text-ink/50 dark:text-white/50 max-w-2xl mb-8">{ui.events.subtitle}</p>
+          <p className="text-base text-ink/60 dark:text-white/50 max-w-2xl mb-8">{ui.events.subtitle}</p>
         </motion.div>
 
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -204,7 +204,7 @@ export default function EventsPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={ui.events.searchPlaceholder}
-              className="relative w-full text-sm rounded-full border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] pl-14 pr-4 py-3.5 outline-none focus:border-[#22D3EE] text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 transition-colors"
+              className="relative w-full text-sm rounded-full border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] pl-14 pr-4 py-3.5 outline-none focus:border-[#22D3EE] text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 transition-colors"
             />
           </div>
           <button
@@ -225,7 +225,7 @@ export default function EventsPage() {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="mb-8 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 grid sm:grid-cols-2 lg:grid-cols-4 gap-4"
+            className="mb-8 rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 grid sm:grid-cols-2 lg:grid-cols-4 gap-4"
           >
             <FilterSelect
               label={ui.events.categoryLabel}
@@ -257,7 +257,7 @@ export default function EventsPage() {
             />
 
             <div>
-              <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-2">{ui.events.locationLabel}</p>
+              <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-2">{ui.events.locationLabel}</p>
               <div className="flex flex-wrap gap-1.5">
                 {(['', 'online', 'in_person', 'hybrid'] as const).map((v) => (
                   <button
@@ -276,7 +276,7 @@ export default function EventsPage() {
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-2">{ui.events.dateLabel}</p>
+              <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-2">{ui.events.dateLabel}</p>
               <div className="flex flex-wrap gap-1.5">
                 {(['', 'today', 'week', 'month', '3months'] as const).map((v) => (
                   <button
@@ -295,7 +295,7 @@ export default function EventsPage() {
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-2">{ui.events.freeLabel} / {ui.events.paidLabel}</p>
+              <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-2">{ui.events.freeLabel} / {ui.events.paidLabel}</p>
               <div className="flex flex-wrap gap-1.5">
                 {(['', 'true', 'false'] as const).map((v) => (
                   <button
@@ -319,7 +319,7 @@ export default function EventsPage() {
                   setFilters(EMPTY_FILTERS)
                   setQuery('')
                 }}
-                className="flex items-center gap-1.5 text-xs font-semibold text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white transition-colors self-end"
+                className="flex items-center gap-1.5 text-xs font-semibold text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white transition-colors self-end"
               >
                 <X size={13} />
                 {ui.events.allLabel}
@@ -338,17 +338,17 @@ export default function EventsPage() {
           <Rail title={ui.events.nearYouHeading} events={nearYou} router={router} icon={<MapPin size={15} className="text-[#A855F7]" />} />
         )}
 
-        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-ink/40 dark:text-white/40 mb-4 mt-2">
+        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-ink/55 dark:text-white/40 mb-4 mt-2">
           {ui.events.upcomingHeading}
         </p>
 
         {loading ? (
-          <div className="rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
-            <p className="text-sm text-ink/50 dark:text-white/50">{ui.events.loadingEvents}</p>
+          <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
+            <p className="text-sm text-ink/60 dark:text-white/50">{ui.events.loadingEvents}</p>
           </div>
         ) : events.length === 0 ? (
-          <div className="rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
-            <p className="text-sm text-ink/50 dark:text-white/50">{ui.events.noEventsFound}</p>
+          <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
+            <p className="text-sm text-ink/60 dark:text-white/50">{ui.events.noEventsFound}</p>
           </div>
         ) : (
           <>
@@ -373,25 +373,25 @@ export default function EventsPage() {
         )}
 
         {providers.length > 0 && (
-          <div className="mt-16 pt-10 border-t border-black/[0.06] dark:border-white/10">
+          <div className="mt-16 pt-10 border-t border-black/[0.09] dark:border-white/10">
             <div className="flex items-center gap-2 mb-1.5">
               <Building2 size={15} className="text-[#A855F7]" />
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase text-ink/40 dark:text-white/40">
+              <p className="text-xs font-semibold tracking-[0.2em] uppercase text-ink/55 dark:text-white/40">
                 {ui.events.providersHeading}
               </p>
             </div>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">{ui.events.providersSubtitle}</p>
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">{ui.events.providersSubtitle}</p>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {providers.map((provider) => (
                 <div
                   key={provider.id}
-                  className="group rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#A855F7]/30 hover:shadow-[0_16px_40px_-18px_rgba(168,85,247,0.3)]"
+                  className="group rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#A855F7]/30 hover:shadow-[0_16px_40px_-18px_rgba(168,85,247,0.3)]"
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <h3 className="text-sm font-semibold text-ink dark:text-white">{provider.name}</h3>
                     {provider.country && (
-                      <span className="shrink-0 text-[11px] font-medium text-ink/40 dark:text-white/40 bg-black/[0.04] dark:bg-white/[0.06] rounded-full px-2 py-0.5">
+                      <span className="shrink-0 text-[11px] font-medium text-ink/55 dark:text-white/40 bg-black/[0.04] dark:bg-white/[0.06] rounded-full px-2 py-0.5">
                         {provider.country}
                       </span>
                     )}
@@ -400,7 +400,7 @@ export default function EventsPage() {
                     <p className="text-xs text-ink/55 dark:text-white/55 leading-relaxed mb-1.5">{provider.description}</p>
                   )}
                   {provider.courses_note && (
-                    <p className="text-xs text-ink/40 dark:text-white/40 leading-relaxed mb-4">{provider.courses_note}</p>
+                    <p className="text-xs text-ink/55 dark:text-white/40 leading-relaxed mb-4">{provider.courses_note}</p>
                   )}
                   <a
                     href={provider.base_url}
@@ -436,7 +436,7 @@ function FilterSelect({
 }) {
   return (
     <div>
-      <label className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-2 block">{label}</label>
+      <label className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-2 block">{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -466,7 +466,7 @@ function Rail({
 }) {
   return (
     <div className="mb-10">
-      <p className="flex items-center gap-1.5 text-xs font-semibold tracking-[0.2em] uppercase text-ink/40 dark:text-white/40 mb-4">
+      <p className="flex items-center gap-1.5 text-xs font-semibold tracking-[0.2em] uppercase text-ink/55 dark:text-white/40 mb-4">
         {icon}
         {title}
       </p>

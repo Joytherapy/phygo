@@ -36,7 +36,7 @@ export default async function ConditionLibraryIndexPageFR() {
   const conditions = await getTranslatedConditionNames('fr');
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -58,7 +58,7 @@ export default async function ConditionLibraryIndexPageFR() {
             </span>{' '}
             pathologies cliniques
           </h1>
-          <p className="text-sm text-ink/50 dark:text-white/50 max-w-xl mx-auto">
+          <p className="text-sm text-ink/60 dark:text-white/50 max-w-xl mx-auto">
             Orthopédiques, neurologiques, cardiopulmonaires, oncologiques — chaque fiche vérifiée à partir des recommandations cliniques et de la littérature scientifique actuelle, conçue pour la pratique quotidienne en kinésithérapie.
           </p>
           <div className="flex justify-center mt-5">

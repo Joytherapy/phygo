@@ -73,7 +73,7 @@ export default function PelvicFloorStructureDetailPage() {
   }, [slug, lang, t.errorLoadingStructure]);
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -93,7 +93,7 @@ export default function PelvicFloorStructureDetailPage() {
         </button>
 
         {loading && (
-          <p className="text-sm text-ink/40 dark:text-white/40">{t.loading}</p>
+          <p className="text-sm text-ink/55 dark:text-white/40">{t.loading}</p>
         )}
 
         {error && <p className="text-sm text-red-500">{error}</p>}
@@ -113,7 +113,7 @@ export default function PelvicFloorStructureDetailPage() {
             </div>
 
             {structure.diagram_image && (
-              <div className="mb-8 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden">
+              <div className="mb-8 rounded-2xl border border-black/[0.09] dark:border-white/10 bg-[#08090b] overflow-hidden">
                 <img
                   src={`${IMAGE_BASE}/${structure.diagram_image}`}
                   alt={structure.name}
@@ -134,8 +134,8 @@ export default function PelvicFloorStructureDetailPage() {
             )}
 
             {structure.function && (
-              <div className="mb-8 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-2">
+              <div className="mb-8 rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-2">
                   {t.functionSectionLabel}
                 </p>
                 <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">
@@ -160,7 +160,7 @@ export default function PelvicFloorStructureDetailPage() {
                 {t.relatedConditionsHeading}
               </h2>
               {conditions.length === 0 && (
-                <p className="text-sm text-ink/40 dark:text-white/40">
+                <p className="text-sm text-ink/55 dark:text-white/40">
                   {t.noConditionsLinked}
                 </p>
               )}
@@ -170,7 +170,7 @@ export default function PelvicFloorStructureDetailPage() {
                     <button
                       key={c.id}
                       onClick={() => setSelectedCondition(c)}
-                      className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-pink-400/40 hover:-translate-y-0.5 transition-all"
+                      className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-pink-400/40 hover:-translate-y-0.5 transition-all"
                     >
                       <p className="text-sm font-semibold text-ink dark:text-white">
                         {c.condition_name}
@@ -198,7 +198,7 @@ export default function PelvicFloorStructureDetailPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 p-8"
+              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.09] dark:border-white/10 p-8"
             >
               <div className="flex items-start justify-between mb-4">
                 <h3 className="text-xl font-bold text-ink dark:text-white pr-6">
@@ -250,8 +250,8 @@ export default function PelvicFloorStructureDetailPage() {
                   </div>
                 )}
                 {selectedCondition.evidence_level && (
-                  <div className="pt-2 border-t border-black/[0.06] dark:border-white/10">
-                    <p className="text-xs text-ink/40 dark:text-white/40">
+                  <div className="pt-2 border-t border-black/[0.09] dark:border-white/10">
+                    <p className="text-xs text-ink/55 dark:text-white/40">
                       {ui.fields.evidence}: {selectedCondition.evidence_level}
                     </p>
                   </div>

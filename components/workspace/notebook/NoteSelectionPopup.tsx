@@ -97,7 +97,7 @@ export default function NoteSelectionPopup({
   return (
     <div
       ref={popupRef}
-      className="fixed z-[82] flex items-center gap-0.5 -translate-x-1/2 -translate-y-[calc(100%+8px)] rounded-full bg-white dark:bg-[#171821] border border-black/[0.06] dark:border-white/10 shadow-lift p-1"
+      className="fixed z-[82] flex items-center gap-0.5 -translate-x-1/2 -translate-y-[calc(100%+8px)] rounded-full bg-white dark:bg-[#171821] border border-black/[0.09] dark:border-white/10 shadow-lift p-1"
       style={{ left: popup.x, top: popup.y }}
     >
       <button

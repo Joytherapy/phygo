@@ -56,12 +56,12 @@ export default function ConditionSearchList({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-full border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-11 pr-4 py-3 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none focus:border-[#4F7CFF]/40"
+          className="w-full rounded-full border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-11 pr-4 py-3 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none focus:border-[#4F7CFF]/40"
         />
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-ink/40 dark:text-white/40">{noResultsText}</p>
+        <p className="text-sm text-ink/55 dark:text-white/40">{noResultsText}</p>
       ) : (
         <div className="space-y-8">
           {grouped.map(([letter, conditions]) => (
@@ -72,7 +72,7 @@ export default function ConditionSearchList({
                   <a
                     key={c.id}
                     href={buildConditionPath(c.id, c.condition_name, lang)}
-                    className="rounded-xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] px-4 py-3 text-sm font-medium text-ink/80 dark:text-white/80 hover:border-[#4F7CFF]/40 hover:text-ink dark:hover:text-white transition-colors"
+                    className="rounded-xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] px-4 py-3 text-sm font-medium text-ink/80 dark:text-white/80 hover:border-[#4F7CFF]/40 hover:text-ink dark:hover:text-white transition-colors"
                   >
                     {c.condition_name}
                   </a>

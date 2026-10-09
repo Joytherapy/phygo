@@ -231,7 +231,7 @@ export default function EndocrinePage() {
       : rehab.some(matchesRehab);
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -258,7 +258,7 @@ export default function EndocrinePage() {
         </div>
 
         <div className="flex justify-center mb-6">
-          <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
+          <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
             {SUB_TABS.map((t) => (
               <button
                 key={t.key}
@@ -266,7 +266,7 @@ export default function EndocrinePage() {
                 className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   subView === t.key
                     ? 'text-white'
-                    : 'text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
+                    : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                 }`}
                 style={subView === t.key ? { background: ACCENT.solid } : undefined}
               >
@@ -300,7 +300,7 @@ export default function EndocrinePage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {ui.endocrine.anatomyHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
               {ui.endocrine.anatomyHint}
             </p>
 
@@ -311,12 +311,12 @@ export default function EndocrinePage() {
             </div>
 
             {structuresLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">{ui.endocrine.loading}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40">{ui.endocrine.loading}</p>
             )}
             {structuresError && <p className="text-sm text-red-500">{structuresError}</p>}
 
             {!structuresLoading && !structuresError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!structuresLoading && !structuresError && (
@@ -336,7 +336,7 @@ export default function EndocrinePage() {
                         {items.map((s) => (
                           <div
                             key={s.id}
-                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-sm shadow-black/5 dark:shadow-black/40"
+                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-soft shadow-black/5 dark:shadow-black/40"
                           >
                             {s.diagram_image && (
                               <button
@@ -366,7 +366,7 @@ export default function EndocrinePage() {
                                 </p>
                               )}
                               {s.clinical_relevance && (
-                                <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed">
+                                <p className="text-xs text-ink/60 dark:text-white/50 leading-relaxed">
                                   <span className="font-semibold">{ui.anatomy.clinicalRelevance}: </span>{s.clinical_relevance}
                                 </p>
                               )}
@@ -387,17 +387,17 @@ export default function EndocrinePage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {ui.endocrine.conditionsHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
               {ui.endocrine.conditionsHint}
             </p>
 
             {conditionsLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">{ui.endocrine.loading}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40">{ui.endocrine.loading}</p>
             )}
             {conditionsError && <p className="text-sm text-red-500">{conditionsError}</p>}
 
             {!conditionsLoading && !conditionsError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!conditionsLoading && !conditionsError && (
@@ -406,7 +406,7 @@ export default function EndocrinePage() {
                   <button
                     key={c.id}
                     onClick={() => setSelectedCondition(c)}
-                    className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-colors hover:border-[#10B981]/40"
+                    className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-colors hover:border-[#10B981]/40"
                   >
                     <p className="text-sm font-semibold text-ink dark:text-white mb-2">{c.condition_name}</p>
                     <EvidenceBadge level={c.evidence_level} />
@@ -422,17 +422,17 @@ export default function EndocrinePage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {ui.endocrine.assessmentHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
               {ui.endocrine.assessmentHint}
             </p>
 
             {testsLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">{ui.endocrine.loading}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40">{ui.endocrine.loading}</p>
             )}
             {testsError && <p className="text-sm text-red-500">{testsError}</p>}
 
             {!testsLoading && !testsError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!testsLoading && !testsError && (
@@ -452,7 +452,7 @@ export default function EndocrinePage() {
                         {items.map((t) => (
                           <div
                             key={t.id}
-                            className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                            className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{t.name}</p>
                             {t.procedure && (
@@ -481,17 +481,17 @@ export default function EndocrinePage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {ui.endocrine.rehabHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
               {ui.endocrine.rehabHint}
             </p>
 
             {rehabLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">{ui.endocrine.loading}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40">{ui.endocrine.loading}</p>
             )}
             {rehabError && <p className="text-sm text-red-500">{rehabError}</p>}
 
             {!rehabLoading && !rehabError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!rehabLoading && !rehabError && (
@@ -511,7 +511,7 @@ export default function EndocrinePage() {
                         {items.map((r) => (
                           <div
                             key={r.id}
-                            className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                            className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{r.name}</p>
                             {r.description && (
@@ -521,7 +521,7 @@ export default function EndocrinePage() {
                             )}
                             {r.protocol && (
                               <div className="rounded-xl bg-black/[0.02] dark:bg-white/[0.03] p-3 mb-3">
-                                <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-1">
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-1">
                                   {ui.endocrine.protocolLabel}
                                 </p>
                                 <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
@@ -530,7 +530,7 @@ export default function EndocrinePage() {
                               </div>
                             )}
                             {r.evidence_note && (
-                              <p className="text-[10px] text-ink/40 dark:text-white/40 leading-relaxed">
+                              <p className="text-[10px] text-ink/55 dark:text-white/40 leading-relaxed">
                                 {r.evidence_note}
                               </p>
                             )}
@@ -560,7 +560,7 @@ export default function EndocrinePage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 p-8"
+              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.09] dark:border-white/10 p-8"
             >
               <div className="flex items-start justify-between mb-4">
                 <h3 className="text-xl font-bold text-ink dark:text-white pr-6">
@@ -610,7 +610,7 @@ export default function EndocrinePage() {
                   </div>
                 )}
                 {selectedCondition.evidence_level && (
-                  <div className="pt-2 border-t border-black/[0.06] dark:border-white/10">
+                  <div className="pt-2 border-t border-black/[0.09] dark:border-white/10">
                     <EvidenceBadge level={selectedCondition.evidence_level} />
                     <SourceCitation source={selectedCondition.source} sourceDate={selectedCondition.source_date} />
                   </div>

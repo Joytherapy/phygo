@@ -57,16 +57,16 @@ export default function BrainZoneHubPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#08090b] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] flex items-center justify-center">
         <Navbar />
-        <p className="text-ink/40 dark:text-white/40">{ui.common.loading}</p>
+        <p className="text-ink/55 dark:text-white/40">{ui.common.loading}</p>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#08090b] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] flex items-center justify-center">
         <Navbar />
         <div className="text-center">
           <p className="text-ink/60 dark:text-white/60 mb-4">{ui.brainMap.zone.zoneNotFound}</p>
@@ -84,7 +84,7 @@ export default function BrainZoneHubPage() {
   const { zone, conditions, info, geriatricPrinciples } = data;
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -97,7 +97,7 @@ export default function BrainZoneHubPage() {
       <div className="relative max-w-4xl mx-auto px-6 pt-40 pb-24">
         <button
           onClick={() => router.push('/dashboard/brain-map')}
-          className="inline-flex items-center gap-2 text-sm font-medium text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-medium text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
         >
           <ArrowLeft size={16} />
           {ui.brainMap.zone.backToBrainMap}
@@ -110,7 +110,7 @@ export default function BrainZoneHubPage() {
           </div>
 
           {zone.image_url && (
-            <div className="mt-6 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden">
+            <div className="mt-6 rounded-2xl border border-black/[0.09] dark:border-white/10 bg-[#08090b] overflow-hidden">
               <img
                 src={`${IMAGE_BASE}/${zone.image_url}`}
                 alt={`${zone.name} highlighted`}
@@ -163,7 +163,7 @@ export default function BrainZoneHubPage() {
             {geriatricPrinciples.map((g) => (
               <div
                 key={g.slug}
-                className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
               >
                 <p className="text-sm font-semibold mb-1">{g.title}</p>
                 <p className="text-sm text-ink/60 dark:text-white/60 leading-relaxed">
@@ -183,7 +183,7 @@ export default function BrainZoneHubPage() {
           </div>
 
           {conditions.length === 0 ? (
-            <p className="text-sm text-ink/40 dark:text-white/40">
+            <p className="text-sm text-ink/55 dark:text-white/40">
               {ui.brainMap.zone.noConditionsLinked}
             </p>
           ) : (
@@ -217,7 +217,7 @@ export default function BrainZoneHubPage() {
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 rounded-[28px] p-8 max-w-xl w-full max-h-[85vh] overflow-auto shadow-2xl"
+              className="bg-white dark:bg-[#0e0f12] border border-black/[0.09] dark:border-white/10 rounded-[28px] p-8 max-w-xl w-full max-h-[85vh] overflow-auto shadow-2xl"
             >
               <div className="flex items-start justify-between mb-4">
                 <h3 className="font-display text-2xl font-bold pr-4">

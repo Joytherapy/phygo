@@ -1024,7 +1024,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
 
             <div className="flex flex-col">
 
-              <span className="eyebrow text-ink/40 dark:text-white/40">
+              <span className="eyebrow text-ink/55 dark:text-white/40">
 
                 {phase === "idle" && "Ready"}
 
@@ -1247,7 +1247,7 @@ className="text-[11px] rounded-lg border border-black/15 dark:border-white/10 bg
                 )}
 
                 {patientId && noteSaveStatus === "idle" && (
-                  <p className="max-w-[280px] text-[11px] leading-relaxed text-ink/40 dark:text-white/40">
+                  <p className="max-w-[280px] text-[11px] leading-relaxed text-ink/55 dark:text-white/40">
                     Review the note and exercises below, edit anything you like, then save to the patient's chart.
                   </p>
                 )}
@@ -1289,7 +1289,7 @@ className="text-[11px] rounded-lg border border-black/15 dark:border-white/10 bg
         transition={{
           duration: .45,
         }}
-        className="rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-white/[0.03] p-5 shadow-sm"
+        className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] p-5 shadow-soft"
       >
 
         <div className="mb-3 flex items-center justify-between">
@@ -1298,7 +1298,7 @@ className="text-[11px] rounded-lg border border-black/15 dark:border-white/10 bg
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-electric/10 text-electric">
               <Icon size={14} />
             </span>
-            <span className="eyebrow text-ink/40 dark:text-white/40">
+            <span className="eyebrow text-ink/55 dark:text-white/40">
               {cat.label}
             </span>
           </div>
@@ -1361,18 +1361,18 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4 }}
-    className="mt-4 rounded-[24px] border border-black/5 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-sm"
+    className="mt-4 rounded-[24px] border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-soft"
   >
     <div className="flex items-center gap-2 mb-4">
       <Target size={15} className="text-electric" />
-      <span className="eyebrow text-ink/40 dark:text-white/40">
+      <span className="eyebrow text-ink/55 dark:text-white/40">
         Clinical Reasoning
       </span>
     </div>
 
     {Array.isArray(finalNote.clinicalReasoning.hypotheses) && finalNote.clinicalReasoning.hypotheses.length > 0 && (
       <div className="mb-4">
-        <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1.5">Clinical Hypotheses</p>
+        <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1.5">Clinical Hypotheses</p>
         <ul className="space-y-1">
           {finalNote.clinicalReasoning.hypotheses.map((h: string, i: number) => (
             <li key={i} className="text-sm text-ink/70 dark:text-white/70 leading-relaxed flex gap-2">
@@ -1386,7 +1386,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
 
     {Array.isArray(finalNote.clinicalReasoning.differentials) && finalNote.clinicalReasoning.differentials.length > 0 && (
       <div className="mb-4">
-        <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1.5">Differential Considerations</p>
+        <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1.5">Differential Considerations</p>
         <ul className="space-y-1">
           {finalNote.clinicalReasoning.differentials.map((d: string, i: number) => (
             <li key={i} className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">— {d}</li>
@@ -1398,25 +1398,25 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
       {finalNote.clinicalReasoning.supportingFindings && (
         <div>
-          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Supporting Findings</p>
+          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Supporting Findings</p>
           <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{finalNote.clinicalReasoning.supportingFindings}</p>
         </div>
       )}
       {finalNote.clinicalReasoning.findingsAgainst && (
         <div>
-          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Findings Against</p>
+          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Findings Against</p>
           <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{finalNote.clinicalReasoning.findingsAgainst}</p>
         </div>
       )}
       {finalNote.clinicalReasoning.missingInformation && (
         <div>
-          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Missing Information</p>
+          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Missing Information</p>
           <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{finalNote.clinicalReasoning.missingInformation}</p>
         </div>
       )}
       {finalNote.clinicalReasoning.suggestedAssessments && (
         <div>
-          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Suggested Additional Assessments</p>
+          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Suggested Additional Assessments</p>
           <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{finalNote.clinicalReasoning.suggestedAssessments}</p>
         </div>
       )}
@@ -1432,7 +1432,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
       </div>
     )}
 
-    <p className="mt-4 pt-3 border-t border-black/5 dark:border-white/10 text-[11px] text-ink/40 dark:text-white/40">
+    <p className="mt-4 pt-3 border-t border-black/[0.08] dark:border-white/10 text-[11px] text-ink/55 dark:text-white/40">
       Clinical decision support only — not an autonomous diagnosis. Clinical judgment and final decisions remain with the treating professional.
     </p>
   </motion.div>
@@ -1443,7 +1443,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4 }}
-    className="mt-4 relative overflow-hidden rounded-[24px] border border-[#0F1B2E]/10 dark:border-white/10 bg-gradient-to-br from-[#0F1B2E]/[0.02] to-white dark:from-white/[0.02] dark:to-white/[0.03] p-6 shadow-sm"
+    className="mt-4 relative overflow-hidden rounded-[24px] border border-[#0F1B2E]/10 dark:border-white/10 bg-gradient-to-br from-[#0F1B2E]/[0.02] to-white dark:from-white/[0.02] dark:to-white/[0.03] p-6 shadow-soft"
   >
     <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald/50 to-transparent" />
 
@@ -1467,34 +1467,34 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
       <div className="flex gap-3">
         <Target size={16} className="mt-0.5 shrink-0 text-electric" />
         <div>
-          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Goals</p>
+          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Goals</p>
           <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.goals}</p>
         </div>
       </div>
       <div className="flex gap-3">
         <Stethoscope size={16} className="mt-0.5 shrink-0 text-electric" />
         <div>
-          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Clinical Tests</p>
+          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Clinical Tests</p>
           <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.clinical_tests}</p>
         </div>
       </div>
       <div className="flex gap-3">
         <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-500" />
         <div>
-          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Red Flags</p>
+          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Red Flags</p>
           <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.red_flags}</p>
         </div>
       </div>
       <div className="flex gap-3">
         <Dumbbell size={16} className="mt-0.5 shrink-0 text-electric" />
         <div>
-          <p className="text-xs font-semibold text-ink/50 dark:text-white/50 mb-1">Typical Exercises</p>
+          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Typical Exercises</p>
           <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.typical_exercises}</p>
         </div>
       </div>
     </div>
 
-    <div className="mt-5 pt-4 border-t border-black/5 dark:border-white/10 flex items-center justify-between flex-wrap gap-2">
+    <div className="mt-5 pt-4 border-t border-black/[0.08] dark:border-white/10 flex items-center justify-between flex-wrap gap-2">
       <p className="font-mono text-[11px] tracking-tight text-ink/45 dark:text-white/45">
         {clinicalInsight.source} ({clinicalInsight.source_date}) — Clinical decision support, not a diagnosis.
       </p>
@@ -1512,7 +1512,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="mt-2 text-xs text-ink/50 dark:text-white/50"
+        className="mt-2 text-xs text-ink/60 dark:text-white/50"
       >
         Suggested because the note mentions: "{matchedKeyword}"
       </motion.p>
@@ -1564,21 +1564,21 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4, delay: 0.025 }}
-    className="mt-4 rounded-[24px] border border-black/5 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-sm"
+    className="mt-4 rounded-[24px] border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-soft"
   >
     <div className="flex items-center gap-2 mb-4">
       <BookOpen size={15} className="text-electric" />
-      <span className="eyebrow text-ink/40 dark:text-white/40">
+      <span className="eyebrow text-ink/55 dark:text-white/40">
         Relevant Scientific Evidence
       </span>
     </div>
 
     {papersLoading && (
-      <p className="text-xs text-ink/40 dark:text-white/40">Searching the evidence library...</p>
+      <p className="text-xs text-ink/55 dark:text-white/40">Searching the evidence library...</p>
     )}
 
     {!papersLoading && relevantPapers.length === 0 && (
-      <p className="text-xs text-ink/40 dark:text-white/40">
+      <p className="text-xs text-ink/55 dark:text-white/40">
         No matching published paper found in the Phygo Science library for this case.
       </p>
     )}
@@ -1632,7 +1632,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
       </div>
     )}
 
-    <p className="mt-4 pt-3 border-t border-black/5 dark:border-white/10 text-[11px] text-ink/40 dark:text-white/40">
+    <p className="mt-4 pt-3 border-t border-black/[0.08] dark:border-white/10 text-[11px] text-ink/55 dark:text-white/40">
       Showing a paper here does not by itself validate a treatment — clinical judgment remains with the treating professional.
     </p>
   </motion.div>
@@ -1643,10 +1643,10 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4, delay: 0.05 }}
-    className="mt-4 rounded-[24px] border border-black/5 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-sm"
+    className="mt-4 rounded-[24px] border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-soft"
   >
     <div className="flex items-center justify-between mb-4">
-      <span className="eyebrow text-ink/40 dark:text-white/40">
+      <span className="eyebrow text-ink/55 dark:text-white/40">
         Exercises
       </span>
       <button
@@ -1673,10 +1673,10 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
           />
         </div>
         {exerciseSearching && (
-          <p className="text-xs text-ink/40 dark:text-white/40 mt-2">Searching...</p>
+          <p className="text-xs text-ink/55 dark:text-white/40 mt-2">Searching...</p>
         )}
         {!exerciseSearching && exerciseSearchQuery && exerciseSearchResults.length === 0 && (
-          <p className="text-xs text-ink/40 dark:text-white/40 mt-2">No exercises found.</p>
+          <p className="text-xs text-ink/55 dark:text-white/40 mt-2">No exercises found.</p>
         )}
         {exerciseSearchResults.length > 0 && (
           <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
@@ -1700,7 +1700,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                     {result.name}
                   </p>
                   {result.primary_muscle && (
-                    <p className="text-[10px] text-ink/40 dark:text-white/40">
+                    <p className="text-[10px] text-ink/55 dark:text-white/40">
                       {result.primary_muscle}
                     </p>
                   )}
@@ -1745,12 +1745,12 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                     {ex.name}
                   </p>
                   {ex.primary_muscle && (
-                    <p className="text-[11px] text-ink/40 dark:text-white/40 mt-0.5">
+                    <p className="text-[11px] text-ink/55 dark:text-white/40 mt-0.5">
                       {ex.primary_muscle}
                     </p>
                   )}
                   {!isEditing && (ex.dosing?.sets || ex.dosing?.reps || ex.dosing?.duration_seconds) && (
-                    <p className="text-[11px] text-ink/50 dark:text-white/50 mt-1">
+                    <p className="text-[11px] text-ink/60 dark:text-white/50 mt-1">
                       {ex.dosing?.sets && `${ex.dosing.sets} sets`}
                       {ex.dosing?.sets && ex.dosing?.reps && " × "}
                       {ex.dosing?.reps && `${ex.dosing.reps} reps`}
@@ -1774,13 +1774,13 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
               <div className="flex items-start gap-1 shrink-0">
                 <button
                   onClick={() => setEditingExercise(isEditing ? null : key)}
-                  className="p-1.5 rounded-lg text-ink/40 dark:text-white/40 hover:bg-black/5 dark:hover:bg-white/10 hover:text-electric transition-colors"
+                  className="p-1.5 rounded-lg text-ink/55 dark:text-white/40 hover:bg-black/5 dark:hover:bg-white/10 hover:text-electric transition-colors"
                 >
                   <Pencil size={13} />
                 </button>
                 <button
                   onClick={() => removeExercise(key)}
-                  className="p-1.5 rounded-lg text-ink/40 dark:text-white/40 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                  className="p-1.5 rounded-lg text-ink/55 dark:text-white/40 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 transition-colors"
                 >
                   <Trash2 size={13} />
                 </button>
@@ -1788,9 +1788,9 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
             </div>
 
             {isEditing && (
-              <div className="pt-2 border-t border-black/5 dark:border-white/10 grid grid-cols-2 gap-2">
+              <div className="pt-2 border-t border-black/[0.08] dark:border-white/10 grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[10px] text-ink/40 dark:text-white/40">Sets</label>
+                  <label className="text-[10px] text-ink/55 dark:text-white/40">Sets</label>
                   <input
                     type="number"
                     value={ex.dosing?.sets ?? ""}
@@ -1799,7 +1799,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-ink/40 dark:text-white/40">Reps</label>
+                  <label className="text-[10px] text-ink/55 dark:text-white/40">Reps</label>
                   <input
                     type="number"
                     value={ex.dosing?.reps ?? ""}
@@ -1808,7 +1808,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-ink/40 dark:text-white/40">Duration (s)</label>
+                  <label className="text-[10px] text-ink/55 dark:text-white/40">Duration (s)</label>
                   <input
                     type="number"
                     value={ex.dosing?.duration_seconds ?? ""}
@@ -1817,7 +1817,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-ink/40 dark:text-white/40">Freq/week</label>
+                  <label className="text-[10px] text-ink/55 dark:text-white/40">Freq/week</label>
                   <input
                     type="number"
                     value={ex.dosing?.frequency_per_week ?? ""}
@@ -1826,7 +1826,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="text-[10px] text-ink/40 dark:text-white/40">Notes</label>
+                  <label className="text-[10px] text-ink/55 dark:text-white/40">Notes</label>
                   <textarea
                     value={ex.dosing?.notes ?? ""}
                     onChange={(e) => updateExerciseDosing(key, "notes", e.target.value)}
@@ -1844,7 +1844,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
             )}
 
             {!isEditing && isOpen && hasDetails && (
-              <div className="pt-2 border-t border-black/5 dark:border-white/10">
+              <div className="pt-2 border-t border-black/[0.08] dark:border-white/10">
                 {ex.description && (
                   <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
                     {ex.description}
@@ -1871,9 +1871,9 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4, delay: 0.1 }}
-    className="mt-4 rounded-[24px] border border-black/5 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-sm"
+    className="mt-4 rounded-[24px] border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-soft"
   >
-    <span className="eyebrow text-ink/40 dark:text-white/40 mb-4 block">
+    <span className="eyebrow text-ink/55 dark:text-white/40 mb-4 block">
       Rehab Protocol
     </span>
 
@@ -1893,7 +1893,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
               {phase.phase_name}
             </p>
           </div>
-          <p className="text-[11px] text-ink/40 dark:text-white/40 mb-3">
+          <p className="text-[11px] text-ink/55 dark:text-white/40 mb-3">
             {phase.typical_duration}
           </p>
           <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
@@ -1905,7 +1905,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
 <span className="whitespace-pre-line">{formatPhaseText(phase.phase_exercises)}
 </span>
           </p>
-          <p className="text-[11px] text-ink/40 dark:text-white/40 leading-relaxed">
+          <p className="text-[11px] text-ink/55 dark:text-white/40 leading-relaxed">
             <span className="font-medium">Progress when: </span>
             {phase.criteria_to_progress}
           </p>
@@ -2011,7 +2011,7 @@ Write instead
   placeholder="Clinical context (optional): e.g. suspected osteoarthritis, acute trauma"
   className="w-full mb-2 text-[11px] rounded-lg border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/10 px-2 py-1.5"
 />
-<p className="text-[10px] text-ink/40 dark:text-white/40 mt-1">
+<p className="text-[10px] text-ink/55 dark:text-white/40 mt-1">
   Tip: hold Cmd (or Ctrl on Windows) and select multiple files together to analyze them as one case.
 </p>
  <label
@@ -2042,7 +2042,7 @@ Write instead
     />
   </label>
   {!finalNote && (
-  <p className="text-[10px] text-ink/40 dark:text-white/40 mt-1">
+  <p className="text-[10px] text-ink/55 dark:text-white/40 mt-1">
     Available after generating a session note
   </p>
 )}
@@ -2050,7 +2050,7 @@ Write instead
   </div>
   )}
   {uploadedFileNames.length > 0 && (
-  <p className="text-[11px] text-ink/50 dark:text-white/50 mt-2">
+  <p className="text-[11px] text-ink/60 dark:text-white/50 mt-2">
     {uploadedFileNames.length === 1
       ? `1 file: ${uploadedFileNames[0]}`
       : `${uploadedFileNames.length} files: ${uploadedFileNames.join(", ")}`}
@@ -2058,7 +2058,7 @@ Write instead
 )}
 
   {scanAnalyzing && (
-  <span className="text-[11px] text-ink/50 dark:text-white/50 italic">
+  <span className="text-[11px] text-ink/60 dark:text-white/50 italic">
     Analyzing document...
   </span>
 )}

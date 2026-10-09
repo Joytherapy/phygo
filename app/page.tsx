@@ -21,7 +21,7 @@ export default function Home() {
     <>
       <IntroLoader />
       <ScrollProgress />
-      <main id="main-content" className="relative min-h-screen bg-white dark:bg-ink overflow-x-hidden">
+      <main id="main-content" className="relative min-h-screen bg-[#f6f7f9] dark:bg-ink overflow-x-hidden">
         <AmbientMesh />
         <CursorSpotlight />
         <Navbar />

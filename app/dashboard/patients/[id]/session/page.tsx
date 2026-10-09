@@ -53,24 +53,24 @@ export default function PatientSessionPage() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen bg-white dark:bg-[#08090b]">
+      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b]">
         <Navbar />
-        <div className="pt-40 text-center text-ink/40 dark:text-white/40">{ui.common.loading}</div>
+        <div className="pt-40 text-center text-ink/55 dark:text-white/40">{ui.common.loading}</div>
       </div>
     )
   }
 
   if (!patient) {
     return (
-      <div className="relative min-h-screen bg-white dark:bg-[#08090b]">
+      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b]">
         <Navbar />
-        <div className="pt-40 text-center text-ink/40 dark:text-white/40">{ui.patients.patientNotFound}</div>
+        <div className="pt-40 text-center text-ink/55 dark:text-white/40">{ui.patients.patientNotFound}</div>
       </div>
     )
   }
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
       <div className="relative max-w-4xl mx-auto pt-40 pb-20 px-6">
@@ -78,7 +78,7 @@ export default function PatientSessionPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onClick={() => router.push(`/dashboard/patients/${patientId}`)}
-          className="flex items-center gap-1.5 text-sm text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white mb-6 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white mb-6 transition-colors"
         >
           <ArrowLeft size={15} />
           {ui.patients.backToPatientName.replace('{name}', patient.name)}
@@ -90,7 +90,7 @@ export default function PatientSessionPage() {
             className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
               tab === 'session'
                 ? 'text-white'
-                : 'text-ink/50 dark:text-white/50 border border-black/10 dark:border-white/10'
+                : 'text-ink/60 dark:text-white/50 border border-black/10 dark:border-white/10'
             }`}
             style={tab === 'session' ? { background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
           >
@@ -101,7 +101,7 @@ export default function PatientSessionPage() {
             className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
               tab === 'video'
                 ? 'text-white'
-                : 'text-ink/50 dark:text-white/50 border border-black/10 dark:border-white/10'
+                : 'text-ink/60 dark:text-white/50 border border-black/10 dark:border-white/10'
             }`}
             style={tab === 'video' ? { background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
           >

@@ -128,7 +128,7 @@ export default function BulkPatientLinkBar({
 
   return createPortal(
     <div className="fixed bottom-0 inset-x-0 z-[9998] flex justify-center px-4 pb-6 pointer-events-none">
-      <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-black/[0.06] dark:border-white/10 bg-white/95 dark:bg-[#12131a]/95 backdrop-blur-xl shadow-2xl pl-5 pr-2 py-2">
+      <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-[#12131a]/95 backdrop-blur-xl shadow-2xl pl-5 pr-2 py-2">
         <span className="text-sm font-semibold text-ink dark:text-white whitespace-nowrap">
           {ui.bulkSelection.countLabel.replace('{n}', String(items.length))}
         </span>
@@ -136,7 +136,7 @@ export default function BulkPatientLinkBar({
         <button
           type="button"
           onClick={onCancel}
-          className="text-xs font-medium text-ink/40 dark:text-white/40 hover:text-ink dark:hover:text-white whitespace-nowrap"
+          className="text-xs font-medium text-ink/55 dark:text-white/40 hover:text-ink dark:hover:text-white whitespace-nowrap"
         >
           {ui.bulkSelection.toggleOff}
         </button>
@@ -147,7 +147,7 @@ export default function BulkPatientLinkBar({
             type="button"
             onClick={handleLinkClick}
             disabled={status === 'saving' || items.length === 0}
-            className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white shadow-sm disabled:opacity-50 whitespace-nowrap"
+            className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white shadow-soft disabled:opacity-50 whitespace-nowrap"
             style={{ background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' }}
           >
             {status === 'saving' && <Loader2 size={13} className="animate-spin" />}
@@ -180,11 +180,11 @@ export default function BulkPatientLinkBar({
               </div>
 
               {searching && (
-                <p className="text-[11px] text-ink/40 dark:text-white/40 px-1 py-1">{ui.clinicalActionBar.searching}</p>
+                <p className="text-[11px] text-ink/55 dark:text-white/40 px-1 py-1">{ui.clinicalActionBar.searching}</p>
               )}
 
               {!searching && query && results.length === 0 && (
-                <p className="text-[11px] text-ink/40 dark:text-white/40 px-1 py-1">{ui.clinicalActionBar.noPatientsFound}</p>
+                <p className="text-[11px] text-ink/55 dark:text-white/40 px-1 py-1">{ui.clinicalActionBar.noPatientsFound}</p>
               )}
 
               {results.length > 0 && (

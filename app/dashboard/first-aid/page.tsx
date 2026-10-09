@@ -55,7 +55,7 @@ export default function FirstAidPage() {
     categoryFilter === 'all' ? topics : topics.filter((t) => t.category === categoryFilter);
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -76,7 +76,7 @@ export default function FirstAidPage() {
               {ui.firstAid.heading}
             </span>
           </h1>
-                    <p className="text-sm text-ink/50 dark:text-white/50 mt-4 max-w-xl mx-auto">
+                    <p className="text-sm text-ink/60 dark:text-white/50 mt-4 max-w-xl mx-auto">
             {ui.firstAid.subtitle}
           </p>
         </div>
@@ -114,7 +114,7 @@ export default function FirstAidPage() {
           ))}
         </div>
 
-        {loading && <p className="text-center text-sm text-ink/40 dark:text-white/40">{ui.firstAid.loadingTopics}</p>}
+        {loading && <p className="text-center text-sm text-ink/55 dark:text-white/40">{ui.firstAid.loadingTopics}</p>}
         {error && <p className="text-center text-sm text-red-500">{error}</p>}
 
         {!loading && !error && (
@@ -126,7 +126,7 @@ export default function FirstAidPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
                 onClick={() => router.push(`/dashboard/first-aid/${topic.slug}`)}
-                className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden hover:border-[#EF4444]/40 transition-colors"
+                className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden hover:border-[#EF4444]/40 transition-colors"
               >
                 {topic.image_url && (
                   <div className="w-full aspect-[16/9] bg-[#08090b] overflow-hidden">
@@ -146,7 +146,7 @@ export default function FirstAidPage() {
                   </span>
                   <p className="text-sm font-semibold text-ink dark:text-white">{topic.name}</p>
                   {topic.description && (
-                    <p className="text-xs text-ink/50 dark:text-white/50 mt-2 leading-relaxed line-clamp-2">
+                    <p className="text-xs text-ink/60 dark:text-white/50 mt-2 leading-relaxed line-clamp-2">
                       {topic.description}
                     </p>
                   )}

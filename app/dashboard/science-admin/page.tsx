@@ -54,7 +54,7 @@ export default function ScienceAdminPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
       <div className="relative max-w-4xl mx-auto pt-40 pb-20 px-6">
@@ -64,15 +64,15 @@ export default function ScienceAdminPage() {
         <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white mb-2">
           Science Review Queue
         </h1>
-        <p className="text-sm text-ink/50 dark:text-white/50 mb-10">
+        <p className="text-sm text-ink/60 dark:text-white/50 mb-10">
           {papers.length} studies awaiting review.
         </p>
 
         {loading ? (
-          <p className="text-sm text-ink/50 dark:text-white/50">Loading...</p>
+          <p className="text-sm text-ink/60 dark:text-white/50">Loading...</p>
         ) : papers.length === 0 ? (
-          <div className="rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
-            <p className="text-sm text-ink/50 dark:text-white/50">
+          <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
+            <p className="text-sm text-ink/60 dark:text-white/50">
               Nothing to review right now.
             </p>
           </div>
@@ -81,7 +81,7 @@ export default function ScienceAdminPage() {
             {papers.map((paper) => (
               <div
                 key={paper.id}
-                className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
               >
                 <div className="flex items-center gap-2 mb-2">
                   {paper.study_type && (
@@ -99,7 +99,7 @@ export default function ScienceAdminPage() {
                 <h2 className="text-lg font-semibold text-ink dark:text-white mb-1">
                   {paper.title}
                 </h2>
-                <p className="text-sm text-ink/50 dark:text-white/50 mb-4">
+                <p className="text-sm text-ink/60 dark:text-white/50 mb-4">
                   {paper.journal} {paper.publication_date}
                 </p>
 

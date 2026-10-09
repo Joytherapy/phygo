@@ -176,11 +176,11 @@ export default function ClinicalActionBar({
             </div>
 
             {searching && (
-              <p className="text-[11px] text-ink/40 dark:text-white/40 px-1 py-1">{ui.clinicalActionBar.searching}</p>
+              <p className="text-[11px] text-ink/55 dark:text-white/40 px-1 py-1">{ui.clinicalActionBar.searching}</p>
             )}
 
             {!searching && query && results.length === 0 && (
-              <p className="text-[11px] text-ink/40 dark:text-white/40 px-1 py-1">{ui.clinicalActionBar.noPatientsFound}</p>
+              <p className="text-[11px] text-ink/55 dark:text-white/40 px-1 py-1">{ui.clinicalActionBar.noPatientsFound}</p>
             )}
 
             {results.length > 0 && (

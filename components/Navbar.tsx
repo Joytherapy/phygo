@@ -103,7 +103,7 @@ export default function Navbar() {
       active ? "text-ink dark:text-white" : "text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white"
     }`;
   const desktopUnderlineClass = (active: boolean) =>
-    `absolute -bottom-1 left-0 h-px bg-ink/60 dark:bg-white/60 transition-all duration-300 ${
+    `absolute -bottom-1 left-0 h-px bg-ink/60 dark:bg-white/90 transition-all duration-300 ${
       active ? "w-full" : "w-0 group-hover:w-full"
     }`;
   // Same idea for the Library/World dropdown trigger buttons, which don't
@@ -206,7 +206,7 @@ export default function Navbar() {
                 className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors group"
               >
                 {l.label}
-                <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/60 transition-all duration-300 group-hover:w-full" />
+                <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/90 transition-all duration-300 group-hover:w-full" />
               </a>
             ))}
 
@@ -311,7 +311,7 @@ export default function Navbar() {
                           className="block rounded-xl px-3 py-2.5 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
                         >
                           <p className="text-sm font-semibold text-ink dark:text-white">{ui.worldLinks[l.key].label}</p>
-                          <p className="text-xs text-ink/50 dark:text-white/50 mt-0.5">{ui.worldLinks[l.key].description}</p>
+                          <p className="text-xs text-ink/60 dark:text-white/50 mt-0.5">{ui.worldLinks[l.key].description}</p>
                         </a>
                       ))}
                     </div>
@@ -328,7 +328,7 @@ export default function Navbar() {
               className="relative text-sm font-medium text-ink/65 hover:text-ink dark:text-white/65 dark:hover:text-white transition-colors group"
             >
               {faqLink.label}
-              <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/60 transition-all duration-300 group-hover:w-full" />
+              <span className="absolute -bottom-1 left-0 h-px w-0 bg-ink/60 dark:bg-white/90 transition-all duration-300 group-hover:w-full" />
             </a>
           )}
         </div>
@@ -394,7 +394,7 @@ export default function Navbar() {
                           className={`flex-1 rounded-lg py-1.5 text-[10px] font-bold uppercase tracking-wide transition-colors ${
                             l === lang
                               ? "bg-gradient-to-r from-[var(--brand-from)] to-[var(--brand-to)] text-white brand-glow"
-                              : "text-ink/40 dark:text-white/40 hover:text-ink dark:hover:text-white"
+                              : "text-ink/55 dark:text-white/40 hover:text-ink dark:hover:text-white"
                           }`}
                         >
                           {l}
@@ -621,7 +621,7 @@ export default function Navbar() {
                     className={`flex-1 rounded-lg py-1.5 text-[10px] font-bold uppercase tracking-wide transition-colors ${
                       l === lang
                         ? "bg-gradient-to-r from-[var(--brand-from)] to-[var(--brand-to)] text-white brand-glow"
-                        : "text-ink/40 dark:text-white/40"
+                        : "text-ink/55 dark:text-white/40"
                     }`}
                   >
                     {l}

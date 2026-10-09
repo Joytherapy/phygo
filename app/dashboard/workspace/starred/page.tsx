@@ -163,7 +163,7 @@ export default function WorkspaceStarredPage() {
   if (loading) {
     return (
       <WorkspaceShell>
-        <div className="flex items-center justify-center py-24 text-ink/40 dark:text-white/40">
+        <div className="flex items-center justify-center py-24 text-ink/55 dark:text-white/40">
           <Loader2 size={18} className="animate-spin" />
         </div>
       </WorkspaceShell>

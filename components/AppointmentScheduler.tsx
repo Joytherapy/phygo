@@ -202,7 +202,7 @@ export default function AppointmentScheduler({
                 <p className="text-sm font-semibold text-ink dark:text-white">
                   {ui.scheduler.requestedPrefix} {new Date(req.scheduled_at).toLocaleDateString(locale, { day: 'numeric', month: 'short' })} · {new Date(req.scheduled_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
                 </p>
-                <p className="text-xs text-ink/50 dark:text-white/50">{req.session_type === 'video' ? ui.common.videoCall : ui.common.inPerson}</p>
+                <p className="text-xs text-ink/60 dark:text-white/50">{req.session_type === 'video' ? ui.common.videoCall : ui.common.inPerson}</p>
               </div>
               <div className="flex gap-2 shrink-0">
                 <button
@@ -232,7 +232,7 @@ export default function AppointmentScheduler({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowPicker(true)}
-              className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-ink/40 dark:text-white/40 hover:text-[#4F7CFF] transition-colors"
+              className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-ink/55 dark:text-white/40 hover:text-[#4F7CFF] transition-colors"
             >
               <Plus size={13} />
               {mode === 'physio' ? ui.scheduler.scheduleAnother : ui.scheduler.requestAnother}
@@ -257,7 +257,7 @@ export default function AppointmentScheduler({
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 6 }}
-            className="rounded-[24px] border border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-white/[0.04] backdrop-blur-2xl p-5 shadow-xl relative overflow-hidden"
+            className="rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white/80 dark:bg-white/[0.04] backdrop-blur-2xl p-5 shadow-xl relative overflow-hidden"
           >
             <AnimatePresence>
               {justConfirmed && (
@@ -283,7 +283,7 @@ export default function AppointmentScheduler({
               )}
             </AnimatePresence>
 
-            <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-3">
               {ui.scheduler.chooseADay}
             </p>
             <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
@@ -308,7 +308,7 @@ export default function AppointmentScheduler({
               })}
             </div>
 
-            <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-2">
               {ui.scheduler.morning}
             </p>
             <div className="grid grid-cols-3 gap-2 mb-4">
@@ -328,7 +328,7 @@ export default function AppointmentScheduler({
               ))}
             </div>
 
-            <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-2">
               {ui.scheduler.afternoon}
             </p>
             <div className="grid grid-cols-3 gap-2 mb-5">
@@ -353,29 +353,29 @@ export default function AppointmentScheduler({
                 onClick={() => setSessionType('video')}
                 className={`flex flex-col items-center gap-1.5 rounded-2xl py-4 border transition-all ${
                   sessionType === 'video'
-                    ? 'border-[#4F7CFF] bg-[#4F7CFF]/10 shadow-sm'
+                    ? 'border-[#4F7CFF] bg-[#4F7CFF]/10 shadow-soft'
                     : 'border-black/10 dark:border-white/10'
                 }`}
               >
-                <Video size={20} className={sessionType === 'video' ? 'text-[#4F7CFF]' : 'text-ink/40 dark:text-white/40'} />
+                <Video size={20} className={sessionType === 'video' ? 'text-[#4F7CFF]' : 'text-ink/55 dark:text-white/40'} />
                 <span className={`text-sm font-semibold ${sessionType === 'video' ? 'text-[#4F7CFF]' : 'text-ink/60 dark:text-white/60'}`}>
                   {ui.common.video}
                 </span>
-                <span className="text-[10px] text-ink/40 dark:text-white/40">{ui.scheduler.fromAnywhere}</span>
+                <span className="text-[10px] text-ink/55 dark:text-white/40">{ui.scheduler.fromAnywhere}</span>
               </button>
               <button
                 onClick={() => setSessionType('in_person')}
                 className={`flex flex-col items-center gap-1.5 rounded-2xl py-4 border transition-all ${
                   sessionType === 'in_person'
-                    ? 'border-[#4F7CFF] bg-[#4F7CFF]/10 shadow-sm'
+                    ? 'border-[#4F7CFF] bg-[#4F7CFF]/10 shadow-soft'
                     : 'border-black/10 dark:border-white/10'
                 }`}
               >
-                <MapPin size={20} className={sessionType === 'in_person' ? 'text-[#4F7CFF]' : 'text-ink/40 dark:text-white/40'} />
+                <MapPin size={20} className={sessionType === 'in_person' ? 'text-[#4F7CFF]' : 'text-ink/55 dark:text-white/40'} />
                 <span className={`text-sm font-semibold ${sessionType === 'in_person' ? 'text-[#4F7CFF]' : 'text-ink/60 dark:text-white/60'}`}>
                   {ui.common.inPersonShort}
                 </span>
-                <span className="text-[10px] text-ink/40 dark:text-white/40">{ui.scheduler.atTheClinic}</span>
+                <span className="text-[10px] text-ink/55 dark:text-white/40">{ui.scheduler.atTheClinic}</span>
               </button>
             </div>
 
@@ -412,10 +412,10 @@ export default function AppointmentScheduler({
 
       {history.length > 0 && (
         <div className="mt-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-2">{ui.scheduler.history}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-2">{ui.scheduler.history}</p>
           <div className="space-y-1.5">
             {history.slice(0, 5).map((a) => (
-              <div key={a.id} className="rounded-xl border border-black/[0.06] dark:border-white/10 px-3 py-2.5 flex items-center justify-between text-xs">
+              <div key={a.id} className="rounded-xl border border-black/[0.09] dark:border-white/10 px-3 py-2.5 flex items-center justify-between text-xs">
                 <span className="text-ink/60 dark:text-white/60 flex items-center gap-2">
                   <span
                     className={`h-1.5 w-1.5 rounded-full ${

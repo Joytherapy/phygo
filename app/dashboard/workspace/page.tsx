@@ -225,7 +225,7 @@ export default function WorkspaceHomePage() {
   if (loading) {
     return (
       <WorkspaceShell>
-        <div className="flex items-center justify-center py-24 text-ink/40 dark:text-white/40">
+        <div className="flex items-center justify-center py-24 text-ink/55 dark:text-white/40">
           <Loader2 size={18} className="animate-spin" />
         </div>
       </WorkspaceShell>
@@ -263,11 +263,11 @@ export default function WorkspaceHomePage() {
 
       {searchResults ? (
         <section>
-          <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-ink/60 dark:text-white/50 uppercase tracking-wide mb-3">
             {ui.search.resultsIn} Workspace
           </h2>
           {searchResults.folders.length === 0 && searchResults.documents.length === 0 && searchResults.notebooks.length === 0 ? (
-            <p className="text-sm text-ink/40 dark:text-white/40">{ui.search.noResults}</p>
+            <p className="text-sm text-ink/55 dark:text-white/40">{ui.search.noResults}</p>
           ) : (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
               {searchResults.folders.map((f) => (
@@ -309,7 +309,7 @@ export default function WorkspaceHomePage() {
         <div className="space-y-10">
           {continueDoc && (
             <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-              <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
+              <h2 className="text-sm font-semibold text-ink/60 dark:text-white/50 uppercase tracking-wide mb-3">
                 {ui.home.continueReading}
               </h2>
               <div
@@ -321,7 +321,7 @@ export default function WorkspaceHomePage() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-base font-semibold text-ink dark:text-white truncate">{continueDoc.name}</p>
-                  <p className="text-xs text-ink/50 dark:text-white/50 mt-1">
+                  <p className="text-xs text-ink/60 dark:text-white/50 mt-1">
                     {continueDoc.page_count
                       ? `${ui.reader.page} ${continueDoc.last_page} ${ui.reader.of} ${continueDoc.page_count}`
                       : ui.item.lastOpened}
@@ -347,7 +347,7 @@ export default function WorkspaceHomePage() {
                   a CONTAINER, never confused with the files inside it. */}
               {folders.length > 0 && (
                 <section>
-                  <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
+                  <h2 className="text-sm font-semibold text-ink/60 dark:text-white/50 uppercase tracking-wide mb-3">
                     {ui.folder.folders}
                   </h2>
                   <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
@@ -368,7 +368,7 @@ export default function WorkspaceHomePage() {
 
               {(notebooks.length > 0 || documents.length > 0) && (
                 <section>
-                  <h2 className="text-sm font-semibold text-ink/50 dark:text-white/50 uppercase tracking-wide mb-3">
+                  <h2 className="text-sm font-semibold text-ink/60 dark:text-white/50 uppercase tracking-wide mb-3">
                     {ui.folder.documents}
                   </h2>
                   <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">

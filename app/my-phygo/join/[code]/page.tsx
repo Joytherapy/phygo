@@ -57,30 +57,30 @@ export default function JoinInvitePage() {
       <h1 className="font-display text-3xl font-bold tracking-tight text-ink dark:text-white mb-2">
         Welcome to My Phygo
       </h1>
-      <p className="text-sm text-ink/50 dark:text-white/50 mb-8">
+      <p className="text-sm text-ink/60 dark:text-white/50 mb-8">
         Your physiotherapist has invited you. Create your account to access your treatment plan, session history, and more.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-sm font-medium text-ink/50 dark:text-white/50">Email</label>
+          <label className="text-sm font-medium text-ink/60 dark:text-white/50">Email</label>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+            className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-ink/50 dark:text-white/50">Password</label>
+          <label className="text-sm font-medium text-ink/60 dark:text-white/50">Password</label>
           <input
             type="password"
             required
             minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+            className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
           />
         </div>
 
@@ -97,7 +97,7 @@ export default function JoinInvitePage() {
         </button>
       </form>
 
-      <p className="text-xs text-ink/40 dark:text-white/40 mt-6 text-center">
+      <p className="text-xs text-ink/55 dark:text-white/40 mt-6 text-center">
         Already have an account?{' '}
         <a href="/my-phygo/login" className="text-[#4F7CFF] font-medium hover:underline">
           Sign in

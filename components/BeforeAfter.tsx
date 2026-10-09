@@ -41,7 +41,7 @@ export default function BeforeAfter() {
               {before.map((line) => (
                 <li key={line} className="flex items-start gap-3">
                   <X size={16} className="mt-0.5 shrink-0 text-ink/30 dark:text-white/30" />
-                  <span className="text-sm text-ink/50 dark:text-white/50 leading-relaxed">{line}</span>
+                  <span className="text-sm text-ink/60 dark:text-white/50 leading-relaxed">{line}</span>
                 </li>
               ))}
             </ul>

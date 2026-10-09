@@ -375,7 +375,7 @@ export default function OncologyPage() {
       : rehab.some(matchesRehab);
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -402,7 +402,7 @@ export default function OncologyPage() {
         </div>
 
         <div className="flex justify-center mb-6">
-          <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
+          <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
             {SUB_TABS.map((t) => (
               <button
                 key={t.key}
@@ -410,7 +410,7 @@ export default function OncologyPage() {
                 className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   subView === t.key
                     ? 'text-white'
-                    : 'text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
+                    : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                 }`}
                 style={subView === t.key ? { background: ACCENT.solid } : undefined}
               >
@@ -444,7 +444,7 @@ export default function OncologyPage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {ui.oncology.anatomyHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
               {ui.oncology.anatomyHint}
             </p>
 
@@ -455,12 +455,12 @@ export default function OncologyPage() {
             </div>
 
             {structuresLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">{ui.oncology.loading}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40">{ui.oncology.loading}</p>
             )}
             {structuresError && <p className="text-sm text-red-500">{structuresError}</p>}
 
             {!structuresLoading && !structuresError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!structuresLoading && !structuresError && (
@@ -482,7 +482,7 @@ export default function OncologyPage() {
                         {items.map((s) => (
                           <div
                             key={s.id}
-                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-sm shadow-black/5 dark:shadow-black/40"
+                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-soft shadow-black/5 dark:shadow-black/40"
                           >
                             {s.diagram_image && (
                               <button
@@ -518,7 +518,7 @@ export default function OncologyPage() {
                                 </p>
                               )}
                               {s.clinical_relevance && (
-                                <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed">
+                                <p className="text-xs text-ink/60 dark:text-white/50 leading-relaxed">
                                   <span className="font-semibold">{ui.anatomy.clinicalRelevance}: </span>{s.clinical_relevance}
                                 </p>
                               )}
@@ -539,17 +539,17 @@ export default function OncologyPage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {ui.oncology.conditionsHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
               {ui.oncology.conditionsHint}
             </p>
 
             {conditionsLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">{ui.oncology.loading}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40">{ui.oncology.loading}</p>
             )}
             {conditionsError && <p className="text-sm text-red-500">{conditionsError}</p>}
 
             {!conditionsLoading && !conditionsError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!conditionsLoading && !conditionsError && (
@@ -570,11 +570,11 @@ export default function OncologyPage() {
                           <button
                             key={c.id}
                             onClick={() => setSelectedCondition(c)}
-                            className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-colors hover:border-[#A855F7]/40"
+                            className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-colors hover:border-[#A855F7]/40"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white">{c.condition_name}</p>
                             {c.evidence_level && (
-                              <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/40 dark:text-white/40">
+                              <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/55 dark:text-white/40">
                                 {ui.fields.evidence}: {c.evidence_level.split(' - ')[0]}
                               </span>
                             )}
@@ -601,7 +601,7 @@ export default function OncologyPage() {
                   onChange={(e) => setAskQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAskPhygo()}
                   placeholder={ui.oncology.askPhygoPlaceholder}
-                  className="flex-1 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] px-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none focus:border-[#A855F7]/40"
+                  className="flex-1 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] px-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none focus:border-[#A855F7]/40"
                 />
                 <button
                   onClick={handleAskPhygo}
@@ -616,7 +616,7 @@ export default function OncologyPage() {
                 <p className="text-sm text-red-500 mt-3">{askError}</p>
               )}
               {askAnswer && (
-                <div className="mt-4 rounded-xl bg-white dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/10 p-4">
+                <div className="mt-4 rounded-xl bg-white dark:bg-white/[0.03] border border-black/[0.09] dark:border-white/10 p-4">
                   <p className="text-sm text-ink/80 dark:text-white/80 leading-relaxed whitespace-pre-line">
                     {askAnswer}
                   </p>
@@ -631,17 +631,17 @@ export default function OncologyPage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {ui.oncology.treatmentsHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
               {ui.oncology.treatmentsHint}
             </p>
 
             {treatmentsLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">{ui.oncology.loading}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40">{ui.oncology.loading}</p>
             )}
             {treatmentsError && <p className="text-sm text-red-500">{treatmentsError}</p>}
 
             {!treatmentsLoading && !treatmentsError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!treatmentsLoading && !treatmentsError && (
@@ -661,7 +661,7 @@ export default function OncologyPage() {
                         {items.map((t) => (
                           <div
                             key={t.id}
-                            className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                            className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{t.name}</p>
                             {t.description && (
@@ -671,7 +671,7 @@ export default function OncologyPage() {
                             )}
                             {t.pt_implications && (
                               <div className="rounded-xl bg-black/[0.02] dark:bg-white/[0.03] p-3 mb-3">
-                                <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-1">
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-1">
                                   {ui.oncology.ptImplicationsLabel}
                                 </p>
                                 <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
@@ -680,7 +680,7 @@ export default function OncologyPage() {
                               </div>
                             )}
                             {t.evidence_note && (
-                              <p className="text-[10px] text-ink/40 dark:text-white/40 leading-relaxed">
+                              <p className="text-[10px] text-ink/55 dark:text-white/40 leading-relaxed">
                                 {t.evidence_note}
                               </p>
                             )}
@@ -700,17 +700,17 @@ export default function OncologyPage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {ui.oncology.assessmentHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
               {ui.oncology.assessmentHint}
             </p>
 
             {testsLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">{ui.oncology.loading}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40">{ui.oncology.loading}</p>
             )}
             {testsError && <p className="text-sm text-red-500">{testsError}</p>}
 
             {!testsLoading && !testsError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!testsLoading && !testsError && (
@@ -730,7 +730,7 @@ export default function OncologyPage() {
                         {items.map((t) => (
                           <div
                             key={t.id}
-                            className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                            className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{t.name}</p>
                             {t.procedure && (
@@ -759,17 +759,17 @@ export default function OncologyPage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {ui.oncology.rehabHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
               {ui.oncology.rehabHint}
             </p>
 
             {rehabLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">{ui.oncology.loading}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40">{ui.oncology.loading}</p>
             )}
             {rehabError && <p className="text-sm text-red-500">{rehabError}</p>}
 
             {!rehabLoading && !rehabError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!rehabLoading && !rehabError && (
@@ -789,7 +789,7 @@ export default function OncologyPage() {
                         {items.map((r) => (
                           <div
                             key={r.id}
-                            className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                            className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{r.name}</p>
                             {r.description && (
@@ -799,7 +799,7 @@ export default function OncologyPage() {
                             )}
                             {r.protocol && (
                               <div className="rounded-xl bg-black/[0.02] dark:bg-white/[0.03] p-3 mb-3">
-                                <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-1">
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-1">
                                   {ui.oncology.protocolLabel}
                                 </p>
                                 <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
@@ -808,7 +808,7 @@ export default function OncologyPage() {
                               </div>
                             )}
                             {r.evidence_note && (
-                              <p className="text-[10px] text-ink/40 dark:text-white/40 leading-relaxed">
+                              <p className="text-[10px] text-ink/55 dark:text-white/40 leading-relaxed">
                                 {r.evidence_note}
                               </p>
                             )}
@@ -838,7 +838,7 @@ export default function OncologyPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 p-8"
+              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.09] dark:border-white/10 p-8"
             >
               <div className="flex items-start justify-between mb-4">
                 <h3 className="text-xl font-bold text-ink dark:text-white pr-6">
@@ -888,8 +888,8 @@ export default function OncologyPage() {
                   </div>
                 )}
                 {selectedCondition.evidence_level && (
-                  <div className="pt-2 border-t border-black/[0.06] dark:border-white/10">
-                    <p className="text-xs text-ink/40 dark:text-white/40">
+                  <div className="pt-2 border-t border-black/[0.09] dark:border-white/10">
+                    <p className="text-xs text-ink/55 dark:text-white/40">
                       {ui.fields.evidence}: {selectedCondition.evidence_level}
                     </p>
                   </div>

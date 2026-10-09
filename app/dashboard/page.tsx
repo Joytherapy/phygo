@@ -117,7 +117,7 @@ export default function DashboardPage() {
   )
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -155,7 +155,7 @@ export default function DashboardPage() {
             <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight leading-tight text-ink dark:text-white">              {greeting.time ? (greeting.name ? `${greeting.time}, ${greeting.name}` : greeting.time) : ui.patients.greetingDefault}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]">.</span>
             </h1>
-            <p className="text-base text-ink/40 dark:text-white/40 mt-3">
+            <p className="text-base text-ink/55 dark:text-white/40 mt-3">
               {ui.patients.subtitle}
             </p>
           </div>
@@ -186,14 +186,14 @@ export default function DashboardPage() {
           ].map((stat, i) => (
             <div
               key={i}
-              className="group relative rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+              className="group relative rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-soft hover:shadow-lg transition-shadow duration-300 overflow-hidden"
             >
               <div
                 className="pointer-events-none absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-25 blur-2xl transition-transform duration-500 group-hover:scale-125"
                 style={{ background: STAT_STYLES[i].gradient }}
               />
               <div
-                className="relative flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-sm mb-3"
+                className="relative flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-soft mb-3"
                 style={{ background: STAT_STYLES[i].gradient }}
               >
                 <stat.icon size={16} />
@@ -201,7 +201,7 @@ export default function DashboardPage() {
               <p className="relative font-display text-2xl font-bold text-ink dark:text-white">
                 {stat.value}
               </p>
-              <p className="relative text-xs text-ink/40 dark:text-white/40 mt-0.5">{stat.label}</p>
+              <p className="relative text-xs text-ink/55 dark:text-white/40 mt-0.5">{stat.label}</p>
             </div>
           ))}
         </motion.div>
@@ -224,7 +224,7 @@ export default function DashboardPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={ui.patients.searchPlaceholder}
-            className="w-full rounded-full border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl pl-11 pr-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+            className="w-full rounded-full border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl pl-11 pr-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
           />
         </div>
 
@@ -236,10 +236,10 @@ export default function DashboardPage() {
               exit={{ opacity: 0, y: -10, height: 0 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
               onSubmit={handleCreatePatient}
-              className="mb-10 rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.04] backdrop-blur-2xl shadow-2xl p-8 space-y-5 overflow-hidden"
+              className="mb-10 rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.04] backdrop-blur-2xl shadow-2xl p-8 space-y-5 overflow-hidden"
             >
               <div>
-                <label className="text-sm font-medium text-ink/50 dark:text-white/50">
+                <label className="text-sm font-medium text-ink/60 dark:text-white/50">
                   {ui.patients.formNameLabel}
                 </label>
                 <input
@@ -247,11 +247,11 @@ export default function DashboardPage() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+                  className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-ink/50 dark:text-white/50">
+                <label className="text-sm font-medium text-ink/60 dark:text-white/50">
                   {ui.patients.formGenderLabel}
                 </label>
                 <div className="flex gap-2 mt-1.5">
@@ -267,7 +267,7 @@ export default function DashboardPage() {
                       className={`rounded-full px-4 py-2 text-sm font-medium border transition-colors ${
                         gender === opt.value
                           ? 'text-white border-transparent'
-                          : 'text-ink/50 dark:text-white/50 border-black/10 dark:border-white/10'
+                          : 'text-ink/60 dark:text-white/50 border-black/10 dark:border-white/10'
                       }`}
                       style={
                         gender === opt.value
@@ -281,25 +281,25 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-ink/50 dark:text-white/50">
+                <label className="text-sm font-medium text-ink/60 dark:text-white/50">
                   {ui.patients.formAgeLabel}
                 </label>
                 <input
                   type="number"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
-                  className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+                  className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-ink/50 dark:text-white/50">
+                <label className="text-sm font-medium text-ink/60 dark:text-white/50">
                   {ui.patients.formConditionLabel}
                 </label>
                 <input
                   type="text"
                   value={condition}
                   onChange={(e) => setCondition(e.target.value)}
-                  className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+                  className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
                 />
               </div>
               <button
@@ -317,16 +317,16 @@ export default function DashboardPage() {
         </AnimatePresence>
 
         {loading ? (
-          <p className="text-ink/40 dark:text-white/40">{ui.common.loading}</p>
+          <p className="text-ink/55 dark:text-white/40">{ui.common.loading}</p>
         ) : patients.length === 0 ? (
           <div className="rounded-[28px] border border-dashed border-black/10 dark:border-white/15 py-20 text-center">
-            <p className="text-ink/40 dark:text-white/40">
+            <p className="text-ink/55 dark:text-white/40">
               {ui.patients.noPatientsYet}
             </p>
           </div>
         ) : filteredPatients.length === 0 ? (
           <div className="rounded-[28px] border border-dashed border-black/10 dark:border-white/15 py-16 text-center">
-            <p className="text-ink/40 dark:text-white/40">
+            <p className="text-ink/55 dark:text-white/40">
               {ui.patients.noPatientsMatch.replace('{search}', search)}
             </p>
           </div>
@@ -341,10 +341,10 @@ export default function DashboardPage() {
                     transition={{ delay: Math.min(i, 20) * 0.03 }}
                     exit={{ opacity: 0 }}
                     whileHover={{ y: -2 }}
-                    className="group w-full rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl px-4 py-3.5 flex items-center gap-3.5 shadow-sm transition-all hover:shadow-lg hover:border-[#4F7CFF]/30 cursor-pointer"
+                    className="group w-full rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl px-4 py-3.5 flex items-center gap-3.5 shadow-soft transition-all hover:shadow-lg hover:border-[#4F7CFF]/30 cursor-pointer"
                   >
                     <div
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white text-xs font-bold shadow-sm"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white text-xs font-bold shadow-soft"
                       style={{
                         background: avatarGradient(patient.gender),
                       }}
@@ -353,7 +353,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-ink dark:text-white truncate">{patient.name}</p>
-                      <p className="text-xs text-ink/50 dark:text-white/40 truncate">
+                      <p className="text-xs text-ink/60 dark:text-white/40 truncate">
                         {patient.age ? ui.patients.yearsOld.replace('{age}', String(patient.age)) : ''}
                         {patient.age && patient.main_condition ? ' · ' : ''}
                         {patient.main_condition || ''}

@@ -36,7 +36,7 @@ export default function WorkspaceHeader({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-bold tracking-tight text-ink dark:text-white">{title}</h1>
-          {subtitle && <p className="mt-1 text-sm text-ink/50 dark:text-white/50">{subtitle}</p>}
+          {subtitle && <p className="mt-1 text-sm text-ink/60 dark:text-white/50">{subtitle}</p>}
         </div>
 
         <div className="flex items-center gap-2">
@@ -64,7 +64,7 @@ export default function WorkspaceHeader({
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={ui.search.placeholder}
-          className="w-full max-w-sm rounded-full border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] pl-9 pr-4 py-2.5 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+          className="w-full max-w-sm rounded-full border border-black/10 dark:border-white/10 bg-white/90 dark:bg-white/[0.03] pl-9 pr-4 py-2.5 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
         />
       </div>
 

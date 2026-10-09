@@ -112,7 +112,7 @@ export default function VideoCallPanel({
 
   if (call && inCall) {
     return (
-      <div className="rounded-2xl overflow-hidden border border-black/[0.06] dark:border-white/10">
+      <div className="rounded-2xl overflow-hidden border border-black/[0.09] dark:border-white/10">
         <iframe
           src={call.room_url}
           allow="camera; microphone; fullscreen; display-capture; autoplay"
@@ -146,7 +146,7 @@ export default function VideoCallPanel({
   if (!canStart) {
     return (
       <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-10 text-center">
-        <p className="text-sm text-ink/40 dark:text-white/40">No active call right now.</p>
+        <p className="text-sm text-ink/55 dark:text-white/40">No active call right now.</p>
       </div>
     )
   }

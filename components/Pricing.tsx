@@ -57,7 +57,7 @@ export default function Pricing() {
         </div>
 
         <div className="flex items-center gap-3 mb-14">
-          <span className={`text-sm font-medium ${!annual ? "text-ink dark:text-white" : "text-ink/40 dark:text-white/40"}`}>Monthly</span>
+          <span className={`text-sm font-medium ${!annual ? "text-ink dark:text-white" : "text-ink/55 dark:text-white/40"}`}>Monthly</span>
           <button
             onClick={() => setAnnual((a) => !a)}
             aria-label="Toggle annual billing"
@@ -72,7 +72,7 @@ export default function Pricing() {
               style={{ left: annual ? "calc(100% - 24px)" : "4px" }}
             />
           </button>
-          <span className={`text-sm font-medium ${annual ? "text-ink dark:text-white" : "text-ink/40 dark:text-white/40"}`}>Annual</span>
+          <span className={`text-sm font-medium ${annual ? "text-ink dark:text-white" : "text-ink/55 dark:text-white/40"}`}>Annual</span>
           <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald/10 text-emerald-dark">
             Save 20%
           </span>
@@ -108,13 +108,13 @@ export default function Pricing() {
                   color={tier.featured ? "rgba(255,255,255,0.10)" : "rgba(79,124,255,0.12)"}
                 >
                   <h3 className="font-display font-semibold text-lg mb-1">{tier.name}</h3>
-                  <p className={`text-sm mb-6 ${tier.featured ? "text-white/50" : "text-ink/50 dark:text-white/50"}`}>
+                  <p className={`text-sm mb-6 ${tier.featured ? "text-white/50" : "text-ink/60 dark:text-white/50"}`}>
                     {tier.description}
                   </p>
                   <div className="mb-7 flex items-baseline gap-1">
                     <span className="font-display text-4xl font-semibold">{price}</span>
                     {tier.monthly !== null && (
-                      <span className={`text-sm ${tier.featured ? "text-white/40" : "text-ink/40 dark:text-white/40"}`}>
+                      <span className={`text-sm ${tier.featured ? "text-white/40" : "text-ink/55 dark:text-white/40"}`}>
                         /month
                       </span>
                     )}

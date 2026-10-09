@@ -259,7 +259,7 @@ export default function PelvicFloorPage() {
       : rehab.some(matchesRehab);
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -286,7 +286,7 @@ export default function PelvicFloorPage() {
         </div>
 
         <div className="flex justify-center mb-10">
-          <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
+          <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
             {SUB_TABS.map((s) => (
               <button
                 key={s.key}
@@ -294,7 +294,7 @@ export default function PelvicFloorPage() {
                 className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   subView === s.key
                     ? 'text-white'
-                    : 'text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
+                    : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                 }`}
                 style={subView === s.key ? { background: ACCENT.solid } : undefined}
               >
@@ -325,7 +325,7 @@ export default function PelvicFloorPage() {
 
         {(subView === 'anatomy' || subView === 'conditions') && (
           <div className="flex justify-center mb-8">
-            <div className="inline-flex rounded-full border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
+            <div className="inline-flex rounded-full border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
               {(['common', 'female', 'male'] as const).map((sv) => (
                 <button
                   key={sv}
@@ -333,7 +333,7 @@ export default function PelvicFloorPage() {
                   className={`px-4 py-1 rounded-full text-[11px] font-semibold transition-all ${
                     sexView === sv
                       ? 'text-white'
-                      : 'text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
+                      : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                   }`}
                   style={sexView === sv ? { background: ACCENT.solid } : undefined}
                 >
@@ -349,7 +349,7 @@ export default function PelvicFloorPage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {t.anatomyHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
               {t.anatomyIntro}
             </p>
 
@@ -363,7 +363,7 @@ export default function PelvicFloorPage() {
                 <button
                   key={img.file}
                   onClick={() => setExpandedImage(img)}
-                  className="group relative w-full rounded-2xl border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-pink-500/10 transition-shadow"
+                  className="group relative w-full rounded-2xl border border-black/[0.09] dark:border-white/10 bg-[#08090b] overflow-hidden shadow-soft hover:shadow-xl hover:shadow-pink-500/10 transition-shadow"
                 >
                   <img
                     src={`${IMAGE_BASE}/${img.file}`}
@@ -384,12 +384,12 @@ export default function PelvicFloorPage() {
             </div>
 
             {structuresLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">{t.loading}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40">{t.loading}</p>
             )}
             {structuresError && <p className="text-sm text-red-500">{structuresError}</p>}
 
             {!structuresLoading && !structuresError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!structuresLoading && !structuresError && (
@@ -413,7 +413,7 @@ export default function PelvicFloorPage() {
                         {items.map((s) => (
                           <div
                             key={s.id}
-                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-sm shadow-black/5 dark:shadow-black/40"
+                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-soft shadow-black/5 dark:shadow-black/40"
                           >
                             {s.diagram_image && (
                               <button
@@ -446,7 +446,7 @@ export default function PelvicFloorPage() {
                                 </p>
                               )}
                               {s.clinical_relevance && (
-                                <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed">
+                                <p className="text-xs text-ink/60 dark:text-white/50 leading-relaxed">
                                   <span className="font-semibold">{ui.anatomy.clinicalRelevance}: </span>{s.clinical_relevance}
                                 </p>
                               )}
@@ -467,17 +467,17 @@ export default function PelvicFloorPage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {t.conditionsHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
               {t.conditionsIntro}
             </p>
 
             {conditionsLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">{t.loading}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40">{t.loading}</p>
             )}
             {conditionsError && <p className="text-sm text-red-500">{conditionsError}</p>}
 
             {!conditionsLoading && !conditionsError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!conditionsLoading && !conditionsError && (
@@ -500,7 +500,7 @@ export default function PelvicFloorPage() {
                           <button
                             key={c.id}
                             onClick={() => setSelectedCondition(c)}
-                            className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-pink-400/40 hover:-translate-y-0.5 transition-all"
+                            className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-pink-400/40 hover:-translate-y-0.5 transition-all"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{c.condition_name}</p>
                             <EvidenceBadge level={c.evidence_level} />
@@ -520,7 +520,7 @@ export default function PelvicFloorPage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {t.assessmentHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
               {t.assessmentIntro}
             </p>
 
@@ -541,12 +541,12 @@ export default function PelvicFloorPage() {
             </div>
 
             {testsLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">{t.loading}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40">{t.loading}</p>
             )}
             {testsError && <p className="text-sm text-red-500">{testsError}</p>}
 
             {!testsLoading && !testsError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!testsLoading && !testsError && (
@@ -566,7 +566,7 @@ export default function PelvicFloorPage() {
                         {items.map((item) => (
                           <div
                             key={item.id}
-                            className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                            className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{item.name}</p>
                             {item.procedure && (
@@ -595,17 +595,17 @@ export default function PelvicFloorPage() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {t.rehabHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
               {t.rehabIntro}
             </p>
 
             {rehabLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">{t.loading}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40">{t.loading}</p>
             )}
             {rehabError && <p className="text-sm text-red-500">{rehabError}</p>}
 
             {!rehabLoading && !rehabError && normalizedQuery !== '' && !hasAnyMatchCurrent && (
-              <p className="text-sm text-ink/40 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40 text-center">{ui.librarySearchNoResults}</p>
             )}
 
             {!rehabLoading && !rehabError && (
@@ -627,7 +627,7 @@ export default function PelvicFloorPage() {
                         {items.map((r) => (
                           <div
                             key={r.id}
-                            className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                            className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
                           >
                             <div className="flex items-center justify-between gap-2.5 mb-2">
                               <p className="text-sm font-semibold text-ink dark:text-white truncate">{r.name}</p>
@@ -640,7 +640,7 @@ export default function PelvicFloorPage() {
                             )}
                             {r.protocol && (
                               <div className="rounded-xl bg-black/[0.02] dark:bg-white/[0.03] p-3 mb-3">
-                                <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-1">
+                                <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-1">
                                   {t.protocolLabel}
                                 </p>
                                 <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
@@ -649,7 +649,7 @@ export default function PelvicFloorPage() {
                               </div>
                             )}
                             {r.evidence_note && (
-                              <p className="text-[10px] text-ink/40 dark:text-white/40 leading-relaxed">
+                              <p className="text-[10px] text-ink/55 dark:text-white/40 leading-relaxed">
                                 {r.evidence_note}
                               </p>
                             )}
@@ -679,7 +679,7 @@ export default function PelvicFloorPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 p-8"
+              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.09] dark:border-white/10 p-8"
             >
               <div className="flex items-start justify-between mb-4">
                 <h3 className="text-xl font-bold text-ink dark:text-white pr-6">
@@ -731,7 +731,7 @@ export default function PelvicFloorPage() {
                   </div>
                 )}
                 {selectedCondition.evidence_level && (
-                  <div className="pt-2 border-t border-black/[0.06] dark:border-white/10">
+                  <div className="pt-2 border-t border-black/[0.09] dark:border-white/10">
                     <EvidenceBadge level={selectedCondition.evidence_level} />
                     <SourceCitation source={selectedCondition.source} sourceDate={selectedCondition.source_date} />
                   </div>

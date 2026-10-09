@@ -26,7 +26,7 @@ import {
 const BrainMap3D = dynamic(() => import('@/components/BrainMap3D'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[420px] sm:h-[520px] rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-[#08090b] flex items-center justify-center">
+    <div className="w-full h-[420px] sm:h-[520px] rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-[#08090b] flex items-center justify-center">
       <p className="text-sm text-white/40">Caricamento modello 3D...</p>
     </div>
   ),
@@ -451,7 +451,7 @@ function BrainMapPageInner() {
     lp.content.toLowerCase().includes(normalizedLocalizationSearch);
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -472,7 +472,7 @@ function BrainMapPageInner() {
 
       <div className="relative max-w-6xl mx-auto px-6 pt-40 pb-24">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-5 shadow-sm shadow-black/[0.03] dark:shadow-black/20">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-5 shadow-soft shadow-black/[0.03] dark:shadow-black/20">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#32D6A0] opacity-60" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]" />
@@ -484,7 +484,7 @@ function BrainMapPageInner() {
               {ui.brainMap.heading}
             </span>
           </h1>
-          <p className="text-sm sm:text-base text-ink/50 dark:text-white/40 max-w-lg mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base text-ink/60 dark:text-white/40 max-w-lg mx-auto leading-relaxed">
             {ui.brainMap.subtitle}
           </p>
         </div>
@@ -529,7 +529,7 @@ function BrainMapPageInner() {
 
         {view === 'brain' && (
           <div className="flex justify-center mb-6">
-            <div className="relative inline-flex rounded-full border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1 shadow-sm shadow-black/[0.03] dark:shadow-black/30">
+            <div className="relative inline-flex rounded-full border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1 shadow-soft shadow-black/[0.03] dark:shadow-black/30">
               {(['atlas', 'conditions'] as const).map((sv) => (
                 <button
                   key={sv}
@@ -537,7 +537,7 @@ function BrainMapPageInner() {
                   className={`relative z-10 px-5 py-2 rounded-full text-[13px] font-semibold transition-colors duration-300 active:scale-[0.96] ${
                     brainSubView === sv
                       ? 'text-white'
-                      : 'text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
+                      : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                   }`}
                 >
                   {brainSubView === sv && (
@@ -561,7 +561,7 @@ function BrainMapPageInner() {
               <BrainMap3D onSelectZone={(slug) => router.push(`/dashboard/brain-map/${slug}`)} />
 
               <div className="mt-6">
-                <p className="text-sm text-ink/50 dark:text-white/50 mb-3">
+                <p className="text-sm text-ink/60 dark:text-white/50 mb-3">
                   {ui.brainMap.deepStructuresHint}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -582,25 +582,25 @@ function BrainMapPageInner() {
               </div>
 
               <div className="mt-10">
-                <p className="text-sm text-ink/50 dark:text-white/50 mb-4">
+                <p className="text-sm text-ink/60 dark:text-white/50 mb-4">
                   {ui.brainMap.referenceViewsHint}
                 </p>
                 <div className="flex flex-col gap-4">
-                  <div className="group rounded-2xl overflow-hidden border border-black/[0.06] dark:border-white/10 transition-all duration-300 hover:border-[#4F7CFF]/30 hover:shadow-xl hover:shadow-[#4F7CFF]/10">
+                  <div className="group rounded-2xl overflow-hidden border border-black/[0.09] dark:border-white/10 transition-all duration-300 hover:border-[#4F7CFF]/30 hover:shadow-xl hover:shadow-[#4F7CFF]/10">
                     <img
                       src={`${IMAGE_BASE}/brain-lateral-view.png`}
                       alt="Brain — Lateral View"
                       className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                   </div>
-                  <div className="group rounded-2xl overflow-hidden border border-black/[0.06] dark:border-white/10 transition-all duration-300 hover:border-[#4F7CFF]/30 hover:shadow-xl hover:shadow-[#4F7CFF]/10">
+                  <div className="group rounded-2xl overflow-hidden border border-black/[0.09] dark:border-white/10 transition-all duration-300 hover:border-[#4F7CFF]/30 hover:shadow-xl hover:shadow-[#4F7CFF]/10">
                     <img
                       src={`${IMAGE_BASE}/brain-sagittal-view.png`}
                       alt="Brain — Sagittal View"
                       className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                   </div>
-                  <div className="group rounded-2xl overflow-hidden border border-black/[0.06] dark:border-white/10 transition-all duration-300 hover:border-[#4F7CFF]/30 hover:shadow-xl hover:shadow-[#4F7CFF]/10">
+                  <div className="group rounded-2xl overflow-hidden border border-black/[0.09] dark:border-white/10 transition-all duration-300 hover:border-[#4F7CFF]/30 hover:shadow-xl hover:shadow-[#4F7CFF]/10">
                     <img
                       src={`${IMAGE_BASE}/brain-coronal-view.png`}
                       alt="Brain — Coronal View"
@@ -627,7 +627,7 @@ function BrainMapPageInner() {
                 ref={containerRef}
                 onMouseMove={handleNerveViewerMouseMove}
                 onMouseLeave={handleNerveViewerMouseLeave}
-                className="group relative w-full max-w-2xl rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-[#08090b] p-8 shadow-2xl shadow-black/20 dark:shadow-black/50 ring-1 ring-white/[0.04] overflow-hidden [perspective:1000px]"
+                className="group relative w-full max-w-2xl rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-[#08090b] p-8 shadow-2xl shadow-black/20 dark:shadow-black/50 ring-1 ring-white/[0.04] overflow-hidden [perspective:1000px]"
               >
                 {/* Glow che segue il cursore — dà l'illusione di una superficie
                     illuminata dinamicamente, lo stesso linguaggio visivo del fresnel
@@ -685,7 +685,7 @@ function BrainMapPageInner() {
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
               {ui.brainMap.brainConditionsHeading}
             </h2>
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
               {ui.brainMap.brainConditionsHint}
             </p>
 
@@ -694,25 +694,25 @@ function BrainMapPageInner() {
               value={brainConditionsSearch}
               onChange={(e) => setBrainConditionsSearch(e.target.value)}
               placeholder={ui.brainMap.searchConditionsPlaceholder}
-              className="w-full mb-6 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] px-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#4F7CFF]/40"
+              className="w-full mb-6 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] px-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#4F7CFF]/40"
             />
 
             {brainConditionsLoading && (
-              <p className="text-sm text-ink/40 dark:text-white/40">{ui.brainMap.loadingConditions}</p>
+              <p className="text-sm text-ink/55 dark:text-white/40">{ui.brainMap.loadingConditions}</p>
             )}
             {brainConditionsError && <p className="text-sm text-red-500">{brainConditionsError}</p>}
 
             {!brainConditionsLoading && !brainConditionsError && (
               <>
                 {filteredBrainConditions.length === 0 && (
-                  <p className="text-sm text-ink/40 dark:text-white/40">{ui.brainMap.noConditionsFound}</p>
+                  <p className="text-sm text-ink/55 dark:text-white/40">{ui.brainMap.noConditionsFound}</p>
                 )}
                 <div className="grid sm:grid-cols-2 gap-4">
                   {filteredBrainConditions.map((c) => (
                     <button
                       key={c.id}
                       onClick={() => setSelectedCondition(c)}
-                      className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:border-[#4F7CFF]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#4F7CFF]/10"
+                      className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:border-[#4F7CFF]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#4F7CFF]/10"
                     >
                       <p className="text-sm font-semibold text-ink dark:text-white">
                         {c.condition_name}
@@ -728,7 +728,7 @@ function BrainMapPageInner() {
                         ))}
                       </div>
                       {c.evidence_level && (
-                        <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/40 dark:text-white/40">
+                        <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/55 dark:text-white/40">
                           {ui.fields.evidence}: {c.evidence_level}
                         </span>
                       )}
@@ -743,7 +743,7 @@ function BrainMapPageInner() {
         {view === 'nerves' && (
           <div className="mt-12">
             <div className="flex justify-center mb-10">
-              <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1 shadow-sm shadow-black/[0.03] dark:shadow-black/30">
+              <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1 shadow-soft shadow-black/[0.03] dark:shadow-black/30">
                 {NERVES_SUB_TABS.map((t) => (
                   <button
                     key={t.key}
@@ -751,7 +751,7 @@ function BrainMapPageInner() {
                     className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 active:scale-[0.96] ${
                       nervesSubView === t.key
                         ? 'text-white'
-                        : 'text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
+                        : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                     }`}
                     style={
                       nervesSubView === t.key
@@ -770,7 +770,7 @@ function BrainMapPageInner() {
                 <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
                   {ui.brainMap.peripheralAtlasHeading}
                 </h2>
-                <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+                <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
                   {ui.brainMap.peripheralAtlasHint}
                 </p>
 
@@ -781,12 +781,12 @@ function BrainMapPageInner() {
                     value={nervesAtlasSearch}
                     onChange={(e) => setNervesAtlasSearch(e.target.value)}
                     placeholder={ui.librarySearchPlaceholder}
-                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
                   />
                 </div>
 
                 {nervesLoading && (
-                  <p className="text-sm text-ink/40 dark:text-white/40">{ui.brainMap.loadingNerves}</p>
+                  <p className="text-sm text-ink/55 dark:text-white/40">{ui.brainMap.loadingNerves}</p>
                 )}
                 {nervesError && <p className="text-sm text-red-500">{nervesError}</p>}
 
@@ -810,7 +810,7 @@ function BrainMapPageInner() {
                     </div>
 
                     {allNerves.filter((n) => (nerveRegionFilter === 'all' || n.region === nerveRegionFilter) && matchesNerve(n)).length === 0 && (
-                      <p className="text-sm text-ink/40 dark:text-white/40 mb-6">{ui.librarySearchNoResults}</p>
+                      <p className="text-sm text-ink/55 dark:text-white/40 mb-6">{ui.librarySearchNoResults}</p>
                     )}
 
                     <div className="space-y-8">
@@ -829,11 +829,11 @@ function BrainMapPageInner() {
                                   <button
                                     key={n.id}
                                     onClick={() => router.push(`/dashboard/brain-map/nerve/${n.slug}`)}
-                                    className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:border-[#F5A524]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#F5A524]/10"
+                                    className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:border-[#F5A524]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#F5A524]/10"
                                   >
                                     <p className="text-sm font-semibold text-ink dark:text-white mb-1">{n.name}</p>
                                     {n.compression_site && (
-                                      <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed line-clamp-2">
+                                      <p className="text-xs text-ink/60 dark:text-white/50 leading-relaxed line-clamp-2">
                                         {n.compression_site}
                                       </p>
                                     )}
@@ -845,7 +845,7 @@ function BrainMapPageInner() {
                         })}
                     </div>
 
-                    <div className="mt-8 rounded-2xl border border-[#F5A524]/20 bg-[#F5A524]/5 p-5 shadow-sm shadow-[#F5A524]/5">
+                    <div className="mt-8 rounded-2xl border border-[#F5A524]/20 bg-[#F5A524]/5 p-5 shadow-soft shadow-[#F5A524]/5">
                       <div className="flex items-center gap-2 mb-3">
                         <Sparkles size={16} className="text-[#F5A524]" />
                         <p className="text-sm font-semibold text-ink dark:text-white">
@@ -859,7 +859,7 @@ function BrainMapPageInner() {
                           onChange={(e) => setAskQuery(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && handleAskPhygo()}
                           placeholder={ui.brainMap.askPhygoPlaceholder}
-                          className="flex-1 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] px-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
+                          className="flex-1 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] px-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
                         />
                         <button
                           onClick={handleAskPhygo}
@@ -876,7 +876,7 @@ function BrainMapPageInner() {
                       )}
 
                       {askAnswer && (
-                        <div className="mt-4 rounded-xl bg-white dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/10 p-4">
+                        <div className="mt-4 rounded-xl bg-white dark:bg-white/[0.03] border border-black/[0.09] dark:border-white/10 p-4">
                           <p className="text-sm text-ink/80 dark:text-white/80 leading-relaxed whitespace-pre-line">
                             {askAnswer}
                           </p>
@@ -893,7 +893,7 @@ function BrainMapPageInner() {
                 <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
                   {ui.brainMap.nerveInjuryHeading}
                 </h2>
-                <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+                <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
                   {ui.brainMap.nerveInjuryHint}
                 </p>
 
@@ -904,7 +904,7 @@ function BrainMapPageInner() {
                     value={seddonSearch}
                     onChange={(e) => setSeddonSearch(e.target.value)}
                     placeholder={ui.librarySearchPlaceholder}
-                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
                   />
                 </div>
 
@@ -913,7 +913,7 @@ function BrainMapPageInner() {
                     title: 'Nerve Injury Classification (Seddon)',
                     image: `${IMAGE_BASE}/nerve-injury-classification.png`,
                   })}
-                  className="group relative w-full rounded-2xl border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden mb-6 block"
+                  className="group relative w-full rounded-2xl border border-black/[0.09] dark:border-white/10 bg-[#08090b] overflow-hidden mb-6 block"
                 >
                   <img
                     src={`${IMAGE_BASE}/nerve-injury-classification.png`}
@@ -929,13 +929,13 @@ function BrainMapPageInner() {
                 </button>
 
                 {nerveInjuryTypes.filter(matchesNerveInjuryType).length === 0 && (
-                  <p className="text-sm text-ink/40 dark:text-white/40 mb-4">{ui.librarySearchNoResults}</p>
+                  <p className="text-sm text-ink/55 dark:text-white/40 mb-4">{ui.librarySearchNoResults}</p>
                 )}
                 <div className="grid sm:grid-cols-3 gap-4">
                   {nerveInjuryTypes.filter(matchesNerveInjuryType).map((t) => (
                     <div
                       key={t.slug}
-                      className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
+                      className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
                     >
                       <span
                         className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full text-white mb-2"
@@ -958,7 +958,7 @@ function BrainMapPageInner() {
                 <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
                   {ui.brainMap.nerveConductionHeading}
                 </h2>
-                <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+                <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
                   {ui.brainMap.nerveConductionHint}
                 </p>
 
@@ -969,7 +969,7 @@ function BrainMapPageInner() {
                     value={conductionSearch}
                     onChange={(e) => setConductionSearch(e.target.value)}
                     placeholder={ui.librarySearchPlaceholder}
-                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
                   />
                 </div>
 
@@ -978,7 +978,7 @@ function BrainMapPageInner() {
                     title: 'Nerve Conduction Velocity',
                     image: `${IMAGE_BASE}/nerve-conduction-and-velocity.png`,
                   })}
-                  className="group relative w-full rounded-2xl border border-black/[0.06] dark:border-white/10 bg-[#08090b] overflow-hidden mb-6 block"
+                  className="group relative w-full rounded-2xl border border-black/[0.09] dark:border-white/10 bg-[#08090b] overflow-hidden mb-6 block"
                 >
                   <img
                     src={`${IMAGE_BASE}/nerve-conduction-and-velocity.png`}
@@ -994,13 +994,13 @@ function BrainMapPageInner() {
                 </button>
 
                 {conductionFiberTypes.filter(matchesConductionFiberType).length === 0 && (
-                  <p className="text-sm text-ink/40 dark:text-white/40 mb-4">{ui.librarySearchNoResults}</p>
+                  <p className="text-sm text-ink/55 dark:text-white/40 mb-4">{ui.librarySearchNoResults}</p>
                 )}
                 <div className="grid sm:grid-cols-2 gap-4">
                   {conductionFiberTypes.filter(matchesConductionFiberType).map((f) => (
                     <div
                       key={f.slug}
-                      className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
+                      className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
                     >
                       <span
                         className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full text-white mb-2"
@@ -1009,16 +1009,16 @@ function BrainMapPageInner() {
                         {f.name}
                       </span>
                       <p className="text-xs text-ink/70 dark:text-white/70 leading-relaxed">
-                        <span className="font-semibold text-ink/50 dark:text-white/50">{ui.brainMap.fiberDiameter}: </span>{f.diameter}
+                        <span className="font-semibold text-ink/60 dark:text-white/50">{ui.brainMap.fiberDiameter}: </span>{f.diameter}
                       </p>
                       <p className="text-xs text-ink/70 dark:text-white/70 leading-relaxed">
-                        <span className="font-semibold text-ink/50 dark:text-white/50">{ui.brainMap.fiberMyelination}: </span>{f.myelination}
+                        <span className="font-semibold text-ink/60 dark:text-white/50">{ui.brainMap.fiberMyelination}: </span>{f.myelination}
                       </p>
                       <p className="text-xs text-ink/70 dark:text-white/70 leading-relaxed">
-                        <span className="font-semibold text-ink/50 dark:text-white/50">{ui.brainMap.fiberVelocity}: </span>{f.velocity}
+                        <span className="font-semibold text-ink/60 dark:text-white/50">{ui.brainMap.fiberVelocity}: </span>{f.velocity}
                       </p>
                       <p className="text-xs text-ink/70 dark:text-white/70 leading-relaxed">
-                        <span className="font-semibold text-ink/50 dark:text-white/50">{ui.brainMap.fiberFunction}: </span>{f.function}
+                        <span className="font-semibold text-ink/60 dark:text-white/50">{ui.brainMap.fiberFunction}: </span>{f.function}
                       </p>
                     </div>
                   ))}
@@ -1031,7 +1031,7 @@ function BrainMapPageInner() {
                 <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
                   {ui.brainMap.relatedConditionsHeading}
                 </h2>
-                <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+                <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
                   {ui.brainMap.snpConditionsHint}
                 </p>
 
@@ -1042,12 +1042,12 @@ function BrainMapPageInner() {
                     value={peripheralConditionsSearch}
                     onChange={(e) => setPeripheralConditionsSearch(e.target.value)}
                     placeholder={ui.librarySearchPlaceholder}
-                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
                   />
                 </div>
 
                 {conditionsLoading && (
-                  <p className="text-sm text-ink/40 dark:text-white/40">{ui.brainMap.loadingConditions}</p>
+                  <p className="text-sm text-ink/55 dark:text-white/40">{ui.brainMap.loadingConditions}</p>
                 )}
 
                 {conditionsError && (
@@ -1055,7 +1055,7 @@ function BrainMapPageInner() {
                 )}
 
                 {!conditionsLoading && !conditionsError && peripheralConditions.filter(matchesPeripheralCondition).length === 0 && (
-                  <p className="text-sm text-ink/40 dark:text-white/40">{ui.librarySearchNoResults}</p>
+                  <p className="text-sm text-ink/55 dark:text-white/40">{ui.librarySearchNoResults}</p>
                 )}
 
                 {!conditionsLoading && !conditionsError && (
@@ -1064,13 +1064,13 @@ function BrainMapPageInner() {
                       <button
                         key={c.id}
                         onClick={() => setSelectedCondition(c)}
-                        className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:border-[#F5A524]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#F5A524]/10"
+                        className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:border-[#F5A524]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#F5A524]/10"
                       >
                         <p className="text-sm font-semibold text-ink dark:text-white">
                           {c.condition_name}
                         </p>
                         {c.evidence_level && (
-                          <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/40 dark:text-white/40">
+                          <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/55 dark:text-white/40">
                             {ui.fields.evidence}: {c.evidence_level}
                           </span>
                         )}
@@ -1086,7 +1086,7 @@ function BrainMapPageInner() {
                 <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60 mb-2">
                   {ui.brainMap.diffuseHeading}
                 </h2>
-                <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+                <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
                   {ui.brainMap.diffuseHint}
                 </p>
 
@@ -1097,12 +1097,12 @@ function BrainMapPageInner() {
                     value={diffuseSearch}
                     onChange={(e) => setDiffuseSearch(e.target.value)}
                     placeholder={ui.librarySearchPlaceholder}
-                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#F5A524]/40"
                   />
                 </div>
 
                 {diffuseLoading && (
-                  <p className="text-sm text-ink/40 dark:text-white/40">{ui.brainMap.loadingDiffuse}</p>
+                  <p className="text-sm text-ink/55 dark:text-white/40">{ui.brainMap.loadingDiffuse}</p>
                 )}
 
                 {diffuseError && (
@@ -1110,7 +1110,7 @@ function BrainMapPageInner() {
                 )}
 
                 {!diffuseLoading && !diffuseError && diffuseConditions.filter(matchesDiffuseCondition).length === 0 && (
-                  <p className="text-sm text-ink/40 dark:text-white/40">{ui.librarySearchNoResults}</p>
+                  <p className="text-sm text-ink/55 dark:text-white/40">{ui.librarySearchNoResults}</p>
                 )}
 
                 {!diffuseLoading && !diffuseError && (
@@ -1119,13 +1119,13 @@ function BrainMapPageInner() {
                       <button
                         key={c.id}
                         onClick={() => setSelectedCondition(c)}
-                        className="text-left rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:border-[#F5A524]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#F5A524]/10"
+                        className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:border-[#F5A524]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#F5A524]/10"
                       >
                         <p className="text-sm font-semibold text-ink dark:text-white">
                           {c.condition_name}
                         </p>
                         {c.evidence_level && (
-                          <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/40 dark:text-white/40">
+                          <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/55 dark:text-white/40">
                             {ui.fields.evidence}: {c.evidence_level}
                           </span>
                         )}
@@ -1140,7 +1140,7 @@ function BrainMapPageInner() {
         {view === 'pathways' && (
           <div>
             <div className="flex justify-center mb-8">
-              <div className="relative inline-flex rounded-full border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1 shadow-sm shadow-black/[0.03] dark:shadow-black/30">
+              <div className="relative inline-flex rounded-full border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1 shadow-soft shadow-black/[0.03] dark:shadow-black/30">
                 {(['circuits', 'gait', 'localization'] as const).map((sv) => (
                   <button
                     key={sv}
@@ -1148,7 +1148,7 @@ function BrainMapPageInner() {
                     className={`relative z-10 px-5 py-2 rounded-full text-[13px] font-semibold transition-colors duration-300 active:scale-[0.96] ${
                       pathwaySubView === sv
                         ? 'text-white'
-                        : 'text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
+                        : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                     }`}
                   >
                     {pathwaySubView === sv && (
@@ -1176,7 +1176,7 @@ function BrainMapPageInner() {
                     value={pathwaysSearch}
                     onChange={(e) => setPathwaysSearch(e.target.value)}
                     placeholder={ui.librarySearchPlaceholder}
-                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#A855F7]/40"
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#A855F7]/40"
                   />
                 </div>
                                                <div className="flex justify-center gap-2 mb-8">
@@ -1187,7 +1187,7 @@ function BrainMapPageInner() {
                       className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all duration-300 active:scale-[0.96] ${
                         pathwayCategoryFilter === cat
                           ? 'text-white shadow-md shadow-[#32D6A0]/20'
-                          : 'text-ink/50 dark:text-white/50 border border-black/[0.08] dark:border-white/10 hover:text-ink dark:hover:text-white hover:border-[#32D6A0]/30'
+                          : 'text-ink/60 dark:text-white/50 border border-black/[0.08] dark:border-white/10 hover:text-ink dark:hover:text-white hover:border-[#32D6A0]/30'
                       }`}
                       style={pathwayCategoryFilter === cat ? { background: '#32D6A0' } : undefined}
                     >
@@ -1197,13 +1197,13 @@ function BrainMapPageInner() {
                 </div>
 
                 {filteredPathways.filter(matchesPathway).length === 0 && (
-                  <p className="text-sm text-ink/40 dark:text-white/40 text-center mb-6">{ui.librarySearchNoResults}</p>
+                  <p className="text-sm text-ink/55 dark:text-white/40 text-center mb-6">{ui.librarySearchNoResults}</p>
                 )}
                 <div className="space-y-6">
                   {filteredPathways.filter(matchesPathway).map((p) => (
                     <div
                       key={p.slug}
-                      className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden transition-all duration-300 hover:border-[#A855F7]/30 hover:shadow-xl hover:shadow-[#A855F7]/10"
+                      className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden transition-all duration-300 hover:border-[#A855F7]/30 hover:shadow-xl hover:shadow-[#A855F7]/10"
                     >
                       <button
                         onClick={() => setExpandedPathway(p)}
@@ -1223,7 +1223,7 @@ function BrainMapPageInner() {
                       </button>
                       <div className="p-5">
                         <p className="text-base font-semibold text-ink dark:text-white">{p.title}</p>
-                        <p className="text-xs text-ink/50 dark:text-white/50 mt-0.5 mb-3">{p.subtitle}</p>
+                        <p className="text-xs text-ink/60 dark:text-white/50 mt-0.5 mb-3">{p.subtitle}</p>
                         <p
                           className="text-xs font-mono mb-3 leading-relaxed"
                           style={{ color: VIEW_COLORS.pathways.solid }}
@@ -1242,7 +1242,7 @@ function BrainMapPageInner() {
 
             {pathwaySubView === 'gait' && (
               <div>
-                <p className="text-sm text-ink/50 dark:text-white/50 mb-6 max-w-2xl">
+                <p className="text-sm text-ink/60 dark:text-white/50 mb-6 max-w-2xl">
                   {ui.brainMap.gaitHint}
                 </p>
                 <div className="relative mb-6 max-w-md">
@@ -1252,17 +1252,17 @@ function BrainMapPageInner() {
                     value={gaitSearch}
                     onChange={(e) => setGaitSearch(e.target.value)}
                     placeholder={ui.librarySearchPlaceholder}
-                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#A855F7]/40"
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#A855F7]/40"
                   />
                 </div>
                 {gaitTypes.filter(matchesGaitType).length === 0 && (
-                  <p className="text-sm text-ink/40 dark:text-white/40 mb-4">{ui.librarySearchNoResults}</p>
+                  <p className="text-sm text-ink/55 dark:text-white/40 mb-4">{ui.librarySearchNoResults}</p>
                 )}
                 <div className="grid sm:grid-cols-2 gap-4">
                   {gaitTypes.filter(matchesGaitType).map((g) => (
                     <div
                       key={g.slug}
-                      className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
+                      className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
                     >
                       <p className="text-sm font-semibold text-ink dark:text-white">{g.name}</p>
                       <p
@@ -1282,7 +1282,7 @@ function BrainMapPageInner() {
 
             {pathwaySubView === 'localization' && (
               <div>
-                <p className="text-sm text-ink/50 dark:text-white/50 mb-8 max-w-2xl">
+                <p className="text-sm text-ink/60 dark:text-white/50 mb-8 max-w-2xl">
                   {ui.brainMap.localizationHint}
                 </p>
                 <div className="relative mb-6 max-w-md">
@@ -1292,17 +1292,17 @@ function BrainMapPageInner() {
                     value={localizationSearch}
                     onChange={(e) => setLocalizationSearch(e.target.value)}
                     placeholder={ui.librarySearchPlaceholder}
-                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#A855F7]/40"
+                    className="w-full rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#A855F7]/40"
                   />
                 </div>
                 {localizationPrinciples.filter(matchesLocalizationPrinciple).length === 0 && (
-                  <p className="text-sm text-ink/40 dark:text-white/40 mb-4">{ui.librarySearchNoResults}</p>
+                  <p className="text-sm text-ink/55 dark:text-white/40 mb-4">{ui.librarySearchNoResults}</p>
                 )}
                 <div className="space-y-4">
                   {localizationPrinciples.filter(matchesLocalizationPrinciple).map((lp, i) => (
                     <div
                       key={lp.slug}
-                      className="group relative rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-6 overflow-hidden transition-all duration-300 hover:border-[#A855F7]/30 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#A855F7]/10"
+                      className="group relative rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-6 overflow-hidden transition-all duration-300 hover:border-[#A855F7]/30 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#A855F7]/10"
                     >
                       <div
                         className="pointer-events-none absolute -right-10 -top-10 w-32 h-32 rounded-full opacity-[0.07] blur-3xl transition-opacity duration-300 group-hover:opacity-[0.16]"
@@ -1375,7 +1375,7 @@ function BrainMapPageInner() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.06] dark:border-white/10 p-8 shadow-2xl shadow-black/20 dark:shadow-black/60"
+              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.09] dark:border-white/10 p-8 shadow-2xl shadow-black/20 dark:shadow-black/60"
             >
               <div className="flex items-start justify-between mb-4">
                 <h3 className="text-xl font-bold text-ink dark:text-white pr-6">
@@ -1431,8 +1431,8 @@ function BrainMapPageInner() {
                   </div>
                 )}
                 {selectedCondition.evidence_level && (
-                  <div className="pt-2 border-t border-black/[0.06] dark:border-white/10">
-                    <p className="text-xs text-ink/40 dark:text-white/40">
+                  <div className="pt-2 border-t border-black/[0.09] dark:border-white/10">
+                    <p className="text-xs text-ink/55 dark:text-white/40">
                       {ui.fields.evidence}: {selectedCondition.evidence_level}
                     </p>
                   </div>

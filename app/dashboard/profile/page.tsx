@@ -154,15 +154,15 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen bg-white dark:bg-[#08090b]">
+      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b]">
         <Navbar />
-        <div className="pt-40 text-center text-ink/40 dark:text-white/40">{common.loading}</div>
+        <div className="pt-40 text-center text-ink/55 dark:text-white/40">{common.loading}</div>
       </div>
     )
   }
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -175,7 +175,7 @@ export default function ProfilePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-1.5 text-sm text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
         >
           <ArrowLeft size={15} />
           {common.backToPatients}
@@ -193,7 +193,7 @@ export default function ProfilePage() {
           <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white">
             {t.heading}
           </h1>
-          <p className="mt-2 text-sm text-ink/50 dark:text-white/50 max-w-md leading-relaxed">
+          <p className="mt-2 text-sm text-ink/60 dark:text-white/50 max-w-md leading-relaxed">
             {t.subtitle}
           </p>
         </motion.div>
@@ -231,13 +231,13 @@ export default function ProfilePage() {
           </div>
           <div>
             <p className="text-sm font-semibold text-ink dark:text-white">{t.photoLabel}</p>
-            <p className="text-xs text-ink/40 dark:text-white/40">{t.photoHint}</p>
+            <p className="text-xs text-ink/55 dark:text-white/40">{t.photoHint}</p>
           </div>
         </div>
 
         <div className="space-y-6">
           <div>
-            <label className="text-sm font-medium text-ink/50 dark:text-white/50">
+            <label className="text-sm font-medium text-ink/60 dark:text-white/50">
               {t.displayNameLabel}
             </label>
             <input
@@ -245,12 +245,12 @@ export default function ProfilePage() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder={t.displayNamePlaceholder}
-              className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+              className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-ink/50 dark:text-white/50">
+            <label className="text-sm font-medium text-ink/60 dark:text-white/50">
               {t.bioLabel}
             </label>
             <textarea
@@ -258,12 +258,12 @@ export default function ProfilePage() {
               onChange={(e) => setBio(e.target.value)}
               rows={4}
               placeholder={t.bioPlaceholder}
-              className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white resize-none"
+              className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white resize-none"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-ink/50 dark:text-white/50 flex items-center gap-1.5">
+            <label className="text-sm font-medium text-ink/60 dark:text-white/50 flex items-center gap-1.5">
               <BadgeCheck size={14} className="text-[#4F7CFF]" />
               {t.registrationNumberLabel}
             </label>
@@ -272,20 +272,20 @@ export default function ProfilePage() {
               value={registrationNumber}
               onChange={(e) => setRegistrationNumber(e.target.value)}
               placeholder={t.registrationNumberPlaceholder}
-              className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+              className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
             />
-            <p className="mt-1.5 text-xs text-ink/40 dark:text-white/40">{t.registrationNumberHint}</p>
+            <p className="mt-1.5 text-xs text-ink/55 dark:text-white/40">{t.registrationNumberHint}</p>
           </div>
 
           <div>
-            <label className="text-sm font-medium text-ink/50 dark:text-white/50 mb-2 block">
+            <label className="text-sm font-medium text-ink/60 dark:text-white/50 mb-2 block">
               {t.credentialsLabel}
             </label>
             <div className="space-y-2 mb-3">
               {credentials.map((c) => (
                 <div
                   key={c.id}
-                  className="flex items-center gap-3 rounded-xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] px-4 py-2.5"
+                  className="flex items-center gap-3 rounded-xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] px-4 py-2.5"
                 >
                   <Award size={14} className="text-[#4F7CFF] shrink-0" />
                   <span className="text-sm text-ink dark:text-white flex-1">{c.label}</span>
@@ -305,7 +305,7 @@ export default function ProfilePage() {
                 onChange={(e) => setNewCredential(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addCredential()}
                 placeholder={t.credentialPlaceholder}
-                className="flex-1 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-white/[0.02] px-4 py-2.5 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+                className="flex-1 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-2.5 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
               />
               <button
                 onClick={addCredential}
@@ -335,9 +335,9 @@ export default function ProfilePage() {
                   {roleUi.transition.cta}
                 </button>
               ) : (
-                <div className="mt-3 rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] p-4">
+                <div className="mt-3 rounded-xl border border-black/10 dark:border-white/10 bg-white/90 dark:bg-white/[0.03] p-4">
                   <p className="text-sm font-semibold text-ink dark:text-white">{roleUi.transition.confirmTitle}</p>
-                  <p className="mt-1 text-xs text-ink/50 dark:text-white/50">{roleUi.transition.confirmBody}</p>
+                  <p className="mt-1 text-xs text-ink/60 dark:text-white/50">{roleUi.transition.confirmBody}</p>
                   <div className="mt-3 flex gap-2">
                     <button
                       onClick={handleActivateProfessional}

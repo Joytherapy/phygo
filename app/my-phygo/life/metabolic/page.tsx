@@ -67,7 +67,7 @@ export default function MyPhygoLifeMetabolicPage() {
   }, [router])
 
   if (checking) {
-    return <div className="relative pt-40 text-center text-ink/40 dark:text-white/40">…</div>
+    return <div className="relative pt-40 text-center text-ink/55 dark:text-white/40">…</div>
   }
 
   const latest = history[0] ?? null
@@ -91,7 +91,7 @@ export default function MyPhygoLifeMetabolicPage() {
     <div className="relative max-w-2xl mx-auto pt-40 pb-24 px-6">
       <a
         href="/my-phygo/life"
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white transition-colors mb-6"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white transition-colors mb-6"
       >
         <ArrowLeft size={13} />
         {ui.backToHome}
@@ -113,24 +113,24 @@ export default function MyPhygoLifeMetabolicPage() {
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#6366F1]/10">
                 <Flame size={22} className="text-[#6366F1]" />
               </div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-1">
                 {calcUi.todaysTargetHeading}
               </p>
               <p className="font-display text-5xl font-bold text-ink dark:text-white mb-6">
-                {latest.calorie_target} <span className="text-lg font-semibold text-ink/40 dark:text-white/40">{calcUi.kcalPerDaySuffix}</span>
+                {latest.calorie_target} <span className="text-lg font-semibold text-ink/55 dark:text-white/40">{calcUi.kcalPerDaySuffix}</span>
               </p>
               <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-2xl bg-white/60 dark:bg-white/[0.04] py-3">
+                <div className="rounded-2xl bg-white/90 dark:bg-white/[0.04] py-3">
                   <p className="text-lg font-bold text-ink dark:text-white">{latest.protein_g}g</p>
-                  <p className="text-[11px] text-ink/40 dark:text-white/40">{calcUi.proteinLabel}</p>
+                  <p className="text-[11px] text-ink/55 dark:text-white/40">{calcUi.proteinLabel}</p>
                 </div>
-                <div className="rounded-2xl bg-white/60 dark:bg-white/[0.04] py-3">
+                <div className="rounded-2xl bg-white/90 dark:bg-white/[0.04] py-3">
                   <p className="text-lg font-bold text-ink dark:text-white">{latest.carbs_g}g</p>
-                  <p className="text-[11px] text-ink/40 dark:text-white/40">{calcUi.carbsLabel}</p>
+                  <p className="text-[11px] text-ink/55 dark:text-white/40">{calcUi.carbsLabel}</p>
                 </div>
-                <div className="rounded-2xl bg-white/60 dark:bg-white/[0.04] py-3">
+                <div className="rounded-2xl bg-white/90 dark:bg-white/[0.04] py-3">
                   <p className="text-lg font-bold text-ink dark:text-white">{latest.fat_g}g</p>
-                  <p className="text-[11px] text-ink/40 dark:text-white/40">{calcUi.fatLabel}</p>
+                  <p className="text-[11px] text-ink/55 dark:text-white/40">{calcUi.fatLabel}</p>
                 </div>
               </div>
             </div>
@@ -156,7 +156,7 @@ export default function MyPhygoLifeMetabolicPage() {
                     <p className="font-display text-3xl font-bold text-ink dark:text-white">
                       {adaptiveInsight.insight.impliedTdee}
                     </p>
-                    <p className="text-sm font-semibold text-ink/40 dark:text-white/40">{calcUi.kcalPerDaySuffix}</p>
+                    <p className="text-sm font-semibold text-ink/55 dark:text-white/40">{calcUi.kcalPerDaySuffix}</p>
                     <span className="ml-1 inline-flex items-center gap-1 text-xs font-semibold">
                       {adaptiveInsight.insight.deltaFromFormula > 20 && (
                         <span className="inline-flex items-center gap-0.5 text-emerald-600 dark:text-emerald-400">
@@ -169,21 +169,21 @@ export default function MyPhygoLifeMetabolicPage() {
                         </span>
                       )}
                       {Math.abs(adaptiveInsight.insight.deltaFromFormula) <= 20 && (
-                        <span className="inline-flex items-center gap-0.5 text-ink/40 dark:text-white/40">
+                        <span className="inline-flex items-center gap-0.5 text-ink/55 dark:text-white/40">
                           <Minus size={12} />
                         </span>
                       )}
                     </span>
                   </div>
                   <p className="text-xs font-semibold text-ink/60 dark:text-white/60 mb-2">{calcUi.adaptiveHeading}</p>
-                  <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed mb-3">
+                  <p className="text-xs text-ink/60 dark:text-white/50 leading-relaxed mb-3">
                     {adaptiveInsight.insight.deltaFromFormula > 20
                       ? interpolate(calcUi.adaptiveDeltaAbove, { value: adaptiveInsight.insight.deltaFromFormula })
                       : adaptiveInsight.insight.deltaFromFormula < -20
                       ? interpolate(calcUi.adaptiveDeltaBelow, { value: Math.abs(adaptiveInsight.insight.deltaFromFormula) })
                       : calcUi.adaptiveDeltaMatch}
                   </p>
-                  <p className="text-[11px] text-ink/40 dark:text-white/40">
+                  <p className="text-[11px] text-ink/55 dark:text-white/40">
                     {interpolate(calcUi.adaptiveBasedOn, {
                       days: adaptiveInsight.insight.daysSpanned,
                       entries: adaptiveInsight.insight.entriesUsed,
@@ -209,10 +209,10 @@ export default function MyPhygoLifeMetabolicPage() {
                         placeholder={calcUi.goalWeightPlaceholder}
                         className="w-24 text-sm rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/5 px-2.5 py-2 outline-none focus:border-amber-400/50"
                       />
-                      <span className="text-xs text-ink/40 dark:text-white/40">kg</span>
+                      <span className="text-xs text-ink/55 dark:text-white/40">kg</span>
                     </div>
                     {!goalWeightInput ? (
-                      <p className="text-[11px] text-ink/40 dark:text-white/40">{calcUi.goalWeightHint}</p>
+                      <p className="text-[11px] text-ink/55 dark:text-white/40">{calcUi.goalWeightHint}</p>
                     ) : goalProjection ? (
                       <p className="text-xs text-ink/70 dark:text-white/70 leading-relaxed">
                         {goalProjection.achievable
@@ -232,9 +232,9 @@ export default function MyPhygoLifeMetabolicPage() {
                   </div>
                 </>
               ) : (
-                <p className="text-xs text-ink/50 dark:text-white/50 leading-relaxed">{calcUi.adaptiveNotEnoughData}</p>
+                <p className="text-xs text-ink/60 dark:text-white/50 leading-relaxed">{calcUi.adaptiveNotEnoughData}</p>
               )}
-              <p className="text-[11px] text-ink/40 dark:text-white/40 mt-3 italic">{calcUi.adaptiveExplain}</p>
+              <p className="text-[11px] text-ink/55 dark:text-white/40 mt-3 italic">{calcUi.adaptiveExplain}</p>
             </div>
           )}
 
@@ -245,7 +245,7 @@ export default function MyPhygoLifeMetabolicPage() {
               valore di quei dati. */}
           <a
             href="/my-phygo/shop?category=Body%20Composition"
-            className="flex items-center justify-between gap-3 rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-4 mb-6 hover:border-[#6366F1]/30 transition-colors group"
+            className="flex items-center justify-between gap-3 rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 mb-6 hover:border-[#6366F1]/30 transition-colors group"
           >
             <div className="flex items-center gap-3 min-w-0">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#6366F1]/10 text-[#6366F1]">
@@ -253,7 +253,7 @@ export default function MyPhygoLifeMetabolicPage() {
               </span>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-ink dark:text-white truncate">{ui.scaleReminderHeading}</p>
-                <p className="text-xs text-ink/40 dark:text-white/40">{ui.scaleReminderCta}</p>
+                <p className="text-xs text-ink/55 dark:text-white/40">{ui.scaleReminderCta}</p>
               </div>
             </div>
             <ArrowRight size={15} className="text-ink/30 dark:text-white/30 group-hover:translate-x-1 transition-transform shrink-0" />
@@ -268,8 +268,8 @@ export default function MyPhygoLifeMetabolicPage() {
           </button>
 
           {history.length >= 2 && (
-            <div className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-5 mb-6">
-              <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-3">
+            <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 mb-6">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-3">
                 {calcUi.weightTrendHeading}
               </p>
               <WeightTrendChart data={chronologicalHistory.map((h) => ({ date: h.created_at, weightKg: h.weight_kg }))} />
@@ -278,18 +278,18 @@ export default function MyPhygoLifeMetabolicPage() {
 
           {history.length > 0 && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-ink/40 dark:text-white/40 mb-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-3">
                 {calcUi.historyHeading}
               </p>
               <div className="space-y-2">
                 {history.map((h) => (
                   <div
                     key={h.id}
-                    className="rounded-2xl border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3"
+                    className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3"
                   >
                     <Calendar size={14} className="text-ink/30 dark:text-white/30 shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs text-ink/40 dark:text-white/40">
+                      <p className="text-xs text-ink/55 dark:text-white/40">
                         {new Date(h.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
                       </p>
                       <p className="text-sm text-ink/70 dark:text-white/70">
@@ -305,7 +305,7 @@ export default function MyPhygoLifeMetabolicPage() {
       ) : (
         <>
           {!latest && (
-            <p className="text-sm text-ink/50 dark:text-white/50 mb-6">{ui.noProfileYet}</p>
+            <p className="text-sm text-ink/60 dark:text-white/50 mb-6">{ui.noProfileYet}</p>
           )}
           <MetabolicCalculator mode="patient" />
         </>

@@ -11,9 +11,9 @@ export default function TranscriptPanel({
   children,
 }: Props) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/70 dark:bg-white/5 backdrop-blur-xl shadow-xl overflow-hidden">
+    <div className="rounded-3xl border border-white/10 bg-white/95 dark:bg-white/5 backdrop-blur-xl shadow-xl overflow-hidden">
 
-      <div className="flex items-center justify-between border-b border-black/5 dark:border-white/5 px-6 py-4">
+      <div className="flex items-center justify-between border-b border-black/[0.08] dark:border-white/5 px-6 py-4">
 
         <div className="flex items-center gap-3">
 
@@ -24,7 +24,7 @@ export default function TranscriptPanel({
               {title}
             </h3>
 
-            <p className="text-xs text-ink/50 dark:text-white/50">
+            <p className="text-xs text-ink/60 dark:text-white/50">
               {subtitle}
             </p>
           </div>
