@@ -1313,3 +1313,172 @@ Note oneste: per la PLS, tutte le fonti (incluse quelle di Livello 1 su singole 
 **Stato attuale: 565 condizioni totali** (561 + 4 nuove del batch 72). **Mancano 235 per arrivare a 800.**
 
 Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+---
+
+## Batch 73 (condizioni 611-626): vasculiti, miopatie congenite/metaboliche, canalopatie
+
+Lavoro svolto in autonomia durante la notte, su richiesta esplicita dell'utente ("continua a cercare le patologie... senza chiedermi sempre l'accesso"). Metodologia invariata: per ogni candidato, controllo di duplicati via SQL su `knowledge_base.condition_name`, poi ricerca con agenti paralleli dedicati, ciascuno istruito a trovare fonti reali e verificabili specifiche su esercizio/riabilitazione, dichiarare onestamente il livello di evidenza, e raccomandare esplicitamente lo scarto quando non trovava nulla di solido.
+
+Candidati valutati in questo batch: 18 (due giri di brainstorming su vasculiti dei grossi/medi/piccoli vasi, miopatie congenite rare, distrofie, canalopatie e malattie metaboliche/mitocondriali).
+
+Esclusi perché già presenti nel database (controllo duplicati pre-ricerca): Sindrome di Ehlers-Danlos ipermobile/HSD, Charcot-Marie-Tooth, Fabry, Pompe, Osteogenesi Imperfetta, Angelman, Guillain-Barré (generico), Marfan, Prader-Willi, Sjögren, **Behçet** e **Sindrome da anticorpi antifosfolipidi (APS)** (questi ultimi due confermati già presenti durante il secondo giro di controllo duplicati del batch).
+
+Scartati dopo ricerca per evidenza insufficiente:
+
+- **Crioglobulinemia Mista**: ricerca dedicata (PubMed/letteratura specifica) non ha trovato nessuno studio, revisione sistematica o linea guida che tratti esercizio fisico o riabilitazione in questa condizione. Le uniche fonti trovate riguardano neuropatia periferica generica o vasculiti ANCA-associate, non crioglobulinemia. Costruire una voce completa avrebbe significato inventare contenuto clinico. **Scartata**.
+- **Malattia di Danon**: esiste una sola fonte reale e specifica (Hong et al., JACC 2023, consensus internazionale) e riguarda esclusivamente una raccomandazione di sicurezza cardiologica (evitare sport competitivi/esercizio intenso per rischio di aritmia e di accelerare la progressione della cardiomiopatia in un cuore LAMP2-deficiente) — non esiste alcun protocollo, criterio di progressione, test funzionale o lista di esercizi specifici per questa malattia. Costruire una voce completa nel formato standard del database avrebbe richiesto inventare la maggior parte dei campi. **Scartata** (il contenuto di sicurezza cardiologica, se utile, può essere aggiunto in futuro come nota minimale collegata alla voce di cardiomiopatia, non come voce a sé).
+
+Genuinamente presenti e aggiunte in questo batch (16 condizioni, id 611-626):
+
+| Condizione | Categoria | Evidenza | Fonte principale |
+|---|---|---|---|
+| Arterite di Takayasu | Immunitario | low-moderate | Lanzi 2018; Astley 2021 (RCT pediatrico); Li 2020 (RCT); Zhou 2021 |
+| Granulomatosi con Poliangioite (GPA/Wegener) | Immunitario | low | Dos Santos 2024; Hessels 2019; Harper 2021 (RCT fattibilità) |
+| Miopatia Nemalinica | Neurologia | low | Van Kleef 2023 (IMT); Wang 2012 (consensus) |
+| Sindrome di Ehlers-Danlos tipo Vascolare (vEDS) | — (sicurezza, no tag di sistema) | low | Byers 2017; VASCERN factsheet; Ehlers-Danlos Society |
+| Sindrome di Miller Fisher | Neurologia | low | Rathi & Harjpal 2024; Boob 2022; Warghat 2024 (case report) |
+| Poliarterite Nodosa | Immunitario | low | Cochrane CD003904; Merck Manual |
+| Granulomatosi Eosinofila con Poliangioite (EGPA/Churg-Strauss) | Immunitario + Cardiopolmonare | low | Lima 2026; Pistone & Camilli 2023 |
+| Miopatia Centronucleare | Neurologia | low | Wang 2012; CureCMD guide; Tan & Chan 2021 |
+| Distrofia Muscolare dei Cingoli (LGMD) | Neurologia | low-moderate | Narayanaswami 2014 (AAN/AANEM); D'Este 2025; Bostock 2019 |
+| Sindrome di Barth | Endocrino + Cardiopolmonare + Ematologia | low | Cade 2016; Bittel 2018 (pilot studies) |
+| Acidemia Propionica | Endocrino | low | Baumgartner 2014; Storgaard 2020; Myrup 2026 |
+| Acidemia Metilmalonica | Endocrino | low | Baumgartner 2014; Myrup 2026; Østergaard 2005 |
+| Deficit di CPT II | Endocrino + Neurologia | low | Negro 2021; Parimbelli 2021 (case report) |
+| Malattia di McArdle (Glicogenosi tipo V) | Endocrino + Neurologia | moderate | Haller 2006; Cochrane CD007931; GeneReviews |
+| Sindrome di Andersen-Tawil | Cardiopolmonare + Neurologia | low | Sansone & Tawil 2007; Inoue 2018; Vivekanandam 2021 |
+| Paralisi Periodica Ipokaliemica | Neurologia + Cardiopolmonare | low | Weber & Lehmann-Horn 2018 (GeneReviews); Ambalkar 2024 |
+
+Note oneste: questo batch tocca prevalentemente malattie ultra-rare (vasculiti, miopatie congenite, canalopatie, malattie metaboliche mitocondriali) dove la letteratura specifica sull'esercizio è quasi sempre scarsa — la maggioranza delle voci ha evidenza "low" e lo dichiara esplicitamente nel campo `evidence_level`. Due eccezioni positive: la **malattia di McArdle**, che ha evidenza "moderate" grazie a una revisione Cochrane dedicata e a un consensus clinico solido sul fenomeno del "second wind"; e il **deficit di CPT II**, dove pur con una sola fonte (case report), i dati sono clinicamente azionabili e specifici (a differenza del McArdle, la strategia "second wind" NON si applica qui — distinzione segnalata esplicitamente nel campo `typical_exercises` per evitare che le due condizioni, spesso confuse, vengano trattate allo stesso modo). La **sindrome di Ehlers-Danlos vascolare (vEDS)** non è stata taggata a nessun sistema specifico (resta in "Ortopedico/Altro" come la hEDS già presente), perché clinicamente è un tema di sicurezza vascolare trasversale più che di un singolo apparato. Per 4 condizioni (GPA, EGPA, Barth, Andersen-Tawil, Paralisi Periodica Ipokaliemica) è stato applicato un doppio tag di sistema, perché il quadro clinico coinvolge realmente più apparati (es. Barth: mitocondriale + cardiaco + ematologico).
+
+**Stato attuale: 581 condizioni totali** (565 + 16 nuove del batch 73). **Mancano 219 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+---
+
+## Batch 74 (condizioni 627-637)
+
+Metodologia identica ai batch precedenti: controllo duplicati via query SQL su `knowledge_base` (tre round, con pattern ILIKE su nomi italiani/inglesi/sinonimi), ricerca parallela via agenti con brief di 12 punti (nome, descrizione, obiettivi, criteri di progressione, criteri di ritorno all'attività, test clinici, red flags, esercizi tipici, controindicazioni, fonti esatte, livello di evidenza onesto, giudizio finale su inclusione/scarto), decisione finale di inclusione o rigetto, inserimento in `knowledge_base` e tagging nelle tabelle `*_condition_tags` pertinenti.
+
+**14 candidati valutati, 11 inclusi, 3 scartati esplicitamente.**
+
+### Condizioni scartate (evidenza insufficiente per un protocollo di esercizio)
+
+- **Acalasia Esofagea**: gestione primariamente endoscopico-chirurgica (miotomia di Heller, POEM); nessuna letteratura peer-reviewed su esercizio/riabilitazione specifica, solo materiale informativo pazienti non scientifico sul ritorno alle attività post-intervento. Scartata nella forma "protocollo di esercizio" per non presentare come evidence-based contenuto di buon senso clinico generico.
+- **Porpora Trombotica Trombocitopenica (TTP)**: emergenza ematologica acuta (trattata con plasmaferesi), non condizione cronica riabilitativa. Nessuna linea guida ematologica (incluse ISTH/BCSH) menziona attività fisica. L'unica base per "criteri di esercizio" sarebbero soglie piastriniche estrapolate da oncologia generale, non validate per TTP — presentarla con la struttura standard delle altre voci sarebbe fuorviante.
+- **Malattia di Whipple**: infezione batterica cronica rarissima (*Tropheryma whipplei*). Zero fonti, in nessuna lingua cercata, su esercizio o riabilitazione. Qualsiasi "obiettivo riabilitativo" o "esercizio tipico" sarebbe inventato. Raccomandazione esplicita dell'agente di ricerca: scartare.
+
+### Condizioni incluse
+
+| Condizione | Sistema | Evidenza | Fonti principali |
+|---|---|---|---|
+| Malattia di Castleman (UCD/iMCD) | Immunitario | low | Lechowicz 2020 (Blood Advances); van Rhee 2018 (Blood); Campbell 2019 (estrapolazione onco-riabilitativa) |
+| Micosi Fungoide e Sindrome di Sézary | Oncologia | low | Streckmann 2014; Amatya 2021; Brazel 2024; Cutaneous Lymphoma Foundation |
+| Nefropatia da IgA (Malattia di Berger) | Urinario | low | KDIGO 2025; Battaglia 2024 (SIN); Salgado-López 2021 (case study) |
+| Sindrome Nefrotica | Urinario | low | Nishiwaki 2025; Baker 2022; Gerstein 2023 (Kidney360, soglia albumina <22 g/L) |
+| Celiachia | Gastrointestinale | low | Jelsness-Jørgensen 2018; Zapata-Martínez 2026; Grace-Farfaglia 2015; Dowd 2019 (MOVE-C) |
+| Gastroparesi | Gastrointestinale | low | Camilleri 2022 (ACG Guideline); Parrish/Soffer/Parkman (IFFGD); Franke 2008 |
+| Connettivite Mista (MCTD, Sindrome di Sharp) | Immunitario | low | van der Net 2008 (unico studio, pediatrico); Morris 2023 (Cochrane IAP); Denton 2024 (BSR, estrapolazione) |
+| Sindrome di Sheehan | Endocrino | low | Gonzalez 2018; Htut 2024 (sick day rules); estrapolazione da ipopituitarismo generale |
+| Iperparatiroidismo Primario | Endocrino | low | Vaidya 2016; NCT01571843 (Columbia/Bilezikian); Endocrine Society |
+| Feocromocitoma | Endocrino | low | Lenders 2014 (Endocrine Society Guideline); Castelino & Mitmaker 2017; Pereira-da-Silva 2014 |
+| Colangite Biliare Primitiva (PBC) | Gastrointestinale | **moderate** | Freer 2024 (trial EXCITED, JHEP Reports); EASL 2017 |
+
+Note oneste: questo batch è il più povero di evidenza vista finora in termini di densità — su 11 condizioni incluse, 10 hanno evidenza "low" (quasi sempre singola fonte o estrapolazione da categoria più ampia: oncologia generale per Castleman/CTCL, nefropatia cronica generale per IgA/sindrome nefrotica, ipopituitarismo generale per Sheehan). L'unica eccezione solida è la **Colangite Biliare Primitiva**, con evidenza "moderate" grazie al trial EXCITED (JHEP Reports 2024) — un RCT/feasibility trial dedicato specificamente alla fatica da PBC, con protocollo riproducibile e outcome validato (PBC-40). Per la **Nefropatia da IgA** è stata mantenuta la distinzione clinica dalla Porpora di Henoch-Schönlein/vasculite da IgA (id 549, già presente): sono nello stesso spettro immunologico ma entità cliniche distinte (nefropatia isolata vs. vasculite sistemica), quindi trattate come voci separate. Per la **Connettivite Mista (MCTD)** sono stati creati rimandi testuali (non FK) alle voci già presenti di lupus, sclerodermia e miopatie infiammatorie, perché il quadro overlap si sovrappone clinicamente a tutte tre senza esserne un duplicato. Il **Feocromocitoma** ha codice ICD-10 marcato come non verificato (`icd10_verified = false`): D35.00 è il codice generico per neoplasia benigna del surrene, non esiste un codice ICD-10-CM specifico per il feocromocitoma come entità separata, quindi l'approssimazione va segnalata.
+
+**Stato attuale: 592 condizioni totali** (581 + 11 nuove del batch 74). **Mancano 208 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+---
+
+## Batch 75 (condizioni 638-649)
+
+Metodologia identica ai batch precedenti: controllo duplicati via query SQL su `knowledge_base` (quattro round, con pattern ILIKE su nomi italiani/inglesi/sinonimi), ricerca parallela via agenti con brief di 12 punti, decisione finale di inclusione o rigetto, inserimento in `knowledge_base` e tagging nelle tabelle `*_condition_tags` pertinenti.
+
+**12 candidati valutati, 12 inclusi, nessuno scartato.** A differenza del batch 74, in questo batch tutti i candidati ricercati hanno superato la soglia minima per l'inclusione — anche quando l'evidenza è bassa, ogni voce ha contenuto clinico reale e azionabile (soprattutto sui red flags) che giustifica l'inclusione con disclaimer, invece dello scarto.
+
+### Condizioni incluse
+
+| Condizione | Sistema | Evidenza | Fonti principali |
+|---|---|---|---|
+| Sindrome di Klinefelter | Endocrino | low | Spiekermann 2023 (studio pilota fitness cardiorespiratorio); Cung 2021 |
+| Diabete Insipido | Endocrino | low | Roth & Kemp (Medscape); Christ-Crain 2019 (Nat Rev Dis Primers) |
+| Prolattinoma e Iperprolattinemia | Endocrino | low | Erkoc 2024 (Endocrine); consenso tedesco 2018 (timeline post-transfenoidale) |
+| Sclerosi Tuberosa | Neurologia | low | Northrup 2021 (consensus TSC); Child 2024 (Chest, screening Delphi LAM) |
+| Malattia di von Hippel-Lindau | Oncologia | low | VHL Alliance handbook 2020; ERKNet guideline; estrapolazione da voce Feocromocitoma |
+| Sindrome Miastenica di Lambert-Eaton | Neurologia | low | Alhammad 2024; Poh 2024 (facilitazione post-tetanica); Titulaer et al. |
+| Narcolessia | Neurologia | low | Tadrous 2025; Wise 2007 (AASM); Bassetti 2021 (linee guida europee) |
+| Angioedema Ereditario | Immunitario | **low-moderate** | Zotter 2012 (WAO Journal, 3176 attacchi); studio tedesco 2024/2025 |
+| Neuropatia Diabetica Periferica | Endocrino | **moderate** | Gracia-Sánchez 2025 (umbrella review); Perrin 2022 (RCT); consenso Delphi 2023 |
+| Sindrome di Cogan | Neurologia + Immunitario | low | D'Aguanno 2017; Cassis 2018; estrapolazione da riabilitazione vestibolare generale |
+| Malattia di Still dell'Adulto (AOSD) | Immunitario | low | Rausch Osthoff 2018 (EULAR, non AOSD-specifica); Ruscitti (registro AIDA) |
+| Artrite Reattiva | Immunitario | low | Jørgensen & Mechlenburg 2021 (case report BFR); Ramiro 2023 (ASAS-EULAR) |
+
+Note oneste: questo batch conferma il pattern già visto nei batch precedenti — la maggioranza delle condizioni rare/genetiche (Klinefelter, Diabete Insipido, Sclerosi Tuberosa, von Hippel-Lindau, Lambert-Eaton, Narcolessia, Cogan, AOSD, Artrite Reattiva) ha solo 1-2 fonti dirette o nessuna, con contenuto in buona parte estrapolato da categorie più ampie (ipogonadismo generale, riabilitazione neurochirurgica, riabilitazione vestibolare, spondiloartriti). Due eccezioni positive: l'**Angioedema Ereditario**, con evidenza "low-moderate" grazie a due studi osservazionali indipendenti (Ungheria 2012, Germania 2024/2025) che convergono sullo stesso pattern di trigger fisici/da sforzo su oltre 3000 attacchi analizzati complessivamente; e la **Neuropatia Diabetica Periferica**, con evidenza "moderate" solida — un'area ben studiata con umbrella review, RCT dedicato e consenso Delphi specifico sull'esercizio nella prevenzione delle ulcere del piede diabetico. La **Malattia di von Hippel-Lindau** ha codice ICD-10 marcato come non verificato (`icd10_verified = false`): non esiste un codice ICD-10-CM dedicato, si usa l'approssimazione Q85.8 (altre facomatosi). La **Sindrome di Cogan** è stata doppio-taggata (Neurologia + Immunitario) perché il quadro clinico è realmente sia una vasculite sistemica sia un disturbo vestibolare primario. Per il **Diabete Insipido** non è stata creata una distinzione in due voci separate (centrale vs. nefrogenica) perché la gestione dell'esercizio/idratazione è sostanzialmente identica nelle due forme; la differenza eziologica è comunque documentata nei campi `etiology_risk_factors` e `pathophysiology`.
+
+**Stato attuale: 604 condizioni totali** (592 + 12 nuove del batch 75). **Mancano 196 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+---
+
+## Batch 76 (condizioni 650-660)
+
+Metodologia identica ai batch precedenti: controllo duplicati via query SQL su `knowledge_base`, ricerca parallela via agenti con brief di 12 punti, decisione finale di inclusione o rigetto, inserimento in `knowledge_base` e tagging in `cardiopulmonary_condition_tags` (sistema 'cardiac' per tutte, trattandosi di un batch tematico cardiologico/cardiopatie congenite).
+
+**11 candidati valutati, 11 inclusi, nessuno scartato.** Questo è il batch con l'evidenza più solida delle tre sessioni di stanotte: l'area cardiologia sportiva/riabilitazione cardiovascolare è tra le meglio documentate in letteratura, con linee guida ESC, AHA/ACC e consensus HRS multi-società aggiornati regolarmente.
+
+### Condizioni incluse
+
+| Condizione | Sistema | Evidenza | Fonti principali |
+|---|---|---|---|
+| Cardiomiopatia Dilatativa | Cardiopolmonare | moderate | Pelliccia 2020 (ESC sports cardiology); Maron 2015 (Task Force 3); Russo 2025 |
+| Sindrome di Takotsubo | Cardiopolmonare | moderate | Gamble 2025/2026 (trial BREAKOUT); Khan 2025; Gobeil 2021 |
+| Sindrome di Wolff-Parkinson-White | Cardiopolmonare | moderate | Lampert 2024 (consenso HRS/ACC/AHA multi-società); Pelliccia 2020; Petek 2025 |
+| Prolasso della Valvola Mitrale | Cardiopolmonare | moderate | Compagnucci 2024; Sonaglioni 2025 (revisione sistematica); Pelliccia 2020 |
+| Stenosi Mitralica | Cardiopolmonare | moderate | van Buuren 2021 (position statement EAPC); Pelliccia 2021 |
+| Insufficienza Mitralica | Cardiopolmonare | moderate | van Buuren 2021; Pelliccia 2021 |
+| Stenosi Aortica | Cardiopolmonare | moderate | Pelliccia 2021; Bonow 2015 (Task Force 5); AHA/ACC Scientific Statement 2025 |
+| Coartazione Aortica | Cardiopolmonare | moderate | Van Hare 2015 (Task Force 4); Shibbani 2024; Meijs 2022 |
+| Valvola Aortica Bicuspide | Cardiopolmonare | **low-moderate** | Braverman 2015 (Task Force 7); Pelliccia 2021 |
+| Tetralogia di Fallot Riparata | Cardiopolmonare | moderate | Stout 2019 (AHA/ACC); Pelliccia 2021; Schuermans 2023 (revisione sistematica/meta-analisi) |
+| Trasposizione dei Grossi Vasi | Cardiopolmonare | **low-moderate** | Budts 2020 (EAPC/ESC/AEPC); Pelliccia 2021; Westhoff-Bleck 2013 |
+
+Note oneste: il ricercatore sulla mitrale ha trattato insieme stenosi e insufficienza in un'unica ricerca; sono state inserite come due voci distinte nel database per coerenza con la convenzione già in uso (una voce per diagnosi), condividendo però in buona parte le stesse fonti primarie (van Buuren 2021, Pelliccia 2021). La **Valvola Aortica Bicuspide** ha codice ICD-10 marcato come non verificato (`icd10_verified = false`): si usa l'approssimazione Q23.8 (altre malformazioni congenite delle valvole aortica e mitrale), non esiste un codice dedicato univoco per la bicuspidia. Per la **Cardiomiopatia Dilatativa** l'agente ricercatore ha segnalato che i cutoff esatti di frazione di eiezione per la restrizione sportiva (35-40%) andrebbero verificati sulla fonte primaria ESC 2020 prima di essere citati come valori precisi in un contesto clinico reale — qui sono riportati come intervallo di riferimento della letteratura, non come soglia numerica certificata. Per la **Valvola Aortica Bicuspide** l'agente ha segnalato di non essere riuscito a verificare direttamente la sezione 5.3.4 delle linee guida ESC 2020 (citata da fonti secondarie), e ha preferito basarsi sulle soglie verificabili del Task Force 7 AHA/ACC 2015 (Braverman); i millimetri soglia riportati (40/42/45 mm) vanno quindi considerati come riferimento AHA/ACC, con la nota che ESC può avere criteri leggermente diversi non verificati qui. Per la **Trasposizione dei Grossi Vasi** la stratificazione del rischio non è standardizzata per singola tecnica chirurgica (switch atriale storico vs. switch arteriale moderno), ma dipende da funzione ventricolare/aritmie/pressione polmonare individuali — è stato scelto di descrivere entrambe le tecniche nello stesso campo `pathophysiology` per completezza, segnalando che i red flags differiscono sostanzialmente tra le due.
+
+**Stato attuale: 615 condizioni totali** (604 + 11 nuove del batch 76). **Mancano 185 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.
+
+---
+
+## Batch 77 (condizioni 661-671)
+
+Metodologia identica ai batch precedenti: controllo duplicati via query SQL su `knowledge_base` (due round estesi, con pattern ILIKE su nomi italiani/inglesi/sinonimi — questo controllo ha escluso in partenza diversi candidati già presenti: Bronchiectasie, Deficit di alfa-1 antitripsina, Ipertensione polmonare generica, ILD/IPF, Sarcoidosi, OSAS, Asma, BPCO, Fibrosi Cistica, Paralisi diaframmatica, Long COVID, Sindrome di Ondine), ricerca parallela via agenti con brief di 18 punti, decisione finale di inclusione o rigetto, inserimento in `knowledge_base` e tagging in `cardiopulmonary_condition_tags` (sistema 'respiratory' per tutte, tema respiratorio/polmonare).
+
+**11 candidati valutati, 11 inclusi, nessuno scartato.**
+
+### Condizioni incluse
+
+| Condizione | Sistema | Evidenza | Fonti principali |
+|---|---|---|---|
+| Pneumotorace Spontaneo | Cardiopolmonare | low-moderate | BTS Guideline for pleural disease 2023; ERS/EACTS/ESTS 2024 |
+| Versamento Pleurico Non Maligno | Cardiopolmonare | low-moderate | Zunzunwala & Jaiswal 2024 (Cureus); Elkins 2025 (J. of Physiotherapy); BTS 2023 |
+| Discinesia Ciliare Primaria | Cardiopolmonare | low | Schofield et al. (ACPRC); Krämer et al. 2025 (Pneumologie); Qian et al. 2024 (revisione sistematica) |
+| Ipertensione Polmonare Tromboembolica Cronica (CTEPH) | Cardiopolmonare | **moderate** | Humbert 2022 (ESC/ERS Guidelines); Zhao 2021 (meta-analisi) |
+| Sindrome da Distress Respiratorio Acuto — Riabilitazione Post-Acuta | Cardiopolmonare | **moderate** | Renner et al. 2023 (Critical Care, linea guida multidisciplinare PICS) |
+| Bronchiolite Obliterante dell'Adulto (BOS) | Cardiopolmonare | **moderate** | Bery 2024 (Transplantation); Glanville 2022 (ERJ Open Research) |
+| Polmonite da Ipersensibilità | Cardiopolmonare | low-moderate | Raghu 2020 (ATS/JRS/ALAT Guideline); Holland 2021 (Cochrane) |
+| Disfunzione delle Corde Vocali da Esercizio (VCD/EILO) | Cardiopolmonare | **moderate** | Rodríguez-Chiaradía 2024/2025; Halvorsen 2017 (ERS/ELS statement) |
+| Sindrome da Ipoventilazione da Obesità (OHS) | Cardiopolmonare | low-moderate | Mokhlesi 2019 (ATS Guideline); Mandal 2018 (trial NERO, Thorax) |
+| Cifoscoliosi con Malattia Polmonare Restrittiva | Cardiopolmonare | moderate | Fuschillo 2015 (Respiratory Care) |
+| Proteinosi Alveolare Polmonare (PAP) | Cardiopolmonare | low | Pereira & Rangwala 2020 (case report); Trapnell 2020 (NEJM, trial IMPALA) |
+
+Note oneste: questo batch include tre voci con il codice ICD-10 marcato come non verificato o problematico: la **Disfunzione delle Corde Vocali da Esercizio** non ha un codice ICD-10-CM dedicato (si usa l'approssimazione J38.5, spasmo laringeo, non ufficialmente validata per questa entità — `icd10_verified = false`); la **Cifoscoliosi con Malattia Polmonare Restrittiva** usa un codice eziologico (M41.9, scoliosi) in assenza di un codice dedicato alla componente respiratoria restrittiva, gestibile solo con codifica combinata. La differenziazione dalla voce "Ipertensione polmonare" generica già presente (id 487) è stata valutata con attenzione per la **CTEPH**: è stata inclusa come voce separata perché ha un codice ICD-10 dedicato (I27.24), un percorso diagnostico specifico (scintigrafia V/Q + angio-TC, assente nelle altre forme) e un management potenzialmente curativo (endarterectomia chirurgica, angioplastica con balloon) non presente nella forma generica. La **Proteinosi Alveolare Polmonare** ha l'evidenza più debole del batch: un solo case report (N=1) specifico sulla riabilitazione, con i contenuti di esercizio prevalentemente estrapolati da linee guida generiche per malattie polmonari interstiziali — incluso comunque per il valore clinico-educativo su una condizione ultra-rara che un fisioterapista potrebbe incontrare raramente ma deve saper gestire in sicurezza (specialmente il rischio di infezioni opportunistiche). La **Sindrome da Distress Respiratorio Acuto** è stata trattata specificamente nella sua fase di riabilitazione post-acuta/post-terapia intensiva (non la fase acuta in rianimazione, che non è di competenza fisioterapica ambulatoriale), con enfasi sulla sindrome da post-terapia intensiva (PICS) e sulla debolezza acquisita in ICU.
+
+**Stato attuale: 626 condizioni totali** (615 + 11 nuove del batch 77). **Mancano 174 per arrivare a 800.**
+
+Ritmo onesto: a questo passo (poche condizioni realmente ricercate e verificate per volta) servono molte altre sessioni di lavoro per arrivare a 800 mantenendo lo stesso standard di qualità — è un lavoro che continua batch dopo batch, non un'operazione singola.

@@ -128,7 +128,7 @@ export async function GET(request: Request) {
       idChunks.map((ids) =>
         adminSupabase
           .from('exercise_assets')
-          .select('exercise_id, asset_type, storage_bucket, storage_key')
+          .select('exercise_id, asset_type, variant, is_default, storage_bucket, storage_key')
           .in('exercise_id', ids)
       )
     );
@@ -139,23 +139,49 @@ export async function GET(request: Request) {
     }
     const assets = assetResults.flatMap((r) => r.data || []);
 
+    // Da quando esiste anche il video verticale (variant 'vertical' / 'vertical-female',
+    // aggiunto per il mobile, sempre is_default:false), un esercizio può avere PIÙ di un
+    // asset_type:'video'. Si sceglie quindi, per ciascun esercizio, un solo video
+    // "orizzontale" (quello con is_default:true, escludendo le varianti verticali — comportamento
+    // identico a prima) e separatamente, se presente, un solo video "verticale" per il mobile.
+    const videoDefaultKeyByExercise = new Map<string, { bucket: string; key: string }>();
+    const videoVerticalKeyByExercise = new Map<string, { bucket: string; key: string }>();
+    const imageStartKeyByExercise = new Map<string, { bucket: string; key: string }>();
+    const imageEndKeyByExercise = new Map<string, { bucket: string; key: string }>();
+    for (const asset of assets || []) {
+      const ref = { bucket: asset.storage_bucket, key: asset.storage_key };
+      const isVertical = asset.variant === 'vertical' || asset.variant === 'vertical-female';
+      if (asset.asset_type === 'video' && isVertical) {
+        // Se per errore ce ne fossero due (es. maschile+femminile), si tiene il primo trovato.
+        if (!videoVerticalKeyByExercise.has(asset.exercise_id)) videoVerticalKeyByExercise.set(asset.exercise_id, ref);
+      } else if (asset.asset_type === 'video' && asset.is_default) {
+        videoDefaultKeyByExercise.set(asset.exercise_id, ref);
+      } else if (asset.asset_type === 'image_start' && (asset.is_default || !imageStartKeyByExercise.has(asset.exercise_id))) {
+        imageStartKeyByExercise.set(asset.exercise_id, ref);
+      } else if (asset.asset_type === 'image_end' && (asset.is_default || !imageEndKeyByExercise.has(asset.exercise_id))) {
+        imageEndKeyByExercise.set(asset.exercise_id, ref);
+      }
+    }
+
     // Un signed url per ogni oggetto nel bucket privato "exercise-media" — necessario perche'
     // il bucket non e' pubblico, quindi non basta un getPublicUrl. Con ~3600 asset generarli uno
     // alla volta sarebbe lentissimo: si usa createSignedUrls (plurale, batch) a blocchi,
-    // raggruppati per bucket ed eseguiti in parallelo.
-    const keyToAssetInfo = new Map<string, { exercise_id: string; asset_type: string }>();
+    // raggruppati per bucket ed eseguiti in parallelo. Si firmano solo le chiavi scelte sopra
+    // (un video orizzontale + un video verticale al massimo per esercizio), non tutti gli asset.
+    const chosenRefs = [
+      ...videoDefaultKeyByExercise.values(),
+      ...videoVerticalKeyByExercise.values(),
+      ...imageStartKeyByExercise.values(),
+      ...imageEndKeyByExercise.values(),
+    ];
     const keysByBucket = new Map<string, string[]>();
-    for (const asset of assets || []) {
-      keyToAssetInfo.set(`${asset.storage_bucket}::${asset.storage_key}`, {
-        exercise_id: asset.exercise_id,
-        asset_type: asset.asset_type,
-      });
-      const arr = keysByBucket.get(asset.storage_bucket) || [];
-      arr.push(asset.storage_key);
-      keysByBucket.set(asset.storage_bucket, arr);
+    for (const ref of chosenRefs) {
+      const arr = keysByBucket.get(ref.bucket) || [];
+      arr.push(ref.key);
+      keysByBucket.set(ref.bucket, arr);
     }
 
-    const signedByKey = new Map<string, string>();
+    const signedByBucketKey = new Map<string, string>();
     await Promise.all(
       Array.from(keysByBucket.entries()).flatMap(([bucket, keys]) =>
         chunk(keys, SIGNED_URL_CHUNK_SIZE).map(async (keyChunk) => {
@@ -168,15 +194,16 @@ export async function GET(request: Request) {
           }
           for (const item of signedList) {
             if (item.signedUrl && item.path) {
-              const info = keyToAssetInfo.get(`${bucket}::${item.path}`);
-              if (info) {
-                signedByKey.set(`${info.exercise_id}:${info.asset_type}`, item.signedUrl);
-              }
+              signedByBucketKey.set(`${bucket}::${item.path}`, item.signedUrl);
             }
           }
         })
       )
     );
+    function signedUrlFor(ref: { bucket: string; key: string } | undefined): string | null {
+      if (!ref) return null;
+      return signedByBucketKey.get(`${ref.bucket}::${ref.key}`) || null;
+    }
 
     // Traduzione lazy e cache-ata (invariata al secondo giro): prima richiesta reale in una
     // lingua diversa dall'inglese chiama OpenAI una sola volta per l'intero lotto mancante e
@@ -209,9 +236,14 @@ export async function GET(request: Request) {
         body_region: e.body_region,
         difficulty: e.difficulty,
         tags: e.tags || [],
-        video_url: signedByKey.get(`${e.id}:video`) || null,
-        image_start_url: signedByKey.get(`${e.id}:image_start`) || null,
-        image_end_url: signedByKey.get(`${e.id}:image_end`) || null,
+        video_url: signedUrlFor(videoDefaultKeyByExercise.get(e.id)),
+        // Video in formato verticale (9:16), pensato per lo schermo del telefono: null se per
+        // questo esercizio non è ancora stato caricato (es. non faceva parte del lotto "VERTICAL
+        // VIDEOS"). Il sito mostra questo se presente e lo schermo è stretto, altrimenti il video
+        // normale qui sopra.
+        video_vertical_url: signedUrlFor(videoVerticalKeyByExercise.get(e.id)),
+        image_start_url: signedUrlFor(imageStartKeyByExercise.get(e.id)),
+        image_end_url: signedUrlFor(imageEndKeyByExercise.get(e.id)),
       };
     });
 

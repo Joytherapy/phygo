@@ -244,16 +244,22 @@ export default function Navbar() {
               </button>
               <AnimatePresence>
                 {libraryOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-72"
-                  >
-                    <div className="glass-strong rounded-xl2 shadow-soft p-2">
-                      <LibraryNavMenu variant="desktop" />
-                    </div>
-                  </motion.div>
+                  // Centering (left-1/2 -translate-x-1/2) must live on a plain div, not on
+                  // the motion.div: framer-motion writes its own `transform` inline style for
+                  // the y animation, which clobbers Tailwind's translate-x entirely and left
+                  // this menu offset to the right by half its width. The motion.div below only
+                  // animates opacity/y; it is not what centers the panel.
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-72">
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                    >
+                      <div className="glass-strong rounded-xl2 shadow-soft p-2">
+                        <LibraryNavMenu variant="desktop" />
+                      </div>
+                    </motion.div>
+                  </div>
                 )}
               </AnimatePresence>
             </div>
@@ -297,25 +303,29 @@ export default function Navbar() {
               </button>
               <AnimatePresence>
                 {worldOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-64"
-                  >
-                    <div className="glass-strong rounded-xl2 shadow-soft p-2">
-                      {worldLinkHrefs.map((l) => (
-                        <a
-                          key={l.href}
-                          href={l.href}
-                          className="block rounded-xl px-3 py-2.5 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
-                        >
-                          <p className="text-sm font-semibold text-ink dark:text-white">{ui.worldLinks[l.key].label}</p>
-                          <p className="text-xs text-ink/60 dark:text-white/50 mt-0.5">{ui.worldLinks[l.key].description}</p>
-                        </a>
-                      ))}
-                    </div>
-                  </motion.div>
+                  // Same centering fix as the Libreria menu above: keep left-1/2
+                  // -translate-x-1/2 off the motion.div so framer-motion's own
+                  // transform (for the y animation) doesn't override it.
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-64">
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                    >
+                      <div className="glass-strong rounded-xl2 shadow-soft p-2">
+                        {worldLinkHrefs.map((l) => (
+                          <a
+                            key={l.href}
+                            href={l.href}
+                            className="block rounded-xl px-3 py-2.5 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+                          >
+                            <p className="text-sm font-semibold text-ink dark:text-white">{ui.worldLinks[l.key].label}</p>
+                            <p className="text-xs text-ink/60 dark:text-white/50 mt-0.5">{ui.worldLinks[l.key].description}</p>
+                          </a>
+                        ))}
+                      </div>
+                    </motion.div>
+                  </div>
                 )}
               </AnimatePresence>
             </div>

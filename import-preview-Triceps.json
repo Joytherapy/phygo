@@ -1,0 +1,41 @@
+[
+  {
+    "display": "Kettlebell Standing Tricep Extension",
+    "externalId": "kettlebell_standing_tricep_extension",
+    "slug": "kettlebell-standing-tricep-extension",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "triceps",
+    "primary_muscle": "Triceps",
+    "equipment": [
+      "Kettlebells"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Plate Curl to Overhead Press to Tricep Extension",
+    "externalId": "plate_curl_to_overhead_press_to_tricep_extension",
+    "slug": "plate-curl-to-overhead-press-to-tricep-extension",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "shoulder",
+    "primary_muscle": "Shoulders",
+    "equipment": [
+      "Plate"
+    ],
+    "category": "Free Weights"
+  },
+  {
+    "display": "Tricep Rope Extension on Crossover Machine",
+    "externalId": "tricep_rope_extension_on_crossover_machine",
+    "slug": "tricep-rope-extension-on-crossover-machine",
+    "hasMaleVideo": true,
+    "hasFemaleVideo": true,
+    "body_region": "triceps",
+    "primary_muscle": "Triceps",
+    "equipment": [
+      "Machine"
+    ],
+    "category": "Resistance"
+  }
+]

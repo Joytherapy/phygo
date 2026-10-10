@@ -37,12 +37,33 @@ const SYSTEM_TABLES: { key: string; table: string }[] = [
   { key: 'oncology', table: 'oncology_condition_tags' },
 ];
 
+// Supabase limita ogni richiesta a 1000 righe (o meno, a seconda della
+// configurazione del progetto): leggo a "pagine" per essere sicuro di avere
+// SEMPRE tutte le righe di una tabella, anche quando crescono nel tempo
+// (stesso bug/fix già applicato in scripts/import-vertical-videos.js).
+async function fetchAllRows<T>(table: string, select: string, orderColumn: string = 'id'): Promise<T[]> {
+  const PAGE = 500;
+  let from = 0;
+  const all: T[] = [];
+  while (true) {
+    const { data, error } = await adminSupabase.from(table).select(select).order(orderColumn, { ascending: true }).range(from, from + PAGE - 1);
+    if (error) throw error;
+    all.push(...((data ?? []) as T[]));
+    if (!data || data.length < PAGE) break;
+    from += PAGE;
+  }
+  return all;
+}
+
 export async function GET(req: Request) {
   try {
     const lang = parseLang(new URL(req.url).searchParams.get('lang'));
 
     const tagResults = await Promise.all(
-      SYSTEM_TABLES.map(({ table }) => adminSupabase.from(table).select('condition_id'))
+      SYSTEM_TABLES.map(({ table }) => fetchAllRows<{ condition_id: number }>(table, 'condition_id', 'condition_id').then(
+        (data) => ({ data, error: null as { message: string } | null }),
+        (error) => ({ data: null, error })
+      ))
     );
 
     const tagError = tagResults.find((r) => r.error)?.error;
@@ -67,15 +88,12 @@ export async function GET(req: Request) {
     const names =
       lang === 'it'
         ? await (async () => {
-            const { data, error } = await adminSupabase
-              .from('knowledge_base')
-              .select('id, condition_name')
-              .order('condition_name', { ascending: true });
-            if (error) {
-              console.error('conditions-library list error (names it):', error.message);
+            try {
+              return await fetchAllRows<{ id: number; condition_name: string }>('knowledge_base', 'id, condition_name');
+            } catch (error: any) {
+              console.error('conditions-library list error (names it):', error?.message ?? error);
               return [];
             }
-            return data ?? [];
           })()
         : await getTranslatedConditionNames(lang);
 

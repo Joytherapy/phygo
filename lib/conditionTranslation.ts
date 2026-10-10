@@ -21,6 +21,25 @@ const adminSupabase = createClient(
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Supabase limita ogni richiesta a 1000 righe (o meno, a seconda della
+// configurazione del progetto): leggo a "pagine" per essere sicuro di avere
+// SEMPRE tutte le righe di una tabella, anche quando crescono nel tempo.
+async function fetchAllRows<T>(table: string, select: string, eq?: [string, string]): Promise<T[]> {
+  const PAGE = 500;
+  let from = 0;
+  const all: T[] = [];
+  while (true) {
+    let q = adminSupabase.from(table).select(select).order('id', { ascending: true }).range(from, from + PAGE - 1);
+    if (eq) q = q.eq(eq[0], eq[1]);
+    const { data, error } = await q;
+    if (error) throw error;
+    all.push(...((data ?? []) as T[]));
+    if (!data || data.length < PAGE) break;
+    from += PAGE;
+  }
+  return all;
+}
+
 export type SupportedLang = 'en' | 'es' | 'fr';
 
 const LANG_NAMES: Record<SupportedLang, string> = {
@@ -226,20 +245,19 @@ export async function getTranslatedCondition(
 export async function getTranslatedConditionNames(
   lang: SupportedLang
 ): Promise<{ id: number; condition_name: string }[]> {
-  const { data: baseRows, error } = await adminSupabase
-    .from('knowledge_base')
-    .select('id, condition_name')
-    .order('condition_name', { ascending: true });
-
-  if (error || !baseRows) {
+  let baseRows: { id: number; condition_name: string }[];
+  try {
+    baseRows = await fetchAllRows('knowledge_base', 'id, condition_name');
+  } catch (error) {
     console.error('Errore caricamento nomi condizioni:', error);
     return [];
   }
 
-  const { data: cachedRows } = await adminSupabase
-    .from('condition_translations')
-    .select('condition_id, condition_name')
-    .eq('lang', lang);
+  const cachedRows = await fetchAllRows<{ condition_id: number; condition_name: string }>(
+    'condition_translations',
+    'condition_id, condition_name',
+    ['lang', lang]
+  ).catch(() => []);
 
   const cacheMap = new Map<number, string>();
   for (const c of cachedRows ?? []) {

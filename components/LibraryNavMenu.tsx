@@ -86,7 +86,12 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
   const anyMatch = LIBRARY_CATEGORIES.some((cat) => cat.keys.some(matches))
 
   return (
-    <div className={variant === 'desktop' ? 'w-72' : 'w-full'}>
+    // Width is set once, by the parent panel in Navbar.tsx (desktop) or by
+    // the mobile menu container — not here too. The old "w-72" on desktop
+    // duplicated the parent's own w-72 while ignoring its p-2 padding, so
+    // this box was 16px wider than the space inside the panel's border and
+    // poked out past the right edge. w-full fills whatever the parent gives it.
+    <div className="w-full">
       <div className="relative mb-2">
         <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30 pointer-events-none" />
         <input

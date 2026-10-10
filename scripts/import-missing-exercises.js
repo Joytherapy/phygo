@@ -79,9 +79,16 @@ if (!folderArg) {
   process.exit(1);
 }
 
-const SEARCH_ROOT = path.join(os.homedir(), 'Downloads', folderArg);
+// Preferiamo sempre la copia appena scaricata/estratta da Dropbox dentro
+// "HD 720p LOWEST FILE SIZE/<categoria>", perche' le vecchie cartelle dirette
+// in Downloads/<categoria> possono avere file "archiviati" da macOS su
+// iCloud (placeholder non scaricati: stessa causa del vecchio bug dei video
+// vuoti), e leggerli puo' fallire o restituire un file vuoto.
+const FRESH_ROOT = path.join(os.homedir(), 'Downloads', 'HD 720p LOWEST FILE SIZE', folderArg);
+const LEGACY_ROOT = path.join(os.homedir(), 'Downloads', folderArg);
+const SEARCH_ROOT = fs.existsSync(FRESH_ROOT) ? FRESH_ROOT : LEGACY_ROOT;
 if (!fs.existsSync(SEARCH_ROOT)) {
-  console.error(`Non trovo la cartella: ${SEARCH_ROOT}`);
+  console.error(`Non trovo la cartella: ${FRESH_ROOT} (ne' ${LEGACY_ROOT})`);
   process.exit(1);
 }
 

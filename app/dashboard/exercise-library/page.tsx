@@ -93,7 +93,7 @@ function styleFor(category: string | null) {
 function CardSkeleton() {
   return (
     <div className="rounded-[24px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] overflow-hidden animate-pulse">
-      <div className="h-40 bg-ink/5 dark:bg-white/5" />
+      <div className="h-52 bg-ink/5 dark:bg-white/5" />
       <div className="p-5 space-y-2">
         <div className="h-3 w-16 rounded-full bg-ink/10 dark:bg-white/10" />
         <div className="h-4 w-3/4 rounded-full bg-ink/10 dark:bg-white/10" />
@@ -516,9 +516,18 @@ export default function ExerciseLibraryPage() {
                         {isSelected ? <CheckCircle2 size={15} /> : <span className="h-3.5 w-3.5 rounded-full border-2 border-current" />}
                       </span>
                     )}
-                    <div className="relative h-40 overflow-hidden bg-ink/5 dark:bg-white/5">
+                    {/* Earlier attempt (object-contain + padding + mist mat + mix-blend-multiply)
+                        traded the cropped-head problem for a worse one: most source renders are
+                        tall/narrow figures inside a wide card, so "contain" shrank them down with
+                        big empty margins left and right — a visibly separate grey box with a tiny
+                        character, not the premium "mat" look it was going for. Reverted to filling
+                        the frame (object-cover, bigger box) so figures read large with no visible
+                        inset box, and the one real fix that's worth keeping — object-top — biases
+                        the crop to protect the head/upper body (losing some foot room instead,
+                        which reads far less badly) rather than center-cropping blind. */}
+                    <div className="relative h-52 overflow-hidden bg-white dark:bg-white/5">
                       <div
-                        className="pointer-events-none absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-40 blur-2xl transition-transform duration-500 group-hover:scale-125 z-0"
+                        className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-40 dark:opacity-30 blur-2xl transition-transform duration-500 group-hover:scale-125 z-0"
                         style={{ background: style.gradient }}
                       />
                       {ex.image_start_url ? (
@@ -526,7 +535,7 @@ export default function ExerciseLibraryPage() {
                         <img
                           src={ex.image_start_url}
                           alt={ex.name}
-                          className="relative z-[1] w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                          className="relative z-[1] w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
                         />
                       ) : (
                         <div className="relative z-[1] h-full flex items-center justify-center">
@@ -639,14 +648,24 @@ export default function ExerciseLibraryPage() {
                   className="w-full max-h-[40vh] rounded-t-[28px] bg-black"
                 />
               ) : (openExercise.image_start_url || openExercise.image_end_url) && (
-                <div className="grid grid-cols-2 gap-0.5 rounded-t-[28px] overflow-hidden">
+                // Same object-top crop bias as the grid cards above, so the detail view doesn't
+                // reintroduce cropped heads either.
+                <div className="grid grid-cols-2 gap-0.5 rounded-t-[28px] overflow-hidden bg-white dark:bg-white/5">
                   {openExercise.image_start_url && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={openExercise.image_start_url} alt="Posizione iniziale" className="w-full h-52 object-cover" />
+                    <img
+                      src={openExercise.image_start_url}
+                      alt="Posizione iniziale"
+                      className="w-full h-52 object-cover object-top"
+                    />
                   )}
                   {openExercise.image_end_url && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={openExercise.image_end_url} alt="Posizione finale" className="w-full h-52 object-cover" />
+                    <img
+                      src={openExercise.image_end_url}
+                      alt="Posizione finale"
+                      className="w-full h-52 object-cover object-top"
+                    />
                   )}
                 </div>
               )}
