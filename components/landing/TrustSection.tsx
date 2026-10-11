@@ -19,7 +19,7 @@ export default function TrustSection({ trust }: { trust: LandingDict["trust"] })
         <div className="relative">
           <SectionHeader id="trust-title" index="06" eyebrow={trust.eyebrow} title={trust.title} intro={trust.intro} tone="inverse" />
 
-          <ul className="mt-14 grid gap-px overflow-hidden rounded-[22px] bg-white/[0.08] sm:grid-cols-2">
+          <ul className="mt-14 grid grid-cols-1 gap-px overflow-hidden rounded-[22px] bg-white/[0.08] sm:grid-cols-2">
             {trust.items.map((item, i) => {
               const Icon = ICONS[i] ?? ShieldCheck;
               return (

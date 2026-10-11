@@ -212,7 +212,10 @@ async function loadLandingData(lang: Lang): Promise<LandingData> {
     sampleNames: [],
   };
   const supabase = getClient();
-  if (!supabase) return empty;
+  if (!supabase) {
+    console.warn('[landing] NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY missing: showing the page without library figures.');
+    return empty;
+  }
 
   try {
     const [totalRes, coverageCounts, phasesRes, exercisesRes, featured, story, libraryExercise, sampleNames] =
@@ -231,6 +234,9 @@ async function loadLandingData(lang: Lang): Promise<LandingData> {
         getLibraryExercise(supabase, lang).catch(() => null),
         getSampleNames(supabase, lang).catch(() => []),
       ]);
+
+    // Say why figures are missing (wrong key, network, RLS) instead of failing silently; the page still renders.
+    if (totalRes.error) console.warn('[landing] Library figures unavailable:', totalRes.error.message);
 
     const coverage: LandingData['coverage'] = {};
     COVERAGE_KEYS.forEach((k, i) => {

@@ -41,7 +41,7 @@ export default function AudiencesSection({
             <span className="h-px flex-1 bg-gradient-to-l from-transparent via-ink/15 to-ink/15 dark:via-white/15 dark:to-white/15" />
           </div>
 
-          <div className="lp-ticks grid overflow-hidden rounded-[28px] border border-black/[0.08] bg-white shadow-soft dark:border-white/[0.09] dark:bg-[#111318] lg:grid-cols-[1fr_1.15fr_1fr]">
+          <div className="lp-ticks grid grid-cols-1 overflow-hidden rounded-[28px] border border-black/[0.08] bg-white shadow-soft dark:border-white/[0.09] dark:bg-[#111318] lg:grid-cols-[1fr_1.15fr_1fr]">
             {audiences.paths.map((path, i) => {
               const Icon = ICONS[i];
               const featured = i === 1;

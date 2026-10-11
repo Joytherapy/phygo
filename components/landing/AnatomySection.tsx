@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { Brain, PersonStanding } from "lucide-react";
 import type { LandingDict } from "@/lib/i18n/landingStrings";
+import BrainVideo from "./BrainVideo";
 import { MockCaption, Reveal, SectionHeader } from "./ui";
 
 // BodyMap / BrainMap live at /dashboard/body-map and /dashboard/brain-map
@@ -22,7 +22,7 @@ export default function AnatomySection({ anatomy }: { anatomy: LandingDict["anat
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHeader id="anatomy-title" index="04" eyebrow={anatomy.eyebrow} title={anatomy.title} intro={anatomy.intro} />
 
-        <div className="mt-14 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <Reveal className="lp-ticks flex flex-col rounded-[24px] border border-black/[0.07] bg-white p-6 shadow-soft dark:border-white/[0.08] dark:bg-[#111318] sm:p-8">
             <div className="flex items-center gap-3">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-electric to-emerald text-white">
@@ -32,7 +32,7 @@ export default function AnatomySection({ anatomy }: { anatomy: LandingDict["anat
             </div>
             <p className="mt-3 text-[14px] leading-relaxed text-ink/60 dark:text-white/55">{anatomy.body.text}</p>
 
-            <div className="lp-dots mt-6 flex flex-1 items-center justify-center gap-6 rounded-2xl border border-black/[0.05] p-6 dark:border-white/[0.06]">
+            <div className="lp-dots mt-6 flex flex-1 flex-col items-center justify-center gap-6 rounded-2xl border border-black/[0.05] p-6 dark:border-white/[0.06] min-[440px]:flex-row">
               <svg viewBox="0 0 200 300" className="h-72 w-auto shrink-0" role="img" aria-label={anatomy.body.svgLabel}>
                 <defs>
                   <linearGradient id="lp-body-grad" x1="0" y1="0" x2="0" y2="1">
@@ -79,17 +79,43 @@ export default function AnatomySection({ anatomy }: { anatomy: LandingDict["anat
               <h3 className="font-display text-xl font-semibold">{anatomy.brain.title}</h3>
             </div>
             <p className="mt-3 text-[14px] leading-relaxed text-white/60">{anatomy.brain.text}</p>
-            <div className="mt-6 overflow-hidden rounded-2xl ring-1 ring-white/10">
-              <Image
-                src="/images/brain-lateral-view.png"
-                alt={anatomy.brain.alt}
-                width={1672}
-                height={941}
-                sizes="(min-width: 1024px) 640px, 100vw"
-                className="h-auto w-full"
-              />
-            </div>
-            <p className="mt-3 text-center font-mono text-[10.5px] tracking-wide text-white/55">{anatomy.brain.caption}</p>
+            <figure className="mt-6">
+              <div className="overflow-hidden rounded-2xl ring-1 ring-white/10">
+                <BrainVideo label={anatomy.brain.alt} />
+              </div>
+              <figcaption className="mt-3 text-center font-mono text-[10.5px] tracking-wide text-white/55">
+                {anatomy.brain.caption}
+                <span className="mt-1 block text-[10px] text-white/45">
+                  {anatomy.brain.modelCredit} ·{" "}
+                  <a
+                    href="https://sketchfab.com/3d-models/human-brain-c9c9d4d671b94345952d012cc2ea7a24"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline decoration-white/30 underline-offset-2 hover:text-white/80"
+                  >
+                    “Human Brain”
+                  </a>{" "}
+                  ·{" "}
+                  <a
+                    href="https://sketchfab.com/agher08"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline decoration-white/30 underline-offset-2 hover:text-white/80"
+                  >
+                    agher08
+                  </a>{" "}
+                  ·{" "}
+                  <a
+                    href="https://creativecommons.org/licenses/by/4.0/"
+                    target="_blank"
+                    rel="noopener noreferrer license"
+                    className="underline decoration-white/30 underline-offset-2 hover:text-white/80"
+                  >
+                    CC BY 4.0
+                  </a>
+                </span>
+              </figcaption>
+            </figure>
           </Reveal>
         </div>
 

@@ -75,15 +75,15 @@ export default function LibraryShowcase({
         </div>
       )}
 
-      <div className="mx-auto mt-14 grid max-w-7xl items-start gap-6 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr]">
+      <div className="mx-auto mt-14 grid grid-cols-1 max-w-7xl items-start gap-6 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr]">
         <Reveal className="lp-ticks rounded-[24px] border border-black/[0.07] bg-white p-6 shadow-soft dark:border-white/[0.08] dark:bg-[#111318] sm:p-8">
           {total ? (
             <div className="border-b border-black/[0.06] pb-6 dark:border-white/[0.07]">
-              <div className="flex items-end gap-4">
+              <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
                 <p className="font-display text-[3.6rem] font-semibold leading-[0.85] tracking-[-0.05em] text-ink tabular-nums dark:text-white sm:text-[4.4rem]">
                   {formatNumber(lang, total)}
                 </p>
-                <p className="max-w-[12rem] pb-1 text-[13px] leading-snug text-ink/60 dark:text-white/55">{library.countLabel}</p>
+                <p className="min-w-0 max-w-[12rem] pb-1 text-[13px] leading-snug text-ink/60 dark:text-white/55">{library.countLabel}</p>
               </div>
               {total < LIBRARY_GOAL && <Growth lang={lang} library={library} total={total} />}
             </div>
@@ -138,7 +138,7 @@ export default function LibraryShowcase({
         </Reveal>
       </div>
 
-      <Reveal className="mx-auto mt-10 grid max-w-7xl gap-6 px-4 sm:px-6 lg:grid-cols-[auto_1fr] lg:items-center">
+      <Reveal className="mx-auto mt-10 grid grid-cols-1 max-w-7xl gap-6 px-4 sm:px-6 lg:grid-cols-[auto_1fr] lg:items-center">
         <PrimaryButton href={libraryHref}>{library.cta}</PrimaryButton>
         <div className="space-y-1.5">
           <p className="flex items-center gap-2 text-sm font-medium text-ink/75 dark:text-white/70">

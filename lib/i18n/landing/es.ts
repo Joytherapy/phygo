@@ -291,9 +291,10 @@ export const es: LandingDict = {
     },
     brain: {
       title: 'Mapa cerebral',
-      text: 'Neuroanatomía en 3D: áreas cerebrales y nervios periféricos vinculados a las condiciones neurológicas que tratas, con vistas de referencia como esta.',
-      alt: 'Referencia de neuroanatomía de PHYGO: vista lateral del cerebro con los lóbulos, el cerebelo y el tronco encefálico, sus funciones y los síndromes por lesión',
-      caption: 'Vista de referencia del mapa cerebral de PHYGO (rótulos en inglés)',
+      text: 'Neuroanatomía en 3D: áreas cerebrales y nervios periféricos vinculados a las condiciones neurológicas que tratas.',
+      alt: 'Modelo 3D del cerebro humano en rotación, visto de lado: lóbulos cerebrales, cerebelo y tronco encefálico',
+      caption: 'El modelo 3D del cerebro que usa el mapa cerebral de PHYGO',
+      modelCredit: 'Modelo 3D',
     },
     systemsLabel: 'Y además, exploradores por sistema',
     systems: [

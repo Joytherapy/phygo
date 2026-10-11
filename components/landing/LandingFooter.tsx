@@ -27,7 +27,7 @@ export default function LandingFooter({
 
   return (
     <footer className="border-t border-black/[0.07] dark:border-white/[0.08]">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.2fr_1fr_1fr]">
+      <div className="mx-auto grid grid-cols-1 max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.2fr_1fr_1fr]">
         <div>
           <a href={home} className="inline-flex items-center gap-2.5 font-display text-[17px] font-bold tracking-tight text-ink dark:text-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}

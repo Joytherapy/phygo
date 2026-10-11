@@ -286,9 +286,10 @@ export const it: LandingDict = {
     },
     brain: {
       title: 'Mappa cerebrale',
-      text: 'Neuroanatomia in 3D: aree cerebrali e nervi periferici collegati alle condizioni neurologiche che tratti, con viste di riferimento come questa.',
-      alt: 'Riferimento di neuroanatomia di PHYGO: vista laterale del cervello con i lobi, il cervelletto e il tronco encefalico, le loro funzioni e le sindromi da lesione',
-      caption: 'Vista di riferimento dalla mappa cerebrale di PHYGO (etichette in inglese)',
+      text: 'Neuroanatomia in 3D: aree cerebrali e nervi periferici collegati alle condizioni neurologiche che tratti.',
+      alt: 'Modello 3D del cervello umano in rotazione, visto di lato: lobi cerebrali, cervelletto e tronco encefalico',
+      caption: 'Il modello 3D del cervello usato nella mappa cerebrale di PHYGO',
+      modelCredit: 'Modello 3D',
     },
     systemsLabel: 'E in più, esploratori per sistema',
     systems: [

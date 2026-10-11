@@ -178,7 +178,8 @@ export interface LandingDict {
     title: string;
     intro: string;
     body: TitleText & { regions: string[]; caption: string; svgLabel: string };
-    brain: TitleText & { alt: string; caption: string };
+    /** `alt` labels the rotating brain video; `modelCredit` prefixes the CC BY credit. */
+    brain: TitleText & { alt: string; caption: string; modelCredit: string };
     systemsLabel: string;
     systems: string[];
   };

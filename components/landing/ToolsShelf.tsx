@@ -14,7 +14,7 @@ export default function ToolsShelf({ tools }: { tools: LandingDict["tools"] }) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHeader id="tools-title" index="05" eyebrow={tools.eyebrow} title={tools.title} intro={tools.intro} />
 
-        <div className="mt-14 grid border-t border-black/[0.08] dark:border-white/[0.09] md:grid-cols-3">
+        <div className="mt-14 grid grid-cols-1 border-t border-black/[0.08] dark:border-white/[0.09] md:grid-cols-3">
           {tools.columns.map((col, i) => {
             const Icon = ICONS[i] ?? Library;
             return (

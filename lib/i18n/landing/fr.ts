@@ -293,9 +293,10 @@ export const fr: LandingDict = {
     },
     brain: {
       title: 'Carte du cerveau',
-      text: 'La neuroanatomie en 3D : aires cérébrales et nerfs périphériques reliés aux pathologies neurologiques que vous prenez en charge, avec des vues de référence comme celle-ci.',
-      alt: 'Référence de neuroanatomie PHYGO : vue latérale du cerveau avec les lobes, le cervelet et le tronc cérébral, leurs fonctions et les syndromes lésionnels',
-      caption: 'Vue de référence de la carte du cerveau PHYGO (légendes en anglais)',
+      text: 'La neuroanatomie en 3D : aires cérébrales et nerfs périphériques reliés aux pathologies neurologiques que vous prenez en charge.',
+      alt: 'Modèle 3D du cerveau humain en rotation, vu de profil : lobes cérébraux, cervelet et tronc cérébral',
+      caption: 'Le modèle 3D du cerveau utilisé dans la carte du cerveau PHYGO',
+      modelCredit: 'Modèle 3D',
     },
     systemsLabel: 'Et aussi, des explorateurs par système',
     systems: [

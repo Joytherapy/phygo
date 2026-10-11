@@ -135,7 +135,7 @@ export default function StoryTour(props: Props) {
                       {c.text}
                       {videoCalls && c.videoText ? ` ${c.videoText}` : ""}
                     </p>
-                    <dl className="mt-5 grid max-w-md gap-2 text-[13px] leading-snug">
+                    <dl className="mt-5 grid grid-cols-1 max-w-md gap-2 text-[13px] leading-snug">
                       <div className="flex gap-3">
                         <dt className="w-14 shrink-0 font-mono text-[10.5px] uppercase tracking-[0.1em] text-electric-dark dark:text-electric-light">
                           {story.roles.phygo}
@@ -245,7 +245,7 @@ function ChapterVisual({ index, story, evidenceLabel, highLabel, condition, libr
             ))}
           </div>
         </Card>
-        <div className={`grid gap-3 ${videoCalls ? "sm:grid-cols-2" : ""}`}>
+        <div className={`grid grid-cols-1 gap-3 ${videoCalls ? "sm:grid-cols-2" : ""}`}>
           <Card className="!p-3.5">
             <div className="flex items-center gap-2">
               <Smartphone size={14} className="text-emerald-700 dark:text-emerald-light" />
@@ -308,7 +308,7 @@ function ChapterVisual({ index, story, evidenceLabel, highLabel, condition, libr
             <span className="ml-0.5 inline-block h-3.5 w-[2px] translate-y-0.5 animate-caret bg-electric" />
           </p>
         </Card>
-        <div className="grid gap-3 sm:grid-cols-[1.1fr_1fr]">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1.1fr_1fr]">
           <Card className="!p-3">
             <ul className="space-y-2.5">
               {story.soap.map((text, i) => (
@@ -357,7 +357,7 @@ function ChapterVisual({ index, story, evidenceLabel, highLabel, condition, libr
             {condition?.name ?? story.reasoning[0].text}
           </p>
           {phases.length > 0 && (
-            <ol className="mt-3 grid gap-1.5 sm:grid-cols-3">
+            <ol className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-3">
               {phases.map((p, i) => (
                 <li
                   key={p}
@@ -397,7 +397,7 @@ function ChapterVisual({ index, story, evidenceLabel, highLabel, condition, libr
   if (index === 3) {
     const pdf = story.pdf;
     return (
-      <div className="grid gap-3 sm:grid-cols-[1fr_0.95fr]">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_0.95fr]">
         <div className="rounded-xl border border-black/10 bg-white p-4 shadow-lift dark:border-white/10 dark:bg-[#f4f5f7]">
           <div className="flex items-center justify-between border-b border-black/10 pb-2">
             <span className="font-display text-[12px] font-bold text-ink">PHYGO</span>
@@ -434,7 +434,7 @@ function ChapterVisual({ index, story, evidenceLabel, highLabel, condition, libr
 
   const r = story.record;
   return (
-    <div className="grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1.1fr_0.9fr]">
       <div className="space-y-3">
         <Card>
           <div className="flex items-center gap-2">

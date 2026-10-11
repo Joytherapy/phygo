@@ -285,9 +285,10 @@ export const en: LandingDict = {
     },
     brain: {
       title: 'Brain map',
-      text: 'Neuroanatomy in 3D: brain areas and peripheral nerves linked to the neurological conditions you treat, with reference views like this one.',
-      alt: 'PHYGO neuroanatomy reference: lateral view of the brain with the lobes, cerebellum and brainstem, their functions and lesion syndromes',
-      caption: 'Reference view from the PHYGO brain map',
+      text: 'Neuroanatomy in 3D: brain areas and peripheral nerves linked to the neurological conditions you treat.',
+      alt: 'Rotating 3D model of the human brain, shown from the side: cerebral lobes, cerebellum and brainstem',
+      caption: 'The 3D brain model used in the PHYGO brain map',
+      modelCredit: '3D model',
     },
     systemsLabel: 'Plus system explorers',
     systems: [

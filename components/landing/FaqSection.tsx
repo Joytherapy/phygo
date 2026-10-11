@@ -11,7 +11,7 @@ export default function FaqSection({ faq }: { faq: LandingDict["faq"] }) {
 
   return (
     <section id="faq" aria-labelledby="faq-title" className="relative scroll-mt-16 py-24 sm:py-32">
-      <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="mx-auto grid grid-cols-1 max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr]">
         <div className="lg:sticky lg:top-28 lg:self-start">
           <SectionHeader id="faq-title" index="08" eyebrow={faq.eyebrow} title={faq.title} />
         </div>

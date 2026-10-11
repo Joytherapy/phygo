@@ -27,7 +27,7 @@ export default function PricingSection({ lang, pricing }: { lang: AppLang; prici
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHeader id="pricing-title" index="07" eyebrow={pricing.eyebrow} title={pricing.title} intro={pricing.sub} />
 
-        <div className="mt-14 grid items-start gap-6 lg:grid-cols-[0.85fr_1.6fr]">
+        <div className="mt-14 grid grid-cols-1 items-start gap-6 lg:grid-cols-[0.85fr_1.6fr]">
           {/* Available today */}
           <Reveal className="relative flex h-full flex-col rounded-[24px] bg-ink p-7 text-white shadow-[0_24px_60px_rgba(11,13,18,0.28)] ring-1 ring-white/10 dark:bg-white dark:text-ink sm:p-9">
             <span className="inline-flex w-fit items-center gap-2 rounded-full bg-emerald/20 px-3 py-1 text-[11px] font-semibold text-emerald-light dark:bg-emerald/15 dark:text-emerald-700">
@@ -92,7 +92,7 @@ export default function PricingSection({ lang, pricing }: { lang: AppLang; prici
               </div>
             </div>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
               {PLANS.map((plan, i) => {
                 const tier = pricing.tiers[i];
                 const amount = annual ? plan.annual : plan.monthly;

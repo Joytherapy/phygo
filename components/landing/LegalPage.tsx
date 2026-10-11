@@ -57,7 +57,7 @@ export function LegalDocumentPage({ lang, page }: { lang: AppLang; page: "privac
   const doc = t[page];
   return (
     <PublicShell lang={lang} langHrefs={publicPathsFor(page)}>
-      <article className="mx-auto grid max-w-6xl gap-12 px-4 pb-24 pt-32 sm:px-6 sm:pt-40 lg:grid-cols-[220px_minmax(0,1fr)]">
+      <article className="mx-auto grid grid-cols-1 max-w-6xl gap-12 px-4 pb-24 pt-32 sm:px-6 sm:pt-40 lg:grid-cols-[220px_minmax(0,1fr)]">
         <div className="hidden lg:block">
           <nav aria-label={t.contents} className="sticky top-28">
             <p className="eyebrow text-ink/60 dark:text-white/55">{t.contents}</p>
