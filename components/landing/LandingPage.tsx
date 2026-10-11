@@ -12,7 +12,7 @@ import StoryTour from "./StoryTour";
 import LibraryShowcase from "./LibraryShowcase";
 import AnatomySection from "./AnatomySection";
 import ToolsShelf from "./ToolsShelf";
-import WorkspaceSection from "./WorkspaceSection";
+import AudiencesSection from "./AudiencesSection";
 import TrustSection from "./TrustSection";
 import PricingSection from "./PricingSection";
 import FaqSection from "./FaqSection";
@@ -26,6 +26,10 @@ export default async function LandingPage({ lang }: { lang: AppLang }) {
   const t = LANDING_STRINGS[lang];
   const data = await getLandingData(lang);
   const libraryHref = buildConditionIndexPath(lang);
+  // Video calls (Daily.co) exist in the code but only work when the
+  // DAILY_API_KEY is configured; the page mentions them only in that case.
+  // Only the presence of the variable is read, never its value.
+  const videoCalls = Boolean(process.env.DAILY_API_KEY);
 
   const conditions = roundDown(data.total);
   const exercises = roundDown(data.exercises);
@@ -57,13 +61,14 @@ export default async function LandingPage({ lang }: { lang: AppLang }) {
             exercises={data.exercises}
             phasedProtocols={data.phasedProtocols}
           />
+          <AudiencesSection lang={lang} audiences={t.audiences} videoCalls={videoCalls} />
           <StoryTour
             story={t.story}
-            tabs={t.library.tabs}
             evidenceLabel={t.library.evidence}
             highLabel={t.library.levels.high}
             condition={data.story}
             libraryExercise={data.libraryExercise}
+            videoCalls={videoCalls}
           />
           {/* "Platform" in the shared app navbar points at /#features */}
           <div id="features" className="scroll-mt-16">
@@ -80,7 +85,6 @@ export default async function LandingPage({ lang }: { lang: AppLang }) {
             />
             <AnatomySection anatomy={t.anatomy} />
             <ToolsShelf tools={t.tools} />
-            <WorkspaceSection workspace={t.workspace} />
           </div>
           <TrustSection trust={t.trust} />
           <PricingSection lang={lang} pricing={t.pricing} />

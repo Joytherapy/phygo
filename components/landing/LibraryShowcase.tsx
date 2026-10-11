@@ -47,7 +47,7 @@ export default function LibraryShowcase({
   return (
     <section id="library" aria-labelledby="library-title" className="relative scroll-mt-16 overflow-hidden py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <SectionHeader id="library-title" index="02" eyebrow={library.eyebrow} title={title} intro={library.intro} />
+        <SectionHeader id="library-title" index="03" eyebrow={library.eyebrow} title={title} intro={library.intro} />
       </div>
 
       {marqueeRows.length > 0 && (
@@ -78,11 +78,14 @@ export default function LibraryShowcase({
       <div className="mx-auto mt-14 grid max-w-7xl items-start gap-6 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr]">
         <Reveal className="lp-ticks rounded-[24px] border border-black/[0.07] bg-white p-6 shadow-soft dark:border-white/[0.08] dark:bg-[#111318] sm:p-8">
           {total ? (
-            <div className="flex items-end gap-4 border-b border-black/[0.06] pb-6 dark:border-white/[0.07]">
-              <p className="font-display text-[3.6rem] font-semibold leading-[0.85] tracking-[-0.05em] text-ink tabular-nums dark:text-white sm:text-[4.4rem]">
-                {formatNumber(lang, total)}
-              </p>
-              <p className="max-w-[12rem] pb-1 text-[13px] leading-snug text-ink/60 dark:text-white/55">{library.countLabel}</p>
+            <div className="border-b border-black/[0.06] pb-6 dark:border-white/[0.07]">
+              <div className="flex items-end gap-4">
+                <p className="font-display text-[3.6rem] font-semibold leading-[0.85] tracking-[-0.05em] text-ink tabular-nums dark:text-white sm:text-[4.4rem]">
+                  {formatNumber(lang, total)}
+                </p>
+                <p className="max-w-[12rem] pb-1 text-[13px] leading-snug text-ink/60 dark:text-white/55">{library.countLabel}</p>
+              </div>
+              {total < LIBRARY_GOAL && <Growth lang={lang} library={library} total={total} />}
             </div>
           ) : null}
 
@@ -135,14 +138,46 @@ export default function LibraryShowcase({
         </Reveal>
       </div>
 
-      <Reveal className="mx-auto mt-10 flex max-w-7xl flex-col items-start gap-5 px-4 sm:flex-row sm:items-center sm:px-6">
+      <Reveal className="mx-auto mt-10 grid max-w-7xl gap-6 px-4 sm:px-6 lg:grid-cols-[auto_1fr] lg:items-center">
         <PrimaryButton href={libraryHref}>{library.cta}</PrimaryButton>
-        <p className="flex items-center gap-2 text-sm text-ink/60 dark:text-white/55">
-          <Languages size={16} aria-hidden className="text-electric-dark" />
-          {library.languages}
-        </p>
+        <div className="space-y-1.5">
+          <p className="flex items-center gap-2 text-sm font-medium text-ink/75 dark:text-white/70">
+            <Languages size={16} aria-hidden className="shrink-0 text-electric-dark dark:text-electric-light" />
+            {library.languages}
+          </p>
+          <p className="max-w-2xl text-[12.5px] leading-relaxed text-ink/60 dark:text-white/55">{library.templateNote}</p>
+        </div>
       </Reveal>
     </section>
+  );
+}
+
+// Target size of the library set by the product owner. It is shown only as a
+// goal next to the live total, never as the current number of conditions.
+const LIBRARY_GOAL = 800;
+
+function Growth({ lang, library, total }: { lang: AppLang; library: LandingDict["library"]; total: number }) {
+  const pct = Math.round((total / LIBRARY_GOAL) * 100);
+  const goal = formatNumber(lang, LIBRARY_GOAL);
+  return (
+    <div className="mt-6">
+      <div className="flex items-baseline justify-between gap-3 text-[12px]">
+        <span className="font-semibold text-ink dark:text-white">{fill(library.growthLabel, { goal })}</span>
+        <span className="font-mono text-[11px] tabular-nums text-ink/60 dark:text-white/55">
+          {library.todayLabel} {formatNumber(lang, total)} · {library.goalLabel} {goal}
+        </span>
+      </div>
+      <div className="relative mt-2 h-2 overflow-hidden rounded-full bg-ink/[0.06] dark:bg-white/[0.08]" aria-hidden>
+        <motion.div
+          className="h-full rounded-full bg-gradient-to-r from-electric to-emerald"
+          initial={{ width: 0 }}
+          whileInView={{ width: `${pct}%` }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.2, ease: EASE }}
+        />
+      </div>
+      <p className="mt-2 text-[11.5px] leading-relaxed text-ink/60 dark:text-white/55">{fill(library.growthNote, { goal })}</p>
+    </div>
   );
 }
 

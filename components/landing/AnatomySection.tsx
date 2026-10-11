@@ -20,7 +20,7 @@ export default function AnatomySection({ anatomy }: { anatomy: LandingDict["anat
   return (
     <section id="anatomy" aria-labelledby="anatomy-title" className="relative scroll-mt-16 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <SectionHeader id="anatomy-title" index="03" eyebrow={anatomy.eyebrow} title={anatomy.title} intro={anatomy.intro} />
+        <SectionHeader id="anatomy-title" index="04" eyebrow={anatomy.eyebrow} title={anatomy.title} intro={anatomy.intro} />
 
         <div className="mt-14 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <Reveal className="lp-ticks flex flex-col rounded-[24px] border border-black/[0.07] bg-white p-6 shadow-soft dark:border-white/[0.08] dark:bg-[#111318] sm:p-8">

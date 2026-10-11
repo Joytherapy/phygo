@@ -34,6 +34,7 @@ type TitleText = { title: string; text: string };
 export interface LandingDict {
   meta: { title: string; description: string; descriptionNoCount: string; ogLocale: string };
   nav: {
+    audiences: string;
     tour: string;
     library: string;
     pricing: string;
@@ -82,12 +83,47 @@ export interface LandingDict {
     mapsValue: string;
     maps: string;
   };
+  audiences: {
+    eyebrow: string;
+    title: string;
+    intro: string;
+    spine: string;
+    /** Students, physiotherapists, patients (My Phygo) — in this order. */
+    paths: {
+      label: string;
+      title: string;
+      text: string;
+      items: string[];
+      /** Shown only when video calls are configured (DAILY_API_KEY). */
+      videoItem: string;
+      note: string;
+      cta: string;
+      hint: string;
+    }[];
+  };
   story: {
     eyebrow: string;
     title: string;
     intro: string;
     caseLabel: string;
-    chapters: { kicker: string; title: string; text: string }[];
+    roles: { phygo: string; you: string };
+    /** Schedule, document, plan, export, follow up — in this order. */
+    chapters: { kicker: string; title: string; text: string; videoText: string; phygo: string; you: string }[];
+    agenda: {
+      title: string;
+      days: string[];
+      patientA: string;
+      patientB: string;
+      patientC: string;
+      inPerson: string;
+      remote: string;
+      request: string;
+      requestWhen: string;
+      confirm: string;
+      decline: string;
+      call: string;
+      callText: string;
+    };
     listening: string;
     languagesPill: string;
     transcript: string;
@@ -95,17 +131,17 @@ export interface LandingDict {
     soap: [string, string, string, string];
     reasoning: { label: string; text: string }[];
     linkedLabel: string;
-    region: string;
     exercises: { name: string; dose: string }[];
     videoLabel: string;
     fromLibrary: string;
     phasesLabel: string;
     current: string;
+    pdf: { file: string; sections: string[]; download: string; scanTitle: string; scanText: string; scanNote: string };
+    record: { title: string; entries: { when: string; text: string }[]; references: string; next: string };
     review: string;
     savedTo: string;
     portalTitle: string;
     portalText: string;
-    pdf: string;
     caption: string;
     chapterNav: string;
   };
@@ -116,6 +152,11 @@ export interface LandingDict {
     intro: string;
     countLabel: string;
     namesLabel: string;
+    growthLabel: string;
+    growthNote: string;
+    todayLabel: string;
+    goalLabel: string;
+    templateNote: string;
     coverageTitle: string;
     coverageLive: string;
     fields: Record<CoverageLabelKey, string>;
@@ -147,7 +188,6 @@ export interface LandingDict {
     intro: string;
     columns: (TitleText & { items: string[] })[];
   };
-  workspace: { eyebrow: string; title: string; intro: string; items: TitleText[] };
   trust: { eyebrow: string; title: string; intro: string; items: TitleText[]; privacy: string };
   pricing: {
     eyebrow: string;
@@ -173,13 +213,14 @@ export interface LandingDict {
     terms: string;
     contact: string;
     rights: string;
+    navLabel: string;
     languageLabel: string;
   };
   common: { illustrative: string };
 }
 
 /** Applies French typographic spacing to every string in a dictionary. */
-function frenchTypography<T>(value: T): T {
+export function frenchTypography<T>(value: T): T {
   if (typeof value === 'string') {
     return value
       .replace(/ ([;:!?»])/g, ' $1')
@@ -215,6 +256,32 @@ export const LANDING_PATH: Record<AppLang, string> = {
   es: '/es',
   fr: '/fr',
 };
+
+/**
+ * Localized path of a public page. English keeps the unprefixed URL
+ * (/privacy), the other languages are prefixed (/it/privacy), matching the
+ * landing (/, /it) and library (/library, /en/library) conventions.
+ */
+export type PublicPage = 'privacy' | 'terms' | 'contact';
+export function publicPath(lang: AppLang, page: PublicPage): string {
+  return lang === 'en' ? `/${page}` : `/${lang}/${page}`;
+}
+
+/** Same page in every language, for language switchers and hreflang. */
+export function publicPathsFor(page: PublicPage): Record<AppLang, string> {
+  return { en: publicPath('en', page), it: publicPath('it', page), es: publicPath('es', page), fr: publicPath('fr', page) };
+}
+
+/** Entry points that keep the visitor's language (read by the login and My Phygo pages). */
+export function signupHref(lang: AppLang): string {
+  return `/login?mode=signup&lang=${lang}`;
+}
+export function loginHref(lang: AppLang): string {
+  return `/login?lang=${lang}`;
+}
+export function myPhygoLoginHref(lang: AppLang): string {
+  return `/my-phygo/login?lang=${lang}`;
+}
 
 /** Order in which languages are offered in the switcher. */
 export const LANDING_LANGS: AppLang[] = ['en', 'it', 'es', 'fr'];

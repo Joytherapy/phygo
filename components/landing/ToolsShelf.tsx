@@ -12,7 +12,7 @@ export default function ToolsShelf({ tools }: { tools: LandingDict["tools"] }) {
   return (
     <section id="tools" aria-labelledby="tools-title" className="relative scroll-mt-16 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <SectionHeader id="tools-title" index="04" eyebrow={tools.eyebrow} title={tools.title} intro={tools.intro} />
+        <SectionHeader id="tools-title" index="05" eyebrow={tools.eyebrow} title={tools.title} intro={tools.intro} />
 
         <div className="mt-14 grid border-t border-black/[0.08] dark:border-white/[0.09] md:grid-cols-3">
           {tools.columns.map((col, i) => {

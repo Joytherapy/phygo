@@ -1,29 +1,35 @@
 import { APP_LANG_LABELS, type AppLang } from "@/lib/i18n/uiStrings";
-import { LANDING_LANGS, LANDING_PATH, type LandingDict } from "@/lib/i18n/landingStrings";
+import { LANDING_LANGS, LANDING_PATH, publicPath, type LandingDict } from "@/lib/i18n/landingStrings";
 
+// Shared by the landing pages and the localized legal pages. Every link
+// leads to the page in the visitor's language; the language list leads to
+// the current page in the other languages (langHrefs).
 export default function LandingFooter({
   lang,
   footer,
   libraryHref,
+  langHrefs = LANDING_PATH,
 }: {
   lang: AppLang;
   footer: LandingDict["footer"];
   libraryHref: string;
+  langHrefs?: Record<AppLang, string>;
 }) {
+  const home = LANDING_PATH[lang];
   const links = [
-    { label: footer.product, href: "#tour" },
+    { label: footer.product, href: `${home}#tour` },
     { label: footer.library, href: libraryHref },
-    { label: footer.pricing, href: "#pricing" },
-    { label: footer.privacy, href: "/privacy" },
-    { label: footer.terms, href: "/terms" },
-    { label: footer.contact, href: "/contact" },
+    { label: footer.pricing, href: `${home}#pricing` },
+    { label: footer.privacy, href: publicPath(lang, "privacy") },
+    { label: footer.terms, href: publicPath(lang, "terms") },
+    { label: footer.contact, href: publicPath(lang, "contact") },
   ];
 
   return (
     <footer className="border-t border-black/[0.07] dark:border-white/[0.08]">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.2fr_1fr_1fr]">
         <div>
-          <a href={LANDING_PATH[lang]} className="inline-flex items-center gap-2.5 font-display text-[17px] font-bold tracking-tight text-ink dark:text-white">
+          <a href={home} className="inline-flex items-center gap-2.5 font-display text-[17px] font-bold tracking-tight text-ink dark:text-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo-mark.png" alt="" width={28} height={28} className="h-7 w-7 rounded-md object-cover" />
             PHYGO
@@ -31,7 +37,7 @@ export default function LandingFooter({
           <p className="mt-3 max-w-xs text-[13.5px] leading-relaxed text-ink/60 dark:text-white/55">{footer.tagline}</p>
         </div>
 
-        <nav aria-label="PHYGO">
+        <nav aria-label={footer.navLabel}>
           <ul className="grid grid-cols-2 gap-x-6 gap-y-3 text-[13.5px]">
             {links.map((l) => (
               <li key={l.href}>
@@ -49,7 +55,7 @@ export default function LandingFooter({
             {LANDING_LANGS.map((l) => (
               <li key={l}>
                 <a
-                  href={LANDING_PATH[l]}
+                  href={langHrefs[l]}
                   hrefLang={l}
                   lang={l}
                   aria-current={l === lang ? "page" : undefined}

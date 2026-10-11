@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronDown, Globe, Menu, Moon, Sun, X } from "lucide-react";
 import { APP_LANG_LABELS, type AppLang } from "@/lib/i18n/uiStrings";
-import { LANDING_LANGS, LANDING_PATH, type LandingDict } from "@/lib/i18n/landingStrings";
+import { LANDING_LANGS, LANDING_PATH, loginHref, signupHref, type LandingDict } from "@/lib/i18n/landingStrings";
 import { EASE } from "./ui";
 
 // Landing-only header. The shared components/Navbar.tsx also serves the
@@ -30,10 +30,13 @@ export default function LandingHeader({
   lang,
   nav,
   libraryHref,
+  langHrefs = LANDING_PATH,
 }: {
   lang: AppLang;
   nav: LandingDict["nav"];
   libraryHref: string;
+  /** Where each language option leads: the same page in that language. Defaults to the landing pages. */
+  langHrefs?: Record<AppLang, string>;
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -94,11 +97,15 @@ export default function LandingHeader({
     setDark(next);
   };
 
+  // Absolute so the header also works on the legal pages; on the landing
+  // itself "/it#tour" is a same-document jump.
+  const home = LANDING_PATH[lang];
   const links = [
-    { label: nav.tour, href: "#tour" },
+    { label: nav.audiences, href: `${home}#audiences` },
+    { label: nav.tour, href: `${home}#tour` },
     { label: nav.library, href: libraryHref },
-    { label: nav.pricing, href: "#pricing" },
-    { label: nav.faq, href: "#faq" },
+    { label: nav.pricing, href: `${home}#pricing` },
+    { label: nav.faq, href: `${home}#faq` },
   ];
 
   const themeLabel = dark ? nav.lightMode : nav.darkMode;
@@ -122,7 +129,7 @@ export default function LandingHeader({
           PHYGO
         </a>
 
-        <nav className="hidden md:block">
+        <nav className="hidden lg:block">
           <ul className="flex items-center gap-1">
             {links.map((l) => (
               <li key={l.href}>
@@ -166,7 +173,7 @@ export default function LandingHeader({
                 >
                   {LANDING_LANGS.map((l) => (
                     <li key={l}>
-                      <LangLink lang={l} current={lang} onPick={() => setLangOpen(false)} />
+                      <LangLink lang={l} href={langHrefs[l]} current={lang} onPick={() => setLangOpen(false)} />
                     </li>
                   ))}
                 </motion.ul>
@@ -185,13 +192,13 @@ export default function LandingHeader({
           </button>
 
           <a
-            href="/login"
-            className="hidden md:inline-flex rounded-full px-3.5 py-2 text-[13.5px] font-medium text-ink/70 transition-colors hover:text-ink dark:text-white/65 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+            href={loginHref(lang)}
+            className="hidden lg:inline-flex rounded-full px-3.5 py-2 text-[13.5px] font-medium text-ink/70 transition-colors hover:text-ink dark:text-white/65 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
           >
             {nav.login}
           </a>
           <a
-            href="/login?mode=signup"
+            href={signupHref(lang)}
             className="hidden sm:inline-flex items-center rounded-full bg-ink px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-ink/85 dark:bg-white dark:text-ink dark:hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2"
           >
             {nav.startFree}
@@ -203,7 +210,7 @@ export default function LandingHeader({
             aria-expanded={menuOpen}
             aria-controls="landing-mobile-menu"
             aria-label={menuOpen ? nav.closeMenu : nav.openMenu}
-            className="flex md:hidden h-10 w-10 items-center justify-center rounded-full text-ink dark:text-white hover:bg-ink/[0.05] dark:hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+            className="flex lg:hidden h-10 w-10 items-center justify-center rounded-full text-ink dark:text-white hover:bg-ink/[0.05] dark:hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
           >
             {menuOpen ? <X size={20} aria-hidden /> : <Menu size={20} aria-hidden />}
           </button>
@@ -218,7 +225,7 @@ export default function LandingHeader({
             animate={{ opacity: 1, height: "calc(100dvh - 4rem)" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: EASE }}
-            className="md:hidden overflow-y-auto border-t border-black/[0.06] dark:border-white/[0.07]"
+            className="lg:hidden overflow-y-auto border-t border-black/[0.06] dark:border-white/[0.07]"
           >
             <nav className="px-4 pb-10 pt-4">
               <ul className="divide-y divide-black/[0.06] dark:divide-white/[0.07]">
@@ -234,7 +241,7 @@ export default function LandingHeader({
                   </li>
                 ))}
                 <li>
-                  <a href="/login" className="block py-4 font-display text-2xl font-semibold tracking-tight text-ink/70 dark:text-white/70">
+                  <a href={loginHref(lang)} className="block py-4 font-display text-2xl font-semibold tracking-tight text-ink/70 dark:text-white/70">
                     {nav.login}
                   </a>
                 </li>
@@ -244,14 +251,14 @@ export default function LandingHeader({
               <ul className="mt-3 grid grid-cols-2 gap-2">
                 {LANDING_LANGS.map((l) => (
                   <li key={l}>
-                    <LangLink lang={l} current={lang} onPick={() => setMenuOpen(false)} boxed />
+                    <LangLink lang={l} href={langHrefs[l]} current={lang} onPick={() => setMenuOpen(false)} boxed />
                   </li>
                 ))}
               </ul>
 
               <div className="mt-8 flex items-center gap-3">
                 <a
-                  href="/login?mode=signup"
+                  href={signupHref(lang)}
                   className="flex-1 rounded-full bg-ink py-3.5 text-center text-sm font-semibold text-white dark:bg-white dark:text-ink"
                 >
                   {nav.startFree}
@@ -275,11 +282,13 @@ export default function LandingHeader({
 
 function LangLink({
   lang,
+  href,
   current,
   onPick,
   boxed = false,
 }: {
   lang: AppLang;
+  href: string;
   current: AppLang;
   onPick: () => void;
   boxed?: boolean;
@@ -287,7 +296,7 @@ function LangLink({
   const active = lang === current;
   return (
     <a
-      href={LANDING_PATH[lang]}
+      href={href}
       hrefLang={lang}
       lang={lang}
       aria-current={active ? "page" : undefined}

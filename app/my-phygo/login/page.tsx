@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { Loader2, Smartphone } from 'lucide-react'
+import { useEntryLang } from '@/lib/i18n/useEntryLang'
+import { ENTRY_STRINGS } from '@/lib/i18n/entryStrings'
+import { loginHref } from '@/lib/i18n/landingStrings'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,7 +14,17 @@ const supabase = createBrowserClient(
 )
 
 export default function MyPhygoLoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <MyPhygoLogin />
+    </Suspense>
+  )
+}
+
+function MyPhygoLogin() {
   const router = useRouter()
+  const lang = useEntryLang()
+  const t = ENTRY_STRINGS[lang].portal
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -26,7 +39,7 @@ export default function MyPhygoLoginPage() {
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
 
     if (signInError) {
-      setError('Incorrect email or password. Please try again.')
+      setError(t.loginError)
       setLoading(false)
       return
     }
@@ -41,16 +54,18 @@ export default function MyPhygoLoginPage() {
       </div>
 
       <h1 className="font-display text-3xl font-bold tracking-tight text-ink dark:text-white mb-2">
-        Welcome back
+        {t.loginTitle}
       </h1>
       <p className="text-sm text-ink/60 dark:text-white/50 mb-8">
-        Sign in to access your My Phygo portal.
+        {t.loginSub}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-sm font-medium text-ink/60 dark:text-white/50">Email</label>
+          <label htmlFor="portal-email" className="text-sm font-medium text-ink/60 dark:text-white/55">{t.email}</label>
           <input
+            id="portal-email"
+            autoComplete="email"
             type="email"
             required
             value={email}
@@ -59,8 +74,10 @@ export default function MyPhygoLoginPage() {
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-ink/60 dark:text-white/50">Password</label>
+          <label htmlFor="portal-password" className="text-sm font-medium text-ink/60 dark:text-white/55">{t.password}</label>
           <input
+            id="portal-password"
+            autoComplete="current-password"
             type="password"
             required
             value={password}
@@ -69,7 +86,7 @@ export default function MyPhygoLoginPage() {
           />
         </div>
 
-        {error && <p className="text-xs text-red-500">{error}</p>}
+        {error && <p role="alert" className="text-xs text-red-500">{error}</p>}
 
         <button
           type="submit"
@@ -78,9 +95,16 @@ export default function MyPhygoLoginPage() {
           style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
         >
           {loading && <Loader2 size={15} className="animate-spin" />}
-          {loading ? 'Signing in...' : 'Sign in'}
+          {loading ? t.signingIn : t.signIn}
         </button>
       </form>
+
+      <p className="mt-8 text-center text-xs leading-relaxed text-ink/60 dark:text-white/55">{t.noAccountHint}</p>
+      <p className="mt-3 text-center text-xs">
+        <a href={loginHref(lang)} className="font-medium text-[#3A5FE0] dark:text-[#7B9DFF] hover:underline">
+          {t.professionalLink}
+        </a>
+      </p>
     </div>
   )
 }
