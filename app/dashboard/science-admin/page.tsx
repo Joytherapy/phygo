@@ -40,11 +40,15 @@ export default function ScienceAdminPage() {
   const handleAction = async (paperId: string, action: 'approve' | 'reject') => {
     setProcessingId(paperId);
     try {
-      await fetch('/api/science/admin/review', {
+      const res = await fetch('/api/science/admin/review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ paperId, action }),
       });
+      if (!res.ok) {
+        alert(res.status === 403 || res.status === 401 ? 'Accesso riservato agli amministratori.' : 'Errore aggiornamento');
+        return;
+      }
       setPapers((prev) => prev.filter((p) => p.id !== paperId));
     } catch (err) {
       console.error('Errore azione admin:', err);

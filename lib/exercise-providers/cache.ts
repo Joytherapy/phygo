@@ -1,11 +1,22 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { ExerciseEntry } from "./types";
 import { WgerProvider } from "./wger";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Created on first use, not at import time: `next build` imports every route
+// module while collecting page data, and createClient() throws
+// "supabaseUrl is required" if NEXT_PUBLIC_SUPABASE_URL isn't set in that
+// build environment.
+let supabaseClient: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient {
+  if (!supabaseClient) {
+    supabaseClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+  }
+  return supabaseClient;
+}
 
 const wgerProvider = new WgerProvider();
 
@@ -14,7 +25,7 @@ export async function getCachedExercise(
   providerId: string,
   language: string
 ): Promise<ExerciseEntry | null> {
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from("exercise_cache")
     .select("data")
     .eq("provider", provider)
@@ -32,7 +43,7 @@ export async function saveCachedExercise(
   language: string,
   entry: ExerciseEntry
 ): Promise<void> {
-  await supabase.from("exercise_cache").upsert(
+  await getSupabase().from("exercise_cache").upsert(
     {
       provider,
       provider_id: providerId,
@@ -53,7 +64,7 @@ export async function searchExercisesWithCache(
   if (cleanKeywords.length === 0) return [];
 
   for (const keyword of cleanKeywords) {
-    const { data } = await supabase
+    const { data } = await getSupabase()
       .from("exercise_cache")
       .select("data")
       .eq("language", language)
