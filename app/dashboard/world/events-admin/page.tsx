@@ -89,7 +89,11 @@ export default function EventsAdminPage() {
   const remove = async (id: string) => {
     setProcessingId(id)
     try {
-      await fetch(`/api/events/admin/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/events/admin/${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        alert(res.status === 403 || res.status === 401 ? 'Accesso riservato agli amministratori.' : 'Eliminazione non riuscita')
+        return
+      }
       setEvents((prev) => prev.filter((e) => e.id !== id))
     } finally {
       setProcessingId(null)
