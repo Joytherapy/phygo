@@ -21,8 +21,7 @@ const tiers = [
     description: "For full-time practices that run daily.",
     features: [
       "Unlimited sessions",
-      "AI clinical notes + summaries",
-      "WhatsApp integration",
+      "AI clinical notes + patient-friendly summaries",
       "Exercise library",
       "Priority support",
     ],
@@ -32,11 +31,11 @@ const tiers = [
     name: "Clinic",
     monthly: null,
     annual: null,
-    description: "For multi-practitioner clinics.",
+    description: "For multi-practitioner clinics. Team features are in development — tell us what your clinic needs.",
     features: [
       "Everything in Professional",
-      "Multi-practitioner accounts",
-      "Shared patient history",
+      "Multi-practitioner accounts (in development)",
+      "Shared patient history (in development)",
       "Dedicated onboarding",
     ],
     featured: false,
@@ -54,13 +53,18 @@ export default function Pricing() {
           <h2 className="font-display font-semibold text-ink dark:text-white text-3xl sm:text-5xl tracking-tight text-balance">
             Simple plans that grow with your practice.
           </h2>
+          <p className="mt-4 text-base text-ink/60 dark:text-white/55">
+            Create your account for free — no credit card required.
+          </p>
         </div>
 
         <div className="flex items-center gap-3 mb-14">
           <span className={`text-sm font-medium ${!annual ? "text-ink dark:text-white" : "text-ink/55 dark:text-white/40"}`}>Monthly</span>
           <button
             onClick={() => setAnnual((a) => !a)}
-            aria-label="Toggle annual billing"
+            role="switch"
+            aria-checked={annual}
+            aria-label="Annual billing"
             className={`relative h-7 w-12 rounded-full transition-colors duration-300 ${
               annual ? "bg-ink dark:bg-white" : "bg-ink/15 dark:bg-white/15"
             }`}
@@ -131,12 +135,12 @@ export default function Pricing() {
                     ))}
                   </ul>
                   <a
-                    href={tier.monthly === null ? "#contact" : "/login?mode=signup"}
+                    href={tier.monthly === null ? "/contact" : "/login?mode=signup"}
                     className={`block text-center rounded-full text-sm font-semibold py-3 transition-opacity hover:opacity-90 ${
                       tier.featured ? "bg-white text-ink" : "bg-ink text-white"
                     }`}
                   >
-                    {tier.monthly === null ? "Contact Sales" : "Start Free"}
+                    {tier.monthly === null ? "Contact us" : "Start free"}
                   </a>
                 </SpotlightBorder>
               </motion.div>
