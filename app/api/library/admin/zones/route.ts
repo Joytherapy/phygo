@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth/adminServer';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -6,13 +7,19 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function GET() {
+export async function GET(req: Request) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
+
   const { data: zones } = await supabase.from('body_zones').select('*').order('sort_order');
   const { data: zoneItems } = await supabase.from('body_zone_items').select('*');
   return NextResponse.json({ zones, zoneItems });
 }
 
 export async function POST(req: Request) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const { zoneId, itemId } = await req.json();
     if (!zoneId || !itemId) {

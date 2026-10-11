@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth/adminServer';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
@@ -100,7 +101,10 @@ Abstract: ${paper.abstract || 'Not available'}`;
   };
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const { data: papers, error } = await supabase
       .from('research_papers')

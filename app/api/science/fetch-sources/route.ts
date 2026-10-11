@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth/adminServer';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -6,7 +7,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function GET() {
+export async function GET(req: Request) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const searchRes = await fetch(
       'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=(physical+therapy%5BTitle%2FAbstract%5D+OR+physiotherapy%5BTitle%2FAbstract%5D+OR+%22exercise+therapy%22%5BTitle%2FAbstract%5D+OR+%22musculoskeletal+rehabilitation%22%5BTitle%2FAbstract%5D)+AND+(randomized+controlled+trial%5BPublication+Type%5D+OR+systematic+review%5BPublication+Type%5D+OR+meta-analysis%5BPublication+Type%5D)+NOT+(cancer%5BTitle%5D+OR+oncology%5BTitle%5D+OR+tumor%5BTitle%5D)&retmax=10&sort=date&retmode=json'

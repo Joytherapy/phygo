@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth/adminServer';
 import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
@@ -12,7 +13,10 @@ const supabase = createClient(
 // The events-admin page filters client-side by moderation_status (pending
 // review vs. already approved/rejected) so one endpoint covers both the
 // "to review" queue and the "manage everything" list.
-export async function GET() {
+export async function GET(req: Request) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const { data, error } = await supabase
       .from('events')
@@ -38,6 +42,9 @@ export async function GET() {
 // but stay verification_status='unverified' by default unless the admin
 // sets a different one.
 export async function POST(req: Request) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const body = await req.json();
 

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth/adminServer';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -16,7 +17,10 @@ function classify(pubTypes: string[]): string {
   return 'Other';
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const { data: papers, error } = await supabase
       .from('research_papers')
