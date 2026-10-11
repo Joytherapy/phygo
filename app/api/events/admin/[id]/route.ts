@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth/adminServer';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -12,6 +13,9 @@ const supabase = createClient(
 // page sends only the fields that change, same "patch" shape for all of
 // them rather than one route per action.
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const body = await req.json();
     const patch: Record<string, unknown> = {};
@@ -58,6 +62,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 // should go through PATCH { moderation_status: 'rejected' } instead, which
 // keeps the record for reference.
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const { error } = await supabase.from('events').delete().eq('id', params.id);
 
