@@ -135,14 +135,14 @@ export default function SciencePage() {
         )}
 
         {loading ? (
-          <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-gradient-to-b from-white to-[#FBFBFE] dark:from-white/[0.05] dark:to-white/[0.02] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_16px_40px_-16px_rgba(16,24,40,0.1)] dark:shadow-none p-14 text-center">
+          <div className="rounded-[28px] border border-black/[0.12] dark:border-white/10 bg-gradient-to-b from-white to-[#FBFBFE] dark:from-white/[0.05] dark:to-white/[0.02] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_16px_40px_-16px_rgba(16,24,40,0.1)] dark:shadow-none p-14 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F5B942]/10 animate-pulse">
               <FlaskConical size={20} style={{ color: GOLD }} />
             </div>
             <p className="text-sm text-ink/60 dark:text-white/50">{ui.science.loadingText}</p>
           </div>
         ) : filteredPapers.length === 0 ? (
-          <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-gradient-to-b from-white to-[#FBFBFE] dark:from-white/[0.05] dark:to-white/[0.02] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_16px_40px_-16px_rgba(16,24,40,0.1)] dark:shadow-none p-14 text-center">
+          <div className="rounded-[28px] border border-black/[0.12] dark:border-white/10 bg-gradient-to-b from-white to-[#FBFBFE] dark:from-white/[0.05] dark:to-white/[0.02] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_16px_40px_-16px_rgba(16,24,40,0.1)] dark:shadow-none p-14 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F5B942]/10">
               <Search size={20} className="opacity-70" style={{ color: GOLD }} />
             </div>
@@ -156,7 +156,7 @@ export default function SciencePage() {
               return (
                 <div
                   key={paper.id}
-                  className="group relative rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-gradient-to-b from-white to-[#FBFBFE] dark:from-white/[0.05] dark:to-white/[0.02] overflow-hidden shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-14px_rgba(16,24,40,0.1)] dark:shadow-none p-6 pt-[26px] transition-all duration-300 hover:-translate-y-1 hover:border-[#B8860B]/35 hover:shadow-[0_24px_60px_-20px_rgba(184,134,11,0.35)]"
+                  className="group relative rounded-[24px] border border-black/[0.12] dark:border-white/10 bg-gradient-to-b from-white to-[#FBFBFE] dark:from-white/[0.05] dark:to-white/[0.02] overflow-hidden shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-14px_rgba(16,24,40,0.1)] dark:shadow-none p-6 pt-[26px] transition-all duration-300 hover:-translate-y-1 hover:border-[#B8860B]/35 hover:shadow-[0_24px_60px_-20px_rgba(184,134,11,0.35)]"
                 >
                   <div
                     className="absolute top-0 left-0 right-0 h-[3px] opacity-70 group-hover:opacity-100 transition-opacity"

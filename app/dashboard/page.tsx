@@ -186,7 +186,7 @@ export default function DashboardPage() {
           ].map((stat, i) => (
             <div
               key={i}
-              className="group relative rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-soft hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+              className="group relative rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-soft hover:shadow-lg transition-shadow duration-300 overflow-hidden"
             >
               <div
                 className="pointer-events-none absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-25 blur-2xl transition-transform duration-500 group-hover:scale-125"
@@ -224,7 +224,7 @@ export default function DashboardPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={ui.patients.searchPlaceholder}
-            className="w-full rounded-full border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl pl-11 pr-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+            className="w-full rounded-full border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl pl-11 pr-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
           />
         </div>
 
@@ -236,7 +236,7 @@ export default function DashboardPage() {
               exit={{ opacity: 0, y: -10, height: 0 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
               onSubmit={handleCreatePatient}
-              className="mb-10 rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.04] backdrop-blur-2xl shadow-2xl p-8 space-y-5 overflow-hidden"
+              className="mb-10 rounded-[28px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.04] backdrop-blur-2xl shadow-2xl p-8 space-y-5 overflow-hidden"
             >
               <div>
                 <label className="text-sm font-medium text-ink/60 dark:text-white/50">
@@ -341,7 +341,7 @@ export default function DashboardPage() {
                     transition={{ delay: Math.min(i, 20) * 0.03 }}
                     exit={{ opacity: 0 }}
                     whileHover={{ y: -2 }}
-                    className="group w-full rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl px-4 py-3.5 flex items-center gap-3.5 shadow-soft transition-all hover:shadow-lg hover:border-[#4F7CFF]/30 cursor-pointer"
+                    className="group w-full rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl px-4 py-3.5 flex items-center gap-3.5 shadow-soft transition-all hover:shadow-lg hover:border-[#4F7CFF]/30 cursor-pointer"
                   >
                     <div
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white text-xs font-bold shadow-soft"

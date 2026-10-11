@@ -449,7 +449,7 @@ export default function PatientDetailPage() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10"
         >
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
+          <div className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
             <div className="flex items-center gap-2 mb-1.5">
               <ClipboardList size={13} className="text-[#4F7CFF]" />
               <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
@@ -459,7 +459,7 @@ export default function PatientDetailPage() {
             <p className="text-2xl font-bold text-ink dark:text-white">{notes.length}</p>
           </div>
 
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
+          <div className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
             <div className="flex items-center gap-2 mb-1.5">
               <Calendar size={13} className="text-[#32D6A0]" />
               <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
@@ -471,7 +471,7 @@ export default function PatientDetailPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
+          <div className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
             <div className="flex items-center gap-2 mb-1.5">
               <Activity size={13} className="text-amber-500" />
               <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
@@ -481,7 +481,7 @@ export default function PatientDetailPage() {
             <p className="text-2xl font-bold text-ink dark:text-white">{formatSince(patient.created_at, ui)}</p>
           </div>
 
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
+          <div className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
             <div className="flex items-center gap-2 mb-1.5">
               <Dumbbell size={13} className="text-[#EC4899]" />
               <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
@@ -492,7 +492,7 @@ export default function PatientDetailPage() {
           </div>
         </motion.div>
 
-        <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
+        <div className="rounded-[28px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
           <div className="flex items-start justify-between gap-3 mb-6">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4F7CFF]/15 to-[#4F7CFF]/5 text-[#4F7CFF]">
@@ -535,7 +535,7 @@ export default function PatientDetailPage() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.35, delay: i * 0.05 }}
-                  className="group rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-start gap-4 shadow-soft hover:border-[#4F7CFF]/30 hover:shadow-md transition-all"
+                  className="group rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-start gap-4 shadow-soft hover:border-[#4F7CFF]/30 hover:shadow-md transition-all"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF] group-hover:scale-105 transition-transform">
                     <FileText size={16} />
@@ -558,7 +558,7 @@ export default function PatientDetailPage() {
           )}
         </div>
 
-        <div className="mt-8 rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
+        <div className="mt-8 rounded-[28px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
           <div className="flex items-start justify-between gap-3 mb-6">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#32D6A0]/15 to-[#32D6A0]/5 text-[#32D6A0]">
@@ -619,9 +619,9 @@ export default function PatientDetailPage() {
                           }
                         : undefined
                     }
-                    className={`rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-start gap-4 shadow-soft transition-colors ${
+                    className={`rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-start gap-4 shadow-soft transition-colors ${
                       href
-                        ? 'cursor-pointer hover:border-black/15 dark:hover:border-white/25 hover:bg-white/90 dark:hover:bg-white/[0.06]'
+                        ? 'cursor-pointer hover:border-black/15 dark:hover:border-white/25 hover:bg-white/95 dark:hover:bg-white/[0.06]'
                         : 'hover:border-black/10 dark:hover:border-white/20'
                     }`}
                   >
@@ -670,7 +670,7 @@ export default function PatientDetailPage() {
           )}
         </div>
 
-        <div className="mt-8 rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
+        <div className="mt-8 rounded-[28px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
           <div className="flex items-start justify-between gap-3 mb-6 flex-wrap">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6366F1]/15 to-[#6366F1]/5 text-[#6366F1]">
@@ -720,19 +720,19 @@ export default function PatientDetailPage() {
                         {ui.patients.latestProfileLabel} · {formatRefDate(latestProfile.created_at)}
                       </p>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
+                        <div className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
                           <p className="text-lg font-bold text-ink dark:text-white">{latestProfile.tdee}</p>
                           <p className="text-[10px] text-ink/55 dark:text-white/40">TDEE</p>
                         </div>
-                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
+                        <div className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
                           <p className="text-lg font-bold text-ink dark:text-white">{latestProfile.protein_g}g</p>
                           <p className="text-[10px] text-ink/55 dark:text-white/40">{ui.metabolicCalculator.proteinLabel}</p>
                         </div>
-                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
+                        <div className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
                           <p className="text-lg font-bold text-ink dark:text-white">{latestProfile.carbs_g}g</p>
                           <p className="text-[10px] text-ink/55 dark:text-white/40">{ui.metabolicCalculator.carbsLabel}</p>
                         </div>
-                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
+                        <div className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
                           <p className="text-lg font-bold text-ink dark:text-white">{latestProfile.fat_g}g</p>
                           <p className="text-[10px] text-ink/55 dark:text-white/40">{ui.metabolicCalculator.fatLabel}</p>
                         </div>
@@ -744,7 +744,7 @@ export default function PatientDetailPage() {
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-2">
                           {ui.patients.weightTrendHeading}
                         </p>
-                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+                        <div className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
                           <WeightTrendChart data={chronological.map((h) => ({ date: h.created_at, weightKg: h.weight_kg }))} height={120} />
                         </div>
                       </div>

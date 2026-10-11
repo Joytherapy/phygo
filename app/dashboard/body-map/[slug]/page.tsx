@@ -239,7 +239,7 @@ export default function ZoneHubPage() {
         </button>
 
         <div className="mb-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.11] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]" />
             {isBoneZone ? ui.bodyMap.zoneTypeSkeletal : ui.bodyMap.zoneTypeAnatomical}
           </div>
@@ -260,7 +260,7 @@ export default function ZoneHubPage() {
                 <button
                   key={relSlug}
                   onClick={() => router.push(`/dashboard/body-map/${relSlug}`)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:border-black/[0.14] dark:hover:border-white/20 transition-all text-xs font-medium"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/[0.11] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:border-black/[0.14] dark:hover:border-white/20 transition-all text-xs font-medium"
                 >
                   {relSlug.startsWith('bone-') && <Bone size={11} className="text-[#4F7CFF]" />}
                   {zoneDisplayName(relSlug)}
@@ -282,7 +282,7 @@ export default function ZoneHubPage() {
             ).map(({ key, label, icon: Icon, color }) => (
               <div
                 key={key}
-                className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-soft"
+                className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-soft"
               >
                 <div className="flex items-center gap-2 mb-3">
                   <span
@@ -303,7 +303,7 @@ export default function ZoneHubPage() {
           </div>
         )}
 
-        <div className="mt-10 pt-10 border-t border-black/[0.09] dark:border-white/10">
+        <div className="mt-10 pt-10 border-t border-black/[0.12] dark:border-white/10">
           {!askOpen ? (
             <button
               onClick={() => {
@@ -317,7 +317,7 @@ export default function ZoneHubPage() {
               {ui.bodyMap.askPhygoButton}
             </button>
           ) : (
-            <div className="rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 max-w-2xl">
+            <div className="rounded-[24px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 max-w-2xl">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles size={16} className="text-[#4F7CFF]" />
                 <p className="text-sm font-semibold">{ui.bodyMap.askPhygoHeadingPrefix.replace('{zone}', zoneDisplayName(zone.slug))}</p>
@@ -343,7 +343,7 @@ export default function ZoneHubPage() {
                 <p className="text-xs text-red-500 mt-2">{askError}</p>
               )}
               {askAnswer && (
-                <div className="mt-4 pt-4 border-t border-black/[0.09] dark:border-white/10 text-sm text-ink/70 dark:text-white/70 leading-relaxed whitespace-pre-wrap">
+                <div className="mt-4 pt-4 border-t border-black/[0.12] dark:border-white/10 text-sm text-ink/70 dark:text-white/70 leading-relaxed whitespace-pre-wrap">
                   {askAnswer}
                 </div>
               )}
@@ -351,7 +351,7 @@ export default function ZoneHubPage() {
           )}
         </div>
 
-        <div className="mt-10 pt-10 border-t border-black/[0.09] dark:border-white/10">
+        <div className="mt-10 pt-10 border-t border-black/[0.12] dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/[0.12] text-[#4F7CFF]">
               <Activity size={14} />
@@ -370,7 +370,7 @@ export default function ZoneHubPage() {
               {exercises.map((ex) => (
                 <div
                   key={ex.id}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl shadow-soft hover:shadow-md transition-all"
+                  className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl shadow-soft hover:shadow-md transition-all"
                 >
                   {ex.image_url && (
                     <div className="aspect-video bg-white flex items-center justify-center rounded-t-2xl overflow-hidden">
@@ -412,7 +412,7 @@ export default function ZoneHubPage() {
           )}
         </div>
 
-        <div className="mt-10 pt-10 border-t border-black/[0.09] dark:border-white/10">
+        <div className="mt-10 pt-10 border-t border-black/[0.12] dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#32D6A0]/[0.12] text-[#32D6A0]">
               <Stethoscope size={14} />
@@ -432,7 +432,7 @@ export default function ZoneHubPage() {
                 <button
                   key={c.id}
                   onClick={() => setSelectedCondition(c)}
-                  className="group flex items-start justify-between gap-3 text-left px-4 py-3 rounded-2xl border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:border-black/[0.14] dark:hover:border-white/20 transition-all"
+                  className="group flex items-start justify-between gap-3 text-left px-4 py-3 rounded-2xl border border-black/[0.11] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:border-black/[0.14] dark:hover:border-white/20 transition-all"
                 >
                   <span className="inline-flex items-center gap-1.5 text-sm font-medium text-ink dark:text-white leading-snug">
                     {c.condition_name}
@@ -477,7 +477,7 @@ export default function ZoneHubPage() {
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-[#0e0f12] border border-black/[0.09] dark:border-white/10 rounded-[28px] p-8 max-w-xl w-full max-h-[85vh] overflow-auto shadow-2xl"
+              className="bg-white dark:bg-[#0e0f12] border border-black/[0.12] dark:border-white/10 rounded-[28px] p-8 max-w-xl w-full max-h-[85vh] overflow-auto shadow-2xl"
             >
               <div className="flex items-start justify-between mb-4">
                 <h3 className="font-display text-2xl font-bold pr-4">
@@ -594,7 +594,7 @@ export default function ZoneHubPage() {
               </div>
 
               {selectedCondition.source && (
-                <div className="mt-5 pt-4 border-t border-black/[0.09] dark:border-white/10 flex items-start gap-2">
+                <div className="mt-5 pt-4 border-t border-black/[0.12] dark:border-white/10 flex items-start gap-2">
                   <Quote size={12} className="text-ink/30 dark:text-white/30 mt-0.5 shrink-0" />
                   <p className="text-[11px] text-ink/55 dark:text-white/40 leading-relaxed italic">
                     {selectedCondition.source}

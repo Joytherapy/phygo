@@ -243,7 +243,7 @@ export default function UrinaryPage() {
 
       <div className="relative max-w-4xl mx-auto px-6 pt-40 pb-24">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.11] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT.gradient }} />
             {ui.urinary.atlasBadge}
           </div>
@@ -258,7 +258,7 @@ export default function UrinaryPage() {
         </div>
 
         <div className="flex justify-center mb-6">
-          <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
+          <div className="inline-flex flex-wrap justify-center rounded-full border border-black/[0.12] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-1">
             {SUB_TABS.map((t) => (
               <button
                 key={t.key}
@@ -283,7 +283,7 @@ export default function UrinaryPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={ui.librarySearchPlaceholder}
-            className="w-full pl-11 pr-10 py-2.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-sm text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 focus:outline-none focus:border-black/20 dark:focus:border-white/20 transition-colors"
+            className="w-full pl-11 pr-10 py-2.5 rounded-full border border-black/[0.11] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-sm text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 focus:outline-none focus:border-black/20 dark:focus:border-white/20 transition-colors"
           />
           {searchQuery && (
             <button
@@ -336,7 +336,7 @@ export default function UrinaryPage() {
                         {items.map((s) => (
                           <div
                             key={s.id}
-                            className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-soft shadow-black/5 dark:shadow-black/40"
+                            className="rounded-2xl border border-black/[0.11] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-soft shadow-black/5 dark:shadow-black/40"
                           >
                             {s.diagram_image && (
                               <button
@@ -423,7 +423,7 @@ export default function UrinaryPage() {
                           <button
                             key={c.id}
                             onClick={() => setSelectedCondition(c)}
-                            className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-colors hover:border-[#22D3EE]/40"
+                            className="text-left rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-colors hover:border-[#22D3EE]/40"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{c.condition_name}</p>
                             <EvidenceBadge level={c.evidence_level} />
@@ -473,7 +473,7 @@ export default function UrinaryPage() {
                         {items.map((t) => (
                           <div
                             key={t.id}
-                            className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                            className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{t.name}</p>
                             {t.procedure && (
@@ -532,7 +532,7 @@ export default function UrinaryPage() {
                         {items.map((r) => (
                           <div
                             key={r.id}
-                            className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                            className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{r.name}</p>
                             {r.description && (
@@ -581,7 +581,7 @@ export default function UrinaryPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.09] dark:border-white/10 p-8"
+              className="w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#0e0f12] border border-black/[0.12] dark:border-white/10 p-8"
             >
               <div className="flex items-start justify-between mb-4">
                 <h3 className="text-xl font-bold text-ink dark:text-white pr-6">
@@ -631,7 +631,7 @@ export default function UrinaryPage() {
                   </div>
                 )}
                 {selectedCondition.evidence_level && (
-                  <div className="pt-2 border-t border-black/[0.09] dark:border-white/10">
+                  <div className="pt-2 border-t border-black/[0.12] dark:border-white/10">
                     <EvidenceBadge level={selectedCondition.evidence_level} />
                     <SourceCitation source={selectedCondition.source} sourceDate={selectedCondition.source_date} />
                   </div>

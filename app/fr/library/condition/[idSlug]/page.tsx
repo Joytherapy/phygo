@@ -143,7 +143,7 @@ export default async function PublicConditionPageFR({
         )}
 
         <div className="mb-4 flex items-center gap-2 flex-wrap">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.11] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase">
             <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]" />
             Guide Clinique
           </div>
@@ -218,7 +218,7 @@ export default async function PublicConditionPageFR({
           </div>
         )}
 
-        <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-gradient-to-br from-[#4F7CFF]/5 to-[#32D6A0]/5 p-8 text-center">
+        <div className="rounded-[28px] border border-black/[0.12] dark:border-white/10 bg-gradient-to-br from-[#4F7CFF]/5 to-[#32D6A0]/5 p-8 text-center">
           <div className="flex justify-center mb-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#4F7CFF] to-[#32D6A0] text-white">
               <Sparkles size={18} />

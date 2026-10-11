@@ -133,7 +133,7 @@ export default function MyPhygoHomePage() {
 
       <a
         href="/my-phygo/life/metabolic"
-        className="mb-3 flex items-center justify-between rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#6366F1]/30 transition-colors group"
+        className="mb-3 flex items-center justify-between rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#6366F1]/30 transition-colors group"
       >
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#6366F1]/10 text-[#6366F1]">
@@ -149,7 +149,7 @@ export default function MyPhygoHomePage() {
 
       <a
         href="/my-phygo/shop"
-        className="mb-8 flex items-center justify-between rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#4F7CFF]/30 transition-colors group"
+        className="mb-8 flex items-center justify-between rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#4F7CFF]/30 transition-colors group"
       >
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF]">
@@ -179,7 +179,7 @@ export default function MyPhygoHomePage() {
                   href={ref.payload.amazonUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3 hover:border-[#4F7CFF]/30 transition-colors"
+                  className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3 hover:border-[#4F7CFF]/30 transition-colors"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF]">
                     <ShoppingBag size={16} />
@@ -207,7 +207,7 @@ export default function MyPhygoHomePage() {
       ) : (
         <>
           {latestNote.summary_for_patient && (
-            <div className="mb-6 rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5">
+            <div className="mb-6 rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5">
               <div className="flex items-center gap-2 mb-2">
                 <FileText size={14} className="text-[#4F7CFF]" />
                 <p className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50">
@@ -232,7 +232,7 @@ export default function MyPhygoHomePage() {
                 {exercises.map((ex: any, i: number) => (
                   <div
                     key={ex.internal_id || i}
-                    className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4"
+                    className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4"
                   >
                     <p className="text-sm font-semibold text-ink dark:text-white">
                       {ex.name || `Exercise ${i + 1}`}
@@ -261,7 +261,7 @@ export default function MyPhygoHomePage() {
               {notes.map((note) => (
                 <div
                   key={note.id}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3"
+                  className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3"
                 >
                   <Calendar size={14} className="text-ink/30 dark:text-white/30 shrink-0" />
                   <div className="min-w-0">

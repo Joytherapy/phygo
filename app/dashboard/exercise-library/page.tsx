@@ -92,7 +92,7 @@ function styleFor(category: string | null) {
 
 function CardSkeleton() {
   return (
-    <div className="rounded-[24px] border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] overflow-hidden animate-pulse">
+    <div className="rounded-[24px] border border-black/[0.08] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] overflow-hidden animate-pulse">
       <div className="h-52 bg-ink/5 dark:bg-white/5" />
       <div className="p-5 space-y-2">
         <div className="h-3 w-16 rounded-full bg-ink/10 dark:bg-white/10" />
@@ -319,7 +319,7 @@ export default function ExerciseLibraryPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={ui.searchPlaceholder}
-              className="w-full rounded-full border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/35 dark:placeholder:text-white/35 outline-none focus:border-[#4F7CFF]/40 transition-colors shadow-sm"
+              className="w-full rounded-full border border-black/[0.08] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/35 dark:placeholder:text-white/35 outline-none focus:border-[#4F7CFF]/40 transition-colors shadow-sm"
             />
             {search && (
               <button
@@ -339,7 +339,7 @@ export default function ExerciseLibraryPage() {
             className={`flex-none inline-flex items-center justify-center h-[42px] w-[42px] rounded-full border backdrop-blur-xl transition-colors ${
               selectionMode
                 ? 'border-transparent text-white shadow-sm'
-                : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
+                : 'border-black/[0.08] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
             }`}
             style={selectionMode ? { background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
           >
@@ -361,7 +361,7 @@ export default function ExerciseLibraryPage() {
                   className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
                     filter?.type === 'region'
                       ? 'border-[#A855F7]/40 bg-[#A855F7]/10 text-ink dark:text-white'
-                      : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
+                      : 'border-black/[0.08] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
                   }`}
                 >
                   <option value="">{ui.bodyZoneHeading}</option>
@@ -395,7 +395,7 @@ export default function ExerciseLibraryPage() {
                   className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
                     filter?.type === 'category' || filter?.type === 'tag'
                       ? 'border-[#4F7CFF]/40 bg-[#4F7CFF]/10 text-ink dark:text-white'
-                      : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
+                      : 'border-black/[0.08] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
                   }`}
                 >
                   <option value="">{ui.categoryHeading}</option>
@@ -429,7 +429,7 @@ export default function ExerciseLibraryPage() {
                   className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
                     filter?.type === 'equipment'
                       ? 'border-[#4F7CFF]/40 bg-[#4F7CFF]/10 text-ink dark:text-white'
-                      : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
+                      : 'border-black/[0.08] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
                   }`}
                 >
                   <option value="">{ui.equipmentHeading}</option>
@@ -503,13 +503,13 @@ export default function ExerciseLibraryPage() {
                       }
                     }}
                     className={`group text-left relative rounded-[24px] border backdrop-blur-xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 cursor-pointer bg-white/70 dark:bg-white/[0.03] ${
-                      isSelected ? 'border-[#4F7CFF] ring-2 ring-[#4F7CFF]/50' : 'border-black/[0.06] dark:border-white/10'
+                      isSelected ? 'border-[#4F7CFF] ring-2 ring-[#4F7CFF]/50' : 'border-black/[0.08] dark:border-white/10'
                     }`}
                   >
                     {selectionMode && (
                       <span
                         className={`absolute top-3 right-3 z-[3] flex h-7 w-7 items-center justify-center rounded-full shadow-lg transition-colors ${
-                          isSelected ? 'text-white' : 'bg-white/90 dark:bg-black/60 text-ink/30 dark:text-white/40'
+                          isSelected ? 'text-white' : 'bg-white/95 dark:bg-black/60 text-ink/30 dark:text-white/40'
                         }`}
                         style={isSelected ? { background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
                       >
@@ -543,7 +543,7 @@ export default function ExerciseLibraryPage() {
                         </div>
                       )}
                       {ex.video_url && (
-                        <span className="absolute bottom-3 right-3 z-[2] flex h-8 w-8 items-center justify-center rounded-full bg-white/90 dark:bg-black/60 backdrop-blur-sm shadow-sm">
+                        <span className="absolute bottom-3 right-3 z-[2] flex h-8 w-8 items-center justify-center rounded-full bg-white/95 dark:bg-black/60 backdrop-blur-sm shadow-sm">
                           <Play size={13} fill="currentColor" className="text-ink dark:text-white ml-0.5" />
                         </span>
                       )}
@@ -603,7 +603,7 @@ export default function ExerciseLibraryPage() {
                 <button
                   type="button"
                   onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
-                  className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl px-5 py-2.5 text-sm font-semibold text-ink dark:text-white hover:bg-white/95 dark:hover:bg-white/[0.08] shadow-sm transition-colors"
+                  className="inline-flex items-center gap-2 rounded-full border border-black/[0.11] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl px-5 py-2.5 text-sm font-semibold text-ink dark:text-white hover:bg-white/95 dark:hover:bg-white/[0.08] shadow-sm transition-colors"
                 >
                   {ui.showMore.replace('{n}', String(Math.min(PAGE_SIZE, filteredExercises.length - visibleCount)))}
                   <span className="text-ink/40 dark:text-white/40 font-normal">
@@ -630,12 +630,12 @@ export default function ExerciseLibraryPage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 16, scale: 0.98 }}
               transition={{ duration: 0.25 }}
-              className="relative max-w-3xl w-full max-h-[88vh] overflow-y-auto rounded-[28px] border border-black/[0.06] dark:border-white/10 bg-white/95 dark:bg-[#0d0f13]/95 backdrop-blur-xl shadow-2xl"
+              className="relative max-w-3xl w-full max-h-[88vh] overflow-y-auto rounded-[28px] border border-black/[0.08] dark:border-white/10 bg-white/95 dark:bg-[#0d0f13]/95 backdrop-blur-xl shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 onClick={() => setOpenExercise(null)}
-                className="absolute top-4 right-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 dark:bg-black/50 backdrop-blur-sm text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white shadow-sm"
+                className="absolute top-4 right-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 dark:bg-black/50 backdrop-blur-sm text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white shadow-sm"
               >
                 <X size={17} />
               </button>
@@ -731,7 +731,7 @@ export default function ExerciseLibraryPage() {
                         applyFilter({ type: 'muscle', value: m });
                         setOpenExercise(null);
                       }}
-                      className="rounded-full border border-black/[0.06] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-ink/60 dark:text-white/60 hover:bg-white/90 dark:hover:bg-white/[0.08]"
+                      className="rounded-full border border-black/[0.08] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-ink/60 dark:text-white/60 hover:bg-white/95 dark:hover:bg-white/[0.08]"
                     >
                       {m}
                     </button>

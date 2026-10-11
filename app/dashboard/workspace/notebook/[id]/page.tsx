@@ -361,7 +361,7 @@ export default function WorkspaceNotebookPageRoute() {
   // NotebookPageView fills every remaining pixel below it.
   return (
     <WorkspaceShell fullscreen>
-      <div className="flex items-center gap-3 border-b border-black/[0.09] dark:border-white/10 px-3 sm:px-4 py-2.5 shrink-0">
+      <div className="flex items-center gap-3 border-b border-black/[0.12] dark:border-white/10 px-3 sm:px-4 py-2.5 shrink-0">
         <button
           onClick={() => router.push(notebook.folder_id ? `/dashboard/workspace/folder/${notebook.folder_id}` : '/dashboard/workspace')}
           aria-label={ui.nav.workspace}

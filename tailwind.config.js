@@ -38,8 +38,8 @@ module.exports = {
         xl4: "28px",
       },
       boxShadow: {
-        soft: "0 2px 8px rgba(11, 13, 18, 0.04), 0 12px 32px rgba(11, 13, 18, 0.06)",
-        lift: "0 8px 24px rgba(11, 13, 18, 0.06), 0 30px 60px rgba(11, 13, 18, 0.10)",
+        soft: "0 2px 10px rgba(11, 13, 18, 0.07), 0 16px 40px rgba(11, 13, 18, 0.12)",
+        lift: "0 8px 28px rgba(11, 13, 18, 0.10), 0 30px 70px rgba(11, 13, 18, 0.16)",
         softDark: "0 2px 8px rgba(0, 0, 0, 0.3), 0 20px 48px rgba(0, 0, 0, 0.35)",
         glow: "0 0 0 1px rgba(79, 124, 255, 0.14), 0 12px 40px rgba(79, 124, 255, 0.20)",
         glowEmerald: "0 0 0 1px rgba(50, 214, 160, 0.14), 0 12px 40px rgba(50, 214, 160, 0.20)",

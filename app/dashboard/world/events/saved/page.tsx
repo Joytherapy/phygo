@@ -60,7 +60,7 @@ export default function MyEventsPage() {
         </h1>
 
         {needsSignIn ? (
-          <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
+          <div className="rounded-[28px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
             <p className="text-sm text-ink/60 dark:text-white/50">{ui.events.signInToSave}</p>
           </div>
         ) : (
@@ -85,11 +85,11 @@ export default function MyEventsPage() {
             </div>
 
             {loading ? (
-              <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
+              <div className="rounded-[28px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
                 <p className="text-sm text-ink/60 dark:text-white/50">{ui.events.loadingEvents}</p>
               </div>
             ) : shown.length === 0 ? (
-              <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
+              <div className="rounded-[28px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
                 <p className="text-sm text-ink/60 dark:text-white/50">{ui.events.noSavedEvents}</p>
               </div>
             ) : (

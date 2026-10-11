@@ -55,7 +55,7 @@ function BodyMapContent() {
             animate="show"
             custom={0}
             variants={fadeUp}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase text-ink/75 dark:text-white/75 mb-4"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.11] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase text-ink/75 dark:text-white/75 mb-4"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-emerald animate-pulse" />
             {calibrate ? bm.calibrationBadge : bm.badge}
@@ -87,7 +87,7 @@ function BodyMapContent() {
         <div className="flex justify-center mb-10">
           <Link
             href="/dashboard/physiology?system=muscular"
-            className="group inline-flex items-center gap-2 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl px-4 py-2 text-xs font-medium text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white hover:border-emerald/40 transition-colors"
+            className="group inline-flex items-center gap-2 rounded-full border border-black/[0.11] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl px-4 py-2 text-xs font-medium text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white hover:border-emerald/40 transition-colors"
           >
             {ui.physiologyCrossLink.question}
             <span className="font-semibold" style={{ color: '#32D6A0' }}>

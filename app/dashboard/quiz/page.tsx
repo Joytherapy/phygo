@@ -198,7 +198,7 @@ export default function QuizPage() {
                   <button
                     key={s}
                     onClick={() => pickSubject(s)}
-                    className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-soft hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                    className="text-left rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-soft hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                   >
                     <p className="font-display text-base font-bold text-ink dark:text-white">{subjectLabel(s, ui, quizUi)}</p>
                     {p ? (
@@ -235,7 +235,7 @@ export default function QuizPage() {
                 <button
                   key={d}
                   onClick={() => pickDifficulty(d)}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl px-5 py-6 text-center shadow-soft hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                  className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl px-5 py-6 text-center shadow-soft hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                 >
                   <p className="font-display text-lg font-bold text-ink dark:text-white">{quizUi.difficulty[d]}</p>
                   <p className="text-xs text-ink/55 dark:text-white/40 mt-1.5">
@@ -316,7 +316,7 @@ export default function QuizPage() {
                             className={`w-full text-left rounded-xl border px-4 py-3.5 text-sm font-medium transition-all duration-200 ${
                               selected
                                 ? 'border-[#4F7CFF] bg-[#4F7CFF]/10 text-ink dark:text-white'
-                                : 'border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] text-ink/70 dark:text-white/70 hover:border-black/20 dark:hover:border-white/20'
+                                : 'border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] text-ink/70 dark:text-white/70 hover:border-black/20 dark:hover:border-white/20'
                             }`}
                           >
                             {opt}
@@ -376,7 +376,7 @@ export default function QuizPage() {
               {results.results.map((r) => (
                 <div
                   key={r.questionId}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                  className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
                 >
                   <div className="flex items-start gap-2.5 mb-3">
                     {r.isCorrect ? (
@@ -410,7 +410,7 @@ export default function QuizPage() {
               </button>
               <button
                 onClick={restart}
-                className="rounded-full px-6 py-3 text-sm font-semibold text-ink/60 dark:text-white/60 border border-black/[0.09] dark:border-white/10 hover:text-ink dark:hover:text-white transition-colors"
+                className="rounded-full px-6 py-3 text-sm font-semibold text-ink/60 dark:text-white/60 border border-black/[0.12] dark:border-white/10 hover:text-ink dark:hover:text-white transition-colors"
               >
                 {quizUi.backToSubjects}
               </button>

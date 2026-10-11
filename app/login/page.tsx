@@ -70,7 +70,7 @@ function LoginForm() {
         }}
       />
 
-      <div className="relative w-full max-w-sm rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.04] backdrop-blur-2xl shadow-2xl p-8">
+      <div className="relative w-full max-w-sm rounded-[28px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.04] backdrop-blur-2xl shadow-2xl p-8">
         <div className="flex justify-center mb-6">
           <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7CFF] to-[#32D6A0] text-white text-lg font-bold shadow-[0_8px_24px_rgba(79,124,255,0.35)]">
             P

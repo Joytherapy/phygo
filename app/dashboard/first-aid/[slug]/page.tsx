@@ -106,7 +106,7 @@ export default function FirstAidDetailPage() {
         {!loading && !error && topic && (
           <>
             {topic.image_url && (
-              <div className="w-full aspect-[16/9] rounded-2xl overflow-hidden bg-[#08090b] mb-8 border border-black/[0.09] dark:border-white/10">
+              <div className="w-full aspect-[16/9] rounded-2xl overflow-hidden bg-[#08090b] mb-8 border border-black/[0.12] dark:border-white/10">
                 <img src={topic.image_url} alt={topic.name} className="w-full h-full object-cover" />
               </div>
             )}
@@ -126,7 +126,7 @@ export default function FirstAidDetailPage() {
                   className={`px-4 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-1.5 ${
                     activeCountry === p.country
                       ? 'text-white'
-                      : 'text-ink/60 dark:text-white/60 border border-black/[0.08] dark:border-white/10 hover:text-ink dark:hover:text-white'
+                      : 'text-ink/60 dark:text-white/60 border border-black/[0.11] dark:border-white/10 hover:text-ink dark:hover:text-white'
                   }`}
                   style={activeCountry === p.country ? { background: ACCENT.gradient } : undefined}
                 >
@@ -144,7 +144,7 @@ export default function FirstAidDetailPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-6 space-y-5"
+                  className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-6 space-y-5"
                 >
                   <div className="flex flex-wrap gap-4 text-xs text-ink/60 dark:text-white/50">
                     {activeProtocol.emergency_number && (
@@ -180,7 +180,7 @@ export default function FirstAidDetailPage() {
                   )}
 
                   {activeProtocol.key_source && (
-                    <div className="pt-3 border-t border-black/[0.09] dark:border-white/10">
+                    <div className="pt-3 border-t border-black/[0.12] dark:border-white/10">
                       <p className="text-xs text-ink/55 dark:text-white/40">
                         {ui.firstAid.sourceLabel}{activeProtocol.key_source}
                       </p>

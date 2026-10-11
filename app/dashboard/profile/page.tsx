@@ -285,7 +285,7 @@ export default function ProfilePage() {
               {credentials.map((c) => (
                 <div
                   key={c.id}
-                  className="flex items-center gap-3 rounded-xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] px-4 py-2.5"
+                  className="flex items-center gap-3 rounded-xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] px-4 py-2.5"
                 >
                   <Award size={14} className="text-[#4F7CFF] shrink-0" />
                   <span className="text-sm text-ink dark:text-white flex-1">{c.label}</span>
@@ -335,7 +335,7 @@ export default function ProfilePage() {
                   {roleUi.transition.cta}
                 </button>
               ) : (
-                <div className="mt-3 rounded-xl border border-black/10 dark:border-white/10 bg-white/90 dark:bg-white/[0.03] p-4">
+                <div className="mt-3 rounded-xl border border-black/10 dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
                   <p className="text-sm font-semibold text-ink dark:text-white">{roleUi.transition.confirmTitle}</p>
                   <p className="mt-1 text-xs text-ink/60 dark:text-white/50">{roleUi.transition.confirmBody}</p>
                   <div className="mt-3 flex gap-2">

@@ -288,7 +288,7 @@ export default function ConditionsLibraryPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={ui.searchPlaceholder}
-              className="w-full rounded-full border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl pl-10 pr-9 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/35 dark:placeholder:text-white/35 outline-none focus:border-[#4F7CFF]/40 transition-colors shadow-soft"
+              className="w-full rounded-full border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl pl-10 pr-9 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/35 dark:placeholder:text-white/35 outline-none focus:border-[#4F7CFF]/40 transition-colors shadow-soft"
             />
             {search && (
               <button
@@ -310,7 +310,7 @@ export default function ConditionsLibraryPage() {
                 className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-soft cursor-pointer transition-colors ${
                   systemFilter
                     ? 'border-[#4F7CFF]/40 bg-[#4F7CFF]/10 text-ink dark:text-white'
-                    : 'border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
+                    : 'border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
                 }`}
               >
                 <option value="">{ui.allSystems}</option>
@@ -341,7 +341,7 @@ export default function ConditionsLibraryPage() {
               return (
                 <div
                   key={c.id}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] overflow-hidden transition-colors"
+                  className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] overflow-hidden transition-colors"
                 >
                   <button
                     type="button"
@@ -363,7 +363,7 @@ export default function ConditionsLibraryPage() {
                         exit={{ opacity: 0, height: 0 }}
                         className="overflow-hidden"
                       >
-                        <div className="px-5 pb-5 pt-1 space-y-4 border-t border-black/[0.09] dark:border-white/10">
+                        <div className="px-5 pb-5 pt-1 space-y-4 border-t border-black/[0.12] dark:border-white/10">
                           {loadingDetailId === c.id && !detail ? (
                             <p className="text-xs text-ink/55 dark:text-white/40 py-3">{ui.loadingDetail}</p>
                           ) : detail ? (
@@ -377,7 +377,7 @@ export default function ConditionsLibraryPage() {
                               <DetailField label={ui.returnToActivity} value={detail.return_to_activity_criteria} />
                               <DetailField label={ui.outcomeMeasures} value={detail.outcome_measures} />
                               {detail.source && (
-                                <div className="pt-2 border-t border-black/[0.09] dark:border-white/10">
+                                <div className="pt-2 border-t border-black/[0.12] dark:border-white/10">
                                   <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-1">
                                     {ui.source}
                                     {detail.evidence_level ? ` · ${ui.evidenceLevel}: ${detail.evidence_level}` : ''}

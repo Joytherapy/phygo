@@ -144,7 +144,7 @@ export default function LibraryAdminPage() {
         </div>
 
         {editing && (
-          <div className="mb-10 rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-6">
+          <div className="mb-10 rounded-[24px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-ink dark:text-white">
                 {editing.id ? 'Edit item' : 'New item'}
@@ -276,7 +276,7 @@ export default function LibraryAdminPage() {
             {items.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4"
+                className="flex items-center justify-between rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4"
               >
                 <div>
                   <p className="text-sm font-semibold text-ink dark:text-white">{item.title}</p>

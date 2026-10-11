@@ -120,7 +120,7 @@ function PatientShopPageInner() {
             Equipment picks that support your recovery.
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl px-4 py-2.5">
+        <div className="flex items-center gap-2 rounded-full border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl px-4 py-2.5">
           <Sparkles size={13} className="text-[#4F7CFF]" />
           <span className="text-xs font-semibold text-ink/60 dark:text-white/60">
             {products.length} curated picks
@@ -175,7 +175,7 @@ function PatientShopPageInner() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: Math.min(i, 12) * 0.05 }}
               whileHover={{ y: -4 }}
-              className="group relative rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden flex flex-col shadow-soft hover:shadow-xl transition-shadow duration-300"
+              className="group relative rounded-[24px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden flex flex-col shadow-soft hover:shadow-xl transition-shadow duration-300"
             >
               <div
                 className="relative h-32 flex items-center justify-center overflow-hidden"
@@ -191,7 +191,7 @@ function PatientShopPageInner() {
                 >
                   <Icon size={26} strokeWidth={1.75} />
                 </div>
-                <span className="absolute top-3 right-3 rounded-full bg-white/90 dark:bg-black/50 backdrop-blur-sm px-2.5 py-1 text-[11px] font-bold text-ink dark:text-white shadow-soft">
+                <span className="absolute top-3 right-3 rounded-full bg-white/95 dark:bg-black/50 backdrop-blur-sm px-2.5 py-1 text-[11px] font-bold text-ink dark:text-white shadow-soft">
                   {product.price}
                 </span>
               </div>

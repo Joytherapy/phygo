@@ -128,7 +128,7 @@ export default function NeuroExamPage() {
         </button>
 
         <div className="mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.11] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT.gradient }} />
             {ui.neuroExam.badge}
           </div>
@@ -181,7 +181,7 @@ export default function NeuroExamPage() {
                                 className={`px-4 py-2 rounded-full text-xs font-medium border transition-colors ${
                                   answers[q.id] === opt.value
                                     ? 'text-white border-transparent'
-                                    : 'text-ink/60 dark:text-white/60 border-black/[0.08] dark:border-white/10 hover:text-ink dark:hover:text-white'
+                                    : 'text-ink/60 dark:text-white/60 border-black/[0.11] dark:border-white/10 hover:text-ink dark:hover:text-white'
                                 }`}
                                 style={answers[q.id] === opt.value ? { background: ACCENT.solid } : undefined}
                               >
@@ -202,7 +202,7 @@ export default function NeuroExamPage() {
                                   className={`px-4 py-2 rounded-full text-xs font-medium border transition-colors ${
                                     selected
                                       ? 'text-white border-transparent'
-                                      : 'text-ink/60 dark:text-white/60 border-black/[0.08] dark:border-white/10 hover:text-ink dark:hover:text-white'
+                                      : 'text-ink/60 dark:text-white/60 border-black/[0.11] dark:border-white/10 hover:text-ink dark:hover:text-white'
                                   }`}
                                   style={selected ? { background: ACCENT.solid } : undefined}
                                 >
@@ -223,7 +223,7 @@ export default function NeuroExamPage() {
               <button
                 onClick={handleBack}
                 disabled={currentStep === 0}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-ink/60 dark:text-white/60 border border-black/[0.08] dark:border-white/10 disabled:opacity-30"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-ink/60 dark:text-white/60 border border-black/[0.11] dark:border-white/10 disabled:opacity-30"
               >
                 <ArrowLeft size={16} />
                 {ui.neuroExam.backButton}
@@ -250,7 +250,7 @@ export default function NeuroExamPage() {
               {sections.map((s) => (
                 <div
                   key={s.key}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                  className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
                 >
                   <p className="text-sm font-bold text-ink dark:text-white mb-3">{s.title}</p>
                   <div className="space-y-2">
@@ -277,7 +277,7 @@ export default function NeuroExamPage() {
             <div className="flex justify-between mt-10">
               <button
                 onClick={handleBack}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-ink/60 dark:text-white/60 border border-black/[0.08] dark:border-white/10"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-ink/60 dark:text-white/60 border border-black/[0.11] dark:border-white/10"
               >
                 <ArrowLeft size={16} />
                 {ui.neuroExam.editAnswersButton}

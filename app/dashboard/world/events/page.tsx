@@ -225,7 +225,7 @@ export default function EventsPage() {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="mb-8 rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 grid sm:grid-cols-2 lg:grid-cols-4 gap-4"
+            className="mb-8 rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 grid sm:grid-cols-2 lg:grid-cols-4 gap-4"
           >
             <FilterSelect
               label={ui.events.categoryLabel}
@@ -343,11 +343,11 @@ export default function EventsPage() {
         </p>
 
         {loading ? (
-          <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
+          <div className="rounded-[28px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
             <p className="text-sm text-ink/60 dark:text-white/50">{ui.events.loadingEvents}</p>
           </div>
         ) : events.length === 0 ? (
-          <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
+          <div className="rounded-[28px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
             <p className="text-sm text-ink/60 dark:text-white/50">{ui.events.noEventsFound}</p>
           </div>
         ) : (
@@ -373,7 +373,7 @@ export default function EventsPage() {
         )}
 
         {providers.length > 0 && (
-          <div className="mt-16 pt-10 border-t border-black/[0.09] dark:border-white/10">
+          <div className="mt-16 pt-10 border-t border-black/[0.12] dark:border-white/10">
             <div className="flex items-center gap-2 mb-1.5">
               <Building2 size={15} className="text-[#A855F7]" />
               <p className="text-xs font-semibold tracking-[0.2em] uppercase text-ink/55 dark:text-white/40">
@@ -386,7 +386,7 @@ export default function EventsPage() {
               {providers.map((provider) => (
                 <div
                   key={provider.id}
-                  className="group rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#A855F7]/30 hover:shadow-[0_16px_40px_-18px_rgba(168,85,247,0.3)]"
+                  className="group rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#A855F7]/30 hover:shadow-[0_16px_40px_-18px_rgba(168,85,247,0.3)]"
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <h3 className="text-sm font-semibold text-ink dark:text-white">{provider.name}</h3>

@@ -71,7 +71,7 @@ export default function ScienceAdminPage() {
         {loading ? (
           <p className="text-sm text-ink/60 dark:text-white/50">Loading...</p>
         ) : papers.length === 0 ? (
-          <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
+          <div className="rounded-[28px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
             <p className="text-sm text-ink/60 dark:text-white/50">
               Nothing to review right now.
             </p>
@@ -81,7 +81,7 @@ export default function ScienceAdminPage() {
             {papers.map((paper) => (
               <div
                 key={paper.id}
-                className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
               >
                 <div className="flex items-center gap-2 mb-2">
                   {paper.study_type && (

@@ -147,7 +147,7 @@ export default function WorkspaceTrashPage() {
           {folders.map((f) => (
             <div
               key={f.id}
-              className="flex items-center gap-3 rounded-xl2 border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3.5"
+              className="flex items-center gap-3 rounded-xl2 border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3.5"
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#4F7CFF]/10 text-[#4F7CFF]">
                 <Folder size={15} />
@@ -166,7 +166,7 @@ export default function WorkspaceTrashPage() {
           {notebooks.map((nb) => (
             <div
               key={nb.id}
-              className="flex items-center gap-3 rounded-xl2 border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3.5"
+              className="flex items-center gap-3 rounded-xl2 border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3.5"
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#4F7CFF]/10 text-[#4F7CFF]">
                 <BookOpen size={15} />
@@ -185,7 +185,7 @@ export default function WorkspaceTrashPage() {
           {documents.map((d) => (
             <div
               key={d.id}
-              className="flex items-center gap-3 rounded-xl2 border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3.5"
+              className="flex items-center gap-3 rounded-xl2 border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3.5"
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#32D6A0]/10 text-[#32D6A0]">
                 <FileText size={15} />

@@ -49,7 +49,7 @@ export default function MyPhygoLifePage() {
 
       <a
         href="/my-phygo/life/metabolic"
-        className="flex items-center justify-between rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#6366F1]/30 transition-colors group"
+        className="flex items-center justify-between rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#6366F1]/30 transition-colors group"
       >
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#6366F1]/10 text-[#6366F1]">

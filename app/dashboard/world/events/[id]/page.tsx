@@ -287,7 +287,7 @@ export default function EventDetailPage() {
 
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3">
+    <div className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10">{icon}</div>
       <div className="min-w-0">
         <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">{label}</p>

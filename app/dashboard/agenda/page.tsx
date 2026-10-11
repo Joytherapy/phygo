@@ -320,15 +320,15 @@ export default function AgendaPage() {
               </div>
             )}
 
-            <div className="rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden">
+            <div className="rounded-[24px] border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden">
               <div className="overflow-x-auto">
                 <div style={{ minWidth: 900 }}>
-                  <div className="flex border-b border-black/[0.09] dark:border-white/10">
+                  <div className="flex border-b border-black/[0.12] dark:border-white/10">
                     <div className="w-16 shrink-0" />
                     {weekDays.map((d) => (
                       <div
                         key={d.toISOString()}
-                        className={`flex-1 text-center py-3 border-l border-black/[0.09] dark:border-white/10 ${
+                        className={`flex-1 text-center py-3 border-l border-black/[0.12] dark:border-white/10 ${
                           isToday(d) ? 'bg-[#4F7CFF]/5' : ''
                         }`}
                       >
@@ -367,7 +367,7 @@ export default function AgendaPage() {
                         <div
                           key={d.toISOString()}
                           onClick={(e) => handleColumnClick(d, e)}
-                          className={`flex-1 relative border-l border-black/[0.09] dark:border-white/10 cursor-pointer group/col ${
+                          className={`flex-1 relative border-l border-black/[0.12] dark:border-white/10 cursor-pointer group/col ${
                             isToday(d) ? 'bg-[#4F7CFF]/[0.03]' : ''
                           }`}
                         >
@@ -456,7 +456,7 @@ export default function AgendaPage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#12131a] shadow-2xl p-6"
+              className="w-full max-w-sm rounded-[24px] border border-black/[0.12] dark:border-white/10 bg-white dark:bg-[#12131a] shadow-2xl p-6"
             >
               <p className="text-xs font-semibold uppercase tracking-wide text-[#4F7CFF] mb-1">
                 {ui.modal.newAppointmentEyebrow}

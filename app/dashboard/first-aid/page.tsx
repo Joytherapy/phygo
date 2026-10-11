@@ -67,7 +67,7 @@ export default function FirstAidPage() {
 
       <div className="relative max-w-5xl mx-auto px-6 pt-40 pb-24">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.11] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT.solid }} />
             {ui.firstAid.badge}
           </div>
@@ -92,7 +92,7 @@ export default function FirstAidPage() {
             className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
               categoryFilter === 'all'
                 ? 'text-white'
-                : 'text-ink/60 dark:text-white/60 border border-black/[0.08] dark:border-white/10 hover:text-ink dark:hover:text-white'
+                : 'text-ink/60 dark:text-white/60 border border-black/[0.11] dark:border-white/10 hover:text-ink dark:hover:text-white'
             }`}
             style={categoryFilter === 'all' ? { background: ACCENT.gradient } : undefined}
           >
@@ -105,7 +105,7 @@ export default function FirstAidPage() {
               className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 categoryFilter === c
                   ? 'text-white'
-                  : 'text-ink/60 dark:text-white/60 border border-black/[0.08] dark:border-white/10 hover:text-ink dark:hover:text-white'
+                  : 'text-ink/60 dark:text-white/60 border border-black/[0.11] dark:border-white/10 hover:text-ink dark:hover:text-white'
               }`}
               style={categoryFilter === c ? { background: ACCENT.gradient } : undefined}
             >
@@ -126,7 +126,7 @@ export default function FirstAidPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
                 onClick={() => router.push(`/dashboard/first-aid/${topic.slug}`)}
-                className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden hover:border-[#EF4444]/40 transition-colors"
+                className="text-left rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden hover:border-[#EF4444]/40 transition-colors"
               >
                 {topic.image_url && (
                   <div className="w-full aspect-[16/9] bg-[#08090b] overflow-hidden">

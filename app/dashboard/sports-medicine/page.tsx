@@ -82,7 +82,7 @@ export default function SportsMedicinePage() {
 
       <div className="relative max-w-4xl mx-auto px-6 pt-40 pb-24">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.11] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT.gradient }} />
             {ui.sportsMedicine.atlasBadge}
           </div>
@@ -103,7 +103,7 @@ export default function SportsMedicinePage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={ui.librarySearchPlaceholder}
-            className="w-full pl-11 pr-10 py-2.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-sm text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 focus:outline-none focus:border-black/20 dark:focus:border-white/20 transition-colors"
+            className="w-full pl-11 pr-10 py-2.5 rounded-full border border-black/[0.11] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-sm text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 focus:outline-none focus:border-black/20 dark:focus:border-white/20 transition-colors"
           />
           {searchQuery && (
             <button
@@ -136,7 +136,7 @@ export default function SportsMedicinePage() {
                     {items.map((c) => (
                       <div
                         key={c.id}
-                        className="rounded-2xl border border-black/[0.08] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-soft shadow-black/5 dark:shadow-black/40"
+                        className="rounded-2xl border border-black/[0.11] dark:border-white/[0.14] bg-white/80 dark:bg-white/[0.05] backdrop-blur-xl overflow-hidden shadow-soft shadow-black/5 dark:shadow-black/40"
                       >
                         {c.diagram_image && (
                           <button

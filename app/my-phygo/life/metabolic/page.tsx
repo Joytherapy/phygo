@@ -120,15 +120,15 @@ export default function MyPhygoLifeMetabolicPage() {
                 {latest.calorie_target} <span className="text-lg font-semibold text-ink/55 dark:text-white/40">{calcUi.kcalPerDaySuffix}</span>
               </p>
               <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-2xl bg-white/90 dark:bg-white/[0.04] py-3">
+                <div className="rounded-2xl bg-white/95 dark:bg-white/[0.04] py-3">
                   <p className="text-lg font-bold text-ink dark:text-white">{latest.protein_g}g</p>
                   <p className="text-[11px] text-ink/55 dark:text-white/40">{calcUi.proteinLabel}</p>
                 </div>
-                <div className="rounded-2xl bg-white/90 dark:bg-white/[0.04] py-3">
+                <div className="rounded-2xl bg-white/95 dark:bg-white/[0.04] py-3">
                   <p className="text-lg font-bold text-ink dark:text-white">{latest.carbs_g}g</p>
                   <p className="text-[11px] text-ink/55 dark:text-white/40">{calcUi.carbsLabel}</p>
                 </div>
-                <div className="rounded-2xl bg-white/90 dark:bg-white/[0.04] py-3">
+                <div className="rounded-2xl bg-white/95 dark:bg-white/[0.04] py-3">
                   <p className="text-lg font-bold text-ink dark:text-white">{latest.fat_g}g</p>
                   <p className="text-[11px] text-ink/55 dark:text-white/40">{calcUi.fatLabel}</p>
                 </div>
@@ -245,7 +245,7 @@ export default function MyPhygoLifeMetabolicPage() {
               valore di quei dati. */}
           <a
             href="/my-phygo/shop?category=Body%20Composition"
-            className="flex items-center justify-between gap-3 rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 mb-6 hover:border-[#6366F1]/30 transition-colors group"
+            className="flex items-center justify-between gap-3 rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 mb-6 hover:border-[#6366F1]/30 transition-colors group"
           >
             <div className="flex items-center gap-3 min-w-0">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#6366F1]/10 text-[#6366F1]">
@@ -268,7 +268,7 @@ export default function MyPhygoLifeMetabolicPage() {
           </button>
 
           {history.length >= 2 && (
-            <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 mb-6">
+            <div className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 mb-6">
               <p className="text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-3">
                 {calcUi.weightTrendHeading}
               </p>
@@ -285,7 +285,7 @@ export default function MyPhygoLifeMetabolicPage() {
                 {history.map((h) => (
                   <div
                     key={h.id}
-                    className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3"
+                    className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3"
                   >
                     <Calendar size={14} className="text-ink/30 dark:text-white/30 shrink-0" />
                     <div className="min-w-0 flex-1">

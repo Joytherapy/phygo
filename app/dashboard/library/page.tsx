@@ -191,7 +191,7 @@ export default function LibraryPage() {
               {filteredItems.map((item) => (
                 <div
                   key={item.id}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl hover:border-[#4F7CFF]/40 transition-colors"
+                  className="rounded-2xl border border-black/[0.12] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl hover:border-[#4F7CFF]/40 transition-colors"
                 >
                   <button
                     onClick={() => setOpenItem(item)}
@@ -240,7 +240,7 @@ export default function LibraryPage() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-w-lg w-full max-h-[85vh] overflow-y-auto rounded-[24px] bg-white dark:bg-[#0e0f12] border border-black/[0.09] dark:border-white/10 p-6"
+            className="max-w-lg w-full max-h-[85vh] overflow-y-auto rounded-[24px] bg-white dark:bg-[#0e0f12] border border-black/[0.12] dark:border-white/10 p-6"
           >
             {openItem.image_url && (
               <div className="w-full aspect-video bg-white rounded-2xl overflow-hidden mb-4 flex items-center justify-center">
