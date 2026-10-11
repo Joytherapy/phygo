@@ -147,10 +147,10 @@ function Stage({
       {/* Main window */}
       <div aria-hidden className="lp-ticks overflow-hidden rounded-[22px] border border-black/[0.08] bg-white/95 shadow-lift backdrop-blur-xl dark:border-white/[0.09] dark:bg-[#0f1116]/95 dark:shadow-softDark">
         <div className="flex items-center gap-2 border-b border-black/[0.06] px-4 py-3 dark:border-white/[0.06]">
-          <span className="h-2.5 w-2.5 rounded-full bg-ink/10 dark:bg-white/15" />
-          <span className="h-2.5 w-2.5 rounded-full bg-ink/10 dark:bg-white/15" />
-          <span className="h-2.5 w-2.5 rounded-full bg-ink/10 dark:bg-white/15" />
-          <span className="ml-3 truncate text-[12px] font-medium text-ink/70 dark:text-white/70">{s.windowTitle}</span>
+          <span className="hidden h-2.5 w-2.5 rounded-full bg-ink/10 dark:bg-white/15 sm:block" />
+          <span className="hidden h-2.5 w-2.5 rounded-full bg-ink/10 dark:bg-white/15 sm:block" />
+          <span className="hidden h-2.5 w-2.5 rounded-full bg-ink/10 dark:bg-white/15 sm:block" />
+          <span className="min-w-0 truncate text-[12px] font-medium sm:ml-3 text-ink/70 dark:text-white/70">{s.windowTitle}</span>
           <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full bg-amber-400/15 px-2.5 py-1 text-[10.5px] font-semibold text-amber-700 dark:text-amber-300">
             <PencilLine size={11} /> {s.draft}
           </span>

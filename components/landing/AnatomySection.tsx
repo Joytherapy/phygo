@@ -80,8 +80,24 @@ export default function AnatomySection({ anatomy }: { anatomy: LandingDict["anat
             </div>
             <p className="mt-3 text-[14px] leading-relaxed text-white/60">{anatomy.brain.text}</p>
             <figure className="mt-6">
-              <div className="overflow-hidden rounded-2xl ring-1 ring-white/10">
+              <div className="relative overflow-hidden rounded-2xl bg-ink ring-1 ring-white/[0.07]">
                 <BrainVideo label={anatomy.brain.alt} />
+                {/* Soft electric glow behind the model and a vignette that melts the frame into the card. */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 bg-[radial-gradient(55%_50%_at_50%_52%,rgba(79,124,255,0.16),transparent_70%)] mix-blend-screen"
+                />
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_95%_at_50%_50%,transparent_58%,rgba(11,13,18,0.9))]"
+                />
+                <span
+                  aria-hidden
+                  className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-2.5 py-1 font-mono text-[10px] tracking-wide text-white/65 ring-1 ring-white/10 backdrop-blur"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald" />
+                  3D · 360°
+                </span>
               </div>
               <figcaption className="mt-3 text-center font-mono text-[10.5px] tracking-wide text-white/55">
                 {anatomy.brain.caption}
