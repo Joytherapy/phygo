@@ -1,0 +1,382 @@
+import type { LandingDict } from '../landingStrings';
+
+export const en: LandingDict = {
+  meta: {
+    title: 'PHYGO — The clinical workspace for physiotherapy',
+    description:
+      'AI-drafted SOAP notes you review and approve, {n}+ clinical conditions, 3D anatomy and exercise prescription — one connected workspace for physiotherapists.',
+    descriptionNoCount:
+      'AI-drafted SOAP notes you review and approve, a clinical conditions library, 3D anatomy and exercise prescription — one connected workspace for physiotherapists.',
+    ogLocale: 'en_GB',
+  },
+  nav: {
+    tour: 'Product',
+    library: 'Library',
+    pricing: 'Pricing',
+    faq: 'FAQ',
+    login: 'Log in',
+    startFree: 'Start free',
+    openMenu: 'Open menu',
+    closeMenu: 'Close menu',
+    language: 'Language',
+    darkMode: 'Switch to dark mode',
+    lightMode: 'Switch to light mode',
+    home: 'PHYGO home',
+    skip: 'Skip to content',
+  },
+  hero: {
+    eyebrow: 'The clinical workspace for physiotherapy',
+    title: 'From the first word\nto the *rehab plan.*',
+    sub: 'PHYGO turns what you observe in a session into a structured SOAP draft, connects it to {conditions}, 3D anatomy and {exercises} — and leaves every clinical decision to you.',
+    conditionsPhrase: '{n}+ clinical conditions',
+    conditionsFallback: 'a clinical conditions library',
+    exercisesPhrase: '{n}+ exercises with video',
+    exercisesFallback: 'an exercise library with video',
+    ctaPrimary: 'Start free',
+    ctaSecondary: 'Take the product tour',
+    assurances: ['Free to start', 'No credit card', 'EN · IT · ES · FR'],
+    caption: 'Illustrative interface with a sample case. Every draft waits for your review.',
+    stage: {
+      windowTitle: 'Session · Sample patient',
+      draft: 'Draft · not saved',
+      sidebar: ['Patients', 'Copilot', 'Conditions', 'Body map', 'Exercises', 'Evidence'],
+      voiceLabel: 'Dictation',
+      voiceText: '“…painful arc between 70 and 120 degrees, weaker on external rotation…”',
+      linkedLabel: 'Linked condition',
+      evidence: 'Evidence: high',
+      exerciseLabel: 'Exercise draft',
+      phasesLabel: 'Rehab phases',
+      reviewSave: 'Review & save',
+      ariaLabel: 'Illustrative PHYGO interface: a session draft linked to the clinical library, exercises and rehab phases',
+    },
+  },
+  proof: {
+    conditions: 'clinical conditions',
+    exercises: 'exercises with video',
+    protocols: 'phased rehab protocols',
+    languages: 'languages',
+    mapsValue: '3D',
+    maps: 'body & brain maps',
+  },
+  story: {
+    eyebrow: 'Product tour',
+    title: 'One patient. *One continuous workflow.*',
+    intro:
+      'Follow a sample case through PHYGO — from what you hear in the session to a rehab plan you are ready to sign off.',
+    caseLabel: 'Sample case · right shoulder, 3 weeks',
+    chapters: [
+      {
+        kicker: 'Understand',
+        title: 'Capture the session the way you think it.',
+        text: 'Dictate or type your notes naturally, in English, Italian, Spanish or French. Speech is transcribed in the browser — no rigid template to follow.',
+      },
+      {
+        kicker: 'Organise',
+        title: 'A structured SOAP draft, with the reasoning shown.',
+        text: 'Subjective, objective, assessment and plan — plus hypotheses, differentials, red flags and the information still missing, written as cautious decision support.',
+      },
+      {
+        kicker: 'Explore',
+        title: 'The relevant knowledge, already linked.',
+        text: 'The assessment is matched to the clinical library: goals, clinical tests, red flags and typical exercises for the condition, one click away.',
+      },
+      {
+        kicker: 'Prescribe',
+        title: 'Exercises with a dose, not just a name.',
+        text: "Exercise suggestions with sets, reps and frequency, refined against the condition's phased protocol when one exists. In the exercise library, every exercise comes with a demonstration video.",
+      },
+      {
+        kicker: 'Plan & review',
+        title: 'You decide what reaches the record.',
+        text: 'Edit or discard anything. When you save, the plan and a plain-language summary become available to your patient in My Phygo — and you can export a PDF whenever you need one.',
+      },
+    ],
+    listening: 'Listening',
+    languagesPill: 'EN · IT · ES · FR',
+    transcript:
+      '42-year-old, right shoulder pain for three weeks after starting overhead training. Painful arc between 70 and 120 degrees, weaker on resisted external rotation. No trauma, no night pain.',
+    soapLabels: ['Subjective', 'Objective', 'Assessment', 'Plan'],
+    soap: [
+      'Right shoulder pain for 3 weeks, started with overhead training. No trauma, no night pain.',
+      'Painful arc 70–120°. Reduced strength on resisted external rotation.',
+      'Presentation may be consistent with rotator cuff related shoulder pain.',
+      'Graded loading of the rotator cuff and scapular muscles; review in 2 weeks.',
+    ],
+    reasoning: [
+      { label: 'Hypothesis', text: 'Possible rotator cuff related shoulder pain' },
+      { label: 'Differentials', text: 'Consider cervical referral or early adhesive capsulitis' },
+      { label: 'Red flags', text: 'None apparent from the information provided' },
+      { label: 'Missing information', text: 'Pain score and a baseline outcome measure (e.g. SPADI)' },
+    ],
+    linkedLabel: 'Linked from the library',
+    region: 'Body map · Shoulder',
+    exercises: [
+      { name: 'Isometric external rotation', dose: '5 × 30 s · daily' },
+      { name: 'Side-lying external rotation', dose: '3 × 12 · every other day' },
+      { name: 'Scapular retraction with band', dose: '3 × 15 · daily' },
+    ],
+    videoLabel: 'Video',
+    fromLibrary: 'From the exercise library',
+    phasesLabel: 'Rehab phases',
+    current: 'Current',
+    review: 'Review & save',
+    savedTo: 'Shared with the patient after you save',
+    portalTitle: 'My Phygo · patient view',
+    portalText:
+      'Your shoulder is sensitive to overhead load right now. Do your three exercises daily and keep overhead lifting pain-free.',
+    pdf: 'Export PDF',
+    caption:
+      'Sample case for illustration. The condition name and rehab phases come from the real PHYGO library.',
+    chapterNav: 'Product tour chapters',
+  },
+  library: {
+    eyebrow: 'Clinical library',
+    title: '{n}+ clinical conditions.\n*One clinical structure.*',
+    titleNoCount: 'A clinical library built\n*around how you reason.*',
+    intro:
+      'Orthopaedic, neurological, cardiopulmonary, oncological, pelvic-floor and many more presentations — each entry organised around the questions you ask in clinic, and openly browsable without an account.',
+    countLabel: 'conditions and pathologies, live from the library',
+    namesLabel: 'A selection of conditions in the library',
+    coverageTitle: 'What each entry covers',
+    coverageLive: 'Live coverage · {n} entries',
+    fields: {
+      goals: 'Rehabilitation goals',
+      clinical_tests: 'Clinical tests',
+      red_flags: 'Red flags',
+      contraindications: 'Contraindications',
+      typical_exercises: 'Typical exercises',
+      progression_criteria: 'Progression criteria',
+      return_to_activity_criteria: 'Return-to-activity criteria',
+      outcome_measures: 'Outcome measures',
+      source: 'Cited sources',
+      phased: 'Phased rehab protocols',
+    },
+    coverageNote:
+      'Not every entry has every field yet. Each condition shows its evidence level, and sources where available. The library supports — it does not replace — clinical judgement.',
+    featuredKicker: 'A real library entry',
+    evidence: 'Evidence',
+    levels: { high: 'High', moderate: 'Moderate', low: 'Low', strong: 'Strong' },
+    tabs: { goals: 'Goals', clinical_tests: 'Clinical tests', red_flags: 'Red flags', typical_exercises: 'Exercises' },
+    phasesLabel: 'Rehab phases',
+    excerptTranslated: 'Excerpt · translated from the Italian source',
+    excerptSource: 'Excerpt from the original entry',
+    openEntry: 'Open the full entry',
+    cta: 'Explore the library',
+    languages: 'Browse it in English, Italian, Spanish or French',
+    tablistLabel: '{name} sections',
+  },
+  anatomy: {
+    eyebrow: 'Anatomy & neuroanatomy',
+    title: 'Start from the body.\n*Land on the condition.*',
+    intro:
+      'Explore interactive 3D models, select a region and go straight to the conditions — and, for body regions, the exercise programs — linked to it.',
+    body: {
+      title: 'Body map',
+      text: 'A 3D musculoskeletal model with selectable regions. Each region opens its associated conditions and exercise programs.',
+      regions: ['Shoulder', 'Lumbar spine', 'Knee', 'Ankle'],
+      caption: 'Simplified illustration — the app uses an interactive 3D model.',
+      svgLabel: 'Illustrative body outline with selectable regions',
+    },
+    brain: {
+      title: 'Brain map',
+      text: 'Neuroanatomy in 3D: brain areas and peripheral nerves linked to the neurological conditions you treat, with reference views like this one.',
+      alt: 'PHYGO neuroanatomy reference: lateral view of the brain with the lobes, cerebellum and brainstem, their functions and lesion syndromes',
+      caption: 'Reference view from the PHYGO brain map',
+    },
+    systemsLabel: 'Plus system explorers',
+    systems: [
+      'Pelvic floor',
+      'Cardiopulmonary',
+      'Endocrine',
+      'Gastrointestinal',
+      'Urinary',
+      'Immune',
+      'Haematology',
+      'Oncology',
+      'Fascia',
+      'Physiology',
+    ],
+  },
+  tools: {
+    eyebrow: 'Evidence & professional tools',
+    title: 'The reference shelf\n*of a modern practice.*',
+    intro: 'Research, assessment tools and specialty knowledge — next to the patient you are treating, not in another tab.',
+    columns: [
+      {
+        title: 'Evidence, filtered',
+        text: 'New PubMed studies are checked daily. Only randomised controlled trials, systematic reviews and meta-analyses on physiotherapy are imported, then summarised in a fixed structure.',
+        items: [
+          'Clinical question, population and intervention',
+          'Main findings and clinical interpretation',
+          'Auto-published only above a quality threshold',
+          'Related studies shown next to copilot drafts',
+        ],
+      },
+      {
+        title: 'Assessment tools',
+        text: 'The tests and scales you use every week, within reach while you write.',
+        items: [
+          'Orthopaedic special tests',
+          'Functional scales and outcome measures',
+          'Neurological examination',
+          'Pelvic-floor questionnaires',
+          'Metabolic and energy-needs calculator',
+        ],
+      },
+      {
+        title: 'Specialty libraries',
+        text: 'Depth beyond musculoskeletal care.',
+        items: [
+          'Sports medicine and return to play',
+          'Cardiopulmonary rehabilitation and airway clearance',
+          'Pelvic-floor rehabilitation',
+          'Oncology rehabilitation',
+          'First aid and BLS by country',
+        ],
+      },
+    ],
+  },
+  workspace: {
+    eyebrow: 'The workspace',
+    title: 'Your practice,\n*connected.*',
+    intro:
+      'Documentation and knowledge are half of the work. PHYGO also keeps patients, scheduling and your study material in one place.',
+    items: [
+      {
+        title: 'Patients & sessions',
+        text: "Every patient's saved notes, plans and clinical references in one record — the next visit starts where the last one ended.",
+      },
+      {
+        title: 'My Phygo for patients',
+        text: "Invite patients with a code. They see the plan, exercises and summary you saved — nothing you haven't approved.",
+      },
+      { title: 'Agenda', text: 'Schedule sessions and let linked patients request appointments for you to confirm.' },
+      {
+        title: 'Documents & notebooks',
+        text: 'Upload PDFs, highlight and annotate them, keep notebooks and ask PHYGO about what you are reading.',
+      },
+      {
+        title: 'Student mode',
+        text: 'For physiotherapy students: the workspace, the knowledge libraries and quizzes by subject and difficulty.',
+      },
+    ],
+  },
+  trust: {
+    eyebrow: 'Clinical responsibility',
+    title: 'Built to support your judgement —\n*never to replace it.*',
+    intro:
+      'PHYGO is a documentation and knowledge tool for qualified professionals. It does not diagnose, and it never acts on patients without you.',
+    items: [
+      {
+        title: 'Drafts, not decisions',
+        text: 'AI output is a proposal. Reasoning is phrased as decision support, and nothing reaches a patient record until you save it.',
+      },
+      {
+        title: 'Access-controlled data',
+        text: 'Stored in an EU-hosted database (Frankfurt), encrypted in transit and at rest, with row-level security so each account reaches only its own patients.',
+      },
+      {
+        title: 'Transparent AI processing',
+        text: 'To create a draft, session text — and any image you upload — is processed by our AI provider. Clinical data is not used to train third-party models.',
+      },
+      {
+        title: 'Evidence you can weigh',
+        text: 'Library entries show their evidence level and cite sources where available, so you decide how much weight to give them.',
+      },
+    ],
+    privacy: 'Read the privacy policy',
+  },
+  pricing: {
+    eyebrow: 'Pricing',
+    title: 'Plans that grow\n*with your practice.*',
+    sub: 'Create your account for free — no credit card required.',
+    monthly: 'Monthly',
+    annual: 'Annual',
+    save: 'Save 20%',
+    perMonth: '/month',
+    custom: 'Custom',
+    popular: 'Most popular',
+    billingLabel: 'Annual billing',
+    tiers: [
+      {
+        description: 'For solo practitioners getting started.',
+        features: ['50 sessions / month', 'AI clinical notes', 'PDF export', 'Email support'],
+        cta: 'Start free',
+      },
+      {
+        description: 'For full-time practices that work every day.',
+        features: [
+          'Unlimited sessions',
+          'AI clinical notes + patient-friendly summaries',
+          'Exercise library',
+          'Priority support',
+        ],
+        cta: 'Start free',
+      },
+      {
+        description:
+          'For multi-practitioner clinics. Team features are in development — tell us what your clinic needs.',
+        features: [
+          'Everything in Professional',
+          'Multi-practitioner accounts (in development)',
+          'Shared patient history (in development)',
+          'Dedicated onboarding',
+        ],
+        cta: 'Contact us',
+      },
+    ],
+  },
+  faq: {
+    eyebrow: 'Questions',
+    title: 'What physiotherapists\n*ask us.*',
+    items: [
+      {
+        q: 'Does PHYGO replace my clinical judgement?',
+        a: 'No. PHYGO drafts documentation and brings relevant knowledge to hand. Every note, reasoning summary and exercise suggestion is a draft you review, edit and approve. PHYGO does not diagnose and does not contact patients on its own.',
+      },
+      {
+        q: 'What if the AI gets something wrong?',
+        a: 'It can — which is why nothing reaches a patient record until you save it. Reasoning is written as cautious decision support, with red flags and missing information listed, so it is easy to check against your own assessment.',
+      },
+      {
+        q: 'How is patient data handled?',
+        a: 'Clinical data is stored in an EU-hosted database (Frankfurt), encrypted in transit and at rest, with row-level security so each account reaches only its own patients. Session text and uploaded images are processed by our AI provider to create drafts and are not used to train third-party models. Details are in the privacy policy.',
+      },
+      {
+        q: 'Where does the library content come from?',
+        a: 'Entries are compiled from published literature and clinical guidelines. Each shows its evidence level and cites sources where available. Coverage varies by condition, so treat the library as a starting point for your own reasoning.',
+      },
+      {
+        q: 'Which languages does PHYGO support?',
+        a: 'You can dictate or type sessions in English, Italian, Spanish or French. The public condition library and the exercise library are available in the same four languages.',
+      },
+      {
+        q: 'Can I try it on a sample case first?',
+        a: 'Yes. Create a free account and run the copilot on a made-up case to see the drafts it produces before you use it in practice.',
+      },
+      {
+        q: 'How much does it cost to start?',
+        a: "Creating an account is free and doesn't require a credit card.",
+      },
+    ],
+  },
+  final: {
+    title: 'Spend your attention on the patient,\n*not the paperwork.*',
+    text: 'Create a free account and try the copilot, the clinical library and the exercise tools on your next session.',
+    cta: 'Start free',
+    secondary: 'Browse the library first',
+    note: 'No credit card required.',
+  },
+  footer: {
+    tagline: 'The clinical workspace for physiotherapy.',
+    product: 'Product',
+    library: 'Library',
+    pricing: 'Pricing',
+    privacy: 'Privacy',
+    terms: 'Terms',
+    contact: 'Contact',
+    rights: 'All rights reserved.',
+    languageLabel: 'Language',
+  },
+  common: { illustrative: 'Illustrative' },
+};

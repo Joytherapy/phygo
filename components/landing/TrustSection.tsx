@@ -1,70 +1,43 @@
-import { PenLine, Lock, Cpu, Scale } from "lucide-react";
+import { Database, FileCheck2, Scale, ShieldCheck } from "lucide-react";
+import type { LandingDict } from "@/lib/i18n/landingStrings";
 import { Reveal, SectionHeader, TextLink } from "./ui";
 
-// Every statement here is checked against the implementation or the privacy
-// policy (app/privacy/page.tsx):
-// - drafts: LiveStructuring only saves on an explicit "save to patient";
-//   generate-note asks for hedged, decision-support reasoning.
-// - data: Supabase project in eu-central-1 (Frankfurt), RLS on every table,
-//   encryption in transit/at rest per the privacy policy.
-// - AI processing: transcripts and uploaded images are sent to OpenAI to
-//   produce drafts; the policy states clinical data is not used to train
-//   third-party models.
-// - evidence: each library entry carries an evidence level; sources where present.
-const PILLARS = [
-  {
-    icon: PenLine,
-    title: "Drafts, not decisions",
-    text: "AI output is a proposal. Reasoning is phrased as decision support, and nothing is saved to a patient record until you review and save it.",
-  },
-  {
-    icon: Lock,
-    title: "Access-controlled clinical data",
-    text: "Data is stored in an EU-hosted database (Frankfurt), encrypted in transit and at rest, with row-level security so each account only reaches its own patients.",
-  },
-  {
-    icon: Cpu,
-    title: "Transparent AI processing",
-    text: "To create a draft, session text — and any image you upload — is processed by our AI provider. Clinical data is not used to train third-party models.",
-  },
-  {
-    icon: Scale,
-    title: "Evidence you can weigh",
-    text: "Library entries show their evidence level and cite sources where available, so you can judge how much weight to give them.",
-  },
-];
+// Every statement here is checked against the code: drafts are only saved on
+// explicit action (components/liveStructuring), Supabase project region
+// eu-central-1 with RLS on patient tables, AI processing disclosed in
+// app/privacy, evidence_level + source fields in knowledge_base.
+const ICONS = [FileCheck2, Database, ShieldCheck, Scale];
 
-export default function TrustSection() {
+export default function TrustSection({ trust }: { trust: LandingDict["trust"] }) {
   return (
-    <section id="trust" aria-labelledby="trust-title" className="relative py-24 sm:py-32 scroll-mt-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <SectionHeader
-          id="trust-title"
-          eyebrow="Clinical responsibility"
-          title="Built to support your judgement, never to replace it."
-          intro="PHYGO is a documentation and knowledge tool for qualified professionals. It does not diagnose, and it does not act on patients without you."
-        />
+    <section id="trust" aria-labelledby="trust-title" className="relative scroll-mt-16 px-4 py-8 sm:px-6">
+      <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[32px] bg-ink px-6 py-16 text-white ring-1 ring-white/[0.07] sm:px-12 sm:py-24">
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60 [background-image:radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:22px_22px]" />
+        <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-electric/25 blur-[110px]" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-16 h-80 w-80 rounded-full bg-emerald/15 blur-[110px]" />
 
-        <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {PILLARS.map((p, i) => (
-            <Reveal
-              as="li"
-              key={p.title}
-              delay={i * 0.08}
-              className="list-none rounded-xl3 glass shadow-soft p-6"
-            >
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-electric to-emerald text-white shadow-soft">
-                <p.icon size={19} aria-hidden />
-              </span>
-              <h3 className="mt-5 font-display text-lg font-semibold text-ink dark:text-white">{p.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink/60 dark:text-white/55">{p.text}</p>
-            </Reveal>
-          ))}
-        </ul>
+        <div className="relative">
+          <SectionHeader id="trust-title" index="06" eyebrow={trust.eyebrow} title={trust.title} intro={trust.intro} tone="inverse" />
 
-        <Reveal className="mt-8">
-          <TextLink href="/privacy">Read the privacy policy</TextLink>
-        </Reveal>
+          <ul className="mt-14 grid gap-px overflow-hidden rounded-[22px] bg-white/[0.08] sm:grid-cols-2">
+            {trust.items.map((item, i) => {
+              const Icon = ICONS[i] ?? ShieldCheck;
+              return (
+                <Reveal as="li" key={item.title} delay={i * 0.06} className="list-none bg-[#101218] p-6 sm:p-8">
+                  <Icon size={20} aria-hidden className="text-emerald-light" />
+                  <h3 className="mt-5 font-display text-lg font-semibold tracking-tight">{item.title}</h3>
+                  <p className="mt-2 text-[14px] leading-relaxed text-white/60">{item.text}</p>
+                </Reveal>
+              );
+            })}
+          </ul>
+
+          <div className="mt-10">
+            <TextLink href="/privacy" className="!text-white/80 hover:!text-white">
+              {trust.privacy}
+            </TextLink>
+          </div>
+        </div>
       </div>
     </section>
   );

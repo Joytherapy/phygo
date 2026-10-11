@@ -1,73 +1,42 @@
-import { Users, CalendarDays, Smartphone, FolderOpen, GraduationCap } from "lucide-react";
+import { CalendarDays, FileText, GraduationCap, Smartphone, Users } from "lucide-react";
+import type { LandingDict } from "@/lib/i18n/landingStrings";
 import { Reveal, SectionHeader } from "./ui";
 
-// Grounded in: app/dashboard/patients (records + saved notes), app/dashboard/agenda
-// and components/AppointmentScheduler.tsx, app/my-phygo (invite-code portal
-// that reads the practitioner's saved notes), app/dashboard/workspace (PDF
-// documents, annotations, notebooks, Ask PHYGO panel) and app/dashboard/quiz.
-// Video calls are intentionally not advertised: they depend on an external
-// provider key that is not configured in production.
-const CARDS = [
-  {
-    icon: Users,
-    title: "Patients & session history",
-    text: "Every patient's saved notes, plans and linked clinical references in one record — so the next visit starts where the last one ended.",
-    wide: true,
-  },
-  {
-    icon: Smartphone,
-    title: "My Phygo for patients",
-    text: "Invite a patient with a code. They see the plan, exercises and plain-language summary you saved — nothing you haven't approved.",
-    wide: false,
-  },
-  {
-    icon: CalendarDays,
-    title: "Agenda",
-    text: "Schedule sessions, and let linked patients request appointments for you to confirm.",
-    wide: false,
-  },
-  {
-    icon: FolderOpen,
-    title: "Documents & notebooks",
-    text: "Upload PDFs, highlight and annotate them, keep notebooks, and ask PHYGO about the document you are reading.",
-    wide: false,
-  },
-  {
-    icon: GraduationCap,
-    title: "Student mode",
-    text: "Physiotherapy students get the workspace, the knowledge libraries and quizzes by subject and difficulty.",
-    wide: false,
-  },
-];
+// Patients & sessions: /dashboard/patients. My Phygo: /my-phygo (invite
+// codes, patient sees only saved plans). Agenda: /dashboard/agenda with
+// appointment requests. Documents & notebooks: /dashboard/workspace.
+// Student mode: profiles.practice_stage + quizzes.
+const ICONS = [Users, Smartphone, CalendarDays, FileText, GraduationCap];
 
-export default function WorkspaceSection() {
+export default function WorkspaceSection({ workspace }: { workspace: LandingDict["workspace"] }) {
   return (
-    <section id="workspace" aria-labelledby="workspace-title" className="relative py-24 sm:py-32 scroll-mt-20 bg-mist/60 dark:bg-white/[0.02]">
+    <section id="workspace" aria-labelledby="workspace-title" className="relative scroll-mt-16 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <SectionHeader
-          id="workspace-title"
-          eyebrow="The PHYGO workspace"
-          title="Your practice, connected — not scattered across apps."
-          intro="Documentation and knowledge are only half of the work. PHYGO also keeps patients, scheduling and your study material in the same place."
-        />
+        <SectionHeader id="workspace-title" index="05" eyebrow={workspace.eyebrow} title={workspace.title} intro={workspace.intro} />
 
-        <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {CARDS.map((c, i) => (
-            <Reveal
-              as="li"
-              key={c.title}
-              delay={(i % 3) * 0.08}
-              className={`list-none rounded-xl3 bg-white dark:bg-ink-soft p-6 sm:p-7 shadow-soft ring-1 ring-black/[0.04] dark:ring-white/[0.06] ${
-                c.wide ? "lg:col-span-2" : ""
-              }`}
-            >
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-electric/15 to-emerald/15 text-electric">
-                <c.icon size={18} aria-hidden />
-              </span>
-              <h3 className="mt-5 font-display text-lg font-semibold text-ink dark:text-white">{c.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink/60 dark:text-white/55">{c.text}</p>
-            </Reveal>
-          ))}
+        <ul className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+          {workspace.items.map((item, i) => {
+            const Icon = ICONS[i] ?? FileText;
+            const wide = i < 2;
+            return (
+              <Reveal
+                as="li"
+                key={item.title}
+                delay={i * 0.06}
+                className={`group relative list-none overflow-hidden rounded-[22px] border border-black/[0.07] bg-white p-6 shadow-soft transition-shadow hover:shadow-lift dark:border-white/[0.08] dark:bg-[#111318] ${
+                  wide ? "lg:col-span-3 sm:p-8" : "lg:col-span-2"
+                } ${i === 4 ? "sm:col-span-2 lg:col-span-2" : ""}`}
+              >
+                <span className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-electric/15 to-emerald/15 text-electric-dark dark:text-electric-light">
+                  <Icon size={18} aria-hidden />
+                </span>
+                <h3 className={`relative mt-5 font-display font-semibold tracking-tight text-ink dark:text-white ${wide ? "text-xl" : "text-lg"}`}>
+                  {item.title}
+                </h3>
+                <p className="relative mt-2 text-[14px] leading-relaxed text-ink/60 dark:text-white/55">{item.text}</p>
+              </Reveal>
+            );
+          })}
         </ul>
       </div>
     </section>

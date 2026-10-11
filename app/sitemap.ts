@@ -23,6 +23,9 @@ function safeDate(value: string | null | undefined): Date | undefined {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, changeFrequency: 'weekly', priority: 1 },
+    { url: `${SITE_URL}/it`, changeFrequency: 'weekly', priority: 1 },
+    { url: `${SITE_URL}/es`, changeFrequency: 'weekly', priority: 1 },
+    { url: `${SITE_URL}/fr`, changeFrequency: 'weekly', priority: 1 },
     { url: `${SITE_URL}/library/condition`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${SITE_URL}/en/library/condition`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${SITE_URL}/es/library/condition`, changeFrequency: 'weekly', priority: 0.9 },
