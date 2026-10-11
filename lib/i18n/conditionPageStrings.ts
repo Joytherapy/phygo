@@ -31,6 +31,8 @@ type ConditionPageDict = {
   evidence: Record<EvidenceKey, string>;
   translating: string;
   machineTranslated: string;
+  aiTranslated: string;
+  shownInItalian: string;
   sourceLanguageNote: string;
   missingNote: string;
   ctaTitle: string;
@@ -75,6 +77,8 @@ const en: ConditionPageDict = {
   },
   translating:
     'The English translation of this page is being generated — the original Italian content is shown for now. Please come back later to read it in English.',
+  aiTranslated: 'Machine-translated from Italian',
+  shownInItalian: 'Shown in the original Italian — no translation available yet',
   machineTranslated:
     'Machine-translated from Italian — for clinical decisions, please verify red flags and contraindications against the original source.',
   sourceLanguageNote: 'Sources are cited as published.',
@@ -122,6 +126,8 @@ const it: ConditionPageDict = {
     limited: 'Evidenza limitata',
   },
   translating: '',
+  aiTranslated: '',
+  shownInItalian: '',
   machineTranslated: '',
   sourceLanguageNote: 'Le fonti sono citate come pubblicate.',
   missingNote:
@@ -169,6 +175,8 @@ const es: ConditionPageDict = {
   },
   translating:
     'Se está generando la traducción al español de esta página: por ahora se muestra el contenido original en italiano. Vuelve más tarde para leerla en español.',
+  aiTranslated: 'Traducción automática del italiano',
+  shownInItalian: 'Se muestra en el italiano original: aún no hay traducción disponible',
   machineTranslated:
     'Traducción automática del italiano: para decisiones clínicas, comprueba las banderas rojas y las contraindicaciones en la fuente original.',
   sourceLanguageNote: 'Las fuentes se citan tal como se publicaron.',
@@ -217,6 +225,8 @@ const fr: ConditionPageDict = {
   },
   translating:
     'La traduction française de cette page est en cours de génération : le contenu original en italien est affiché pour le moment. Revenez plus tard pour la lire en français.',
+  aiTranslated: 'Traduction automatique de l’italien',
+  shownInItalian: 'Affiché dans l’italien original : pas encore de traduction disponible',
   machineTranslated:
     'Traduction automatique de l’italien : pour toute décision clinique, vérifiez les drapeaux rouges et les contre-indications dans la source originale.',
   sourceLanguageNote: 'Les sources sont citées telles que publiées.',

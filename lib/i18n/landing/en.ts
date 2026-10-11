@@ -107,7 +107,7 @@ export const en: LandingDict = {
           'Request an appointment and see the next one',
         ],
         videoItem: 'Join the video call your physiotherapist starts',
-        note: 'Access is by invitation: your physiotherapist sends you a personal link to create your account.',
+        note: 'Access is by invitation: your physiotherapist sends you a personal link to create your account. After sign-in, My Phygo is currently available in English.',
         cta: 'Sign in to My Phygo',
         hint: '',
       },
@@ -134,7 +134,7 @@ export const en: LandingDict = {
         title: 'Talk through the session. Get a structured draft.',
         text: 'Dictate or type as you work, in English, Italian, Spanish or French. PHYGO drafts the SOAP note and shows its reasoning: hypotheses, differentials, red flags and the information still missing.',
         videoText: '',
-        phygo: 'Transcribes in the browser and drafts the note as cautious decision support.',
+        phygo: 'Transcribes through your browser’s speech recognition and drafts the note as cautious decision support.',
         you: 'Check and correct every line.',
       },
       {
@@ -264,7 +264,7 @@ export const en: LandingDict = {
     levels: { high: 'High', moderate: 'Moderate', low: 'Low', strong: 'Strong' },
     tabs: { goals: 'Goals', clinical_tests: 'Clinical tests', red_flags: 'Red flags', typical_exercises: 'Exercises' },
     phasesLabel: 'Rehab phases',
-    excerptTranslated: 'Excerpt · translated from the Italian source',
+    excerptTranslated: 'Excerpt · machine-translated from the Italian source',
     excerptSource: 'Excerpt from the original entry',
     openEntry: 'Open the full entry',
     cta: 'Explore the library',
@@ -369,20 +369,40 @@ export const en: LandingDict = {
   },
   pricing: {
     eyebrow: 'Pricing',
-    title: 'Plans that grow\n*with your practice.*',
-    sub: 'Create your account for free — no credit card required.',
+    title: 'Free to use today.\n*Paid plans are on the way.*',
+    sub: 'Today PHYGO is available with a free account — no credit card, no payment. The paid plans below are planned and cannot be purchased yet.',
+    today: {
+      label: 'Available today',
+      name: 'Free account',
+      price: 'Free',
+      text: 'Everything you can use right now, for physiotherapists and students.',
+      items: [
+        'AI-drafted SOAP notes you review, with PDF download',
+        'Patients, Agenda and My Phygo invitations',
+        'Clinical library, exercise library with video and 3D maps',
+        'Assessment tools, evidence summaries and quizzes',
+      ],
+      limits:
+        'Fair-use limits apply to some features (for example, the Ask PHYGO assistant), and a few advanced areas, such as the Pro Library, are not included.',
+      cta: 'Start free',
+    },
+    planned: {
+      label: 'Planned plans',
+      status: 'Not yet available for purchase',
+      note: 'Planned prices and features may change before paid plans launch. No payment can be made today.',
+    },
     monthly: 'Monthly',
     annual: 'Annual',
-    save: 'Save 20%',
+    save: 'Planned annual price −20%',
     perMonth: '/month',
     custom: 'Custom',
-    popular: 'Most popular',
-    billingLabel: 'Annual billing',
+    billingLabel: 'Show planned annual prices',
+    notYet: 'Not available yet',
     tiers: [
       {
         description: 'For solo practitioners getting started.',
         features: ['50 sessions / month', 'AI clinical notes', 'PDF export', 'Email support'],
-        cta: 'Start free',
+        cta: '',
       },
       {
         description: 'For full-time practices that work every day.',
@@ -392,7 +412,7 @@ export const en: LandingDict = {
           'Exercise library',
           'Priority support',
         ],
-        cta: 'Start free',
+        cta: '',
       },
       {
         description:
@@ -403,7 +423,7 @@ export const en: LandingDict = {
           'Shared patient history (in development)',
           'Dedicated onboarding',
         ],
-        cta: 'Contact us',
+        cta: 'Tell us what you need',
       },
     ],
   },
@@ -429,7 +449,7 @@ export const en: LandingDict = {
       },
       {
         q: 'How is patient data handled?',
-        a: 'Clinical data is stored in an EU-hosted database (Frankfurt), encrypted in transit and at rest, with row-level security so each account reaches only its own patients. Session text and uploaded images are processed by our AI provider to create drafts and are not used to train third-party models. Details are in the privacy policy.',
+        a: 'Clinical data is stored in an EU-hosted database (Frankfurt), encrypted in transit and at rest, with row-level security so each account reaches only its own patients. Session text and uploaded images are processed by our AI provider to create drafts and are not used to train third-party models. Uploaded images are not stored by PHYGO. Dictation uses your browser’s built-in speech recognition, which may process audio through the browser provider’s service. Details are in the privacy policy (currently a draft under legal review).',
       },
       {
         q: 'Where does the library content come from?',
@@ -437,7 +457,7 @@ export const en: LandingDict = {
       },
       {
         q: 'Which languages does PHYGO support?',
-        a: 'You can dictate or type sessions in English, Italian, Spanish or French. The public condition library and the exercise library are available in the same four languages.',
+        a: 'You can dictate or type sessions in English, Italian, Spanish or French. The public website, sign-up and the public clinical library are available in all four languages; library entries in English, Spanish and French are machine-translated from the Italian source and labelled as such. The My Phygo patient portal is currently in English after sign-in, except the metabolic profile.',
       },
       {
         q: 'Can I try it on a sample case first?',
@@ -445,7 +465,7 @@ export const en: LandingDict = {
       },
       {
         q: 'How much does it cost to start?',
-        a: "Creating an account is free and doesn't require a credit card.",
+        a: "Creating an account is free and doesn't require a credit card. Paid plans are planned but not yet available — nothing can be purchased today.",
       },
     ],
   },

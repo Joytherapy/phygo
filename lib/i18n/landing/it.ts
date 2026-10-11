@@ -108,7 +108,7 @@ export const it: LandingDict = {
           'Richiedi un appuntamento e vedi il prossimo',
         ],
         videoItem: 'Partecipa alla videochiamata avviata dal tuo fisioterapista',
-        note: 'L’accesso è su invito: il tuo fisioterapista ti invia un link personale per creare l’account.',
+        note: 'L’accesso è su invito: il tuo fisioterapista ti invia un link personale per creare l’account. Dopo l’accesso, My Phygo è al momento disponibile in inglese.',
         cta: 'Accedi a My Phygo',
         hint: '',
       },
@@ -135,7 +135,7 @@ export const it: LandingDict = {
         title: 'Racconta la seduta. Ottieni una bozza strutturata.',
         text: 'Detta o scrivi mentre lavori, in italiano, inglese, spagnolo o francese. PHYGO prepara la nota SOAP e mostra il ragionamento: ipotesi, diagnosi differenziali, red flag e informazioni ancora mancanti.',
         videoText: '',
-        phygo: 'Trascrive nel browser e prepara la nota come prudente supporto alla decisione.',
+        phygo: 'Trascrive con il riconoscimento vocale del tuo browser e prepara la nota come prudente supporto alla decisione.',
         you: 'Controlli e correggi ogni riga.',
       },
       {
@@ -265,7 +265,7 @@ export const it: LandingDict = {
     levels: { high: 'Alta', moderate: 'Moderata', low: 'Bassa', strong: 'Forte' },
     tabs: { goals: 'Obiettivi', clinical_tests: 'Test clinici', red_flags: 'Red flag', typical_exercises: 'Esercizi' },
     phasesLabel: 'Fasi riabilitative',
-    excerptTranslated: 'Estratto · tradotto dalla fonte italiana',
+    excerptTranslated: 'Estratto · tradotto automaticamente dalla fonte italiana',
     excerptSource: 'Estratto dalla scheda originale',
     openEntry: 'Apri la scheda completa',
     cta: 'Esplora la libreria',
@@ -370,20 +370,40 @@ export const it: LandingDict = {
   },
   pricing: {
     eyebrow: 'Prezzi',
-    title: 'Piani che crescono\n*con il tuo studio.*',
-    sub: 'Crea il tuo account gratuitamente, senza carta di credito.',
+    title: 'Oggi è gratuito.\n*I piani a pagamento arriveranno.*',
+    sub: 'Oggi PHYGO si usa con un account gratuito — senza carta di credito e senza pagamenti. I piani a pagamento qui sotto sono previsti e non si possono ancora acquistare.',
+    today: {
+      label: 'Disponibile oggi',
+      name: 'Account gratuito',
+      price: 'Gratis',
+      text: 'Tutto ciò che puoi usare già ora, per fisioterapisti e studenti.',
+      items: [
+        'Note SOAP preparate dall’AI che rivedi tu, con download in PDF',
+        'Pazienti, Agenda e inviti a My Phygo',
+        'Libreria clinica, libreria esercizi con video e mappe 3D',
+        'Strumenti di valutazione, sintesi delle evidenze e quiz',
+      ],
+      limits:
+        'Per alcune funzioni valgono limiti d’uso (ad esempio per l’assistente Ask PHYGO) e alcune aree avanzate, come la Pro Library, non sono incluse.',
+      cta: 'Inizia gratis',
+    },
+    planned: {
+      label: 'Piani previsti',
+      status: 'Non ancora acquistabili',
+      note: 'Prezzi e funzionalità previsti possono cambiare prima del lancio dei piani a pagamento. Oggi non è possibile effettuare alcun pagamento.',
+    },
     monthly: 'Mensile',
     annual: 'Annuale',
-    save: 'Risparmi il 20%',
+    save: 'Prezzo annuale previsto −20%',
     perMonth: '/mese',
     custom: 'Su misura',
-    popular: 'Il più scelto',
-    billingLabel: 'Fatturazione annuale',
+    billingLabel: 'Mostra i prezzi annuali previsti',
+    notYet: 'Non ancora disponibile',
     tiers: [
       {
         description: 'Per chi lavora in autonomia e sta iniziando.',
         features: ['50 sedute al mese', 'Note cliniche con AI', 'Esportazione PDF', 'Supporto via email'],
-        cta: 'Inizia gratis',
+        cta: '',
       },
       {
         description: 'Per chi lavora a tempo pieno, ogni giorno.',
@@ -393,7 +413,7 @@ export const it: LandingDict = {
           'Libreria esercizi',
           'Supporto prioritario',
         ],
-        cta: 'Inizia gratis',
+        cta: '',
       },
       {
         description:
@@ -404,7 +424,7 @@ export const it: LandingDict = {
           'Storico pazienti condiviso (in sviluppo)',
           'Onboarding dedicato',
         ],
-        cta: 'Contattaci',
+        cta: 'Raccontaci di cosa hai bisogno',
       },
     ],
   },
@@ -430,7 +450,7 @@ export const it: LandingDict = {
       },
       {
         q: 'Come vengono gestiti i dati dei pazienti?',
-        a: 'I dati clinici sono conservati in un database ospitato nell’UE (Francoforte), cifrati in transito e a riposo, con sicurezza a livello di riga: ogni account accede solo ai propri pazienti. Il testo delle sedute e le immagini caricate vengono elaborati dal nostro fornitore di AI per creare le bozze e non vengono usati per addestrare modelli di terze parti. Trovi i dettagli nell’informativa sulla privacy.',
+        a: 'I dati clinici sono conservati in un database ospitato nell’UE (Francoforte), cifrati in transito e a riposo, con sicurezza a livello di riga: ogni account accede solo ai propri pazienti. Il testo delle sedute e le immagini caricate vengono elaborati dal nostro fornitore di AI per creare le bozze e non vengono usati per addestrare modelli di terze parti. Le immagini caricate non vengono conservate da PHYGO. La dettatura usa il riconoscimento vocale integrato nel browser, che può elaborare l’audio tramite il servizio del fornitore del browser. Trovi i dettagli nell’informativa sulla privacy (al momento una bozza in revisione legale).',
       },
       {
         q: 'Da dove provengono i contenuti della libreria?',
@@ -438,7 +458,7 @@ export const it: LandingDict = {
       },
       {
         q: 'Quali lingue supporta PHYGO?',
-        a: 'Puoi dettare o scrivere le sedute in italiano, inglese, spagnolo o francese. La libreria pubblica delle condizioni e la libreria esercizi sono disponibili nelle stesse quattro lingue.',
+        a: 'Puoi dettare o scrivere le sedute in italiano, inglese, spagnolo o francese. Il sito pubblico, la registrazione e la libreria clinica pubblica sono disponibili in tutte e quattro le lingue; le schede in inglese, spagnolo e francese sono tradotte automaticamente dalla fonte italiana e indicate come tali. Il portale paziente My Phygo, dopo l’accesso, è al momento in inglese, tranne il profilo metabolico.',
       },
       {
         q: 'Posso provarlo prima su un caso di esempio?',
@@ -446,7 +466,7 @@ export const it: LandingDict = {
       },
       {
         q: 'Quanto costa iniziare?',
-        a: 'Creare un account è gratuito e non serve una carta di credito.',
+        a: 'Creare un account è gratuito e non serve una carta di credito. I piani a pagamento sono previsti ma non ancora disponibili: oggi non si può acquistare nulla.',
       },
     ],
   },

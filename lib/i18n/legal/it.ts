@@ -34,7 +34,7 @@ export const it: LegalDict = {
         title: '4. Dati che raccogliamo',
         blocks: [
           '**Dati dell’account:** nome, email, password (in forma hash), informazioni sullo studio.',
-          '**Dati clinici:** trascrizioni vocali, note SOAP, piani di esercizi, documenti diagnostici caricati e qualsiasi altro contenuto inserito dal professionista durante una seduta.',
+          '**Dati clinici:** note SOAP, piani di esercizi e qualsiasi altro contenuto che il professionista salva durante una seduta. Il testo della seduta (dettato o scritto) e le eventuali immagini di documenti diagnostici caricate dal professionista vengono inviati all’elaborazione AI per generare una bozza di nota o un riassunto scritto; Phygo non conserva la trascrizione della seduta né le immagini caricate.',
           '**Dati di utilizzo:** dati di log, informazioni sul dispositivo e dati di interazione necessari per far funzionare e proteggere il Servizio.',
         ],
       },

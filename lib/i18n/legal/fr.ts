@@ -35,7 +35,7 @@ export const fr: LegalDict = {
         title: '4. Données que nous collectons',
         blocks: [
           '**Données de compte :** nom, adresse e-mail, mot de passe (haché), informations sur le cabinet.',
-          '**Données cliniques :** transcriptions vocales, notes SOAP, programmes d’exercices, documents diagnostiques importés et tout autre contenu saisi par le praticien au cours d’une séance.',
+          '**Données cliniques :** notes SOAP, programmes d’exercices et tout autre contenu que le praticien enregistre au cours d’une séance. Le texte de la séance (dicté ou saisi) et les éventuelles images de documents diagnostiques importées par le praticien sont transmis au traitement par l’IA pour produire un brouillon de note ou un résumé écrit ; Phygo ne conserve ni la transcription de la séance ni les images importées.',
           '**Données d’utilisation :** données de journalisation, informations sur l’appareil et données d’interaction nécessaires au fonctionnement et à la sécurité du Service.',
         ],
       },

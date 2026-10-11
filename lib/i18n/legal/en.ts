@@ -34,7 +34,7 @@ export const en: LegalDict = {
         title: '4. Data we collect',
         blocks: [
           '**Account data:** name, email, password (hashed), practice information.',
-          '**Clinical data:** voice transcripts, SOAP notes, exercise plans, uploaded diagnostic documents, and any other content entered by the practitioner during a session.',
+          '**Clinical data:** SOAP notes, exercise plans, and any other content the practitioner saves during a session. Session text (dictated or typed) and any images of diagnostic documents the practitioner uploads are sent for AI processing to produce a draft note or a written summary; Phygo does not store the session transcript or the uploaded images.',
           '**Usage data:** log data, device information, and interaction data needed to operate and secure the Service.',
         ],
       },

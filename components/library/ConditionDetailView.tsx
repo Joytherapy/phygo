@@ -40,6 +40,8 @@ export type ConditionViewData = {
   sourceDate: string | null;
   /** en/es/fr: the cached translation failed and Italian text is shown. */
   translationFailed?: boolean;
+  /** en/es/fr: fields shown in Italian because no translation exists for them. */
+  untranslated?: string[];
 };
 
 type Phase = {
@@ -153,6 +155,13 @@ export default async function ConditionDetailView({
     !data.translationFailed &&
     (has("red_flags") || has("contraindications"));
 
+  const shownInItalian = (k: string) =>
+    lang !== "it" && !data.translationFailed && data.untranslated?.includes(k) && t.shownInItalian ? (
+      <p className="mb-2 text-[12px] italic text-amber-800 dark:text-amber-300">
+        {t.shownInItalian}
+      </p>
+    ) : null;
+
   const section = (k: TextKey) =>
     has(k) ? (
       <section
@@ -167,6 +176,7 @@ export default async function ConditionDetailView({
         >
           {t.sections[k]}
         </h2>
+        {shownInItalian(k)}
         <Prose>{data.fields[k]}</Prose>
       </section>
     ) : null;
@@ -210,6 +220,11 @@ export default async function ConditionDetailView({
                 className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${EVIDENCE_TONE[ev]}`}
               >
                 {t.evidence[ev]}
+              </span>
+            )}
+            {lang !== "it" && !data.translationFailed && t.aiTranslated && (
+              <span className="rounded-full border border-black/10 px-2.5 py-1 text-[11px] font-medium text-ink/70 dark:border-white/15 dark:text-white/65">
+                {t.aiTranslated}
               </span>
             )}
           </div>
@@ -298,6 +313,7 @@ export default async function ConditionDetailView({
                         <AlertTriangle size={15} aria-hidden />
                         {t.sections.red_flags}
                       </h3>
+                      {shownInItalian("red_flags")}
                       <Prose>{data.fields.red_flags}</Prose>
                     </div>
                   )}
@@ -310,6 +326,7 @@ export default async function ConditionDetailView({
                         <ShieldAlert size={15} aria-hidden />
                         {t.sections.contraindications}
                       </h3>
+                      {shownInItalian("contraindications")}
                       <Prose>{data.fields.contraindications}</Prose>
                     </div>
                   )}

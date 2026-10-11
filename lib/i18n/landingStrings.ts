@@ -193,13 +193,17 @@ export interface LandingDict {
     eyebrow: string;
     title: string;
     sub: string;
+    /** The only offer that exists today: a free account. */
+    today: { label: string; name: string; price: string; text: string; items: string[]; limits: string; cta: string };
+    /** Paid plans are planned, not purchasable (there is no checkout). */
+    planned: { label: string; status: string; note: string };
     monthly: string;
     annual: string;
     save: string;
     perMonth: string;
     custom: string;
-    popular: string;
     billingLabel: string;
+    notYet: string;
     tiers: { description: string; features: string[]; cta: string }[];
   };
   faq: { eyebrow: string; title: string; items: { q: string; a: string }[] };

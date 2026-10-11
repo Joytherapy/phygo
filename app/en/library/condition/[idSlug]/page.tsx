@@ -102,6 +102,7 @@ export default async function PublicConditionPageEN({
         source: condition.source,
         sourceDate: condition.source_date,
         translationFailed: !!condition._translationFailed,
+        untranslated: condition._untranslatedFields ?? [],
       }}
     />
   );
