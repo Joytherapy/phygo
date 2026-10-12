@@ -21,6 +21,12 @@ block() { sed -n '/^--   begin;/,/^--   commit;/p' "$1" | sed 's/^--   //' > "${
 runs() { if q -f "$1" >/dev/null 2>&1; then echo ok; else echo refused; fi; }
 expect() { if [ "$2" = "$3" ]; then echo "  ok   $1"; else echo "  FAIL $1: expected $3, got $2"; fail=1; fi; }
 
+echo "SQL files match the checksums in the release guide"
+while read -r f sum; do
+  expect "$f matches the guide" "$(sha256sum "$f" | cut -d' ' -f1)" "$sum"
+done < <(grep -oE '`sql/[^`]+\.sql`[^|]*\| `[0-9a-f]{64}`' docs/security/professional-verification-rollout.md | sed -E 's/`(sql\/[^`]+)`.*`([0-9a-f]{64})`/\1 \2/')
+expect "the guide lists every 2026-10 SQL file" "$(grep -cE '`sql/2026-10_[^`]+\.sql`[^|]*\| `[0-9a-f]{64}`' docs/security/professional-verification-rollout.md)" "$(ls sql/2026-10_*.sql | wc -l | tr -d ' ')"
+
 q -f tests/sql/replica.sql >/dev/null
 q -f docs/security/live-clinical-rls-2026-10-12.sql >/dev/null
 q -c "insert into auth.users (id) values ('$A'), ('$B'), ('$C');

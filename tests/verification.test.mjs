@@ -291,6 +291,25 @@ test('the transition list fails closed: expired, too long, unreadable, or set th
   }
 });
 
+test('reading existing metabolic data: own patients only; adding needs verification or the list', async () => {
+  // Intended rule (same as notes, appointments and links under RLS): an
+  // unverified, unlisted clinician keeps READ access to the existing records of
+  // their own patients, but cannot add to them.
+  const read = (who, id) => call(app.url, 'GET', `/api/metabolic/save${id ? `?patientId=${id}` : ''}`, who);
+  assert.equal((await read('declared', 'p-declared')).status, 200, 'unverified: reads own patient');
+  assert.equal((await read('declared', 'p-legacy')).status, 404, 'unverified: not another clinician’s patient');
+  assert.equal((await read('declared', 'p-unknown')).status, 404, 'missing and not-yours look the same');
+  const before = fake.state.tables.metabolic_profiles.length;
+  assert.equal((await call(app.url, 'POST', '/api/metabolic/save', 'declared', { ...metabolic, patientId: 'p-declared' })).status, 403, 'unverified: cannot add');
+  assert.equal(fake.state.tables.metabolic_profiles.length, before);
+  assert.equal((await read('legacy', 'p-legacy')).status, 200, 'listed: reads own patient');
+  assert.equal((await read('legacy', 'p-declared')).status, 404, 'listed: not another clinician’s patient');
+  // Patients always read their own record, and only it.
+  assert.equal((await read('patient')).status, 200, 'patient: own record');
+  assert.equal((await read('patient', 'p-declared')).status, 403, 'patient: not someone else’s record');
+  assert.equal((await read(null, 'p-declared')).status, 401, 'anonymous');
+});
+
 test('no server route deletes clinical data (deletion only goes through the database rules)', async () => {
   // Patient records, notes, appointments, invitations, calls and clinical links
   // are deleted only from the browser under RLS (tests/sql/run.sh). The
@@ -311,8 +330,7 @@ test('patient management: clinical data on a real patient needs verification or 
   assert.equal(res.status, 403);
   assert.equal((await res.json()).code, 'verification_required');
   assert.equal(saved(), before, 'nothing written');
-  // They can still read what they already have, and use the calculator for themselves.
-  assert.equal((await call(app.url, 'GET', '/api/metabolic/save?patientId=p-declared', 'declared')).status, 200);
+  // The personal calculator (no patient) stays open.
   assert.equal((await call(app.url, 'POST', '/api/metabolic/save', 'declared', metabolic)).status, 200);
   // Listed and verified accounts can, for their own patients only.
   assert.equal((await call(app.url, 'POST', '/api/metabolic/save', 'legacy', { ...metabolic, patientId: 'p-legacy' })).status, 200);

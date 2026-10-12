@@ -7,7 +7,7 @@
 -- owner's transition list). For everybody else:
 --   - CREATING, CHANGING or DELETING patients, notes, appointments,
 --     invitations, video calls and clinical links is refused;
---   - their OWN existing records stay readable (nothing is hidden);
+--   - the existing records of their own patients stay readable (nothing is hidden);
 --   - patients keep exactly their current access to their own data
 --     (My Phygo, appointment requests, invite redemption): those policies and
 --     redeem_patient_invite() are not changed.

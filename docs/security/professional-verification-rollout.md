@@ -13,9 +13,18 @@ Nothing here has been applied to production. Every step needs the owner's explic
 |---|---|---|
 | **1. Public clinical and educational resources:** public site, condition library, legal pages | Everyone, no account | Nothing to enforce (public content) |
 | **2. General signed-in features and settings:** library, anatomy, exercises, quizzes, workspace, Ask PHYGO, own metabolic calculator, profile, language, declared role, requesting verification | Any signed-in account; patients use My Phygo | Sign-in (`requireUser`), per-owner RLS, hourly limits |
-| **3. Real patients and their clinical information:** creating, changing and **deleting** patients, notes, appointments, invitations, video calls and clinical links; metabolic data on a patient; clinical AI on real cases | **Authorised clinicians:** verified by PHYGO, or listed on the owner's time-limited transition list | Database (`can_manage_patients()` in RLS) **and** API routes (`requireVerifiedProfessional`), applying the same rule |
+| **3. Real patients and their clinical information:** creating, changing and **deleting** patients, notes, appointments, invitations, video calls and clinical links; **adding** metabolic data on a patient; clinical AI on real cases | **Authorised clinicians:** verified by PHYGO, or listed on the owner's time-limited transition list | Database (`can_manage_patients()` in RLS) **and** API routes (`requireVerifiedProfessional`), applying the same rule |
 
 The declared role (student / professional) is only a preference. It never grants permission 3.
+
+**Reading is deliberately separate from permission 3.** A clinician account keeps **read** access to the existing records of **its own** patients even without verification:
+- patients;
+- notes;
+- appointments;
+- clinical links;
+- metabolic data.
+
+Those records are already that account's own. Reading them reveals nothing new and avoids a sudden loss of access. Everything that creates, changes or deletes needs permission 3.
 
 ## Permission matrix
 
@@ -24,12 +33,19 @@ The declared role (student / professional) is only a preference. It never grants
 | Public resources | yes | yes | yes | yes | yes | yes |
 | Educational tools, Ask PHYGO, workspace, own calculator | – | yes | yes | yes | yes | My Phygo |
 | Profile, language, role switch, request verification | – | yes | yes | yes | yes | profile only |
-| **See** own existing patients, notes, appointments, links | – | – | yes (only what they already created) | yes | yes | own data |
+| **Read** the existing records of their **own** patients: patients, notes, appointments, clinical links, metabolic data* | – | – | yes (own patients only; read-only) | yes | yes | their own record, all entries |
 | **Create, change or delete** patients, notes, appointments; confirm requests | – | – | **no** | yes | yes | request appointments for themselves |
 | **Invite** to My Phygo, reset portal access, delete invitations | – | – | **no** | yes | yes | redeem an invitation |
-| **Add or remove** clinical links; metabolic data on a patient | – | – | **no** | yes | yes | own calculator |
+| **Add or remove** clinical links; **add** metabolic data on a patient | – | – | **no** | yes | yes | add their own entries (shared or private) |
 | **Video calls** (create, change, delete) | – | – | **no** | yes | yes | join only |
 | **Clinical AI on real cases** | – | – | **no** | yes | yes | – |
+
+\* **Metabolic data** (`/api/metabolic/save`):
+- **Who sees what:**
+  - a clinician sees the entries entered by professionals, plus the entries the patient chose to share;
+  - entries the patient saved as private (`shared_with_professional = false`) are visible only to the patient.
+- **Who can add:** only verified or listed clinicians, for their own patients, can add an entry; the personal calculator (no patient) is open to every account.
+- **Tests:** these rules are covered by `tests/security.test.mjs` and `tests/verification.test.mjs`.
 
 Two protections apply in every column:
 - **Ownership:** a clinician reaches only their own patients (`patients.user_id = auth.uid()`). It is checked by RLS, and in the code of the service-role routes (`ownsPatient`, `clinicianOwnsPatient`). "Missing" and "not yours" give the same 404.
@@ -51,7 +67,7 @@ The live foreign keys were read on 12 Oct 2026.
 
 PostgreSQL runs cascades without checking RLS. That is why the DELETE on `patients` itself requires `can_manage_patients()`: only an authorised clinician can start a cascade. Every child table also needs it for direct deletes.
 
-Unverified accounts can still **read** what they created. Nothing is hidden or lost; it is only frozen until verification or listing.
+Unverified accounts can still **read** the existing records of their own patients. Nothing is hidden or lost; it is only frozen until verification or listing.
 
 No server route deletes clinical data. The only path is the browser under RLS. Account deletion (which cascades through `auth.users`) is available only to the owner in Supabase.
 
@@ -150,6 +166,24 @@ Complete items A–D **before step 6** of the SQL sequence. Item E follows the d
 ## Exactly which SQL, in which order
 
 Apply in the Supabase SQL editor, one file at a time, in this order. Each file is a single transaction and can be re-run safely.
+
+**Use these exact file versions.** They are the versions on PR #8's branch, and after the merges on `main`. The same versions are now also on PR #5's and PR #7's branches (byte-identical):
+- the PR #5 files contain the **guarded rollback blocks**, which refuse to run once #7/#8 are applied;
+- the PR #7 file's rollback removes rejected accounts from the transition list first.
+
+Before pasting a file into the SQL editor, you can check it on your Mac with `shasum -a 256 <file>`:
+
+| File | SHA-256 |
+|---|---|
+| `sql/2026-10_security_profile_privileged_columns_PROPOSED.sql` | `a32b5689f859c2bde1d342df4b5d58d2cd1092c2a52389f50fa48d5eafd5f813` |
+| `sql/2026-10_security_clinical_rls_hardening_PROPOSED.sql` | `72010012c78a5d5c3c880c8f05dd9174a45da21356a12ddbfe6cd2d6ca24083f` |
+| `sql/2026-10_professional_verification_PROPOSED.sql` | `9581dcfec095906c6f0bd3178ec987d9250c1d924e8702bf069030a822e2c26a` |
+| `sql/2026-10_patient_management_A_transition_list_PROPOSED.sql` | `1ce386f64585a9f9007288c1ef5a1cd5cf7aae7b4acf7e71045aa97d60e7a72a` |
+| `sql/2026-10_patient_management_B_policies_PROPOSED.sql` | `1f732a5aad9a5c3e944d95443eceada5e5e806cdf116f39ecfa9f67b47660d70` |
+| `sql/2026-10_security_demo_usage_policies_PROPOSED.sql` | `3f0c6f26d2569784601c63a683fdcc77a48128c267477d6b33697859437ae599` |
+| `sql/2026-10_patient_management_R_freeze_PROPOSED.sql` (emergency only) | `ab13dabed7c3d80a23c51eb57e1a50eda574308a8aa9149ce21fb72305d6b7de` |
+
+If a file changes after this table, the table must be updated in the same commit.
 
 | # | File | When | Effect while the current code is still live |
 |---|---|---|---|
