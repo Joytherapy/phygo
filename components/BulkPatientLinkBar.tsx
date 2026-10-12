@@ -11,6 +11,7 @@ import { Check, Loader2, Search, User, Link2 } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 import { usePatientContext } from '@/contexts/PatientContext'
 import { useUiStrings } from '@/contexts/LanguageContext'
+import { useClinicalLocked } from '@/lib/useClinicalAccess'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -46,6 +47,8 @@ export default function BulkPatientLinkBar({
   const [results, setResults] = useState<PatientOption[]>([])
   const [searching, setSearching] = useState(false)
   const [mounted, setMounted] = useState(false)
+  // Linking content to a real patient is patient management (verified or listed accounts).
+  const locked = useClinicalLocked()
   const pickerRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
@@ -125,6 +128,7 @@ export default function BulkPatientLinkBar({
   }
 
   if (!mounted) return null
+  if (locked) return null
 
   return createPortal(
     <div className="fixed bottom-0 inset-x-0 z-[9998] flex justify-center px-4 pb-6 pointer-events-none">

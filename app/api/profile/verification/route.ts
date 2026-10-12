@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireUser, transitionUntilFor } from "@/lib/auth/sessionServer";
 import { parseVerificationRequest, serviceClient } from "@/lib/verification";
 
@@ -20,7 +21,7 @@ export async function GET() {
     console.error("verification status read failed:", error.message);
     return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   }
-  return NextResponse.json({ verification: toPublic(data, gate.user.id) });
+  return NextResponse.json({ verification: await withAccess(gate.supabase, data, gate.user.id) });
 }
 
 export async function POST(req: Request) {
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
     current.registration_number === registrationNumber;
   // Re-sending the same details never downgrades a decision already taken.
   if (unchanged && ["pending", "verified", "rejected"].includes(current.professional_status)) {
-    return NextResponse.json({ verification: toPublic(current, gate.user.id) });
+    return NextResponse.json({ verification: await withAccess(gate.supabase, current, gate.user.id) });
   }
 
   const { data: updated, error: updateError } = await db
@@ -77,10 +78,26 @@ export async function POST(req: Request) {
     console.error("verification request save failed:", updateError.message);
     return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   }
-  return NextResponse.json({ verification: toPublic(updated, gate.user.id) });
+  return NextResponse.json({ verification: await withAccess(gate.supabase, updated, gate.user.id) });
 }
 
-function toPublic(p: Record<string, any> | null, userId: string) {
+// Adds the account's temporary transition access, if any, and whether it may
+// manage real patients (same rule as can_manage_patients() in the database).
+// The interface uses canManagePatients only to explain and disable actions;
+// the database and API routes enforce it.
+async function withAccess(supabase: SupabaseClient, p: Record<string, any> | null, userId: string) {
+  const status = p?.professional_status ?? "not_applicable";
+  const professional = p?.practice_stage !== "student";
+  const until = professional ? await transitionUntilFor(supabase, userId, status) : null;
+  const transitionUntil = until === "error" ? null : until;
+  return {
+    ...toPublic(p),
+    transitionUntil,
+    canManagePatients: professional && (status === "verified" || !!transitionUntil),
+  };
+}
+
+function toPublic(p: Record<string, any> | null) {
   const status = p?.professional_status ?? "not_applicable";
   return {
     status,
@@ -91,7 +108,5 @@ function toPublic(p: Record<string, any> | null, userId: string) {
     requestedAt: p?.verification_requested_at ?? null,
     reviewedAt: p?.verification_reviewed_at ?? null,
     message: p?.verification_message ?? null,
-    // Set only for accounts on the owner's temporary transition list.
-    transitionUntil: p?.practice_stage === "student" ? null : transitionUntilFor(userId, status),
   };
 }

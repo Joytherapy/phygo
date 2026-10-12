@@ -1,5 +1,6 @@
-// Professional verification: declared role vs verified status, and the bounded
-// transition list for pre-existing accounts, tested at the API level
+// Professional verification: declared role vs verified status, the bounded
+// transition list for pre-existing accounts (table
+// professional_transition_accounts), and patient management, tested at the API level
 // (server-side authorization, not the interface). Synthetic users only;
 // OpenAI and Daily are stand-ins on the fake server, so every call to them is
 // recorded and none leaves this machine.
@@ -34,12 +35,10 @@ const profile = (who, practice_stage, professional_status, extra = {}) => ({
   id: people[who].id, practice_stage, professional_status, plan: 'free', display_name: who, ...extra,
 });
 const DAY = 24 * 60 * 60 * 1000;
-const transitionEnv = (until) => ({
-  // Listed explicitly by id; the stray entry shows malformed values are ignored.
-  PROFESSIONAL_TRANSITION_ACCOUNTS: [people.legacy, people.legacyRejected, people.legacyStudent, people.patient].map((p) => p.id.toUpperCase()).join(', ') + ', not-an-id',
-  PROFESSIONAL_TRANSITION_UNTIL: until,
-  DAILY_API_KEY: 'test-daily-key', // calls go to the Daily stand-in (DAILY_API_BASE_URL)
-});
+const inDays = (d) => new Date(Date.now() + d * DAY).toISOString();
+// The owner's list: explicit account ids with an end date (rows added from the SQL editor).
+const listed = ['legacy', 'legacyRejected', 'legacyStudent', 'patient'].map((who) => ({ user_id: people[who].id, until: inDays(30), added_by: 'owner' }));
+const APP_ENV = { DAILY_API_KEY: 'test-daily-key' }; // calls go to the Daily stand-in (DAILY_API_BASE_URL)
 
 let fake;
 let app; // runs with an active transition list, as it would during the rollout
@@ -72,9 +71,10 @@ before(async () => {
       patient_clinical_references: [],
       ask_phygo_usage: [],
       knowledge_base: [],
+      professional_transition_accounts: listed,
     },
   });
-  app = await startApp({ fakeUrl: fake.url, env: transitionEnv(new Date(Date.now() + 30 * DAY).toISOString()) });
+  app = await startApp({ fakeUrl: fake.url, env: APP_ENV });
 });
 after(async () => {
   await app?.stop();
@@ -90,6 +90,7 @@ const call = (base, method, path, who, body) =>
 const count = (prefix) => fake.state.requests.filter((r) => r.path.startsWith(prefix)).length;
 const providerCalls = () => ({ openai: count('/openai/'), daily: count('/daily/') });
 const NOTE = { transcript: 'synthetic transcript', lang: 'en' };
+const listRow = (who) => fake.state.tables.professional_transition_accounts.find((r) => r.user_id === people[who].id);
 const row = (who) => fake.state.tables.profiles.find((p) => p.id === people[who].id);
 const metabolic = { sex: 'female', age: 40, weightKg: 65, heightCm: 168, activityLevel: 'moderate', goal: 'maintain', macroStrategy: 'balanced' };
 // Every protected operation, with a body that would otherwise be accepted.
@@ -258,24 +259,60 @@ test('only an administrator can review, and the decision takes effect', async ()
   assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.declared.id, decision: 'verified' })).status, 409, 'cannot verify an account without registration details');
 });
 
-test('the transition list fails closed when it has ended, has no valid end date, or is too long', async () => {
-  const configs = [
-    ['ended', transitionEnv(new Date(Date.now() - DAY).toISOString())],
-    ['more than 90 days ahead', transitionEnv(new Date(Date.now() + 120 * DAY).toISOString())],
-    // The old blanket switch is ignored, and a list without an end date does nothing.
-    ['no end date, old grace switch set', { ...transitionEnv(''), PROFESSIONAL_VERIFICATION_MODE: 'grace' }],
-  ];
-  let port = 3416;
-  for (const [label, env] of configs) {
-    const other = await startApp({ fakeUrl: fake.url, port: port++, env });
-    try {
-      await assertLockedOut(other.url, 'legacy', 'not_applicable');
-      await assertLockedOut(other.url, 'declared', 'not_applicable');
-      const own = await (await call(other.url, 'GET', '/api/profile/verification', 'legacy')).json();
-      assert.equal(own.verification.transitionUntil, null, label);
-      if (label.includes('grace')) assert.match(other.logs(), /PROFESSIONAL_VERIFICATION_MODE is no longer supported/);
-    } finally {
-      await other.stop();
-    }
+test('the transition list fails closed: expired, too long, unreadable, or set the old way', async () => {
+  const entry = listRow('legacy');
+  try {
+    entry.until = inDays(-1);
+    await assertLockedOut(app.url, 'legacy', 'not_applicable');
+    entry.until = inDays(120); // the database refuses this; the server ignores it too
+    await assertLockedOut(app.url, 'legacy', 'not_applicable');
+    assert.equal((await (await call(app.url, 'GET', '/api/profile/verification', 'legacy')).json()).verification.transitionUntil, null);
+    entry.until = inDays(30);
+    await fetch(`${fake.url}/__control/fail?table=professional_transition_accounts`);
+    const before = providerCalls();
+    const res = await call(app.url, 'POST', '/api/generate-note', 'legacy', NOTE);
+    assert.equal(res.status, 503, 'list unreadable: refused, not allowed through');
+    assert.deepEqual(providerCalls(), before);
+  } finally {
+    entry.until = inDays(30);
+    await fetch(`${fake.url}/__control/fail`);
   }
+  // The environment variables of the first version are ignored.
+  const other = await startApp({
+    fakeUrl: fake.url,
+    port: 3416,
+    env: { ...APP_ENV, PROFESSIONAL_TRANSITION_ACCOUNTS: people.declared.id, PROFESSIONAL_TRANSITION_UNTIL: inDays(30), PROFESSIONAL_VERIFICATION_MODE: 'grace' },
+  });
+  try {
+    await assertLockedOut(other.url, 'declared', 'not_applicable');
+    assert.match(other.logs(), /PROFESSIONAL_TRANSITION_ACCOUNTS is no longer used/);
+  } finally {
+    await other.stop();
+  }
+});
+
+test('patient management: clinical data on a real patient needs verification or the list', async () => {
+  const saved = () => fake.state.tables.metabolic_profiles.length;
+  // Unverified, unlisted professional with an existing patient of their own.
+  let before = saved();
+  const res = await call(app.url, 'POST', '/api/metabolic/save', 'declared', { ...metabolic, patientId: 'p-declared' });
+  assert.equal(res.status, 403);
+  assert.equal((await res.json()).code, 'verification_required');
+  assert.equal(saved(), before, 'nothing written');
+  // They can still read what they already have, and use the calculator for themselves.
+  assert.equal((await call(app.url, 'GET', '/api/metabolic/save?patientId=p-declared', 'declared')).status, 200);
+  assert.equal((await call(app.url, 'POST', '/api/metabolic/save', 'declared', metabolic)).status, 200);
+  // Listed and verified accounts can, for their own patients only.
+  assert.equal((await call(app.url, 'POST', '/api/metabolic/save', 'legacy', { ...metabolic, patientId: 'p-legacy' })).status, 200);
+  before = saved();
+  assert.equal((await call(app.url, 'POST', '/api/metabolic/save', 'legacy', { ...metabolic, patientId: 'p-declared' })).status, 404, 'another clinician’s patient');
+  assert.equal(saved(), before);
+  // What the interface is told (it only explains and disables; the database enforces).
+  const can = async (who) => (await (await call(app.url, 'GET', '/api/profile/verification', who)).json()).verification.canManagePatients;
+  assert.equal(await can('declared'), false);
+  assert.equal(await can('legacy'), true);
+  assert.equal(await can('admin'), true); // verified
+  assert.equal(await can('legacyRejected'), false);
+  assert.equal(await can('legacyStudent'), false);
+  assert.equal(await can('student'), false);
 });

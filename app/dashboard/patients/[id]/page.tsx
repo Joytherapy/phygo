@@ -6,6 +6,8 @@ import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Plus, FileText, Calendar, Activity, Stethoscope, ClipboardList, Smartphone, Copy, Check, RotateCcw, Dumbbell, ClipboardCheck, MapPin, ShoppingBag, X, ChevronRight, Sparkles, Flame, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import Navbar from '@/components/Navbar'
+import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
+import { useClinicalLocked } from '@/lib/useClinicalAccess'
 import { useUiStrings } from '@/contexts/LanguageContext'
 import { usePatientContext } from '@/contexts/PatientContext'
 import WeightTrendChart from '@/components/WeightTrendChart'
@@ -143,6 +145,7 @@ export default function PatientDetailPage() {
   const ui = useUiStrings()
   const params = useParams()
   const router = useRouter()
+  const locked = useClinicalLocked()
   const { setCurrentPatient } = usePatientContext()
   const patientId = params.id as string
 
@@ -328,6 +331,8 @@ export default function PatientDetailPage() {
           {ui.common.backToPatients}
         </motion.button>
 
+        <ClinicalAccessNotice />
+
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -378,7 +383,8 @@ export default function PatientDetailPage() {
               </button>
               <button
                 onClick={() => router.push(`/dashboard/patients/${patientId}/session`)}
-                className="flex-1 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105"
+                disabled={locked}
+                className="flex-1 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
               >
                 <Plus size={16} />
@@ -389,7 +395,7 @@ export default function PatientDetailPage() {
             {!patient.patient_user_id && (
               <button
                 onClick={handleInvite}
-                disabled={inviteLoading}
+                disabled={inviteLoading || locked}
                 className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold border border-black/10 dark:border-white/10 text-ink/70 dark:text-white/70 hover:border-[#4F7CFF]/40 hover:text-[#4F7CFF] transition-colors disabled:opacity-60"
               >
                 <Smartphone size={16} />
@@ -400,7 +406,8 @@ export default function PatientDetailPage() {
             {patient.patient_user_id && (
               <button
                 onClick={handleResetPortalAccess}
-                className="flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ink/55 dark:text-white/40 hover:text-red-500 transition-colors self-end"
+                disabled={locked}
+                className="disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ink/55 dark:text-white/40 hover:text-red-500 transition-colors self-end"
               >
                 <RotateCcw size={12} />
                 {ui.patients.resetPortalAccess}
