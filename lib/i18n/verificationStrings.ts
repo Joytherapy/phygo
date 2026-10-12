@@ -34,6 +34,11 @@ type Dict = {
   videoSaveFailed: string;
   patientsLocked: string;
   patientsLockedLink: string;
+  badgeVerified: string;
+  badgeNotVerified: string;
+  badgeStudent: string;
+  showDetails: string;
+  hideDetails: string;
 };
 
 const en: Dict = {
@@ -71,6 +76,11 @@ const en: Dict = {
   videoSaveFailed: 'Could not save the call. Please try again.',
   patientsLocked: 'Managing real patients (adding patients, notes, appointments, invitations, video calls and clinical links) is reserved for verified physiotherapists. You can still view what you already created and explore every educational resource.',
   patientsLockedLink: 'Request verification',
+  badgeVerified: "Verified physiotherapist",
+  badgeNotVerified: "Not verified",
+  badgeStudent: "Student",
+  showDetails: "Verification details",
+  hideDetails: "Hide details",
 };
 
 const it: Dict = {
@@ -108,6 +118,11 @@ const it: Dict = {
   videoSaveFailed: 'Impossibile salvare la chiamata. Riprova.',
   patientsLocked: 'La gestione di pazienti reali (nuovi pazienti, note, appuntamenti, inviti, videochiamate e collegamenti clinici) è riservata ai fisioterapisti verificati. Puoi comunque vedere ciò che hai già creato ed esplorare tutte le risorse di studio.',
   patientsLockedLink: 'Richiedi la verifica',
+  badgeVerified: "Fisioterapista verificato",
+  badgeNotVerified: "Non verificato",
+  badgeStudent: "Studente",
+  showDetails: "Dati di verifica",
+  hideDetails: "Nascondi dati",
 };
 
 const es: Dict = {
@@ -145,6 +160,11 @@ const es: Dict = {
   videoSaveFailed: 'No se pudo guardar la llamada. Inténtalo de nuevo.',
   patientsLocked: 'La gestión de pacientes reales (nuevos pacientes, notas, citas, invitaciones, videollamadas y vínculos clínicos) está reservada a fisioterapeutas verificados. Puedes seguir viendo lo que ya creaste y explorar todos los recursos de estudio.',
   patientsLockedLink: 'Solicitar verificación',
+  badgeVerified: "Fisioterapeuta verificado",
+  badgeNotVerified: "No verificado",
+  badgeStudent: "Estudiante",
+  showDetails: "Datos de verificación",
+  hideDetails: "Ocultar datos",
 };
 
 const fr: Dict = {
@@ -182,6 +202,11 @@ const fr: Dict = {
   videoSaveFailed: 'Impossible d’enregistrer l’appel. Réessayez.',
   patientsLocked: 'La gestion de patients réels (nouveaux patients, notes, rendez-vous, invitations, appels vidéo et liens cliniques) est réservée aux kinésithérapeutes vérifiés. Vous pouvez toujours consulter ce que vous avez déjà créé et explorer toutes les ressources d’étude.',
   patientsLockedLink: 'Demander la vérification',
+  badgeVerified: "Kinésithérapeute vérifié",
+  badgeNotVerified: "Non vérifié",
+  badgeStudent: "Étudiant",
+  showDetails: "Données de vérification",
+  hideDetails: "Masquer les données",
 };
 
 export const VERIFICATION_STRINGS: Record<AppLang, Dict> = { en, it, es, fr };
