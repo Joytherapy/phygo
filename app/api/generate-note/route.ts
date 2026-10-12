@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { requireProfessional } from "@/lib/auth/sessionServer";
-import { consumeHourly, HOURLY_LIMITS, tooManyRequests } from "@/lib/rateLimit";
+import { consumeHourly, HOURLY_LIMITS, limitResponse } from "@/lib/rateLimit";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -14,7 +14,8 @@ const openai = new OpenAI({
 export async function POST(request: NextRequest) {
   const gate = await requireProfessional();
   if (!gate.ok) return gate.response;
-  if (!(await consumeHourly(`ai:generate-note:${gate.user.id}`, HOURLY_LIMITS.generateNote))) return tooManyRequests();
+  const limited = limitResponse(await consumeHourly(`ai:generate-note:${gate.user.id}`, HOURLY_LIMITS.generateNote));
+  if (limited) return limited;
 
   try {
 

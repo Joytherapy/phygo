@@ -176,3 +176,47 @@ test('video rooms: configuration and patient ownership are checked before Daily 
     await withDaily.stop();
   }
 });
+
+test('concurrent requests cannot exceed the hourly limit', async () => {
+  // Physio B has no analyze-scan counter yet; 40 simultaneous calls against a limit of 30.
+  const before = fake.state.tables.ask_phygo_usage.filter((r) => r.ip === `ai:analyze-scan:${people.physioB.id}`).length;
+  assert.equal(before, 0);
+  const results = await Promise.all(
+    Array.from({ length: 40 }, () => post(app.url, '/api/analyze-scan', 'physioB', { images: ['data:image/png;base64,AAAA'] }).then((r) => r.status)),
+  );
+  const passed = results.filter((s) => ![429, 503].includes(s)).length;
+  assert.equal(passed, 30, `statuses: ${results.join(',')}`);
+  assert.equal(results.filter((s) => s === 429).length, 10);
+  const rows = fake.state.tables.ask_phygo_usage.filter((r) => r.ip === `ai:analyze-scan:${people.physioB.id}`);
+  assert.equal(rows.length, 1, 'one counter row, no duplicates');
+  assert.equal(rows[0].request_count, 30, 'no increment lost or double-counted');
+});
+
+test('if the limit cannot be checked, paid calls are refused (fail closed)', async () => {
+  await fetch(`${fake.url}/__control/fail?table=ask_phygo_usage`);
+  try {
+    const before = openaiCalls();
+    const res = await post(app.url, '/api/generate-note', 'physioA', { transcript: 'x', lang: 'en' });
+    assert.equal(res.status, 503);
+    assert.equal((await res.json()).code, 'limit_unavailable');
+    assert.equal((await post(app.url, '/api/ask-phygo', 'physioA', { question: 'x' })).status, 503);
+    assert.equal(openaiCalls(), before, 'no OpenAI call without a working limit');
+  } finally {
+    await fetch(`${fake.url}/__control/fail`);
+  }
+});
+
+test('a missing or masked service-role key also fails closed', async () => {
+  for (const key of ['', `eyJ${'\u2022'.repeat(10)}`]) {
+    const broken = await startApp({ fakeUrl: fake.url, port: 3415, serviceRoleKey: key });
+    try {
+      const before = openaiCalls();
+      const res = await post(broken.url, '/api/analyze-scan', 'physioA', { images: ['x'] });
+      assert.equal(res.status, 503);
+      assert.equal(openaiCalls(), before);
+      assert.ok(!(await res.text()).includes('\u2022'));
+    } finally {
+      await broken.stop();
+    }
+  }
+});

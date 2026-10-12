@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ownsPatient, requireProfessional } from '@/lib/auth/sessionServer'
-import { consumeHourly, HOURLY_LIMITS, tooManyRequests } from '@/lib/rateLimit'
+import { consumeHourly, HOURLY_LIMITS, limitResponse } from '@/lib/rateLimit'
 
 // Creates a paid Daily.co room for one of the signed-in clinician's own
 // patients. Rooms are created only by the clinician; patients join them from
@@ -25,7 +25,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Patient not found' }, { status: 404 })
     }
 
-    if (!(await consumeHourly(`ai:video-room:${gate.user.id}`, HOURLY_LIMITS.videoRoom))) return tooManyRequests()
+    const limited = limitResponse(await consumeHourly(`ai:video-room:${gate.user.id}`, HOURLY_LIMITS.videoRoom))
+    if (limited) return limited
 
     const roomName = `session-${patientId}-${Date.now()}`
 

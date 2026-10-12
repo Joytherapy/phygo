@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { requireUser } from "@/lib/auth/sessionServer";
-import { consumeHourly } from "@/lib/rateLimit";
+import { consumeHourly, limitResponse } from "@/lib/rateLimit";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -24,9 +24,8 @@ export async function POST(request: NextRequest) {
   if (!gate.ok) return gate.response;
   const { data: profile } = await gate.supabase.from("profiles").select("plan").eq("id", gate.user.id).maybeSingle();
   const plan = profile?.plan || "free";
-  if (!(await consumeHourly(`user:${gate.user.id}`, LIMITS[plan] ?? LIMITS.free))) {
-    return NextResponse.json({ error: "Too many requests. Please wait a bit before asking again." }, { status: 429 });
-  }
+  const limited = limitResponse(await consumeHourly(`user:${gate.user.id}`, LIMITS[plan] ?? LIMITS.free));
+  if (limited) return limited;
 
   try {
     const { question, noteContext, lang } = await request.json();

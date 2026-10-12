@@ -8,10 +8,11 @@
 //
 // Supported PostgREST features: select (columns ignored), eq., neq., is.null,
 // in.(...), order=<col>.asc|desc, offset/limit, single/maybeSingle (Accept
-// header), insert/update/upsert/delete on simple tables.
+// header), insert/update/upsert/delete on simple tables, and primary-key
+// conflicts (23505) for the tables listed in `primaryKeys`.
 import http from 'node:http';
 
-export async function startFakeSupabase({ port, tables = {}, users = {} }) {
+export async function startFakeSupabase({ port, tables = {}, users = {}, primaryKeys = { ask_phygo_usage: 'ip' } }) {
   const state = {
     tables: structuredClone(tables),
     users, // access token -> user object
@@ -100,6 +101,10 @@ export async function startFakeSupabase({ port, tables = {}, users = {} }) {
     }
     if (req.method === 'POST') {
       const items = [].concat(JSON.parse(body || '[]'));
+      const pk = primaryKeys[table];
+      if (pk && !url.searchParams.get('on_conflict') && items.some((item) => rows.some((r) => r[pk] === item[pk]))) {
+        return send(409, { code: '23505', message: `duplicate key value violates unique constraint "${table}_pkey"` });
+      }
       for (const item of items) {
         const conflict = url.searchParams.get('on_conflict');
         const existing = conflict ? rows.find((r) => conflict.split(',').every((c) => r[c] === item[c])) : null;
