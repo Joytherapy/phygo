@@ -762,7 +762,7 @@ export default function ExerciseLibraryPage() {
                   />
                 </div>
 
-                {openExercise.instructions && openExercise.instructions.length > 0 && (
+                {Array.isArray(openExercise.instructions) && openExercise.instructions.length > 0 && (
                   <div className="mb-6">
                     <p className="eyebrow text-ink/40 dark:text-white/40 mb-3">{ui.instructionsLabel}</p>
                     <StepList steps={openExercise.instructions} />

@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 import { getTranslatedExercisesBatch, type ExerciseLang } from '@/lib/exerciseTranslation';
 import { serviceRoleConfigProblem } from '@/lib/supabase/serverConfig';
+import { normalizeInstructions } from '@/lib/exerciseInstructions';
 
 export const dynamic = 'force-dynamic';
 
@@ -240,7 +241,7 @@ export async function GET(request: Request) {
       return {
         id: e.id,
         name: translated?.name || source?.name || e.external_id,
-        instructions: translated?.instructions ?? source?.instructions ?? null,
+        instructions: normalizeInstructions(translated?.instructions ?? source?.instructions ?? null),
         tips: translated?.tips ?? source?.tips ?? null,
         primary_muscle: e.primary_muscle,
         secondary_muscles: e.secondary_muscles,

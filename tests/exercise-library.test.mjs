@@ -34,8 +34,15 @@ for (let n = 1; n <= ACTIVE + 5; n++) {
     tags: n % 10 === 0 ? ['cardio-hiit'] : [],
     archived_at: archived ? '2026-10-01T00:00:00Z' : null,
   });
-  const en = { exercise_id: id(n), lang: 'en', name: `Test exercise ${n}`, instructions: `Step ${n}`, tips: null };
-  translations.push(en, { ...en, lang: 'it', name: `Esercizio di prova ${n}`, source_hash: hash(en) });
+  // Real rows store steps as a jsonb array; exercise 7 mimics the one real row stored as a numbered string.
+  const instructions = n === 7 ? '1. Synthetic first step. 2. Synthetic second step.' : [`Step ${n}`];
+  const en = { exercise_id: id(n), lang: 'en', name: `Test exercise ${n}`, instructions, tips: null };
+  translations.push(
+    en,
+    { ...en, lang: 'it', name: `Esercizio di prova ${n}`, source_hash: hash(en) },
+    { ...en, lang: 'es', name: `Ejercicio de prueba ${n}`, source_hash: hash(en) },
+    { ...en, lang: 'fr', name: `Exercice d’essai ${n}`, source_hash: hash(en) },
+  );
   // Exercises 1-5 only have a vertical video (as 17 real exercises do); the rest have a default one.
   const verticalOnly = n <= 5;
   if (!verticalOnly) assets.push({ exercise_id: id(n), asset_type: 'video', variant: '720p', is_default: true, storage_bucket: 'exercise-media', storage_key: `videos/${n}.mp4` });
@@ -105,17 +112,40 @@ test('every exercise has a playable, signed video reference', async () => {
   assert.match(regular.image_start_url, /images\/100-start\.jpg/);
 });
 
+test('instructions are always a list of steps, even when stored as a numbered string', async () => {
+  const { exercises: out } = await (await list('physio')).json();
+  assert.deepEqual(out.find((e) => e.id === id(7)).instructions, ['Synthetic first step.', 'Synthetic second step.']);
+  assert.deepEqual(out.find((e) => e.id === id(8)).instructions, ['Step 8']);
+  assert.ok(out.every((e) => e.instructions === null || Array.isArray(e.instructions)));
+});
+
 test('a student gets the same library', async () => {
   const res = await list('student');
   assert.equal(res.status, 200);
   assert.equal((await res.json()).exercises.length, ACTIVE);
 });
 
-test('cached translations are used without calling OpenAI', async () => {
+test('cached translations are used in every language without calling OpenAI', async () => {
   const before = fake.state.requests.filter((r) => r.path.startsWith('/openai/')).length;
-  const { exercises: out } = await (await list('physio', 'it')).json();
-  assert.equal(out.find((e) => e.id === id(42)).name, 'Esercizio di prova 42');
+  const expected = { en: 'Test exercise 42', it: 'Esercizio di prova 42', es: 'Ejercicio de prueba 42', fr: 'Exercice d’essai 42' };
+  for (const [lang, name] of Object.entries(expected)) {
+    const { exercises: out } = await (await list('physio', lang)).json();
+    assert.equal(out.length, ACTIVE, `${lang}: full list`);
+    assert.equal(out.find((e) => e.id === id(42)).name, name, `${lang}: translated name`);
+  }
   assert.equal(fake.state.requests.filter((r) => r.path.startsWith('/openai/')).length, before);
+});
+
+test('an empty library is an empty list, not an error', async () => {
+  const saved = fake.state.tables.exercises;
+  fake.state.tables.exercises = [];
+  try {
+    const res = await list('physio');
+    assert.equal(res.status, 200);
+    assert.deepEqual((await res.json()).exercises, []);
+  } finally {
+    fake.state.tables.exercises = saved;
+  }
 });
 
 test('a database failure is reported as an error, never as an empty library', async () => {
