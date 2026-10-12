@@ -172,31 +172,31 @@ So being the administrator never opens clinical data, and no general bypass is a
 Complete items A–D and F, including the review and preparation of the transition list, **before step 1** of the SQL sequence. Item E follows the deploy.
 
 **A. `PHYGO_ADMIN_EMAILS` in Production**
-- [ ] Open Vercel → Project → Settings → Environment Variables, filtered on **Production**.
-- [ ] The value contains **only** the authorised administrator's email, exactly as registered (one address, no typos, no extra addresses).
-- [ ] Preview and Development do not hold the production value. If Preview needs an administrator, use a separate test account.
-- [ ] In Supabase, that email belongs to an existing account whose email is confirmed. The owner's account was checked on 12 Oct 2026 (exists, confirmed).
+- [x] Open Vercel → Project → Settings → Environment Variables, filtered on **Production**.
+- [x] The value contains **only** the authorised administrator's email, exactly as registered (one address, no typos, no extra addresses).
+- [x] Preview and Development do not hold the production value. If Preview needs an administrator, use a separate test account. *(It is assigned to Production only.)*
+- [x] In Supabase, that email belongs to an existing account whose email is confirmed. The owner's account was checked on 12 Oct 2026 (exists, confirmed).
 - [x] Checked on 12 Oct 2026 (read-only, value not copied anywhere): the Production value is exactly one address, the owner's account email, with no extra spaces; it is set for Production only.
-- [ ] If the variable is empty or wrong, nobody can review requests (fail closed). Fix it before the deploy.
+- [x] If the variable is empty or wrong, nobody can review requests (fail closed). Fix it before the deploy. *(It is correct.)*
 
 **B. Old transition variables removed**
-- [ ] `PROFESSIONAL_TRANSITION_ACCOUNTS`, `PROFESSIONAL_TRANSITION_UNTIL` and `PROFESSIONAL_VERIFICATION_MODE` are **absent** in Production (and in Preview and Development).
-- [ ] No code version uses them (tested: a valid old list plus `grace` grants nothing, in #7 and #8). Removing them keeps the configuration honest and avoids confusion.
+- [x] `PROFESSIONAL_TRANSITION_ACCOUNTS`, `PROFESSIONAL_TRANSITION_UNTIL` and `PROFESSIONAL_VERIFICATION_MODE` are **absent** in Production (and in Preview and Development). *(Vercel connector, 12 Oct 2026.)*
+- [x] No code version uses them (tested: a valid old list plus `grace` grants nothing, in #7 and #8). Removing them keeps the configuration honest and avoids confusion.
 
 **C. Manual review of the transition list** (before the release window; the owner's row is pasted at step 4b, any other reviewed accounts at step 6)
-- [ ] Run the candidate query (above) and go through **every** row personally.
-- [ ] Add an account only if all of these hold:
+- [x] Run the candidate query (above) and go through **every** row personally.
+- [x] Add an account only if all of these hold:
   - you know the person and that they practise as a physiotherapist;
   - the email belongs to them;
   - they have real use (patients or notes) or a concrete reason to keep working during the review.
-- [ ] If you can confirm someone on the official public register now, **verify them** on `/dashboard/verification-admin` instead of listing them.
-- [ ] Do not add:
+- [x] If you can confirm someone on the official public register now, **verify them** on `/dashboard/verification-admin` instead of listing them.
+- [x] Do not add:
   - accounts you cannot identify;
   - test accounts;
   - students;
   - patient accounts;
   - accounts with no activity. These can request verification normally.
-- [ ] Use `until` ≤ 60 days, `added_by` = your name, and a `note` saying why the account was kept.
+- [x] Use `until` ≤ 60 days, `added_by` = your name, and a `note` saying why the account was kept.
 - [ ] After inserting, compare the table with your reviewed list using this read-only query:
   <!-- list-review -->
   ```sql
@@ -212,23 +212,21 @@ Complete items A–D and F, including the review and preparation of the transiti
 - [ ] Keep ids and emails out of GitHub, PRs and chat.
 
 **F. Vercel checks** (see "Vercel: what is known, and what the owner must check")
-- [ ] The cause of the Preview failure has been read in the build logs and is the missing-variables case. Anything else stops the release.
-- [ ] The latest Production deployment of `main` is **Ready** and current.
-- [ ] The required variables exist for Production (names only).
+- [x] The cause of the Preview failure has been read in the build logs and is the missing-variables case. Anything else stops the release. *(Vercel connector, 12 Oct 2026: PR #5, #7 and #8.)*
+- [x] The latest Production deployment of `main` is **Ready** and current. *(Vercel connector, 12 Oct 2026: `ca11624`. Look again on the day of the release.)*
+- [x] The required variables exist for Production (names only). *(Vercel connector, 12 Oct 2026.)*
 
 **D. No production secrets in Preview**
-- [ ] Preview uses its own values, or none. Nothing is copied from Production.
+- [x] Preview uses its own values, or none. Nothing is copied from Production. *(Preview has none.)*
 - [x] **Project variables**, checked read-only on 12 Oct 2026 (names and environments only, no values): all 6 variables (`SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET`, `OPENAI_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `PHYGO_ADMIN_EMAILS`) are assigned to **Production only**. None is in Preview or Development. There are no custom environments and no branch-specific Preview variables. `DAILY_API_KEY`, `PHYGO_ADMIN_API_TOKEN` and email-service credentials are not set in any environment. The code reads no email credentials: sign-in emails are sent by Supabase.
-- [ ] **Team-level shared variables: not verifiable with the available read-only tools; the owner checks them.** D stays open until this is done.
-  1. Vercel → team **joytherapy's projects** → **Settings** → **Environment Variables** (the team's shared variables). For each shared variable, note whether it is linked to the PHYGO project and whether its environments include **Preview**. Do not open or reveal any value.
-  2. Vercel → project **phygo** → **Settings** → **Environment Variables**: check that no row is marked as **shared** (linked from the team) with **Preview** among its environments.
-  3. D passes only if no shared variable linked to PHYGO is available in Preview. Also note whether a shared `DAILY_API_KEY` exists (see "Known limitation: video calls").
+- [x] **Shared variables**, checked manually by the owner in the Vercel dashboard on 12 Oct 2026: project **phygo** → Settings → Environment Variables → **Shared** shows "No shared variables linked"; the **Project** tab shows the six variables above, assigned to Production only. A team-level shared variable reaches a project only if it is linked to it, so none reaches PHYGO's Preview. (The Vercel connector cannot list shared variables; this part could only be checked in the dashboard.)
+- [x] **D passed on 12 Oct 2026.** No production secret is available to Preview, from the project or from the team. Repeat it if variables are added or linked before the release.
 
 **E. After the deploy (smoke test)**
 - [ ] The administrator opens `/dashboard/verification-admin` and the list loads.
 - [ ] The owner, listed at step 4b, creates a note and an appointment on one of their **own** patients. Video call: only if `DAILY_API_KEY` is configured; otherwise the expected answer is "Video calls are not configured" (see "Known limitation: video calls").
 - [ ] A non-admin test account gets "forbidden" there.
-- [ ] As a verified or listed account, and as an unlisted test account, try: one note, one scan, one video call, one appointment, one invitation, and one delete. The unlisted account must be refused each time.
+- [ ] As a verified or listed account, and as an unlisted test account, try: one note, one scan, one video call, one appointment, one invitation, and one delete. The unlisted account must be refused each time. While `DAILY_API_KEY` is absent, the listed or verified account gets "Video calls are not configured" for the video call; the unlisted account must still get 403 first.
 
 ## SQL file versions (checksums)
 
@@ -341,16 +339,27 @@ If the build is faster than steps 6–7, production passes briefly through **S3*
 
 ## Known limitation: video calls
 
-- **`DAILY_API_KEY` is not set** among the project's variables, in any environment (checked 12 Oct 2026). Whether a team-level shared `DAILY_API_KEY` exists is part of checklist D, step 3.
-- **If it does not exist there either, video calls are not configured.** This is a **known functional limitation** of the release, not a security issue. The new code answers `503 Video calls are not configured` and makes no call to Daily. Everything else works without it.
+- **`DAILY_API_KEY` is not set** for PHYGO in any environment: not among the project's variables (Vercel connector), and no shared variable is linked to the project (dashboard, owner). Checked 12 Oct 2026.
+- **So video calls are not configured.** This is a **known functional limitation** of the release, not a security issue. The new code answers `503 Video calls are not configured` and makes no call to Daily. Everything else works without it.
 - **To enable video calls later:** add `DAILY_API_KEY` to **Production only**. This is a separate Vercel change and needs the owner's explicit approval. It is not part of this release.
 
-## Vercel: what is known, and what the owner must check
+## Vercel: what was checked, and how
 
-**Known, without Vercel access.** No Vercel connector or login is available to this work, so the build logs could not be read.
-- **Every PR branch** shows the Vercel status "Deployment has failed" since PR #1 (11 Oct), including PR #2, which was later merged into `main`.
-- **The Vercel bot comments** carry no error text; they only link to the dashboard (`npx vercel inspect <deployment> --logs`).
-- **The production deployment status of `main`** is not visible through GitHub here.
+Vercel access was added during the preparation, on 12 Oct 2026. Two sources were used, and the guide says which one each result comes from.
+
+**Through the Vercel connector** (read-only tools; no value read, except where stated):
+- **Preview failures:** the build logs of the failed Preview deployments of PR #5, #7 and #8 stop at "Collecting page data" with `supabaseUrl is required`. That is the missing-variables case: Preview has no variables. It is not a code error.
+- **Production:** the latest Production deployment of `main` (`ca11624`) is **Ready** and current. An earlier Production failure was caused by `CRON_SECRET` having spaces around its value; it was fixed and redeployed.
+- **Project variables (names and environments only):** six, all assigned to **Production only**. No custom environments, no branch-specific Preview variables. `DAILY_API_KEY`, `PHYGO_ADMIN_API_TOKEN` and the old transition variables are absent.
+- **One change, approved by the owner:** Preview was removed from `OPENAI_API_KEY`. Its value and its Production assignment were not touched.
+- **`PHYGO_ADMIN_EMAILS`:** its value was read once, at the owner's request, only to compare it with the owner's account (it matches: one address, Production only). It was not copied anywhere.
+- **Not possible with the connector:** listing team-level shared variables. The connector only offers a tool that returns a shared variable's decrypted value, by id, and it was not used.
+
+**Checked manually by the owner in the Vercel dashboard:**
+- **Shared variables:** project **phygo** → Settings → Environment Variables → **Shared** shows "No shared variables linked".
+- **Project tab:** it shows the six variables, assigned to Production only, matching the connector.
+
+**Before this access** (11–12 Oct), only GitHub was available. Every PR branch showed "Deployment has failed" since PR #1, with no error text in the bot comments. That is why the local reproduction below was made.
 
 **Reproduced locally** (dummy values only, no real service):
 
@@ -372,6 +381,8 @@ The two versions have the same `.env.example` variable names. The only new varia
 
 **Owner checks, before the release window**
 
+Items 1 and 2 were done through the connector on 12 Oct 2026 (see above). On the day of the release, look again at item 2: the latest Production deployment must still be Ready. Item 3 is still optional.
+
 1. **Read the cause of a Preview failure.** Open Vercel → project **phygo** → **Deployments** → the failed Preview of PR #8 → **Build Logs**.
 
    | What the log shows | Meaning | Action |
@@ -391,7 +402,9 @@ The two versions have the same `.env.example` variable names. The only new varia
 | Check | Where |
 |---|---|
 | SQL replica, release sequence, API state matrix (old and new code), network guard, builds with dummy variables | **Local**, in this repository's tests, no real services |
-| Cause of the Preview failures; whether Production builds; whether the new deployment is Ready and current | **Vercel dashboard** (owner) |
+| Cause of the Preview failures; latest Production deployment Ready; project variables (names and environments) | **Vercel connector**, read-only (done 12 Oct 2026) |
+| Shared variables linked to the project | **Vercel dashboard**, owner (done 12 Oct 2026) |
+| Whether the new deployment is Ready and current, at step 8 | **Vercel dashboard** (owner) or the connector, read-only |
 | Which code the production domain serves | The step 8 GET (owner, after the deploy) |
 
 ## Exactly which SQL, in which order
