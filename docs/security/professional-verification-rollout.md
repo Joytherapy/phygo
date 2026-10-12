@@ -281,6 +281,7 @@ Before pasting a file into the SQL editor, you can check it on your Mac with `sh
 | `sql/2026-10_patient_management_B_policies_PROPOSED.sql` | `1f732a5aad9a5c3e944d95443eceada5e5e806cdf116f39ecfa9f67b47660d70` |
 | `sql/2026-10_security_demo_usage_policies_PROPOSED.sql` | `3f0c6f26d2569784601c63a683fdcc77a48128c267477d6b33697859437ae599` |
 | `sql/2026-10_patient_management_R_freeze_PROPOSED.sql` (emergency only) | `ab13dabed7c3d80a23c51eb57e1a50eda574308a8aa9149ce21fb72305d6b7de` |
+| `sql/2026-10_verification_evidence_PROPOSED.sql` (**not part of the 12 Oct release**; proposed with the evidence PR, not applied) | `bf970acbad65233b9f0dae24d02ffa2f138c9584da4d1349e8384917f463abd2` |
 
 If a file changes after this table, the table must be updated in the same commit.
 

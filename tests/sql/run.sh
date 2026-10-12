@@ -278,5 +278,38 @@ expect "self-verification still refused after rollback" "$(as authenticated $B "
 q -f sql/2026-10_professional_verification_PROPOSED.sql >/dev/null
 expect "verification migration re-applies after rollback" "$(as authenticated $B "update profiles set registration_number = 'R-10' where id = '$B'")" denied
 
+echo "verification evidence (sql/2026-10_verification_evidence_PROPOSED.sql, applied twice)"
+for i in 1 2; do q -f sql/2026-10_verification_evidence_PROPOSED.sql >/dev/null; done
+EV=sql/2026-10_verification_evidence_PROPOSED.sql
+expect "both tables exist with RLS on and no policy" "$(q -c "select count(*) filter (where c.relrowsecurity) || '/' || (select count(*) from pg_policies where tablename like 'professional_verification_%') from pg_class c where c.relname in ('professional_verification_requests', 'professional_verification_reviews')")" "2/0"
+RQ=60000000-0000-0000-0000-0000000000e1
+q -c "insert into professional_verification_requests (id, user_id, legal_first_name, legal_last_name, registry_country, registry_name, registration_number, document_path, document_mime, document_size, declaration_version, declaration_accepted_at)
+      values ('$RQ', '$V', 'Maria', 'Rossi', 'IT', 'OFI Lombardia', '1234', '$V/$RQ/doc.pdf', 'application/pdf', 1000, 'v1', now());
+      insert into professional_verification_reviews (request_id, action, registry_check, reviewer) values ('$RQ', 'registry_check', 'match', 'admin@test.invalid')" >/dev/null
+for who in V U; do
+  id=${!who}
+  expect "$who cannot read verification requests, even their own" "$(as authenticated $id "select count(*) from professional_verification_requests")" denied
+  expect "$who cannot read the review history" "$(as authenticated $id "select count(*) from professional_verification_reviews")" denied
+  expect "$who cannot insert a request directly" "$(as authenticated $id "insert into professional_verification_requests (user_id, legal_first_name, legal_last_name, registry_country, registry_name, registration_number, declaration_version, declaration_accepted_at) values ('$id', 'A', 'B', 'IT', 'OFI', '1', 'v1', now())")" denied
+  expect "$who cannot change a status or a register check" "$(as authenticated $id "update professional_verification_requests set status = 'verified', registry_check = 'match' where user_id = '$id'")" denied
+  expect "$who cannot point a request at another document" "$(as authenticated $id "update professional_verification_requests set document_path = '$U/x/y.pdf'")" denied
+done
+expect "anon cannot read requests" "$(as anon $V "select count(*) from professional_verification_requests")" denied
+expect "even the server cannot store a document path outside the owner's folder" "$(as service_role $V "insert into professional_verification_requests (user_id, legal_first_name, legal_last_name, registry_country, registry_name, registration_number, document_path, declaration_version, declaration_accepted_at) values ('$V', 'A', 'B', 'IT', 'OFI', '1', '$U/x/y.pdf', 'v1', now())")" denied
+expect "unknown statuses and check results are refused" "$(as service_role $V "update professional_verification_requests set registry_check = 'probably' where id = '$RQ'")" denied
+expect "documents larger than 4 MB or of another type are refused" "$(as service_role $V "update professional_verification_requests set document_mime = 'text/html' where id = '$RQ'")" denied
+expect "bucket is private, 4 MB, PDF/JPEG/PNG only" "$(q -c "select public || '/' || file_size_limit || '/' || array_to_string(allowed_mime_types, ',') from storage.buckets where id = 'verification-documents'")" "false/4194304/application/pdf,image/jpeg,image/png"
+expect "no storage policy mentions the verification bucket" "$(q -c "select count(*) from pg_policies where schemaname = 'storage' and (coalesce(qual, '') || coalesce(with_check, '')) like '%verification-documents%'")" 0
+q -c "insert into storage.objects (bucket_id, name) values ('verification-documents', '$V/$RQ/doc.pdf')" >/dev/null
+expect "V cannot list or read verification documents, even their own" "$(val_as() { psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$1'; select count(*) from storage.objects where bucket_id = 'verification-documents'"; }; val_as $V)" 0
+expect "U cannot read another user's verification document" "$(psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$U'; select count(*) from storage.objects where bucket_id = 'verification-documents'")" 0
+expect "a user cannot upload into the verification bucket directly" "$(as authenticated $V "insert into storage.objects (bucket_id, name) values ('verification-documents', '$V/x/new.pdf')")" denied
+expect "a user cannot delete a verification document" "$(as authenticated $V "delete from storage.objects where bucket_id = 'verification-documents'"; q -c "select count(*) from storage.objects where bucket_id = 'verification-documents'")" "$(printf 'ok\n1')"
+expect "the workspace bucket keeps working for its owner" "$(as authenticated $V "insert into storage.objects (bucket_id, name) values ('workspace-files', '$V/notes.pdf')")" ok
+expect "the evidence tables do not change patient access: U still cannot create patients" "$(as authenticated $U "insert into patients (id, user_id, name) values (gen_random_uuid(), '$U', 'n')")" denied
+expect "self-verification is still refused" "$(as authenticated $U "update profiles set professional_status = 'verified' where id = '$U'")" denied
+expect "the evidence rollback refuses while requests exist" "$(runs "$(block $EV)")" refused
+expect "after the refused rollback the request and its history are intact" "$(q -c "select (select count(*) from professional_verification_requests) || '/' || (select count(*) from professional_verification_reviews)")" "1/1"
+
 psql -q -d postgres -c "drop database $DB" >/dev/null
 [ $fail = 0 ] && echo "ALL SQL CHECKS PASSED" || { echo "SOME SQL CHECKS FAILED"; exit 1; }

@@ -82,3 +82,20 @@ begin
   return v_patient_id;
 end; $$;
 grant execute on function redeem_patient_invite(text) to authenticated;
+
+-- Storage (approximation, for sql/2026-10_verification_evidence_PROPOSED.sql):
+-- Supabase grants table privileges on storage.objects to the client roles and
+-- relies on RLS policies. The live storage policies were not snapshotted; one
+-- bucket-scoped policy like the workspace one stands in for them, so the tests
+-- show that a policy scoped to another bucket does not reach a new bucket.
+create schema if not exists storage;
+create table if not exists storage.buckets (id text primary key, name text not null, public boolean default false, file_size_limit bigint, allowed_mime_types text[]);
+create table if not exists storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text references storage.buckets(id), name text, owner uuid);
+alter table storage.objects enable row level security;
+grant usage on schema storage to anon, authenticated, service_role;
+grant all on storage.objects, storage.buckets to anon, authenticated, service_role;
+insert into storage.buckets (id, name, public) values ('workspace-files', 'workspace-files', false) on conflict do nothing;
+create or replace function storage.foldername_first(name text) returns text language sql immutable as $$ select split_part(name, '/', 1) $$;
+create policy "workspace owners" on storage.objects for all to authenticated
+  using (bucket_id = 'workspace-files' and (storage.foldername_first(name)) = auth.uid()::text)
+  with check (bucket_id = 'workspace-files' and (storage.foldername_first(name)) = auth.uid()::text);

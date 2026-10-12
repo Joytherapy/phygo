@@ -71,6 +71,8 @@ before(async () => {
       patient_clinical_references: [],
       ask_phygo_usage: [],
       knowledge_base: [],
+      professional_verification_requests: [],
+      professional_verification_reviews: [],
       professional_transition_accounts: listed,
     },
   });
@@ -87,6 +89,16 @@ const call = (base, method, path, who, body) =>
     headers: { 'content-type': 'application/json', ...cookie(who) },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
+// A verification request is a multipart form with the proof of registration (sql/2026-10_verification_evidence_PROPOSED.sql).
+const PDF = Buffer.from('%PDF-1.4\n% synthetic registration certificate\n');
+const submit = (base, who, fields = {}, file = { bytes: PDF, name: 'certificate.pdf', type: 'application/pdf' }) => {
+  const form = new FormData();
+  const all = { legalFirstName: 'Synthetic', legalLastName: 'Clinician', declarationAccepted: 'true', declarationVersion: '2026-10-12.v1', ...fields };
+  for (const [k, v] of Object.entries(all)) form.append(k, String(v));
+  if (file) form.append('document', new Blob([file.bytes], { type: file.type }), file.name);
+  return fetch(`${base}/api/profile/verification`, { method: 'POST', headers: cookie(who), body: form });
+};
+const requestOf = (who) => [...fake.state.tables.professional_verification_requests].reverse().find((r) => r.user_id === people[who].id);
 const count = (prefix) => fake.state.requests.filter((r) => r.path.startsWith(prefix)).length;
 const providerCalls = () => ({ openai: count('/openai/'), daily: count('/daily/') });
 const NOTE = { transcript: 'synthetic transcript', lang: 'en' };
@@ -172,7 +184,7 @@ test('2. a new account is refused even after switching its declared role to phys
   assert.equal(row('newcomer').practice_stage, 'professional');
   await assertLockedOut(app.url, 'newcomer', 'not_applicable');
   // Submitting registration details does not unlock anything either.
-  const req = await call(app.url, 'POST', '/api/profile/verification', 'newcomer', { registryCountry: 'IT', registryName: 'Synthetic register', registrationNumber: 'N-9' });
+  const req = await submit(app.url, 'newcomer', { registryCountry: 'IT', registryName: 'Synthetic register', registrationNumber: 'N-9' });
   const v = (await req.json()).verification;
   assert.equal(v.status, 'pending');
   assert.equal(v.transitionUntil, null, 'not covered by the transition');
@@ -182,7 +194,7 @@ test('2. a new account is refused even after switching its declared role to phys
 });
 
 test('3. a student cannot bypass the restriction by changing their profile', async () => {
-  const res = await call(app.url, 'POST', '/api/profile/verification', 'student', {
+  const res = await submit(app.url, 'student', {
     registryCountry: 'it', registryName: 'Synthetic register', registrationNumber: 'S-1',
     status: 'verified', professional_status: 'verified', professionalStatus: 'verified', practice_stage: 'professional',
   });
@@ -194,7 +206,7 @@ test('3. a student cannot bypass the restriction by changing their profile', asy
   // Being on the transition list does not help a student either.
   await assertLockedOut(app.url, 'legacyStudent');
   // Invalid details are rejected field by field.
-  const bad = await call(app.url, 'POST', '/api/profile/verification', 'student', { registryCountry: 'Italy', registryName: '', registrationNumber: '<script>' });
+  const bad = await submit(app.url, 'student', { registryCountry: 'Italy', registryName: '', registrationNumber: '<script>' });
   assert.equal(bad.status, 400);
   assert.deepEqual((await bad.json()).fields.sort(), ['registrationNumber', 'registryCountry', 'registryName']);
 });
@@ -227,16 +239,14 @@ test('5. a verified professional can use clinical functions, for their own patie
 
 test('6. patients are refused everywhere, even if listed by mistake, and never reach OpenAI or Daily', async () => {
   await assertLockedOut(app.url, 'patient');
-  assert.equal((await call(app.url, 'POST', '/api/profile/verification', 'patient', { registryCountry: 'IT', registryName: 'x register', registrationNumber: '1' })).status, 403);
+  assert.equal((await submit(app.url, 'patient', { registryCountry: 'IT', registryName: 'x register', registrationNumber: '1' })).status, 403);
   const before = providerCalls();
   for (const [path, body] of PROTECTED) assert.equal((await call(app.url, 'POST', path, null, body)).status, 401, `anonymous on ${path}`);
   assert.deepEqual(providerCalls(), before);
 });
 
-test('changing a verified number sends it back to review; re-sending the same does not', async () => {
-  const same = await call(app.url, 'POST', '/api/profile/verification', 'verified', { registryCountry: 'IT', registryName: 'Synthetic register', registrationNumber: 'T-400' });
-  assert.equal((await same.json()).verification.status, 'verified');
-  const changed = await call(app.url, 'POST', '/api/profile/verification', 'verified', { registryCountry: 'IT', registryName: 'Synthetic register', registrationNumber: 'T-401' });
+test('any new submission sends a verified account back to review (new document, new decision)', async () => {
+  const changed = await submit(app.url, 'verified', { registryCountry: 'IT', registryName: 'Synthetic register', registrationNumber: 'T-401' });
   assert.equal((await changed.json()).verification.status, 'pending');
   await assertLockedOut(app.url, 'verified', 'pending');
 });
@@ -250,6 +260,12 @@ test('only an administrator can review, and the decision takes effect', async ()
   assert.ok(list.requests.some((r) => r.id === people.pending.id));
 
   assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.needsInfo.id, decision: 'rejected' })).status, 400, 'a rejection needs a message');
+  // A request without evidence cannot be approved: it needs a document and a match on the register.
+  const legacy = await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.pending.id, decision: 'verified' });
+  assert.equal(legacy.status, 409);
+  assert.equal((await legacy.json()).code, 'no_request');
+  assert.equal((await submit(app.url, 'pending', { registryCountry: 'IT', registryName: 'Synthetic register', registrationNumber: 'T-100' })).status, 200);
+  assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { action: 'registry_check', requestId: requestOf('pending').id, result: 'match' })).status, 200);
   const approve = await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.pending.id, decision: 'verified' });
   assert.equal(approve.status, 200);
   assert.equal(row('pending').professional_status, 'verified');
@@ -380,11 +396,12 @@ test('owner path: the administrator is listed before the release, then verified 
     assert.equal((await call(app.url, 'GET', '/api/metabolic/save?patientId=p-declared', 'admin')).status, 404);
 
     // Official verification: the request makes the status pending; the listed access continues.
-    const req = await call(app.url, 'POST', '/api/profile/verification', 'admin', { registryCountry: 'IT', registryName: 'Synthetic register', registrationNumber: 'O-1' });
+    const req = await submit(app.url, 'admin', { registryCountry: 'IT', registryName: 'Synthetic register', registrationNumber: 'O-1' });
     assert.equal((await req.json()).verification.status, 'pending');
     assert.equal(await opens(), true, 'pending + listed: no interruption');
 
     // Approval on the console, after checking the official register; recorded with the reviewer.
+    assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { action: 'registry_check', requestId: requestOf('admin').id, result: 'match' })).status, 200);
     assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.admin.id, decision: 'verified' })).status, 200);
     assert.equal(row('admin').professional_status, 'verified');
     assert.equal(row('admin').verification_reviewed_by, 'admin@test.invalid');

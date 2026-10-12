@@ -132,4 +132,5 @@ export const HOURLY_LIMITS = {
   generateNote: 120,
   noteEnrichment: 120, // refine-exercises, refine-plan, exercise-intelligence, science/relevant
   videoRoom: 20, // one room per video appointment
+  verificationUpload: 10, // professional verification submissions with a document
 } as const;

@@ -18,15 +18,18 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     users, // access token -> user object
     requests: [],
     failTables: new Set(), // tables that answer 500 (to test error handling)
+    storage: new Map(), // "bucket/path" -> { bucket, path, size, contentType }
+    signRequests: [], // { bucket, path, expiresIn } for every signed URL issued
   };
 
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
-    const body = await new Promise((resolve) => {
-      let b = '';
-      req.on('data', (c) => (b += c));
-      req.on('end', () => resolve(b));
+    const raw = await new Promise((resolve) => {
+      const chunks = [];
+      req.on('data', (c) => chunks.push(c));
+      req.on('end', () => resolve(Buffer.concat(chunks)));
     });
+    const body = raw.toString();
     state.requests.push({ method: req.method, path: url.pathname, search: url.search, auth: req.headers.authorization ?? null });
     // Browser pages (Playwright checks) call Supabase directly from another origin.
     const cors = {
@@ -59,6 +62,32 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
       return user ? send(200, user) : send(401, { code: 401, msg: 'invalid JWT' });
     }
     if (url.pathname.startsWith('/auth/v1/')) return send(401, { msg: 'not supported in tests' });
+
+    // Storage: one signed URL for one object (createSignedUrl).
+    const signOne = url.pathname.match(/^\/storage\/v1\/object\/sign\/([^/]+)\/(.+)$/);
+    if (signOne && req.method === 'POST') {
+      const [, bucket, path] = signOne;
+      const { expiresIn } = JSON.parse(body || '{}');
+      if (!state.storage.has(`${bucket}/${path}`)) return send(400, { statusCode: '404', error: 'not_found', message: 'Object not found' });
+      state.signRequests.push({ bucket, path, expiresIn });
+      return send(200, { signedURL: `/object/sign/${bucket}/${path}?token=test` });
+    }
+    // Storage: upload (createBucket is not supported; buckets are implicit).
+    const object = url.pathname.match(/^\/storage\/v1\/object\/([^/]+)\/(.+)$/);
+    if (object && (req.method === 'POST' || req.method === 'PUT') && object[1] !== 'sign') {
+      const [, bucket, path] = object;
+      const key = `${bucket}/${path}`;
+      if (state.storage.has(key) && req.headers['x-upsert'] !== 'true') return send(400, { statusCode: '409', error: 'Duplicate', message: 'The resource already exists' });
+      state.storage.set(key, { bucket, path, size: raw.length, contentType: req.headers['content-type'] ?? null });
+      return send(200, { Key: key });
+    }
+    // Storage: remove (DELETE /object/<bucket> with { prefixes }).
+    const removeObjects = url.pathname.match(/^\/storage\/v1\/object\/([^/]+)$/);
+    if (removeObjects && req.method === 'DELETE') {
+      const { prefixes = [] } = JSON.parse(body || '{}');
+      const removed = prefixes.filter((p) => state.storage.delete(`${removeObjects[1]}/${p}`)).map((name) => ({ name }));
+      return send(200, removed);
+    }
 
     // Storage: signed URLs for private buckets.
     const sign = url.pathname.match(/^\/storage\/v1\/object\/sign\/([^/]+)$/);
