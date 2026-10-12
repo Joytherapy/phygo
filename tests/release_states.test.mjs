@@ -106,6 +106,17 @@ for (const [name, observe, openOld, openNew] of CAPABILITIES) {
   });
 }
 
+// Deploy marker used by the release guide (step 8) to tell which code is live:
+// one anonymous GET, no side effect, no paid call. The new code answers 401
+// (the route exists and needs an account); the current code has no such route.
+test(`[${CODE} code] deploy marker: anonymous GET /api/profile/verification answers ${CODE === 'old' ? 404 : 401}`, async () => {
+  const before = { openai: openai(), daily: daily(), requests: fake.state.requests.length };
+  const res = await fetch(`${app.url}/api/profile/verification`);
+  assert.equal(res.status, CODE === 'old' ? 404 : 401);
+  assert.equal(openai(), before.openai);
+  assert.equal(daily(), before.daily);
+});
+
 test(`[${CODE} code] no request ever left this machine`, () => {
   // Blocked attempts are logged; they never reach the real host.
   const blocked = app.logs().match(/blocked external request to [^\s]+/g) ?? [];

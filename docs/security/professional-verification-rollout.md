@@ -120,7 +120,7 @@ Today (read-only, 12 Oct 2026):
 
 ## Release checklist
 
-Complete items A–D, including the review and preparation of the transition list, **before step 1** of the SQL sequence. Item E follows the deploy.
+Complete items A–D and F, including the review and preparation of the transition list, **before step 1** of the SQL sequence. Item E follows the deploy.
 
 **A. `PHYGO_ADMIN_EMAILS` in Production**
 - [ ] Open Vercel → Project → Settings → Environment Variables, filtered on **Production**.
@@ -154,6 +154,11 @@ Complete items A–D, including the review and preparation of the transition lis
   order by u.email;
   ```
 - [ ] Keep ids and emails out of GitHub, PRs and chat.
+
+**F. Vercel checks** (see "Vercel: what is known, and what the owner must check")
+- [ ] The cause of the Preview failure has been read in the build logs and is the missing-variables case. Anything else stops the release.
+- [ ] The latest Production deployment of `main` is **Ready** and current.
+- [ ] The required variables exist for Production (names only).
 
 **D. No production secrets in Preview**
 - [ ] Preview uses its own values, or none. Nothing is copied from Production.
@@ -209,7 +214,9 @@ What an **unverified, unlisted account** can do in each state. Also shown: what 
 | API half of S3 and S4 (new code) | `tests/release_states.test.mjs`, part of `bash tests/run.sh`: all 9 **closed**, own-patient metabolic reads open by design |
 | Database half of every state, including direct Supabase writes on own patients, and the failure scenarios | `bash tests/sql/release_sequence.sh` |
 
-Every external request in these tests is blocked and logged. The current code's hard-coded Daily URL is attempted and blocked.
+**Test isolation.** In every Node process of these tests (the app, its workers and the test runner), `fetch` and every TCP/TLS connection to a non-loopback host are refused and logged before any name lookup, and no proxy variable is passed. `tests/network-guard.test.mjs` proves this for fetch, http, https, net and tls, using only addresses that can never reach a real service.
+- **Documented limits** (in `tests/support/no-external-network.cjs`): explicit `node:dns` lookups, UDP, non-Node child processes, and the build step, which downloads Google Fonts.
+- **Daily:** the current code's hard-coded Daily URL is attempted and blocked.
 
 **Ordering of the states**
 - **S2 ⊂ S1:** SQL 1–4 only close things.
@@ -268,12 +275,61 @@ If the build is faster than steps 6–7, production passes briefly through **S3*
 | **Part B fails** (error in the SQL editor; its transaction is rolled back) | S3 once the deploy is live (S2 before) | Own-patient browser writes only; the API is protected by the new code | **Let the deploy go live**: S3 is strictly better than S2. Read the error, fix the cause, re-run Part B. Do not roll the code back |
 | **Deploy live, application misbehaves** | S4 | — | Fix forward. Instant Rollback to the previous deployment would return to the current code on the S2+B database: the API exposure would reopen, so use it only as a last resort |
 
+## Vercel: what is known, and what the owner must check
+
+**Known, without Vercel access.** No Vercel connector or login is available to this work, so the build logs could not be read.
+- **Every PR branch** shows the Vercel status "Deployment has failed" since PR #1 (11 Oct), including PR #2, which was later merged into `main`.
+- **The Vercel bot comments** carry no error text; they only link to the dashboard (`npx vercel inspect <deployment> --logs`).
+- **The production deployment status of `main`** is not visible through GitHub here.
+
+**Reproduced locally** (dummy values only, no real service):
+
+| Build of | Environment | Result |
+|---|---|---|
+| `main` (`ca11624`) and PR #8 | no environment variables | fails, identically for both, at "collect page data" (`Missing credentials … OPENAI_API_KEY` / `supabaseUrl is required`) |
+| `main` and PR #8 | the 4 core variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`) | passes, for both |
+| `main` and PR #8 | without `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` or `OPENAI_API_KEY` | fails, for both |
+
+The two versions have the same `.env.example` variable names. The only new variable the code reads is the optional, test-only `DAILY_API_BASE_URL`.
+
+**What this proves:**
+- PR #8 needs no build-time variable that `main` does not already need.
+- A build without those variables fails exactly like the Preview builds.
+
+**What it does not prove:**
+- that the Preview failures have this cause;
+- that the Production build will pass. Only Vercel's logs and a real build can show that (other causes exist: limits, Node version, settings).
+
+**Owner checks, before the release window**
+
+1. **Read the cause of a Preview failure.** Open Vercel → project **phygo** → **Deployments** → the failed Preview of PR #8 → **Build Logs**.
+
+   | What the log shows | Meaning | Action |
+   |---|---|---|
+   | `Failed to collect page data` with `supabaseUrl is required` or `Missing credentials … OPENAI_API_KEY` | Environment variables missing in **Preview** | Not a code failure. To get working Previews, give Preview its **own non-production** values (a separate Supabase project); never copy Production secrets |
+   | `Type error`, `Module not found`, `Failed to compile`, or anything else | A different problem | **Stop the release** and report the log text |
+
+2. **Check that Production can build.**
+   - In **Deployments**, filter on **Production**: the latest Production deployment, for `main` `ca11624`, should be **Ready** and current. If it is **Error**, production is already not deploying: fix that first.
+   - In **Settings → Environment Variables**, the variables `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY` and `PHYGO_ADMIN_EMAILS` must exist for **Production**. Check names only, not values.
+   - If both hold, the release build has the same requirements as a build that already succeeds. It is still confirmed only by the real build at step 5.
+
+3. **Optional:** check whether automatic assignment of the production domain can be turned off. That lets you build first and promote afterwards (see "Chosen sequence").
+
+**Which checks are local and which depend on Vercel**
+
+| Check | Where |
+|---|---|
+| SQL replica, release sequence, API state matrix (old and new code), network guard, builds with dummy variables | **Local**, in this repository's tests, no real services |
+| Cause of the Preview failures; whether Production builds; whether the new deployment is Ready and current | **Vercel dashboard** (owner) |
+| Which code the production domain serves | The step 8 GET (owner, after the deploy) |
+
 ## Exactly which SQL, in which order
 
 Each check query is read-only and must return **`true`** before you move on. The same queries are executed by `tests/sql/release_sequence.sh`: before their step they return `false`, after it they return `true`.
 
 **Preparation (no production change)**
-- Checklist A–D done.
+- Checklist A–D and F done (F: Vercel checks).
 - **The transition list reviewed and its insert statements prepared** (checklist C).
 - The merges **#8 → #7's branch** and **#7 → #5's branch** done; these do not deploy production.
 - PR #5 ready to merge into `main`. `main` is still `ca11624`, an ancestor of #8, so the merge brings exactly the tested code.
@@ -337,7 +393,18 @@ where schemaname = 'public'
   and (coalesce(qual, '') like '%can_manage_patients%' or coalesce(with_check, '') like '%can_manage_patients%');
 ```
 
-**Step 8. Deploy live.** Wait until the deployment is **Ready** and serving the production domain: state **S4**. If it fails or stays pending, see the scenarios above.
+**Step 8. Deploy live.** Confirm both of these:
+1. **Vercel:** in **Deployments**, the deployment of the merge commit shows environment **Production**, status **Ready**, and is the **current** production deployment (production domain assigned).
+2. **The live site answers like the new code.** This is one anonymous GET, with no side effect and no paid call:
+   ```bash
+   curl -s -o /dev/null -w '%{http_code}\n' https://<production-domain>/api/profile/verification
+   ```
+   - `401` means the new code is serving: state **S4**.
+   - `404` means the current code is still serving.
+
+   `<production-domain>` is the domain shown in Vercel; the code's `SITE_URL` is `https://phygo.vercel.app`. **Do not** use an AI route as the check: with the current code, an anonymous call to `/api/generate-note` would be a real paid request.
+
+If the deployment fails or stays pending, see the scenarios above.
 
 **Step 9.** Apply `sql/2026-10_security_demo_usage_policies_PROPOSED.sql`, only once the new code is live. The current demo code treats an unreadable counter as "allowed".
 
