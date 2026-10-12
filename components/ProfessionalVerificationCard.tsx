@@ -30,7 +30,21 @@ const STATUS_STYLE: Record<VerificationStatusKey, string> = {
 const inputClass =
   'w-full mt-1.5 rounded-xl border bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white'
 
-export default function ProfessionalVerificationCard() {
+export type VerificationSummary = { status: VerificationStatusKey; practiceStage: 'student' | 'professional' }
+
+/**
+ * onChange: called with the status when it loads and after each submission,
+ * so the page can show the badge next to the profile photo.
+ * hidden: keeps the card mounted (it still loads the status) without
+ * rendering it; the page hides it once the account is verified.
+ */
+export default function ProfessionalVerificationCard({
+  onChange,
+  hidden = false,
+}: {
+  onChange?: (v: VerificationSummary) => void
+  hidden?: boolean
+} = {}) {
   const t = useVerificationStrings()
   const { lang } = useLanguage()
   const [data, setData] = useState<Verification | null>(null)
@@ -47,6 +61,7 @@ export default function ProfessionalVerificationCard() {
         if (cancelled) return
         const v = body.verification as Verification
         setData(v)
+        onChange?.({ status: v.status, practiceStage: v.practiceStage })
         setForm({
           registryCountry: v.registryCountry ?? '',
           registryName: v.registryName ?? '',
@@ -58,6 +73,7 @@ export default function ProfessionalVerificationCard() {
     return () => {
       cancelled = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function submit() {
@@ -80,6 +96,7 @@ export default function ProfessionalVerificationCard() {
         return
       }
       setData(body.verification)
+      onChange?.({ status: body.verification.status, practiceStage: body.verification.practiceStage })
       setState('saved')
     } catch {
       setState('unavailable')
@@ -90,8 +107,10 @@ export default function ProfessionalVerificationCard() {
   const Icon = status === 'verified' ? BadgeCheck : status === 'pending' ? Clock : status === 'not_applicable' ? ShieldCheck : AlertCircle
   const field = (key: keyof typeof form) => `${inputClass} ${invalid.includes(key) ? 'border-red-400' : 'border-black/10 dark:border-white/10'}`
 
+  if (hidden) return null
+
   return (
-    <section aria-labelledby="verification-title" className="rounded-2xl border border-[#4F7CFF]/20 bg-[#4F7CFF]/[0.04] p-5">
+    <section id="professional-verification" aria-labelledby="verification-title" className="rounded-2xl border border-[#4F7CFF]/20 bg-[#4F7CFF]/[0.04] p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 id="verification-title" className="text-sm font-semibold text-ink dark:text-white flex items-center gap-1.5">
           <ShieldCheck size={15} className="text-[#4F7CFF]" />

@@ -6,7 +6,8 @@ import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Camera, Plus, X, Loader2, Check, Award, GraduationCap, Stethoscope } from 'lucide-react'
 import Navbar from '@/components/Navbar'
-import ProfessionalVerificationCard from '@/components/ProfessionalVerificationCard'
+import ProfessionalVerificationCard, { type VerificationSummary } from '@/components/ProfessionalVerificationCard'
+import VerificationBadge from '@/components/VerificationBadge'
 import { useUiStrings } from '@/contexts/LanguageContext'
 import { useRoleUi, type PracticeStage } from '@/lib/i18n/roleStrings'
 
@@ -43,6 +44,8 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState('')
   const [bio, setBio] = useState('')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [verification, setVerification] = useState<VerificationSummary | null>(null)
+  const [showVerification, setShowVerification] = useState(false)
   const [credentials, setCredentials] = useState<Credential[]>([])
   const [newCredential, setNewCredential] = useState('')
 
@@ -230,6 +233,13 @@ export default function ProfilePage() {
           <div>
             <p className="text-sm font-semibold text-ink dark:text-white">{t.photoLabel}</p>
             <p className="text-xs text-ink/55 dark:text-white/40">{t.photoHint}</p>
+            <div className="mt-2">
+              <VerificationBadge
+                summary={verification && { ...verification, practiceStage }}
+                expanded={showVerification}
+                onClick={verification?.status === 'verified' ? () => setShowVerification((s) => !s) : undefined}
+              />
+            </div>
           </div>
         </div>
 
@@ -262,7 +272,14 @@ export default function ProfilePage() {
 
           {/* The registration number is submitted for review here, never saved
               directly from the browser: only PHYGO can mark it verified. */}
-          <ProfessionalVerificationCard />
+          {/* Only the badge next to the photo by default: students never see the
+              card (verification is for qualified physiotherapists), and once
+              verified it collapses into the badge, which reopens it. A student
+              who switches to professional sees it right away. */}
+          <ProfessionalVerificationCard
+            onChange={setVerification}
+            hidden={practiceStage === 'student' || (verification?.status === 'verified' && !showVerification)}
+          />
 
           <div>
             <label className="text-sm font-medium text-ink/60 dark:text-white/50 mb-2 block">
