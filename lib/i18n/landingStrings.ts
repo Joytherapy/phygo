@@ -36,6 +36,7 @@ export interface LandingDict {
   nav: {
     audiences: string;
     tour: string;
+    world: string;
     library: string;
     pricing: string;
     faq: string;
@@ -182,6 +183,16 @@ export interface LandingDict {
     brain: TitleText & { alt: string; caption: string; modelCredit: string };
     systemsLabel: string;
     systems: string[];
+  };
+  /** PHYGO World: Evidence Hub + Events (the dashboard's "Phygo World" menu, minus the placeholder shop). */
+  world: {
+    eyebrow: string;
+    title: string;
+    intro: string;
+    evidence: TitleText & { studyType: string; fields: string[]; relevance: string; publish: string };
+    events: TitleText & { filters: string[]; rows: { type: string; format: string }[]; save: string; nearYou: string; note: string };
+    caption: string;
+    cta: string;
   };
   tools: {
     eyebrow: string;

@@ -25,7 +25,7 @@ export default function PricingSection({ lang, pricing }: { lang: AppLang; prici
   return (
     <section id="pricing" aria-labelledby="pricing-title" className="relative scroll-mt-16 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <SectionHeader id="pricing-title" index="07" eyebrow={pricing.eyebrow} title={pricing.title} intro={pricing.sub} />
+        <SectionHeader id="pricing-title" index="08" eyebrow={pricing.eyebrow} title={pricing.title} intro={pricing.sub} />
 
         <div className="mt-14 grid grid-cols-1 items-start gap-6 lg:grid-cols-[0.85fr_1.6fr]">
           {/* Available today */}

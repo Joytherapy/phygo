@@ -101,8 +101,16 @@ async function getPhases(supabase: SupabaseClient, conditionId: number, lang: La
     .from('rehab_phases')
     .select('phase_number, phase_name, translations')
     .eq('condition_id', conditionId)
-    .order('phase_number', { ascending: true });
+    .order('phase_number', { ascending: true })
+    .order('id', { ascending: false });
+  // Same rule as the condition page: one entry per phase number (a few protocols were imported twice).
+  const seen = new Set<number>();
   return (data ?? [])
+    .filter((p: any) => {
+      if (seen.has(p.phase_number)) return false;
+      seen.add(p.phase_number);
+      return true;
+    })
     .map((p: any) => (lang === 'it' ? p.phase_name : p.translations?.[lang]?.phase_name) as string | undefined)
     .filter((n): n is string => !!n && n.trim().length > 0)
     .map((n) => tidy(n, lang));
@@ -218,11 +226,14 @@ async function loadLandingData(lang: Lang): Promise<LandingData> {
   }
 
   try {
-    const [totalRes, coverageCounts, phasesRes, exercisesRes, featured, story, libraryExercise, sampleNames] =
+    const [totalRes, coverageCounts, phasesRes, idsRes, exercisesRes, featured, story, libraryExercise, sampleNames] =
       await Promise.all([
         supabase.from('knowledge_base').select('id', { count: 'exact', head: true }),
         Promise.all(COVERAGE_KEYS.map((k) => countNonEmpty(supabase, k))),
         supabase.from('rehab_phases').select('condition_id'),
+        // rehab_phases has no foreign key to knowledge_base and a few rows point at removed
+        // conditions, so a protocol only counts when its condition still exists.
+        supabase.from('knowledge_base').select('id').range(0, 9999),
         // Active exercises that have a demonstration video, so "exercises with video" stays literally true.
         supabase
           .from('exercises')
@@ -247,9 +258,7 @@ async function loadLandingData(lang: Lang): Promise<LandingData> {
     return {
       total: totalRes.error ? null : totalRes.count ?? null,
       coverage,
-      phasedProtocols: phasesRes.error
-        ? null
-        : new Set((phasesRes.data ?? []).map((r: { condition_id: number | null }) => r.condition_id).filter(Boolean)).size || null,
+      phasedProtocols: countProtocols(phasesRes, idsRes),
       exercises: exercisesRes.error ? null : exercisesRes.count || null,
       featured,
       story,
@@ -260,6 +269,16 @@ async function loadLandingData(lang: Lang): Promise<LandingData> {
     console.error('Landing data unavailable:', err);
     return empty;
   }
+}
+
+type Rows<T> = { data: T[] | null; error: unknown };
+
+/** Distinct conditions that have phases and still exist in knowledge_base. */
+function countProtocols(phases: Rows<{ condition_id: number | null }>, ids: Rows<{ id: number }>): number | null {
+  if (phases.error || ids.error || !ids.data?.length) return null;
+  const existing = new Set(ids.data.map((r) => r.id));
+  const linked = new Set((phases.data ?? []).map((r) => r.condition_id).filter((id): id is number => id !== null && existing.has(id)));
+  return linked.size || null;
 }
 
 /** Deduplicated per request: generateMetadata and the page share one set of queries. */

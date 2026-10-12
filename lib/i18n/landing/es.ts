@@ -12,6 +12,7 @@ export const es: LandingDict = {
   nav: {
     audiences: 'Para quién',
     tour: 'Producto',
+    world: 'PHYGO World',
     library: 'Biblioteca',
     pricing: 'Precios',
     faq: 'Preguntas',
@@ -310,22 +311,52 @@ export const es: LandingDict = {
       'Fisiología',
     ],
   },
+  world: {
+    eyebrow: 'PHYGO World',
+    title: 'La fisioterapia,\n*más allá de la consulta.*',
+    intro: 'PHYGO World te mantiene cerca de lo que hace avanzar la fisioterapia: la nueva investigación, resumida para la práctica, y los cursos y congresos que merecen tu tiempo.',
+    evidence: {
+      title: 'Evidence Hub',
+      text: 'Cada día PHYGO busca en PubMed nuevos ensayos controlados aleatorizados, revisiones sistemáticas y metaanálisis sobre fisioterapia y ejercicio terapéutico, y resume cada uno con la misma estructura clínica. Los estudios pertinentes también aparecen junto a los borradores de tus sesiones.',
+      studyType: 'Revisión sistemática',
+      fields: [
+        'Pregunta clínica',
+        'Población e intervención',
+        'Variables de resultado',
+        'Hallazgos principales',
+        'Interpretación clínica',
+        'Por qué importa',
+      ],
+      relevance: 'Relevancia para la práctica',
+      publish: 'Solo se publican automáticamente ensayos, revisiones y metaanálisis con una relevancia de al menos 70/100; el resto espera una revisión.',
+    },
+    events: {
+      title: 'Eventos',
+      text: 'Cursos, congresos y certificaciones para fisioterapeutas en un solo calendario. Busca y filtra por tipo, formato, nivel y fecha, descubre lo que hay cerca de ti y guarda lo que te interesa.',
+      filters: [
+        'Cursos',
+        'Congresos',
+        'Certificaciones',
+        'Presencial',
+        'Híbrido',
+      ],
+      rows: [
+          { type: 'Curso', format: 'Presencial' },
+          { type: 'Congreso', format: 'Híbrido' },
+          { type: 'Certificación', format: 'Presencial' },
+      ],
+      save: 'Guardar',
+      nearYou: 'Cerca de ti',
+      note: 'Los eventos se revisan antes de publicarse; la inscripción se hace en el sitio oficial del organizador.',
+    },
+    caption: 'Interfaz ilustrativa: no muestra estudios ni eventos reales. PHYGO World está incluido en la cuenta gratuita.',
+    cta: 'Explorar PHYGO World',
+  },
   tools: {
-    eyebrow: 'Evidencia y herramientas profesionales',
+    eyebrow: 'Herramientas clínicas y estudio',
     title: 'La estantería de referencia\n*de una consulta moderna.*',
-    intro:
-      'Investigación, herramientas de valoración y conocimiento especializado — junto al paciente que estás tratando, no en otra pestaña.',
+    intro: 'Herramientas de valoración, conocimiento especializado y un espacio de estudio personal — junto al paciente que estás tratando, no en otra pestaña.',
     columns: [
-      {
-        title: 'Evidencia, filtrada',
-        text: 'Cada día se revisan los nuevos estudios de PubMed. Solo se importan ensayos controlados aleatorizados, revisiones sistemáticas y metaanálisis sobre fisioterapia, que después se resumen con una estructura fija.',
-        items: [
-          'Pregunta clínica, población e intervención',
-          'Resultados principales e interpretación clínica',
-          'Publicación automática solo por encima de un umbral de calidad',
-          'Estudios relacionados junto a los borradores del copiloto',
-        ],
-      },
       {
         title: 'Herramientas de valoración',
         text: 'Las pruebas y escalas que usas cada semana, a mano mientras escribes.',
@@ -335,6 +366,7 @@ export const es: LandingDict = {
           'Exploración neurológica',
           'Cuestionarios de suelo pélvico',
           'Calculadora metabólica y de necesidades energéticas',
+          'Técnicas de terapia manual',
         ],
       },
       {
@@ -346,6 +378,17 @@ export const es: LandingDict = {
           'Rehabilitación del suelo pélvico',
           'Rehabilitación oncológica',
           'Primeros auxilios y SVB por país',
+        ],
+      },
+      {
+        title: 'Estudio y workspace',
+        text: 'Para estudiantes — y para quien prepare un examen o un caso complejo.',
+        items: [
+          'Tus PDF, anotados y ordenados en carpetas',
+          'Cuadernos para tus propios apuntes',
+          'Cuestionarios de 14 materias, en tres niveles de dificultad',
+          'Preguntas creadas a partir de la biblioteca PHYGO, en tu idioma',
+          'Progreso registrado materia por materia',
         ],
       },
     ],

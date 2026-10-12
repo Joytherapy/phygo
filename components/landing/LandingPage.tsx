@@ -11,6 +11,7 @@ import ProofStrip from "./ProofStrip";
 import StoryTour from "./StoryTour";
 import LibraryShowcase from "./LibraryShowcase";
 import AnatomySection from "./AnatomySection";
+import WorldSection from "./WorldSection";
 import ToolsShelf from "./ToolsShelf";
 import AudiencesSection from "./AudiencesSection";
 import TrustSection from "./TrustSection";
@@ -84,9 +85,10 @@ export default async function LandingPage({ lang }: { lang: AppLang }) {
               libraryHref={libraryHref}
             />
             <AnatomySection anatomy={t.anatomy} />
+            <WorldSection lang={lang} world={t.world} />
             <ToolsShelf tools={t.tools} />
           </div>
-          <TrustSection trust={t.trust} />
+          <TrustSection lang={lang} trust={t.trust} />
           <PricingSection lang={lang} pricing={t.pricing} />
           <FaqSection faq={t.faq} />
           <FinalCta final={t.final} libraryHref={libraryHref} />

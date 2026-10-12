@@ -1,18 +1,21 @@
-import { ClipboardCheck, FlaskConical, Library } from "lucide-react";
+import { ClipboardCheck, GraduationCap, Library } from "lucide-react";
 import type { LandingDict } from "@/lib/i18n/landingStrings";
 import { Reveal, SectionHeader } from "./ui";
 
-// Evidence: app/api/cron/science-daily (PubMed, RCT / systematic review /
-// meta-analysis filter, structured summary, quality-gated auto-publish) and
-// app/api/science/relevant. Assessment tools and specialty libraries are the
-// /dashboard/* pages listed in components/LibraryNavMenu.tsx.
-const ICONS = [FlaskConical, ClipboardCheck, Library];
+// Assessment tools: /dashboard/clinical-tools (orthopaedic tests, functional
+// scales, neuro exam, pelvic-floor questionnaires, manual therapy, metabolic
+// calculator). Specialty libraries: the /dashboard/* pages in
+// components/LibraryNavMenu.tsx. Study: /dashboard/workspace (PDFs with
+// annotations, notebooks) and /dashboard/quiz (lib/quiz/subjects.ts: 14
+// subjects, 3 difficulty levels, progress per subject). Evidence moved to
+// WorldSection.
+const ICONS = [ClipboardCheck, Library, GraduationCap];
 
 export default function ToolsShelf({ tools }: { tools: LandingDict["tools"] }) {
   return (
     <section id="tools" aria-labelledby="tools-title" className="relative scroll-mt-16 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <SectionHeader id="tools-title" index="05" eyebrow={tools.eyebrow} title={tools.title} intro={tools.intro} />
+        <SectionHeader id="tools-title" index="06" eyebrow={tools.eyebrow} title={tools.title} intro={tools.intro} />
 
         <div className="mt-14 grid grid-cols-1 border-t border-black/[0.08] dark:border-white/[0.09] md:grid-cols-3">
           {tools.columns.map((col, i) => {

@@ -14,6 +14,7 @@ export const fr: LandingDict = {
   nav: {
     audiences: 'Pour qui',
     tour: 'Produit',
+    world: 'PHYGO World',
     library: 'Bibliothèque',
     pricing: 'Tarifs',
     faq: 'FAQ',
@@ -312,22 +313,52 @@ export const fr: LandingDict = {
       'Physiologie',
     ],
   },
+  world: {
+    eyebrow: 'PHYGO World',
+    title: 'La kinésithérapie,\n*au-delà du cabinet.*',
+    intro: 'PHYGO World vous garde au plus près de ce qui fait avancer la kinésithérapie : la recherche récente, résumée pour la pratique, et les formations et congrès qui méritent votre temps.',
+    evidence: {
+      title: 'Evidence Hub',
+      text: 'Chaque jour, PHYGO recherche sur PubMed les nouveaux essais contrôlés randomisés, revues systématiques et méta-analyses en kinésithérapie et en exercice thérapeutique, puis résume chacun selon la même structure clinique. Les études pertinentes apparaissent aussi à côté des brouillons de vos séances.',
+      studyType: 'Revue systématique',
+      fields: [
+        'Question clinique',
+        'Population et intervention',
+        'Critères de jugement',
+        'Résultats principaux',
+        'Interprétation clinique',
+        'Pourquoi c’est important',
+      ],
+      relevance: 'Pertinence pour la pratique',
+      publish: 'Seuls les essais, revues et méta-analyses dont la pertinence atteint au moins 70/100 sont publiés automatiquement ; tout le reste attend une relecture.',
+    },
+    events: {
+      title: 'Événements',
+      text: 'Formations, congrès et certifications pour kinésithérapeutes dans un seul calendrier. Recherchez et filtrez par type, format, niveau et date, voyez ce qui a lieu près de chez vous et enregistrez ce qui vous intéresse.',
+      filters: [
+        'Formations',
+        'Congrès',
+        'Certifications',
+        'En présentiel',
+        'Hybride',
+      ],
+      rows: [
+          { type: 'Formation', format: 'En présentiel' },
+          { type: 'Congrès', format: 'Hybride' },
+          { type: 'Certification', format: 'En présentiel' },
+      ],
+      save: 'Enregistrer',
+      nearYou: 'Près de chez vous',
+      note: 'Les événements sont vérifiés avant d’être publiés ; l’inscription se fait sur le site officiel de l’organisateur.',
+    },
+    caption: 'Interface illustrative : aucune étude ni aucun événement réel n’est affiché. PHYGO World est inclus dans le compte gratuit.',
+    cta: 'Explorer PHYGO World',
+  },
   tools: {
-    eyebrow: 'Données probantes et outils professionnels',
+    eyebrow: 'Outils cliniques et étude',
     title: 'La bibliothèque de référence\n*d’un cabinet moderne.*',
-    intro:
-      'Recherche, outils d’évaluation et connaissances spécialisées — à côté du patient que vous prenez en charge, pas dans un autre onglet.',
+    intro: 'Outils d’évaluation, connaissances spécialisées et un espace d’étude personnel — à côté du patient que vous prenez en charge, pas dans un autre onglet.',
     columns: [
-      {
-        title: 'Des données probantes, filtrées',
-        text: 'Les nouvelles études PubMed sont vérifiées chaque jour. Seuls les essais contrôlés randomisés, les revues systématiques et les méta-analyses en kinésithérapie sont importés, puis résumés selon une structure fixe.',
-        items: [
-          'Question clinique, population et intervention',
-          'Principaux résultats et interprétation clinique',
-          'Publication automatique seulement au-dessus d’un seuil de qualité',
-          'Études associées affichées à côté des brouillons du copilote',
-        ],
-      },
       {
         title: 'Outils d’évaluation',
         text: 'Les tests et échelles que vous utilisez chaque semaine, à portée de main pendant la rédaction.',
@@ -337,6 +368,7 @@ export const fr: LandingDict = {
           'Examen neurologique',
           'Questionnaires pelvi-périnéaux',
           'Calculateur métabolique et des besoins énergétiques',
+          'Techniques de thérapie manuelle',
         ],
       },
       {
@@ -348,6 +380,17 @@ export const fr: LandingDict = {
           'Rééducation pelvi-périnéale',
           'Rééducation en oncologie',
           'Premiers secours et BLS par pays',
+        ],
+      },
+      {
+        title: 'Étude et workspace',
+        text: 'Pour les étudiants — et pour quiconque prépare un examen ou un cas complexe.',
+        items: [
+          'Vos PDF, annotés et rangés dans des dossiers',
+          'Des carnets pour vos propres notes',
+          'Des quiz dans 14 matières, sur trois niveaux de difficulté',
+          'Des questions construites à partir de la bibliothèque PHYGO, dans votre langue',
+          'Une progression suivie matière par matière',
         ],
       },
     ],

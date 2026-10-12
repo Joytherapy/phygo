@@ -12,6 +12,7 @@ export const en: LandingDict = {
   nav: {
     audiences: 'Who it’s for',
     tour: 'Product',
+    world: 'PHYGO World',
     library: 'Library',
     pricing: 'Pricing',
     faq: 'FAQ',
@@ -304,21 +305,52 @@ export const en: LandingDict = {
       'Physiology',
     ],
   },
+  world: {
+    eyebrow: 'PHYGO World',
+    title: 'Physiotherapy,\n*beyond the treatment room.*',
+    intro: 'PHYGO World keeps you close to what moves physiotherapy forward: new research, summarised for practice, and the courses and congresses worth your time.',
+    evidence: {
+      title: 'Evidence Hub',
+      text: 'Every day PHYGO checks PubMed for new randomised controlled trials, systematic reviews and meta-analyses in physiotherapy and exercise therapy, and summarises each one in the same clinical structure. Relevant studies also appear next to your session drafts.',
+      studyType: 'Systematic review',
+      fields: [
+        'Clinical question',
+        'Population and intervention',
+        'Outcomes',
+        'Main findings',
+        'Clinical interpretation',
+        'Why it matters',
+      ],
+      relevance: 'Relevance to practice',
+      publish: 'Only trials, reviews and meta-analyses scoring at least 70/100 for relevance are published automatically; everything else waits for review.',
+    },
+    events: {
+      title: 'Events',
+      text: 'Courses, congresses and certifications for physiotherapists in one calendar. Search and filter by type, format, level and date, see what is near you and save what interests you.',
+      filters: [
+        'Courses',
+        'Congresses',
+        'Certifications',
+        'In person',
+        'Hybrid',
+      ],
+      rows: [
+          { type: 'Course', format: 'In person' },
+          { type: 'Congress', format: 'Hybrid' },
+          { type: 'Certification', format: 'In person' },
+      ],
+      save: 'Save',
+      nearYou: 'Near you',
+      note: 'Events are reviewed before they are listed; registration happens on the organiser’s official site.',
+    },
+    caption: 'Illustrative interface: no real study or event is shown. PHYGO World is included in the free account.',
+    cta: 'Explore PHYGO World',
+  },
   tools: {
-    eyebrow: 'Evidence & professional tools',
+    eyebrow: 'Clinical toolkit & study',
     title: 'The reference shelf\n*of a modern practice.*',
-    intro: 'Research, assessment tools and specialty knowledge — next to the patient you are treating, not in another tab.',
+    intro: 'Assessment tools, specialty knowledge and a personal study space — next to the patient you are treating, not in another tab.',
     columns: [
-      {
-        title: 'Evidence, filtered',
-        text: 'New PubMed studies are checked daily. Only randomised controlled trials, systematic reviews and meta-analyses on physiotherapy are imported, then summarised in a fixed structure.',
-        items: [
-          'Clinical question, population and intervention',
-          'Main findings and clinical interpretation',
-          'Auto-published only above a quality threshold',
-          'Related studies shown next to copilot drafts',
-        ],
-      },
       {
         title: 'Assessment tools',
         text: 'The tests and scales you use every week, within reach while you write.',
@@ -328,6 +360,7 @@ export const en: LandingDict = {
           'Neurological examination',
           'Pelvic-floor questionnaires',
           'Metabolic and energy-needs calculator',
+          'Manual therapy techniques',
         ],
       },
       {
@@ -339,6 +372,17 @@ export const en: LandingDict = {
           'Pelvic-floor rehabilitation',
           'Oncology rehabilitation',
           'First aid and BLS by country',
+        ],
+      },
+      {
+        title: 'Study & workspace',
+        text: 'For students — and for anyone preparing an exam or a complex case.',
+        items: [
+          'Your PDFs, annotated and organised in folders',
+          'Notebooks for your own notes',
+          'Quizzes in 14 subjects, at three difficulty levels',
+          'Questions built from the PHYGO library, in your language',
+          'Progress tracked subject by subject',
         ],
       },
     ],

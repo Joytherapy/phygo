@@ -94,8 +94,17 @@ async function getPhases(conditionId: number, lang: AppLang): Promise<Phase[]> {
         "phase_number, phase_name, phase_criteria_to_start, typical_duration, phase_goals, phase_exercises, criteria_to_progress, translations",
       )
       .eq("condition_id", conditionId)
-      .order("phase_number", { ascending: true });
-    return (data ?? [])
+      .order("phase_number", { ascending: true })
+      .order("id", { ascending: false });
+    // A few protocols were imported twice, so the same phase number can appear
+    // more than once; show each phase once, keeping the most recent copy.
+    const seen = new Set<number>();
+    const unique = (data ?? []).filter((p: any) => {
+      if (seen.has(p.phase_number)) return false;
+      seen.add(p.phase_number);
+      return true;
+    });
+    return unique
       .map((p: any): Phase | null => {
         const src = lang === "it" ? p : p.translations?.[lang];
         const name = clean(src?.phase_name);

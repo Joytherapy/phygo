@@ -104,6 +104,7 @@ export default function LandingHeader({
     { label: nav.audiences, href: `${home}#audiences` },
     { label: nav.tour, href: `${home}#tour` },
     { label: nav.library, href: libraryHref },
+    { label: nav.world, href: `${home}#world` },
     { label: nav.pricing, href: `${home}#pricing` },
     { label: nav.faq, href: `${home}#faq` },
   ];
@@ -118,7 +119,7 @@ export default function LandingHeader({
           : "border-b border-transparent"
       }`}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 xl:gap-6">
         <a
           href={LANDING_PATH[lang]}
           aria-label={nav.home}
@@ -130,12 +131,12 @@ export default function LandingHeader({
         </a>
 
         <nav className="hidden lg:block">
-          <ul className="flex items-center gap-1">
+          <ul className="flex items-center gap-0.5 xl:gap-1">
             {links.map((l) => (
               <li key={l.href}>
                 <a
                   href={l.href}
-                  className="rounded-full px-3.5 py-2 text-[13.5px] font-medium text-ink/65 transition-colors hover:text-ink dark:text-white/60 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+                  className="whitespace-nowrap rounded-full px-2.5 py-2 text-[13.5px] font-medium text-ink/65 xl:px-3.5 transition-colors hover:text-ink dark:text-white/60 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
                 >
                   {l.label}
                 </a>
@@ -193,13 +194,13 @@ export default function LandingHeader({
 
           <a
             href={loginHref(lang)}
-            className="hidden lg:inline-flex rounded-full px-3.5 py-2 text-[13.5px] font-medium text-ink/70 transition-colors hover:text-ink dark:text-white/65 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+            className="hidden lg:inline-flex whitespace-nowrap rounded-full px-3 py-2 text-[13.5px] font-medium text-ink/70 transition-colors hover:text-ink dark:text-white/65 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
           >
             {nav.login}
           </a>
           <a
             href={signupHref(lang)}
-            className="hidden sm:inline-flex items-center rounded-full bg-ink px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-ink/85 dark:bg-white dark:text-ink dark:hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2"
+            className="hidden sm:inline-flex items-center whitespace-nowrap rounded-full bg-ink px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-ink/85 dark:bg-white dark:text-ink dark:hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2"
           >
             {nav.startFree}
           </a>

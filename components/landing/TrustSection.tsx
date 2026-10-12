@@ -1,5 +1,6 @@
 import { Database, FileCheck2, Scale, ShieldCheck } from "lucide-react";
-import type { LandingDict } from "@/lib/i18n/landingStrings";
+import type { AppLang } from "@/lib/i18n/uiStrings";
+import { publicPath, type LandingDict } from "@/lib/i18n/landingStrings";
 import { Reveal, SectionHeader, TextLink } from "./ui";
 
 // Every statement here is checked against the code: drafts are only saved on
@@ -8,7 +9,7 @@ import { Reveal, SectionHeader, TextLink } from "./ui";
 // app/privacy, evidence_level + source fields in knowledge_base.
 const ICONS = [FileCheck2, Database, ShieldCheck, Scale];
 
-export default function TrustSection({ trust }: { trust: LandingDict["trust"] }) {
+export default function TrustSection({ lang, trust }: { lang: AppLang; trust: LandingDict["trust"] }) {
   return (
     <section id="trust" aria-labelledby="trust-title" className="relative scroll-mt-16 px-4 py-8 sm:px-6">
       <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[32px] bg-ink px-6 py-16 text-white ring-1 ring-white/[0.07] sm:px-12 sm:py-24">
@@ -17,7 +18,7 @@ export default function TrustSection({ trust }: { trust: LandingDict["trust"] })
         <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-16 h-80 w-80 rounded-full bg-emerald/15 blur-[110px]" />
 
         <div className="relative">
-          <SectionHeader id="trust-title" index="06" eyebrow={trust.eyebrow} title={trust.title} intro={trust.intro} tone="inverse" />
+          <SectionHeader id="trust-title" index="07" eyebrow={trust.eyebrow} title={trust.title} intro={trust.intro} tone="inverse" />
 
           <ul className="mt-14 grid grid-cols-1 gap-px overflow-hidden rounded-[22px] bg-white/[0.08] sm:grid-cols-2">
             {trust.items.map((item, i) => {
@@ -33,7 +34,7 @@ export default function TrustSection({ trust }: { trust: LandingDict["trust"] })
           </ul>
 
           <div className="mt-10">
-            <TextLink href="/privacy" className="!text-white/80 hover:!text-white">
+            <TextLink href={publicPath(lang, "privacy")} className="!text-white/80 hover:!text-white">
               {trust.privacy}
             </TextLink>
           </div>
