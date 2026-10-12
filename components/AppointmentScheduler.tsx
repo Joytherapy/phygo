@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Clock, Video, MapPin, Check, X, Loader2, Plus, Sparkles } from 'lucide-react'
+import { Calendar, Clock, Video, MapPin, Check, X, Loader2, Plus, Sparkles, CalendarX } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useAgendaUi, localeForLang } from '@/lib/i18n/agendaStrings'
+import { cancelAppointment } from '@/lib/appointments'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -53,6 +54,9 @@ export default function AppointmentScheduler({
   const [saving, setSaving] = useState(false)
   const [justConfirmed, setJustConfirmed] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [confirmingCancel, setConfirmingCancel] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelError, setCancelError] = useState<string | null>(null)
 
   const days = nextDays(14)
 
@@ -125,6 +129,21 @@ export default function AppointmentScheduler({
     await loadAppointments()
   }
 
+  // Clinician only (mode 'physio'); the database allows it only for the
+  // clinician's own patients and only when can_manage_patients() is true.
+  const handleCancel = async (id: string) => {
+    setCancelling(true)
+    setCancelError(null)
+    const ok = await cancelAppointment(supabase, id)
+    setCancelling(false)
+    if (!ok) {
+      setCancelError(ui.cancelFlow.cancelError)
+      return
+    }
+    setConfirmingCancel(false)
+    await loadAppointments()
+  }
+
   const now = new Date()
   const upcoming = appointments.filter((a) => new Date(a.scheduled_at) >= now && a.status !== 'cancelled')
   const nextAppointment = upcoming.find((a) => a.status === 'confirmed') || upcoming[0]
@@ -185,6 +204,42 @@ export default function AppointmentScheduler({
                 {nextAppointment.session_type === 'video' ? ui.common.videoCall : ui.common.inPerson}
               </span>
             </div>
+            {mode === 'physio' &&
+              (confirmingCancel ? (
+                <div className="relative mt-4 rounded-2xl border border-red-500/30 bg-red-500/5 p-4">
+                  <p className="text-sm font-semibold text-ink dark:text-white">{ui.cancelFlow.confirmQuestion}</p>
+                  <p className="text-xs text-ink/60 dark:text-white/50 mt-1 mb-3">{ui.cancelFlow.confirmDetail}</p>
+                  {cancelError && <p className="text-xs text-red-500 mb-3">{cancelError}</p>}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setConfirmingCancel(false)
+                        setCancelError(null)
+                      }}
+                      disabled={cancelling}
+                      className="flex-1 rounded-full py-2 text-xs font-semibold text-ink/60 dark:text-white/60 border border-black/10 dark:border-white/10 disabled:opacity-50"
+                    >
+                      {ui.cancelFlow.keep}
+                    </button>
+                    <button
+                      onClick={() => handleCancel(nextAppointment.id)}
+                      disabled={cancelling}
+                      className="flex-1 flex items-center justify-center gap-1.5 rounded-full py-2 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 disabled:opacity-50 transition-colors"
+                    >
+                      {cancelling && <Loader2 size={12} className="animate-spin" />}
+                      {ui.cancelFlow.confirmYes}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmingCancel(true)}
+                  className="relative mt-3 flex items-center gap-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:underline"
+                >
+                  <CalendarX size={13} />
+                  {ui.cancelFlow.cancelAppointment}
+                </button>
+              ))}
           </div>
         </motion.div>
       )}

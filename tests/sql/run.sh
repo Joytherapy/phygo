@@ -205,6 +205,18 @@ expect "cascade removed every child row" "$(q -c "select (select count(*) from n
 expect "V cannot write a note on L's patient" "$(as authenticated $V "insert into notes (patient_id, user_id) values ('$PL', '$V')")" denied
 expect "V cannot schedule for L's patient" "$(as authenticated $V "insert into appointments (patient_id, physio_id, requested_by, status) values ('$PL', '$V', 'physio', 'confirmed')")" denied
 expect "V cannot invite for L's patient" "$(as authenticated $V "insert into patient_invites (patient_id, code, created_by, expires_at) values ('$PL', 'Z', '$V', now() + interval '1 day')")" denied
+# Cancelling an appointment: the statement lib/appointments.ts sends (status -> 'cancelled', returning id).
+# Success = exactly one row returned; a refusal returns no row or an error, and the row stays unchanged.
+cancel() { psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$1'; update appointments set status = 'cancelled' where id = '$2' returning id" 2>/dev/null | grep -c . ; }
+status_of() { q -c "select status from appointments where id = '$1'"; }
+AL=50000000-0000-0000-0000-0000000000a1; AU=50000000-0000-0000-0000-0000000000a2; AV=50000000-0000-0000-0000-0000000000a3
+q -c "insert into appointments (id, patient_id, physio_id, requested_by, status) values
+        ('$AL', '$PL', '$L', 'physio', 'confirmed'), ('$AU', '$PU', '$U', 'physio', 'confirmed'), ('$AV', '$PV', '$V', 'physio', 'confirmed')" >/dev/null
+expect "V cannot cancel an appointment of L's patient" "$(cancel $V $AL)/$(status_of $AL)" "0/confirmed"
+expect "U (not verified, not listed) cannot cancel their own appointment" "$(cancel $U $AU)/$(status_of $AU)" "0/confirmed"
+expect "the patient cannot cancel a confirmed appointment as a clinician would" "$(cancel $P $AV)/$(status_of $AV)" "0/confirmed"
+expect "L (listed) cancels their own appointment: one row, kept as cancelled" "$(cancel $L $AL)/$(status_of $AL)" "1/cancelled"
+expect "V (verified) cancels their own appointment" "$(cancel $V $AV)/$(status_of $AV)" "1/cancelled"
 expect "V cannot see L's patient" "$(psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$V'; select count(*) from patients where id = '$PL'")" 0
 expect "invitation must name the signed-in clinician as creator" "$(as authenticated $V "insert into patient_invites (patient_id, code, created_by, expires_at) values ('$PV', 'Y', '$L', now() + interval '1 day')")" denied
 expect "video call must point to Daily" "$(as authenticated $V "insert into video_calls (patient_id, room_url, created_by) values ('$PV', 'https://evil.example/x', '$V')")" denied
