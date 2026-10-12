@@ -235,7 +235,7 @@ export default function ProfilePage() {
             <p className="text-xs text-ink/55 dark:text-white/40">{t.photoHint}</p>
             <div className="mt-2">
               <VerificationBadge
-                summary={verification}
+                summary={verification && { ...verification, practiceStage }}
                 expanded={showVerification}
                 onClick={verification?.status === 'verified' ? () => setShowVerification((s) => !s) : undefined}
               />
@@ -272,11 +272,13 @@ export default function ProfilePage() {
 
           {/* The registration number is submitted for review here, never saved
               directly from the browser: only PHYGO can mark it verified. */}
-          {/* Once verified, the card collapses into the badge next to the photo;
-              the badge reopens it (to see or update the details). */}
+          {/* Only the badge next to the photo by default: students never see the
+              card (verification is for qualified physiotherapists), and once
+              verified it collapses into the badge, which reopens it. A student
+              who switches to professional sees it right away. */}
           <ProfessionalVerificationCard
             onChange={setVerification}
-            hidden={verification?.status === 'verified' && !showVerification}
+            hidden={practiceStage === 'student' || (verification?.status === 'verified' && !showVerification)}
           />
 
           <div>
