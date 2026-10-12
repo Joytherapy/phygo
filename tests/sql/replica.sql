@@ -11,10 +11,25 @@ create function auth.uid() returns uuid language sql stable
   as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
 grant usage on schema auth to anon, authenticated, service_role;
 
+-- profiles: every live column, default and check constraint (information_schema
+-- and pg_constraint, read on 12 Oct 2026), so the migrations meet the real names.
+create table auth.users (id uuid primary key, email text);
 create table profiles (
-  id uuid primary key, plan text not null default 'free', role text default 'physio', display_name text,
-  registration_number text, practice_stage text not null default 'professional',
-  professional_status text not null default 'not_applicable'
+  id uuid primary key references auth.users(id) on delete cascade,
+  plan text not null default 'free',
+  role text default 'physio',
+  display_name text,
+  bio text,
+  avatar_url text,
+  credentials jsonb default '[]'::jsonb,
+  registration_number text,
+  practice_stage text not null default 'professional',
+  professional_status text not null default 'not_applicable',
+  preferred_language text not null default 'it',
+  created_at timestamptz not null default now(),
+  constraint profiles_role_check check (role = any (array['physio', 'patient'])),
+  constraint profiles_practice_stage_check check (practice_stage = any (array['student', 'professional'])),
+  constraint profiles_professional_status_check check (professional_status = any (array['not_applicable', 'pending', 'verified']))
 );
 create table patients (id uuid primary key, user_id uuid not null, name text not null, patient_user_id uuid);
 create table notes (id uuid primary key default gen_random_uuid(), patient_id uuid not null, user_id uuid not null, assessment text);
@@ -33,7 +48,15 @@ do $$ declare t text; begin
   end loop;
 end $$;
 
--- Live SECURITY DEFINER function, as defined in production.
+-- Live SECURITY DEFINER functions and the signup trigger, as defined in production.
+create function handle_new_user() returns trigger language plpgsql security definer as $$
+begin
+  insert into public.profiles (id, plan)
+  values (new.id, 'free');
+  return new;
+end; $$;
+create trigger on_auth_user_created after insert on auth.users for each row execute function handle_new_user();
+
 create function redeem_patient_invite(invite_code text) returns uuid language plpgsql security definer set search_path to 'public' as $$
 declare v_patient_id uuid; v_invite_id uuid;
 begin

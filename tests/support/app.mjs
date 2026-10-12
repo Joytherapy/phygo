@@ -21,9 +21,12 @@ export function testEnv(fakeUrl, overrides = {}) {
     CRON_SECRET: 'test-cron-secret',
     PHYGO_ADMIN_API_TOKEN: 'test-admin-token',
     DAILY_API_KEY: '',
+    // Daily stand-in on the fake server: even a test that sets a key never reaches Daily.
+    DAILY_API_BASE_URL: `${fakeUrl}/daily/v1`,
     SOFFICE_PATH: '',
     EBOOK_CONVERT_PATH: '',
-    PROFESSIONAL_VERIFICATION_MODE: '',
+    PROFESSIONAL_TRANSITION_ACCOUNTS: '',
+    PROFESSIONAL_TRANSITION_UNTIL: '',
     ...overrides,
   };
 }
@@ -31,6 +34,10 @@ export function testEnv(fakeUrl, overrides = {}) {
 export async function startApp({ fakeUrl, port = 3411, serviceRoleKey, env = {} }) {
   const overrides = { ...env };
   if (serviceRoleKey !== undefined) overrides.SUPABASE_SERVICE_ROLE_KEY = serviceRoleKey;
+  // Refuse to start if something already answers on this port (for example a
+  // server left over from an earlier run): the tests would silently talk to it.
+  const inUse = await fetch(`http://127.0.0.1:${port}/robots.txt`).then(() => true, () => false);
+  if (inUse) throw new Error(`port ${port} is already in use; stop the other server first`);
   let output = '';
   const child = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'start', '-p', String(port)], {
     cwd: ROOT,
