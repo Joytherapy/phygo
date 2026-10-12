@@ -11,6 +11,7 @@ psql -q -d postgres -c "drop database if exists $DB" -c "create database $DB" >/
 q() { psql -q -At -v ON_ERROR_STOP=1 -d "$DB" "$@"; }
 fail=0
 A=00000000-0000-0000-0000-00000000000a; B=00000000-0000-0000-0000-00000000000b; C=00000000-0000-0000-0000-00000000000c
+D=00000000-0000-0000-0000-00000000000d
 PA=10000000-0000-0000-0000-00000000000a; PB=10000000-0000-0000-0000-00000000000b
 # as <role> <user id> <sql>: runs one statement as a Supabase client role; prints ok or denied
 as() { if psql -q -At -d "$DB" -c "set role $1; set request.jwt.claim.sub = '$2'; $3" >/dev/null 2>&1; then echo ok; else echo denied; fi; }
@@ -18,7 +19,7 @@ expect() { if [ "$2" = "$3" ]; then echo "  ok   $1"; else echo "  FAIL $1: expe
 
 q -f tests/sql/replica.sql >/dev/null
 q -f docs/security/live-clinical-rls-2026-10-12.sql >/dev/null
-q -c "insert into profiles (id) values ('$A'), ('$B'), ('$C');
+q -c "insert into auth.users (id) values ('$A'), ('$B'), ('$C');
       insert into patients (id, user_id, name) values ('$PA', '$A', 'Synthetic A'), ('$PB', '$B', 'Synthetic B');
       insert into demo_usage values ('203.0.113.7', 1);
       insert into patient_invites (patient_id, code, expires_at) values ('$PA', 'INV1', now() + interval '1 day');" >/dev/null
@@ -39,6 +40,10 @@ for i in 1 2; do
 done
 
 echo "after the fixes"
+expect "signup still creates a free, unverified profile" "$(q -c "insert into auth.users (id) values ('$D'); select plan || '/' || professional_status from profiles where id = '$D'")" "free/not_applicable"
+expect "onboarding role choice still works" "$(as authenticated $D "update profiles set practice_stage = 'student' where id = '$D'")" ok
+expect "language preference still saves" "$(as authenticated $D "update profiles set preferred_language = 'en' where id = '$D'")" ok
+expect "profile page save still works" "$(as authenticated $D "update profiles set display_name = 'D', bio = 'b', avatar_url = 'a.png', credentials = '[]', registration_number = null where id = '$D'")" ok
 expect "plan change refused" "$(as authenticated $A "update profiles set plan = 'pro' where id = '$A'")" denied
 expect "self-verification refused" "$(as authenticated $A "update profiles set professional_status = 'verified' where id = '$A'")" denied
 expect "editing own profile still works" "$(as authenticated $A "update profiles set display_name = 'Dr Test', registration_number = 'X1', practice_stage = 'student' where id = '$A'")" ok
