@@ -218,10 +218,15 @@ Complete items A–D and F, including the review and preparation of the transiti
 
 **D. No production secrets in Preview**
 - [ ] Preview uses its own values, or none. Nothing is copied from Production.
+- [x] **Project variables**, checked read-only on 12 Oct 2026 (names and environments only, no values): all 6 variables (`SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET`, `OPENAI_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `PHYGO_ADMIN_EMAILS`) are assigned to **Production only**. None is in Preview or Development. There are no custom environments and no branch-specific Preview variables. `DAILY_API_KEY`, `PHYGO_ADMIN_API_TOKEN` and email-service credentials are not set in any environment. The code reads no email credentials: sign-in emails are sent by Supabase.
+- [ ] **Team-level shared variables: not verifiable with the available read-only tools; the owner checks them.** D stays open until this is done.
+  1. Vercel → team **joytherapy's projects** → **Settings** → **Environment Variables** (the team's shared variables). For each shared variable, note whether it is linked to the PHYGO project and whether its environments include **Preview**. Do not open or reveal any value.
+  2. Vercel → project **phygo** → **Settings** → **Environment Variables**: check that no row is marked as **shared** (linked from the team) with **Preview** among its environments.
+  3. D passes only if no shared variable linked to PHYGO is available in Preview. Also note whether a shared `DAILY_API_KEY` exists (see "Known limitation: video calls").
 
 **E. After the deploy (smoke test)**
 - [ ] The administrator opens `/dashboard/verification-admin` and the list loads.
-- [ ] The owner, listed at step 4b, creates a note, an appointment and a video call on one of their **own** patients.
+- [ ] The owner, listed at step 4b, creates a note and an appointment on one of their **own** patients. Video call: only if `DAILY_API_KEY` is configured; otherwise the expected answer is "Video calls are not configured" (see "Known limitation: video calls").
 - [ ] A non-admin test account gets "forbidden" there.
 - [ ] As a verified or listed account, and as an unlisted test account, try: one note, one scan, one video call, one appointment, one invitation, and one delete. The unlisted account must be refused each time.
 
@@ -333,6 +338,12 @@ If the build is faster than steps 6–7, production passes briefly through **S3*
 | **Deploy fails or stays pending** (build error, queued, building) | S2+B: Vercel keeps the current code live | The API exposure only (as today); browser writes closed | Keep the SQL. Fix the build and deploy again. If it cannot be fixed the same day, watch OpenAI and Daily usage and rotate the keys if abused. Do not run step 9 |
 | **Part B fails** (error in the SQL editor; its transaction is rolled back) | S3 once the deploy is live (S2 before) | Own-patient browser writes only; the API is protected by the new code | **Let the deploy go live**: S3 is strictly better than S2. Read the error, fix the cause, re-run Part B. Do not roll the code back |
 | **Deploy live, application misbehaves** | S4 | — | Fix forward. Instant Rollback to the previous deployment would return to the current code on the S2+B database: the API exposure would reopen, so use it only as a last resort |
+
+## Known limitation: video calls
+
+- **`DAILY_API_KEY` is not set** among the project's variables, in any environment (checked 12 Oct 2026). Whether a team-level shared `DAILY_API_KEY` exists is part of checklist D, step 3.
+- **If it does not exist there either, video calls are not configured.** This is a **known functional limitation** of the release, not a security issue. The new code answers `503 Video calls are not configured` and makes no call to Daily. Everything else works without it.
+- **To enable video calls later:** add `DAILY_API_KEY` to **Production only**. This is a separate Vercel change and needs the owner's explicit approval. It is not part of this release.
 
 ## Vercel: what is known, and what the owner must check
 
