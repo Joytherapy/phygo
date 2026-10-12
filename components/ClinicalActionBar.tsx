@@ -6,6 +6,7 @@ import { Plus, Check, Loader2, Search, User } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 import { usePatientContext } from '@/contexts/PatientContext'
 import { useUiStrings } from '@/contexts/LanguageContext'
+import { useClinicalLocked } from '@/lib/useClinicalAccess'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -48,6 +49,8 @@ export default function ClinicalActionBar({
   const [searching, setSearching] = useState(false)
   const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 })
   const [mounted, setMounted] = useState(false)
+  // Linking content to a real patient is patient management (verified or listed accounts).
+  const locked = useClinicalLocked()
   const buttonRef = useRef<HTMLButtonElement>(null)
   const pickerRef = useRef<HTMLDivElement>(null)
 
@@ -134,6 +137,8 @@ export default function ClinicalActionBar({
     }
     await saveReference(currentPatient.id)
   }
+
+  if (locked) return null
 
   return (
     <>

@@ -19,6 +19,8 @@ import {
   User,
 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
+import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
+import { useClinicalLocked } from '@/lib/useClinicalAccess'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useAgendaUi, localeForLang } from '@/lib/i18n/agendaStrings'
 
@@ -73,6 +75,7 @@ export default function AgendaPage() {
   const router = useRouter()
   const { lang } = useLanguage()
   const ui = useAgendaUi()
+  const locked = useClinicalLocked()
   const locale = localeForLang(lang)
   const SLOTS = buildSlots(locale)
   const [appointments, setAppointments] = useState<Appointment[]>([])
@@ -114,6 +117,7 @@ export default function AgendaPage() {
   }, [])
 
   const updateStatus = async (id: string, status: 'confirmed' | 'cancelled') => {
+    if (locked) return
     await supabase.from('appointments').update({ status }).eq('id', id)
     await loadAppointments()
   }
@@ -145,6 +149,7 @@ export default function AgendaPage() {
   }
 
   const openAddModal = (day: Date, slotIndex: number) => {
+    if (locked) return
     setAddDay(day)
     setAddSlotIndex(slotIndex)
     setAddSessionType('video')
@@ -244,7 +249,8 @@ export default function AgendaPage() {
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => openAddModal(weekDays[0], 4)}
-              className="flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white shadow-[0_6px_16px_rgba(79,124,255,0.35)] transition-transform hover:scale-[1.03]"
+              disabled={locked}
+              className="flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white shadow-[0_6px_16px_rgba(79,124,255,0.35)] transition-transform hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
             >
               <Plus size={14} />
@@ -270,6 +276,8 @@ export default function AgendaPage() {
             </button>
           </div>
         </div>
+
+        <ClinicalAccessNotice />
 
         {loading || !mounted ? (
           <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-16 text-center">
@@ -303,12 +311,14 @@ export default function AgendaPage() {
                       <div className="flex gap-2 shrink-0">
                         <button
                           onClick={() => updateStatus(req.id, 'confirmed')}
+                          disabled={locked}
                           className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white hover:bg-emerald-600 transition-colors"
                         >
                           <Check size={14} />
                         </button>
                         <button
                           onClick={() => updateStatus(req.id, 'cancelled')}
+                          disabled={locked}
                           className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
                         >
                           <X size={14} />

@@ -9,6 +9,8 @@ import Navbar from '@/components/Navbar'
 import LiveStructuring from '@/components/liveStructuring/LiveStructuring'
 import { usePatientContext } from '@/contexts/PatientContext'
 import VideoCallPanel from '@/components/VideoCallPanel'
+import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
+import { useClinicalLocked } from '@/lib/useClinicalAccess'
 import AppointmentScheduler from '@/components/AppointmentScheduler'
 import { useUiStrings } from '@/contexts/LanguageContext'
 
@@ -26,6 +28,7 @@ export default function PatientSessionPage() {
   const ui = useUiStrings()
   const params = useParams()
   const router = useRouter()
+  const locked = useClinicalLocked()
   const patientId = params.id as string
 
   const { setCurrentPatient } = usePatientContext()
@@ -110,6 +113,8 @@ export default function PatientSessionPage() {
           </button>
         </div>
 
+        <ClinicalAccessNotice />
+
         {savedMessage && (
           <div className="mb-6 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400">
             {ui.patients.noteSavedMessage.replace('{name}', patient.name)}
@@ -118,7 +123,7 @@ export default function PatientSessionPage() {
 
         {tab === 'session' && (
           <>
-            <AppointmentScheduler patientId={patientId} mode="physio" />
+            {!locked && <AppointmentScheduler patientId={patientId} mode="physio" />}
 
             <div className="flex items-center gap-3 my-8">
               <div className="h-px flex-1 bg-black/[0.06] dark:bg-white/10" />
@@ -138,7 +143,7 @@ export default function PatientSessionPage() {
         )}
 
         {tab === 'video' && (
-          <VideoCallPanel patientId={patientId} canStart={true} />
+          <VideoCallPanel patientId={patientId} canStart={!locked} />
         )}
       </div>
     </div>
