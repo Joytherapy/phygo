@@ -1,0 +1,45 @@
+condition_id,condizione,area,nota,stato
+97,Rischio di caduta nell'anziano,"msk, neuro",in revisione duplicati con #66 (che ha già un protocollo),candidato
+98,Sarcopenia,msk,,candidato
+324,Frattura del collo chirurgico dell'omero,msk,,candidato
+326,Frattura diafisaria femorale (post-chiodo endomidollare),msk,,candidato
+327,Frattura del dente dell'epistrofeo (C2),msk,,candidato
+333,Scoliosi idiopatica dell'adolescente (curva dorsale),msk,,candidato
+335,Frattura di clavicola,msk,,candidato
+336,Frattura vertebrale da compressione osteoporotica (dorso-lombare),msk,,candidato
+339,Frattura tibiale acuta (gestione post-chirurgica),msk,,candidato
+342,Trauma cranico lieve (commozione cerebrale) — ritorno graduale all'attività,msk,,candidato
+344,Frattura malleolare (Weber),msk,,candidato
+346,Vertigine posizionale post-trauma cranico lieve,msk,,candidato
+442,Torcicollo miogeno congenito (TMC) — fisioterapia pediatrica,msk,,candidato
+467,Amputazione dell'arto inferiore — riabilitazione protesica,non taggata,,candidato
+40,Riabilitazione post-infarto miocardico,cardio,sovrapposizione con #115,candidato
+43,Miocardite (ritorno all'attività fisica),cardio,,candidato
+116,Riabilitazione post-cardiochirurgia (sternotomia mediana),cardio,,candidato
+118,Fibrosi cistica,cardio,,candidato
+462,Cardiomiopatia ipertrofica — esercizio e sport,cardio,,candidato
+67,Lesione del midollo spinale (fase riabilitativa),neuro,sovrapposizione con #495,candidato
+85,Ictus ischemico (fase acuta/subacuta),neuro,,candidato
+86,Ictus emorragico,neuro,,candidato
+88,Malattia di Parkinson,neuro,,candidato
+89,Malattia di Alzheimer,neuro,,candidato
+94,Sclerosi laterale amiotrofica (SLA),neuro,,candidato
+443,Spina bifida / mielomeningocele,neuro,,candidato
+101,Incontinenza urinaria da sforzo,pavimento pelvico,,candidato
+102,Incontinenza da urgenza / vescica iperattiva,pavimento pelvico,,candidato
+110,Dolore pelvico cronico,pavimento pelvico,,candidato
+303,Preparazione del pavimento pelvico a gravidanza e parto,pavimento pelvico,,candidato
+304,Pavimento pelvico nel post-partum,pavimento pelvico,,candidato
+306,Prolasso degli organi pelvici (POP),pavimento pelvico,,candidato
+307,Dispareunia e vaginismo,pavimento pelvico,,candidato
+409,Dissinergia del pavimento pelvico,pavimento pelvico,,candidato
+348,Diabete mellito di tipo 2,endocrino,,candidato
+349,Osteoporosi,endocrino,,candidato
+351,Diabete mellito di tipo 1,endocrino,,candidato
+410,Obesità,endocrino,,candidato
+419,Sindrome metabolica,endocrino,,candidato
+358,Malattia renale cronica,urinario,,candidato
+374,Artrite reumatoide,immuno,,candidato
+379,Linfedema secondario,immuno,,candidato
+383,Trombosi venosa profonda / TEV,ematologia,,candidato
+441,Artrite idiopatica giovanile,immuno,,candidato
