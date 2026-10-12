@@ -11,7 +11,7 @@ psql -q -d postgres -c "drop database if exists $DB" -c "create database $DB" >/
 q() { psql -q -At -v ON_ERROR_STOP=1 -d "$DB" "$@"; }
 fail=0
 A=00000000-0000-0000-0000-00000000000a; B=00000000-0000-0000-0000-00000000000b; C=00000000-0000-0000-0000-00000000000c
-D=00000000-0000-0000-0000-00000000000d
+D=00000000-0000-0000-0000-00000000000d; E=00000000-0000-0000-0000-00000000000e
 PA=10000000-0000-0000-0000-00000000000a; PB=10000000-0000-0000-0000-00000000000b
 # as <role> <user id> <sql>: runs one statement as a Supabase client role; prints ok or denied
 as() { if psql -q -At -d "$DB" -c "set role $1; set request.jwt.claim.sub = '$2'; $3" >/dev/null 2>&1; then echo ok; else echo denied; fi; }
@@ -72,6 +72,14 @@ expect "declared role switch still works" "$(as authenticated $B "update profile
 expect "profile editing still works" "$(as authenticated $B "update profiles set display_name = 'B' where id = '$B'")" ok
 expect "new statuses accepted for the service role" "$(as service_role $B "update profiles set professional_status = 'needs_info', registration_number = 'R-1' where id = '$B'")" ok
 expect "unknown status refused by the check constraint" "$(as service_role $B "update profiles set professional_status = 'super' where id = '$B'")" denied
+expect "signup still works; new profile has no registration or review data" "$(q -c "insert into auth.users (id) values ('$E'); select plan || '/' || professional_status || '/' || coalesce(registration_number, '-') || '/' || coalesce(registry_country, '-') from profiles where id = '$E'")" "free/not_applicable/-/-"
+expect "onboarding role choice and language still save" "$(as authenticated $E "update profiles set practice_stage = 'professional', preferred_language = 'fr' where id = '$E'")" ok
+expect "new profile page save (no registration number) works" "$(as authenticated $B "update profiles set display_name = 'B', bio = 'b', avatar_url = 'a.png', credentials = '[]' where id = '$B'")" ok
+expect "old profile page save with the same number still works" "$(as authenticated $B "update profiles set display_name = 'B2', registration_number = 'R-1' where id = '$B'")" ok
+expect "old profile page save with a changed number is refused (deploy right after)" "$(as authenticated $B "update profiles set display_name = 'B3', registration_number = 'R-2' where id = '$B'")" denied
+q -c "insert into patient_invites (patient_id, code, expires_at) values ('$PB', 'INV2', now() + interval '1 day')" >/dev/null
+expect "invite redemption still works (role set by the function)" "$(as authenticated $E "select redeem_patient_invite('INV2')")" ok
+expect "redeemed account is a patient" "$(q -c "select role from profiles where id = '$E'")" patient
 
 echo "optional: new patients require a verified professional"
 q -f sql/2026-10_patients_require_verification_PROPOSED.sql >/dev/null
@@ -83,6 +91,18 @@ q -c "update profiles set professional_status = 'verified' where id = '$A'" >/de
 expect "verified clinician can create patients" "$(as authenticated $A "insert into patients (id, user_id, name) values (gen_random_uuid(), '$A', 'x')")" ok
 expect "anon cannot call the helper" "$(as anon $A "select is_verified_professional('$A')")" denied
 q -c "drop policy if exists \"Users can insert their own patients\" on patients; create policy \"Users can insert their own patients\" on patients for insert with check (auth.uid() = user_id); drop function if exists is_verified_professional(uuid);" >/dev/null
+
+echo "rollback of the verification migration (block from its header)"
+q -c "update profiles set professional_status = 'rejected', registry_country = 'IT' where id = '$B'" >/dev/null
+sed -n '/^--   begin;/,/^--   commit;/p' sql/2026-10_professional_verification_PROPOSED.sql | sed 's/^--   //' > "${TMPDIR:-/tmp}/verification_rollback.sql"
+q -f "${TMPDIR:-/tmp}/verification_rollback.sql" >/dev/null
+expect "review columns removed" "$(q -c "select count(*) from information_schema.columns where table_name = 'profiles' and column_name like 'registry_%'")" 0
+expect "new statuses mapped back" "$(q -c "select professional_status from profiles where id = '$B'")" not_applicable
+expect "live constraint restored" "$(as service_role $B "update profiles set professional_status = 'needs_info' where id = '$B'")" denied
+expect "profile editing works after rollback" "$(as authenticated $B "update profiles set display_name = 'B4', registration_number = 'R-9' where id = '$B'")" ok
+expect "self-verification still refused after rollback" "$(as authenticated $B "update profiles set professional_status = 'verified' where id = '$B'")" denied
+q -f sql/2026-10_professional_verification_PROPOSED.sql >/dev/null
+expect "verification migration re-applies after rollback" "$(as authenticated $B "update profiles set registration_number = 'R-10' where id = '$B'")" denied
 
 echo "rollback (from the comments in each file)"
 q -c "drop trigger if exists profiles_protect_privileged_columns on profiles; drop function if exists protect_profile_privileged_columns();

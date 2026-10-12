@@ -7,7 +7,8 @@
 //   Patient accounts (a row in patients.patient_user_id) and student accounts
 //   (profiles.practice_stage) are refused, mirroring middleware.ts.
 // - requireVerifiedProfessional(): a professional whose registration PHYGO
-//   has verified (profiles.professional_status = 'verified').
+//   has verified (profiles.professional_status = 'verified'), or a listed
+//   pre-existing account during the bounded transition (see below).
 //
 // Lookups use the caller's own session (anon key + cookie), so Row Level
 // Security applies: patients and profiles rows are only readable by their

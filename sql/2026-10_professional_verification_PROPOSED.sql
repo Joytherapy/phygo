@@ -25,15 +25,42 @@
 -- swapped silently. Existing registration_number values are kept as data and
 -- are NOT treated as verified.
 --
--- Rollback (data entered in the new columns is lost; export first):
+-- Depends on: the live check constraint profiles_professional_status_check
+-- (name and values verified on 12 Oct 2026) and the trigger from PR #5.
+--
+-- Rollback. Roll the APPLICATION back first (to a build without
+-- /api/profile/verification), because that code writes the new columns. Data
+-- entered in the new columns is lost; export it first. Run as one transaction,
+-- in this order, so the trigger never refers to a dropped column:
+--   begin;
+--   -- 1. restore the PR #5 trigger function (plan and professional_status only)
+--   create or replace function protect_profile_privileged_columns() returns trigger
+--   language plpgsql as $f$
+--   begin
+--     if current_user in ('anon', 'authenticated') then
+--       if tg_op = 'INSERT' then
+--         new.plan := 'free';
+--         new.professional_status := 'not_applicable';
+--       elsif new.plan is distinct from old.plan
+--          or new.professional_status is distinct from old.professional_status then
+--         raise exception 'plan and professional_status can only be changed by PHYGO'
+--           using errcode = '42501';
+--       end if;
+--     end if;
+--     return new;
+--   end $f$;
+--   -- 2. map the new statuses back and restore the live constraint
 --   update profiles set professional_status = 'not_applicable' where professional_status in ('needs_info', 'rejected');
 --   alter table profiles drop constraint if exists profiles_professional_status_check;
 --   alter table profiles add constraint profiles_professional_status_check
 --     check (professional_status in ('not_applicable', 'pending', 'verified'));
+--   -- 3. drop the review columns
 --   alter table profiles drop column if exists registry_country, drop column if exists registry_name,
 --     drop column if exists verification_requested_at, drop column if exists verification_reviewed_at,
 --     drop column if exists verification_reviewed_by, drop column if exists verification_message;
---   then re-run 2026-10_security_profile_privileged_columns_PROPOSED.sql to restore the PR #5 trigger.
+--   commit;
+-- Never drop the trigger itself as part of this rollback: that would let
+-- users set professional_status = 'verified' on themselves again.
 
 begin;
 
