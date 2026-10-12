@@ -1,86 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import { createServerClient } from "@supabase/ssr";
-import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
+import { requireProfessional } from "@/lib/auth/sessionServer";
+import { consumeHourly, HOURLY_LIMITS, tooManyRequests } from "@/lib/rateLimit";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const DEMO_LIMIT = 1;
-
-async function isLoggedIn() {
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll() {
-          // no-op: not needed for a read-only check
-        },
-      },
-    }
-  );
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return !!user;
-}
-
-async function checkDemoLimit(request: NextRequest) {
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    "unknown";
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
-  const { data } = await supabase
-    .from("demo_usage")
-    .select("count")
-    .eq("ip", ip)
-    .maybeSingle();
-
-  if (data && data.count >= DEMO_LIMIT) {
-    return false;
-  }
-
-  if (data) {
-    await supabase
-      .from("demo_usage")
-      .update({ count: data.count + 1, last_used: new Date().toISOString() })
-      .eq("ip", ip);
-  } else {
-    await supabase.from("demo_usage").insert({ ip, count: 1 });
-  }
-
-  return true;
-}
-
+// Clinician-only paid AI operation (OpenAI). The former anonymous "demo"
+// path (one free call per IP, counted in demo_usage) had no caller in the
+// app and its counter could be reset by anyone holding the public anon key,
+// so anonymous calls are now refused.
 export async function POST(request: NextRequest) {
-  try {
-    const loggedIn = await isLoggedIn();
+  const gate = await requireProfessional();
+  if (!gate.ok) return gate.response;
+  if (!(await consumeHourly(`ai:generate-note:${gate.user.id}`, HOURLY_LIMITS.generateNote))) return tooManyRequests();
 
-    if (!loggedIn) {
-      const allowed = await checkDemoLimit(request);
-      if (!allowed) {
-        return NextResponse.json(
-          {
-            error: "demo_limit_reached",
-            message:
-              "You've already tried the free demo. Sign up to keep using Phygo on unlimited patients.",
-          },
-          { status: 403 }
-        );
-      }
-    }
+  try {
 
     const { transcript, lang } = await request.json();
 

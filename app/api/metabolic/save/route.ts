@@ -48,6 +48,21 @@ async function resolveOwnPatientId(userId: string): Promise<string | null> {
   return data?.id ?? null;
 }
 
+// A clinician may only read or write metabolic data of their own patients
+// (patients.user_id). This client uses the service-role key, which bypasses
+// RLS, so the check has to happen here.
+async function clinicianOwnsPatient(userId: string, patientId: unknown): Promise<boolean> {
+  if (typeof patientId !== 'string' || patientId.length === 0) return false;
+  const { data, error } = await supabase
+    .from('patients')
+    .select('id')
+    .eq('id', patientId)
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error) console.error('metabolic ownership check failed:', error.message);
+  return !!data;
+}
+
 // POST: calcola (di nuovo, lato server, mai fidandosi dei numeri del client)
 // e salva una riga storica.
 // - Professionista (Clinical Toolkit): passa `patientId` esplicitamente,
@@ -65,6 +80,13 @@ export async function POST(req: Request) {
     const enteredBy: 'professional' | 'patient' = ownPatientId ? 'patient' : 'professional';
 
     const patientId = enteredBy === 'patient' ? ownPatientId : body.patientId ?? null;
+
+    // Without a patient the calculation is saved for the clinician alone; with
+    // one, it must be one of their patients. Same answer for "missing" and "not
+    // yours", so patient ids cannot be probed.
+    if (enteredBy === 'professional' && patientId !== null && !(await clinicianOwnsPatient(userId, patientId))) {
+      return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
+    }
 
     const input: MetabolicInput = {
       sex: body.sex,
@@ -155,10 +177,10 @@ export async function POST(req: Request) {
   }
 }
 
-// GET: storico. ?patientId= per il professionista (deve appartenere a un
-// paziente esistente — stesso livello di fiducia del resto dell'app, single
-// tenant); senza parametro, per un utente-paziente risolve automaticamente
-// il proprio patient_id, cosi' non puo' mai leggere lo storico di un altro.
+// GET: storico. ?patientId= per il professionista (deve essere un suo
+// paziente, vedi clinicianOwnsPatient); senza parametro, per un
+// utente-paziente risolve automaticamente il proprio patient_id, cosi' non
+// puo' mai leggere lo storico di un altro.
 export async function GET(req: Request) {
   try {
     const userId = await getUserId();
@@ -172,6 +194,10 @@ export async function GET(req: Request) {
 
     if (!patientId) {
       return NextResponse.json({ error: 'patientId mancante' }, { status: 400 });
+    }
+
+    if (!ownPatientId && !(await clinicianOwnsPatient(userId, patientId))) {
+      return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
     }
 
     let query = supabase

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireProfessional } from "@/lib/auth/sessionServer";
+import { consumeHourly, HOURLY_LIMITS, tooManyRequests } from "@/lib/rateLimit";
 import OpenAI from "openai";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -11,6 +13,11 @@ const LANGUAGE_NAMES: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
+  // Clinician-only paid AI operation (OpenAI): authenticated professional + hourly cap.
+  const gate = await requireProfessional();
+  if (!gate.ok) return gate.response;
+  if (!(await consumeHourly(`ai:analyze-scan:${gate.user.id}`, HOURLY_LIMITS.analyzeScan))) return tooManyRequests();
+
   try {
     const { images, language, context } = await req.json();
 

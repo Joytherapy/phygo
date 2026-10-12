@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { requireProfessional } from '@/lib/auth/sessionServer';
+import { consumeHourly, HOURLY_LIMITS, tooManyRequests } from '@/lib/rateLimit';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
@@ -21,6 +23,11 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const MAX_RESULTS = 3;
 
 export async function POST(req: Request) {
+  // Clinician-only paid AI operation (OpenAI): authenticated professional + hourly cap.
+  const gate = await requireProfessional();
+  if (!gate.ok) return gate.response;
+  if (!(await consumeHourly(`ai:science-relevant:${gate.user.id}`, HOURLY_LIMITS.noteEnrichment))) return tooManyRequests();
+
   try {
     const { primaryCondition, assessment } = await req.json();
 

@@ -1,12 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { ownsPatient, requireProfessional } from '@/lib/auth/sessionServer'
+import { consumeHourly, HOURLY_LIMITS, tooManyRequests } from '@/lib/rateLimit'
 
+// Creates a paid Daily.co room for one of the signed-in clinician's own
+// patients. Rooms are created only by the clinician; patients join them from
+// My Phygo through the video_calls row (RLS: their own calls only).
 export async function POST(req: NextRequest) {
+  const gate = await requireProfessional()
+  if (!gate.ok) return gate.response
+
+  if (!process.env.DAILY_API_KEY) {
+    return NextResponse.json({ error: 'Video calls are not configured' }, { status: 503 })
+  }
+
   try {
     const { patientId } = await req.json()
 
-    if (!patientId) {
+    if (!patientId || typeof patientId !== 'string') {
       return NextResponse.json({ error: 'Missing patientId' }, { status: 400 })
     }
+
+    // Same answer for "does not exist" and "not yours", so ids cannot be probed.
+    if (!(await ownsPatient(gate.supabase, gate.user.id, patientId))) {
+      return NextResponse.json({ error: 'Patient not found' }, { status: 404 })
+    }
+
+    if (!(await consumeHourly(`ai:video-room:${gate.user.id}`, HOURLY_LIMITS.videoRoom))) return tooManyRequests()
 
     const roomName = `session-${patientId}-${Date.now()}`
 

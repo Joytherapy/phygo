@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireProfessional } from "@/lib/auth/sessionServer";
+import { consumeHourly, HOURLY_LIMITS, tooManyRequests } from "@/lib/rateLimit";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
@@ -6,6 +8,11 @@ const openai = new OpenAI({
 });
 
 export async function POST(request: NextRequest) {
+  // Clinician-only paid AI operation (OpenAI): authenticated professional + hourly cap.
+  const gate = await requireProfessional();
+  if (!gate.ok) return gate.response;
+  if (!(await consumeHourly(`ai:refine-exercises:${gate.user.id}`, HOURLY_LIMITS.noteEnrichment))) return tooManyRequests();
+
   try {
     const { transcript, assessment, exercisesDraft, phases, lang } = await request.json();
 
