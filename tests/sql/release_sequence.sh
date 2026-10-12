@@ -6,9 +6,10 @@
 # (<!-- check after=N --> blocks): each must return false before its step and
 # true after it. Never point this at Supabase.
 #   PGHOST=/var/run/postgresql PGUSER=postgres bash tests/sql/release_sequence.sh
-# What the CURRENT code exposes through its API in states S1, S2 and S2+B
-# (service-role routes, routes without authentication) cannot be closed by SQL;
-# that part is shown by running tests/security.test.mjs against main.
+# The database half of each release state is checked here. The API half
+# depends only on the code version: tests/release_states.test.mjs (new code,
+# states S3/S4) and tests/release_states_old.sh (current code, S1/S2/S2+B).
+# Scenarios: deploy succeeded, deploy failed or pending, Part B failed.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 DB=${TEST_DB:-phygo_release_sequence}
@@ -79,6 +80,22 @@ capabilities() {
   for i in "${!names[@]}"; do expect "${names[$i]} -> $1" "${got[$i]}" "$1"; shift; done
 }
 
+# direct_writes <state> <expected x6>: more browser writes straight to Supabase on U's OWN patient
+direct_writes() {
+  local st=$1; shift
+  local got=(
+    "$(try $U "update patients set name = 'renamed' where id = '$PU'")"
+    "$(try $U "update notes set assessment = 'edited' where patient_id = '$PU'")"
+    "$(try $U "insert into appointments (patient_id, physio_id, requested_by, status) values ('$PU', '$U', 'physio', 'confirmed')")"
+    "$(try $U "insert into patient_clinical_references (patient_id, content_type, content_id) values ('$PU', 'exercise', 'e')")"
+    "$(try $U "insert into video_calls (patient_id, room_url, created_by) values ('$PU', 'https://team.daily.co/r', '$U')")"
+    "$(val $U "with d as (delete from patients where id = '$PU' returning 1) select count(*) from d")"
+  )
+  local names=("U edits their patient" "U edits an existing note" "U schedules an appointment" "U links library content" "U adds a Daily video-call row" "U deletes their patient, cascading to notes (rows deleted)")
+  echo "direct Supabase writes on own patient, $st"
+  for i in "${!names[@]}"; do expect "${names[$i]} -> $1" "${got[$i]}" "$1"; shift; done
+}
+
 #                         note-other link  see-other self-verify create note-own invite video delete read  listed
 capabilities S1           ok         ok    0         ok          ok     ok       ok     ok    1      1     ok
 
@@ -90,33 +107,46 @@ for n in 1 2 3 4; do
   q -f "${files[$n]}" >/dev/null
   expect "check $n is true after step $n" "$(check $n)" t
 done
-capabilities S2           denied     denied 0        denied      ok     ok       ok     ok    1      1     ok
+capabilities "S2 and S3 (same database; S3 = corrected code without Part B)" denied denied 0 denied ok ok ok ok 1 1 ok
+direct_writes "S2 and S3" ok ok ok ok ok 1
 
-echo "step 5 (transition list)"
-expect "check 5 is false before step 5" "$(check 5)" f
-q -c "insert into professional_transition_accounts (user_id, until, added_by, note) values ('$O', now() + interval '30 days', 'owner', 'reviewed')" >/dev/null
-expect "check 5 is true after step 5" "$(check 5)" t
+echo "step 5: merge and deploy start (no database change; the current code stays live until the build is Ready)"
 
-echo "step 6 (Part B)"
+echo "step 6 (transition list, during the build)"
 expect "check 6 is false before step 6" "$(check 6)" f
-q -f sql/2026-10_patient_management_B_policies_PROPOSED.sql >/dev/null
+q -c "insert into professional_transition_accounts (user_id, until, added_by, note) values ('$O', now() + interval '30 days', 'owner', 'reviewed')" >/dev/null
 expect "check 6 is true after step 6" "$(check 6)" t
-capabilities "S2+B (= S4 in the database)" denied denied 0 denied   denied denied   denied denied 0   1      ok
 
-echo "deploy fails or stays pending: the database stays in S2+B (nothing to undo)"
-expect "Part B is still applied" "$(check 6)" t
+echo "scenario: Part B fails (simulated error inside its transaction)"
+sed 's/^commit;$/select 1 \/ 0;\ncommit;/' sql/2026-10_patient_management_B_policies_PROPOSED.sql > "${TMPDIR:-/tmp}/phygo_b_fails.sql"
+expect "the failing copy is refused" "$(if q -f "${TMPDIR:-/tmp}/phygo_b_fails.sql" >/dev/null 2>&1; then echo applied; else echo refused; fi)" refused
+expect "nothing of Part B was applied" "$(check 7)" f
+capabilities "after a failed Part B (S2 database: S3 once the deploy is live)" denied denied 0 denied ok ok ok ok 1 1 ok
+echo "  recovery: re-run Part B (the deploy is NOT rolled back)"
+
+echo "step 7 (Part B)"
+q -f sql/2026-10_patient_management_B_policies_PROPOSED.sql >/dev/null
+expect "check 7 is true after step 7" "$(check 7)" t
+capabilities "S2+B (database of S4)" denied denied 0 denied   denied denied   denied denied 0   1      ok
+direct_writes "S2+B and S4" denied denied denied denied denied 0
+
+echo "scenario: deploy fails or stays pending -> current code on the S2+B database (nothing to undo)"
+expect "Part B is still applied" "$(check 7)" t
 # The current pages keep working for a listed clinician in S2+B (same writes as today's UI).
 expect "listed O, current UI: create a patient" "$(try $O "insert into patients (id, user_id, name) values (gen_random_uuid(), '$O', 'new')")" ok
 expect "listed O, current UI: invite (created_by = self)" "$(try $O "insert into patient_invites (patient_id, code, created_by, expires_at) values ('$PO', 'C', '$O', now() + interval '1 day')")" ok
 expect "listed O, current UI: video-call row with a Daily room" "$(try $O "insert into video_calls (patient_id, room_url, created_by) values ('$PO', 'https://team.daily.co/r', '$O')")" ok
 expect "listed O, current UI: schedule an appointment" "$(try $O "insert into appointments (patient_id, physio_id, requested_by, status) values ('$PO', '$O', 'physio', 'confirmed')")" ok
+echo "  recovery: fix the build and deploy again; the SQL stays"
 
-echo "step 8 (demo_usage, after the deploy)"
-expect "check 8 is false before step 8" "$(check 8)" f
+echo "scenario: deploy succeeds -> S4 (database above, API: tests/release_states.test.mjs)"
+
+echo "step 9 (demo_usage, after the deploy is live)"
+expect "check 9 is false before step 9" "$(check 9)" f
 q -f sql/2026-10_security_demo_usage_policies_PROPOSED.sql >/dev/null
-expect "check 8 is true after step 8" "$(check 8)" t
+expect "check 9 is true after step 9" "$(check 9)" t
 
-expect "the guide has a check for steps 1-6 and 8" "$(ls "$CHECKS" | sort -n | tr '\n' ' ')" "1.sql 2.sql 3.sql 4.sql 5.sql 6.sql 8.sql "
+expect "the guide has a check for steps 1-4, 6, 7 and 9" "$(ls "$CHECKS" | sort -n | tr '\n' ' ')" "1.sql 2.sql 3.sql 4.sql 6.sql 7.sql 9.sql "
 rm -rf "$CHECKS"
 psql -q -d postgres -c "drop database $DB" >/dev/null
 [ $fail = 0 ] && echo "RELEASE SEQUENCE CHECKS PASSED" || { echo "SOME RELEASE SEQUENCE CHECKS FAILED"; exit 1; }

@@ -120,7 +120,7 @@ Today (read-only, 12 Oct 2026):
 
 ## Release checklist
 
-Complete items A–D **before step 6** of the SQL sequence. Item E follows the deploy.
+Complete items A–D, including the review and preparation of the transition list, **before step 1** of the SQL sequence. Item E follows the deploy.
 
 **A. `PHYGO_ADMIN_EMAILS` in Production**
 - [ ] Open Vercel → Project → Settings → Environment Variables, filtered on **Production**.
@@ -133,7 +133,7 @@ Complete items A–D **before step 6** of the SQL sequence. Item E follows the d
 - [ ] `PROFESSIONAL_TRANSITION_ACCOUNTS`, `PROFESSIONAL_TRANSITION_UNTIL` and `PROFESSIONAL_VERIFICATION_MODE` are **absent** in Production (and in Preview and Development).
 - [ ] No code version uses them (tested: a valid old list plus `grace` grants nothing, in #7 and #8). Removing them keeps the configuration honest and avoids confusion.
 
-**C. Manual review of the transition list** (before step 6)
+**C. Manual review of the transition list** (before the release window; the inserts are pasted at step 6)
 - [ ] Run the candidate query (above) and go through **every** row personally.
 - [ ] Add an account only if all of these hold:
   - you know the person and that they practise as a physiotherapist;
@@ -187,50 +187,86 @@ If a file changes after this table, the table must be updated in the same commit
 
 ## Release states
 
-Production deploys `main` automatically. The current code (`main` at `ca11624`) **is not protected by any SQL** for the API holes below. They exist today and end **only when the corrected code is live**. The database rules (RLS) protect browser writes; the API holes come from service-role routes and from routes without authentication.
+Production deploys `main` automatically. The release combines two independent changes:
+- the **code** (API routes);
+- the **database** rules (RLS, which govern writes made directly from the browser to Supabase).
 
 What an **unverified, unlisted account** can do in each state. Also shown: what a visitor with no account can do.
 
-| | Code | Database | Other clinicians' patients | Own patients (browser writes) | Clinical AI | Video (Daily rooms) |
+| State | Code | Database | Other clinicians' patients | Own patients: direct browser writes | Clinical AI | Video (Daily rooms) |
 |---|---|---|---|---|---|---|
-| **S1: today** | current `main` | live | **Yes:** read/write metabolic data of any patient by id (`/api/metabolic/save`, service role), incl. entries the patient kept private; write notes onto their patients; link any account as "own patient" | **Yes:** create, change, delete everything, incl. video-call rows pointing to any URL | **Yes, even without an account:** 6 routes; Ask PHYGO with no working limit | **Yes, even without an account:** creates Daily rooms |
-| **S2: after SQL 1–4** | current `main` | + profile protection, clinical RLS, verification, Part A | **Yes, via the API only:** metabolic data by id. Notes on others' patients and linking are **closed** | **Yes** (no Part B yet) | **Yes, even without an account** | **Yes, even without an account** |
-| **S2+B: after the list and Part B** (recommended intermediate) | current `main` | + list + Part B | **Yes, via the API only:** metabolic data by id (service role bypasses RLS) | **No:** read-only. Metabolic writes through the current API are still possible, because the service role bypasses RLS | **Yes, even without an account** | **Yes, even without an account** |
-| S3: corrected code, no Part B (**not recommended**) | #5+#7+#8 | SQL 1–4 | **No** | **Yes:** create, change, delete, incl. video-call rows to any URL. Metabolic data via the API: **no** | **No** (verified or listed only) | **No** |
-| **S4: target** | #5+#7+#8 | all | **No** | **No**: read-only | **No** | **No** |
+| **S1: today** | current `main` | live | **Yes:** metabolic data of any patient by id, read and write (service-role API); notes onto their patients; link any account as "own patient" | **Yes:** create, change, delete everything, incl. video-call rows pointing to any URL | **Yes, even without an account** (6 routes, plus Ask PHYGO without a working limit) | **Yes, even without an account** |
+| **S2: after SQL 1–4** | current `main` | + profile protection, clinical RLS, verification, Part A | **Yes, via the API only:** metabolic data by id. Notes and linking are **closed** | **Yes** | **Yes, even without an account** | **Yes, even without an account** |
+| **S2+B: SQL incl. Part B, current code** | current `main` | + list + Part B | **Yes, via the API only:** metabolic data by id | **No** (read-only), except metabolic writes through the current API | **Yes, even without an account** | **Yes, even without an account** |
+| **S3: corrected code, without Part B** | #5+#7+#8 | SQL 1–4 | **No** | **Yes:** create, change, delete own patients and their records; invitations; video-call rows to any URL. Metabolic writes through the API: **no** | **No** (verified or listed only) | **No** |
+| **S4: target** | #5+#7+#8 | all | **No** | **No** (read-only) | **No** | **No** |
 
-**Evidence**
-- **API holes in S1, S2 and S2+B:** the security tests run against the code of `main` fail on 10 of 12 checks. That covers anonymous AI and video, Ask PHYGO limits, the metabolic IDOR, private entries, and fail-open limits.
-- **Database capabilities** in every state are checked step by step by `tests/sql/release_sequence.sh`.
-- **S3 and S4 code behaviour** is covered by the integration tests on the PR branches.
+**Evidence (executable)**
 
-### Chosen sequence: Part B first, then the deploy, immediately
+| What | Test |
+|---|---|
+| API half of S1, S2 and S2+B (current code) | `bash tests/release_states_old.sh`: all 9 risky capabilities **open** |
+| API half of S3 and S4 (new code) | `tests/release_states.test.mjs`, part of `bash tests/run.sh`: all 9 **closed**, own-patient metabolic reads open by design |
+| Database half of every state, including direct Supabase writes on own patients, and the failure scenarios | `bash tests/sql/release_sequence.sh` |
 
-- **The API holes last until the deploy, whatever the order.** No SQL closes them, because they come from the service role and from routes without authentication.
-- **Part B only adds protection.** Applied before the deploy, it closes browser writes earlier. Applied after, it leaves state S3 open for the time between deploy and Part B.
-- **So "Part B first, then the deploy" is never more exposed than the reverse.** At every moment its exposure is the same or smaller. S2+B is strictly less exposed than S1 and S2, and the target S4 follows.
-- **There is still a window.** From now until the corrected code is live, the S1/S2 API holes remain open. The release cannot remove that window; it can only shorten it. Do the steps below without pauses, and do not start the release window until everything is ready.
+Every external request in these tests is blocked and logged. The current code's hard-coded Daily URL is attempted and blocked.
 
-**Temporary extra protections, assessed:**
+**Ordering of the states**
+- **S2 ⊂ S1:** SQL 1–4 only close things.
+- **S2+B ⊂ S2 and S3 ⊂ S2:** each closes one of S2's two exposures.
+- **S4 ⊂ all.**
+- **S2+B and S3 are not comparable:** each leaves open a different exposure.
 
-| Option | What it does | Assessment |
+### Comparing the two exposures
+
+| | API exposure (S2+B: current code) | Browser-write exposure (S3: no Part B) |
 |---|---|---|
-| A database trigger blocking metabolic writes to other clinicians' patients | Closes only the *write* half of the metabolic IDOR in S2 | Does not close reads, AI or video; adds a new permanent object for a window of minutes. **Not recommended** |
-| Removing `OPENAI_API_KEY` / `DAILY_API_KEY` from Production | Stops paid abuse | Breaks AI and video for everyone, and needs a redeploy anyway. If you can redeploy, deploy the fix. **Only if abuse is seen now, together with rotating the keys** |
-| Applying `demo_usage` SQL early | — | **Harmful before the deploy:** the current demo code treats an unreadable counter as "allowed", so anonymous generate-note would lose even its per-IP limit. It stays after the deploy |
-| **Vercel: build the production deployment first, then make it live** (only if your plan offers it; check whether automatic assignment of the production domain can be turned off) | The new build is ready before Part B, and making it live takes seconds | **Best, if available.** It shortens S2+B to seconds and removes the risk that the build fails after Part B. It is a Vercel setting the owner must check and change; it was not verified here |
-| Applying SQL 1–2 **now**, ahead of the release window | Closes notes on other clinicians' patients, patient re-linking and self-upgrade today | **Recommended if you approve it.** It is tested with the current code (all legitimate flows keep working). It does not touch the API holes |
+| Who can use it | **Anyone, without an account** (AI, video, Ask PHYGO); any signed-in non-patient account (metabolic API) | Any signed-in account; signing up is free and the role defaults to "professional" |
+| Whose data | **Any patient's** metabolic data, given its id (read and write); writes also add clinical links the patient sees in My Phygo | **Only patients the account itself owns**; nothing of other clinicians |
+| What it costs or harms | Paid OpenAI and Daily usage, with no account and no limit; confidentiality and integrity of health data across clinicians | Unverified clinical records; an invitation sent to a real person who accepts it; a video-call link pointing elsewhere. All of this needs the attacker to recruit the patient first (social engineering) |
+| How easy | Trivial for AI and video (one request). The metabolic path needs a patient id: random UUIDs, never shown to other accounts by the app, so only a leaked id works | Easy for one's own records; harming a third party takes several steps and the victim's cooperation |
+| Status today | Exists today (S1) | Exists today (S1), and it is how the 13 existing clinicians work now |
 
-### If the deploy fails or stays pending
-- **Build fails, or is queued or building:** Vercel keeps the current deployment live until a new one is Ready. You stay in **S2+B**:
-  - patient browser writes are protected;
-  - the API holes are the same as today.
-- **Do not revert the SQL:** S2+B is strictly better than S1 and S2. Fix the build and redeploy.
-- **If the deploy cannot be completed the same day:** stay in S2+B and keep watching OpenAI and Daily usage. If you see abuse, rotate the keys.
-- **The deploy is live but the application misbehaves:** prefer fixing forward.
-  - Vercel "Instant Rollback" to the previous deployment returns to the **current code with the new database**, which is state S2+B. Patient writes stay protected, but the API holes reopen.
-  - Use it only if the new deployment is unusable and no fix can ship quickly.
-- **Part B fails in the SQL editor:** the transaction is rolled back and nothing changes. **Do not deploy.** Investigate, re-run Part B, and deploy only after its check query returns `true`.
+**Assessment:** the API exposure is the **more severe** one.
+- It is reachable without an account, it costs money per request, and it is the only path to **other clinicians'** patients.
+- The browser-write exposure stays inside the account's own records and needs social engineering to reach anyone else.
+
+Both exist today. The release must close both; the order decides which closes first.
+
+### Chosen sequence: start the deploy right after SQL 1–4, apply the list and Part B during the build
+
+- **The API exposure ends only when the corrected code is live.** No SQL can close it. So the deploy should **not wait** for anything that is not a technical prerequisite.
+- **Part B and the list are not prerequisites of the code.** They can go in while the build runs. The new code works with or without Part B; listed accounts simply get AI access once the list exists.
+- **SQL 1–4 *are* prerequisites, so they come before the merge:**
+  - without step 1, the new code would accept a self-set `verified` status;
+  - without step 3, the verification request cannot be stored;
+  - without step 4, unverified accounts get 503 instead of the transition rules.
+- **The manual review of the list is done *before* the release window** (checklist C), and the insert statements are prepared in advance. In the window, step 6 is a paste.
+
+Resulting order:
+
+| Step | What | State while it runs |
+|---|---|---|
+| 1–4 | SQL 1–4, a few minutes | S1 → **S2** |
+| 5 | Merge PR #5 into `main`: the production build starts; the current code stays live until the build is **Ready** | S2 |
+| 6–7 | **During the build:** insert the prepared list, then Part B | **S2+B** |
+| 8 | The build becomes Ready and live | **S4** |
+| 9 | `demo_usage` SQL, only now | S4 |
+
+If the build is faster than steps 6–7, production passes briefly through **S3** instead of S2+B. Both are strictly better than S2, and both end at S4 a few minutes later.
+
+**The remaining risk window is real.** The API exposure lasts from now until the build is live: the time until the release, plus the 1–4 SQL steps and the build. The browser-write exposure lasts until Part B. The plan shortens both windows; it cannot remove them. Applying SQL 1–2 **earlier**, on approval, closes notes on other clinicians' patients, re-linking and self-upgrade today. They are safe with the current code, as tested.
+
+**Optional, if your Vercel plan offers it:** with automatic assignment of the production domain turned off, you can build first, then run SQL 1–7, then promote. That shrinks every window to seconds. This was not verified here; the owner must check it.
+
+### Scenarios and recovery (never back to code older than #5)
+
+| Scenario | State reached | What stays open | Recovery |
+|---|---|---|---|
+| **Deploy succeeds** (normal case) | S4 | Nothing of the above; own-patient reads by design | Step 9, smoke test |
+| **Deploy fails or stays pending** (build error, queued, building) | S2+B: Vercel keeps the current code live | The API exposure only (as today); browser writes closed | Keep the SQL. Fix the build and deploy again. If it cannot be fixed the same day, watch OpenAI and Daily usage and rotate the keys if abused. Do not run step 9 |
+| **Part B fails** (error in the SQL editor; its transaction is rolled back) | S3 once the deploy is live (S2 before) | Own-patient browser writes only; the API is protected by the new code | **Let the deploy go live**: S3 is strictly better than S2. Read the error, fix the cause, re-run Part B. Do not roll the code back |
+| **Deploy live, application misbehaves** | S4 | — | Fix forward. Instant Rollback to the previous deployment would return to the current code on the S2+B database: the API exposure would reopen, so use it only as a last resort |
 
 ## Exactly which SQL, in which order
 
@@ -238,6 +274,7 @@ Each check query is read-only and must return **`true`** before you move on. The
 
 **Preparation (no production change)**
 - Checklist A–D done.
+- **The transition list reviewed and its insert statements prepared** (checklist C).
 - The merges **#8 → #7's branch** and **#7 → #5's branch** done; these do not deploy production.
 - PR #5 ready to merge into `main`. `main` is still `ca11624`, an ancestor of #8, so the merge brings exactly the tested code.
 
@@ -266,7 +303,7 @@ select exists (select 1 from information_schema.columns
    and pg_get_constraintdef((select oid from pg_constraint where conname = 'profiles_professional_status_check')) like '%rejected%';
 ```
 
-**Step 4.** Apply `sql/2026-10_patient_management_A_transition_list_PROPOSED.sql`. It adds a table and a function and changes nothing else.
+**Step 4.** Apply `sql/2026-10_patient_management_A_transition_list_PROPOSED.sql`.
 
 <!-- check after=4 -->
 ```sql
@@ -274,16 +311,16 @@ select to_regclass('public.professional_transition_accounts') is not null
    and to_regprocedure('public.can_manage_patients()') is not null;
 ```
 
-**Step 5.** Fill the transition list after the manual review (checklist C). Then:
-- check that the list is not empty;
-- review who will become **read-only**: accounts that own patients and are neither verified nor listed. Each one must be a deliberate decision.
+**Step 5. Start the deploy.** Merge PR #5 into `main`. The production build starts, and the current code stays live until the build is Ready. Go straight to step 6.
 
-<!-- check after=5 -->
+**Step 6.** Insert the prepared transition list. Then run the review query below: it shows who becomes read-only at step 7.
+
+<!-- check after=6 -->
 ```sql
 select count(*) > 0 from professional_transition_accounts where until > now();
 ```
 ```sql
--- Review (not a check): accounts that own patients and will become read-only at step 6.
+-- Review (not a check): accounts that own patients and will become read-only at step 7.
 select u.email, count(*) as patients
 from patients x join auth.users u on u.id = x.user_id join profiles p on p.id = x.user_id
 where p.professional_status <> 'verified'
@@ -291,28 +328,25 @@ where p.professional_status <> 'verified'
 group by u.email order by patients desc;
 ```
 
-**Step 6.** Apply `sql/2026-10_patient_management_B_policies_PROPOSED.sql`. State **S2+B**. Go straight to step 7.
+**Step 7.** Apply `sql/2026-10_patient_management_B_policies_PROPOSED.sql`. If it fails, see "Part B fails" above: let the deploy continue.
 
-<!-- check after=6 -->
+<!-- check after=7 -->
 ```sql
 select count(*) = 18 from pg_policies
 where schemaname = 'public'
   and (coalesce(qual, '') like '%can_manage_patients%' or coalesce(with_check, '') like '%can_manage_patients%');
 ```
 
-**Step 7. Deploy.** Merge PR #5 into `main`; production deploys automatically.
-- Wait until the deployment is **Ready** and serving the production domain.
-- With the optional Vercel setting, build first and promote here.
-- State **S4**. If the deploy fails or stays pending, see above.
+**Step 8. Deploy live.** Wait until the deployment is **Ready** and serving the production domain: state **S4**. If it fails or stays pending, see the scenarios above.
 
-**Step 8.** Apply `sql/2026-10_security_demo_usage_policies_PROPOSED.sql` (only now; see "Applying `demo_usage` SQL early" above).
+**Step 9.** Apply `sql/2026-10_security_demo_usage_policies_PROPOSED.sql`, only once the new code is live. The current demo code treats an unreadable counter as "allowed".
 
-<!-- check after=8 -->
+<!-- check after=9 -->
 ```sql
 select not exists (select 1 from pg_policies where tablename = 'demo_usage' and 'anon' = any (roles));
 ```
 
-**Step 9.** Checklist E (smoke test). Repeat the security spot checks against production:
+**Step 10.** Checklist E (smoke test). Repeat the API spot checks against production:
 - anonymous calls to an AI route get 401;
 - an unlisted account gets 403 `verification_required`;
 - metabolic data of another clinician's patient gets 404.
@@ -325,7 +359,7 @@ Then review the verification requests.
 
 ## Rollback that never reopens access
 
-**Safety floor:** once steps 1–6 are applied, the **database** protects patient data whatever the application code does. Every rollback below keeps steps 1–6 in place.
+**Safety floor:** once steps 1–4, 6 and 7 are applied, the **database** protects patient data whatever the application code does. Every rollback below keeps those steps in place.
 
 | Problem | What to do | Takes effect |
 |---|---|---|
@@ -342,7 +376,7 @@ Then review the verification requests.
 - to undo it, re-run Part A (step 4). The list is untouched.
 
 **Why a code rollback to PR #7 is safe:**
-- Under #7's code, every patient write still goes through the step 6 rules.
+- Under #7's code, every patient write still goes through the step 7 rules (Part B).
 - The only service-role write of patient data (`/api/metabolic/save`) now requires verification in #7 too. It was added to #7 for this reason.
 - **In practice:** the first release ships #5, #7 and #8 together, so production has no "#7 only" deployment to return to. Every earlier production deployment predates #5. Until a later safe release exists, a code problem means fixing forward, or deploying a revert of the #8 code commits, which leaves #7's code.
 - **Last resort:** Vercel "Instant Rollback" to the previous deployment brings back today's code on top of the new database, which is state **S2+B** (see Release states):
@@ -369,6 +403,6 @@ Then review the verification requests.
 - only for an aborted release before the deploy, because the deployed code writes its columns;
 - it restores the PR #5 trigger instead of dropping it;
 - it first removes rejected accounts from the transition list, so that mapping `rejected` back to `not_applicable` cannot give them access again;
-- it leaves the step 6 rules in place.
+- it leaves the Part B rules in place.
 
 All of the above is executed in `tests/sql/run.sh`.
