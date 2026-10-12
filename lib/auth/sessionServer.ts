@@ -7,7 +7,8 @@
 //   Patient accounts (a row in patients.patient_user_id) and student accounts
 //   (profiles.practice_stage) are refused, mirroring middleware.ts.
 // - requireVerifiedProfessional(): a professional whose registration PHYGO
-//   has verified (profiles.professional_status = 'verified').
+//   has verified (profiles.professional_status = 'verified'), or a listed
+//   pre-existing account during the bounded transition (see below).
 //
 // Lookups use the caller's own session (anon key + cookie), so Row Level
 // Security applies: patients and profiles rows are only readable by their
@@ -84,6 +85,7 @@ export async function requireProfessional(): Promise<Gate> {
   return { ...gate, professionalStatus: profile?.professional_status ?? "not_applicable" };
 }
 
+const MAX_TRANSITION_MS = 90 * 24 * 60 * 60 * 1000;
 const warned = new Set<string>();
 function warnOnce(message: string) {
   if (warned.has(message)) return;
@@ -92,18 +94,41 @@ function warnOnce(message: string) {
 }
 
 /**
- * Temporary access for pre-existing accounts is NOT granted by this code
- * version. The owner's time-limited transition list lives in the database
- * (table professional_transition_accounts, PR #8), where the patient-record
- * rules can use it too. The environment variables of an earlier draft
- * (PROFESSIONAL_TRANSITION_ACCOUNTS / PROFESSIONAL_TRANSITION_UNTIL) and the
- * old PROFESSIONAL_VERIFICATION_MODE grant nothing in any version: if they are
- * still set they are ignored and logged, so a stale value can never open
- * clinical access (also when the code is rolled back to this version).
+ * Temporary transition policy for accounts that existed before professional
+ * verification was introduced. The list lives in the database table
+ * professional_transition_accounts (sql/2026-10_patient_management_A_...):
+ * only the owner adds rows, each with an end date at most 90 days ahead, and
+ * users can read only their own row. The same list is used by the database
+ * rules for patient records (can_manage_patients()), so one list governs
+ * clinical AI, video and patient management. Nothing qualifies automatically:
+ * a new account, or one that switches its declared role, is not on the list.
+ *
+ * Returns the end of this account's temporary access, null when it is not
+ * covered, or "error" when the list cannot be read (callers fail closed).
+ * A PHYGO decision always wins: verified accounts do not need it and rejected
+ * accounts lose it immediately.
  */
-export function warnIgnoredTransitionEnv() {
+export async function transitionUntilFor(
+  supabase: SupabaseClient,
+  userId: string,
+  professionalStatus: string | undefined,
+): Promise<string | null | "error"> {
   for (const old of ["PROFESSIONAL_VERIFICATION_MODE", "PROFESSIONAL_TRANSITION_ACCOUNTS", "PROFESSIONAL_TRANSITION_UNTIL"])
-    if (process.env[old]) warnOnce(`${old} is no longer used and is ignored; remove it from the environment`);
+    if (process.env[old]) warnOnce(`${old} is no longer used and is ignored; the transition list is the professional_transition_accounts table`);
+  if (professionalStatus === "verified" || professionalStatus === "rejected") return null;
+  const { data, error } = await supabase
+    .from("professional_transition_accounts")
+    .select("until")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) {
+    console.error("transition list lookup failed:", error.message);
+    return "error";
+  }
+  const until = data?.until ? new Date(data.until) : null;
+  const now = Date.now();
+  if (!until || Number.isNaN(until.getTime()) || until.getTime() <= now || until.getTime() - now > MAX_TRANSITION_MS) return null;
+  return until.toISOString();
 }
 
 /**
@@ -111,14 +136,21 @@ export function warnIgnoredTransitionEnv() {
  * Used for operations that send real clinical information to a paid AI
  * processor or open live consultations with patients. Declaring yourself a
  * professional (practice_stage) or typing a registration number is not enough;
- * only an administrator can set professional_status = 'verified'.
+ * only an administrator can set professional_status = 'verified'. Accounts on
+ * the explicit transition list (above) are let through until their end date.
+ * The same rule decides patient management in the database (can_manage_patients()).
  * Patients and students are refused before any of this (requireProfessional).
  */
 export async function requireVerifiedProfessional(): Promise<Gate> {
   const gate = await requireProfessional();
   if (!gate.ok) return gate;
-  warnIgnoredTransitionEnv();
   if (gate.professionalStatus === "verified") return gate;
+  const until = await transitionUntilFor(gate.supabase, gate.user.id, gate.professionalStatus);
+  if (until === "error") return { ok: false, response: unavailable() };
+  if (until) {
+    console.warn("verification transition: listed unverified account allowed until", until, gate.user.id);
+    return gate;
+  }
   return {
     ok: false,
     response: NextResponse.json(

@@ -32,6 +32,8 @@ type Dict = {
   transition: string;
   videoFailed: string;
   videoSaveFailed: string;
+  patientsLocked: string;
+  patientsLockedLink: string;
 };
 
 const en: Dict = {
@@ -67,6 +69,8 @@ const en: Dict = {
   transition: 'Your account has temporary access to these features until {date}, while your verification is completed. Request verification before then to keep it.',
   videoFailed: 'Could not start the video call. Please try again.',
   videoSaveFailed: 'Could not save the call. Please try again.',
+  patientsLocked: 'Managing real patients (adding patients, notes, appointments, invitations, video calls and clinical links) is reserved for verified physiotherapists. You can still view what you already created and explore every educational resource.',
+  patientsLockedLink: 'Request verification',
 };
 
 const it: Dict = {
@@ -102,6 +106,8 @@ const it: Dict = {
   transition: 'Il tuo account ha un accesso temporaneo a queste funzioni fino al {date}, in attesa della verifica. Richiedi la verifica entro quella data per mantenerlo.',
   videoFailed: 'Impossibile avviare la videochiamata. Riprova.',
   videoSaveFailed: 'Impossibile salvare la chiamata. Riprova.',
+  patientsLocked: 'La gestione di pazienti reali (nuovi pazienti, note, appuntamenti, inviti, videochiamate e collegamenti clinici) è riservata ai fisioterapisti verificati. Puoi comunque vedere ciò che hai già creato ed esplorare tutte le risorse di studio.',
+  patientsLockedLink: 'Richiedi la verifica',
 };
 
 const es: Dict = {
@@ -137,6 +143,8 @@ const es: Dict = {
   transition: 'Tu cuenta tiene acceso temporal a estas funciones hasta el {date}, mientras se completa tu verificación. Solicita la verificación antes de esa fecha para mantenerlo.',
   videoFailed: 'No se pudo iniciar la videollamada. Inténtalo de nuevo.',
   videoSaveFailed: 'No se pudo guardar la llamada. Inténtalo de nuevo.',
+  patientsLocked: 'La gestión de pacientes reales (nuevos pacientes, notas, citas, invitaciones, videollamadas y vínculos clínicos) está reservada a fisioterapeutas verificados. Puedes seguir viendo lo que ya creaste y explorar todos los recursos de estudio.',
+  patientsLockedLink: 'Solicitar verificación',
 };
 
 const fr: Dict = {
@@ -172,6 +180,8 @@ const fr: Dict = {
   transition: 'Votre compte a un accès temporaire à ces fonctions jusqu’au {date}, le temps de finaliser votre vérification. Demandez la vérification avant cette date pour le conserver.',
   videoFailed: 'Impossible de démarrer l’appel vidéo. Réessayez.',
   videoSaveFailed: 'Impossible d’enregistrer l’appel. Réessayez.',
+  patientsLocked: 'La gestion de patients réels (nouveaux patients, notes, rendez-vous, invitations, appels vidéo et liens cliniques) est réservée aux kinésithérapeutes vérifiés. Vous pouvez toujours consulter ce que vous avez déjà créé et explorer toutes les ressources d’étude.',
+  patientsLockedLink: 'Demander la vérification',
 };
 
 export const VERIFICATION_STRINGS: Record<AppLang, Dict> = { en, it, es, fr };
