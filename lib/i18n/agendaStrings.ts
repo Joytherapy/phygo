@@ -56,6 +56,16 @@ interface AgendaDict {
     sendRequest: string
     history: string
   }
+  cancelFlow: {
+    detailsEyebrow: string
+    openPatient: string
+    cancelAppointment: string
+    confirmQuestion: string
+    confirmDetail: string
+    confirmYes: string
+    keep: string
+    cancelError: string
+  }
 }
 
 const it: AgendaDict = {
@@ -105,6 +115,16 @@ const it: AgendaDict = {
     atTheClinic: 'In clinica',
     sendRequest: 'Invia richiesta',
     history: 'Storico',
+  },
+  cancelFlow: {
+    detailsEyebrow: "Dettagli appuntamento",
+    openPatient: "Apri scheda paziente",
+    cancelAppointment: "Annulla appuntamento",
+    confirmQuestion: "Annullare questo appuntamento?",
+    confirmDetail: "Sparirà dall'agenda e dal portale del paziente. Resta registrato come annullato.",
+    confirmYes: "Sì, annulla",
+    keep: "Indietro",
+    cancelError: "Impossibile annullare l'appuntamento. Riprova.",
   },
 }
 
@@ -156,6 +176,16 @@ const en: AgendaDict = {
     sendRequest: 'Send Request',
     history: 'History',
   },
+  cancelFlow: {
+    detailsEyebrow: "Appointment details",
+    openPatient: "Open patient record",
+    cancelAppointment: "Cancel appointment",
+    confirmQuestion: "Cancel this appointment?",
+    confirmDetail: "It will disappear from the agenda and from the patient's portal. It stays on record as cancelled.",
+    confirmYes: "Yes, cancel it",
+    keep: "Go back",
+    cancelError: "Could not cancel the appointment. Try again.",
+  },
 }
 
 const es: AgendaDict = {
@@ -206,6 +236,16 @@ const es: AgendaDict = {
     sendRequest: 'Enviar solicitud',
     history: 'Historial',
   },
+  cancelFlow: {
+    detailsEyebrow: "Detalles de la cita",
+    openPatient: "Abrir ficha del paciente",
+    cancelAppointment: "Cancelar cita",
+    confirmQuestion: "¿Cancelar esta cita?",
+    confirmDetail: "Desaparecerá de la agenda y del portal del paciente. Queda registrada como cancelada.",
+    confirmYes: "Sí, cancelar",
+    keep: "Volver",
+    cancelError: "No se pudo cancelar la cita. Inténtalo de nuevo.",
+  },
 }
 
 const fr: AgendaDict = {
@@ -255,6 +295,16 @@ const fr: AgendaDict = {
     atTheClinic: 'À la clinique',
     sendRequest: 'Envoyer la demande',
     history: 'Historique',
+  },
+  cancelFlow: {
+    detailsEyebrow: "Détails du rendez-vous",
+    openPatient: "Ouvrir le dossier du patient",
+    cancelAppointment: "Annuler le rendez-vous",
+    confirmQuestion: "Annuler ce rendez-vous ?",
+    confirmDetail: "Il disparaîtra de l'agenda et du portail du patient. Il reste enregistré comme annulé.",
+    confirmYes: "Oui, annuler",
+    keep: "Retour",
+    cancelError: "Impossible d'annuler le rendez-vous. Réessayez.",
   },
 }
 
