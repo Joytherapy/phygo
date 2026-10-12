@@ -98,25 +98,74 @@ Today (read-only, 12 Oct 2026):
 
 ### How to populate it
 
-1. Find the candidates with this read-only query:
+**Outcome of the review of 12 Oct 2026 (checklist C):** only the owner's account is listed. The other 31 declared professionals were judged test accounts and are not listed. They keep read access to their existing data and can request verification normally.
+
+1. **The owner's account: step 4b**, before the merge (see "The owner's account" below). The script is in step 4b.
+2. **Any other reviewed account:** use this all-or-nothing script at step 6.
+   - Put the approved emails in `approved` and your name in `reviewer`.
+   - If even one email is wrong, already listed, a student, a patient or rejected, **nothing** is saved and the error says so. Fix the list and run it again.
+   - Keep the emails out of GitHub and chat.
+
+   <!-- list-insert -->
    ```sql
-   select p.id, u.email, u.created_at,
-          (select count(*) from patients x where x.user_id = p.id) as patients
-   from profiles p join auth.users u on u.id = p.id
-   where p.practice_stage = 'professional'
-     and u.created_at < '2026-10-13'
-     and not exists (select 1 from patients x where x.patient_user_id = p.id)
-   order by patients desc, u.created_at;
+   do $$
+   declare
+     approved text[] := array[
+       'email-approvata-1@esempio.it',
+       'email-approvata-2@esempio.it'
+     ];
+     reviewer text := 'IL TUO NOME';
+     inserted int;
+   begin
+     insert into professional_transition_accounts (user_id, until, added_by, note)
+     select p.id, now() + interval '60 days', reviewer, 'pre-existing clinician, reviewed ' || current_date
+     from auth.users u
+     join profiles p on p.id = u.id
+     where lower(u.email) in (select lower(trim(e)) from unnest(approved) e)
+       and p.practice_stage = 'professional'
+       and p.professional_status <> 'rejected'
+       and not exists (select 1 from patients x where x.patient_user_id = p.id)
+     on conflict (user_id) do nothing;
+     get diagnostics inserted = row_count;
+     if inserted <> cardinality(approved) then
+       raise exception 'Inserted % of % approved accounts: NOTHING was saved. Check the emails (typo, student, patient, rejected, or already listed).', inserted, cardinality(approved);
+     end if;
+   end $$;
    ```
-2. Add only the accounts you know are real clinicians, one statement per account. Keep the ids out of GitHub and chat.
-   ```sql
-   insert into professional_transition_accounts (user_id, until, added_by, note)
-   values ('<id>', now() + interval '60 days', 'owner', 'pre-existing clinician');
-   ```
-3. To remove an account immediately, do either of these. Neither needs a redeploy.
+3. **To remove an account immediately,** do either of these. Neither needs a redeploy.
    - reject it on `/dashboard/verification-admin`;
    - run `delete from professional_transition_accounts where user_id = '<id>';`
-4. To end the transition, run `delete from professional_transition_accounts;`, or let the dates pass.
+4. **To end the transition,** run `delete from professional_transition_accounts;`, or let the dates pass.
+
+### The owner's account
+
+The owner is a physiotherapist and PHYGO's only administrator. The account must keep every professional function through the release. Today it is **not verified** (`not_applicable`), like every account.
+
+**Two separate permissions; neither implies the other:**
+
+| What | Granted by |
+|---|---|
+| Administration: verification console, library editing, events, science review | `PHYGO_ADMIN_EMAILS` (Production) + confirmed email. Independent of the professional status and of the list. These routes touch profiles, library, events and science tables only; never patients or notes. |
+| Clinical functions on the owner's **own** patients: create, edit or delete patients, notes (exercise programs are saved in notes), appointments, invitations, video calls, library links; clinical AI and document generation; video rooms; metabolic data on a patient | **verified, or listed** (`can_manage_patients()` in the database; `requireVerifiedProfessional` on the server) |
+| Reading own patients and notes; exercise library, protocols, clinical tools, Ask PHYGO, workspace | any signed-in account |
+
+So being the administrator never opens clinical data, and no general bypass is added: the owner's access goes through the same list and the same rules as everyone else, and covers **only the owner's own patients**.
+
+**How the access stays continuous:**
+1. **Step 4b, before the merge:** the owner's row is inserted for 60 days. The current code ignores the table, so this changes nothing yet.
+2. **Do not merge** until the step 4b check returns `true` and the review query shows the row.
+3. When the new code goes live (step 8) and when Part B is applied (step 7), the row is already there: no interruption, in either order.
+
+**Official verification, within the 60 days** (after the release):
+1. On the profile page, submit country, register and registration number. The status becomes `pending`, and the listed access continues (`pending` + listed is allowed; tested).
+2. Check the number on the **official public register** of the profession.
+3. Approve the request on `/dashboard/verification-admin`. The console records the reviewer's email. The code does not stop an administrator from approving their own account: this approval is the owner's self-certification against the official register.
+4. Check that the profile shows **verified**. Then the list row is no longer needed; you can delete it or let it expire. A verified account does not even read the list, so a temporary failure to read it no longer affects the owner.
+
+**Risks that remain:**
+- **Never choose "Rejected" on your own account.** A rejection wins over the list immediately.
+- **If the list cannot be read** (for example a Supabase error), the new code refuses every unverified account with 503, the owner included, until verification is done. This is fail-closed by design.
+- **When the row expires** (60 days), access to clinical functions stops unless the account is verified. To extend, delete the row and insert a new one: a row can last at most 90 days from when it was added.
 
 ## Release checklist
 
@@ -126,14 +175,15 @@ Complete items A–D and F, including the review and preparation of the transiti
 - [ ] Open Vercel → Project → Settings → Environment Variables, filtered on **Production**.
 - [ ] The value contains **only** the authorised administrator's email, exactly as registered (one address, no typos, no extra addresses).
 - [ ] Preview and Development do not hold the production value. If Preview needs an administrator, use a separate test account.
-- [ ] In Supabase, that email belongs to an existing account whose email is confirmed. The owner's account was checked on 12 Oct 2026 (exists, confirmed); the Vercel value itself must be confirmed by the owner.
+- [ ] In Supabase, that email belongs to an existing account whose email is confirmed. The owner's account was checked on 12 Oct 2026 (exists, confirmed).
+- [x] Checked on 12 Oct 2026 (read-only, value not copied anywhere): the Production value is exactly one address, the owner's account email, with no extra spaces; it is set for Production only.
 - [ ] If the variable is empty or wrong, nobody can review requests (fail closed). Fix it before the deploy.
 
 **B. Old transition variables removed**
 - [ ] `PROFESSIONAL_TRANSITION_ACCOUNTS`, `PROFESSIONAL_TRANSITION_UNTIL` and `PROFESSIONAL_VERIFICATION_MODE` are **absent** in Production (and in Preview and Development).
 - [ ] No code version uses them (tested: a valid old list plus `grace` grants nothing, in #7 and #8). Removing them keeps the configuration honest and avoids confusion.
 
-**C. Manual review of the transition list** (before the release window; the inserts are pasted at step 6)
+**C. Manual review of the transition list** (before the release window; the owner's row is pasted at step 4b, any other reviewed accounts at step 6)
 - [ ] Run the candidate query (above) and go through **every** row personally.
 - [ ] Add an account only if all of these hold:
   - you know the person and that they practise as a physiotherapist;
@@ -148,11 +198,17 @@ Complete items A–D and F, including the review and preparation of the transiti
   - accounts with no activity. These can request verification normally.
 - [ ] Use `until` ≤ 60 days, `added_by` = your name, and a `note` saying why the account was kept.
 - [ ] After inserting, compare the table with your reviewed list using this read-only query:
+  <!-- list-review -->
   ```sql
-  select u.email, t.until, t.added_by, t.note
-  from professional_transition_accounts t join auth.users u on u.id = t.user_id
-  order by u.email;
+  select u.email,
+    t.until::date as scadenza,
+    t.added_by,
+    t.note
+    from professional_transition_accounts t
+    join auth.users u on u.id = t.user_id
+    order by u.email;
   ```
+- [x] Done on 12 Oct 2026: only the owner's account is to be listed (step 4b). No other account.
 - [ ] Keep ids and emails out of GitHub, PRs and chat.
 
 **F. Vercel checks** (see "Vercel: what is known, and what the owner must check")
@@ -165,6 +221,7 @@ Complete items A–D and F, including the review and preparation of the transiti
 
 **E. After the deploy (smoke test)**
 - [ ] The administrator opens `/dashboard/verification-admin` and the list loads.
+- [ ] The owner, listed at step 4b, creates a note, an appointment and a video call on one of their **own** patients.
 - [ ] A non-admin test account gets "forbidden" there.
 - [ ] As a verified or listed account, and as an unlisted test account, try: one note, one scan, one video call, one appointment, one invitation, and one delete. The unlisted account must be refused each time.
 
@@ -248,15 +305,17 @@ Both exist today. The release must close both; the order decides which closes fi
   - without step 1, the new code would accept a self-set `verified` status;
   - without step 3, the verification request cannot be stored;
   - without step 4, unverified accounts get 503 instead of the transition rules.
-- **The manual review of the list is done *before* the release window** (checklist C), and the insert statements are prepared in advance. In the window, step 6 is a paste.
+- **The manual review of the list is done *before* the release window** (checklist C), and the insert statements are prepared in advance. In the window, steps 4b and 6 are pastes.
+- **The owner's row goes in at step 4b, before the merge.** The current code ignores the table, so inserting early costs nothing, and the owner's access never depends on how fast the build is.
 
 Resulting order:
 
 | Step | What | State while it runs |
 |---|---|---|
 | 1–4 | SQL 1–4, a few minutes | S1 → **S2** |
+| 4b | Owner's row on the list; do not merge until its check is `true` | S2 |
 | 5 | Merge PR #5 into `main`: the production build starts; the current code stays live until the build is **Ready** | S2 |
-| 6–7 | **During the build:** insert the prepared list, then Part B | **S2+B** |
+| 6–7 | **During the build:** any other reviewed accounts (none after the 12 Oct review), then Part B | **S2+B** |
 | 8 | The build becomes Ready and live | **S4** |
 | 9 | `demo_usage` SQL, only now | S4 |
 
@@ -367,14 +426,44 @@ select to_regclass('public.professional_transition_accounts') is not null
    and to_regprocedure('public.can_manage_patients()') is not null;
 ```
 
+**Step 4b. The owner's account on the list, before the merge.** In the script below, replace `SCRIVI-QUI-LA-TUA-EMAIL` with the owner's email (only in the SQL editor, never in GitHub). It inserts that one account for 60 days, or nothing.
+
+<!-- owner-insert -->
+```sql
+do $$
+declare
+  my_email text := 'SCRIVI-QUI-LA-TUA-EMAIL';
+  inserted int;
+begin
+  insert into professional_transition_accounts (user_id, until, added_by, note)
+  select p.id, now() + interval '60 days', 'owner', 'PHYGO owner, physiotherapist; official verification to follow'
+  from auth.users u
+  join profiles p on p.id = u.id
+  where lower(u.email) = lower(trim(my_email))
+    and u.email_confirmed_at is not null
+    and p.practice_stage = 'professional'
+    and p.professional_status <> 'rejected'
+    and not exists (select 1 from patients x where x.patient_user_id = p.id)
+  on conflict (user_id) do nothing;
+  get diagnostics inserted = row_count;
+  if inserted <> 1 then
+    raise exception 'NOTHING was saved: account not found, email not confirmed, not an eligible professional, or already listed.';
+  end if;
+end $$;
+```
+
+Then run the check below and the review query of checklist C (it must show the owner's row, ending in 60 days). **If the check is not `true`, do not merge.** The script saves nothing on error, so it can be corrected and run again.
+
+<!-- check after=4b -->
+```sql
+select count(*) = 1 and bool_and(until > now() + interval '59 days')
+from professional_transition_accounts;
+```
+
 **Step 5. Start the deploy.** Merge PR #5 into `main`. The production build starts, and the current code stays live until the build is Ready. Go straight to step 6.
 
-**Step 6.** Insert the prepared transition list. Then run the review query below: it shows who becomes read-only at step 7.
+**Step 6.** Insert any other reviewed accounts with the all-or-nothing script ("How to populate it"). After the 12 Oct review there are none: skip the insert. Then run the review query below: it shows who becomes read-only at step 7. The owner's account must **not** appear in it.
 
-<!-- check after=6 -->
-```sql
-select count(*) > 0 from professional_transition_accounts where until > now();
-```
 ```sql
 -- Review (not a check): accounts that own patients and will become read-only at step 7.
 select u.email, count(*) as patients

@@ -13,7 +13,7 @@ grant usage on schema auth to anon, authenticated, service_role;
 
 -- profiles: every live column, default and check constraint (information_schema
 -- and pg_constraint, read on 12 Oct 2026), so the migrations meet the real names.
-create table auth.users (id uuid primary key, email text);
+create table auth.users (id uuid primary key, email text, email_confirmed_at timestamptz);
 create table profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   plan text not null default 'free',

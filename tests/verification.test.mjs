@@ -346,3 +346,58 @@ test('patient management: clinical data on a real patient needs verification or 
   assert.equal(await can('legacyStudent'), false);
   assert.equal(await can('student'), false);
 });
+
+test('owner path: the administrator is listed before the release, then verified from the register, with no general bypass', async () => {
+  // The owner is a physiotherapist and the only PHYGO administrator. Before the
+  // release the account is unverified; the guide lists it at step 4b, before
+  // the merge, and the official verification follows within the 60 days.
+  const owner = row('admin');
+  const saved = { ...owner };
+  const patients = fake.state.tables.patients;
+  const list = fake.state.tables.professional_transition_accounts;
+  const dropListRow = () => { const i = list.findIndex((r) => r.user_id === people.admin.id); if (i >= 0) list.splice(i, 1); };
+  patients.push({ id: 'p-owner', user_id: people.admin.id, patient_user_id: null, name: 'Synthetic owner patient' });
+  const opens = async () => {
+    const res = await call(app.url, 'POST', '/api/generate-note', 'admin', NOTE);
+    return ![401, 403, 429, 503].includes(res.status);
+  };
+  try {
+    Object.assign(owner, { professional_status: 'not_applicable', registry_country: null, registry_name: null, registration_number: null });
+
+    // Being the administrator grants no clinical access.
+    await assertLockedOut(app.url, 'admin', 'not_applicable');
+    assert.equal((await call(app.url, 'GET', '/api/admin/verification', 'admin')).status, 200, 'the console does not depend on the professional status');
+
+    // Step 4b: listed for 60 days -> clinical functions on the owner's own patients.
+    list.push({ user_id: people.admin.id, until: inDays(60), added_by: 'owner' });
+    assert.equal(await opens(), true, 'clinical AI');
+    const dailyBefore = providerCalls().daily;
+    assert.equal((await call(app.url, 'POST', '/api/video-call/create-room', 'admin', { patientId: 'p-owner' })).status, 200, 'video room, own patient');
+    assert.equal(providerCalls().daily, dailyBefore + 1);
+    assert.equal((await call(app.url, 'POST', '/api/metabolic/save', 'admin', { ...metabolic, patientId: 'p-owner' })).status, 200, 'metabolic data, own patient');
+    // ...and still nothing on another clinician's patient.
+    assert.equal((await call(app.url, 'POST', '/api/video-call/create-room', 'admin', { patientId: 'p-declared' })).status, 404);
+    assert.equal((await call(app.url, 'GET', '/api/metabolic/save?patientId=p-declared', 'admin')).status, 404);
+
+    // Official verification: the request makes the status pending; the listed access continues.
+    const req = await call(app.url, 'POST', '/api/profile/verification', 'admin', { registryCountry: 'IT', registryName: 'Synthetic register', registrationNumber: 'O-1' });
+    assert.equal((await req.json()).verification.status, 'pending');
+    assert.equal(await opens(), true, 'pending + listed: no interruption');
+
+    // Approval on the console, after checking the official register; recorded with the reviewer.
+    assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.admin.id, decision: 'verified' })).status, 200);
+    assert.equal(row('admin').professional_status, 'verified');
+    assert.equal(row('admin').verification_reviewed_by, 'admin@test.invalid');
+
+    // Verified: the list row is no longer needed, and the list is not even read.
+    dropListRow();
+    await fetch(`${fake.url}/__control/fail?table=professional_transition_accounts`);
+    assert.equal(await opens(), true, 'verified: independent of the transition list');
+  } finally {
+    await fetch(`${fake.url}/__control/fail`);
+    dropListRow();
+    patients.splice(patients.findIndex((p) => p.id === 'p-owner'), 1);
+    Object.keys(owner).forEach((k) => delete owner[k]);
+    Object.assign(owner, saved);
+  }
+});
