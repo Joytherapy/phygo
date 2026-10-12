@@ -35,7 +35,7 @@ This guide covers three PRs:
 >   The metabolic 404 for another clinician's patient is covered by the automated tests only.
 > - **Not part of the release:**
 >   - the freeze file was not applied;
->   - the stored IP row in `demo_usage` is kept (a separate decision);
+>   - the stored IP row in `demo_usage` was not part of the SQL file; the owner deleted it separately on 12 Oct 2026 (data minimisation), and the table is now empty;
 >   - video calls stay unavailable until `DAILY_API_KEY` is set in Production.
 >
 > The `PROPOSED - NOT APPLIED` headers inside the SQL files are historical. The files were applied exactly as they are, and they are kept unchanged so that their checksums keep matching what was applied and recorded.
