@@ -12,6 +12,8 @@ export function testEnv(fakeUrl, overrides = {}) {
     HOME: process.env.HOME,
     NODE_ENV: 'production',
     NEXT_TELEMETRY_DISABLED: '1',
+    // Refuse any request to a real external host (see no-external-network.cjs).
+    NODE_OPTIONS: `--require ${fileURLToPath(new URL('./no-external-network.cjs', import.meta.url))}`,
     NEXT_PUBLIC_SUPABASE_URL: fakeUrl,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
     SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-key',

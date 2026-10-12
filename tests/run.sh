@@ -13,7 +13,7 @@ export FAKE_SUPABASE_PORT=${FAKE_SUPABASE_PORT:-54329}
 node --input-type=module -e "
   import { testEnv } from './tests/support/app.mjs';
   const env = testEnv('http://127.0.0.1:${FAKE_SUPABASE_PORT}');
-  for (const [k, v] of Object.entries(env)) if (k !== 'PATH' && k !== 'HOME' && k !== 'NODE_ENV') console.log('export ' + k + '=' + JSON.stringify(v));
+  for (const [k, v] of Object.entries(env)) if (!['PATH', 'HOME', 'NODE_ENV', 'NODE_OPTIONS'].includes(k)) console.log('export ' + k + '=' + JSON.stringify(v));
 " > /tmp/phygo-test-env.sh
 # shellcheck disable=SC1091
 source /tmp/phygo-test-env.sh
