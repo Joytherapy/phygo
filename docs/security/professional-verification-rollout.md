@@ -452,12 +452,17 @@ begin
 end $$;
 ```
 
-Then run the check below and the review query of checklist C (it must show the owner's row, ending in 60 days). **If the check is not `true`, do not merge.** The script saves nothing on error, so it can be corrected and run again.
+Then run the check below. In it, replace `SCRIVI-QUI-LA-TUA-EMAIL` with **the same email** used in the script. It looks at the owner's row only, whatever else is on the list: it returns `true` only if that row exists and ends more than 59 days from now. **If it is not `true`, do not merge.** The script saves nothing on error, so it can be corrected and run again. The review query of checklist C then shows the whole list.
 
 <!-- check after=4b -->
 ```sql
-select count(*) = 1 and bool_and(until > now() + interval '59 days')
-from professional_transition_accounts;
+select exists (
+  select 1
+    from professional_transition_accounts t
+    join auth.users u on u.id = t.user_id
+   where lower(u.email) = lower(trim('SCRIVI-QUI-LA-TUA-EMAIL'))
+     and t.until > now() + interval '59 days'
+);
 ```
 
 **Step 5. Start the deploy.** Merge PR #5 into `main`. The production build starts, and the current code stays live until the build is Ready. Go straight to step 6.

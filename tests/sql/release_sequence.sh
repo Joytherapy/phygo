@@ -42,6 +42,8 @@ check() { q -f "$CHECKS/$1.sql"; }
 # owner_insert <email>: the step 4b script from the guide, with the placeholder replaced; prints saved or refused
 owner_insert() { sed "s/SCRIVI-QUI-LA-TUA-EMAIL/$1/" "$CHECKS/owner-insert.sql" > "$CHECKS/run.sql"; if q -f "$CHECKS/run.sql" >/dev/null 2>&1; then echo saved; else echo refused; fi; }
 listed() { q -c "select count(*) from professional_transition_accounts"; }
+# check_owner <email>: the step 4b check from the guide, with the placeholder replaced as the owner would
+check_owner() { sed "s/SCRIVI-QUI-LA-TUA-EMAIL/$1/" "$CHECKS/4b.sql" > "$CHECKS/run.sql"; q -f "$CHECKS/run.sql"; }
 
 q -f tests/sql/replica.sql >/dev/null
 q -f docs/security/live-clinical-rls-2026-10-12.sql >/dev/null
@@ -120,12 +122,25 @@ capabilities "S2 and S3 (same database; S3 = corrected code without Part B)" den
 direct_writes "S2 and S3" ok ok ok ok ok 1
 
 echo "step 4b (the owner's row, before the merge)"
-expect "check 4b is false before step 4b" "$(check 4b)" f
+expect "check 4b, empty list: false" "$(check_owner 'owner@test.invalid')" f
+q -c "insert into professional_transition_accounts (user_id, until, added_by, note) values ('$X', now() + interval '60 days', 'owner', 'another account')" >/dev/null
+expect "check 4b, only another account listed (owner's row missing): false" "$(check_owner 'owner@test.invalid')" f
+q -c "delete from professional_transition_accounts where user_id = '$X'" >/dev/null
 expect "owner script, email with a typo: nothing saved" "$(owner_insert 'owner@test.invalid.x')" refused
 expect "owner script, unconfirmed email: nothing saved" "$(owner_insert 'unverified@test.invalid')" refused
 expect "nothing was listed by the refused runs" "$(listed)" 0
 expect "owner script, owner's email (spaces, capitals): saved" "$(owner_insert '  OWNER@test.invalid ')" saved
-expect "check 4b is true after step 4b" "$(check 4b)" t
+expect "check 4b, owner's row present: true" "$(check_owner 'owner@test.invalid')" t
+expect "check 4b, same email typed with spaces and capitals: true" "$(check_owner ' Owner@Test.invalid ')" t
+expect "check 4b with a different email: false" "$(check_owner 'unverified@test.invalid')" f
+expect "check 4b with the placeholder left in: false" "$(q -f "$CHECKS/4b.sql")" f
+q -c "insert into professional_transition_accounts (user_id, until, added_by, note) values ('$X', now() + interval '60 days', 'owner', 'another account')" >/dev/null
+expect "check 4b, owner's row plus another account: still true" "$(check_owner 'owner@test.invalid')" t
+q -c "delete from professional_transition_accounts where user_id = '$X'" >/dev/null
+q -c "update professional_transition_accounts set until = added_at + interval '30 days' where user_id = '$O'" >/dev/null
+expect "check 4b, owner's row ending in 30 days: false" "$(check_owner 'owner@test.invalid')" f
+q -c "update professional_transition_accounts set until = now() + interval '60 days' where user_id = '$O'" >/dev/null
+expect "check 4b, owner's row back to 60 days: true" "$(check_owner 'owner@test.invalid')" t
 expect "owner script run again: refused, nothing changes" "$(owner_insert 'owner@test.invalid')" refused
 expect "exactly one row, the owner's" "$(q -c "select count(*) = 1 and bool_and(user_id = '$O') from professional_transition_accounts")" t
 expect "the review query shows the owner's row" "$(q -f "$CHECKS/list-review.sql" | cut -d'|' -f1)" owner@test.invalid
