@@ -23,7 +23,8 @@ This guide covers three PRs:
 >   | `20261012182600` | `security_demo_usage_policies` |
 >
 >   The versions are approximate times; nothing was re-run to record them.
-> - **Transition list:** one entry, the owner's account, until 11 Dec 2026 (step 4b). The owner's official verification is to be completed before that date.
+> - **Transition list:** one entry, the owner's account, until 11 Dec 2026 (step 4b).
+> - **Owner verified on 12 Oct 2026:** the owner submitted the registration details from the profile page, checked them against the official public register, and approved the request on `/dashboard/verification-admin`. The account is now `verified`, the only one on PHYGO. Its access no longer depends on the transition list: verified accounts do not read it. The list entry is left to expire on 11 Dec 2026.
 > - **Step 8 check:** an anonymous `GET /api/profile/verification` answered `401`.
 > - **Smoke test (step 10):**
 >   - **anonymous call to an AI route:** `401`;
@@ -36,7 +37,7 @@ This guide covers three PRs:
 > - **Not part of the release:**
 >   - the freeze file was not applied;
 >   - the stored IP row in `demo_usage` was not part of the SQL file; the owner deleted it separately on 12 Oct 2026 (data minimisation), and the table is now empty;
->   - video calls stay unavailable until `DAILY_API_KEY` is set in Production.
+>   - video calls were enabled after the release: `DAILY_API_KEY` was added for Production only (sensitive), production was redeployed, and a room was opened from a patient's session page on 12 Oct 2026.
 >
 > The `PROPOSED - NOT APPLIED` headers inside the SQL files are historical. The files were applied exactly as they are, and they are kept unchanged so that their checksums keep matching what was applied and recorded.
 
@@ -257,7 +258,7 @@ Complete items A–D and F, including the review and preparation of the transiti
 
 **E. After the deploy (smoke test)**
 - [ ] The administrator opens `/dashboard/verification-admin` and the list loads.
-- [ ] The owner, listed at step 4b, creates a note and an appointment on one of their **own** patients. Video call: only if `DAILY_API_KEY` is configured; otherwise the expected answer is "Video calls are not configured" (see "Known limitation: video calls").
+- [ ] The owner, listed at step 4b, creates a note and an appointment on one of their **own** patients. Video call: only if `DAILY_API_KEY` is configured; otherwise the expected answer is "Video calls are not configured" (see "Video calls (Daily)").
 - [ ] A non-admin test account gets "forbidden" there.
 - [ ] As a verified or listed account, and as an unlisted test account, try: one note, one scan, one video call, one appointment, one invitation, and one delete. The unlisted account must be refused each time. While `DAILY_API_KEY` is absent, the listed or verified account gets "Video calls are not configured" for the video call; the unlisted account must still get 403 first.
 
@@ -370,11 +371,25 @@ If the build is faster than steps 6–7, production passes briefly through **S3*
 | **Part B fails** (error in the SQL editor; its transaction is rolled back) | S3 once the deploy is live (S2 before) | Own-patient browser writes only; the API is protected by the new code | **Let the deploy go live**: S3 is strictly better than S2. Read the error, fix the cause, re-run Part B. Do not roll the code back |
 | **Deploy live, application misbehaves** | S4 | — | Fix forward. Instant Rollback to the previous deployment would return to the current code on the S2+B database: the API exposure would reopen, so use it only as a last resort |
 
-## Known limitation: video calls
+## Video calls (Daily)
 
-- **`DAILY_API_KEY` is not set** for PHYGO in any environment: not among the project's variables (Vercel connector), and no shared variable is linked to the project (dashboard, owner). Checked 12 Oct 2026.
-- **So video calls are not configured.** This is a **known functional limitation** of the release, not a security issue. The new code answers `503 Video calls are not configured` and makes no call to Daily. Everything else works without it.
-- **To enable video calls later:** add `DAILY_API_KEY` to **Production only**. This is a separate Vercel change and needs the owner's explicit approval. It is not part of this release.
+- **At the release** `DAILY_API_KEY` was not set for PHYGO (checked 12 Oct 2026), so video calls answered `503 Video calls are not configured`.
+- **Enabled the same day, after the release:**
+  - the owner added `DAILY_API_KEY` for **Production only**, as a sensitive variable (the value never left the owner's machine and Vercel);
+  - production was redeployed so the variable took effect;
+  - a Daily room opened from a patient's session page.
+- **Who can open a room:** only a verified or listed clinician, for their own patient, at most 20 rooms per hour. Each room expires after one hour.
+
+## Reviewing professional verification requests
+
+- **Who reviews:** only the administrator in `PHYGO_ADMIN_EMAILS` (today the owner), on `/dashboard/verification-admin`. Nothing is verified automatically: the app does not query any register.
+- **How a request arrives:** a clinician fills country, register and registration number on the profile page. The status becomes `pending`, and it appears under the **pending** tab of the console.
+- **No notification:** the app sends no email or alert when a request arrives. The administrator has to open the console to see new requests.
+- **The check:** look the number up on the official public register (for Italy, the register of the Ordini dei Fisioterapisti, FNOFI), and match the name and number. Then choose one of:
+  - **verified:** clinical functions open immediately for that account;
+  - **needs_info:** a message to the user is required; the account stays locked;
+  - **rejected:** a message to the user is required; access closes immediately, even for a listed account.
+- **What the record keeps:** the console records who reviewed and when. If the user later changes the number, the request goes back to `pending`.
 
 ## Vercel: what was checked, and how
 
