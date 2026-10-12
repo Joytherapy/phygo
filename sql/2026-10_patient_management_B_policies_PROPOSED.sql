@@ -32,8 +32,9 @@
 --   - the application misbehaves: roll the CODE back to a deployment that
 --     contains PR #7 or later; these rules stay in place and keep protecting
 --     patient data whatever the code does.
--- Part A's function cannot be dropped while these policies exist (PostgreSQL
--- refuses); never use DROP ... CASCADE on it.
+-- Part A must stay while these policies exist: PostgreSQL refuses to drop its
+-- function, and Part A's own rollback block refuses to run. Never use
+-- DROP ... CASCADE on it.
 
 begin;
 

@@ -1,7 +1,8 @@
 -- PROPOSED - NOT APPLIED. Needs the owner's approval. Part A of 2 (PR #8).
 -- Apply AFTER 2026-10_professional_verification_PROPOSED.sql (PR #7).
 -- Harmless on its own: it adds a table and a function, and changes no
--- existing access. Part B (the policies) uses them.
+-- existing access. Part B (the policies) uses them; once Part B is applied,
+-- this part must stay (see Rollback below).
 --
 -- 1. professional_transition_accounts: the explicit, time-limited list of
 --    PRE-EXISTING accounts that keep clinical access while their verification
@@ -29,9 +30,28 @@
 -- Remove one:   delete from professional_transition_accounts where user_id = '<uuid>';
 -- End for all:  delete from professional_transition_accounts;
 --
--- Rollback (apply Part B's rollback first; export the list if needed):
+-- Rollback:
+--   - AFTER Part B has been applied, Part A must never be removed: Part B's
+--     rules depend on can_manage_patients(), and without them any signed-in
+--     account could manage patient data again. Use the safe procedures in
+--     Part B's header and in docs/security/professional-verification-rollout.md
+--     instead (edit the list, reject or approve, emergency freeze, code
+--     rollback to PR #7 or later). Re-running this file is always safe: it is
+--     also how the emergency freeze is undone.
+--   - BEFORE Part B (for example, an aborted release), Part A can be removed
+--     with the block below. It refuses to run once any policy uses
+--     can_manage_patients(). Export the list first if it has entries.
+--   begin;
+--   do $g$ begin
+--     if exists (select 1 from pg_policies
+--                where coalesce(qual, '') like '%can_manage_patients%'
+--                   or coalesce(with_check, '') like '%can_manage_patients%') then
+--       raise exception 'Part B is applied: removing Part A would reopen patient management';
+--     end if;
+--   end $g$;
 --   drop function if exists can_manage_patients();
 --   drop table if exists professional_transition_accounts;
+--   commit;
 
 begin;
 

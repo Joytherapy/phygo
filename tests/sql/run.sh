@@ -117,6 +117,9 @@ for i in 1 2; do
 done
 expect "part A alone changes nothing: unlisted account can still create a patient" "$(as authenticated $U "insert into patients (id, user_id, name) values (gen_random_uuid(), '$U', 'tmp')")" ok
 q -c "delete from patients where name = 'tmp'" >/dev/null
+expect "Part A rollback runs before Part B (aborted release)" "$(runs "$(block sql/2026-10_patient_management_A_transition_list_PROPOSED.sql)")" ok
+expect "Part A rollback removed the table and the function" "$(q -c "select (to_regclass('public.professional_transition_accounts') is null) and (to_regprocedure('public.can_manage_patients()') is null)")" t
+for i in 1 2; do q -f sql/2026-10_patient_management_A_transition_list_PROPOSED.sql >/dev/null; done
 q -c "insert into professional_transition_accounts (user_id, until, added_by) values
         ('$L', now() + interval '30 days', 'owner'), ('$R', now() + interval '30 days', 'owner'),
         ('$S', now() + interval '30 days', 'owner'), ('$P', now() + interval '30 days', 'owner');
@@ -234,6 +237,8 @@ expect "undo does not open U" "$(as authenticated $U "insert into notes (patient
 echo "unsafe rollbacks are refused once PR #8 is applied"
 expect "PR #5 privileged-columns rollback refuses" "$(runs "$(block sql/2026-10_security_profile_privileged_columns_PROPOSED.sql)")" refused
 expect "PR #5 clinical-RLS rollback refuses" "$(runs "$(block sql/2026-10_security_clinical_rls_hardening_PROPOSED.sql)")" refused
+expect "Part A rollback refuses once Part B is applied" "$(runs "$(block sql/2026-10_patient_management_A_transition_list_PROPOSED.sql)")" refused
+expect "after the refused Part A rollback: table and function still there" "$(q -c "select (to_regclass('public.professional_transition_accounts') is not null) and (to_regprocedure('public.can_manage_patients()') is not null)")" t
 expect "can_manage_patients() cannot be dropped while the rules use it" "$(runs <(echo "drop function can_manage_patients();"))" refused
 expect "after the refused attempts: self-verification still refused" "$(as authenticated $U "update profiles set professional_status = 'verified' where id = '$U'")" denied
 expect "after the refused attempts: U still cannot create patients" "$(as authenticated $U "insert into patients (id, user_id, name) values (gen_random_uuid(), '$U', 'n')")" denied

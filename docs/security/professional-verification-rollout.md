@@ -59,7 +59,7 @@ No server route deletes clinical data. The only path is the browser under RLS. A
 
 - **The table:** `professional_transition_accounts`, created by Part A of PR #8.
 - **Why a table:** database rules cannot read Vercel settings, so the list lives in the database. One list and one rule (`can_manage_patients()`) govern patient management, clinical AI and video.
-- **Old variables:** PR #7's `PROFESSIONAL_TRANSITION_*` environment variables are ignored and logged.
+- **Old variables:** `PROFESSIONAL_TRANSITION_ACCOUNTS`, `PROFESSIONAL_TRANSITION_UNTIL` and `PROFESSIONAL_VERIFICATION_MODE` grant nothing in **any** code version, #7 included. If set, they are ignored and logged. They must still be removed from Vercel (checklist item B), so the configuration matches the code.
 - **Who can change it:** only the owner adds rows, from the Supabase SQL editor. Users can read their own row, and nothing else.
 - **No automatic entries:** a new account or a role switch never adds a row.
 - **Each entry ends at `until`,** at most 90 days after it was added (a check constraint).
@@ -102,12 +102,50 @@ Today (read-only, 12 Oct 2026):
    - run `delete from professional_transition_accounts where user_id = '<id>';`
 4. To end the transition, run `delete from professional_transition_accounts;`, or let the dates pass.
 
-## Prerequisites
+## Release checklist
 
-- **`PHYGO_ADMIN_EMAILS`** (Vercel, Production) must contain exactly the authorised administrator's confirmed email.
-  - The owner's account exists and is confirmed.
-  - The owner must confirm the Vercel value.
-- **No other variable or secret** is needed. Never copy production secrets into Preview.
+Complete items A–D **before step 6** of the SQL sequence. Item E follows the deploy.
+
+**A. `PHYGO_ADMIN_EMAILS` in Production**
+- [ ] Open Vercel → Project → Settings → Environment Variables, filtered on **Production**.
+- [ ] The value contains **only** the authorised administrator's email, exactly as registered (one address, no typos, no extra addresses).
+- [ ] Preview and Development do not hold the production value. If Preview needs an administrator, use a separate test account.
+- [ ] In Supabase, that email belongs to an existing account whose email is confirmed. The owner's account was checked on 12 Oct 2026 (exists, confirmed); the Vercel value itself must be confirmed by the owner.
+- [ ] If the variable is empty or wrong, nobody can review requests (fail closed). Fix it before the deploy.
+
+**B. Old transition variables removed**
+- [ ] `PROFESSIONAL_TRANSITION_ACCOUNTS`, `PROFESSIONAL_TRANSITION_UNTIL` and `PROFESSIONAL_VERIFICATION_MODE` are **absent** in Production (and in Preview and Development).
+- [ ] No code version uses them (tested: a valid old list plus `grace` grants nothing, in #7 and #8). Removing them keeps the configuration honest and avoids confusion.
+
+**C. Manual review of the transition list** (before step 6)
+- [ ] Run the candidate query (above) and go through **every** row personally.
+- [ ] Add an account only if all of these hold:
+  - you know the person and that they practise as a physiotherapist;
+  - the email belongs to them;
+  - they have real use (patients or notes) or a concrete reason to keep working during the review.
+- [ ] If you can confirm someone on the official public register now, **verify them** on `/dashboard/verification-admin` instead of listing them.
+- [ ] Do not add:
+  - accounts you cannot identify;
+  - test accounts;
+  - students;
+  - patient accounts;
+  - accounts with no activity. These can request verification normally.
+- [ ] Use `until` ≤ 60 days, `added_by` = your name, and a `note` saying why the account was kept.
+- [ ] After inserting, compare the table with your reviewed list using this read-only query:
+  ```sql
+  select u.email, t.until, t.added_by, t.note
+  from professional_transition_accounts t join auth.users u on u.id = t.user_id
+  order by u.email;
+  ```
+- [ ] Keep ids and emails out of GitHub, PRs and chat.
+
+**D. No production secrets in Preview**
+- [ ] Preview uses its own values, or none. Nothing is copied from Production.
+
+**E. After the deploy (smoke test)**
+- [ ] The administrator opens `/dashboard/verification-admin` and the list loads.
+- [ ] A non-admin test account gets "forbidden" there.
+- [ ] As a verified or listed account, and as an unlisted test account, try: one note, one scan, one video call, one appointment, one invitation, and one delete. The unlisted account must be refused each time.
 
 ## Exactly which SQL, in which order
 
@@ -119,15 +157,13 @@ Apply in the Supabase SQL editor, one file at a time, in this order. Each file i
 | 2 | `sql/2026-10_security_clinical_rls_hardening_PROPOSED.sql` | Before the deploy | Notes only on your own patients; patient links only by invitation |
 | 3 | `sql/2026-10_professional_verification_PROPOSED.sql` | Before the deploy | The current profile page cannot *change* a registration number (none exists today) |
 | 4 | `sql/2026-10_patient_management_A_transition_list_PROPOSED.sql` | Before the deploy | None: adds a table and a function |
-| 5 | **Owner fills the transition list** (insert statements above) | After 4, before 6 | None |
-| 6 | `sql/2026-10_patient_management_B_policies_PROPOSED.sql` | **Immediately before the deploy** | Unlisted, unverified accounts can no longer create, change or delete patient data. The current pages show a generic error, for minutes only. Listed accounts are unaffected |
+| 5 | **Owner fills the transition list** after the manual review (checklist C) | After 4, before 6 | None |
+| 6 | `sql/2026-10_patient_management_B_policies_PROPOSED.sql` | **Immediately before the deploy**, once checklist A–D is complete | Unlisted, unverified accounts can no longer create, change or delete patient data. The current pages show a generic error, for minutes only. Listed accounts are unaffected |
 | — | **Deploy** (one deployment) | — | Merge #8 into #7's branch, #7 into #5's branch, then #5 into `main` |
 | 7 | `sql/2026-10_security_demo_usage_policies_PROPOSED.sql` | After the deploy | Removes public read access to stored IPs; deleting the stored row is a separate decision |
 
 - **Not part of the release:** `sql/2026-10_patient_management_R_freeze_PROPOSED.sql` is for emergencies only (see Rollback).
-- **After the deploy:**
-  - smoke test as a verified administrator, a listed account and an unlisted test account: one note, one scan, one video call, one appointment, one invitation, and a delete attempt;
-  - then review the verification requests.
+- **After the deploy:** checklist E, then review the verification requests.
 - **PR #6** (exercise library) is independent and can go before or after.
 
 ## Rollback that never reopens access
@@ -152,14 +188,15 @@ Apply in the Supabase SQL editor, one file at a time, in this order. Each file i
 - Under #7's code, every patient write still goes through the step 6 rules.
 - The only service-role write of patient data (`/api/metabolic/save`) now requires verification in #7 too. It was added to #7 for this reason.
 - **In practice:** the first release ships #5, #7 and #8 together, so production has no "#7 only" deployment to return to. Every earlier production deployment predates #5 and is **not** safe. Until a later safe release exists, a code problem means fixing forward, or deploying a revert of the #8 code commits, which leaves #7's code.
-- #7's environment-variable list for AI and video should stay **empty**. In that state, listed accounts temporarily lose AI and video, but keep patient management. That is the safe direction.
+- **No transition in #7's code:** it grants no temporary access at all; the old environment variables are ignored, as tested. After a code rollback to #7, clinical AI and video are verified-only. Listed accounts keep patient management through the database list. That is the safe direction, and it does not depend on what is left in Vercel.
 
-**Never do these.** The SQL refuses the first three:
+**Never do these.** The SQL refuses the first four:
 
 | Action | Why it is dangerous | Guard |
 |---|---|---|
 | Run PR #5's profile-protection rollback after #7/#8 | Users could mark themselves verified | Refuses with an error |
 | Run PR #5's clinical-RLS rollback after #8 | It would overwrite #8's notes rules and reopen patient linking | Refuses with an error |
+| Run Part A's rollback block after Part B | It would remove the function the patient rules depend on | Refuses with an error |
 | `drop function can_manage_patients()` | — | PostgreSQL refuses while the rules use it |
 | `drop function can_manage_patients() ... CASCADE` | It removes the rules | Not refused: never use it |
 | Return the patient rules to the PR #5 version | It lets any signed-in account manage patient data | Not provided on purpose |
