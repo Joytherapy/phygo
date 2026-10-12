@@ -161,6 +161,20 @@ test('patients keep access to their own metabolic data only', async () => {
   assert.equal((await get(app.url, '/api/metabolic/save', null)).status, 401);
 });
 
+test('entries a patient keeps private are not shown to their clinician', async () => {
+  const shared = await post(app.url, '/api/metabolic/save', 'patient', { ...metabolicInput, weightKg: 61 });
+  const priv = await post(app.url, '/api/metabolic/save', 'patient', { ...metabolicInput, weightKg: 62, sharedWithProfessional: false });
+  assert.equal(shared.status, 200);
+  assert.equal(priv.status, 200);
+  const weights = async (who, path) => (await (await get(app.url, path, who)).json()).profiles.map((p) => Number(p.weight_kg));
+  const patientView = await weights('patient', '/api/metabolic/save');
+  assert.ok(patientView.includes(61) && patientView.includes(62), 'the patient sees all of their own entries');
+  const clinicianView = await weights('physioA', `/api/metabolic/save?patientId=${P1}`);
+  assert.ok(clinicianView.includes(61), 'shared entry visible to the clinician');
+  assert.ok(!clinicianView.includes(62), 'private entry hidden from the clinician');
+  assert.ok(clinicianView.includes(70), 'entries without a patient flag (professional) stay visible');
+});
+
 test('video rooms: configuration and patient ownership are checked before Daily is called', async () => {
   // Daily not configured: a clear 503, no external call.
   assert.equal((await post(app.url, '/api/video-call/create-room', 'physioA', { patientId: P1 })).status, 503);

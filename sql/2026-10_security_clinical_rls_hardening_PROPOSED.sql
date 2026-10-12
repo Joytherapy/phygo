@@ -21,13 +21,22 @@
 -- notes for your own patients, editing them, resetting portal access, and
 -- redeeming invites.
 --
--- Rollback (re-creates the live definitions):
+-- Rollback (re-creates the live definitions; only before PR #8 is applied:
+-- it refuses to run after, because it would replace PR #8's notes rules and
+-- reopen patient linking):
+--   begin;
+--   do $g$ begin
+--     if to_regprocedure('public.can_manage_patients()') is not null then
+--       raise exception 'patient management (PR #8) is applied: this rollback would reopen access';
+--     end if;
+--   end $g$;
 --   drop policy if exists "Users can insert their own notes" on notes;
 --   create policy "Users can insert their own notes" on notes for insert with check (auth.uid() = user_id);
 --   drop policy if exists "Users can update their own notes" on notes;
 --   create policy "Users can update their own notes" on notes for update using (auth.uid() = user_id);
 --   drop trigger if exists patients_protect_links on patients;
 --   drop function if exists protect_patient_links();
+--   commit;
 
 begin;
 

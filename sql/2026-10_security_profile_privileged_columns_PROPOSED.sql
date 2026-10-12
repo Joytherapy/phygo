@@ -14,9 +14,19 @@
 -- bio, avatar, credentials, registration number, declared practice_stage,
 -- preferred language) keeps working.
 --
--- Rollback:
+-- Rollback (only before PR #7 / PR #8 are applied; it refuses to run after,
+-- because without this trigger users could mark themselves verified and
+-- gain clinical access):
+--   begin;
+--   do $g$ begin
+--     if exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'profiles' and column_name = 'registry_country')
+--        or to_regprocedure('public.can_manage_patients()') is not null then
+--       raise exception 'professional verification is applied: removing this protection would let users self-verify';
+--     end if;
+--   end $g$;
 --   drop trigger if exists profiles_protect_privileged_columns on profiles;
 --   drop function if exists protect_profile_privileged_columns();
+--   commit;
 
 begin;
 

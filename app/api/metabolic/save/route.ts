@@ -206,8 +206,7 @@ export async function GET(req: Request) {
       .eq('patient_id', patientId)
       .order('created_at', { ascending: false });
 
-    // Un paziente vede solo le proprie voci condivise con il professionista
-    // quando le legge il professionista; le proprie le vede sempre.
+    // A patient can only read their own record.
     if (ownPatientId && requestedPatientId && requestedPatientId !== ownPatientId) {
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     }
@@ -218,7 +217,12 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const profiles = data ?? [];
+    // A patient always sees all of their own entries. The clinician sees what
+    // professionals entered plus what the patient chose to share
+    // (shared_with_professional); entries the patient kept private stay private.
+    const profiles = (data ?? []).filter(
+      (p) => !!ownPatientId || p.entered_by !== 'patient' || p.shared_with_professional === true
+    );
 
     // "Phygo Adapt": ricalibra il TDEE dal trend di peso REALE del paziente
     // nel tempo — un vantaggio che solo un sistema con storico longitudinale
