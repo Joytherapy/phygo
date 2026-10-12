@@ -19,4 +19,7 @@ node --input-type=module -e "
 source /tmp/phygo-test-env.sh
 rm -rf .next/cache/fetch-cache
 node node_modules/next/dist/bin/next build > /tmp/phygo-test-build.log 2>&1 || { tail -40 /tmp/phygo-test-build.log; exit 1; }
-node --test --test-concurrency=1 tests/*.test.mjs
+# The test runner itself also runs with the network guard (tests/support/no-external-network.cjs)
+# and without proxy variables (the build above may need them to download fonts; the tests must not).
+env -u HTTP_PROXY -u HTTPS_PROXY -u http_proxy -u https_proxy -u ALL_PROXY -u all_proxy -u NODE_USE_ENV_PROXY \
+  node --require ./tests/support/no-external-network.cjs --test --test-concurrency=1 tests/*.test.mjs
