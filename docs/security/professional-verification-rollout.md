@@ -5,7 +5,40 @@ This guide covers three PRs:
 - **PR #7 (professional verification):** stacked on #5.
 - **PR #8 (patient management):** stacked on #7.
 
-Nothing here has been applied to production. Every step needs the owner's explicit approval.
+> **Released on 12 Oct 2026.** Steps 1–10 below were completed in production, with the owner's approval.
+>
+> - **Code:** PR #5 (with #7 and #8) merged into `main` as `71586f1`. Production deployment `dpl_CBCQv4DdiWm623YKNxjbSw66weWT`, Ready on `phygo.vercel.app`. PR #9 (cancel appointment) followed as `99c365d`.
+> - **Database:**
+>   - the six SQL files were applied from the SQL editor, in the order of this guide, as the exact versions listed under "SQL file versions (checksums)";
+>   - check queries 1, 2, 3, 4, 4b, 7 and 9 all returned `true`.
+> - **Migration history:** the same six files are recorded in Supabase's migration history, with their exact text (checksums identical):
+>
+>   | Version | Name |
+>   |---|---|
+>   | `20261012181100` | `security_profile_privileged_columns` |
+>   | `20261012181300` | `security_clinical_rls_hardening` |
+>   | `20261012181500` | `professional_verification` |
+>   | `20261012181700` | `patient_management_a_transition_list` |
+>   | `20261012182100` | `patient_management_b_policies` |
+>   | `20261012182600` | `security_demo_usage_policies` |
+>
+>   The versions are approximate times; nothing was re-run to record them.
+> - **Transition list:** one entry, the owner's account, until 11 Dec 2026 (step 4b). The owner's official verification is to be completed before that date.
+> - **Step 8 check:** an anonymous `GET /api/profile/verification` answered `401`.
+> - **Smoke test (step 10):**
+>   - **anonymous call to an AI route:** `401`;
+>   - **owner:** the verification console loads, and an appointment was created on an own patient;
+>   - **unverified, unlisted test account:**
+>     - "Admin access required" on the console;
+>     - verification notice shown, and "New patient" disabled.
+>
+>   The metabolic 404 for another clinician's patient is covered by the automated tests only.
+> - **Not part of the release:**
+>   - the freeze file was not applied;
+>   - the stored IP row in `demo_usage` is kept (a separate decision);
+>   - video calls stay unavailable until `DAILY_API_KEY` is set in Production.
+>
+> The `PROPOSED - NOT APPLIED` headers inside the SQL files are historical. The files were applied exactly as they are, and they are kept unchanged so that their checksums keep matching what was applied and recorded.
 
 ## Three separate permissions
 
