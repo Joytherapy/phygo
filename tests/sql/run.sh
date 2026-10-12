@@ -15,6 +15,10 @@ D=00000000-0000-0000-0000-00000000000d; E=00000000-0000-0000-0000-00000000000e
 PA=10000000-0000-0000-0000-00000000000a; PB=10000000-0000-0000-0000-00000000000b
 # as <role> <user id> <sql>: runs one statement as a Supabase client role; prints ok or denied
 as() { if psql -q -At -d "$DB" -c "set role $1; set request.jwt.claim.sub = '$2'; $3" >/dev/null 2>&1; then echo ok; else echo denied; fi; }
+# block <file>: the rollback block from a migration header (between "--   begin;" and "--   commit;")
+block() { sed -n '/^--   begin;/,/^--   commit;/p' "$1" | sed 's/^--   //' > "${TMPDIR:-/tmp}/phygo_block.sql"; echo "${TMPDIR:-/tmp}/phygo_block.sql"; }
+# runs <file>: executes a SQL file as the owner; prints ok or refused
+runs() { if q -f "$1" >/dev/null 2>&1; then echo ok; else echo refused; fi; }
 expect() { if [ "$2" = "$3" ]; then echo "  ok   $1"; else echo "  FAIL $1: expected $3, got $2"; fail=1; fi; }
 
 q -f tests/sql/replica.sql >/dev/null
@@ -61,6 +65,19 @@ expect "patient account is linked" "$(q -c "select patient_user_id from patients
 expect "reset portal access (set to null) still works" "$(as authenticated $A "update patients set patient_user_id = null where id = '$PA'")" ok
 expect "anon can no longer read stored IPs" "$(psql -q -At -d "$DB" -c "set role anon; select count(*) from demo_usage")" 0
 expect "stored IP row kept (deletion is a separate decision)" "$(q -c "select count(*) from demo_usage")" 1
+
+echo "rollback of the PR #5 changes (blocks from the file headers), then re-applied"
+expect "privileged-columns rollback runs before PR #7/#8" "$(runs "$(block sql/2026-10_security_profile_privileged_columns_PROPOSED.sql)")" ok
+expect "clinical-RLS rollback runs before PR #8" "$(runs "$(block sql/2026-10_security_clinical_rls_hardening_PROPOSED.sql)")" ok
+q -c "create policy \"anon can read demo_usage\" on demo_usage for select to anon using (true);
+      create policy \"anon can insert demo_usage\" on demo_usage for insert to anon with check (true);
+      create policy \"anon can update demo_usage\" on demo_usage for update to anon using (true) with check (true);" >/dev/null
+expect "rollback restores live behaviour (plan)" "$(as authenticated $A "update profiles set plan = 'free' where id = '$A'")" ok
+expect "rollback restores live behaviour (notes)" "$(as authenticated $A "insert into notes (patient_id, user_id) values ('$PB', '$A')")" ok
+expect "rollback restores live behaviour (demo_usage)" "$(psql -q -At -d "$DB" -c "set role anon; select count(*) from demo_usage")" 1
+q -c "delete from notes where patient_id = '$PB' and user_id = '$A'; update profiles set plan = 'free';" >/dev/null
+for f in profile_privileged_columns clinical_rls_hardening demo_usage_policies; do q -f sql/2026-10_security_${f}_PROPOSED.sql >/dev/null; done
+expect "re-applied: self-upgrade refused again" "$(as authenticated $A "update profiles set plan = 'pro' where id = '$A'")" denied
 
 echo "professional verification (sql/2026-10_professional_verification_PROPOSED.sql, applied twice)"
 q -f sql/2026-10_professional_verification_PROPOSED.sql >/dev/null
@@ -132,7 +149,18 @@ expect "U cannot create a video call" "$(as authenticated $U "insert into video_
 expect "U cannot link library content to a patient" "$(as authenticated $U "insert into patient_clinical_references (patient_id, content_type, content_id) values ('$PU', 'exercise', 'e1')")" denied
 expect "U still reads their own existing patient" "$(psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$U'; select count(*) from patients")" 1
 expect "U still reads their own existing note" "$(psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$U'; select count(*) from notes")" 1
-expect "U can still delete their own patient record" "$(as authenticated $U "delete from patients where id = '$PU'")" ok
+expect "U cannot delete their own patient (it would cascade to notes)" "$(as authenticated $U "delete from patients where id = '$PU'"; q -c "select count(*) from patients where id = '$PU'")" "$(printf 'ok\n1')"
+expect "U cannot delete their own note" "$(as authenticated $U "delete from notes where patient_id = '$PU'"; q -c "select count(*) from notes where patient_id = '$PU'")" "$(printf 'ok\n1')"
+q -c "insert into appointments (patient_id, physio_id, requested_by, status) values ('$PU', '$U', 'physio', 'confirmed');
+      insert into patient_invites (patient_id, code, created_by, expires_at) values ('$PU', 'UOLD', '$U', now() + interval '1 day');
+      insert into video_calls (patient_id, room_url, created_by) values ('$PU', 'https://t.daily.co/u', '$U');
+      insert into patient_clinical_references (patient_id, content_type, content_id) values ('$PU', 'exercise', 'old');" >/dev/null
+for t in appointments patient_invites video_calls patient_clinical_references; do
+  expect "U cannot delete own $t" "$(as authenticated $U "delete from $t where patient_id = '$PU'"; q -c "select count(*) from $t where patient_id = '$PU'")" "$(printf 'ok\n1')"
+done
+q -c "insert into patients (id, user_id, name) values ('30000000-0000-0000-0000-0000000000aa', '$R', 'pR')" >/dev/null
+expect "R (rejected, listed) cannot delete their patient" "$(as authenticated $R "delete from patients where user_id = '$R'"; q -c "select count(*) from patients where user_id = '$R'")" "$(printf 'ok\n1')"
+expect "X (expired) cannot delete a note" "$(q -c "insert into notes (patient_id, user_id) values ('$PX', '$X')" >/dev/null; as authenticated $X "delete from notes where patient_id = '$PX'"; q -c "select count(*) from notes where patient_id = '$PX'")" "$(printf 'ok\n1')"
 expect "X (expired) cannot write a note" "$(as authenticated $X "insert into notes (patient_id, user_id) values ('$PX', '$X')")" denied
 for who in V L; do
   id=${!who}; pid=$([ $who = V ] && echo $PV || echo $PL)
@@ -144,6 +172,27 @@ for who in V L; do
   expect "$who can create a Daily video call" "$(as authenticated $id "insert into video_calls (patient_id, room_url, created_by) values ('$pid', 'https://t.daily.co/a', '$id')")" ok
   expect "$who can link library content" "$(as authenticated $id "insert into patient_clinical_references (patient_id, content_type, content_id) values ('$pid', 'exercise', 'e1')")" ok
 done
+for who in V L; do
+  id=${!who}; pid=$([ $who = V ] && echo $PV || echo $PL)
+  nid=$(q -c "insert into notes (patient_id, user_id) values ('$pid', '$id') returning id")
+  rid=$(q -c "insert into patient_clinical_references (patient_id, note_id, content_type, content_id) values ('$pid', '$nid', 'exercise', 'n') returning id")
+  expect "$who can delete a note" "$(as authenticated $id "delete from notes where id = '$nid'"; q -c "select count(*) from notes where id = '$nid'")" "$(printf 'ok\n0')"
+  expect "$who: deleting a note keeps its clinical link, with note_id cleared" "$(q -c "select count(*) || '/' || count(note_id) from patient_clinical_references where id = '$rid'")" "1/0"
+  expect "$who can delete an appointment" "$(as authenticated $id "delete from appointments where patient_id = '$pid' and requested_by = 'physio'"; q -c "select count(*) from appointments where patient_id = '$pid' and requested_by = 'physio'")" "$(printf 'ok\n0')"
+  expect "$who can delete a clinical link" "$(as authenticated $id "delete from patient_clinical_references where patient_id = '$pid'"; q -c "select count(*) from patient_clinical_references where patient_id = '$pid'")" "$(printf 'ok\n0')"
+done
+# Cascade: an authorised clinician deletes a whole patient; every child row goes with it.
+PC=30000000-0000-0000-0000-0000000000cc
+q -c "insert into patients (id, user_id, name) values ('$PC', '$L', 'to delete');
+      insert into notes (id, patient_id, user_id) values ('40000000-0000-0000-0000-0000000000cc', '$PC', '$L');
+      insert into appointments (patient_id, physio_id, requested_by, status) values ('$PC', '$L', 'physio', 'confirmed');
+      insert into patient_invites (patient_id, code, created_by, expires_at) values ('$PC', 'CC', '$L', now() + interval '1 day');
+      insert into video_calls (patient_id, room_url, created_by) values ('$PC', 'https://t.daily.co/c', '$L');
+      insert into patient_clinical_references (patient_id, note_id, content_type, content_id) values ('$PC', '40000000-0000-0000-0000-0000000000cc', 'exercise', 'c');
+      insert into metabolic_profiles (patient_id) values ('$PC');" >/dev/null
+expect "U cannot delete another clinician's patient" "$(as authenticated $U "delete from patients where id = '$PC'"; q -c "select count(*) from patients where id = '$PC'")" "$(printf 'ok\n1')"
+expect "L (listed) can delete their patient" "$(as authenticated $L "delete from patients where id = '$PC'")" ok
+expect "cascade removed every child row" "$(q -c "select (select count(*) from notes where patient_id = '$PC') + (select count(*) from appointments where patient_id = '$PC') + (select count(*) from patient_invites where patient_id = '$PC') + (select count(*) from video_calls where patient_id = '$PC') + (select count(*) from patient_clinical_references where patient_id = '$PC') + (select count(*) from metabolic_profiles where patient_id = '$PC')")" 0
 expect "V cannot write a note on L's patient" "$(as authenticated $V "insert into notes (patient_id, user_id) values ('$PL', '$V')")" denied
 expect "V cannot schedule for L's patient" "$(as authenticated $V "insert into appointments (patient_id, physio_id, requested_by, status) values ('$PL', '$V', 'physio', 'confirmed')")" denied
 expect "V cannot invite for L's patient" "$(as authenticated $V "insert into patient_invites (patient_id, code, created_by, expires_at) values ('$PL', 'Z', '$V', now() + interval '1 day')")" denied
@@ -165,41 +214,46 @@ q -c "insert into patient_invites (patient_id, code, expires_at) values ('$PL', 
 q -c "insert into auth.users (id) values ('20000000-0000-0000-0000-0000000000ff')" >/dev/null
 expect "invite redemption still works" "$(as authenticated 20000000-0000-0000-0000-0000000000ff "select redeem_patient_invite('INV3')")" ok
 
-echo "rollback of patient management (blocks from the file headers)"
-sed -n '/^--   begin;/,/^--   commit;/p' sql/2026-10_patient_management_B_policies_PROPOSED.sql | sed 's/^--   //' > "${TMPDIR:-/tmp}/pm_rollback.sql"
-q -f "${TMPDIR:-/tmp}/pm_rollback.sql" >/dev/null
-q -c "drop function if exists can_manage_patients(); drop table if exists professional_transition_accounts;" >/dev/null
-expect "after rollback an unlisted account can create patients again (PR #5 state)" "$(as authenticated $U "insert into patients (id, user_id, name) values (gen_random_uuid(), '$U', 'n')")" ok
-expect "after rollback notes still need an own patient (PR #5 kept)" "$(as authenticated $U "insert into notes (patient_id, user_id) values ('$PV', '$U')")" denied
-expect "after rollback self-verification is still refused" "$(as authenticated $U "update profiles set professional_status = 'verified' where id = '$U'")" denied
-for i in 1 2; do q -f sql/2026-10_patient_management_A_transition_list_PROPOSED.sql >/dev/null; q -f sql/2026-10_patient_management_B_policies_PROPOSED.sql >/dev/null; done
-expect "re-applies cleanly after rollback" "$(as authenticated $U "insert into notes (patient_id, user_id) values ('$PU', '$U')")" denied
-sed -n '/^--   begin;/,/^--   commit;/p' sql/2026-10_patient_management_B_policies_PROPOSED.sql | sed 's/^--   //' > "${TMPDIR:-/tmp}/pm_rollback.sql"
-q -f "${TMPDIR:-/tmp}/pm_rollback.sql" >/dev/null
-q -c "drop function if exists can_manage_patients(); drop table if exists professional_transition_accounts;" >/dev/null
+echo "emergency stop (sql/2026-10_patient_management_R_freeze_PROPOSED.sql), then undo"
+q -f sql/2026-10_patient_management_R_freeze_PROPOSED.sql >/dev/null
+for who in V L; do
+  id=${!who}; pid=$([ $who = V ] && echo $PV || echo $PL)
+  expect "frozen: $who cannot write a note" "$(as authenticated $id "insert into notes (patient_id, user_id) values ('$pid', '$id')")" denied
+  expect "frozen: $who cannot create a patient" "$(as authenticated $id "insert into patients (id, user_id, name) values (gen_random_uuid(), '$id', 'n')")" denied
+  expect "frozen: $who cannot delete their patient" "$(as authenticated $id "delete from patients where id = '$pid'"; q -c "select count(*) from patients where id = '$pid'")" "$(printf 'ok\n1')"
+  expect "frozen: $who still reads their patients" "$(psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$id'; select count(*) > 0 from patients")" t
+done
+expect "frozen: U still refused" "$(as authenticated $U "insert into patients (id, user_id, name) values (gen_random_uuid(), '$U', 'n')")" denied
+expect "frozen: patient still reads own notes" "$(psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$P'; select count(*) > 0 from notes")" t
+expect "frozen: patient can still request an appointment" "$(as authenticated $P "insert into appointments (patient_id, requested_by, status) values ('$PV', 'patient', 'requested')")" ok
+q -f sql/2026-10_patient_management_A_transition_list_PROPOSED.sql >/dev/null
+expect "undo (re-run Part A): V can write again" "$(as authenticated $V "insert into notes (patient_id, user_id) values ('$PV', '$V')")" ok
+expect "undo keeps the list: L can write again" "$(as authenticated $L "insert into notes (patient_id, user_id) values ('$PL', '$L')")" ok
+expect "undo does not open U" "$(as authenticated $U "insert into notes (patient_id, user_id) values ('$PU', '$U')")" denied
+
+echo "unsafe rollbacks are refused once PR #8 is applied"
+expect "PR #5 privileged-columns rollback refuses" "$(runs "$(block sql/2026-10_security_profile_privileged_columns_PROPOSED.sql)")" refused
+expect "PR #5 clinical-RLS rollback refuses" "$(runs "$(block sql/2026-10_security_clinical_rls_hardening_PROPOSED.sql)")" refused
+expect "can_manage_patients() cannot be dropped while the rules use it" "$(runs <(echo "drop function can_manage_patients();"))" refused
+expect "after the refused attempts: self-verification still refused" "$(as authenticated $U "update profiles set professional_status = 'verified' where id = '$U'")" denied
+expect "after the refused attempts: U still cannot create patients" "$(as authenticated $U "insert into patients (id, user_id, name) values (gen_random_uuid(), '$U', 'n')")" denied
+expect "after the refused attempts: notes on another clinician's patient still refused" "$(as authenticated $V "insert into notes (patient_id, user_id) values ('$PL', '$V')")" denied
 
 echo "rollback of the verification migration (block from its header)"
 q -c "update profiles set professional_status = 'rejected', registry_country = 'IT' where id = '$B'" >/dev/null
+expect "before: R is listed but rejected" "$(cm $R)" f
 sed -n '/^--   begin;/,/^--   commit;/p' sql/2026-10_professional_verification_PROPOSED.sql | sed 's/^--   //' > "${TMPDIR:-/tmp}/verification_rollback.sql"
 q -f "${TMPDIR:-/tmp}/verification_rollback.sql" >/dev/null
 expect "review columns removed" "$(q -c "select count(*) from information_schema.columns where table_name = 'profiles' and column_name like 'registry_%'")" 0
 expect "new statuses mapped back" "$(q -c "select professional_status from profiles where id = '$B'")" not_applicable
+expect "a rejected account was removed from the list, so it does not regain access" "$(q -c "select count(*) from professional_transition_accounts where user_id = '$R'"; cm $R)" "$(printf '0\nf')"
+expect "listed accounts that were not rejected keep their entry" "$(cm $L)" t
+expect "patient-management rules still in place after the verification rollback" "$(as authenticated $U "insert into patients (id, user_id, name) values (gen_random_uuid(), '$U', 'n')")" denied
 expect "live constraint restored" "$(as service_role $B "update profiles set professional_status = 'needs_info' where id = '$B'")" denied
 expect "profile editing works after rollback" "$(as authenticated $B "update profiles set display_name = 'B4', registration_number = 'R-9' where id = '$B'")" ok
 expect "self-verification still refused after rollback" "$(as authenticated $B "update profiles set professional_status = 'verified' where id = '$B'")" denied
 q -f sql/2026-10_professional_verification_PROPOSED.sql >/dev/null
 expect "verification migration re-applies after rollback" "$(as authenticated $B "update profiles set registration_number = 'R-10' where id = '$B'")" denied
-
-echo "rollback (from the comments in each file)"
-q -c "drop trigger if exists profiles_protect_privileged_columns on profiles; drop function if exists protect_profile_privileged_columns();
-      drop policy if exists \"Users can insert their own notes\" on notes; create policy \"Users can insert their own notes\" on notes for insert with check (auth.uid() = user_id);
-      drop policy if exists \"Users can update their own notes\" on notes; create policy \"Users can update their own notes\" on notes for update using (auth.uid() = user_id);
-      drop trigger if exists patients_protect_links on patients; drop function if exists protect_patient_links();
-      create policy \"anon can read demo_usage\" on demo_usage for select to anon using (true);
-      create policy \"anon can insert demo_usage\" on demo_usage for insert to anon with check (true);
-      create policy \"anon can update demo_usage\" on demo_usage for update to anon using (true) with check (true);" >/dev/null
-expect "rollback restores live behaviour (plan)" "$(as authenticated $A "update profiles set plan = 'free' where id = '$A'")" ok
-expect "rollback restores live behaviour (demo_usage)" "$(psql -q -At -d "$DB" -c "set role anon; select count(*) from demo_usage")" 1
 
 psql -q -d postgres -c "drop database $DB" >/dev/null
 [ $fail = 0 ] && echo "ALL SQL CHECKS PASSED" || { echo "SOME SQL CHECKS FAILED"; exit 1; }

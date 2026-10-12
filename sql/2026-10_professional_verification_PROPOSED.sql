@@ -49,12 +49,20 @@
 --     end if;
 --     return new;
 --   end $f$;
---   -- 2. map the new statuses back and restore the live constraint
+--   -- 2. keep rejections effective: a rejected account must not regain
+--   --    access through the transition list (PR #8) once 'rejected' is mapped away
+--   do $r$ begin
+--     if to_regclass('public.professional_transition_accounts') is not null then
+--       delete from professional_transition_accounts t using profiles p
+--       where p.id = t.user_id and p.professional_status = 'rejected';
+--     end if;
+--   end $r$;
+--   -- 3. map the new statuses back and restore the live constraint
 --   update profiles set professional_status = 'not_applicable' where professional_status in ('needs_info', 'rejected');
 --   alter table profiles drop constraint if exists profiles_professional_status_check;
 --   alter table profiles add constraint profiles_professional_status_check
 --     check (professional_status in ('not_applicable', 'pending', 'verified'));
---   -- 3. drop the review columns
+--   -- 4. drop the review columns
 --   alter table profiles drop column if exists registry_country, drop column if exists registry_name,
 --     drop column if exists verification_requested_at, drop column if exists verification_reviewed_at,
 --     drop column if exists verification_reviewed_by, drop column if exists verification_message;

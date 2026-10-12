@@ -34,12 +34,26 @@ create table profiles (
 create table patients (id uuid primary key, user_id uuid not null, name text not null, patient_user_id uuid);
 create table notes (id uuid primary key default gen_random_uuid(), patient_id uuid not null, user_id uuid not null, assessment text);
 create table appointments (id uuid primary key default gen_random_uuid(), patient_id uuid, physio_id uuid, scheduled_at timestamptz not null default now(), requested_by text, status text);
-create table patient_clinical_references (id uuid primary key default gen_random_uuid(), patient_id uuid, content_type text, content_id text);
+create table patient_clinical_references (id uuid primary key default gen_random_uuid(), patient_id uuid, note_id uuid, content_type text, content_id text);
 create table patient_invites (id uuid primary key default gen_random_uuid(), patient_id uuid, code text, created_by uuid, used_at timestamptz, expires_at timestamptz);
 create table video_calls (id uuid primary key default gen_random_uuid(), patient_id uuid, room_url text not null default 'https://x.daily.co/r', room_name text, created_by uuid, status text default 'active');
 create table metabolic_profiles (id uuid primary key default gen_random_uuid(), patient_id uuid);
 create table demo_usage (ip text primary key, count int);
 create table ask_phygo_usage (ip text primary key, request_count int not null default 0, window_start timestamptz not null default now());
+
+-- Foreign keys exactly as live (pg_constraint, 12 Oct 2026): deleting a patient
+-- cascades to its clinical rows; deleting a note clears note_id on its links.
+alter table patients add foreign key (user_id) references auth.users(id) on delete cascade,
+  add foreign key (patient_user_id) references auth.users(id);
+alter table notes add foreign key (patient_id) references patients(id) on delete cascade,
+  add foreign key (user_id) references auth.users(id) on delete cascade;
+alter table appointments add foreign key (patient_id) references patients(id) on delete cascade,
+  add foreign key (physio_id) references auth.users(id);
+alter table patient_invites add foreign key (patient_id) references patients(id) on delete cascade;
+alter table video_calls add foreign key (patient_id) references patients(id) on delete cascade;
+alter table patient_clinical_references add foreign key (patient_id) references patients(id) on delete cascade,
+  add foreign key (note_id) references notes(id) on delete set null;
+alter table metabolic_profiles add foreign key (patient_id) references patients(id) on delete cascade;
 
 do $$ declare t text; begin
   foreach t in array array['profiles','patients','notes','appointments','patient_clinical_references','patient_invites','video_calls','metabolic_profiles','demo_usage','ask_phygo_usage'] loop

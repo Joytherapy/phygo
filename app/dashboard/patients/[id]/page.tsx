@@ -267,6 +267,7 @@ export default function PatientDetailPage() {
   }
 
   const handleRemoveClinicalRef = async (refId: string) => {
+    if (locked) return
     setRemovingRefId(refId)
     const { error } = await supabase
       .from('patient_clinical_references')
@@ -659,6 +660,7 @@ export default function PatientDetailPage() {
                     {href && (
                       <ChevronRight size={16} className="shrink-0 mt-1.5 text-ink/20 dark:text-white/20" />
                     )}
+                    {!locked && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
@@ -670,6 +672,7 @@ export default function PatientDetailPage() {
                     >
                       <X size={14} />
                     </button>
+                    )}
                   </motion.div>
                 )
               })}

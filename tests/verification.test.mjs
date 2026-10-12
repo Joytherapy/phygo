@@ -291,6 +291,18 @@ test('the transition list fails closed: expired, too long, unreadable, or set th
   }
 });
 
+test('no server route deletes clinical data (deletion only goes through the database rules)', async () => {
+  // Patient records, notes, appointments, invitations, calls and clinical links
+  // are deleted only from the browser under RLS (tests/sql/run.sh). The
+  // service-role routes that touch patient data expose no DELETE.
+  for (const path of ['/api/metabolic/save', '/api/video-call/create-room', '/api/profile/verification', '/api/generate-note']) {
+    for (const who of ['declared', 'verified']) {
+      const res = await call(app.url, 'DELETE', path, who);
+      assert.equal(res.status, 405, `${who} DELETE ${path}`);
+    }
+  }
+});
+
 test('patient management: clinical data on a real patient needs verification or the list', async () => {
   const saved = () => fake.state.tables.metabolic_profiles.length;
   // Unverified, unlisted professional with an existing patient of their own.
