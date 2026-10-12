@@ -1,5 +1,6 @@
-// Professional verification: declared role vs verified status, and the bounded
-// transition list for pre-existing accounts, tested at the API level
+// Professional verification: declared role vs verified status, tested at the
+// API level. The old environment-variable transition list is set on purpose
+// and must grant nothing (the real list lives in the database, PR #8). Tested
 // (server-side authorization, not the interface). Synthetic users only;
 // OpenAI and Daily are stand-ins on the fake server, so every call to them is
 // recorded and none leaves this machine.
@@ -34,15 +35,17 @@ const profile = (who, practice_stage, professional_status, extra = {}) => ({
   id: people[who].id, practice_stage, professional_status, plan: 'free', display_name: who, ...extra,
 });
 const DAY = 24 * 60 * 60 * 1000;
+// The variables of an earlier draft, deliberately left set with a valid list:
+// they must be ignored, as if stale values were still in Vercel Production.
 const transitionEnv = (until) => ({
-  // Listed explicitly by id; the stray entry shows malformed values are ignored.
+  PROFESSIONAL_VERIFICATION_MODE: 'grace',
   PROFESSIONAL_TRANSITION_ACCOUNTS: [people.legacy, people.legacyRejected, people.legacyStudent, people.patient].map((p) => p.id.toUpperCase()).join(', ') + ', not-an-id',
   PROFESSIONAL_TRANSITION_UNTIL: until,
   DAILY_API_KEY: 'test-daily-key', // calls go to the Daily stand-in (DAILY_API_BASE_URL)
 });
 
 let fake;
-let app; // runs with an active transition list, as it would during the rollout
+let app; // runs with the old variables set, which must change nothing
 before(async () => {
   fake = await startFakeSupabase({
     port: FAKE_PORT,
@@ -91,6 +94,7 @@ const count = (prefix) => fake.state.requests.filter((r) => r.path.startsWith(pr
 const providerCalls = () => ({ openai: count('/openai/'), daily: count('/daily/') });
 const NOTE = { transcript: 'synthetic transcript', lang: 'en' };
 const row = (who) => fake.state.tables.profiles.find((p) => p.id === people[who].id);
+const saved = () => fake.state.tables.metabolic_profiles.length;
 const metabolic = { sex: 'female', age: 40, weightKg: 65, heightCm: 168, activityLevel: 'moderate', goal: 'maintain', macroStrategy: 'balanced' };
 // Every protected operation, with a body that would otherwise be accepted.
 const PROTECTED = [
@@ -128,37 +132,18 @@ test('public and educational features stay open', async () => {
   assert.ok(![401, 403].includes((await call(app.url, 'POST', '/api/ask-phygo', 'declared', { question: 'x' })).status), 'unverified professionals explore too');
 });
 
-test('1. an explicitly listed existing account keeps its temporary access', async () => {
-  const before = providerCalls();
-  const note = await call(app.url, 'POST', '/api/generate-note', 'legacy', NOTE);
-  assert.ok(![401, 403, 429, 503].includes(note.status), `got ${note.status}`);
-  assert.ok(providerCalls().openai > before.openai, 'reached the AI');
-
-  const room = await call(app.url, 'POST', '/api/video-call/create-room', 'legacy', { patientId: 'p-legacy' });
-  assert.equal(room.status, 200);
-  assert.match((await room.json()).url, /^https:\/\/test\.invalid\//);
-  assert.equal(providerCalls().daily, before.daily + 1);
-
-  // Patient ownership still applies during the transition.
-  const dailyBefore = providerCalls().daily;
-  assert.equal((await call(app.url, 'POST', '/api/video-call/create-room', 'legacy', { patientId: 'p-declared' })).status, 404);
-  assert.equal((await call(app.url, 'GET', '/api/metabolic/save?patientId=p-declared', 'legacy')).status, 404);
-  assert.equal(providerCalls().daily, dailyBefore, 'no room for another clinician’s patient');
-
-  // Rate limits still apply during the transition.
-  const usage = fake.state.tables.ask_phygo_usage;
-  const key = `ai:generate-note:${people.legacy.id}`;
-  const counter = usage.find((r) => r.ip === key) ?? usage[usage.push({ ip: key }) - 1];
-  Object.assign(counter, { request_count: 120, window_start: new Date().toISOString() });
-  const openaiBefore = providerCalls().openai;
-  assert.equal((await call(app.url, 'POST', '/api/generate-note', 'legacy', NOTE)).status, 429);
-  assert.equal(providerCalls().openai, openaiBefore);
-
-  // The user sees that the access is temporary, and until when.
+test('1. the old environment list grants nothing, also in this (rollback) code version', async () => {
+  // 'legacy' is listed in PROFESSIONAL_TRANSITION_ACCOUNTS with a valid date,
+  // and PROFESSIONAL_VERIFICATION_MODE=grace is set: still refused.
+  await assertLockedOut(app.url, 'legacy', 'not_applicable');
+  const before = saved();
+  assert.equal((await call(app.url, 'POST', '/api/metabolic/save', 'legacy', { ...metabolic, patientId: 'p-legacy' })).status, 403);
+  assert.equal(saved(), before);
   const own = await (await call(app.url, 'GET', '/api/profile/verification', 'legacy')).json();
-  assert.equal(own.verification.status, 'not_applicable');
-  assert.ok(Date.parse(own.verification.transitionUntil) > Date.now());
-  assert.match(app.logs(), /verification transition: listed unverified account allowed until/);
+  assert.equal(own.verification.transitionUntil, null);
+  assert.match(app.logs(), /PROFESSIONAL_TRANSITION_ACCOUNTS is no longer used and is ignored/);
+  assert.match(app.logs(), /PROFESSIONAL_VERIFICATION_MODE is no longer used and is ignored/);
+  assert.doesNotMatch(app.logs(), /listed unverified account allowed/);
 });
 
 test('2. a new account is refused even after switching its declared role to physiotherapist', async () => {
@@ -258,8 +243,7 @@ test('only an administrator can review, and the decision takes effect', async ()
   assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.declared.id, decision: 'verified' })).status, 409, 'cannot verify an account without registration details');
 });
 
-test('metabolic data on a real patient needs verification or the list (service-role route)', async () => {
-  const saved = () => fake.state.tables.metabolic_profiles.length;
+test('metabolic data on a real patient needs verification (service-role route)', async () => {
   const before = saved();
   const res = await call(app.url, 'POST', '/api/metabolic/save', 'declared', { ...metabolic, patientId: 'p-declared' });
   assert.equal(res.status, 403);
@@ -267,27 +251,7 @@ test('metabolic data on a real patient needs verification or the list (service-r
   assert.equal(saved(), before, 'nothing written');
   assert.equal((await call(app.url, 'GET', '/api/metabolic/save?patientId=p-declared', 'declared')).status, 200, 'own existing data stays readable');
   assert.equal((await call(app.url, 'POST', '/api/metabolic/save', 'declared', metabolic)).status, 200, 'personal calculator');
-  assert.equal((await call(app.url, 'POST', '/api/metabolic/save', 'legacy', { ...metabolic, patientId: 'p-legacy' })).status, 200, 'listed account');
-});
-
-test('the transition list fails closed when it has ended, has no valid end date, or is too long', async () => {
-  const configs = [
-    ['ended', transitionEnv(new Date(Date.now() - DAY).toISOString())],
-    ['more than 90 days ahead', transitionEnv(new Date(Date.now() + 120 * DAY).toISOString())],
-    // The old blanket switch is ignored, and a list without an end date does nothing.
-    ['no end date, old grace switch set', { ...transitionEnv(''), PROFESSIONAL_VERIFICATION_MODE: 'grace' }],
-  ];
-  let port = 3416;
-  for (const [label, env] of configs) {
-    const other = await startApp({ fakeUrl: fake.url, port: port++, env });
-    try {
-      await assertLockedOut(other.url, 'legacy', 'not_applicable');
-      await assertLockedOut(other.url, 'declared', 'not_applicable');
-      const own = await (await call(other.url, 'GET', '/api/profile/verification', 'legacy')).json();
-      assert.equal(own.verification.transitionUntil, null, label);
-      if (label.includes('grace')) assert.match(other.logs(), /PROFESSIONAL_VERIFICATION_MODE is no longer supported/);
-    } finally {
-      await other.stop();
-    }
-  }
+  // 'pending' was approved by the administrator in the previous test and owns p-pending.
+  assert.equal((await call(app.url, 'POST', '/api/metabolic/save', 'pending', { ...metabolic, patientId: 'p-pending' })).status, 200, 'verified professional, own patient');
+  assert.equal((await call(app.url, 'POST', '/api/metabolic/save', 'pending', { ...metabolic, patientId: 'p-declared' })).status, 404, 'another clinician’s patient');
 });

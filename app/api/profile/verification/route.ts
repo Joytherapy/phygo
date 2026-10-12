@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireUser, transitionUntilFor } from "@/lib/auth/sessionServer";
+import { requireUser } from "@/lib/auth/sessionServer";
 import { parseVerificationRequest, serviceClient } from "@/lib/verification";
 
 // GET: the signed-in user's own verification status.
@@ -20,7 +20,7 @@ export async function GET() {
     console.error("verification status read failed:", error.message);
     return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   }
-  return NextResponse.json({ verification: toPublic(data, gate.user.id) });
+  return NextResponse.json({ verification: toPublic(data) });
 }
 
 export async function POST(req: Request) {
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     current.registration_number === registrationNumber;
   // Re-sending the same details never downgrades a decision already taken.
   if (unchanged && ["pending", "verified", "rejected"].includes(current.professional_status)) {
-    return NextResponse.json({ verification: toPublic(current, gate.user.id) });
+    return NextResponse.json({ verification: toPublic(current) });
   }
 
   const { data: updated, error: updateError } = await db
@@ -77,10 +77,10 @@ export async function POST(req: Request) {
     console.error("verification request save failed:", updateError.message);
     return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   }
-  return NextResponse.json({ verification: toPublic(updated, gate.user.id) });
+  return NextResponse.json({ verification: toPublic(updated) });
 }
 
-function toPublic(p: Record<string, any> | null, userId: string) {
+function toPublic(p: Record<string, any> | null) {
   const status = p?.professional_status ?? "not_applicable";
   return {
     status,
@@ -91,7 +91,7 @@ function toPublic(p: Record<string, any> | null, userId: string) {
     requestedAt: p?.verification_requested_at ?? null,
     reviewedAt: p?.verification_reviewed_at ?? null,
     message: p?.verification_message ?? null,
-    // Set only for accounts on the owner's temporary transition list.
-    transitionUntil: p?.practice_stage === "student" ? null : transitionUntilFor(userId, status),
+    // Temporary transition access comes from the database list (PR #8); none here.
+    transitionUntil: null,
   };
 }
