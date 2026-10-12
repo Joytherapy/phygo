@@ -57,6 +57,28 @@ expect "reset portal access (set to null) still works" "$(as authenticated $A "u
 expect "anon can no longer read stored IPs" "$(psql -q -At -d "$DB" -c "set role anon; select count(*) from demo_usage")" 0
 expect "stored IP row kept (deletion is a separate decision)" "$(q -c "select count(*) from demo_usage")" 1
 
+echo "professional verification (sql/2026-10_professional_verification_PROPOSED.sql, applied twice)"
+q -f sql/2026-10_professional_verification_PROPOSED.sql >/dev/null
+q -f sql/2026-10_professional_verification_PROPOSED.sql >/dev/null
+expect "user cannot set own status to verified" "$(as authenticated $B "update profiles set professional_status = 'verified' where id = '$B'")" denied
+expect "user cannot write the registration number directly" "$(as authenticated $B "update profiles set registration_number = 'R-1' where id = '$B'")" denied
+expect "user cannot write review fields" "$(as authenticated $B "update profiles set verification_reviewed_by = 'me' where id = '$B'")" denied
+expect "declared role switch still works" "$(as authenticated $B "update profiles set practice_stage = 'student' where id = '$B'")" ok
+expect "profile editing still works" "$(as authenticated $B "update profiles set display_name = 'B' where id = '$B'")" ok
+expect "new statuses accepted for the service role" "$(as service_role $B "update profiles set professional_status = 'needs_info', registration_number = 'R-1' where id = '$B'")" ok
+expect "unknown status refused by the check constraint" "$(as service_role $B "update profiles set professional_status = 'super' where id = '$B'")" denied
+
+echo "optional: new patients require a verified professional"
+q -f sql/2026-10_patients_require_verification_PROPOSED.sql >/dev/null
+q -c "update profiles set professional_status = 'not_applicable' where id = '$A'" >/dev/null
+expect "unverified clinician cannot create a new patient" "$(as authenticated $A "insert into patients (id, user_id, name) values (gen_random_uuid(), '$A', 'x')")" denied
+expect "unverified clinician keeps their existing patients" "$(as authenticated $A "update patients set name = 'Renamed' where id = '$PA'")" ok
+expect "unverified clinician can still write notes for existing patients" "$(as authenticated $A "insert into notes (patient_id, user_id) values ('$PA', '$A')")" ok
+q -c "update profiles set professional_status = 'verified' where id = '$A'" >/dev/null
+expect "verified clinician can create patients" "$(as authenticated $A "insert into patients (id, user_id, name) values (gen_random_uuid(), '$A', 'x')")" ok
+expect "anon cannot call the helper" "$(as anon $A "select is_verified_professional('$A')")" denied
+q -c "drop policy if exists \"Users can insert their own patients\" on patients; create policy \"Users can insert their own patients\" on patients for insert with check (auth.uid() = user_id); drop function if exists is_verified_professional(uuid);" >/dev/null
+
 echo "rollback (from the comments in each file)"
 q -c "drop trigger if exists profiles_protect_privileged_columns on profiles; drop function if exists protect_profile_privileged_columns();
       drop policy if exists \"Users can insert their own notes\" on notes; create policy \"Users can insert their own notes\" on notes for insert with check (auth.uid() = user_id);

@@ -34,8 +34,8 @@ before(async () => {
         { id: P2, user_id: people.physioB.id, patient_user_id: null, name: 'Synthetic patient 2' },
       ],
       profiles: [
-        { id: people.physioA.id, practice_stage: 'professional', plan: 'free' },
-        { id: people.physioB.id, practice_stage: 'professional', plan: 'pro' },
+        { id: people.physioA.id, practice_stage: 'professional', professional_status: 'verified', plan: 'free' },
+        { id: people.physioB.id, practice_stage: 'professional', professional_status: 'verified', plan: 'pro' },
         { id: people.student.id, practice_stage: 'student', plan: 'free' },
         { id: people.patient.id, practice_stage: 'professional', plan: 'free' },
       ],

@@ -23,6 +23,7 @@ export function testEnv(fakeUrl, overrides = {}) {
     DAILY_API_KEY: '',
     SOFFICE_PATH: '',
     EBOOK_CONVERT_PATH: '',
+    PROFESSIONAL_VERIFICATION_MODE: '',
     ...overrides,
   };
 }

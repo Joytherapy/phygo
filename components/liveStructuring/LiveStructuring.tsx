@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 
 import jsPDF from "jspdf";
+import { refusalMessage, useVerificationStrings } from "@/lib/i18n/verificationStrings";
 import { createBrowserClient } from "@supabase/ssr";
 
 const supabase = createBrowserClient(
@@ -69,6 +70,7 @@ export default function LiveStructuring({
   patientId?: string;
   onSaved?: () => void;
 }) {
+  const verificationUi = useVerificationStrings();
   const [phase, setPhase] = useState<Phase>("idle");
 
   const [phrases, setPhrases] = useState<Phrase[]>([]);
@@ -173,8 +175,12 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 }),
 
         });
-        const data = await res.json();
-        setScanSummary(data.summary || "Could not analyze document.");
+        const data = await res.json().catch(() => ({}));
+        setScanSummary(
+          data.summary ||
+            refusalMessage(verificationUi, res.status, data) ||
+            "Could not analyze document."
+        );
       } catch (err) {
         console.error("Scan analysis failed:", err);
         setScanSummary("Could not analyze document.");
@@ -400,12 +406,11 @@ const [recordingLang, setRecordingLang] = useState("it-IT");
 
 
 if (!res.ok) {
-  if (res.status === 403) {
-    const data = await res.json().catch(() => ({}));
-    setAiError(
-      data.message ||
-        "You've already tried the free demo. Sign up to keep using Phygo on unlimited patients."
-    );
+  // Verification required, hourly limit or service unavailable: say which.
+  const data = await res.json().catch(() => ({}));
+  const refusal = refusalMessage(verificationUi, res.status, data);
+  if (refusal) {
+    setAiError(refusal);
     setPhase("idle");
     return;
   }

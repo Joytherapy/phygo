@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ownsPatient, requireProfessional } from '@/lib/auth/sessionServer'
+import { ownsPatient, requireVerifiedProfessional } from '@/lib/auth/sessionServer'
 import { consumeHourly, HOURLY_LIMITS, limitResponse } from '@/lib/rateLimit'
 
 // Creates a paid Daily.co room for one of the signed-in clinician's own
 // patients. Rooms are created only by the clinician; patients join them from
 // My Phygo through the video_calls row (RLS: their own calls only).
 export async function POST(req: NextRequest) {
-  const gate = await requireProfessional()
+  const gate = await requireVerifiedProfessional()
   if (!gate.ok) return gate.response
 
   if (!process.env.DAILY_API_KEY) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireProfessional } from "@/lib/auth/sessionServer";
+import { requireVerifiedProfessional } from "@/lib/auth/sessionServer";
 import { consumeHourly, HOURLY_LIMITS, limitResponse } from "@/lib/rateLimit";
 import OpenAI from "openai";
 
@@ -13,8 +13,8 @@ const LANGUAGE_NAMES: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
-  // Clinician-only paid AI operation (OpenAI): authenticated professional + hourly cap.
-  const gate = await requireProfessional();
+  // Clinician-only paid AI operation (OpenAI) on real clinical information: verified professional + hourly cap.
+  const gate = await requireVerifiedProfessional();
   if (!gate.ok) return gate.response;
   const limited = limitResponse(await consumeHourly(`ai:analyze-scan:${gate.user.id}`, HOURLY_LIMITS.analyzeScan));
   if (limited) return limited;
