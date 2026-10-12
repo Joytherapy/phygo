@@ -28,10 +28,21 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
       req.on('end', () => resolve(b));
     });
     state.requests.push({ method: req.method, path: url.pathname, search: url.search, auth: req.headers.authorization ?? null });
+    // Browser pages (Playwright checks) call Supabase directly from another origin.
+    const cors = {
+      'access-control-allow-origin': req.headers.origin ?? '*',
+      'access-control-allow-credentials': 'true',
+      'access-control-allow-headers': req.headers['access-control-request-headers'] ?? '*',
+      'access-control-allow-methods': 'GET,HEAD,POST,PATCH,DELETE,OPTIONS',
+    };
     const send = (status, payload, headers = {}) => {
-      res.writeHead(status, { 'content-type': 'application/json', ...headers });
+      res.writeHead(status, { 'content-type': 'application/json', ...cors, ...headers });
       res.end(payload === undefined ? '' : JSON.stringify(payload));
     };
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204, cors);
+      return res.end();
+    }
 
     // Test control: make a table fail, or reset failures.
     if (url.pathname === '/__control/fail') {
@@ -117,6 +128,10 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
       const patch = JSON.parse(body || '{}');
       const hit = rows.filter(match);
       hit.forEach((r) => Object.assign(r, patch));
+      if ((req.headers.accept ?? '').includes('vnd.pgrst.object')) {
+        if (hit.length !== 1) return send(406, { code: 'PGRST116', message: 'JSON object requested, multiple (or no) rows returned' });
+        return send(200, hit[0]);
+      }
       return send(200, hit);
     }
     if (req.method === 'DELETE') {
