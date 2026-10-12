@@ -195,9 +195,10 @@ export default function ExerciseLibraryPage() {
           setLoading(false);
           return;
         }
-        const data = await res.json();
+        // A server crash can answer with HTML: treat it as a load error, not a network error.
+        const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          setErrorMsg(data.error || ui.loadError);
+          setErrorMsg(data.code === 'server_config' ? ui.configError : data.error || ui.loadError);
           setLoading(false);
           return;
         }

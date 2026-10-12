@@ -1122,6 +1122,7 @@ interface UiDict {
     loginRequired: string;
     loadError: string;
     networkError: string;
+    configError: string;
     noExercises: string;
     noMatchPrefix: string;
     noMatchFilterPart: string;
@@ -2526,6 +2527,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       loginRequired: 'Devi effettuare l’accesso per vedere questa pagina.',
       loadError: 'Errore nel caricamento.',
       networkError: 'Errore di rete nel caricamento.',
+      configError: 'La libreria esercizi non è disponibile: la configurazione del server è incompleta. Il dettaglio è nei log del server.',
       noExercises: 'Nessun esercizio trovato.',
       noMatchPrefix: 'Nessun esercizio corrisponde',
       noMatchFilterPart: 'al filtro "{filter}"',
@@ -3928,6 +3930,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       loginRequired: 'You need to sign in to view this page.',
       loadError: 'Loading error.',
       networkError: 'Network error while loading.',
+      configError: 'The exercise library is unavailable: the server configuration is incomplete. Details are in the server logs.',
       noExercises: 'No exercises found.',
       noMatchPrefix: 'No exercise matches',
       noMatchFilterPart: 'the filter "{filter}"',
@@ -5330,6 +5333,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       loginRequired: 'Debes iniciar sesión para ver esta página.',
       loadError: 'Error al cargar.',
       networkError: 'Error de red al cargar.',
+      configError: 'La biblioteca de ejercicios no está disponible: la configuración del servidor está incompleta. El detalle está en los registros del servidor.',
       noExercises: 'No se encontraron ejercicios.',
       noMatchPrefix: 'Ningún ejercicio coincide con',
       noMatchFilterPart: 'el filtro "{filter}"',
@@ -6732,6 +6736,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       loginRequired: 'Vous devez vous connecter pour voir cette page.',
       loadError: 'Erreur de chargement.',
       networkError: 'Erreur réseau lors du chargement.',
+      configError: 'La bibliothèque d’exercices est indisponible : la configuration du serveur est incomplète. Le détail se trouve dans les journaux du serveur.',
       noExercises: 'Aucun exercice trouvé.',
       noMatchPrefix: 'Aucun exercice ne correspond',
       noMatchFilterPart: 'au filtre « {filter} »',
