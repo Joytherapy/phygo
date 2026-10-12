@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import { requireProfessional } from "@/lib/auth/sessionServer";
+import { requireVerifiedProfessional } from "@/lib/auth/sessionServer";
 import { consumeHourly, HOURLY_LIMITS, limitResponse } from "@/lib/rateLimit";
 
 const openai = new OpenAI({
@@ -12,7 +12,7 @@ const openai = new OpenAI({
 // app and its counter could be reset by anyone holding the public anon key,
 // so anonymous calls are now refused.
 export async function POST(request: NextRequest) {
-  const gate = await requireProfessional();
+  const gate = await requireVerifiedProfessional();
   if (!gate.ok) return gate.response;
   const limited = limitResponse(await consumeHourly(`ai:generate-note:${gate.user.id}`, HOURLY_LIMITS.generateNote));
   if (limited) return limited;

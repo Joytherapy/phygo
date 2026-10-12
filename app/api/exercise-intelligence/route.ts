@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireProfessional } from "@/lib/auth/sessionServer";
+import { requireVerifiedProfessional } from "@/lib/auth/sessionServer";
 import { consumeHourly, HOURLY_LIMITS, limitResponse } from "@/lib/rateLimit";
 import OpenAI from "openai";
 import { searchExercisesWithCache } from "@/lib/exercise-providers/cache";
@@ -24,8 +24,8 @@ type ExerciseOutput = ExerciseEntry & {
 };
 
 export async function POST(request: Request) {
-  // Clinician-only paid AI operation (OpenAI): authenticated professional + hourly cap.
-  const gate = await requireProfessional();
+  // Clinician-only paid AI operation (OpenAI) on real clinical information: verified professional + hourly cap.
+  const gate = await requireVerifiedProfessional();
   if (!gate.ok) return gate.response;
   const limited = limitResponse(await consumeHourly(`ai:exercise-intelligence:${gate.user.id}`, HOURLY_LIMITS.noteEnrichment));
   if (limited) return limited;
