@@ -1,4 +1,4 @@
-// A small stand-in for Supabase (auth, PostgREST, storage) and OpenAI, used by
+// A small stand-in for Supabase (auth, PostgREST, storage), OpenAI and Daily, used by
 // the integration tests in tests/. It serves only synthetic data, never talks
 // to the network and records every request, so tests can prove what the app
 // asked for (and that it did not call OpenAI or any real service).
@@ -72,6 +72,12 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
 
     // OpenAI stand-in: any call is recorded and refused, so tests can assert none happened.
     if (url.pathname.startsWith('/openai/')) return send(500, { error: { message: 'OpenAI is not available in tests' } });
+
+    // Daily stand-in: room creation answers with a synthetic room, so tests can count calls.
+    if (url.pathname === '/daily/v1/rooms' && req.method === 'POST') {
+      const { name } = JSON.parse(body || '{}');
+      return send(200, { name, url: `https://test.invalid/${name}` });
+    }
 
     const rest = url.pathname.match(/^\/rest\/v1\/([a-z_]+)$/);
     if (!rest) return send(404, { message: 'not found' });

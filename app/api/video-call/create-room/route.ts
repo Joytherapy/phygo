@@ -5,6 +5,8 @@ import { consumeHourly, HOURLY_LIMITS, limitResponse } from '@/lib/rateLimit'
 // Creates a paid Daily.co room for one of the signed-in clinician's own
 // patients. Rooms are created only by the clinician; patients join them from
 // My Phygo through the video_calls row (RLS: their own calls only).
+// DAILY_API_BASE_URL is only for tests (a local stand-in); leave it unset.
+const DAILY_API = (process.env.DAILY_API_BASE_URL || 'https://api.daily.co/v1').replace(/\/$/, '')
 export async function POST(req: NextRequest) {
   const gate = await requireVerifiedProfessional()
   if (!gate.ok) return gate.response
@@ -30,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     const roomName = `session-${patientId}-${Date.now()}`
 
-    const res = await fetch('https://api.daily.co/v1/rooms', {
+    const res = await fetch(`${DAILY_API}/rooms`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${process.env.DAILY_API_KEY}`,

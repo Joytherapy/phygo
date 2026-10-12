@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { Video, PhoneOff, Loader2 } from 'lucide-react'
+import { refusalMessage, useVerificationStrings } from '@/lib/i18n/verificationStrings'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,6 +29,7 @@ export default function VideoCallPanel({
   const [inCall, setInCall] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const t = useVerificationStrings()
 
   const loadActiveCall = async () => {
     const { data } = await supabase
@@ -60,11 +62,11 @@ export default function VideoCallPanel({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ patientId }),
     })
-    const data = await res.json()
+    const data = await res.json().catch(() => ({}))
 
     if (!res.ok) {
       console.error('Errore creazione stanza:', data.error)
-      setError('Could not start the video call. Please try again.')
+      setError(refusalMessage(t, res.status, data) ?? t.videoFailed)
       setStarting(false)
       return
     }
@@ -87,7 +89,7 @@ export default function VideoCallPanel({
       setCall(newCall)
       setInCall(true)
     } else {
-      setError('Could not save the call. Please try again.')
+      setError(t.videoSaveFailed)
     }
     setStarting(false)
   }

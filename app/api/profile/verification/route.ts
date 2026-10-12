@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth/sessionServer";
+import { requireUser, transitionUntilFor } from "@/lib/auth/sessionServer";
 import { parseVerificationRequest, serviceClient } from "@/lib/verification";
 
 // GET: the signed-in user's own verification status.
@@ -20,7 +20,7 @@ export async function GET() {
     console.error("verification status read failed:", error.message);
     return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   }
-  return NextResponse.json({ verification: toPublic(data) });
+  return NextResponse.json({ verification: toPublic(data, gate.user.id) });
 }
 
 export async function POST(req: Request) {
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     current.registration_number === registrationNumber;
   // Re-sending the same details never downgrades a decision already taken.
   if (unchanged && ["pending", "verified", "rejected"].includes(current.professional_status)) {
-    return NextResponse.json({ verification: toPublic(current) });
+    return NextResponse.json({ verification: toPublic(current, gate.user.id) });
   }
 
   const { data: updated, error: updateError } = await db
@@ -77,12 +77,13 @@ export async function POST(req: Request) {
     console.error("verification request save failed:", updateError.message);
     return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   }
-  return NextResponse.json({ verification: toPublic(updated) });
+  return NextResponse.json({ verification: toPublic(updated, gate.user.id) });
 }
 
-function toPublic(p: Record<string, any> | null) {
+function toPublic(p: Record<string, any> | null, userId: string) {
+  const status = p?.professional_status ?? "not_applicable";
   return {
-    status: p?.professional_status ?? "not_applicable",
+    status,
     practiceStage: p?.practice_stage ?? "professional",
     registryCountry: p?.registry_country ?? null,
     registryName: p?.registry_name ?? null,
@@ -90,5 +91,7 @@ function toPublic(p: Record<string, any> | null) {
     requestedAt: p?.verification_requested_at ?? null,
     reviewedAt: p?.verification_reviewed_at ?? null,
     message: p?.verification_message ?? null,
+    // Set only for accounts on the owner's temporary transition list.
+    transitionUntil: p?.practice_stage === "student" ? null : transitionUntilFor(userId, status),
   };
 }

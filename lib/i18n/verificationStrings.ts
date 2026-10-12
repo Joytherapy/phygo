@@ -29,6 +29,9 @@ type Dict = {
   required: string;
   rateLimited: string;
   serviceUnavailable: string;
+  transition: string;
+  videoFailed: string;
+  videoSaveFailed: string;
 };
 
 const en: Dict = {
@@ -61,6 +64,9 @@ const en: Dict = {
   required: 'This feature is available to verified physiotherapists. Request verification from your profile.',
   rateLimited: 'You have reached the hourly limit for this feature. Please try again later.',
   serviceUnavailable: 'This feature is temporarily unavailable. Please try again later.',
+  transition: 'Your account has temporary access to these features until {date}, while your verification is completed. Request verification before then to keep it.',
+  videoFailed: 'Could not start the video call. Please try again.',
+  videoSaveFailed: 'Could not save the call. Please try again.',
 };
 
 const it: Dict = {
@@ -93,6 +99,9 @@ const it: Dict = {
   required: 'Questa funzione è disponibile per i fisioterapisti verificati. Richiedi la verifica dal tuo profilo.',
   rateLimited: 'Hai raggiunto il limite orario per questa funzione. Riprova più tardi.',
   serviceUnavailable: 'Questa funzione non è disponibile al momento. Riprova più tardi.',
+  transition: 'Il tuo account ha un accesso temporaneo a queste funzioni fino al {date}, in attesa della verifica. Richiedi la verifica entro quella data per mantenerlo.',
+  videoFailed: 'Impossibile avviare la videochiamata. Riprova.',
+  videoSaveFailed: 'Impossibile salvare la chiamata. Riprova.',
 };
 
 const es: Dict = {
@@ -125,6 +134,9 @@ const es: Dict = {
   required: 'Esta función está disponible para fisioterapeutas verificados. Solicita la verificación desde tu perfil.',
   rateLimited: 'Has alcanzado el límite por hora de esta función. Inténtalo más tarde.',
   serviceUnavailable: 'Esta función no está disponible ahora. Inténtalo más tarde.',
+  transition: 'Tu cuenta tiene acceso temporal a estas funciones hasta el {date}, mientras se completa tu verificación. Solicita la verificación antes de esa fecha para mantenerlo.',
+  videoFailed: 'No se pudo iniciar la videollamada. Inténtalo de nuevo.',
+  videoSaveFailed: 'No se pudo guardar la llamada. Inténtalo de nuevo.',
 };
 
 const fr: Dict = {
@@ -157,6 +169,9 @@ const fr: Dict = {
   required: 'Cette fonction est disponible pour les kinésithérapeutes vérifiés. Demandez la vérification depuis votre profil.',
   rateLimited: 'Vous avez atteint la limite horaire de cette fonction. Réessayez plus tard.',
   serviceUnavailable: 'Cette fonction est momentanément indisponible. Réessayez plus tard.',
+  transition: 'Votre compte a un accès temporaire à ces fonctions jusqu’au {date}, le temps de finaliser votre vérification. Demandez la vérification avant cette date pour le conserver.',
+  videoFailed: 'Impossible de démarrer l’appel vidéo. Réessayez.',
+  videoSaveFailed: 'Impossible d’enregistrer l’appel. Réessayez.',
 };
 
 export const VERIFICATION_STRINGS: Record<AppLang, Dict> = { en, it, es, fr };

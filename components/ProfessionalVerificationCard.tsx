@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { BadgeCheck, Clock, AlertCircle, Loader2, ShieldCheck } from 'lucide-react'
 import { useVerificationStrings, type VerificationStatusKey } from '@/lib/i18n/verificationStrings'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 // Profile card for professional verification. The status comes from the
 // server and can only be changed by PHYGO; this card only submits the
@@ -15,6 +16,7 @@ type Verification = {
   registryName: string | null
   registrationNumber: string | null
   message: string | null
+  transitionUntil: string | null
 }
 
 const STATUS_STYLE: Record<VerificationStatusKey, string> = {
@@ -30,6 +32,7 @@ const inputClass =
 
 export default function ProfessionalVerificationCard() {
   const t = useVerificationStrings()
+  const { lang } = useLanguage()
   const [data, setData] = useState<Verification | null>(null)
   const [form, setForm] = useState({ registryCountry: '', registryName: '', registrationNumber: '' })
   const [invalid, setInvalid] = useState<string[]>([])
@@ -113,6 +116,11 @@ export default function ProfessionalVerificationCard() {
             <p className="mt-2 text-xs text-ink/60 dark:text-white/55">{t.studentNote}</p>
           )}
           {status !== 'verified' && <p className="mt-2 text-xs text-ink/60 dark:text-white/55">{t.unlocks}</p>}
+          {data.transitionUntil && (
+            <p className="mt-2 rounded-xl bg-amber-400/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
+              {t.transition.replace('{date}', new Date(data.transitionUntil).toLocaleDateString(lang, { dateStyle: 'long' }))}
+            </p>
+          )}
           {data.message && (status === 'needs_info' || status === 'rejected') && (
             <div className="mt-3 rounded-xl border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/[0.03] p-3">
               <p className="text-xs font-semibold text-ink/70 dark:text-white/65">{t.reviewerMessage}</p>

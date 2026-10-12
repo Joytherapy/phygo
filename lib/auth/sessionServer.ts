@@ -84,15 +84,58 @@ export async function requireProfessional(): Promise<Gate> {
   return { ...gate, professionalStatus: profile?.professional_status ?? "not_applicable" };
 }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const MAX_TRANSITION_MS = 90 * 24 * 60 * 60 * 1000;
+const warned = new Set<string>();
+function warnOnce(message: string) {
+  if (warned.has(message)) return;
+  warned.add(message);
+  console.warn(message);
+}
+
 /**
- * Transition switch for professional verification (env PROFESSIONAL_VERIFICATION_MODE):
- *   enforce (default) - clinician-only operations need professional_status = 'verified'.
- *   grace             - declared professionals keep their current access while
- *                       verification requests are collected and reviewed; each
- *                       unverified use is logged. Meant for a limited rollout window.
+ * Temporary transition policy for accounts that existed before professional
+ * verification was introduced. It covers ONLY the stable account ids the owner
+ * lists explicitly, and only until a fixed end date:
+ *
+ *   PROFESSIONAL_TRANSITION_ACCOUNTS  comma-separated auth user ids (UUIDs)
+ *   PROFESSIONAL_TRANSITION_UNTIL     end of the transition, ISO 8601
+ *                                     (e.g. 2026-11-30T23:59:59Z); at most
+ *                                     90 days ahead
+ *
+ * Nothing qualifies automatically: a new account, or one that switches its
+ * declared role to professional, is not on the list. If either variable is
+ * missing or invalid, or the date has passed or is more than 90 days ahead,
+ * the list is ignored (fail closed). See docs/security/professional-verification-rollout.md.
  */
-export function verificationMode(): "enforce" | "grace" {
-  return process.env.PROFESSIONAL_VERIFICATION_MODE === "grace" ? "grace" : "enforce";
+export function verificationTransition(now = new Date()): { accounts: Set<string>; until: Date } | null {
+  if (process.env.PROFESSIONAL_VERIFICATION_MODE)
+    warnOnce("PROFESSIONAL_VERIFICATION_MODE is no longer supported and is ignored; use PROFESSIONAL_TRANSITION_ACCOUNTS");
+  const listRaw = process.env.PROFESSIONAL_TRANSITION_ACCOUNTS?.trim();
+  const untilRaw = process.env.PROFESSIONAL_TRANSITION_UNTIL?.trim();
+  if (!listRaw) return null;
+  const until = untilRaw ? new Date(untilRaw) : null;
+  if (!until || Number.isNaN(until.getTime()) || until.getTime() - now.getTime() > MAX_TRANSITION_MS) {
+    warnOnce("verification transition ignored: PROFESSIONAL_TRANSITION_UNTIL is missing, invalid or more than 90 days ahead");
+    return null;
+  }
+  if (until <= now) return null;
+  const entries = listRaw.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+  const accounts = new Set(entries.filter((e) => UUID.test(e)));
+  if (accounts.size !== entries.length)
+    warnOnce(`verification transition: ${entries.length - accounts.size} invalid entries in PROFESSIONAL_TRANSITION_ACCOUNTS ignored`);
+  return accounts.size ? { accounts, until } : null;
+}
+
+/**
+ * End of the temporary access for this account, or null when it is not
+ * covered. A PHYGO decision always wins: verified accounts do not need it and
+ * rejected accounts lose it immediately, whatever the list says.
+ */
+export function transitionUntilFor(userId: string, professionalStatus: string | undefined): string | null {
+  if (professionalStatus === "verified" || professionalStatus === "rejected") return null;
+  const transition = verificationTransition();
+  return transition?.accounts.has(userId.toLowerCase()) ? transition.until.toISOString() : null;
 }
 
 /**
@@ -100,14 +143,17 @@ export function verificationMode(): "enforce" | "grace" {
  * Used for operations that send real clinical information to a paid AI
  * processor or open live consultations with patients. Declaring yourself a
  * professional (practice_stage) or typing a registration number is not enough;
- * only an administrator can set professional_status = 'verified'.
+ * only an administrator can set professional_status = 'verified'. Accounts on
+ * the explicit transition list (above) are let through until its end date.
+ * Patients and students are refused before any of this (requireProfessional).
  */
 export async function requireVerifiedProfessional(): Promise<Gate> {
   const gate = await requireProfessional();
   if (!gate.ok) return gate;
   if (gate.professionalStatus === "verified") return gate;
-  if (verificationMode() === "grace") {
-    console.warn("verification grace mode: unverified professional allowed", gate.user.id);
+  const until = transitionUntilFor(gate.user.id, gate.professionalStatus);
+  if (until) {
+    console.warn("verification transition: listed unverified account allowed until", until, gate.user.id);
     return gate;
   }
   return {
