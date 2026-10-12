@@ -258,6 +258,18 @@ test('only an administrator can review, and the decision takes effect', async ()
   assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.declared.id, decision: 'verified' })).status, 409, 'cannot verify an account without registration details');
 });
 
+test('metabolic data on a real patient needs verification or the list (service-role route)', async () => {
+  const saved = () => fake.state.tables.metabolic_profiles.length;
+  const before = saved();
+  const res = await call(app.url, 'POST', '/api/metabolic/save', 'declared', { ...metabolic, patientId: 'p-declared' });
+  assert.equal(res.status, 403);
+  assert.equal((await res.json()).code, 'verification_required');
+  assert.equal(saved(), before, 'nothing written');
+  assert.equal((await call(app.url, 'GET', '/api/metabolic/save?patientId=p-declared', 'declared')).status, 200, 'own existing data stays readable');
+  assert.equal((await call(app.url, 'POST', '/api/metabolic/save', 'declared', metabolic)).status, 200, 'personal calculator');
+  assert.equal((await call(app.url, 'POST', '/api/metabolic/save', 'legacy', { ...metabolic, patientId: 'p-legacy' })).status, 200, 'listed account');
+});
+
 test('the transition list fails closed when it has ended, has no valid end date, or is too long', async () => {
   const configs = [
     ['ended', transitionEnv(new Date(Date.now() - DAY).toISOString())],

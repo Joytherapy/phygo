@@ -11,6 +11,7 @@ import {
   type AdaptiveInsightResult,
 } from '@/lib/metabolicCalculator';
 import { UI_STRINGS, type AppLang } from '@/lib/i18n/uiStrings';
+import { requireVerifiedProfessional } from '@/lib/auth/sessionServer';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -86,6 +87,12 @@ export async function POST(req: Request) {
     // yours", so patient ids cannot be probed.
     if (enteredBy === 'professional' && patientId !== null && !(await clinicianOwnsPatient(userId, patientId))) {
       return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
+    }
+    // Writing clinical data on a real patient is patient management: verified
+    // professionals, or accounts on the owner's transition list.
+    if (enteredBy === 'professional' && patientId !== null) {
+      const gate = await requireVerifiedProfessional();
+      if (!gate.ok) return gate.response;
     }
 
     const input: MetabolicInput = {
