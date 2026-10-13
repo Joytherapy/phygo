@@ -13,7 +13,8 @@ The decisions are listed in `DECISIONS.md` (D1–D12).
 | PR #15: build without secrets (fixes every Vercel Preview) | **In Production** (`bb98c85`, deployment Ready, no build or runtime errors). Previews now build |
 | PR #16: Functions in `fra1`, analysis of the Vercel plan and DPA | **Draft**, Preview Ready (first deployment with `fra1`). Waits on D5 |
 | PR #13: verification with documents | **Draft**, up to date with `main`, Preview Ready. 86/86 integration tests, SQL suite passing, 27 browser checks. Four review findings fixed (see below). Waits on the legal texts |
-| Privacy section and Terms §3A (IT, EN, ES, FR) | **Drafts complete**, with placeholders for D1–D11 |
+| Privacy section and Terms §3A (IT, EN, ES, FR) | **Drafts complete**, with placeholders for D1–D11. **PR #17** (draft, on PR #3) puts them in the site from the drafts; they appear only when every value is set and the review is approved |
+| Provider inventory (what each provider receives) | `docs/infra/providers-and-transfers.md` in PR #16. Fixes: **PR #18** (random video room name, no patient id), **PR #19** (pdf.js worker from our domain, no cdnjs). Decisions D13–D15 |
 
 ## Dependencies
 ```
@@ -50,12 +51,12 @@ Independent of the owner's decisions, done in parallel: #15, the drafts, tests, 
    - a check that no `{{` remains;
    - update the privacy notice's sub-processor section (add Daily; Supabase Storage and the CDN; the function region).
 9. **Lawyer:** reviews the Italian version (D12).
-10. **Claude:** puts the approved texts into the site, on the PR #13 branch:
+10. **Claude:** fills `lib/i18n/legal/verificationValues.ts` in PR #17 and sets `LEGAL_REVIEW_APPROVED`. That publishes, in four languages:
     - the `/privacy#professional-verification` section, which the form already links to;
-    - the new Terms §3A;
+    - Terms §3A;
     - §12, governing law.
 
-    Tests and browser checks follow.
+    The same commit updates the two "not published yet" tests. Tests and browser checks follow. Order: PR #3, then PR #13, then PR #17, in the same release window.
 
 ### Phase D: PR #13 in Production
 11. **Owner:** run `sql/2026-10_verification_evidence_PROPOSED.sql` in the SQL Editor, **before** the deploy (the code fails closed without these tables). Check its checksum in the guide first. Then run the read-only checks from the guide. The file changes nobody's access.
