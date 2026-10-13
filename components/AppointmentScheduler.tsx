@@ -7,11 +7,12 @@ import { Calendar, Clock, Video, MapPin, Check, X, Loader2, Plus, Sparkles, Cale
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useAgendaUi, localeForLang } from '@/lib/i18n/agendaStrings'
 import { cancelAppointment } from '@/lib/appointments'
+import { lazy } from '@/lib/lazy'
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+))
 
 type Appointment = {
   id: string

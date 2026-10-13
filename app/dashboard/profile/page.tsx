@@ -10,11 +10,12 @@ import ProfessionalVerificationCard, { type VerificationSummary } from '@/compon
 import VerificationBadge from '@/components/VerificationBadge'
 import { useUiStrings } from '@/contexts/LanguageContext'
 import { useRoleUi, type PracticeStage } from '@/lib/i18n/roleStrings'
+import { lazy } from '@/lib/lazy'
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+))
 
 type Credential = { id: string; label: string }
 

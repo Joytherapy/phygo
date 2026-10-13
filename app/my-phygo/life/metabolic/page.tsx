@@ -8,11 +8,12 @@ import { useUiStrings } from '@/contexts/LanguageContext'
 import MetabolicCalculator from '@/components/MetabolicCalculator'
 import WeightTrendChart from '@/components/WeightTrendChart'
 import { calculateGoalProjection, type AdaptiveInsightResult } from '@/lib/metabolicCalculator'
+import { lazy } from '@/lib/lazy'
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+))
 
 type HistoryEntry = {
   id: string

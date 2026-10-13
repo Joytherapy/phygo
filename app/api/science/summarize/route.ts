@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/adminServer';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
+import { lazy } from '@/lib/lazy';
 
-const supabase = createClient(
+const supabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
 
 export async function POST(req: Request) {
   const denied = await requireAdmin(req);
