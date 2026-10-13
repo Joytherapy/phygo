@@ -84,6 +84,9 @@ Do not describe this as "all data stays in the EU":
    - save the sub-processor list.
 6. Update the privacy notice (section 6, sub-processors). Add Daily, which is missing today.
 
+## 6b. Every provider, from the code
+See `providers-and-transfers.md`: what each provider receives (OpenAI also gets clinical images and the session note; Daily, the browser speech service and cdnjs are missing from the privacy notice; Resend is listed but not used), and the actions.
+
 ## 7. Recommendation
 1. **Move to Vercel Pro.** It is needed in any case for commercial use and for an applicable DPA.
 2. **Merge this PR.** Measure before and after with the script.
