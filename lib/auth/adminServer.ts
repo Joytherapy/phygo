@@ -13,11 +13,16 @@ import { timingSafeEqual } from 'crypto'
 //
 //   PHYGO_ADMIN_EMAILS      comma-separated emails of admin accounts; the
 //                           account's email must also be confirmed
-//   CRON_SECRET             already used by Vercel Cron — accepted as a
-//                           bearer token so /api/cron/science-daily can call
-//                           the science batch routes
+//   CRON_SECRET             used by Vercel Cron. It is accepted ONLY by the
+//                           routes that the cron calls (/api/cron/* and the
+//                           two science batch routes, which opt in with
+//                           { allowCron: true }); it opens nothing else
 //   PHYGO_ADMIN_API_TOKEN   optional bearer token for local maintenance
 //                           scripts (seed-*.js, link-*.js, tag-zones.js)
+//
+// The professional verification console is stricter:
+// requireAdminSession() accepts only a signed-in administrator, never a
+// token, so every decision has a person behind it.
 //
 // Fails closed: if none of these are configured, nobody is an admin.
 
@@ -48,25 +53,25 @@ export function hasCronSecret(req: Request): boolean {
   return !!secret && !!token && safeEqual(token, secret)
 }
 
-function hasAdminApiToken(req: Request): boolean {
+function hasAdminApiToken(req: Request, allowCron: boolean): boolean {
   const token = bearerToken(req)
   if (!token) return false
-  const secrets = [process.env.CRON_SECRET, process.env.PHYGO_ADMIN_API_TOKEN].filter(
-    (s): s is string => !!s
-  )
-  return secrets.some((secret) => safeEqual(token, secret))
+  const cron = process.env.CRON_SECRET
+  if (cron && safeEqual(token, cron)) return allowCron
+  // A PHYGO_ADMIN_API_TOKEN equal to CRON_SECRET is refused above, so the cron
+  // secret can never open other admin routes through the maintenance token.
+  const apiToken = process.env.PHYGO_ADMIN_API_TOKEN
+  return !!apiToken && safeEqual(token, apiToken)
 }
 
-/**
- * Returns null when the caller is an admin, otherwise a 401/403 response the
- * route should return as-is:
- *
- *   const denied = await requireAdmin(req)
- *   if (denied) return denied
- */
-export async function requireAdmin(req: Request): Promise<NextResponse | null> {
-  if (hasAdminApiToken(req)) return null
+export type AdminSession = { ok: true; userId: string; email: string } | { ok: false; response: NextResponse }
 
+/**
+ * A signed-in administrator: confirmed e-mail listed in PHYGO_ADMIN_EMAILS.
+ * Bearer tokens (CRON_SECRET, PHYGO_ADMIN_API_TOKEN) are never accepted here.
+ * Administrator status grants no clinical permission and no patient access.
+ */
+export async function requireAdminSession(): Promise<AdminSession> {
   const cookieStore = cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -88,7 +93,7 @@ export async function requireAdmin(req: Request): Promise<NextResponse | null> {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+    return { ok: false, response: NextResponse.json({ error: 'unauthorized' }, { status: 401 }) }
   }
 
   const adminEmails = parseList(process.env.PHYGO_ADMIN_EMAILS)
@@ -96,7 +101,23 @@ export async function requireAdmin(req: Request): Promise<NextResponse | null> {
   const isAdmin = !!email && !!user.email_confirmed_at && adminEmails.includes(email)
 
   if (!isAdmin) {
-    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+    return { ok: false, response: NextResponse.json({ error: 'forbidden' }, { status: 403 }) }
   }
-  return null
+  return { ok: true, userId: user.id, email: email as string }
+}
+
+/**
+ * Returns null when the caller is an admin, otherwise a 401/403 response the
+ * route should return as-is:
+ *
+ *   const denied = await requireAdmin(req)
+ *   if (denied) return denied
+ *
+ * Accepts a signed-in administrator or PHYGO_ADMIN_API_TOKEN. CRON_SECRET is
+ * accepted only with { allowCron: true }, for the routes the cron calls.
+ */
+export async function requireAdmin(req: Request, options: { allowCron?: boolean } = {}): Promise<NextResponse | null> {
+  if (hasAdminApiToken(req, !!options.allowCron)) return null
+  const session = await requireAdminSession()
+  return session.ok ? null : session.response
 }

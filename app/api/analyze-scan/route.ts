@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireVerifiedProfessional } from "@/lib/auth/sessionServer";
+import { consumeHourly, HOURLY_LIMITS, limitResponse } from "@/lib/rateLimit";
 import OpenAI from "openai";
+import { lazy } from "@/lib/lazy";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
 
 const LANGUAGE_NAMES: Record<string, string> = {
   "it-IT": "Italian",
@@ -11,6 +14,12 @@ const LANGUAGE_NAMES: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
+  // Clinician-only paid AI operation (OpenAI) on real clinical information: verified professional + hourly cap.
+  const gate = await requireVerifiedProfessional();
+  if (!gate.ok) return gate.response;
+  const limited = limitResponse(await consumeHourly(`ai:analyze-scan:${gate.user.id}`, HOURLY_LIMITS.analyzeScan));
+  if (limited) return limited;
+
   try {
     const { images, language, context } = await req.json();
 

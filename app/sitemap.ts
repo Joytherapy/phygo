@@ -1,11 +1,12 @@
 import type { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { SITE_URL, buildConditionPath } from '@/lib/publicLibrary';
+import { lazy } from '@/lib/lazy';
 
-const adminSupabase = createClient(
+const adminSupabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
 export const revalidate = 3600;
 

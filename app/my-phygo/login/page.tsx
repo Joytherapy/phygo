@@ -7,11 +7,12 @@ import { Loader2, Smartphone } from 'lucide-react'
 import { useEntryLang } from '@/lib/i18n/useEntryLang'
 import { ENTRY_STRINGS } from '@/lib/i18n/entryStrings'
 import { loginHref } from '@/lib/i18n/landingStrings'
+import { lazy } from '@/lib/lazy'
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+))
 
 export default function MyPhygoLoginPage() {
   return (

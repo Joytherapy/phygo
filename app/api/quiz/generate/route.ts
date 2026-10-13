@@ -3,14 +3,15 @@ import { createClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
 import { requireQuizUser } from '@/lib/quiz/authServer'
 import { isQuizSubject, isQuizDifficulty, isQuizLanguage, QUIZ_SUBJECT_SCOPES, type QuizLanguage, type QuizSubject } from '@/lib/quiz/subjects'
+import { lazy } from '@/lib/lazy'
 
 // Service-role client — same reasoning as knowledge-resolve/route.ts: quiz_questions
 // has RLS enabled with zero policies, so it is only ever reachable through routes
 // like this one, never via a direct anon/authenticated Supabase call. That is what
 // keeps correct_index/explanation out of reach of the client (a row-level policy
 // couldn't hide just those two columns on its own).
-const adminSupabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const adminSupabase = lazy(() => createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!))
+const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }))
 
 const TARGET_POOL_SIZE = 100 // cached questions kept on hand per subject+difficulty+language —
 // raised from 50 to 100 per user request ("anatomia vorrei ci fossero almeno 100 domande");

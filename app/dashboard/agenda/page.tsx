@@ -17,15 +17,21 @@ import {
   Plus,
   Search,
   User,
+  Clock,
+  CalendarX,
 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
+import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
+import { useClinicalLocked } from '@/lib/useClinicalAccess'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useAgendaUi, localeForLang } from '@/lib/i18n/agendaStrings'
+import { cancelAppointment } from '@/lib/appointments'
+import { lazy } from '@/lib/lazy'
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+))
 
 type Appointment = {
   id: string
@@ -73,6 +79,7 @@ export default function AgendaPage() {
   const router = useRouter()
   const { lang } = useLanguage()
   const ui = useAgendaUi()
+  const locked = useClinicalLocked()
   const locale = localeForLang(lang)
   const SLOTS = buildSlots(locale)
   const [appointments, setAppointments] = useState<Appointment[]>([])
@@ -91,6 +98,10 @@ export default function AgendaPage() {
   const [addSaving, setAddSaving] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
   const [addNote, setAddNote] = useState('')
+  const [selected, setSelected] = useState<Appointment | null>(null)
+  const [confirmingCancel, setConfirmingCancel] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelError, setCancelError] = useState<string | null>(null)
   const columnRefs = useRef<Record<string, HTMLDivElement | null>>({})
   useEffect(() => {
     setMounted(true)
@@ -114,7 +125,33 @@ export default function AgendaPage() {
   }, [])
 
   const updateStatus = async (id: string, status: 'confirmed' | 'cancelled') => {
+    if (locked) return
     await supabase.from('appointments').update({ status }).eq('id', id)
+    await loadAppointments()
+  }
+
+  const openDetails = (a: Appointment) => {
+    setSelected(a)
+    setConfirmingCancel(false)
+    setCancelError(null)
+  }
+
+  const closeDetails = () => {
+    if (cancelling) return
+    setSelected(null)
+  }
+
+  const handleCancelSelected = async () => {
+    if (!selected || locked) return
+    setCancelling(true)
+    setCancelError(null)
+    const ok = await cancelAppointment(supabase, selected.id)
+    setCancelling(false)
+    if (!ok) {
+      setCancelError(ui.cancelFlow.cancelError)
+      return
+    }
+    setSelected(null)
     await loadAppointments()
   }
 
@@ -145,6 +182,7 @@ export default function AgendaPage() {
   }
 
   const openAddModal = (day: Date, slotIndex: number) => {
+    if (locked) return
     setAddDay(day)
     setAddSlotIndex(slotIndex)
     setAddSessionType('video')
@@ -244,7 +282,8 @@ export default function AgendaPage() {
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => openAddModal(weekDays[0], 4)}
-              className="flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white shadow-[0_6px_16px_rgba(79,124,255,0.35)] transition-transform hover:scale-[1.03]"
+              disabled={locked}
+              className="flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white shadow-[0_6px_16px_rgba(79,124,255,0.35)] transition-transform hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
             >
               <Plus size={14} />
@@ -270,6 +309,8 @@ export default function AgendaPage() {
             </button>
           </div>
         </div>
+
+        <ClinicalAccessNotice />
 
         {loading || !mounted ? (
           <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-16 text-center">
@@ -303,12 +344,14 @@ export default function AgendaPage() {
                       <div className="flex gap-2 shrink-0">
                         <button
                           onClick={() => updateStatus(req.id, 'confirmed')}
+                          disabled={locked}
                           className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white hover:bg-emerald-600 transition-colors"
                         >
                           <Check size={14} />
                         </button>
                         <button
                           onClick={() => updateStatus(req.id, 'cancelled')}
+                          disabled={locked}
                           className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
                         >
                           <X size={14} />
@@ -392,7 +435,7 @@ export default function AgendaPage() {
                                 key={a.id}
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  router.push(`/dashboard/patients/${a.patient_id}`)
+                                  openDetails(a)
                                 }}
                                 className="absolute left-1 right-1 rounded-lg px-2 py-1 text-left overflow-hidden text-white shadow-soft hover:shadow-md hover:scale-[1.02] transition-all z-10"
                                 style={{
@@ -597,6 +640,95 @@ export default function AgendaPage() {
                   {ui.common.confirm}
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {selected && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-6"
+            onClick={closeDetails}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.98 }}
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="appointment-details-title"
+              className="w-full max-w-sm rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#12131a] shadow-2xl p-6"
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#4F7CFF] mb-1">
+                {ui.cancelFlow.detailsEyebrow}
+              </p>
+              <p id="appointment-details-title" className="text-sm font-bold text-ink dark:text-white">
+                {selected.patients?.name || ui.common.patientFallback}
+              </p>
+              <div className="mt-2 mb-5 space-y-1.5 text-sm text-ink/60 dark:text-white/60">
+                <p className="flex items-center gap-1.5">
+                  <Calendar size={13} />
+                  {new Date(selected.scheduled_at).toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })}
+                </p>
+                <p className="flex items-center gap-1.5">
+                  <Clock size={13} />
+                  {new Date(selected.scheduled_at).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })}
+                </p>
+                <p className="flex items-center gap-1.5">
+                  {selected.session_type === 'video' ? <Video size={13} /> : <MapPin size={13} />}
+                  {selected.session_type === 'video' ? ui.common.videoCall : ui.common.inPerson}
+                </p>
+              </div>
+
+              {confirmingCancel ? (
+                <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-4">
+                  <p className="text-sm font-semibold text-ink dark:text-white">{ui.cancelFlow.confirmQuestion}</p>
+                  <p className="text-xs text-ink/60 dark:text-white/50 mt-1 mb-3">{ui.cancelFlow.confirmDetail}</p>
+                  {cancelError && <p className="text-xs text-red-500 mb-3">{cancelError}</p>}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setConfirmingCancel(false)}
+                      disabled={cancelling}
+                      className="flex-1 rounded-full py-2.5 text-sm font-semibold text-ink/60 dark:text-white/60 border border-black/10 dark:border-white/10 disabled:opacity-50"
+                    >
+                      {ui.cancelFlow.keep}
+                    </button>
+                    <button
+                      onClick={handleCancelSelected}
+                      disabled={cancelling || locked}
+                      className="flex-1 flex items-center justify-center gap-2 rounded-full py-2.5 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 disabled:opacity-50 transition-colors"
+                    >
+                      {cancelling && <Loader2 size={14} className="animate-spin" />}
+                      {ui.cancelFlow.confirmYes}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => router.push(`/dashboard/patients/${selected.patient_id}`)}
+                    className="w-full flex items-center justify-center gap-2 rounded-full py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02]"
+                    style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                  >
+                    <User size={14} />
+                    {ui.cancelFlow.openPatient}
+                  </button>
+                  {!locked && (
+                    <button
+                      onClick={() => setConfirmingCancel(true)}
+                      className="w-full flex items-center justify-center gap-2 rounded-full py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 border border-red-500/30 hover:bg-red-500/5 transition-colors"
+                    >
+                      <CalendarX size={14} />
+                      {ui.cancelFlow.cancelAppointment}
+                    </button>
+                  )}
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}

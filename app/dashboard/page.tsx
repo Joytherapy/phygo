@@ -6,12 +6,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, User, Users, FileText, Activity, Search, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
+import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
+import { useClinicalLocked } from '@/lib/useClinicalAccess'
 import { useUiStrings } from '@/contexts/LanguageContext'
+import { lazy } from '@/lib/lazy'
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+))
 
 type Patient = {
   id: string
@@ -43,6 +46,7 @@ const STAT_STYLES = [
 
 export default function DashboardPage() {
   const ui = useUiStrings()
+  const locked = useClinicalLocked()
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -85,6 +89,7 @@ export default function DashboardPage() {
 
   const handleCreatePatient = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (locked) return
     setSaving(true)
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -162,7 +167,8 @@ export default function DashboardPage() {
                    <div className="hidden sm:flex items-center gap-2">
             <button
               onClick={() => setShowForm(!showForm)}
-              className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105"
+              disabled={locked}
+              className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               style={{
                 background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)',
               }}
@@ -206,10 +212,13 @@ export default function DashboardPage() {
           ))}
         </motion.div>
 
+        <ClinicalAccessNotice />
+
                <div className="mb-6 sm:hidden">
           <button
             onClick={() => setShowForm(!showForm)}
-            className="w-full flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg"
+            disabled={locked}
+            className="w-full flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
           >
             {showForm ? <X size={16} /> : <Plus size={16} />}

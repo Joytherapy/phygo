@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { Flame, ArrowRight, ArrowLeft } from 'lucide-react'
 import { useUiStrings } from '@/contexts/LanguageContext'
+import { lazy } from '@/lib/lazy'
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+))
 
 // Hub "Phygo Life" — oggi ospita solo il Profilo Metabolico, ma e' pensato
 // per crescere (passi, allenamenti, sonno, wearable — vedi §15 del brief)

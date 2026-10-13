@@ -6,13 +6,14 @@ import Footer from '@/components/Footer';
 import ConditionSearchList from './_components/ConditionSearchList';
 import LanguageSwitcher from '@/components/library/LanguageSwitcher';
 import { SITE_URL, buildConditionIndexPath } from '@/lib/publicLibrary';
+import { lazy } from '@/lib/lazy';
 
 export const revalidate = 3600;
 
-const adminSupabase = createClient(
+const adminSupabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
 const description =
   'Centinaia di condizioni cliniche — ortopediche, neurologiche, cardiopolmonari, oncologiche — con obiettivi riabilitativi, test clinici, red flags ed esercizi tipici verificati su letteratura scientifica aggiornata.';
@@ -39,6 +40,10 @@ export const metadata: Metadata = {
 };
 
 async function getAllConditions() {
+  // A build without Supabase (Vercel Preview has no Production secrets) still
+  // renders the page, empty. With Supabase configured, nothing changes: a
+  // failed regeneration keeps serving the previous version.
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
   const { data, error } = await adminSupabase
     .from('knowledge_base')
     .select('id, condition_name')

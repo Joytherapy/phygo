@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { lazy } from '@/lib/lazy';
 
 export const dynamic = 'force-dynamic';
 
-const supabase = createClient(
+const supabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
 // Backs the "My Events" page: returns every event the current user has
 // saved, joined with the event row. The page itself buckets these into

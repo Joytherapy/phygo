@@ -7,10 +7,11 @@ import { motion } from 'framer-motion'
 import { FileText, Calendar, Dumbbell, ClipboardList, ShoppingBag, ExternalLink, ArrowRight, Flame } from 'lucide-react'
 import VideoCallPanel from '@/components/VideoCallPanel'
 import AppointmentScheduler from '@/components/AppointmentScheduler'
-const supabase = createBrowserClient(
+import { lazy } from '@/lib/lazy'
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+))
 
 type PatientRecord = {
   id: string
