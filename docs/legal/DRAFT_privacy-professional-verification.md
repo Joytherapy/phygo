@@ -1,23 +1,74 @@
 # DRAFT — Privacy notice, section "Professional verification" (`/privacy#professional-verification`)
 
-**Status: unpublished draft. Do not copy into `app/privacy/page.tsx` until every item marked `[TO CONFIRM]` is filled in by the owner and the text has been reviewed by a qualified data-protection professional.**
+**Status: unpublished draft. Do not copy it into `app/privacy/page.tsx` until:**
+- every item marked `[TO CONFIRM]` or `[OWNER DECISION]` is resolved;
+- the text has been reviewed by a qualified data-protection professional.
 
 The verification form already links to `/privacy#professional-verification`. That anchor does not exist yet, on purpose: the evidence feature must not be released before this section is published.
+
+## Verified facts (read-only checks, 13 Oct 2026)
+How the facts were obtained:
+- Vercel and Supabase settings: read through their APIs.
+- Provider documentation: the official documentation search tools, plus web search.
+- The container cannot open vercel.com or supabase.com directly, so the legal pages themselves (DPA, sub-processor lists) were **not read in full**. Every contract point below says what was and was not seen.
+
+### Where the document goes
+| # | Step | Where | What happens to the file | Evidence |
+|---|---|---|---|---|
+| 1 | Browser → `POST /api/profile/verification` | Vercel. The function runs in **`iad1`, Washington DC, USA** | **The file is processed:** read into memory, then size, extension and first bytes are checked. It is then uploaded to Supabase. It is not written to disk and not logged | Production deployment metadata: `regions: ["iad1"]`. No `regions` in `vercel.json` and no `preferredRegion` in the code, so this is Vercel's default |
+| 1a | Middleware (`middleware.ts`) | Vercel | Runs on every request. It reads only cookies and headers, **not the file** | Code |
+| 2 | Vercel → Supabase Storage | Bucket `verification-documents`, project region **`eu-central-1`, Frankfurt, Germany** | **Stored** | Supabase API (project region). Supabase docs: "Storage objects are hosted in that region" |
+| 3 | User or administrator opens the document | `GET /api/profile/verification/document` and `GET /api/admin/verification/document` (Vercel, `iad1`) | **Metadata only:** the routes read the path and type and create a signed link. They do not read the file | Code |
+| 3a | The browser downloads the file | Directly from Supabase, through its CDN (Cloudflare) | **Copies may be cached** at the CDN node that serves the request and in the browser (see "Caches") | Supabase docs (Smart CDN); storage-js defaults |
+| 4 | Administrator console `GET /api/admin/verification` | Vercel, `iad1` | **Metadata only:** declared details, status, history. No path and no file | Code |
+| 5 | Retention route (off) | Vercel, `iad1` | Deletes the file and lists its folder. **No file content** | Code |
+
+**Not involved:** the document is never sent to OpenAI, to the video service or to e-mail. The code has no analytics or monitoring SDK.
+
+### Caches, copies and logs
+- **Supabase Smart CDN.** It is on, because the Supabase organisation is on the **Pro** plan and Supabase enables it automatically from Pro. Supabase's docs say:
+  - signed-link responses are cached at the CDN edge;
+  - a cached response for the **same link** can still be served after the link's token has expired, until the CDN cache entry expires;
+  - deleting the file invalidates all cached copies within about 60 seconds.
+
+  So "the link expires after 60 seconds" means new downloads need a new link. It does **not** mean every copy disappears after 60 seconds.
+- **Browser cache.** The upload does not set `cacheControl`, so storage-js uses its default of `3600`. A browser that opened the file may keep it for up to 1 hour.
+- **Next.js data cache.** It was empty after the whole test suite ran against the production build of the app with test settings.
+- **Signed-link routes** answer with `Cache-Control: no-store`.
+- **Application logs.** No paths, contents or signed links. There is a test for this.
+- **Vercel log drains:** none configured (API).
+- **Supabase logs.**
+  - Storage and API logs record request paths. The object path contains the account id and the request id, not the content.
+  - **Not verified:** whether the signed-link token (a query parameter) is also recorded.
+- **Administrator access through a token.** `requireAdmin` also accepts the cron secret and an admin API token as a bearer token, so whoever holds those can open documents without a personal admin session. The decision is still attributed to the label "api-token".
+
+### Providers: what was verified and what was not
+| | Supabase | Vercel |
+|---|---|---|
+| Plan | **Pro** (Supabase API) | **Hobby**. Established earlier in the project; the team API does not show the plan. Check in Settings → Billing |
+| Region | `eu-central-1` (Frankfurt) for database, Auth and Storage (API + docs) | Functions in `iad1` (USA) (API). Static files are served from Vercel's global network |
+| Copies outside the region | Possible, through the CDN (Cloudflare) cache, per Supabase's own documentation. Logs, backups and support access are part of the transfer analysis, per Supabase | Requests enter Vercel's network at a nearby point of presence and are forwarded to `iad1` |
+| DPA | Exists (supabase.com/legal/dpa). **Not verified:** whether it is accepted or signed for this organisation (check Organization → Legal Documents), or which Supabase entity signs it | Exists (vercel.com/legal/dpa). The excerpt read says it applies to customers on **Enterprise and Pro** plans. **No evidence that it covers Hobby** |
+| Plan terms | — | Vercel's docs: the Hobby plan is for **personal, non-commercial use** only. PHYGO has paid plans, so this must be resolved with Vercel |
+| Sub-processors | A list is published. The June 2026 version names AWS and Cloudflare (hosting), among others. **Read only through search results:** review the live list | **Not obtained.** Review vercel.com/legal/sub-processors |
+| Transfer mechanism | SCCs according to third-party summaries; **no primary text read**. **No evidence** of DPF certification | Vercel states it is certified under the EU-U.S. Data Privacy Framework (its own help article). **Not checked** on dataprivacyframework.gov. The DPA refers to SCCs |
 
 ## What the current privacy notice already says (app/privacy/page.tsx)
 | Topic | Documented today | Enough for verification? |
 |---|---|---|
 | Controller | "For account and billing data, Phygo acts as data controller" (section 2) | **No.** The legal entity, address and contact details are not named |
 | Contact | General contact address (section 15) | **To confirm** that it is monitored and is the channel for data-protection requests |
-| Processors | Supabase (database and authentication, EU region), OpenAI, Vercel (hosting), Resend (e-mail) (section 6) | **Partly.** Supabase Storage (documents) is not named, and nor is the region where Vercel processes the upload |
-| Transfers | Standard Contractual Clauses "where a sub-processor is outside the EEA" (section 7) | **To confirm** for Vercel and Supabase Storage |
+| Processors | Supabase ("database and authentication, EU region"), OpenAI, Vercel ("application hosting"), Resend (section 6), each "bound by a Data Processing Agreement" | **Partly.** Storage and the CDN are not mentioned. The functions' US region is not mentioned. The "bound by a DPA" statement is **not supported by evidence for Vercel on Hobby** |
+| Transfers | Standard Contractual Clauses "where a sub-processor is outside the EEA" (section 7) | **Not supported yet** for Vercel (the processing happens in the USA) |
 | Retention | Clinical data only (section 9) | **No.** Nothing on verification data |
 | Rights and complaint | Listed in sections 12 and 15 | Yes, in general terms |
 | Automated decisions | None for clinical data (section 13) | Verification is also decided by a person (fact, from the code) |
 
-Found while checking, outside verification: the video service (Daily) is used in production but is **not** in the sub-processor list (section 6). To be added (owner and legal).
+Found while checking, outside verification:
+- Daily (video) is used in production but is **not** in the sub-processor list (section 6).
+- The `iad1` region applies to **every** server function, so clinical data sent to the API (notes, AI requests) is also processed in the USA. The privacy notice does not say so today.
 
-## Facts taken from the code (true today, no confirmation needed)
+## Facts taken from the code (true today)
 - **Data collected:**
   - legal first and last name;
   - country, territorial Order or register, and registration number;
@@ -27,47 +78,53 @@ Found while checking, outside verification: the video service (Daily) is used in
   - the decision (time, who, reason category, message to the user);
   - an optional internal note;
   - an hourly counter of submissions (abuse prevention).
-- **Storage:**
-  - the document is kept in a private storage area;
-  - users read only their own document, through a link valid for 60 seconds;
-  - administrators reach documents only after a server-side permission check, also through a 60-second link.
+- **Access:** the owner and authorised administrators get a temporary link, after a server-side permission check. Nobody else does: no other user, no patient.
 - **Who decides:**
-  - the check is made by a person, against the public official register;
-  - there is no automatic query of the register and no automated decision.
-- **Approval requirements:**
-  - the document must be on file;
-  - a "match" with the register must be recorded.
-- **What is never done with the document:** it is never sent to AI services (OpenAI) or to the video service. It never appears in patient records, in clinical PDFs, or to other users or patients.
+  - a person decides;
+  - there is no automatic query of the register and no automated decision;
+  - approval needs the document and a recorded "match" with the register.
 - **Already-verified accounts:**
-  - they can send the document without interruption, as long as name, number and Order stay the same;
-  - after the deadline without a confirmed document, the functions that need verification are suspended;
+  - they can send the document without interruption when name, number and Order are unchanged;
+  - the 60-day deadline is **not active** (the backfill has not been run);
   - no data is deleted.
+- **Retention:**
+  - nothing automatic is active;
+  - the periods (30 days, 12 months, 24 months) are **proposals not yet approved** and must not be published.
 
-## Items the owner must confirm `[TO CONFIRM]`
-1. The controller's identity: legal name, address, and VAT or company number if any. Also whether a DPO has been appointed.
-2. The contact channel for data-protection requests: the existing general address, or a dedicated one.
-3. **Legal basis.** Options for the lawyer:
-   - performance of the contract (Terms §3: the service is for qualified professionals), Art. 6(1)(b) GDPR;
-   - legitimate interest in patient safety and abuse prevention, Art. 6(1)(f), which needs a balancing test;
-   - a combination of the two.
+## Items to resolve
+`[OWNER DECISION]`
+1. **Function region:** keep `iad1` or move to an EU region (`fra1` Frankfurt or `cdg1` Paris). See the analysis in the PR.
+2. **Vercel plan:** Hobby (non-commercial, no evidence of DPA coverage) or Pro.
+3. **Administrator access by token:** whether documents may be opened with an API token, or only with a personal admin session.
+4. **Who the authorised administrators are:** their role and how many.
+5. **Retention periods:** approve or change the proposal.
+6. **The 60-day transition:** when, and how it is communicated (in-app only, or also by e-mail).
+7. **Data export:** whether users can export their data, and how.
 
-   Nothing is decided here.
-4. **Processors for this feature:**
-   - Supabase: database and Storage. Confirm the region and that the DPA covers Storage.
-   - Vercel: the upload passes through its functions. The deployment metadata shows the function region `iad1` (Washington, USA), so the document transits through the United States: confirm the region choice (an EU region can be set in the project), the DPA and the transfer mechanism (for example the EU-US Data Privacy Framework or Standard Contractual Clauses).
-   - Resend: only if verification e-mails are activated (not active today).
-5. **Who the "authorised administrators" are:** their role and how many. Today the list is a server setting.
-6. **Retention periods.** The proposal is in `docs/security/verification-evidence.md`: 30 days for the document, 12 months for internal notes, 24 months for older requests. Nothing is active.
-7. Whether the "verified" status will ever be shown to other users or patients. Today it is shown only to the account owner.
-8. Whether users can export their data, and how.
-9. How the 60-day transition is communicated: in-app only (implemented), or also by e-mail (not implemented).
+`[TO CONFIRM]` (facts the owner must provide or check)
+1. The controller's identity: legal name, address, VAT or company number. Whether a DPO has been appointed.
+2. The contact channel for data-protection requests.
+3. **Supabase:**
+   - whether the DPA is accepted or signed for this organisation, and by which entity;
+   - the current sub-processor list;
+   - the transfer mechanism (SCCs or other).
+4. **Vercel:**
+   - whether the account has an applicable DPA (today the evidence says Pro or Enterprise only);
+   - the current sub-processor list;
+   - the DPF listing on dataprivacyframework.gov.
+5. Whether Supabase logs record the signed-link token.
 
-## Texts needing legal review
-All four language versions below need it, in particular:
-- the legal-basis paragraph;
-- the rights paragraph, including the limits on erasure while the account is active;
-- the retention paragraph;
-- the international transfers paragraph.
+`[LEGAL REVIEW]`
+1. **Legal basis.** Not decided here. The options for the lawyer are:
+   - contract, Art. 6(1)(b);
+   - legitimate interest, Art. 6(1)(f), with a balancing test;
+   - both.
+2. **Transfers:**
+   - to the USA (Vercel functions);
+   - through the global CDN (Cloudflare) cache;
+   - whether processing by a US company counts as a transfer even with an EU region.
+3. The rights paragraph, including the limits on erasure while the account is active.
+4. Section 6 of the current notice ("each bound by a Data Processing Agreement"): it must be true before it is published.
 
 ---
 
@@ -108,15 +165,14 @@ Usiamo i dati della verifica solo per questo scopo e per prevenire abusi. Non li
 - Approviamo solo se il documento è presente e la corrispondenza con l'albo è stata registrata.
 
 **Chi può vedere i dati.**
-- **Tu:** lo stato, il messaggio che ti inviamo e il tuo documento, tramite un link valido 60 secondi.
-- **Gli amministratori autorizzati da PHYGO** `[TO CONFIRM: ruolo e numero]`: accedono al documento solo dopo un controllo dei permessi, con un link valido 60 secondi.
+- **Tu:** lo stato, il messaggio che ti inviamo e il tuo documento, tramite un link temporaneo.
+- **Gli amministratori autorizzati da PHYGO** `[TO CONFIRM: ruolo e numero]`: accedono al documento solo dopo un controllo dei permessi, con un link temporaneo.
 - **Nessun altro:** gli altri utenti e i pazienti non vedono il documento. Il documento non compare nelle cartelle cliniche, nei PDF clinici o nelle ricerche, e non viene inviato a servizi di intelligenza artificiale.
 
 **Chi tratta i dati per nostro conto.**
-- Supabase: database e archivio dei documenti `[TO CONFIRM: regione e copertura del contratto per Storage]`.
-- Vercel: hosting dell'applicazione, attraverso cui transita il caricamento `[TO CONFIRM: regione e garanzie]`.
-
-Entrambi agiscono come responsabili del trattamento, vincolati da un accordo sul trattamento dei dati. `[TO CONFIRM: trasferimenti fuori dallo Spazio economico europeo e relative garanzie]`
+- **Supabase:** database e archivio dei documenti, ospitati nella regione di Francoforte (Germania). I file vengono consegnati attraverso la rete di distribuzione dei contenuti di Supabase (Cloudflare), che può conservarne copie temporanee nei propri nodi. `[TO CONFIRM: accordo sul trattamento dei dati, sub-responsabili, garanzie per i trasferimenti]`
+- **Vercel:** hosting dell'applicazione. Il documento caricato viene elaborato dai server dell'applicazione, che oggi si trovano negli Stati Uniti (Washington). `[OWNER DECISION: mantenere questa regione o spostare l'elaborazione in una regione dell'Unione europea]` `[TO CONFIRM: accordo sul trattamento dei dati e garanzie per il trasferimento]`
+- **Nessun altro:** il documento non viene inviato a servizi di intelligenza artificiale, al servizio video o via e-mail.
 
 **Titolare e base giuridica.**
 - Titolare del trattamento: `[TO CONFIRM: denominazione, sede, contatti]`.
@@ -186,15 +242,14 @@ We use verification data only for this purpose and to prevent abuse. We do not u
 - Approval requires the document and a recorded match with the register.
 
 **Who can see the data.**
-- **You:** your status, the message we send you, and your document, through a link valid for 60 seconds.
-- **Administrators authorised by PHYGO** `[TO CONFIRM: role and number]`: they open the document only after a permission check, through a 60-second link.
+- **You:** your status, the message we send you, and your document, through a temporary link.
+- **Administrators authorised by PHYGO** `[TO CONFIRM: role and number]`: they open the document only after a permission check, through a temporary link.
 - **No one else:** other users and patients never see the document. It never appears in patient records, clinical PDFs or search, and is never sent to AI services.
 
 **Who processes the data on our behalf.**
-- Supabase: database and document storage `[TO CONFIRM: region and DPA coverage for Storage]`.
-- Vercel: application hosting, which the upload passes through `[TO CONFIRM: region and safeguards]`.
-
-Both act as processors under a data processing agreement. `[TO CONFIRM: transfers outside the European Economic Area and safeguards]`
+- **Supabase:** database and document storage, hosted in the Frankfurt (Germany) region. Files are delivered through Supabase's content delivery network (Cloudflare), which may keep temporary copies at its nodes. `[TO CONFIRM: data processing agreement, sub-processors, transfer safeguards]`
+- **Vercel:** application hosting. The uploaded document is processed by our application servers, which are currently located in the United States (Washington). `[OWNER DECISION: keep this region or move processing to a European Union region]` `[TO CONFIRM: data processing agreement and transfer safeguards]`
+- **No one else:** the document is never sent to AI services, to the video service or by e-mail.
 
 **Controller and legal basis.**
 - Controller: `[TO CONFIRM: legal name, address, contact]`.
@@ -264,15 +319,14 @@ Usamos los datos de la verificación solo con este fin y para prevenir abusos. N
 - Solo aprobamos si el documento está presente y se ha registrado la coincidencia con el registro.
 
 **Quién puede ver los datos.**
-- **Tú:** tu estado, el mensaje que te enviamos y tu documento, mediante un enlace válido durante 60 segundos.
-- **Los administradores autorizados por PHYGO** `[TO CONFIRM: función y número]`: abren el documento solo tras un control de permisos, con un enlace de 60 segundos.
+- **Tú:** tu estado, el mensaje que te enviamos y tu documento, mediante un enlace temporal.
+- **Los administradores autorizados por PHYGO** `[TO CONFIRM: función y número]`: abren el documento solo tras un control de permisos, con un enlace temporal.
 - **Nadie más:** los demás usuarios y los pacientes no ven el documento. No aparece en historias clínicas, PDF clínicos ni búsquedas, y nunca se envía a servicios de inteligencia artificial.
 
 **Quién trata los datos por nuestra cuenta.**
-- Supabase: base de datos y almacenamiento de documentos `[TO CONFIRM: región y cobertura del contrato para Storage]`.
-- Vercel: alojamiento de la aplicación, por la que pasa la subida `[TO CONFIRM: región y garantías]`.
-
-Ambos actúan como encargados del tratamiento en virtud de un contrato de encargo. `[TO CONFIRM: transferencias fuera del Espacio Económico Europeo y garantías]`
+- **Supabase:** base de datos y almacenamiento de documentos, alojados en la región de Fráncfort (Alemania). Los archivos se entregan a través de la red de distribución de contenidos de Supabase (Cloudflare), que puede conservar copias temporales en sus nodos. `[TO CONFIRM: contrato de encargo, subencargados, garantías para las transferencias]`
+- **Vercel:** alojamiento de la aplicación. El documento subido lo procesan los servidores de la aplicación, que hoy se encuentran en Estados Unidos (Washington). `[OWNER DECISION: mantener esta región o trasladar el procesamiento a una región de la Unión Europea]` `[TO CONFIRM: contrato de encargo y garantías para la transferencia]`
+- **Nadie más:** el documento nunca se envía a servicios de inteligencia artificial, al servicio de vídeo ni por correo electrónico.
 
 **Responsable y base jurídica.**
 - Responsable del tratamiento: `[TO CONFIRM: denominación, domicilio, contacto]`.
@@ -342,15 +396,14 @@ Nous utilisons les données de vérification uniquement à cette fin et pour pr�
 - Nous n'approuvons que si le document est présent et que la correspondance avec le registre a été enregistrée.
 
 **Qui peut voir les données.**
-- **Vous :** votre statut, le message que nous vous adressons et votre document, par un lien valable 60 secondes.
-- **Les administrateurs autorisés par PHYGO** `[TO CONFIRM : fonction et nombre]` : ils n'ouvrent le document qu'après un contrôle des autorisations, par un lien de 60 secondes.
+- **Vous :** votre statut, le message que nous vous adressons et votre document, par un lien temporaire.
+- **Les administrateurs autorisés par PHYGO** `[TO CONFIRM : fonction et nombre]` : ils n'ouvrent le document qu'après un contrôle des autorisations, par un lien temporaire.
 - **Personne d'autre :** les autres utilisateurs et les patients ne voient pas le document. Il n'apparaît ni dans les dossiers patients, ni dans les PDF cliniques, ni dans les recherches, et n'est jamais envoyé à des services d'intelligence artificielle.
 
 **Qui traite les données pour notre compte.**
-- Supabase : base de données et stockage des documents `[TO CONFIRM : région et couverture du contrat pour Storage]`.
-- Vercel : hébergement de l'application, par laquelle transite le téléversement `[TO CONFIRM : région et garanties]`.
-
-Tous deux agissent en tant que sous-traitants, liés par un accord de traitement des données. `[TO CONFIRM : transferts hors de l'Espace économique européen et garanties]`
+- **Supabase :** base de données et stockage des documents, hébergés dans la région de Francfort (Allemagne). Les fichiers sont distribués par le réseau de diffusion de contenu de Supabase (Cloudflare), qui peut en conserver des copies temporaires sur ses nœuds. `[TO CONFIRM : accord de traitement des données, sous-traitants ultérieurs, garanties pour les transferts]`
+- **Vercel :** hébergement de l'application. Le document téléversé est traité par les serveurs de l'application, situés aujourd'hui aux États-Unis (Washington). `[OWNER DECISION : conserver cette région ou déplacer le traitement dans une région de l'Union européenne]` `[TO CONFIRM : accord de traitement des données et garanties pour le transfert]`
+- **Personne d'autre :** le document n'est jamais envoyé à des services d'intelligence artificielle, au service vidéo ni par e-mail.
 
 **Responsable et base juridique.**
 - Responsable du traitement : `[TO CONFIRM : dénomination, siège, contact]`.
