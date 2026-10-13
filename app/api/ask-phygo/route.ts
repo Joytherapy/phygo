@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { requireUser } from "@/lib/auth/sessionServer";
 import { consumeHourly, limitResponse } from "@/lib/rateLimit";
+import { lazy } from "@/lib/lazy";
 
-const openai = new OpenAI({
+const openai = lazy(() => new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-});
+}));
 
 // Hourly questions per plan. Ask PHYGO is only used inside the signed-in
 // dashboard, so anonymous calls are refused.
