@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { ownsPatient, requireVerifiedProfessional } from '@/lib/auth/sessionServer'
 import { consumeHourly, HOURLY_LIMITS, limitResponse } from '@/lib/rateLimit'
@@ -30,7 +31,9 @@ export async function POST(req: NextRequest) {
     const limited = limitResponse(await consumeHourly(`ai:video-room:${gate.user.id}`, HOURLY_LIMITS.videoRoom))
     if (limited) return limited
 
-    const roomName = `session-${patientId}-${Date.now()}`
+    // A random name: Daily never receives the patient's id, and the room URL
+    // (shared with the patient) cannot be guessed from anything we know.
+    const roomName = `phygo-${randomUUID()}`
 
     const res = await fetch(`${DAILY_API}/rooms`, {
       method: 'POST',
