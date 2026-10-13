@@ -151,3 +151,16 @@ test('the daily cron still runs: it needs CRON_SECRET and its calls to the batch
   }
   assert.match(String(body.summarize?.message), /sintesi/);
 });
+
+test('a maintenance token set to the same value as CRON_SECRET does not reopen the other admin routes', async () => {
+  // Misconfiguration guard: PHYGO_ADMIN_API_TOKEN equal to CRON_SECRET.
+  const same = await startApp({ fakeUrl: fake.url, port: 3431, env: { PHYGO_ADMIN_API_TOKEN: CRON } });
+  try {
+    const get = (path) => fetch(`${same.url}${path}`, { headers: { authorization: `Bearer ${CRON}` } });
+    assert.equal((await get('/api/library/admin')).status, 401, 'maintenance route');
+    assert.equal((await get('/api/admin/verification')).status, 401, 'verification console');
+    assert.equal((await get('/api/science/summarize-all')).status, 200, 'the cron route still works');
+  } finally {
+    await same.stop();
+  }
+});

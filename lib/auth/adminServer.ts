@@ -56,10 +56,12 @@ export function hasCronSecret(req: Request): boolean {
 function hasAdminApiToken(req: Request, allowCron: boolean): boolean {
   const token = bearerToken(req)
   if (!token) return false
-  const secrets = [allowCron ? process.env.CRON_SECRET : undefined, process.env.PHYGO_ADMIN_API_TOKEN].filter(
-    (s): s is string => !!s
-  )
-  return secrets.some((secret) => safeEqual(token, secret))
+  const cron = process.env.CRON_SECRET
+  if (cron && safeEqual(token, cron)) return allowCron
+  // A PHYGO_ADMIN_API_TOKEN equal to CRON_SECRET is refused above, so the cron
+  // secret can never open other admin routes through the maintenance token.
+  const apiToken = process.env.PHYGO_ADMIN_API_TOKEN
+  return !!apiToken && safeEqual(token, apiToken)
 }
 
 export type AdminSession = { ok: true; userId: string; email: string } | { ok: false; response: NextResponse }
