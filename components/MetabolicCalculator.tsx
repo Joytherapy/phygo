@@ -14,11 +14,12 @@ import type {
   MetabolicResult,
   Sex,
 } from '@/lib/metabolicCalculator';
+import { lazy } from '@/lib/lazy';
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+));
 
 // Identita' cromatica del calcolatore: eredita l'indaco/violetto di Clinical
 // Toolkit (#6366F1/#8B5CF6) per il badge/CTA, ma per il grafico a barre dei

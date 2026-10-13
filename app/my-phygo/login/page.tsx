@@ -4,11 +4,12 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { Loader2, Smartphone } from 'lucide-react'
+import { lazy } from '@/lib/lazy'
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+))
 
 export default function MyPhygoLoginPage() {
   const router = useRouter()

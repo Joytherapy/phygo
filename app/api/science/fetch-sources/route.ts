@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/adminServer';
 import { createClient } from '@supabase/supabase-js';
+import { lazy } from '@/lib/lazy';
 
-const supabase = createClient(
+const supabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
 export async function GET(req: Request) {
-  const denied = await requireAdmin(req);
+  // Called daily by /api/cron/science-daily with CRON_SECRET.
+  const denied = await requireAdmin(req, { allowCron: true });
   if (denied) return denied;
 
   try {

@@ -4,15 +4,18 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Camera, Plus, X, Loader2, Check, Award, BadgeCheck, GraduationCap, Stethoscope } from 'lucide-react'
+import { ArrowLeft, Camera, Plus, X, Loader2, Check, Award, GraduationCap, Stethoscope } from 'lucide-react'
 import Navbar from '@/components/Navbar'
+import ProfessionalVerificationCard, { type VerificationSummary } from '@/components/ProfessionalVerificationCard'
+import VerificationBadge from '@/components/VerificationBadge'
 import { useUiStrings } from '@/contexts/LanguageContext'
 import { useRoleUi, type PracticeStage } from '@/lib/i18n/roleStrings'
+import { lazy } from '@/lib/lazy'
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+))
 
 type Credential = { id: string; label: string }
 
@@ -42,7 +45,8 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState('')
   const [bio, setBio] = useState('')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
-  const [registrationNumber, setRegistrationNumber] = useState('')
+  const [verification, setVerification] = useState<VerificationSummary | null>(null)
+  const [showVerification, setShowVerification] = useState(false)
   const [credentials, setCredentials] = useState<Credential[]>([])
   const [newCredential, setNewCredential] = useState('')
 
@@ -57,7 +61,7 @@ export default function ProfilePage() {
 
       const { data } = await supabase
         .from('profiles')
-        .select('display_name, bio, avatar_url, credentials, registration_number, practice_stage')
+        .select('display_name, bio, avatar_url, credentials, practice_stage')
         .eq('id', user.id)
         .single()
 
@@ -65,7 +69,6 @@ export default function ProfilePage() {
         setDisplayName(data.display_name || user.user_metadata?.display_name || '')
         setBio(data.bio || '')
         setAvatarUrl(data.avatar_url || null)
-        setRegistrationNumber(data.registration_number || '')
         setCredentials(Array.isArray(data.credentials) ? data.credentials : [])
         if (data.practice_stage === 'student' || data.practice_stage === 'professional') {
           setPracticeStage(data.practice_stage)
@@ -115,7 +118,6 @@ export default function ProfilePage() {
         display_name: displayName || null,
         bio: bio || null,
         avatar_url: avatarUrl,
-        registration_number: registrationNumber || null,
         credentials,
       })
       .eq('id', userId)
@@ -232,6 +234,13 @@ export default function ProfilePage() {
           <div>
             <p className="text-sm font-semibold text-ink dark:text-white">{t.photoLabel}</p>
             <p className="text-xs text-ink/55 dark:text-white/40">{t.photoHint}</p>
+            <div className="mt-2">
+              <VerificationBadge
+                summary={verification && { ...verification, practiceStage }}
+                expanded={showVerification}
+                onClick={verification?.status === 'verified' ? () => setShowVerification((s) => !s) : undefined}
+              />
+            </div>
           </div>
         </div>
 
@@ -262,20 +271,16 @@ export default function ProfilePage() {
             />
           </div>
 
-          <div>
-            <label className="text-sm font-medium text-ink/60 dark:text-white/50 flex items-center gap-1.5">
-              <BadgeCheck size={14} className="text-[#4F7CFF]" />
-              {t.registrationNumberLabel}
-            </label>
-            <input
-              type="text"
-              value={registrationNumber}
-              onChange={(e) => setRegistrationNumber(e.target.value)}
-              placeholder={t.registrationNumberPlaceholder}
-              className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
-            />
-            <p className="mt-1.5 text-xs text-ink/55 dark:text-white/40">{t.registrationNumberHint}</p>
-          </div>
+          {/* The registration number is submitted for review here, never saved
+              directly from the browser: only PHYGO can mark it verified. */}
+          {/* Only the badge next to the photo by default: students never see the
+              card (verification is for qualified physiotherapists), and once
+              verified it collapses into the badge, which reopens it. A student
+              who switches to professional sees it right away. */}
+          <ProfessionalVerificationCard
+            onChange={setVerification}
+            hidden={practiceStage === 'student' || (verification?.status === 'verified' && !showVerification)}
+          />
 
           <div>
             <label className="text-sm font-medium text-ink/60 dark:text-white/50 mb-2 block">

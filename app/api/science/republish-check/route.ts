@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/adminServer';
 import { createClient } from '@supabase/supabase-js';
+import { lazy } from '@/lib/lazy';
 
-const supabase = createClient(
+const supabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
 const AUTO_PUBLISH_TYPES = ['Systematic Review', 'Meta-analysis', 'RCT'];
 const AUTO_PUBLISH_THRESHOLD = 70;
