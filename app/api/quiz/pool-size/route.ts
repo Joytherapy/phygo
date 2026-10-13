@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { requireQuizUser } from '@/lib/quiz/authServer'
 import { isQuizSubject, isQuizLanguage, QUIZ_DIFFICULTIES, type QuizLanguage } from '@/lib/quiz/subjects'
+import { lazy } from '@/lib/lazy'
 
 // Lightweight companion to /api/quiz/generate — added per user request
 // ("andrebbe esplicitato quante sono le domande totali... che cambiano
@@ -12,7 +13,7 @@ import { isQuizSubject, isQuizLanguage, QUIZ_DIFFICULTIES, type QuizLanguage } f
 // Same service-role reasoning as generate/route.ts: quiz_questions has RLS
 // enabled with zero policies, so counting rows needs the admin client even
 // though this only ever returns a number, never row content.
-const adminSupabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+const adminSupabase = lazy(() => createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!))
 
 export async function GET(req: NextRequest) {
   const { unauthorized } = await requireQuizUser()

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
 import { requireQuizUser } from '@/lib/quiz/authServer'
 import { isQuizSubject, isQuizDifficulty, isQuizLanguage, type QuizLanguage } from '@/lib/quiz/subjects'
+import { lazy } from '@/lib/lazy'
 
 // One-off maintenance tool, added per user request ("ricontrolla tutte le
 // domande") after a live spot-check of generated content turned up one
@@ -18,8 +19,8 @@ import { isQuizSubject, isQuizDifficulty, isQuizLanguage, type QuizLanguage } fr
 // real user (the founder, testing); flag for a real admin check before
 // wider launch, since a malicious authenticated user could otherwise burn
 // OpenAI budget by hitting this repeatedly.
-const adminSupabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const adminSupabase = lazy(() => createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!))
+const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }))
 
 const BATCH_LIMIT = 10 // kept small (vs. generate/route.ts's 15-question GENERATE_BATCH) — each
 // item here asks for a verdict PLUS a reason, which is a heavier per-item output than plain

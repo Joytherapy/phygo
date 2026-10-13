@@ -14,13 +14,14 @@
 import { createHash } from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
+import { lazy } from '@/lib/lazy';
 
-const adminSupabase = createClient(
+const adminSupabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
 
 /** Languages the Exercise Library can be displayed in. English is the source language this content is authored in. */
 export type ExerciseLang = 'en' | 'it' | 'es' | 'fr';

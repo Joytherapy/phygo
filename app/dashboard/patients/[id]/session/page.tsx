@@ -13,11 +13,12 @@ import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
 import { useClinicalLocked } from '@/lib/useClinicalAccess'
 import AppointmentScheduler from '@/components/AppointmentScheduler'
 import { useUiStrings } from '@/contexts/LanguageContext'
+import { lazy } from '@/lib/lazy'
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+))
 
 type Patient = {
   id: string

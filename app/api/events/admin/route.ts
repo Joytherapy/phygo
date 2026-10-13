@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/adminServer';
 import { createClient } from '@supabase/supabase-js';
+import { lazy } from '@/lib/lazy';
 
 export const dynamic = 'force-dynamic';
 
-const supabase = createClient(
+const supabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
 // Admin queue: every event regardless of moderation_status, newest first.
 // The events-admin page filters client-side by moderation_status (pending

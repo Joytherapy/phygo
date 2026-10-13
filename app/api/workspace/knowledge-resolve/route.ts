@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireWorkspaceUser } from '@/lib/workspace/authServer'
+import { lazy } from '@/lib/lazy'
 
 // GET /api/workspace/knowledge-resolve?text=<selected text>&lang=it|en|es|fr
 //
@@ -50,7 +51,7 @@ import { requireWorkspaceUser } from '@/lib/workspace/authServer'
 // user-owned rows. The route itself is still gated behind
 // requireWorkspaceUser so only a signed-in Workspace user can call it.
 
-const adminSupabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+const adminSupabase = lazy(() => createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!))
 
 const MIN_MATCH_CHARS = 4
 // Only for the RISKY match direction — see matchScore below. A generic short

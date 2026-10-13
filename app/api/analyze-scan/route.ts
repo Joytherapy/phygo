@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireVerifiedProfessional } from "@/lib/auth/sessionServer";
 import { consumeHourly, HOURLY_LIMITS, limitResponse } from "@/lib/rateLimit";
 import OpenAI from "openai";
+import { lazy } from "@/lib/lazy";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
 
 const LANGUAGE_NAMES: Record<string, string> = {
   "it-IT": "Italian",

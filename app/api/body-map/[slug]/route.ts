@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr';
 import { getTranslatedCondition, type SupportedLang } from '@/lib/conditionTranslation';
 import { translateContent, type AppLang } from '@/lib/contentTranslation';
 import { ZONE_ANATOMY } from '@/lib/bodyMapAnatomy';
+import { lazy } from '@/lib/lazy';
 
 function parseLang(value: string | null): AppLang {
   return value === 'en' || value === 'es' || value === 'fr' ? value : 'it';
@@ -30,10 +31,10 @@ async function getZoneAnatomy(slug: string, lang: AppLang) {
 
 export const dynamic = 'force-dynamic';
 
-const adminSupabase = createClient(
+const adminSupabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
 // --- Bone layer (X-ray view) fallback content ---
 // These 14 slugs come from the skeletal groups in BodyMap3D's X-ray mode.
