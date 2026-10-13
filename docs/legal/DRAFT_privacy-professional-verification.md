@@ -54,7 +54,7 @@ Found while checking, outside verification: the video service (Daily) is used in
    Nothing is decided here.
 4. **Processors for this feature:**
    - Supabase: database and Storage. Confirm the region and that the DPA covers Storage.
-   - Vercel: the upload passes through its functions. Confirm the function region, the DPA and the transfer mechanism.
+   - Vercel: the upload passes through its functions. The deployment metadata shows the function region `iad1` (Washington, USA), so the document transits through the United States: confirm the region choice (an EU region can be set in the project), the DPA and the transfer mechanism (for example the EU-US Data Privacy Framework or Standard Contractual Clauses).
    - Resend: only if verification e-mails are activated (not active today).
 5. **Who the "authorised administrators" are:** their role and how many. Today the list is a server setting.
 6. **Retention periods.** The proposal is in `docs/security/verification-evidence.md`: 30 days for the document, 12 months for internal notes, 24 months for older requests. Nothing is active.
