@@ -102,7 +102,8 @@ Abstract: ${paper.abstract || 'Not available'}`;
 }
 
 export async function GET(req: Request) {
-  const denied = await requireAdmin(req);
+  // Called daily by /api/cron/science-daily with CRON_SECRET.
+  const denied = await requireAdmin(req, { allowCron: true });
   if (denied) return denied;
 
   try {

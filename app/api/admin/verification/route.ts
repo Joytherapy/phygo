@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-import { requireAdmin } from "@/lib/auth/adminServer";
+import { requireAdminSession } from "@/lib/auth/adminServer";
 import { REVIEW_DECISIONS, serviceClient, type ReviewDecision } from "@/lib/verification";
 
 // Manual review of professional registrations by a PHYGO administrator
-// (PHYGO_ADMIN_EMAILS, see lib/auth/adminServer.ts). The administrator checks
+// (PHYGO_ADMIN_EMAILS, see lib/auth/adminServer.ts). Only a signed-in
+// administrator: no bearer token (CRON_SECRET or API token) is accepted, so
+// every decision is attributed to a person. The administrator checks
 // the number against the official public register of the stated country;
 // nothing here claims an automatic registry check.
 
@@ -13,8 +13,8 @@ const LIST_FIELDS =
   "id, display_name, practice_stage, professional_status, registry_country, registry_name, registration_number, verification_requested_at, verification_reviewed_at, verification_reviewed_by, verification_message";
 
 export async function GET(req: Request) {
-  const denied = await requireAdmin(req);
-  if (denied) return denied;
+  const admin = await requireAdminSession();
+  if (!admin.ok) return admin.response;
   const db = serviceClient();
   if (!db) return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   const status = new URL(req.url).searchParams.get("status") ?? "pending";
@@ -28,8 +28,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const denied = await requireAdmin(req);
-  if (denied) return denied;
+  const admin = await requireAdminSession();
+  if (!admin.ok) return admin.response;
   const db = serviceClient();
   if (!db) return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
 
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     .update({
       professional_status: decision,
       verification_reviewed_at: new Date().toISOString(),
-      verification_reviewed_by: await reviewerLabel(req),
+      verification_reviewed_by: admin.email,
       verification_message: message,
     })
     .eq("id", body.userId)
@@ -63,15 +63,4 @@ export async function POST(req: Request) {
     .maybeSingle();
   if (error) return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   return NextResponse.json({ request: data });
-}
-
-/** The reviewing administrator's e-mail, or "api-token" for server-to-server calls. */
-async function reviewerLabel(req: Request): Promise<string> {
-  if (/^Bearer\s+/i.test(req.headers.get("authorization") ?? "")) return "api-token";
-  const cookieStore = cookies();
-  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-    cookies: { get: (name: string) => cookieStore.get(name)?.value },
-  });
-  const { data } = await supabase.auth.getUser();
-  return data.user?.email ?? "admin";
 }
