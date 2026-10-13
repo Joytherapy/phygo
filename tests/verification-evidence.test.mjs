@@ -9,6 +9,7 @@ import assert from 'node:assert/strict';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { startFakeSupabase, sessionCookie } from './support/fake-supabase.mjs';
+import { verificationRpc } from './support/verification-rpc.mjs';
 import { startApp } from './support/app.mjs';
 
 const FAKE_PORT = Number(process.env.FAKE_SUPABASE_PORT ?? 54329);
@@ -27,6 +28,7 @@ let fake;
 let app;
 before(async () => {
   fake = await startFakeSupabase({
+    rpc: verificationRpc,
     port: FAKE_PORT,
     users: Object.fromEntries(Object.entries(people).map(([k, u]) => [`tok-${k}`, u])),
     tables: {

@@ -97,6 +97,9 @@ export function requestForUser(r: Record<string, any> | null) {
     legalFirstName: r.legal_first_name,
     legalLastName: r.legal_last_name,
     submittedAt: r.submitted_at,
+    // Sent by an already verified account with unchanged details: the
+    // account stayed verified while this request is reviewed.
+    whileVerified: !!r.submitted_while_verified,
     decidedAt: r.decided_at ?? null,
     hasDocument: !!r.document_path,
     documentDeleted: !!r.document_deleted_at,

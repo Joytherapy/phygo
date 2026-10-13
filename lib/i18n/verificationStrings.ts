@@ -87,6 +87,22 @@ type Dict = {
   aNoRequests: string;
   aAdminRequired: string;
   aLegacy: string;
+  evidenceDue: string;
+  evidenceOverdue: string;
+  evidenceRequired: string;
+  requestStatusLabel: string;
+  requestStatus: Record<'pending' | 'needs_info' | 'verified' | 'rejected' | 'superseded', string>;
+  whileVerifiedNote: string;
+  changeWarning: string;
+  aReconfirm: string;
+  aConfirm: string;
+  aDeadline: string;
+  aDeadlineOverdue: string;
+  aDeadlineMet: string;
+  aKeepsAccess: string;
+  aAccountStatus: string;
+  aRequestStatus: string;
+  aNoteRemoved: string;
   aCategories: Record<'not_in_register' | 'data_mismatch' | 'document_unreadable' | 'document_not_valid' | 'other', string>;
 };
 
@@ -178,6 +194,22 @@ const en: Dict = {
   aNoRequests: "No requests.",
   aAdminRequired: "Admin access required.",
   aLegacy: "No request with a document (account reviewed before documents were required).",
+  evidenceDue: "To keep clinical features, send proof of your registration by {date}. If your name, number and Order stay the same, your status stays “Verified” and nothing is interrupted while it is checked.",
+  evidenceOverdue: "The {date} deadline has passed without a confirmed document: clinical features that need verification (clinical AI, video consultations, creating and changing patients, notes and appointments) are suspended until PHYGO confirms your document. Your account and your patients’ data have not been deleted and remain viewable.",
+  evidenceRequired: "The deadline to send your registration document has passed. Send it from your profile: this feature will be available again once PHYGO confirms it. Your data has not been deleted.",
+  requestStatusLabel: "Request with document",
+  requestStatus: { pending: "Being checked", needs_info: "More information needed", verified: "Confirmed", rejected: "Not approved", superseded: "Replaced" },
+  whileVerifiedNote: "Document received. Your status stays “Verified” while PHYGO checks it: no feature is interrupted.",
+  changeWarning: "If you change your name, surname, number or Order, your account goes back to “Under review” and clinical features are suspended until it is approved again. If they stay the same, your “Verified” status does not change.",
+  aReconfirm: "Verified: document to check",
+  aConfirm: "Confirm validity",
+  aDeadline: "Document required by {date}",
+  aDeadlineOverdue: "Deadline passed on {date}: clinical features suspended",
+  aDeadlineMet: "Document confirmed",
+  aKeepsAccess: "Already verified account: it stays active while it is checked. “Ask for information” does not interrupt access; only a revocation removes it.",
+  aAccountStatus: "Account status",
+  aRequestStatus: "Request status",
+  aNoteRemoved: "note removed after its retention period",
   aCategories: {not_in_register: "Not in the register", data_mismatch: "Data do not match", document_unreadable: "Document unreadable", document_not_valid: "Document not suitable", other: "Other"},
 };
 
@@ -269,6 +301,22 @@ const it: Dict = {
   aNoRequests: "Nessuna richiesta.",
   aAdminRequired: "Accesso riservato agli amministratori.",
   aLegacy: "Nessuna richiesta con documento (account esaminato prima che il documento fosse richiesto).",
+  evidenceDue: "Per mantenere le funzioni cliniche, invia il documento probatorio dell'iscrizione entro il {date}. Se nome, numero e Ordine restano invariati, il tuo stato resta «Verificato» e nessuna funzione si interrompe durante il controllo.",
+  evidenceOverdue: "La scadenza del {date} è passata senza un documento confermato: le funzioni cliniche che richiedono la verifica (AI clinica, videoconsulenze, creazione e modifica di pazienti, note e appuntamenti) sono sospese finché PHYGO non conferma il documento. Il tuo account e i dati dei pazienti non sono stati cancellati e restano consultabili.",
+  evidenceRequired: "Il termine per inviare il documento d'iscrizione è scaduto. Invialo dal tuo profilo: questa funzione tornerà disponibile dopo la conferma di PHYGO. I tuoi dati non sono stati cancellati.",
+  requestStatusLabel: "Richiesta con documento",
+  requestStatus: { pending: "In controllo", needs_info: "Servono altre informazioni", verified: "Confermata", rejected: "Non approvata", superseded: "Sostituita" },
+  whileVerifiedNote: "Documento ricevuto. Il tuo stato resta «Verificato» mentre PHYGO lo controlla: nessuna funzione viene interrotta.",
+  changeWarning: "Se modifichi nome, cognome, numero o Ordine, l'account torna «In verifica» e le funzioni cliniche si sospendono fino alla nuova approvazione. Se restano uguali, lo stato «Verificato» non cambia.",
+  aReconfirm: "Verificati: documento da controllare",
+  aConfirm: "Conferma la validità",
+  aDeadline: "Documento richiesto entro il {date}",
+  aDeadlineOverdue: "Scadenza superata il {date}: funzioni cliniche sospese",
+  aDeadlineMet: "Documento confermato",
+  aKeepsAccess: "Account già verificato: resta attivo durante il controllo. «Chiedi informazioni» non interrompe l'accesso; solo la revoca lo rimuove.",
+  aAccountStatus: "Stato dell'account",
+  aRequestStatus: "Stato della richiesta",
+  aNoteRemoved: "nota rimossa per scadenza",
   aCategories: {not_in_register: "Non presente nel registro", data_mismatch: "Dati non corrispondenti", document_unreadable: "Documento illeggibile", document_not_valid: "Documento non idoneo", other: "Altro"},
 };
 
@@ -360,6 +408,22 @@ const es: Dict = {
   aNoRequests: "No hay solicitudes.",
   aAdminRequired: "Acceso reservado a administradores.",
   aLegacy: "Ninguna solicitud con documento (cuenta revisada antes de exigir documento).",
+  evidenceDue: "Para mantener las funciones clínicas, envía la prueba de tu colegiación antes del {date}. Si tu nombre, número y Colegio no cambian, tu estado sigue siendo «Verificado» y nada se interrumpe durante la comprobación.",
+  evidenceOverdue: "El plazo del {date} ha vencido sin un documento confirmado: las funciones clínicas que requieren verificación (IA clínica, videoconsultas, crear y modificar pacientes, notas y citas) quedan suspendidas hasta que PHYGO confirme tu documento. Tu cuenta y los datos de tus pacientes no se han eliminado y siguen siendo consultables.",
+  evidenceRequired: "El plazo para enviar tu documento de colegiación ha vencido. Envíalo desde tu perfil: esta función volverá a estar disponible cuando PHYGO lo confirme. Tus datos no se han eliminado.",
+  requestStatusLabel: "Solicitud con documento",
+  requestStatus: { pending: "En comprobación", needs_info: "Se necesita más información", verified: "Confirmada", rejected: "No aprobada", superseded: "Sustituida" },
+  whileVerifiedNote: "Documento recibido. Tu estado sigue siendo «Verificado» mientras PHYGO lo comprueba: ninguna función se interrumpe.",
+  changeWarning: "Si cambias nombre, apellidos, número o Colegio, la cuenta vuelve a «En revisión» y las funciones clínicas se suspenden hasta la nueva aprobación. Si no cambian, el estado «Verificado» se mantiene.",
+  aReconfirm: "Verificados: documento por comprobar",
+  aConfirm: "Confirmar validez",
+  aDeadline: "Documento requerido antes del {date}",
+  aDeadlineOverdue: "Plazo vencido el {date}: funciones clínicas suspendidas",
+  aDeadlineMet: "Documento confirmado",
+  aKeepsAccess: "Cuenta ya verificada: sigue activa durante la comprobación. «Pedir información» no interrumpe el acceso; solo la revocación lo retira.",
+  aAccountStatus: "Estado de la cuenta",
+  aRequestStatus: "Estado de la solicitud",
+  aNoteRemoved: "nota eliminada al vencer su plazo de conservación",
   aCategories: {not_in_register: "No figura en el registro", data_mismatch: "Los datos no coinciden", document_unreadable: "Documento ilegible", document_not_valid: "Documento no válido", other: "Otro"},
 };
 
@@ -451,6 +515,22 @@ const fr: Dict = {
   aNoRequests: "Aucune demande.",
   aAdminRequired: "Accès réservé aux administrateurs.",
   aLegacy: "Aucune demande avec document (compte examiné avant l'exigence du document).",
+  evidenceDue: "Pour conserver les fonctions cliniques, envoyez la preuve de votre inscription avant le {date}. Si vos nom, numéro et Ordre restent identiques, votre statut reste « Vérifié » et rien n’est interrompu pendant le contrôle.",
+  evidenceOverdue: "L’échéance du {date} est passée sans document confirmé : les fonctions cliniques qui exigent la vérification (IA clinique, téléconsultations, création et modification de patients, notes et rendez-vous) sont suspendues jusqu’à ce que PHYGO confirme votre document. Votre compte et les données de vos patients n’ont pas été supprimés et restent consultables.",
+  evidenceRequired: "Le délai pour envoyer votre document d’inscription est dépassé. Envoyez-le depuis votre profil : cette fonction sera de nouveau disponible après confirmation par PHYGO. Vos données n’ont pas été supprimées.",
+  requestStatusLabel: "Demande avec document",
+  requestStatus: { pending: "En cours de contrôle", needs_info: "Informations complémentaires nécessaires", verified: "Confirmée", rejected: "Non approuvée", superseded: "Remplacée" },
+  whileVerifiedNote: "Document reçu. Votre statut reste « Vérifié » pendant que PHYGO le contrôle : aucune fonction n’est interrompue.",
+  changeWarning: "Si vous modifiez nom, prénom, numéro ou Ordre, le compte repasse « En vérification » et les fonctions cliniques sont suspendues jusqu’à la nouvelle approbation. S’ils restent identiques, le statut « Vérifié » ne change pas.",
+  aReconfirm: "Vérifiés : document à contrôler",
+  aConfirm: "Confirmer la validité",
+  aDeadline: "Document demandé avant le {date}",
+  aDeadlineOverdue: "Échéance dépassée le {date} : fonctions cliniques suspendues",
+  aDeadlineMet: "Document confirmé",
+  aKeepsAccess: "Compte déjà vérifié : il reste actif pendant le contrôle. « Demander des informations » n’interrompt pas l’accès ; seule la révocation le retire.",
+  aAccountStatus: "Statut du compte",
+  aRequestStatus: "Statut de la demande",
+  aNoteRemoved: "note supprimée à la fin de sa durée de conservation",
   aCategories: {not_in_register: "Absent du registre", data_mismatch: "Données non concordantes", document_unreadable: "Document illisible", document_not_valid: "Document non valable", other: "Autre"},
 };
 
@@ -464,6 +544,7 @@ export function useVerificationStrings(): Dict {
 /** User-facing text for an API refusal (verification, rate limit, unavailable), or null. */
 export function refusalMessage(t: Dict, status: number, body: { code?: string } | null): string | null {
   if (status === 403 && body?.code === 'verification_required') return t.required;
+  if (status === 403 && body?.code === 'verification_evidence_overdue') return t.evidenceRequired;
   if (status === 429) return t.rateLimited;
   if (status === 503) return t.serviceUnavailable;
   return null;

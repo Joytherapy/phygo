@@ -9,6 +9,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { startFakeSupabase, sessionCookie } from './support/fake-supabase.mjs';
+import { verificationRpc } from './support/verification-rpc.mjs';
 import { startApp } from './support/app.mjs';
 
 const FAKE_PORT = Number(process.env.FAKE_SUPABASE_PORT ?? 54329);
@@ -44,6 +45,7 @@ let fake;
 let app; // runs with an active transition list, as it would during the rollout
 before(async () => {
   fake = await startFakeSupabase({
+    rpc: verificationRpc,
     port: FAKE_PORT,
     users,
     tables: {
@@ -245,7 +247,7 @@ test('6. patients are refused everywhere, even if listed by mistake, and never r
   assert.deepEqual(providerCalls(), before);
 });
 
-test('any new submission sends a verified account back to review (new document, new decision)', async () => {
+test('a verified account that changes its registration number goes back to review (new document, new decision)', async () => {
   const changed = await submit(app.url, 'verified', { registryCountry: 'IT', registryName: 'Synthetic register', registrationNumber: 'T-401' });
   assert.equal((await changed.json()).verification.status, 'pending');
   await assertLockedOut(app.url, 'verified', 'pending');

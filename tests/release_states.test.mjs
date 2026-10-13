@@ -13,6 +13,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { startFakeSupabase, sessionCookie } from './support/fake-supabase.mjs';
+import { verificationRpc } from './support/verification-rpc.mjs';
 import { startApp } from './support/app.mjs';
 
 const CODE = process.env.RELEASE_CODE === 'old' ? 'old' : 'new';
@@ -27,6 +28,7 @@ let fake;
 let app;
 before(async () => {
   fake = await startFakeSupabase({
+    rpc: verificationRpc,
     port: FAKE_PORT,
     users: { [`tok-${U.email}`]: U, [`tok-${O.email}`]: O },
     tables: {

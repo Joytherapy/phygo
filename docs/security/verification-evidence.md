@@ -1,38 +1,110 @@
 # Professional verification with evidence
 
-Status: **proposed, not applied, not deployed.** The SQL is `sql/2026-10_verification_evidence_PROPOSED.sql`. It needs the owner's approval, and the open legal and privacy points below must be closed before release.
+Status: **proposed, not applied, not deployed.**
+
+| File | What it does |
+|---|---|
+| `sql/2026-10_verification_evidence_PROPOSED.sql` | Tables, history guard, atomic server functions, private bucket. **Changes nobody's access** |
+| `sql/2026-10_verification_evidence_access_PROPOSED.sql` | Makes `can_manage_patients()` honour the evidence deadline. **Changes nothing while no deadline exists** |
+| `sql/2026-10_verification_evidence_backfill_PROPOSED.sql` | Gives accounts verified before documents were required a 60-day deadline. **Starts the clock** |
+
+All three need the owner's approval. The legal points at the end must be closed before release.
 
 ## What it adds to the existing flow
-The existing model stays the source of truth:
-- `profiles.professional_status` is still the only verified status;
-- `can_manage_patients()`, `professional_transition_accounts` and every RLS policy are unchanged.
-
-New pieces:
+`profiles.professional_status` stays the **only** verified status, with the same meaning: PHYGO verified this registration. A document request has its **own** status, kept on the request.
 
 | Piece | Role |
 |---|---|
-| `professional_verification_requests` | One row per submission: the declaration, the private document path, the administrator's register check, and the decision |
-| `professional_verification_reviews` | Append-only history of administrator actions (register checks and decisions), with internal notes |
+| `professional_verification_requests` | One row per submission: declaration, private document path, register check, decision, and `submitted_while_verified` |
+| `professional_verification_reviews` | History of administrator actions, each with an optional internal note. Protected, see "History" |
+| `professional_evidence_deadlines` | Per-account date by which an account verified before documents must have one confirmed. Users read only their own row |
+| `verification_submit`, `verification_record_check`, `verification_decide` | Server-only database functions, one transaction each |
 | Bucket `verification-documents` | Private, 4 MB, PDF/JPEG/PNG |
-| `/api/profile/verification` (POST, multipart) | The only way to submit. A submission always resets the profile to `pending` |
+| `/api/profile/verification` (POST, multipart) | The only way to submit |
 | `/api/profile/verification/document` | The user's own latest document (signed URL, 60 s) |
-| `/api/admin/verification` | List; record the register check; decide (approve, ask for information, reject, revoke) |
+| `/api/admin/verification` | List (also `?status=reconfirm`); record the register check; decide (approve or confirm, ask for information, reject, revoke) |
 | `/api/admin/verification/document` | A document for the administrator (signed URL, 60 s) |
-| `/api/cron/verification-retention` | Deletes documents after the configured retention. **Off** unless configured |
+| `/api/cron/verification-retention` | Retention by category. **Off** unless configured |
+
+## Already-verified accounts: policy and consequences
+### Rules
+| Situation | Account status (`professional_status`) | Request status | Clinical functions |
+|---|---|---|---|
+| Verified account sends a document with the **same** legal name, number and Order (spaces and letter case aside) | Stays `verified` | `pending` (`submitted_while_verified`) | **Unchanged** |
+| Verified account sends **changed** details (number, Order, country, or a legal name different from its last approved request) | `pending` | `pending` | Suspended until a new approval: the earlier verification was for other details |
+| Administrator **confirms** (needs document + recorded match + same details as the profile) | Stays `verified` | `verified` | Unchanged; the deadline is marked satisfied |
+| Administrator **asks for information** on a verified account | Stays `verified` | `needs_info` | **Unchanged**: the user is asked for a better document |
+| Administrator records **mismatch** or **not found** | Unchanged by itself | Unchanged | Approval and confirmation are refused. The administrator then decides: ask for information, or revoke |
+| Administrator **revokes** (needs a category and a message) | `rejected` | Unchanged if already decided (an approval is never rewritten) | Removed at once. No data deleted |
+| A security problem (for example, a suspected forged document or account takeover) | The administrator revokes (immediate, reversible by a new request and approval) | — | Removed at once |
+
+### 60-day transition (accounts verified before documents were required)
+- **Who:** the backfill gives a deadline 60 days from the moment it runs. It covers every verified account with no approved request. Today that is the owner's account only. Nobody else is added automatically.
+- **Before the deadline:** nothing changes. The profile shows the date, in four languages. Sending the same details does not interrupt anything.
+- **After the deadline, without a confirmed document:**
+  - **Removed:** clinical AI, video, and creating or changing patients, notes, appointments, invitations and links (database rules and server routes alike).
+  - **Kept:** the account, `professional_status = 'verified'`, and reading its own patients and notes.
+  - **Deleted:** nothing.
+- **When the administrator confirms the document:** everything returns at once, and the deadline is marked satisfied.
+
+### Consequences for existing permissions and database checks (read before applying)
+1. **Profile trigger** `protect_profile_privileged_columns`:
+   - unchanged;
+   - clients still cannot write the status or registration fields;
+   - the deadline lives in a separate table, which users can only read.
+2. **`can_manage_patients()`** is redefined by the access file. It changes in two ways only:
+   - **Change 1:** a verified account with an unsatisfied, past deadline answers false.
+   - **Change 2:** the transition list (`professional_transition_accounts`) no longer applies to **verified** accounts, as on the server already. Without this, an old list entry (the owner has one until 11 Dec 2026) would bypass a passed deadline.
+
+   While the deadline table is empty, every answer is the same as today (tested).
+3. **`requireVerifiedProfessional`** (`lib/auth/sessionServer.ts`):
+   - for verified accounts it now also reads the account's own deadline row;
+   - a passed deadline answers 403 `verification_evidence_overdue`;
+   - an unreadable row answers 503 (fails closed). **Release order matters:** apply the evidence SQL before deploying this code, or every verified account gets a 503 on clinical functions.
+4. **Patient isolation:** unchanged. Administrator status opens the console and documents only; patient records are reached only through the normal clinical rules (own patients). Tested.
+5. **Emergency freeze:** once the access file is applied, undoing a freeze means re-running Part A **and then** the access file. Part A alone restores the earlier rule, which ignores the deadlines (tested).
+6. **Self-review:** the owner is both an administrator and a verified account with no document. The server does not forbid an administrator from confirming their own account, and the history records who confirmed. **To decide:** accept and document it, or have a second person confirm.
 
 ## Verification is real, not self-declaration
 1. **The user submits:**
    - legal first and last name, registration number and territorial Order;
    - the proof of registration;
    - the declaration, explicitly accepted, with its version and time.
-2. **Nothing changes yet:** the status is `pending`, and uploading a document grants nothing.
+2. **Uploading grants nothing:** a new or changed request is `pending`, and a document from a verified account keeps only what the account already had.
 3. **The administrator compares four separate things:**
-   - the user's declaration;
+   - the declaration;
    - the document;
    - their own check on the official register, https://albo.alboweb-fnofi.net/registry/search, recorded as **match**, **mismatch** or **not found**;
    - the final decision.
-4. **Approval is refused by the server** unless the latest request is open, still has its document, and has a recorded **match**.
-5. **Not automated:** there is no scraping and no assumed API. No official machine interface of the register is known; if one becomes available, it can feed step 3.
+4. **The database function refuses an approval or confirmation** unless:
+   - the latest request is open;
+   - it still has its document;
+   - a **match** is recorded;
+   - its details equal the profile's.
+5. **Not automated:** there is no scraping and no assumed API.
+
+## Consistent decisions
+- **One transaction per call:** each submission, register check and decision is one database call. The profile, the request, the deadline and the history entry change together or not at all.
+- **On failure, nothing changes:**
+  - if the history write fails, nothing is changed and the administrator gets "nothing was changed" (503);
+  - if a submission fails, the uploaded file is removed.
+- **Documents replaced by a newer request:**
+  - they are removed after the transaction;
+  - if a removal fails, the path stays on the superseded request so retention can remove it later.
+- **Tests:** in SQL, with forced failures (history insert, profile update), and through the API.
+
+## History: what is and is not protected
+`professional_verification_reviews` is **not** called append-only, because these paths exist:
+
+| Path | Allowed? |
+|---|---|
+| Insert | Yes (server functions) |
+| Update | **No**, except the documented removal of the internal note: `internal_note` set to null and `note_redacted_at` set, once |
+| Direct delete or truncate | **No**. The service role has no privilege, and a trigger refuses even the owner |
+| Delete with its request or account (foreign-key cascade) | **Yes**: account deletion, and retention of old requests |
+| Database owner (`postgres`) | Can still drop the trigger or the table: the guard protects against application mistakes, **not** against the owner |
+
+Each entry points at a request of the **same** account, enforced by the database, or at no request. A decision on an account with no request is still recorded; for example, the revocation of an account verified before documents.
 
 ## Document access policy
 - **Bucket:**
@@ -41,79 +113,66 @@ New pieces:
   - only the server (service role) reads and writes.
 - **Path:**
   - generated by the server: `<user id>/<request id>/<random uuid>.<ext>`;
-  - a database constraint keeps it inside the owner's folder;
-  - no path or id from the client is ever used for a user's own document.
+  - a database constraint keeps it inside the owner's folder.
 - **Reads:**
   - only through the two routes above, after a server-side check (session owner, or `requireAdmin`);
   - each read returns a signed URL valid for **60 seconds**, with `Cache-Control: no-store`.
 - **Upload checks, on the server:**
-  - size of 4 MB or less (Vercel functions refuse request bodies above 4.5 MB);
+  - size of 4 MB or less;
   - extension in pdf, jpg, jpeg or png;
   - real type from the file's first bytes;
   - extension and content must agree.
-- **What users cannot do** (the API ignores these fields, and the database grants nothing):
-  - set the status or the register check;
+- **What users cannot do:**
+  - set a status or a register check;
   - pick a path;
   - approve themselves;
-  - replace a document after a decision without a new review.
-- **Logs:**
-  - errors are logged without paths, document contents or signed URLs;
-  - a test checks that no signed URL reaches the logs.
-- **Administrators:**
-  - `PHYGO_ADMIN_EMAILS` is read only on the server (`lib/auth/adminServer.ts`);
-  - a test checks that it never reaches the browser bundle;
-  - admin status opens the verification console and documents, and **no patient data**.
-- **Where documents never appear:** the public profile, patient records, clinical PDFs or search.
+  - call the database functions (no privilege for `anon` or `authenticated`).
+- **Logs:** no paths, document contents or signed URLs (tested).
+- **Administrators:** `PHYGO_ADMIN_EMAILS` is read only on the server, and never reaches the browser bundle (tested).
 
-## Audit trail
-Each request keeps only what the procedure needs:
-- account and request id;
-- status;
-- submission time;
-- decision time and author;
-- register check result, time and author;
-- declaration version and time;
-- rejection category.
+## Retention by category: proposal, nothing active
+| Category | Proposed period | Why | Implementation (off) |
+|---|---|---|---|
+| Document file | **30 days after the final decision**; at once when replaced by a newer request | Enough for a contestation or a re-check; afterwards the decision and the register check are the evidence | `VERIFICATION_DOCUMENT_RETENTION_DAYS`. Removes through the Storage API (which deletes the stored object, not just a database row), then lists the folder to confirm the file is gone. Only then clears `document_path` and sets `document_deleted_at` |
+| Internal notes in the history | **12 months** after the entry | Useful to answer questions about a decision; afterwards the decision, the check result and the category suffice | `VERIFICATION_NOTE_RETENTION_DAYS`. Removes the note and keeps the entry |
+| Older requests (superseded, or replaced by a later decision) and their history | **24 months** after their decision | Contestations and repeated abuse; afterwards not needed | `VERIFICATION_HISTORY_RETENTION_DAYS`. Deletes the request and its entries (cascade). Never the latest request of an account, nor its latest approval |
+| The request the current status is based on, its history entries (without notes after 12 months), and the deadline row | While the account exists | Shows on what basis clinical access is granted | — |
+| Account deletion | Everything above is deleted with the account (cascade). Storage files are not reached by the database cascade | | **To do:** the app has no account-deletion feature. Today an account is deleted only from the Supabase dashboard; whoever does it must also delete the user's folder in `verification-documents` |
 
-Internal notes and reviewer identities live in `professional_verification_reviews`, which is visible to administrators only. The user sees their own status, the message written for them, and whether a document is on file.
+**Kept after a document is deleted** (strictly needed):
+- the request identifiers;
+- status and dates;
+- the declared details;
+- the declaration version;
+- the register check result;
+- the decision and its category.
 
-Rejection categories:
-- `not_in_register`;
-- `data_mismatch`;
-- `document_unreadable`;
-- `document_not_valid`;
-- `other`.
+The file, its path, and its type and size become irrelevant.
 
-## Retention: proposal, not active
-**What exists today:** the privacy notice (`/privacy`, section 9) covers clinical data only. It sets no period for verification documents.
+**To activate after approval:**
+1. set the variables in Production;
+2. add a daily cron that calls the route with `Authorization: Bearer <CRON_SECRET>`;
+3. update the privacy notice with the same periods.
 
-**Proposal (to be confirmed by the owner, with legal advice):**
-
-| Data | Proposed period | Why |
-|---|---|---|
-| Document file | **30 days after the final decision** (approved, rejected, or replaced by a new request) | Enough to handle a contestation or a re-check; after that, the decision and the register check are the evidence that matters |
-| Request metadata and review history | While the account exists, then deleted with it (`on delete cascade`) | Needed to show who verified whom, when and on what basis |
-| Superseded request files | Deleted immediately when a new request replaces them | No longer needed |
-
-**Implementation:**
-- `/api/cron/verification-retention` deletes only the file. It sets `document_deleted_at` and keeps the status, the decision and the history.
-- **It does nothing** unless `VERIFICATION_DOCUMENT_RETENTION_DAYS` is set. It is not scheduled in `vercel.json`.
-- **To activate after approval:**
-  1. set the variable in Production;
-  2. add a daily cron that calls the route with `Authorization: Bearer <CRON_SECRET>`.
+**What cannot be verified from here:** that Supabase Storage removes the stored object in production. The code uses the documented Storage API and confirms the file no longer appears in its folder. On the first real run, also check the bucket in the Supabase dashboard (Storage → `verification-documents`).
 
 ## Legal and privacy points to confirm before release
-These are **not** decided here, and no text in this PR presents them as decided.
-1. **Privacy notice section.** The form links to `/privacy#professional-verification`, which **does not exist yet**. It must describe:
-   - the data collected (name, number, Order, document, declaration record);
-   - the purpose (professional verification);
-   - the legal basis;
-   - recipients (none outside PHYGO; Supabase as processor, as in section 6);
-   - the retention above, once approved;
-   - the user's rights.
+Drafts (unpublished, four languages each):
+- `docs/legal/DRAFT_privacy-professional-verification.md`
+- `docs/legal/DRAFT_terms-professional-verification.md`
 
-   Not provided here: the controller's identity and contact details, and the legal basis (for example contract or legitimate interest). **Do not merge before this section exists and has been legally reviewed.**
-2. **Declaration text.** The Italian text is the owner's. The English, Spanish and French versions are translations and need legal review. It is stored as version `2026-10-12.v1`. It is not presented as an official self-certification under any law.
-3. **Terms of Service.** The declaration refers to suspension "within the limits of the Terms of Service": the Terms must say so.
-4. **Retention period.** Confirm or change the proposal above.
-5. **Existing verified accounts.** Accounts verified before this feature (today, the owner's) have no document on file. They stay verified, and the console shows that no request with a document exists. Decide whether to ask them for a document.
+Both files list what is documented today, what the owner must confirm, and what needs legal review. In short:
+1. **Privacy notice:**
+   - controller identity and contact;
+   - legal basis;
+   - processors for documents: Supabase Storage region, and Vercel function region and transfers;
+   - who the authorised administrators are;
+   - retention periods.
+
+   The form links to `/privacy#professional-verification`, which **does not exist yet**. **Do not deploy before it is published.**
+2. **Terms of Service:** new section 3A (duties, gradual measures, data kept, 60-day transition). It does not exclude PHYGO's liability.
+3. **Declaration text:** the Italian text is the owner's. The English, Spanish and French versions need legal review. Version `2026-10-12.v1`.
+4. **Retention periods:** confirm or change the table above.
+5. **Communications for the 60-day transition:** in-app notice implemented (4 languages). E-mail is not implemented.
+6. **Self-review** of the owner's own account (see above).
+7. **Found while checking:** Daily (video) is not in the privacy notice's sub-processor list.

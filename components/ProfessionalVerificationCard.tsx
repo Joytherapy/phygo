@@ -24,18 +24,36 @@ type Verification = {
   registrationNumber: string | null
   message: string | null
   transitionUntil: string | null
+  evidenceDueAt: string | null
+  evidenceOverdue: boolean
   request: {
-    status: string
+    status: 'pending' | 'needs_info' | 'verified' | 'rejected' | 'superseded'
     legalFirstName: string
     legalLastName: string
     submittedAt: string
+    whileVerified: boolean
     hasDocument: boolean
     documentDeleted: boolean
     message: string | null
   } | null
 }
 
-export type VerificationSummary = { status: VerificationStatusKey; practiceStage: 'student' | 'professional' }
+/**
+ * evidenceDueAt and openRequest keep the card visible for a verified account
+ * that must still send its document, or whose document is being checked.
+ */
+export type VerificationSummary = {
+  status: VerificationStatusKey
+  practiceStage: 'student' | 'professional'
+  evidenceDueAt: string | null
+  openRequest: boolean
+}
+const summary = (v: Verification): VerificationSummary => ({
+  status: v.status,
+  practiceStage: v.practiceStage,
+  evidenceDueAt: v.evidenceDueAt ?? null,
+  openRequest: !!v.request && ['pending', 'needs_info'].includes(v.request.status),
+})
 
 const STATUS_STYLE: Record<VerificationStatusKey, string> = {
   not_applicable: 'bg-ink/[0.06] text-ink/70 dark:bg-white/[0.08] dark:text-white/70',
@@ -83,7 +101,7 @@ export default function ProfessionalVerificationCard({
         if (cancelled) return
         const v = body.verification as Verification
         setData(v)
-        onChange?.({ status: v.status, practiceStage: v.practiceStage })
+        onChange?.(summary(v))
         setForm({
           legalFirstName: v.request?.legalFirstName ?? '',
           legalLastName: v.request?.legalLastName ?? '',
@@ -147,7 +165,7 @@ export default function ProfessionalVerificationCard({
       }
       const v = json.verification as Verification
       setData(v)
-      onChange?.({ status: v.status, practiceStage: v.practiceStage })
+      onChange?.(summary(v))
       setFile(null)
       setAccepted(false)
       setStep('form')
@@ -192,12 +210,35 @@ export default function ProfessionalVerificationCard({
 
       {data && state !== 'loading' && (
         <>
-          <p className="mt-3 text-sm text-ink/80 dark:text-white/75">{t.statusHelp[status]}</p>
+          {/* Past the evidence deadline the "features are available" text would be wrong: the notice below explains instead. */}
+          {!data.evidenceOverdue && <p className="mt-3 text-sm text-ink/80 dark:text-white/75">{t.statusHelp[status]}</p>}
           {status !== 'verified' && <p className="mt-2 text-xs text-ink/60 dark:text-white/55">{t.unlocks}</p>}
           {data.transitionUntil && (
             <p className="mt-2 rounded-xl bg-amber-400/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
               {t.transition.replace('{date}', new Date(data.transitionUntil).toLocaleDateString(lang, { dateStyle: 'long' }))}
             </p>
+          )}
+          {data.evidenceDueAt && (
+            <p
+              role={data.evidenceOverdue ? 'alert' : undefined}
+              className={`mt-2 rounded-xl px-3 py-2 text-xs ${data.evidenceOverdue ? 'bg-red-500/10 text-red-800 dark:text-red-200' : 'bg-amber-400/10 text-amber-900 dark:text-amber-200'}`}
+            >
+              {(data.evidenceOverdue ? t.evidenceOverdue : t.evidenceDue).replace('{date}', new Date(data.evidenceDueAt).toLocaleDateString(lang, { dateStyle: 'long' }))}
+            </p>
+          )}
+          {data.request && data.request.status !== 'superseded' && (
+            <p className="mt-3 text-xs text-ink/70 dark:text-white/65">
+              {t.requestStatusLabel}: <strong>{t.requestStatus[data.request.status]}</strong>
+            </p>
+          )}
+          {data.request?.whileVerified && status === 'verified' && ['pending', 'needs_info'].includes(data.request.status) && (
+            <p className="mt-1 text-xs text-emerald-800 dark:text-[#5EE5B8]">{t.whileVerifiedNote}</p>
+          )}
+          {data.request?.message && data.request.status === 'needs_info' && status === 'verified' && (
+            <div className="mt-3 rounded-xl border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/[0.03] p-3">
+              <p className="text-xs font-semibold text-ink/70 dark:text-white/65">{t.reviewerMessage}</p>
+              <p className="mt-1 text-sm text-ink dark:text-white whitespace-pre-line">{data.request.message}</p>
+            </div>
           )}
           {data.message && (status === 'needs_info' || status === 'rejected') && (
             <div className="mt-3 rounded-xl border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/[0.03] p-3">
@@ -241,6 +282,7 @@ export default function ProfessionalVerificationCard({
                 </label>
               </div>
               <p className="mt-1 text-xs text-ink/55 dark:text-white/40">{t.countryHint}</p>
+              {status === 'verified' && <p className="mt-2 rounded-xl bg-[#4F7CFF]/[0.06] px-3 py-2 text-xs text-ink/75 dark:text-white/70">{t.changeWarning}</p>}
               <label className="mt-3 block text-sm font-medium text-ink/60 dark:text-white/50">
                 {t.numberLabel}
                 <input value={form.registrationNumber} onChange={set('registrationNumber')} maxLength={40} placeholder={t.numberPlaceholder} aria-invalid={invalid.includes('registrationNumber')} className={field('registrationNumber')} />

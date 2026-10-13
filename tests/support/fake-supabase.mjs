@@ -10,9 +10,13 @@
 // in.(...), order=<col>.asc|desc, offset/limit, single/maybeSingle (Accept
 // header), insert/update/upsert/delete on simple tables, and primary-key
 // conflicts (23505) for the tables listed in `primaryKeys`.
+// Database functions (POST /rest/v1/rpc/<name>) are answered by the `rpc`
+// handlers given by the test: (args, state) => result, or throw
+// { message } for a database error (PostgREST answers 400 with it).
+// /__control/fail?table=rpc:<name> makes a function fail as a server error.
 import http from 'node:http';
 
-export async function startFakeSupabase({ port, tables = {}, users = {}, primaryKeys = { ask_phygo_usage: 'ip' } }) {
+export async function startFakeSupabase({ port, tables = {}, users = {}, primaryKeys = { ask_phygo_usage: 'ip' }, rpc = {} }) {
   const state = {
     tables: structuredClone(tables),
     users, // access token -> user object
@@ -72,6 +76,17 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
       state.signRequests.push({ bucket, path, expiresIn });
       return send(200, { signedURL: `/object/sign/${bucket}/${path}?token=test` });
     }
+    // Storage: list a folder (POST /object/list/<bucket> with { prefix, search }).
+    const list = url.pathname.match(/^\/storage\/v1\/object\/list\/([^/]+)$/);
+    if (list && req.method === 'POST') {
+      const { prefix = '', search = '' } = JSON.parse(body || '{}');
+      const folder = prefix ? `${list[1]}/${prefix.replace(/\/$/, '')}/` : `${list[1]}/`;
+      const names = [...state.storage.keys()]
+        .filter((k) => k.startsWith(folder) && !k.slice(folder.length).includes('/'))
+        .map((k) => k.slice(folder.length))
+        .filter((name) => name.includes(search));
+      return send(200, names.map((name) => ({ name, id: name })));
+    }
     // Storage: upload (createBucket is not supported; buckets are implicit).
     const object = url.pathname.match(/^\/storage\/v1\/object\/([^/]+)\/(.+)$/);
     if (object && (req.method === 'POST' || req.method === 'PUT') && object[1] !== 'sign') {
@@ -106,6 +121,17 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     if (url.pathname === '/daily/v1/rooms' && req.method === 'POST') {
       const { name } = JSON.parse(body || '{}');
       return send(200, { name, url: `https://test.invalid/${name}` });
+    }
+
+    const fn = url.pathname.match(/^\/rest\/v1\/rpc\/([a-z_]+)$/);
+    if (fn && req.method === 'POST') {
+      if (state.failTables.has(`rpc:${fn[1]}`)) return send(500, { message: `simulated failure on ${fn[1]}`, code: 'XX000' });
+      if (!rpc[fn[1]]) return send(404, { code: 'PGRST202', message: `function ${fn[1]} not found` });
+      try {
+        return send(200, rpc[fn[1]](JSON.parse(body || '{}'), state) ?? null);
+      } catch (e) {
+        return send(400, { code: 'P0001', message: e.message });
+      }
     }
 
     const rest = url.pathname.match(/^\/rest\/v1\/([a-z_]+)$/);

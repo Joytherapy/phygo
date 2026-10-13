@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { requireUser, transitionUntilFor } from "@/lib/auth/sessionServer";
+import { evidenceDeadlineFor, requireUser, transitionUntilFor } from "@/lib/auth/sessionServer";
 import { serviceClient } from "@/lib/verification";
 import {
   VERIFICATION_BUCKET,
@@ -14,12 +14,15 @@ import { consumeHourly, HOURLY_LIMITS, limitResponse } from "@/lib/rateLimit";
 
 // GET: the signed-in user's own verification status and latest request.
 // POST (multipart/form-data): a new verification request with the registration
-// document. Every submission starts a new review: the profile goes back to
-// 'pending' (also after an approval), so details or documents cannot be
-// replaced without a new decision. The route never accepts a status, a check
-// result or a storage path from the client; the document is validated here
-// (size, extension and real type) and stored in a private bucket under a
-// server-generated path.
+// document. Every submission is reviewed by an administrator. The account
+// status depends on what changes:
+//   - a verified account sending the same legal name, number and Order stays
+//     verified while the document is reviewed (no interruption);
+//   - any other submission (new account, or changed details) puts the account
+//     to 'pending' until a new decision.
+// The route never accepts a status, a check result or a storage path from the
+// client; the document is validated here (size, extension and real type) and
+// stored in a private bucket under a server-generated path.
 
 const FIELDS =
   "practice_stage, professional_status, registry_country, registry_name, registration_number, verification_requested_at, verification_reviewed_at, verification_message";
@@ -92,65 +95,47 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   }
 
-  const now = new Date().toISOString();
+  // One transaction (sql/2026-10_verification_evidence_PROPOSED.sql,
+  // verification_submit): the request, the replaced requests and the profile
+  // change together or not at all.
   const v = parsed.value;
-  const { error: insertError } = await db.from("professional_verification_requests").insert({
-    id: requestId,
-    user_id: userId,
-    legal_first_name: v.legalFirstName,
-    legal_last_name: v.legalLastName,
-    registry_country: v.registryCountry,
-    registry_name: v.registryName,
-    registration_number: v.registrationNumber,
-    document_path: path,
-    document_mime: type.type.mime,
-    document_size: bytes.length,
-    declaration_version: String(form.get("declarationVersion")),
-    declaration_accepted_at: now,
-    status: "pending",
-    submitted_at: now,
+  const { data: result, error: submitError } = await db.rpc("verification_submit", {
+    p_user_id: userId,
+    p_request_id: requestId,
+    p_legal_first_name: v.legalFirstName,
+    p_legal_last_name: v.legalLastName,
+    p_registry_country: v.registryCountry,
+    p_registry_name: v.registryName,
+    p_registration_number: v.registrationNumber,
+    p_document_path: path,
+    p_document_mime: type.type.mime,
+    p_document_size: bytes.length,
+    p_declaration_version: String(form.get("declarationVersion")),
   });
-  if (insertError) {
+  if (submitError) {
     await db.storage.from(VERIFICATION_BUCKET).remove([path]);
-    console.error("verification request save failed:", insertError.message);
+    console.error("verification request save failed:", submitError.message);
     return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   }
 
-  // Earlier open requests are replaced by this one; their documents are no longer needed.
-  const { data: open } = await db
-    .from("professional_verification_requests")
-    .select("id, document_path, status")
-    .eq("user_id", userId)
-    .in("status", ["pending", "needs_info"]);
-  const replaced = (open ?? []).filter((r) => r.id !== requestId);
+  // Replaced requests no longer need their documents. If a file cannot be
+  // removed now, its path stays on the superseded request so the retention
+  // job can remove it later.
+  const replaced = ((result as { superseded_paths?: string[] } | null)?.superseded_paths ?? []).filter(Boolean);
   if (replaced.length) {
-    const paths = replaced.map((r) => r.document_path).filter(Boolean) as string[];
-    if (paths.length) await db.storage.from(VERIFICATION_BUCKET).remove(paths);
-    for (const r of replaced) {
+    const { error: removeError } = await db.storage.from(VERIFICATION_BUCKET).remove(replaced);
+    if (removeError) console.error("verification: replaced documents not removed yet");
+    else
       await db
         .from("professional_verification_requests")
-        .update({ status: "superseded", decided_at: now, document_path: null, document_deleted_at: r.document_path ? now : null })
-        .eq("id", r.id);
-    }
+        .update({ document_path: null, document_deleted_at: new Date().toISOString() })
+        .eq("user_id", userId)
+        .in("document_path", replaced);
   }
 
-  const { data: updated, error: updateError } = await db
-    .from("profiles")
-    .update({
-      registry_country: v.registryCountry,
-      registry_name: v.registryName,
-      registration_number: v.registrationNumber,
-      professional_status: "pending",
-      verification_requested_at: now,
-      verification_reviewed_at: null,
-      verification_reviewed_by: null,
-      verification_message: null,
-    })
-    .eq("id", userId)
-    .select(FIELDS)
-    .maybeSingle();
-  if (updateError) {
-    console.error("verification status update failed:", updateError.message);
+  const { data: updated, error: readError } = await gate.supabase.from("profiles").select(FIELDS).eq("id", userId).maybeSingle();
+  if (readError) {
+    console.error("verification status read failed:", readError.message);
     return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   }
   return NextResponse.json({ verification: await withAccess(gate.supabase, updated, userId) });
@@ -166,10 +151,16 @@ async function withAccess(supabase: SupabaseClient, p: Record<string, any> | nul
   const professional = p?.practice_stage !== "student";
   const until = professional ? await transitionUntilFor(supabase, userId, status) : null;
   const transitionUntil = until === "error" ? null : until;
+  const deadline = status === "verified" ? await evidenceDeadlineFor(supabase, userId) : null;
+  const evidence = deadline && deadline !== "error" && !deadline.satisfied ? deadline : null;
   return {
     ...toPublic(p),
     transitionUntil,
-    canManagePatients: professional && (status === "verified" || !!transitionUntil),
+    // Accounts verified before documents were required: the date by which
+    // the document must be confirmed, and whether it has passed.
+    evidenceDueAt: evidence?.dueAt ?? null,
+    evidenceOverdue: !!evidence?.overdue,
+    canManagePatients: professional && deadline !== "error" && ((status === "verified" && !evidence?.overdue) || !!transitionUntil),
     request: await latestRequest(userId),
   };
 }
@@ -179,7 +170,7 @@ async function latestRequest(userId: string) {
   if (!db) return null;
   const { data } = await db
     .from("professional_verification_requests")
-    .select("id, status, legal_first_name, legal_last_name, submitted_at, decided_at, document_path, document_deleted_at, declaration_version, user_message")
+    .select("id, status, legal_first_name, legal_last_name, submitted_at, submitted_while_verified, decided_at, document_path, document_deleted_at, declaration_version, user_message")
     .eq("user_id", userId)
     .order("submitted_at", { ascending: false })
     .limit(1)

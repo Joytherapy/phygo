@@ -10,10 +10,11 @@ import { useVerificationStrings } from '@/lib/i18n/verificationStrings'
 // declaration, the document received, the administrator's own check on the
 // official register, and the final decision. Nothing is checked automatically.
 
-type Review = { id: string; action: string; registry_check: string | null; rejection_category: string | null; internal_note: string | null; reviewer: string; created_at: string }
+type Review = { id: string; action: string; registry_check: string | null; rejection_category: string | null; internal_note: string | null; note_redacted_at: string | null; reviewer: string; created_at: string }
 type EvidenceRequest = {
   id: string
-  status: string
+  status: 'pending' | 'needs_info' | 'verified' | 'rejected' | 'superseded'
+  submitted_while_verified: boolean
   legal_first_name: string
   legal_last_name: string
   registry_country: string
@@ -37,10 +38,12 @@ type Row = {
   professional_status: string
   verification_requested_at: string | null
   request: EvidenceRequest | null
+  evidenceDeadline: { dueAt: string; satisfied: boolean; overdue: boolean } | null
   history: Review[]
 }
 
-const TABS = ['pending', 'needs_info', 'verified', 'rejected'] as const
+// 'reconfirm': verified accounts that sent a document; they keep access while it is checked.
+const TABS = ['pending', 'needs_info', 'reconfirm', 'verified', 'rejected'] as const
 const CATEGORIES = ['not_in_register', 'data_mismatch', 'document_unreadable', 'document_not_valid', 'other'] as const
 const box = 'mt-3 rounded-xl border border-black/10 dark:border-white/10 p-3'
 const h3 = 'text-xs font-semibold uppercase tracking-wide text-ink/55 dark:text-white/45'
@@ -111,7 +114,7 @@ export default function VerificationAdminPage() {
               onClick={() => setTab(s)}
               className={`rounded-full px-3 py-1.5 text-sm ${tab === s ? 'bg-ink text-white dark:bg-white dark:text-ink' : 'border border-black/10 dark:border-white/15 text-ink/70 dark:text-white/70'}`}
             >
-              {t.status[s]}
+              {s === 'reconfirm' ? t.aReconfirm : t.status[s]}
             </button>
           ))}
         </div>
@@ -124,6 +127,18 @@ export default function VerificationAdminPage() {
             return (
               <li key={r.id} className="rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.03] p-5">
                 <p className="font-semibold text-ink dark:text-white">{r.display_name || '—'}</p>
+                <p className="mt-1 text-xs text-ink/65 dark:text-white/60">
+                  {t.aAccountStatus}: <strong>{t.status[r.professional_status as keyof typeof t.status] ?? r.professional_status}</strong>
+                  {q && <> · {t.aRequestStatus}: <strong>{t.requestStatus[q.status] ?? q.status}</strong></>}
+                </p>
+                {r.evidenceDeadline && (
+                  <p className={`mt-1 text-xs ${r.evidenceDeadline.overdue ? 'text-red-700 dark:text-red-300' : 'text-amber-800 dark:text-amber-300'}`}>
+                    {r.evidenceDeadline.satisfied
+                      ? t.aDeadlineMet
+                      : (r.evidenceDeadline.overdue ? t.aDeadlineOverdue : t.aDeadline).replace('{date}', new Date(r.evidenceDeadline.dueAt).toLocaleDateString())}
+                  </p>
+                )}
+                {open && r.professional_status === 'verified' && <p className="mt-1 text-xs text-ink/65 dark:text-white/60">{t.aKeepsAccess}</p>}
                 {!q && <p className="mt-2 text-sm text-ink/60 dark:text-white/55">{t.aLegacy}</p>}
                 {q && (
                   <>
@@ -171,7 +186,6 @@ export default function VerificationAdminPage() {
                 )}
                 <section className={box} aria-label={t.aDecision}>
                   <h3 className={h3}>{t.aDecision}</h3>
-                  <p className="mt-2 text-sm text-ink/80 dark:text-white/75">{t.status[r.professional_status as keyof typeof t.status] ?? r.professional_status}</p>
                   <label className="mt-2 block text-sm text-ink/70 dark:text-white/65">
                     {t.aMessage}
                     <textarea value={messages[r.id] ?? ''} onChange={(e) => setMessages({ ...messages, [r.id]: e.target.value })} maxLength={500} rows={2} className="mt-1 w-full rounded-xl border border-black/10 dark:border-white/10 bg-transparent px-3 py-2 text-sm" />
@@ -190,7 +204,7 @@ export default function VerificationAdminPage() {
                   <div className="mt-3 flex flex-wrap gap-2">
                     {open && (
                       <>
-                        <button disabled={busy === r.id || q?.registry_check !== 'match' || !q?.has_document} title={q?.registry_check !== 'match' ? t.aIntro : undefined} onClick={() => post({ userId: r.id, decision: 'verified', message: messages[r.id] ?? '', internalNote: notes[r.id] ?? '' }, r.id)} className="rounded-full bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-40">{t.aApprove}</button>
+                        <button disabled={busy === r.id || q?.registry_check !== 'match' || !q?.has_document} title={q?.registry_check !== 'match' ? t.aIntro : undefined} onClick={() => post({ userId: r.id, decision: 'verified', message: messages[r.id] ?? '', internalNote: notes[r.id] ?? '' }, r.id)} className="rounded-full bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-40">{r.professional_status === 'verified' ? t.aConfirm : t.aApprove}</button>
                         <button disabled={busy === r.id} onClick={() => post({ userId: r.id, decision: 'needs_info', message: messages[r.id] ?? '', internalNote: notes[r.id] ?? '' }, r.id)} className="rounded-full border border-amber-500 px-4 py-1.5 text-sm font-semibold text-amber-700 dark:text-amber-300 disabled:opacity-60">{t.aAskInfo}</button>
                       </>
                     )}
@@ -211,6 +225,7 @@ export default function VerificationAdminPage() {
                           {h.registry_check && ` (${checkLabel(h.registry_check)})`}
                           {h.rejection_category && ` · ${t.aCategories[h.rejection_category as (typeof CATEGORIES)[number]] ?? h.rejection_category}`}
                           {h.internal_note && ` · ${h.internal_note}`}
+                          {h.note_redacted_at && ` · ${t.aNoteRemoved}`}
                         </li>
                       ))}
                     </ul>
