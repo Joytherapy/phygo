@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { startFakeSupabase, sessionCookie } from './support/fake-supabase.mjs';
-import { verificationRpc } from './support/verification-rpc.mjs';
+import { verificationRpc, latestRequestId } from './support/verification-rpc.mjs';
 import { startApp } from './support/app.mjs';
 
 const FAKE_PORT = Number(process.env.FAKE_SUPABASE_PORT ?? 54329);
@@ -72,7 +72,9 @@ const latestOf = (who) => [...requests()].reverse().find((r) => r.user_id === pe
 const reviewsOf = (requestId) => fake.state.tables.professional_verification_reviews.filter((r) => r.request_id === requestId);
 const statusOf = (who) => fake.state.tables.profiles.find((p) => p.id === people[who].id).professional_status;
 const stored = (path) => fake.state.storage.has(`verification-documents/${path}`);
-const admin = (body) => call(app.url, 'POST', '/api/admin/verification', 'admin', body);
+// Like the administration page, a decision names the request on screen: the latest one.
+const admin = (body) =>
+  call(app.url, 'POST', '/api/admin/verification', 'admin', body.decision && !('requestId' in body) ? { requestId: latestRequestId(fake.state, body.userId), ...body } : body);
 const clinicalAiOpen = async (who) => ![401, 403].includes((await call(app.url, 'POST', '/api/generate-note', who, { transcript: 'synthetic', lang: 'en' })).status);
 
 test('1. matching name, surname and number: approved only after the administrator records a match', async () => {
@@ -245,6 +247,37 @@ test('9. documents are deleted only when a retention period is configured, keepi
   assert.equal(statusOf('alice'), 'verified');
   assert.deepEqual(reviewsOf(after.id).map((x) => x.action), ['registry_check', 'verified'], 'the audit trail stays');
   assert.equal((await call(app.url, 'GET', '/api/profile/verification/document', 'alice')).status, 404);
+});
+
+test('9b. retention reads past the 1,000-row page limit, and still keeps each account’s latest request', async () => {
+  // Synthetic rows for an account that has no other data in this test.
+  const zed = '0e000000-0000-4000-8000-00000000zzzz'.replace(/z/g, '9');
+  const old = (days) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  const N = 1100;
+  const reqs = fake.state.tables.professional_verification_requests;
+  for (let i = 0; i < N; i++) {
+    reqs.push({ id: `0e000000-0000-4000-8000-${String(i).padStart(12, '0')}`, user_id: zed, status: 'superseded', submitted_at: old(900 - i / 10000), decided_at: old(800), document_path: null });
+  }
+  const latestZed = { id: '0e000000-0000-4000-8000-999999999999', user_id: zed, status: 'rejected', submitted_at: old(850), decided_at: old(800), document_path: null };
+  reqs.push(latestZed);
+  const reviews = fake.state.tables.professional_verification_reviews;
+  for (let i = 0; i < N; i++) {
+    reviews.push({ id: `0d000000-0000-4000-8000-${String(i).padStart(12, '0')}`, user_id: zed, request_id: null, action: 'registry_check', internal_note: 'synthetic note', note_redacted_at: null, created_at: old(400), reviewer: 'admin@test.invalid' });
+  }
+  const others = reqs.filter((r) => r.user_id !== zed).length;
+  const withRetention = await startApp({ fakeUrl: fake.url, port: 3423, env: { VERIFICATION_NOTE_RETENTION_DAYS: '365', VERIFICATION_HISTORY_RETENTION_DAYS: '730' } });
+  try {
+    const res = await (await fetch(`${withRetention.url}/api/cron/verification-retention`, { headers: { authorization: 'Bearer test-cron-secret' } })).json();
+    assert.equal(res.notesRemoved, N, 'every old note, not only the first 1,000');
+    assert.equal(res.requestsRemoved, N, 'every older request, not only the first 1,000');
+  } finally {
+    await withRetention.stop();
+  }
+  // Deletions replace the fake's arrays: read the tables again.
+  const after = fake.state.tables.professional_verification_requests;
+  assert.deepEqual(after.filter((r) => r.user_id === zed).map((r) => r.id), [latestZed.id], 'the latest request of the account stays');
+  assert.equal(after.filter((r) => r.user_id !== zed).length, others, 'other accounts untouched (recent decisions)');
+  assert.equal(fake.state.tables.professional_verification_reviews.filter((r) => r.user_id === zed && r.internal_note).length, 0);
 });
 
 test('10. verification grants nothing on another clinician’s patients', async () => {

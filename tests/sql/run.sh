@@ -290,7 +290,8 @@ expect "the three tables have RLS on; only the deadline table has a policy" "$(q
 svc() { local out; if out=$(psql -q -At -v ON_ERROR_STOP=1 -d "$DB" -c "set role service_role; $1" 2>&1); then echo "$out"; else echo "$out" | grep -oE 'verification:[a-z_]+|permission denied|cannot be [a-z]+|removed only with|violates [a-z ]+constraint|simulated [a-z ]+failure' | head -1; fi; }
 # submit <user> <request id> <first> <last> <order> <number>: the server's call after uploading the document
 submit() { svc "select verification_submit('$1', '$2', '$3', '$4', 'IT', '$5', '$6', '$1/$2/doc.pdf', 'application/pdf', 1000, 'v1')->>'kept_verified'"; }
-decide() { svc "select verification_decide('$1', '$2', $3, $4, 'internal note', 'admin@test.invalid')->>'action'"; }
+# decide <user> <decision> <message> <category>: on the account's latest request, as the console sends it
+decide() { svc "select verification_decide('$1', '$2', $3, $4, 'internal note', 'admin@test.invalid', (select id from professional_verification_requests where user_id = '$1' order by submitted_at desc limit 1))->>'action'"; }
 check() { svc "select verification_record_check('$1', '$2', null, 'admin@test.invalid')"; }
 status() { q -c "select professional_status from profiles where id = '$1'"; }
 rstatus() { q -c "select status from professional_verification_requests where id = '$1'"; }
@@ -332,6 +333,8 @@ q -c "drop trigger phygo_test_fail on profiles; drop function phygo_test_fail();
 expect "a message is required to ask for information or reject" "$(decide $V rejected null "'other'")" "verification:message_required"
 expect "a rejection needs a category" "$(decide $V rejected "'No.'" null)" "verification:category_required"
 expect "unknown decisions are refused" "$(decide $V approved null null)" "verification:invalid_decision"
+expect "a decision naming an older request is refused (a newer one arrived)" "$(svc "select verification_decide('$V', 'needs_info', 'x', null, null, 'a', '$RV1')")/$(svc "select verification_decide('$V', 'needs_info', 'x', null, null, 'a', null)")" "verification:stale/verification:stale"
+expect "a decision naming another account's request is refused" "$(svc "select verification_decide('$U', 'needs_info', 'x', null, null, 'a', '$RV3')")" "verification:stale"
 check $RU match >/dev/null
 q -c "update professional_verification_requests set document_path = null where id = '$RU'" >/dev/null
 expect "approval without the document is refused" "$(decide $U verified null null)" "verification:no_document"
@@ -340,7 +343,14 @@ expect "approval is refused when the profile no longer matches the request" "$(d
 q -c "update profiles set registration_number = '9999' where id = '$U'" >/dev/null
 expect "the revocation of a verified account is recorded" "$(decide $V rejected "'Verification revoked.'" "'other'")/$(status $V)/$(cm $V)" "revoked/rejected/f"
 expect "the revocation points at the latest request, which keeps its approval" "$(q -c "select request_id from professional_verification_reviews where user_id = '$V' and action = 'revoked'")/$(rstatus $RV3)" "$RV3/verified"
+LISTED_BEFORE="$(q -c "select count(*) from professional_transition_accounts where user_id = '$L'")"
 expect "an account verified before documents can be revoked, with history" "$(decide $L rejected "'Not in the register.'" "'not_in_register'")/$(q -c "select coalesce(request_id::text, 'none') || '/' || rejection_category from professional_verification_reviews where user_id = '$L'")" "revoked/none/not_in_register"
+expect "the rejection also removed it from the transition list" "$LISTED_BEFORE/$(q -c "select count(*) from professional_transition_accounts where user_id = '$L'")" "1/0"
+RL=61000000-0000-0000-0000-0000000000a1
+expect "a new request makes it pending again, without patient management" "$(submit $L $RL Lia Bianchi 'OFI Lombardia' 5555)/$(status $L)/$(cm $L)" "false/pending/f"
+# Only the owner can give the temporary access back, from the SQL editor (used again below).
+q -c "insert into professional_transition_accounts (user_id, until, added_by) values ('$L', now() + interval '30 days', 'owner')" >/dev/null
+expect "after the owner adds it back, the transition applies again" "$(cm $L)" t
 q -c "update profiles set professional_status = 'not_applicable' where id = '$L'" >/dev/null
 
 echo "  the history is protected"
@@ -362,10 +372,10 @@ for who in V U; do
   expect "$who cannot point a request at another document" "$(as authenticated $id "update professional_verification_requests set document_path = '$U/x/y.pdf'")" denied
   expect "$who cannot call the submission function" "$(as authenticated $id "select verification_submit('$id', gen_random_uuid(), 'A', 'B', 'IT', 'OFI', '1', null, null, null, 'v1')")" denied
   expect "$who cannot record a register check" "$(as authenticated $id "select verification_record_check('$RU', 'match', null, 'me')")" denied
-  expect "$who cannot decide, not even on themselves" "$(as authenticated $id "select verification_decide('$id', 'verified', null, null, null, 'me')")" denied
+  expect "$who cannot decide, not even on themselves" "$(as authenticated $id "select verification_decide('$id', 'verified', null, null, null, 'me', null)")" denied
   expect "$who cannot create or extend an evidence deadline" "$(as authenticated $id "insert into professional_evidence_deadlines (user_id, due_at, added_by) values ('$id', now() + interval '10 days', 'me')")" denied
 done
-expect "anon cannot read requests or call the functions" "$(as anon $V "select count(*) from professional_verification_requests")/$(as anon $V "select verification_decide('$V', 'verified', null, null, null, 'x')")" "denied/denied"
+expect "anon cannot read requests or call the functions" "$(as anon $V "select count(*) from professional_verification_requests")/$(as anon $V "select verification_decide('$V', 'verified', null, null, null, 'x', null)")" "denied/denied"
 expect "even the server cannot store a document path outside the owner's folder" "$(svc "insert into professional_verification_requests (user_id, legal_first_name, legal_last_name, registry_country, registry_name, registration_number, document_path, declaration_version, declaration_accepted_at) values ('$V', 'A', 'B', 'IT', 'OFI', '1', '$U/x/y.pdf', 'v1', now())")" "violates check constraint"
 expect "unknown check results are refused" "$(svc "update professional_verification_requests set registry_check = 'probably' where id = '$RV3'")" "violates check constraint"
 expect "documents of another type are refused" "$(svc "update professional_verification_requests set document_mime = 'text/html' where id = '$RV3'")" "violates check constraint"

@@ -8,10 +8,10 @@
 -- accounts verified before documents were required. On its own this file
 -- changes nobody's access:
 --   - profiles.professional_status stays the one source of the verified status;
---   - can_manage_patients(), professional_transition_accounts and every
---     existing policy are untouched (the deadline is enforced in the database
---     only by sql/2026-10_verification_evidence_access_PROPOSED.sql, and only
---     for accounts given a deadline by ..._backfill_PROPOSED.sql);
+--   - can_manage_patients() and every existing policy are untouched (the
+--     deadline is enforced in the database only by
+--     sql/2026-10_verification_evidence_access_PROPOSED.sql, and only for
+--     accounts given a deadline by ..._backfill_PROPOSED.sql);
 --   - no existing policy is relaxed.
 --
 -- 1. professional_verification_requests: one row per submission (legal name,
@@ -35,6 +35,10 @@
 -- 4. Functions for the server (service role only), each one transaction, so a
 --    failed history write never leaves a half-applied decision:
 --      verification_submit, verification_record_check, verification_decide.
+--    A rejection or revocation by verification_decide also removes the
+--    account from professional_transition_accounts (Part A), so a new request
+--    cannot bring back its temporary access. This file therefore grants the
+--    service role DELETE on that table.
 -- 5. Storage bucket verification-documents: private, 4 MB, PDF/JPEG/PNG only.
 --
 -- Access: the request and review tables have RLS on and NO policy, and
@@ -65,7 +69,8 @@
 --   end $g$;
 --   drop function if exists verification_submit(uuid, uuid, text, text, text, text, text, text, text, integer, text);
 --   drop function if exists verification_record_check(uuid, text, text, text);
---   drop function if exists verification_decide(uuid, text, text, text, text, text);
+--   drop function if exists verification_decide(uuid, text, text, text, text, text, uuid);
+--   revoke delete on professional_transition_accounts from service_role;
 --   drop table if exists professional_evidence_deadlines;
 --   drop table if exists professional_verification_reviews;
 --   drop table if exists professional_verification_requests;
@@ -281,8 +286,10 @@ end $$;
 --     for a better document); only a revocation removes access.
 --   - A decided request is never rewritten: a later revocation is recorded in
 --     the history and on the profile.
+drop function if exists verification_decide(uuid, text, text, text, text, text);
 create or replace function verification_decide(
-  p_user_id uuid, p_decision text, p_message text, p_category text, p_note text, p_reviewer text
+  p_user_id uuid, p_decision text, p_message text, p_category text, p_note text, p_reviewer text,
+  p_expected_request_id uuid
 ) returns jsonb
 language plpgsql set search_path = public as $$
 declare
@@ -302,6 +309,9 @@ begin
   if not found then raise exception 'verification:not_found'; end if;
   select * into v_latest from professional_verification_requests
     where user_id = p_user_id order by submitted_at desc limit 1 for update;
+  -- The decision is for the request the reviewer was looking at (null: the
+  -- account had none). A newer request must be opened before deciding.
+  if v_latest.id is distinct from p_expected_request_id then raise exception 'verification:stale'; end if;
   v_open := v_latest.id is not null and v_latest.status in ('pending', 'needs_info');
   v_was_verified := v_profile.professional_status = 'verified';
 
@@ -337,6 +347,13 @@ begin
   if p_decision = 'verified' then
     update professional_evidence_deadlines set satisfied_at = now() where user_id = p_user_id and satisfied_at is null;
   end if;
+  -- A rejection or revocation also ends any temporary access from the
+  -- transition list, so a new request cannot bring it back (the status
+  -- returns to 'pending' on a new request). The owner can add the entry
+  -- again from the SQL editor.
+  if p_decision = 'rejected' then
+    delete from professional_transition_accounts where user_id = p_user_id;
+  end if;
   insert into professional_verification_reviews (user_id, request_id, action, rejection_category, internal_note, reviewer)
     values (p_user_id, v_latest.id, v_action, case when p_decision = 'rejected' then p_category end, nullif(btrim(p_note), ''), p_reviewer);
   return jsonb_build_object('status', v_status, 'action', v_action, 'request_id', v_latest.id);
@@ -345,11 +362,12 @@ end $$;
 revoke all on function verification_same_text(text, text) from public, anon, authenticated;
 revoke all on function verification_submit(uuid, uuid, text, text, text, text, text, text, text, integer, text) from public, anon, authenticated;
 revoke all on function verification_record_check(uuid, text, text, text) from public, anon, authenticated;
-revoke all on function verification_decide(uuid, text, text, text, text, text) from public, anon, authenticated;
+revoke all on function verification_decide(uuid, text, text, text, text, text, uuid) from public, anon, authenticated;
 grant execute on function verification_same_text(text, text) to service_role;
 grant execute on function verification_submit(uuid, uuid, text, text, text, text, text, text, text, integer, text) to service_role;
 grant execute on function verification_record_check(uuid, text, text, text) to service_role;
-grant execute on function verification_decide(uuid, text, text, text, text, text) to service_role;
+grant execute on function verification_decide(uuid, text, text, text, text, text, uuid) to service_role;
+grant delete on professional_transition_accounts to service_role;
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('verification-documents', 'verification-documents', false, 4194304, array['application/pdf', 'image/jpeg', 'image/png'])

@@ -16,6 +16,10 @@ const latestOf = (state, userId) =>
   [...t(state, 'professional_verification_requests')].filter((r) => r.user_id === userId).sort((a, b) => (a.submitted_at < b.submitted_at ? 1 : -1))[0];
 const id = () => crypto.randomUUID();
 
+// The id of an account's latest request (null when it has none): what the
+// administration page sends as requestId with a decision.
+export const latestRequestId = (state, userId) => latestOf(state, userId)?.id ?? null;
+
 export const verificationRpc = {
   verification_submit(a, state) {
     const profile = t(state, 'profiles').find((p) => p.id === a.p_user_id);
@@ -75,6 +79,7 @@ export const verificationRpc = {
     const profile = t(state, 'profiles').find((p) => p.id === a.p_user_id);
     if (!profile) refuse('not_found');
     const latest = latestOf(state, a.p_user_id);
+    if ((latest?.id ?? null) !== (a.p_expected_request_id ?? null)) refuse('stale');
     const open = !!latest && OPEN.includes(latest.status);
     const wasVerified = profile.professional_status === 'verified';
     if (d === 'verified') {
@@ -90,6 +95,7 @@ export const verificationRpc = {
     Object.assign(profile, { professional_status: status, verification_reviewed_at: at, verification_reviewed_by: a.p_reviewer, verification_message: a.p_message || null });
     if (open) Object.assign(latest, { status: d, decided_at: at, decided_by: a.p_reviewer, rejection_category: d === 'rejected' ? a.p_category : null, user_message: a.p_message || null });
     if (d === 'verified') for (const x of t(state, 'professional_evidence_deadlines')) if (x.user_id === a.p_user_id && !x.satisfied_at) x.satisfied_at = at;
+    if (d === 'rejected') state.tables.professional_transition_accounts = t(state, 'professional_transition_accounts').filter((x) => x.user_id !== a.p_user_id);
     t(state, 'professional_verification_reviews').push({
       id: id(), user_id: a.p_user_id, request_id: latest?.id ?? null, action, registry_check: null, rejection_category: d === 'rejected' ? a.p_category : null,
       internal_note: a.p_note || null, note_redacted_at: null, reviewer: a.p_reviewer, created_at: at,

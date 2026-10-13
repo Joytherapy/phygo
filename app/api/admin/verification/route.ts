@@ -97,8 +97,15 @@ export async function POST(req: Request) {
 
   // 2. Final decision on the account: approve (or confirm an already verified
   // account), ask for information, reject, or revoke a verified account.
+  // requestId is the request the administrator was looking at (null when the
+  // account had none). The database refuses the decision if a newer request
+  // has arrived since, so a decision never lands on a request nobody opened.
   const decision = body.decision as ReviewDecision;
-  if (typeof body.userId !== "string" || !UUID.test(body.userId) || !REVIEW_DECISIONS.includes(decision)) {
+  const expectedRequest = body.requestId;
+  if (
+    typeof body.userId !== "string" || !UUID.test(body.userId) || !REVIEW_DECISIONS.includes(decision) ||
+    !(expectedRequest === null || (typeof expectedRequest === "string" && UUID.test(expectedRequest)))
+  ) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
   const message = typeof body.message === "string" ? body.message.trim().slice(0, 500) || null : null;
@@ -118,6 +125,7 @@ export async function POST(req: Request) {
     p_category: decision === "rejected" ? category : null,
     p_note: note,
     p_reviewer: reviewer,
+    p_expected_request_id: expectedRequest,
   });
   if (error) return refusal(error);
   const { data } = await db.from("profiles").select(LIST_FIELDS).eq("id", body.userId).maybeSingle();
@@ -131,6 +139,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const REFUSALS: Record<string, [number, string]> = {
   not_found: [404, "Not found"],
   already_decided: [409, "Request already decided"],
+  stale: [409, "A newer request has arrived: review it before deciding"],
   no_request: [409, "No open request with evidence to approve"],
   no_document: [409, "No document to compare"],
   registry_not_matched: [409, "Record a match on the official register first"],

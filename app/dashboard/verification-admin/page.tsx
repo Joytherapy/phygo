@@ -84,6 +84,9 @@ export default function VerificationAdminPage() {
     const body = await res.json().catch(() => ({}))
     setBusy(null)
     if (!res.ok) {
+      // A newer request arrived: reload to show it (load() clears the error
+      // first, so the message below stays visible).
+      if (body.code === 'stale') load()
       setError(body.error || 'Error')
       return false
     }
@@ -202,12 +205,12 @@ export default function VerificationAdminPage() {
                   <div className="mt-3 flex flex-wrap gap-2">
                     {open && (
                       <>
-                        <button disabled={busy === r.id || q?.registry_check !== 'match' || !q?.has_document} title={q?.registry_check !== 'match' ? t.aIntro : undefined} onClick={() => post({ userId: r.id, decision: 'verified', message: messages[r.id] ?? '', internalNote: notes[r.id] ?? '' }, r.id)} className="rounded-full bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-40">{r.professional_status === 'verified' ? t.aConfirm : t.aApprove}</button>
-                        <button disabled={busy === r.id} onClick={() => post({ userId: r.id, decision: 'needs_info', message: messages[r.id] ?? '', internalNote: notes[r.id] ?? '' }, r.id)} className="rounded-full border border-amber-500 px-4 py-1.5 text-sm font-semibold text-amber-700 dark:text-amber-300 disabled:opacity-60">{t.aAskInfo}</button>
+                        <button disabled={busy === r.id || q?.registry_check !== 'match' || !q?.has_document} title={q?.registry_check !== 'match' ? t.aIntro : undefined} onClick={() => post({ userId: r.id, requestId: q?.id ?? null, decision: 'verified', message: messages[r.id] ?? '', internalNote: notes[r.id] ?? '' }, r.id)} className="rounded-full bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-40">{r.professional_status === 'verified' ? t.aConfirm : t.aApprove}</button>
+                        <button disabled={busy === r.id} onClick={() => post({ userId: r.id, requestId: q?.id ?? null, decision: 'needs_info', message: messages[r.id] ?? '', internalNote: notes[r.id] ?? '' }, r.id)} className="rounded-full border border-amber-500 px-4 py-1.5 text-sm font-semibold text-amber-700 dark:text-amber-300 disabled:opacity-60">{t.aAskInfo}</button>
                       </>
                     )}
                     {r.professional_status !== 'rejected' && (
-                      <button disabled={busy === r.id} onClick={() => post({ userId: r.id, decision: 'rejected', message: messages[r.id] ?? '', rejectionCategory: categories[r.id] || null, internalNote: notes[r.id] ?? '' }, r.id)} className="rounded-full border border-red-500 px-4 py-1.5 text-sm font-semibold text-red-700 dark:text-red-300 disabled:opacity-60">
+                      <button disabled={busy === r.id} onClick={() => post({ userId: r.id, requestId: q?.id ?? null, decision: 'rejected', message: messages[r.id] ?? '', rejectionCategory: categories[r.id] || null, internalNote: notes[r.id] ?? '' }, r.id)} className="rounded-full border border-red-500 px-4 py-1.5 text-sm font-semibold text-red-700 dark:text-red-300 disabled:opacity-60">
                         {r.professional_status === 'verified' ? t.aRevoke : t.aReject}
                       </button>
                     )}

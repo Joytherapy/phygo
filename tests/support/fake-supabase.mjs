@@ -169,8 +169,16 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
       let out = rows.filter(match);
       const order = url.searchParams.get('order');
       if (order) {
-        const [col, dir] = order.split('.');
-        out = [...out].sort((a, b) => (a[col] < b[col] ? -1 : a[col] > b[col] ? 1 : 0) * (dir === 'desc' ? -1 : 1));
+        // order=a.desc,b.asc: compare column by column, as PostgREST does.
+        const keys = order.split(',').map((k) => k.split('.'));
+        const cmp = (a, b) => {
+          for (const [col, dir] of keys) {
+            const c = (a[col] < b[col] ? -1 : a[col] > b[col] ? 1 : 0) * (dir === 'desc' ? -1 : 1);
+            if (c) return c;
+          }
+          return 0;
+        };
+        out = [...out].sort(cmp);
       }
       const offset = Number(url.searchParams.get('offset') ?? 0);
       const limit = url.searchParams.has('limit') ? Number(url.searchParams.get('limit')) : 1000; // PostgREST max-rows

@@ -126,7 +126,7 @@ test('a signed-in administrator keeps working, and decisions carry their identit
   for (const path of ['/api/library/admin', '/api/events/admin']) {
     assert.ok(![401, 403].includes((await call('GET', path, { who: 'admin' })).status), `GET ${path}`);
   }
-  const decision = await call('POST', '/api/admin/verification', { who: 'admin', body: { userId: people.applicant.id, decision: 'needs_info', message: 'Please add the register name.' } });
+  const decision = await call('POST', '/api/admin/verification', { who: 'admin', body: { userId: people.applicant.id, requestId: null, decision: 'needs_info', message: 'Please add the register name.' } });
   assert.equal(decision.status, 200);
   const applicant = fake.state.tables.profiles.find((p) => p.id === people.applicant.id);
   assert.equal(applicant.professional_status, 'needs_info');

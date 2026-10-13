@@ -6,13 +6,13 @@ One sequence for code, privacy, European configuration, SQL, deployment and fina
 
 The decisions are listed in `DECISIONS.md` (D1–D12).
 
-## Where things stand (13 Oct 2026)
+## Where things stand (13 Oct 2026, afternoon)
 | Item | State |
 |---|---|
 | PR #14: `CRON_SECRET` limited, personal admin session | **In Production** (`5f3ac65`). Admin consoles checked by the owner. The first real cron run after it is checked on 14 Oct |
-| PR #15: build without secrets (fixes every Vercel Preview) | **Ready.** Build with no variables succeeds; 53/53 tests; browser checks 16/16 |
-| PR #16: Functions in `fra1`, analysis of the Vercel plan and DPA | **Draft.** Waits on D5 |
-| PR #13: verification with documents | **Draft**, up to date with `main`; 81/81 integration tests, 264 SQL checks, 98 release-sequence checks. Waits on the legal texts |
+| PR #15: build without secrets (fixes every Vercel Preview) | **In Production** (`bb98c85`, deployment Ready, no build or runtime errors). Previews now build |
+| PR #16: Functions in `fra1`, analysis of the Vercel plan and DPA | **Draft**, Preview Ready (first deployment with `fra1`). Waits on D5 |
+| PR #13: verification with documents | **Draft**, up to date with `main`, Preview Ready. 86/86 integration tests, SQL suite passing, 27 browser checks. Four review findings fixed (see below). Waits on the legal texts |
 | Privacy section and Terms §3A (IT, EN, ES, FR) | **Drafts complete**, with placeholders for D1–D11 |
 
 ## Dependencies
@@ -27,11 +27,8 @@ Independent of the owner's decisions, done in parallel: #15, the drafts, tests, 
 
 ## Sequence
 ### Phase A: no decisions needed
-1. **Merge PR #15** (owner approval). Then:
-   - the automatic deploy must be Ready;
-   - Production checks: home, library, dashboard, Ask PHYGO, one clinical AI action;
-   - in Vercel → Logs, no `supabaseUrl is required` and no `Missing credentials` errors.
-2. **Merge `main` into PR #13 and PR #16** (Claude). Their Previews should then build; rerun all suites.
+1. ~~Merge PR #15~~ **Done** (`bb98c85`). Build log clean, no runtime errors. Still to do: the owner's browser checks (home, library, dashboard, Ask PHYGO, one clinical AI action).
+2. ~~Merge `main` into PR #13 and PR #16~~ **Done**. Both Previews are Ready.
 3. **14 Oct, 06:00 UTC:** the first cron after #14. Read-only log check within the hour (Claude): no 401 or 403 on `science-daily`, `fetch-sources`, `summarize-all`.
 
 ### Phase B: plan and region (D5–D8)
@@ -71,6 +68,13 @@ Independent of the owner's decisions, done in parallel: #15, the drafts, tests, 
       - add the daily cron in a small PR;
       - first run with checks, including the Storage bucket in the Supabase dashboard.
     - **60-day transition (after D10):** the owner runs the read-only preview from `..._backfill_PROPOSED.sql`, then the backfill. The owner's account gets 60 days; the owner sends their own document and confirms it from the register.
+
+## Review findings fixed before release (13 Oct)
+An independent review of PR #13 found no critical issue. Four were fixed, each with a test that fails without the fix:
+1. **Rejected account on the transition list** (medium): a new request made the status `pending` again, which gave back temporary patient management. Now a rejection or revocation also deletes the transition-list entry, in the same transaction.
+2. **Decision on a request nobody opened** (low): the console now sends the id of the request on screen; a newer one makes the database refuse (`stale`) and the page reloads.
+3. **Document left in browser memory** (low): leaving the page while a document loads now cancels the download; no blob is created afterwards.
+4. **Retention past 1,000 rows** (low): every list is now read in pages before anything changes (tested with 1,100 rows).
 
 ## Final checks after PR #13
 | Check | Who | Expected |

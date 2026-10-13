@@ -36,6 +36,8 @@ All three need the owner's approval. The legal points at the end must be closed 
 | Administrator **asks for information** on a verified account | Stays `verified` | `needs_info` | **Unchanged**: the user is asked for a better document |
 | Administrator records **mismatch** or **not found** | Unchanged by itself | Unchanged | Approval and confirmation are refused. The administrator then decides: ask for information, or revoke |
 | Administrator **revokes** (needs a category and a message) | `rejected` | Unchanged if already decided (an approval is never rewritten) | Removed at once. No data deleted |
+| Administrator **rejects or revokes** an account on the transition list | `rejected` | As above | The transition-list entry is deleted in the same transaction, so a new request (status back to `pending`) does **not** bring back temporary access. Only the owner can add it again, from the SQL editor |
+| The user sends a **new request while the administrator is reviewing** the previous one | Unchanged | The newer request is open | A decision names the request shown on screen; if it is no longer the latest, it is refused (`stale`, 409) and the page reloads. A decision never lands on a request nobody opened |
 | A security problem (for example, a suspected forged document or account takeover) | The administrator revokes (immediate, reversible by a new request and approval) | — | Removed at once |
 
 ### 60-day transition (accounts verified before documents were required)

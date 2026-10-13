@@ -16,8 +16,13 @@ export function useVerificationDocumentViewer() {
   const [doc, setDoc] = useState<{ url: string; type: string } | null>(null)
   const [state, setState] = useState<'idle' | 'loading' | 'error'>('idle')
   const current = useRef<string | null>(null)
+  // The download in progress: cancelled by close (also on unmount) or by a
+  // newer open, so a late response never creates a blob nobody releases.
+  const pending = useRef<AbortController | null>(null)
 
   const close = useCallback(() => {
+    pending.current?.abort()
+    pending.current = null
     if (current.current) URL.revokeObjectURL(current.current)
     current.current = null
     setDoc(null)
@@ -34,18 +39,24 @@ export function useVerificationDocumentViewer() {
 
   const open = useCallback(
     async (endpoint: string) => {
+      pending.current?.abort()
+      const request = new AbortController()
+      pending.current = request
       setState('loading')
       try {
-        const res = await fetch(endpoint, { cache: 'no-store', credentials: 'same-origin' })
+        const res = await fetch(endpoint, { cache: 'no-store', credentials: 'same-origin', signal: request.signal })
         const type = (res.headers.get('content-type') ?? '').split(';')[0].trim()
         if (!res.ok || !ALLOWED.includes(type)) throw new Error(String(res.status))
-        const blob = new Blob([await res.arrayBuffer()], { type })
+        const bytes = await res.arrayBuffer()
+        if (request.signal.aborted) return
+        pending.current = null
+        const blob = new Blob([bytes], { type })
         if (current.current) URL.revokeObjectURL(current.current)
         current.current = URL.createObjectURL(blob)
         setDoc({ url: current.current, type })
         setState('idle')
       } catch {
-        setState('error')
+        if (!request.signal.aborted) setState('error')
       }
     },
     [],

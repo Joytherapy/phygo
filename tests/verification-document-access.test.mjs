@@ -237,7 +237,7 @@ test('retention still deletes the file, and the document route then answers 404'
   const anna = requestOf('anna');
   // Approve Anna, then make the decision old enough for a 30-day retention.
   assert.equal((await fetch(`${app.url}/api/admin/verification`, { method: 'POST', headers: { ...cookie('admin'), 'content-type': 'application/json' }, body: JSON.stringify({ action: 'registry_check', requestId: anna.id, result: 'match' }) })).status, 200);
-  assert.equal((await fetch(`${app.url}/api/admin/verification`, { method: 'POST', headers: { ...cookie('admin'), 'content-type': 'application/json' }, body: JSON.stringify({ userId: people.anna.id, decision: 'verified' }) })).status, 200);
+  assert.equal((await fetch(`${app.url}/api/admin/verification`, { method: 'POST', headers: { ...cookie('admin'), 'content-type': 'application/json' }, body: JSON.stringify({ userId: people.anna.id, requestId: anna.id, decision: 'verified' }) })).status, 200);
   anna.decided_at = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString();
   const path = anna.document_path;
   const cron = (base) => fetch(`${base}/api/cron/verification-retention`, { headers: { authorization: `Bearer ${CRON}` } });

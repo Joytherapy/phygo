@@ -11,7 +11,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { startFakeSupabase, sessionCookie } from './support/fake-supabase.mjs';
-import { verificationRpc } from './support/verification-rpc.mjs';
+import { verificationRpc, latestRequestId } from './support/verification-rpc.mjs';
 import { startApp } from './support/app.mjs';
 
 const FAKE_PORT = Number(process.env.FAKE_SUPABASE_PORT ?? 54329);
@@ -24,6 +24,7 @@ const people = {
   nina: person('nina@test.invalid'), // verified, asked for a clearer document
   ugo: person('ugo@test.invalid'), // verified, changes details
   alice: person('alice@test.invalid'), // another clinician with a patient
+  tess: person('tess@test.invalid'), // on the transition list, not yet verified
   admin: person('admin@test.invalid'), // in PHYGO_ADMIN_EMAILS (tests/support/app.mjs)
 };
 const cookie = (who) => (who ? { cookie: sessionCookie(`tok-${who}`, people[who]) } : {});
@@ -42,7 +43,8 @@ before(async () => {
     rpc: verificationRpc,
     users: Object.fromEntries(Object.entries(people).map(([k, u]) => [`tok-${k}`, u])),
     tables: {
-      profiles: [verified('vera', '1001'), verified('carlo', '1002'), verified('dora', '1003'), verified('nina', '1004'), verified('ugo', '1005'), verified('alice', '1006'), verified('admin', '1007')],
+      profiles: [verified('vera', '1001'), verified('carlo', '1002'), verified('dora', '1003'), verified('nina', '1004'), verified('ugo', '1005'), verified('alice', '1006'), verified('admin', '1007'),
+        { ...verified('tess', '1008'), professional_status: 'pending' }],
       patients: [
         { id: 'p-carlo', user_id: people.carlo.id, patient_user_id: null, name: 'Synthetic patient C' },
         { id: 'p-dora', user_id: people.dora.id, patient_user_id: null, name: 'Synthetic patient D' },
@@ -56,7 +58,7 @@ before(async () => {
       ],
       metabolic_profiles: [],
       patient_clinical_references: [],
-      professional_transition_accounts: [],
+      professional_transition_accounts: [{ user_id: people.tess.id, until: inDays(30), added_at: inDays(0), added_by: 'owner', note: null }],
       professional_verification_requests: [],
       professional_verification_reviews: [],
       ask_phygo_usage: [],
@@ -84,7 +86,9 @@ const submit = (who, fields = {}) => {
   form.append('document', new Blob([PDF], { type: 'application/pdf' }), 'certificate.pdf');
   return fetch(`${app.url}/api/profile/verification`, { method: 'POST', headers: cookie(who), body: form });
 };
-const admin = (body) => call(app.url, 'POST', '/api/admin/verification', 'admin', body);
+// Like the administration page, a decision names the request on screen: the latest one.
+const admin = (body) =>
+  call(app.url, 'POST', '/api/admin/verification', 'admin', body.decision && !('requestId' in body) ? { requestId: latestRequestId(fake.state, body.userId), ...body } : body);
 const profileOf = (who) => fake.state.tables.profiles.find((p) => p.id === people[who].id);
 const latestOf = (who) => [...fake.state.tables.professional_verification_requests].reverse().find((r) => r.user_id === people[who].id);
 const historyOf = (who) => fake.state.tables.professional_verification_reviews.filter((r) => r.user_id === people[who].id);
@@ -221,6 +225,32 @@ test('revocation of an account verified before documents: recorded, access remov
   const v = await own('dora');
   assert.equal(v.message, 'Verification revoked.');
   assert.ok(!JSON.stringify(v).includes('Not in the register on 13 Oct.'), 'internal note not shown to the user');
+});
+
+test('a rejection ends temporary access from the transition list; a new request does not bring it back', async () => {
+  assert.equal(await clinicalAiOpen('tess'), true, 'on the transition list while pending');
+  assert.equal((await submit('tess')).status, 200);
+  const res = await admin({ userId: people.tess.id, decision: 'rejected', message: 'Not found in the register.', rejectionCategory: 'not_in_register' });
+  assert.equal(res.status, 200);
+  assert.equal(await clinicalAiOpen('tess'), false);
+  assert.ok(!fake.state.tables.professional_transition_accounts.some((t) => t.user_id === people.tess.id), 'removed from the transition list');
+  // Sending a new request puts the status back to pending, but not the temporary access.
+  assert.equal((await submit('tess')).status, 200);
+  assert.equal(profileOf('tess').professional_status, 'pending');
+  assert.equal(await clinicalAiOpen('tess'), false);
+});
+
+test('a decision is refused when a newer request has arrived since the page was loaded', async () => {
+  const shown = latestOf('tess').id;
+  assert.equal((await submit('tess')).status, 200, 'a newer request arrives');
+  const before = snapshot();
+  const stale = await admin({ userId: people.tess.id, requestId: shown, decision: 'needs_info', message: 'Please send a clearer copy.' });
+  assert.equal(stale.status, 409);
+  assert.equal((await stale.json()).code, 'stale');
+  assert.equal(snapshot(), before, 'nothing was written');
+  const missing = await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.tess.id, decision: 'needs_info', message: 'x' });
+  assert.equal(missing.status, 400, 'the request on screen must be named (null when there is none)');
+  assert.equal((await admin({ userId: people.tess.id, decision: 'needs_info', message: 'Please send a clearer copy.' })).status, 200, 'the latest request can be decided');
 });
 
 test('patient isolation: administrator status gives no access to other clinicians’ patients', async () => {

@@ -17,6 +17,9 @@ import { VERIFICATION_BUCKET } from "@/lib/verificationEvidence";
 //     latest request of an account, nor its latest approved one.
 // Not scheduled in vercel.json; call with "Authorization: Bearer <CRON_SECRET>".
 const DAY = 24 * 60 * 60 * 1000;
+// Supabase returns at most 1,000 rows per query, so every list is read in
+// pages, in a stable order, before anything is changed.
+const PAGE = 1000;
 const days = (name: string) => {
   const n = Number.parseInt(process.env[name] ?? "", 10);
   return Number.isFinite(n) && n >= 1 ? n : null;
@@ -34,10 +37,14 @@ export async function GET(req: Request) {
   const report: Record<string, unknown> = { configured: true };
 
   if (documentDays) {
-    const { data, error } = await db
-      .from("professional_verification_requests")
-      .select("id, user_id, document_path, decided_at, status")
-      .in("status", ["verified", "rejected", "superseded"]);
+    const { data, error } = await readAll((from, to) =>
+      db
+        .from("professional_verification_requests")
+        .select("id, user_id, document_path, decided_at, status")
+        .in("status", ["verified", "rejected", "superseded"])
+        .order("id")
+        .range(from, to),
+    );
     if (error) return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
     const cutoff = Date.now() - documentDays * DAY;
     const due = (data ?? []).filter((r) => r.document_path && r.decided_at && Date.parse(r.decided_at) < cutoff);
@@ -61,10 +68,14 @@ export async function GET(req: Request) {
 
   if (noteDays) {
     const cutoff = Date.now() - noteDays * DAY;
-    const { data, error } = await db
-      .from("professional_verification_reviews")
-      .select("id, created_at, internal_note, note_redacted_at")
-      .is("note_redacted_at", null);
+    const { data, error } = await readAll((from, to) =>
+      db
+        .from("professional_verification_reviews")
+        .select("id, created_at, internal_note, note_redacted_at")
+        .is("note_redacted_at", null)
+        .order("id")
+        .range(from, to),
+    );
     if (error) return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
     let redacted = 0;
     for (const r of (data ?? []).filter((x) => x.internal_note && Date.parse(x.created_at) < cutoff)) {
@@ -78,10 +89,16 @@ export async function GET(req: Request) {
   }
 
   if (historyDays) {
-    const { data, error } = await db
-      .from("professional_verification_requests")
-      .select("id, user_id, status, submitted_at, decided_at, document_path")
-      .order("submitted_at", { ascending: false });
+    // Newest first across all pages: the first row seen for an account is its
+    // latest request.
+    const { data, error } = await readAll((from, to) =>
+      db
+        .from("professional_verification_requests")
+        .select("id, user_id, status, submitted_at, decided_at, document_path")
+        .order("submitted_at", { ascending: false })
+        .order("id")
+        .range(from, to),
+    );
     if (error) return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
     const cutoff = Date.now() - historyDays * DAY;
     const keep = new Set<string>();
@@ -107,6 +124,17 @@ export async function GET(req: Request) {
   }
 
   return NextResponse.json(report);
+}
+
+/** Reads every page of a query; any page error fails the whole read. */
+async function readAll<T>(page: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>) {
+  const rows: T[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await page(from, from + PAGE - 1);
+    if (error) return { data: null, error };
+    rows.push(...(data ?? []));
+    if (!data || data.length < PAGE) return { data: rows, error: null };
+  }
 }
 
 /** Removes a document from storage and confirms it is no longer listed in its folder. */

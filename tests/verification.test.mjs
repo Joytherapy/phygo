@@ -263,18 +263,18 @@ test('only an administrator can review, and the decision takes effect', async ()
 
   assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.needsInfo.id, decision: 'rejected' })).status, 400, 'a rejection needs a message');
   // A request without evidence cannot be approved: it needs a document and a match on the register.
-  const legacy = await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.pending.id, decision: 'verified' });
+  const legacy = await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.pending.id, requestId: null, decision: 'verified' });
   assert.equal(legacy.status, 409);
   assert.equal((await legacy.json()).code, 'no_request');
   assert.equal((await submit(app.url, 'pending', { registryCountry: 'IT', registryName: 'Synthetic register', registrationNumber: 'T-100' })).status, 200);
   assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { action: 'registry_check', requestId: requestOf('pending').id, result: 'match' })).status, 200);
-  const approve = await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.pending.id, decision: 'verified' });
+  const approve = await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.pending.id, requestId: requestOf('pending').id, decision: 'verified' });
   assert.equal(approve.status, 200);
   assert.equal(row('pending').professional_status, 'verified');
   assert.equal(row('pending').verification_reviewed_by, 'admin@test.invalid');
   assert.ok(![401, 403].includes((await call(app.url, 'POST', '/api/generate-note', 'pending', NOTE)).status), 'unlocked after approval');
 
-  assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.declared.id, decision: 'verified' })).status, 409, 'cannot verify an account without registration details');
+  assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.declared.id, requestId: null, decision: 'verified' })).status, 409, 'cannot verify an account without registration details');
 });
 
 test('the transition list fails closed: expired, too long, unreadable, or set the old way', async () => {
@@ -404,7 +404,7 @@ test('owner path: the administrator is listed before the release, then verified 
 
     // Approval on the console, after checking the official register; recorded with the reviewer.
     assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { action: 'registry_check', requestId: requestOf('admin').id, result: 'match' })).status, 200);
-    assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.admin.id, decision: 'verified' })).status, 200);
+    assert.equal((await call(app.url, 'POST', '/api/admin/verification', 'admin', { userId: people.admin.id, requestId: requestOf('admin').id, decision: 'verified' })).status, 200);
     assert.equal(row('admin').professional_status, 'verified');
     assert.equal(row('admin').verification_reviewed_by, 'admin@test.invalid');
 
