@@ -1,5 +1,6 @@
 // Values for the professional-verification sections of the privacy notice and
-// the Terms (generated from docs/legal, see verification.generated.ts).
+// the Terms, and for the rewritten privacy sections 6 (providers) and 7
+// (transfers) (generated from docs/legal, see verification.generated.ts).
 //
 // NOTHING IS PUBLISHED until both are true:
 //   1. every value below is set, in all four languages (an empty string is a
@@ -23,6 +24,9 @@ export const VERIFICATION_PLACEHOLDERS = [
   'RETENTION_HISTORY', // D9
   'TRANSITION_DAYS', // D10
   'GOVERNING_LAW', // D11: the full sentence of Terms §12
+  'PROCESSOR_AGREEMENTS', // D6: only once every DPA is accepted (see DRAFT_privacy-providers.md)
+  'AUTH_EMAIL_PROVIDER', // owner checks the SMTP setting in Supabase
+  'OPENAI_RETENTION', // D15: 30 days by default, or none with zero data retention
 ] as const;
 
 export type VerificationPlaceholder = (typeof VERIFICATION_PLACEHOLDERS)[number];

@@ -20,7 +20,7 @@ import { startFakeSupabase } from './support/fake-supabase.mjs';
 import { startApp } from './support/app.mjs';
 
 const LANGS = ['it', 'en', 'es', 'fr'];
-const KEYS = ['CONTROLLER', 'PRIVACY_CONTACT', 'DPO_SENTENCE', 'ADMINS', 'LEGAL_BASIS', 'FUNCTION_REGION', 'TRANSFER_SAFEGUARDS', 'RETENTION_DOCUMENT', 'RETENTION_NOTES', 'RETENTION_HISTORY', 'TRANSITION_DAYS', 'GOVERNING_LAW'];
+const KEYS = ['CONTROLLER', 'PRIVACY_CONTACT', 'DPO_SENTENCE', 'ADMINS', 'LEGAL_BASIS', 'FUNCTION_REGION', 'TRANSFER_SAFEGUARDS', 'RETENTION_DOCUMENT', 'RETENTION_NOTES', 'RETENTION_HISTORY', 'TRANSITION_DAYS', 'GOVERNING_LAW', 'PROCESSOR_AGREEMENTS', 'AUTH_EMAIL_PROVIDER', 'OPENAI_RETENTION'];
 const sample = (lang) => Object.fromEntries(KEYS.map((k) => [k, k === 'DPO_SENTENCE' ? '' : `Synthetic ${k} ${lang}`]));
 const SAMPLE = Object.fromEntries(LANGS.map((l) => [l, sample(l)]));
 
@@ -41,7 +41,7 @@ after(() => dir && rmSync(dir, { recursive: true, force: true }));
 
 // A minimal dictionary with the section titles the function looks for.
 const dict = () => ({
-  privacy: { sections: Array.from({ length: 15 }, (_, i) => ({ title: `${i + 1}. P`, blocks: ['x'] })) },
+  privacy: { sections: Array.from({ length: 15 }, (_, i) => ({ title: `${i + 1}. P`, blocks: [i === 5 ? 'Resend (transactional email delivery)' : 'x'] })) },
   terms: { sections: Array.from({ length: 13 }, (_, i) => ({ title: `${i + 1}. T`, blocks: [i === 11 ? '[jurisdiction to be confirmed]' : 'x'] })) },
   contact: {},
   contents: '',
@@ -83,6 +83,13 @@ test('once ready: no placeholder left, the anchor, §3A after §3 and the govern
     assert.match(out.terms.sections[3].title, /^3A\. /, `${lang}: §3A follows §3`);
     assert.deepEqual(out.terms.sections.find((s) => s.title.startsWith('12.')).blocks, [`Synthetic GOVERNING_LAW ${lang}`]);
     assert.ok(!text.includes('[jurisdiction'), `${lang}: §12 placeholder replaced`);
+    // Privacy §6 and §7 are the rewritten ones: Daily and dictation named, Resend gone.
+    assert.equal(out.privacy.sections.length, 16);
+    assert.match(out.privacy.sections[5].title, /^6\. /);
+    assert.match(out.privacy.sections[6].title, /^7\. /);
+    const providers = JSON.stringify(out.privacy.sections[5]);
+    assert.ok(providers.includes('Daily') && providers.includes('OpenAI') && !providers.includes('Resend'), `${lang}: §6 lists the providers in the code`);
+    assert.ok(providers.includes('Google') && providers.includes('Apple'), `${lang}: §6 explains dictation`);
   }
 });
 
