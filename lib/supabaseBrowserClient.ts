@@ -11,15 +11,17 @@
 // change) — this file only prevents the pattern from spreading further.
 
 import { createBrowserClient } from '@supabase/ssr'
+import { lazy } from '@/lib/lazy'
 
-let client: ReturnType<typeof createBrowserClient> | null = null
+// Created on first use (lib/lazy.ts), so a page can call this while
+// rendering and still be prerendered by a build without Supabase variables.
+const client = lazy(() =>
+  createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+)
 
 export function getSupabaseBrowserClient() {
-  if (!client) {
-    client = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-  }
   return client
 }

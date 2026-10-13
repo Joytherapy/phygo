@@ -6,13 +6,14 @@ import Footer from '@/components/Footer';
 import { AlertTriangle, Quote, ArrowLeft, Sparkles } from 'lucide-react';
 import LanguageSwitcher from '@/components/library/LanguageSwitcher';
 import { SITE_URL, buildConditionPath, buildConditionIdPath, parseConditionId } from '@/lib/publicLibrary';
+import { lazy } from '@/lib/lazy';
 
 export const revalidate = 3600; // re-render at most once an hour, keeps content fresh without hitting the DB on every request
 
-const adminSupabase = createClient(
+const adminSupabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
 interface ConditionRecord {
   id: number;

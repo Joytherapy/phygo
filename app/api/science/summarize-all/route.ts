@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/adminServer';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
+import { lazy } from '@/lib/lazy';
 
-const supabase = createClient(
+const supabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
 
 const systemPrompt = `You are an experienced physiotherapy research assistant. Summarize a scientific paper for physiotherapists using ONLY the title, abstract, journal, and study type provided. Never invent results, numbers, p-values, sample sizes, DOIs, PMIDs, or conclusions. If a field cannot be determined from the given text, write exactly "Not available from abstract".
 
@@ -102,7 +103,8 @@ Abstract: ${paper.abstract || 'Not available'}`;
 }
 
 export async function GET(req: Request) {
-  const denied = await requireAdmin(req);
+  // Called daily by /api/cron/science-daily with CRON_SECRET.
+  const denied = await requireAdmin(req, { allowCron: true });
   if (denied) return denied;
 
   try {

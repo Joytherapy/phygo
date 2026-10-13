@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { translateContent, type AppLang } from '@/lib/contentTranslation';
 import { STRUCTURE_FIELD_ORDER } from '@/lib/pelvicFloorFields';
+import { lazy } from '@/lib/lazy';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,11 +12,11 @@ export const dynamic = 'force-dynamic';
 // this route's `export const dynamic = 'force-dynamic'`, and can keep
 // serving a stale row set — e.g. missing newly INSERTed rows — even across
 // redeploys). See Supabase's own Next.js App Router caching guidance.
-const adminSupabase = createClient(
+const adminSupabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
   { global: { fetch: (url, options) => fetch(url, { ...options, cache: 'no-store' }) } }
-);
+));
 
 function parseLang(value: string | null): AppLang {
   return value === 'en' || value === 'es' || value === 'fr' ? value : 'it';
