@@ -39,12 +39,11 @@ import TextAnnotationLayer, { DEFAULT_FONT_SIZE, DEFAULT_BOX_WIDTH } from './Tex
 import ImageAnnotationLayer from './ImageAnnotationLayer'
 import KnowledgeCardAnnotationLayer from './KnowledgeCardAnnotationLayer'
 import TextSelectionPopup from './TextSelectionPopup'
+import { pdfWorkerSrc } from '@/lib/pdfWorker'
 
-// pdfjs ships its own worker; react-pdf re-exports the exact pdfjs build it
-// bundles, so pointing the worker at the matching version on cdnjs keeps
-// them in lockstep without adding a separate pdfjs-dist dependency (and the
-// version mismatches that come with pinning one by hand).
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`
+// The worker of the pdfjs build react-pdf uses, served from our own domain
+// (see lib/pdfWorker.ts).
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerSrc(pdfjs.version)
 
 const MIN_SCALE = 0.5
 const MAX_SCALE = 2.5
