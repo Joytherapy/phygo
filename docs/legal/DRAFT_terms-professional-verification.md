@@ -11,19 +11,17 @@
 
   This section adds gradual, proportionate steps before closing an account, and does **not** exclude PHYGO's liability.
 
-## Points for the lawyer `[LEGAL REVIEW]`
-1. Paragraph (a), last sentence: verification "is not an assessment of clinical competence". It describes what the check covers; confirm it is not read as a limitation of liability.
-2. Paragraph (b): the duty to report a suspension or removal from the register. Confirm it is proportionate and enforceable.
-3. Paragraph (c):
-   - the graduated measures;
-   - the "urgent cases" exception (patient safety, unlawful use);
-   - whether to mention reporting to the competent authorities or the Order.
-
-   That last point is not included; it is a decision for the owner and the lawyer.
-4. Paragraph (d): "your data stays viewable" is true today (read access is kept). **Export:** confirm whether an export function exists or will exist before mentioning it.
-5. Paragraph (e): the 60-day transition and how it is notified (in-app today; e-mail not implemented).
-6. Consumer and professional law: users are professionals. Confirm the governing law (§12 still says "[jurisdiction to be confirmed]").
-7. The four language versions must stay aligned. State which version prevails, if any.
+## Points for the lawyer, with a recommendation for each
+| # | Point | Recommendation | Why |
+|---|---|---|---|
+| 1 | (a), last sentence: verification "is not an assessment of clinical competence" | **Keep** | It states what the check covers (a register match on a date), so users and patients do not read the badge as a quality certificate. It does not exclude liability, and paragraph (f) says so |
+| 2 | (b): duty to report a suspension or removal from the register | **Keep**, "without delay" | Clinical access depends on a valid registration; the duty is proportionate and costs the user nothing |
+| 3 | (c): graduated measures and the "urgent cases" exception | **Keep as written** | Proportionate, with a right to respond, and an exception limited to patient safety or unlawful use |
+| 3b | (c): reporting to the Order or the authorities | **Do not add it to the Terms** | Reporting a forged document is possible by law anyway; writing it in the Terms adds nothing and reads as a threat. Decide case by case with the lawyer |
+| 4 | (d): data stays viewable; export | **Keep "viewable"; do not promise export** until an export function exists | Read access is kept (tested). There is no export function today |
+| 5 | (e): 60-day transition and how it is notified | **In-app notice** (implemented, 4 languages) | Only accounts verified before documents were required are affected, and today that is only the owner's. No other account can join that group later, so no e-mail campaign is needed |
+| 6 | Governing law (§12 still says "[jurisdiction to be confirmed]") | `{{GOVERNING_LAW}}`: **Italian law; courts of the place where the owner is based** (B2B, professional users) | PHYGO is run from Italy; users are professionals, not consumers. The lawyer confirms the forum |
+| 7 | Which language prevails | **Italian** | The declaration's source text is Italian; the other versions are translations |
 
 ---
 

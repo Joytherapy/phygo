@@ -1,7 +1,7 @@
 # DRAFT — Privacy notice, section "Professional verification" (`/privacy#professional-verification`)
 
 **Status: unpublished draft. Do not copy it into `app/privacy/page.tsx` until:**
-- every item marked `[TO CONFIRM]` or `[OWNER DECISION]` is resolved;
+- every `{{PLACEHOLDER}}` in "Values to fill before publication" is replaced (decisions: `docs/release/DECISIONS.md`);
 - the text has been reviewed by a qualified data-protection professional.
 
 The verification form already links to `/privacy#professional-verification`. That anchor does not exist yet, on purpose: the evidence feature must not be released before this section is published.
@@ -75,7 +75,7 @@ Found while checking, outside verification:
   - the decision (time, who, reason category, message to the user);
   - an optional internal note;
   - an hourly counter of submissions (abuse prevention).
-- **Access:** the owner and authorised administrators get a temporary link, after a server-side permission check. Nobody else does: no other user, no patient.
+- **Access:** the owner and authorised administrators open the document through the server, after a permission check. The browser receives the file itself (no link, no token), shows it from memory, and does not cache it. Nobody else can open it: no other user, no patient.
 - **Who decides:**
   - a person decides;
   - there is no automatic query of the register and no automated decision;
@@ -88,39 +88,22 @@ Found while checking, outside verification:
   - nothing automatic is active;
   - the periods (30 days, 12 months, 24 months) are **proposals not yet approved** and must not be published.
 
-## Items to resolve
-`[OWNER DECISION]`
-1. **Function region:** keep `iad1` or move to an EU region (`fra1` Frankfurt or `cdg1` Paris). See the analysis in the PR.
-2. **Vercel plan:** Hobby (non-commercial, no evidence of DPA coverage) or Pro.
-3. **Who the authorised administrators are:** their role and how many.
-4. **Retention periods:** approve or change the proposal.
-5. **The 60-day transition:** when, and how it is communicated (in-app only, or also by e-mail).
-6. **Data export:** whether users can export their data, and how.
+## Values to fill before publication
+The texts below use these placeholders. Every value comes from the owner. The reasons for each recommendation are in `docs/release/DECISIONS.md`. **Do not publish while any placeholder remains.**
 
-`[TO CONFIRM]` (facts the owner must provide or check)
-1. The controller's identity: legal name, address, VAT or company number. Whether a DPO has been appointed.
-2. The contact channel for data-protection requests.
-3. **Supabase:**
-   - whether the DPA is accepted or signed for this organisation, and by which entity;
-   - the current sub-processor list;
-   - the transfer mechanism (SCCs or other).
-4. **Vercel:**
-   - whether the account has an applicable DPA (today the evidence says Pro or Enterprise only);
-   - the current sub-processor list;
-   - the DPF listing on dataprivacyframework.gov.
-5. Whether Supabase logs record the server's read requests (they contain the object path, which includes the account id; no content).
-
-`[LEGAL REVIEW]`
-1. **Legal basis.** Not decided here. The options for the lawyer are:
-   - contract, Art. 6(1)(b);
-   - legitimate interest, Art. 6(1)(f), with a balancing test;
-   - both.
-2. **Transfers:**
-   - to the USA (Vercel functions);
-   - through the global CDN (Cloudflare) cache;
-   - whether processing by a US company counts as a transfer even with an EU region.
-3. The rights paragraph, including the limits on erasure while the account is active.
-4. Section 6 of the current notice ("each bound by a Data Processing Agreement"): it must be true before it is published.
+| Placeholder | What it is | Recommended value | Status |
+|---|---|---|---|
+| `{{CONTROLLER}}` | Legal name, address, VAT or company number of whoever runs PHYGO | — (owner's data) | **Needed** |
+| `{{PRIVACY_CONTACT}}` | Address for data-protection requests | A dedicated, monitored mailbox (for example a privacy@ alias of the PHYGO domain) | **Needed** |
+| `{{DPO_SENTENCE}}` | DPO details, or remove the sentence | Remove, unless a DPO has been appointed | To confirm |
+| `{{ADMINS}}` | Who reviews documents | "the PHYGO owner, who is a physiotherapist" (one person today) | To confirm |
+| `{{LEGAL_BASIS}}` | Legal basis | Contract, Art. 6(1)(b) GDPR, for checking eligibility; legitimate interest, Art. 6(1)(f), for keeping the decision record and preventing abuse | **Lawyer** |
+| `{{FUNCTION_REGION}}` | Where the servers that receive the upload run | Frankfurt, Germany (after PR #16), otherwise Washington, USA | Owner (plan) |
+| `{{TRANSFER_SAFEGUARDS}}` | Safeguards for Vercel, Supabase, Cloudflare | EU-U.S. Data Privacy Framework where the provider is certified, otherwise the Standard Contractual Clauses in the provider's DPA | **Lawyer**, after the DPAs are signed |
+| `{{RETENTION_DOCUMENT}}` | Document file | 30 days after the decision | Owner |
+| `{{RETENTION_NOTES}}` | Internal notes | 12 months | Owner |
+| `{{RETENTION_HISTORY}}` | Earlier requests and their history | 24 months after the later decision | Owner |
+| `{{TRANSITION_DAYS}}` | Deadline for accounts verified before documents | 60 days from the notice | Owner |
 
 ---
 
@@ -133,6 +116,8 @@ Found while checking, outside verification:
 - la gestione di pazienti reali.
 
 Usiamo i dati della verifica solo per questo scopo e per prevenire abusi. Non li usiamo per finalità commerciali o di profilazione.
+
+**Titolare.** {{CONTROLLER}}. Contatto per la protezione dei dati: {{PRIVACY_CONTACT}}. {{DPO_SENTENCE}}
 
 **Quali dati raccogliamo.**
 - **Iscrizione:**
@@ -148,11 +133,13 @@ Usiamo i dati della verifica solo per questo scopo e per prevenire abusi. Non li
   - la decisione, con data e autore;
   - l'eventuale categoria del motivo;
   - il messaggio che ti inviamo;
-  - eventuali note interne dell'amministratore.
-- **Un contatore** del numero di invii per ora, per prevenire abusi.
+  - eventuali note interne di chi verifica.
+- **Un contatore** del numero di invii e di aperture del documento per ora, per prevenire abusi.
+
+**Perché e su quale base.** Trattiamo questi dati per verificare che tu possa accedere alle funzioni riservate ai professionisti e per prevenire abusi. Base giuridica: {{LEGAL_BASIS}}. Fornire i dati non è obbligatorio: senza verifica continui a usare le funzioni non cliniche di PHYGO.
 
 **Come verifichiamo l'iscrizione.**
-- Un amministratore di PHYGO confronta a mano tre elementi:
+- Una persona ({{ADMINS}}) confronta a mano tre elementi:
   - i dati che hai dichiarato;
   - il documento;
   - l'albo pubblico ufficiale (per l'Italia, l'Albo nazionale gestito dalla FNOFI).
@@ -160,43 +147,40 @@ Usiamo i dati della verifica solo per questo scopo e per prevenire abusi. Non li
 - Non interroghiamo l'albo in modo automatico e non prendiamo decisioni automatizzate.
 - Approviamo solo se il documento è presente e la corrispondenza con l'albo è stata registrata.
 
-**Chi può vedere i dati.**
-- **Tu:** lo stato, il messaggio che ti inviamo e il tuo documento, tramite un link temporaneo.
-- **Gli amministratori autorizzati da PHYGO** `[TO CONFIRM: ruolo e numero]`: accedono al documento solo dopo un controllo dei permessi, con un link temporaneo.
-- **Nessun altro:** gli altri utenti e i pazienti non vedono il documento. Il documento non compare nelle cartelle cliniche, nei PDF clinici o nelle ricerche, e non viene inviato a servizi di intelligenza artificiale.
+**Chi può vedere il documento.**
+- **Tu**, dal tuo profilo.
+- **Chi verifica per PHYGO** ({{ADMINS}}), solo dopo un controllo dei permessi.
+- **Come viene mostrato:** il documento passa dal nostro server e viene mostrato nella pagina. Non riceviamo né consegniamo link pubblici, e il browser non lo conserva in cache.
+- **Nessun altro:** gli altri utenti e i pazienti non lo vedono. Il documento non compare nelle cartelle cliniche, nei PDF clinici o nelle ricerche, e non viene inviato a servizi di intelligenza artificiale, al servizio video o via e-mail.
 
 **Chi tratta i dati per nostro conto.**
-- **Supabase:** database e archivio dei documenti, ospitati nella regione di Francoforte (Germania). I file vengono consegnati attraverso la rete di distribuzione dei contenuti di Supabase (Cloudflare), che può conservarne copie temporanee nei propri nodi. `[TO CONFIRM: accordo sul trattamento dei dati, sub-responsabili, garanzie per i trasferimenti]`
-- **Vercel:** hosting dell'applicazione. Il documento caricato viene elaborato dai server dell'applicazione, che oggi si trovano negli Stati Uniti (Washington). `[OWNER DECISION: mantenere questa regione o spostare l'elaborazione in una regione dell'Unione europea]` `[TO CONFIRM: accordo sul trattamento dei dati e garanzie per il trasferimento]`
-- **Nessun altro:** il documento non viene inviato a servizi di intelligenza artificiale, al servizio video o via e-mail.
+- **Supabase:** database e archivio privato dei documenti, nella regione di Francoforte (Germania). I file letti dal nostro server passano dalla rete di distribuzione di Supabase (Cloudflare), che può conservarne copie temporanee non riutilizzabili. Una copia viene invalidata quando il file viene cancellato.
+- **Vercel:** hosting dell'applicazione. Il documento caricato viene elaborato dai server dell'applicazione a {{FUNCTION_REGION}}.
 
-**Titolare e base giuridica.**
-- Titolare del trattamento: `[TO CONFIRM: denominazione, sede, contatti]`.
-- Base giuridica: `[TO CONFIRM con il legale: esecuzione del contratto, legittimo interesse alla sicurezza dei pazienti e alla prevenzione degli abusi, o entrambi]`.
+Entrambi agiscono come responsabili del trattamento in base a un accordo sul trattamento dei dati. Supabase e Vercel sono società con sede negli Stati Uniti: per i trasferimenti di dati ci basiamo su {{TRANSFER_SAFEGUARDS}}.
 
-**Quanto conserviamo i dati.** `[TO CONFIRM: inserire i periodi solo dopo l'approvazione]`
-- Il documento: fino a `[periodo]` dopo la decisione. Se lo sostituisci con un nuovo invio, viene cancellato subito.
-- Le note interne: `[periodo]`.
-- Le richieste precedenti e il loro storico: `[periodo]`.
-- La richiesta su cui si basa lo stato attuale: finché l'account esiste.
-- Alla chiusura dell'account, cancelliamo tutti questi dati, salvo obblighi di legge.
+**Quanto conserviamo i dati.**
+- Il documento: {{RETENTION_DOCUMENT}}. Se lo sostituisci con un nuovo invio, viene cancellato subito.
+- Le note interne: {{RETENTION_NOTES}}.
+- Le richieste precedenti e il loro storico: {{RETENTION_HISTORY}}.
+- La richiesta su cui si basa il tuo stato attuale: finché l'account esiste.
+- Alla chiusura dell'account cancelliamo tutti questi dati, salvo obblighi di legge.
 
-**Account verificati prima dell'introduzione del documento.** Questi account ricevono una richiesta di invio del documento, con una scadenza (`[TO CONFIRM: 60 giorni dalla comunicazione]`).
+**Account verificati prima dell'introduzione del documento.** Ti chiederemo di inviare il documento entro {{TRANSITION_DAYS}}.
 - Se nome, numero e Ordine restano invariati, lo stato «Verificato» non cambia durante il controllo.
 - Alla scadenza senza un documento confermato, le funzioni che richiedono la verifica vengono sospese finché non lo confermiamo.
 - Account e dati dei pazienti non vengono cancellati.
-
-**È obbligatorio?** No. Senza verifica continui a usare le funzioni non cliniche di PHYGO.
 
 **I tuoi diritti.**
 - Puoi chiedere:
   - l'accesso ai tuoi dati (incluse le note interne che ti riguardano);
   - la rettifica, inviando una nuova richiesta;
   - la cancellazione e la limitazione del trattamento;
-  - la portabilità e l'opposizione, nei casi previsti dalla legge.
+  - l'opposizione al trattamento basato sul legittimo interesse;
+  - la portabilità dei dati che ci hai fornito.
 
-  `[TO CONFIRM con il legale: limiti alla cancellazione mentre l'account è attivo]`
-- Scrivi a `[TO CONFIRM: contatto]`. Rispondiamo entro i termini di legge.
+  Finché l'account resta attivo e riservato ai professionisti, la cancellazione dei dati di verifica comporta la sospensione delle funzioni che li richiedono.
+- Scrivi a {{PRIVACY_CONTACT}}. Rispondiamo entro un mese, salvo proroghe previste dalla legge.
 - Puoi presentare reclamo all'autorità di controllo del Paese in cui vivi, lavori o dove è avvenuta la presunta violazione. In Italia è il Garante per la protezione dei dati personali.
 
 ---
@@ -210,6 +194,8 @@ Usiamo i dati della verifica solo per questo scopo e per prevenire abusi. Non li
 - managing real patients.
 
 We use verification data only for this purpose and to prevent abuse. We do not use it for marketing or profiling.
+
+**Controller.** {{CONTROLLER}}. Data-protection contact: {{PRIVACY_CONTACT}}. {{DPO_SENTENCE}}
 
 **What we collect.**
 - **Registration:**
@@ -225,11 +211,13 @@ We use verification data only for this purpose and to prevent abuse. We do not u
   - the decision, with its date and author;
   - any reason category;
   - the message we send you;
-  - any internal notes by the administrator.
-- **A counter** of submissions per hour, to prevent abuse.
+  - any internal notes by the reviewer.
+- **A counter** of submissions and document openings per hour, to prevent abuse.
+
+**Why, and on what basis.** We process this data to check that you may use the features reserved for professionals, and to prevent abuse. Legal basis: {{LEGAL_BASIS}}. Providing the data is not mandatory: without verification you keep using PHYGO's non-clinical features.
 
 **How we verify your registration.**
-- A PHYGO administrator compares three things by hand:
+- A person ({{ADMINS}}) compares three things by hand:
   - what you declared;
   - the document;
   - the public official register (for Italy, the national register run by FNOFI).
@@ -237,43 +225,40 @@ We use verification data only for this purpose and to prevent abuse. We do not u
 - We do not query the register automatically and make no automated decisions.
 - Approval requires the document and a recorded match with the register.
 
-**Who can see the data.**
-- **You:** your status, the message we send you, and your document, through a temporary link.
-- **Administrators authorised by PHYGO** `[TO CONFIRM: role and number]`: they open the document only after a permission check, through a temporary link.
-- **No one else:** other users and patients never see the document. It never appears in patient records, clinical PDFs or search, and is never sent to AI services.
+**Who can see the document.**
+- **You**, from your profile.
+- **The reviewer for PHYGO** ({{ADMINS}}), only after a permission check.
+- **How it is shown:** the document goes through our server and is shown inside the page. No public link is created or handed out, and the browser does not cache it.
+- **No one else:** other users and patients never see it. It never appears in patient records, clinical PDFs or search, and is never sent to AI services, the video service or by e-mail.
 
 **Who processes the data on our behalf.**
-- **Supabase:** database and document storage, hosted in the Frankfurt (Germany) region. Files are delivered through Supabase's content delivery network (Cloudflare), which may keep temporary copies at its nodes. `[TO CONFIRM: data processing agreement, sub-processors, transfer safeguards]`
-- **Vercel:** application hosting. The uploaded document is processed by our application servers, which are currently located in the United States (Washington). `[OWNER DECISION: keep this region or move processing to a European Union region]` `[TO CONFIRM: data processing agreement and transfer safeguards]`
-- **No one else:** the document is never sent to AI services, to the video service or by e-mail.
+- **Supabase:** database and private document storage, in the Frankfurt (Germany) region. Files read by our server pass through Supabase's content delivery network (Cloudflare), which may keep temporary copies that are not reused. A copy is invalidated when the file is deleted.
+- **Vercel:** application hosting. The uploaded document is processed by our application servers in {{FUNCTION_REGION}}.
 
-**Controller and legal basis.**
-- Controller: `[TO CONFIRM: legal name, address, contact]`.
-- Legal basis: `[TO CONFIRM with counsel: performance of the contract, legitimate interest in patient safety and abuse prevention, or both]`.
+Both act as processors under a data processing agreement. Supabase and Vercel are companies based in the United States: for data transfers we rely on {{TRANSFER_SAFEGUARDS}}.
 
-**How long we keep it.** `[TO CONFIRM: insert periods only after approval]`
-- The document: until `[period]` after the decision. If you replace it with a new submission, it is deleted at once.
-- Internal notes: `[period]`.
-- Earlier requests and their history: `[period]`.
+**How long we keep it.**
+- The document: {{RETENTION_DOCUMENT}}. If you replace it with a new submission, it is deleted at once.
+- Internal notes: {{RETENTION_NOTES}}.
+- Earlier requests and their history: {{RETENTION_HISTORY}}.
 - The request your current status is based on: while your account exists.
 - When your account is closed, all of this is deleted, subject to legal obligations.
 
-**Accounts verified before documents were required.** These accounts are asked to send the document by a deadline (`[TO CONFIRM: 60 days from notice]`).
+**Accounts verified before documents were required.** We will ask you to send the document within {{TRANSITION_DAYS}}.
 - If your name, number and Order stay the same, your "Verified" status does not change while we check it.
 - If the deadline passes without a confirmed document, features that need verification are suspended until we confirm it.
 - Your account and patient data are not deleted.
-
-**Is it mandatory?** No. Without verification you keep using PHYGO's non-clinical features.
 
 **Your rights.**
 - You may ask for:
   - access to your data (including internal notes about you);
   - rectification, by sending a new request;
   - erasure and restriction of processing;
-  - portability and objection, where the law provides for them.
+  - objection to processing based on legitimate interest;
+  - portability of the data you gave us.
 
-  `[TO CONFIRM with counsel: limits on erasure while the account is active]`
-- Write to `[TO CONFIRM: contact]`. We reply within the legal time limits.
+  While your account is active and reserved for professionals, erasing your verification data suspends the features that require it.
+- Write to {{PRIVACY_CONTACT}}. We reply within one month, unless the law allows an extension.
 - You may complain to the supervisory authority where you live, work, or where the alleged infringement took place. In Italy this is the Garante per la protezione dei dati personali.
 
 ---
@@ -287,6 +272,8 @@ We use verification data only for this purpose and to prevent abuse. We do not u
 - la gestión de pacientes reales.
 
 Usamos los datos de la verificación solo con este fin y para prevenir abusos. No los usamos con fines comerciales ni de elaboración de perfiles.
+
+**Responsable.** {{CONTROLLER}}. Contacto de protección de datos: {{PRIVACY_CONTACT}}. {{DPO_SENTENCE}}
 
 **Qué datos recogemos.**
 - **Colegiación:**
@@ -302,11 +289,13 @@ Usamos los datos de la verificación solo con este fin y para prevenir abusos. N
   - la decisión, con su fecha y autor;
   - la categoría del motivo, en su caso;
   - el mensaje que te enviamos;
-  - las notas internas del administrador, si las hay.
-- **Un contador** de envíos por hora, para prevenir abusos.
+  - las notas internas de quien verifica, si las hay.
+- **Un contador** de envíos y aperturas del documento por hora, para prevenir abusos.
+
+**Por qué y con qué base.** Tratamos estos datos para comprobar que puedes usar las funciones reservadas a profesionales y para prevenir abusos. Base jurídica: {{LEGAL_BASIS}}. Facilitar los datos no es obligatorio: sin verificación sigues usando las funciones no clínicas de PHYGO.
 
 **Cómo verificamos la colegiación.**
-- Un administrador de PHYGO compara a mano tres elementos:
+- Una persona ({{ADMINS}}) compara a mano tres elementos:
   - lo que declaraste;
   - el documento;
   - el registro público oficial (para Italia, el registro nacional gestionado por la FNOFI).
@@ -314,43 +303,40 @@ Usamos los datos de la verificación solo con este fin y para prevenir abusos. N
 - No consultamos el registro de forma automática ni tomamos decisiones automatizadas.
 - Solo aprobamos si el documento está presente y se ha registrado la coincidencia con el registro.
 
-**Quién puede ver los datos.**
-- **Tú:** tu estado, el mensaje que te enviamos y tu documento, mediante un enlace temporal.
-- **Los administradores autorizados por PHYGO** `[TO CONFIRM: función y número]`: abren el documento solo tras un control de permisos, con un enlace temporal.
-- **Nadie más:** los demás usuarios y los pacientes no ven el documento. No aparece en historias clínicas, PDF clínicos ni búsquedas, y nunca se envía a servicios de inteligencia artificial.
+**Quién puede ver el documento.**
+- **Tú**, desde tu perfil.
+- **Quien verifica para PHYGO** ({{ADMINS}}), solo tras un control de permisos.
+- **Cómo se muestra:** el documento pasa por nuestro servidor y se muestra dentro de la página. No se crean ni se entregan enlaces públicos, y el navegador no lo guarda en caché.
+- **Nadie más:** los demás usuarios y los pacientes no lo ven. No aparece en historias clínicas, PDF clínicos ni búsquedas, y nunca se envía a servicios de inteligencia artificial, al servicio de vídeo ni por correo electrónico.
 
 **Quién trata los datos por nuestra cuenta.**
-- **Supabase:** base de datos y almacenamiento de documentos, alojados en la región de Fráncfort (Alemania). Los archivos se entregan a través de la red de distribución de contenidos de Supabase (Cloudflare), que puede conservar copias temporales en sus nodos. `[TO CONFIRM: contrato de encargo, subencargados, garantías para las transferencias]`
-- **Vercel:** alojamiento de la aplicación. El documento subido lo procesan los servidores de la aplicación, que hoy se encuentran en Estados Unidos (Washington). `[OWNER DECISION: mantener esta región o trasladar el procesamiento a una región de la Unión Europea]` `[TO CONFIRM: contrato de encargo y garantías para la transferencia]`
-- **Nadie más:** el documento nunca se envía a servicios de inteligencia artificial, al servicio de vídeo ni por correo electrónico.
+- **Supabase:** base de datos y almacenamiento privado de documentos, en la región de Fráncfort (Alemania). Los archivos que lee nuestro servidor pasan por la red de distribución de contenidos de Supabase (Cloudflare), que puede conservar copias temporales que no se reutilizan. Una copia se invalida cuando se elimina el archivo.
+- **Vercel:** alojamiento de la aplicación. El documento subido lo procesan los servidores de la aplicación en {{FUNCTION_REGION}}.
 
-**Responsable y base jurídica.**
-- Responsable del tratamiento: `[TO CONFIRM: denominación, domicilio, contacto]`.
-- Base jurídica: `[TO CONFIRM con el asesor: ejecución del contrato, interés legítimo en la seguridad de los pacientes y la prevención de abusos, o ambos]`.
+Ambos actúan como encargados del tratamiento en virtud de un contrato de encargo. Supabase y Vercel son empresas con sede en Estados Unidos: para las transferencias de datos nos basamos en {{TRANSFER_SAFEGUARDS}}.
 
-**Cuánto tiempo los conservamos.** `[TO CONFIRM: incluir los plazos solo tras su aprobación]`
-- El documento: hasta `[plazo]` después de la decisión. Si lo sustituyes con un nuevo envío, se elimina de inmediato.
-- Las notas internas: `[plazo]`.
-- Las solicitudes anteriores y su historial: `[plazo]`.
+**Cuánto tiempo los conservamos.**
+- El documento: {{RETENTION_DOCUMENT}}. Si lo sustituyes con un nuevo envío, se elimina de inmediato.
+- Las notas internas: {{RETENTION_NOTES}}.
+- Las solicitudes anteriores y su historial: {{RETENTION_HISTORY}}.
 - La solicitud en la que se basa tu estado actual: mientras exista la cuenta.
 - Al cerrar la cuenta, eliminamos todos estos datos, salvo obligaciones legales.
 
-**Cuentas verificadas antes de que se exigiera el documento.** A estas cuentas se les pide enviar el documento antes de una fecha (`[TO CONFIRM: 60 días desde la comunicación]`).
+**Cuentas verificadas antes de que se exigiera el documento.** Te pediremos que envíes el documento en un plazo de {{TRANSITION_DAYS}}.
 - Si nombre, número y Colegio no cambian, el estado «Verificado» se mantiene durante la comprobación.
 - Si vence el plazo sin un documento confirmado, las funciones que requieren verificación se suspenden hasta que lo confirmemos.
 - La cuenta y los datos de los pacientes no se eliminan.
-
-**¿Es obligatorio?** No. Sin verificación sigues usando las funciones no clínicas de PHYGO.
 
 **Tus derechos.**
 - Puedes solicitar:
   - el acceso a tus datos (incluidas las notas internas sobre ti);
   - la rectificación, enviando una nueva solicitud;
   - la supresión y la limitación del tratamiento;
-  - la portabilidad y la oposición, cuando la ley lo prevea.
+  - la oposición al tratamiento basado en el interés legítimo;
+  - la portabilidad de los datos que nos facilitaste.
 
-  `[TO CONFIRM con el asesor: límites a la supresión mientras la cuenta esté activa]`
-- Escribe a `[TO CONFIRM: contacto]`. Respondemos en los plazos legales.
+  Mientras la cuenta siga activa y reservada a profesionales, suprimir los datos de verificación suspende las funciones que los requieren.
+- Escribe a {{PRIVACY_CONTACT}}. Respondemos en el plazo de un mes, salvo las prórrogas previstas por la ley.
 - Puedes reclamar ante la autoridad de control del país donde vives, trabajas o donde se produjo la presunta infracción. En España es la Agencia Española de Protección de Datos; en Italia, el Garante per la protezione dei dati personali.
 
 ---
@@ -364,6 +350,8 @@ Usamos los datos de la verificación solo con este fin y para prevenir abusos. N
 - la gestion de patients réels.
 
 Nous utilisons les données de vérification uniquement à cette fin et pour prévenir les abus. Nous ne les utilisons ni à des fins commerciales ni pour du profilage.
+
+**Responsable.** {{CONTROLLER}}. Contact pour la protection des données : {{PRIVACY_CONTACT}}. {{DPO_SENTENCE}}
 
 **Données collectées.**
 - **Inscription :**
@@ -379,53 +367,52 @@ Nous utilisons les données de vérification uniquement à cette fin et pour pr�
   - la décision, avec sa date et son auteur ;
   - la catégorie du motif, le cas échéant ;
   - le message que nous vous adressons ;
-  - les notes internes de l'administrateur, le cas échéant.
-- **Un compteur** d'envois par heure, pour prévenir les abus.
+  - les notes internes de la personne qui vérifie, le cas échéant.
+- **Un compteur** d'envois et d'ouvertures du document par heure, pour prévenir les abus.
+
+**Pourquoi et sur quelle base.** Nous traitons ces données pour vérifier que vous pouvez utiliser les fonctions réservées aux professionnels et pour prévenir les abus. Base juridique : {{LEGAL_BASIS}}. Fournir ces données n'est pas obligatoire : sans vérification, vous continuez à utiliser les fonctions non cliniques de PHYGO.
 
 **Comment nous vérifions l'inscription.**
-- Un administrateur de PHYGO compare à la main trois éléments :
+- Une personne ({{ADMINS}}) compare à la main trois éléments :
   - ce que vous avez déclaré ;
   - le document ;
   - le registre public officiel (pour l'Italie, le registre national tenu par la FNOFI).
-- Il enregistre si les données correspondent, ne correspondent pas ou sont introuvables, puis décide.
+- Elle enregistre si les données correspondent, ne correspondent pas ou sont introuvables, puis décide.
 - Nous n'interrogeons pas le registre automatiquement et ne prenons aucune décision automatisée.
 - Nous n'approuvons que si le document est présent et que la correspondance avec le registre a été enregistrée.
 
-**Qui peut voir les données.**
-- **Vous :** votre statut, le message que nous vous adressons et votre document, par un lien temporaire.
-- **Les administrateurs autorisés par PHYGO** `[TO CONFIRM : fonction et nombre]` : ils n'ouvrent le document qu'après un contrôle des autorisations, par un lien temporaire.
-- **Personne d'autre :** les autres utilisateurs et les patients ne voient pas le document. Il n'apparaît ni dans les dossiers patients, ni dans les PDF cliniques, ni dans les recherches, et n'est jamais envoyé à des services d'intelligence artificielle.
+**Qui peut voir le document.**
+- **Vous**, depuis votre profil.
+- **La personne qui vérifie pour PHYGO** ({{ADMINS}}), uniquement après un contrôle des autorisations.
+- **Comment il est affiché :** le document passe par notre serveur et s'affiche dans la page. Aucun lien public n'est créé ni transmis, et le navigateur ne le conserve pas en cache.
+- **Personne d'autre :** les autres utilisateurs et les patients ne le voient pas. Il n'apparaît ni dans les dossiers patients, ni dans les PDF cliniques, ni dans les recherches, et n'est jamais envoyé à des services d'intelligence artificielle, au service vidéo ni par e-mail.
 
 **Qui traite les données pour notre compte.**
-- **Supabase :** base de données et stockage des documents, hébergés dans la région de Francfort (Allemagne). Les fichiers sont distribués par le réseau de diffusion de contenu de Supabase (Cloudflare), qui peut en conserver des copies temporaires sur ses nœuds. `[TO CONFIRM : accord de traitement des données, sous-traitants ultérieurs, garanties pour les transferts]`
-- **Vercel :** hébergement de l'application. Le document téléversé est traité par les serveurs de l'application, situés aujourd'hui aux États-Unis (Washington). `[OWNER DECISION : conserver cette région ou déplacer le traitement dans une région de l'Union européenne]` `[TO CONFIRM : accord de traitement des données et garanties pour le transfert]`
-- **Personne d'autre :** le document n'est jamais envoyé à des services d'intelligence artificielle, au service vidéo ni par e-mail.
+- **Supabase :** base de données et stockage privé des documents, dans la région de Francfort (Allemagne). Les fichiers lus par notre serveur passent par le réseau de diffusion de contenu de Supabase (Cloudflare), qui peut en conserver des copies temporaires non réutilisées. Une copie est invalidée lorsque le fichier est supprimé.
+- **Vercel :** hébergement de l'application. Le document téléversé est traité par les serveurs de l'application à {{FUNCTION_REGION}}.
 
-**Responsable et base juridique.**
-- Responsable du traitement : `[TO CONFIRM : dénomination, siège, contact]`.
-- Base juridique : `[TO CONFIRM avec le conseil : exécution du contrat, intérêt légitime à la sécurité des patients et à la prévention des abus, ou les deux]`.
+Tous deux agissent en tant que sous-traitants, liés par un accord de traitement des données. Supabase et Vercel sont des sociétés établies aux États-Unis : pour les transferts de données, nous nous appuyons sur {{TRANSFER_SAFEGUARDS}}.
 
-**Durée de conservation.** `[TO CONFIRM : indiquer les durées seulement après approbation]`
-- Le document : jusqu'à `[durée]` après la décision. Si vous le remplacez par un nouvel envoi, il est supprimé immédiatement.
-- Les notes internes : `[durée]`.
-- Les demandes antérieures et leur historique : `[durée]`.
+**Durée de conservation.**
+- Le document : {{RETENTION_DOCUMENT}}. Si vous le remplacez par un nouvel envoi, il est supprimé immédiatement.
+- Les notes internes : {{RETENTION_NOTES}}.
+- Les demandes antérieures et leur historique : {{RETENTION_HISTORY}}.
 - La demande sur laquelle repose votre statut actuel : tant que le compte existe.
 - À la fermeture du compte, toutes ces données sont supprimées, sous réserve des obligations légales.
 
-**Comptes vérifiés avant l'exigence du document.** Il est demandé à ces comptes d'envoyer le document avant une échéance (`[TO CONFIRM : 60 jours à compter de la notification]`).
+**Comptes vérifiés avant l'exigence du document.** Nous vous demanderons d'envoyer le document dans un délai de {{TRANSITION_DAYS}}.
 - Si nom, numéro et Ordre restent identiques, le statut « Vérifié » ne change pas pendant le contrôle.
 - Si l'échéance passe sans document confirmé, les fonctions qui exigent la vérification sont suspendues jusqu'à notre confirmation.
 - Le compte et les données des patients ne sont pas supprimés.
-
-**Est-ce obligatoire ?** Non. Sans vérification, vous continuez à utiliser les fonctions non cliniques de PHYGO.
 
 **Vos droits.**
 - Vous pouvez demander :
   - l'accès à vos données (y compris les notes internes vous concernant) ;
   - la rectification, en envoyant une nouvelle demande ;
   - l'effacement et la limitation du traitement ;
-  - la portabilité et l'opposition, dans les cas prévus par la loi.
+  - l'opposition au traitement fondé sur l'intérêt légitime ;
+  - la portabilité des données que vous nous avez fournies.
 
-  `[TO CONFIRM avec le conseil : limites de l'effacement tant que le compte est actif]`
-- Écrivez à `[TO CONFIRM : contact]`. Nous répondons dans les délais légaux.
+  Tant que le compte est actif et réservé aux professionnels, l'effacement des données de vérification suspend les fonctions qui les exigent.
+- Écrivez à {{PRIVACY_CONTACT}}. Nous répondons dans un délai d'un mois, sauf prolongation prévue par la loi.
 - Vous pouvez introduire une réclamation auprès de l'autorité de contrôle du pays où vous résidez, travaillez ou où la violation présumée a eu lieu. En France, c'est la CNIL ; en Italie, le Garante per la protezione dei dati personali.
