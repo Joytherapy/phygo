@@ -4,8 +4,9 @@ import { consumeHourly, HOURLY_LIMITS, limitResponse } from "@/lib/rateLimit";
 import OpenAI from "openai";
 import { searchExercisesWithCache } from "@/lib/exercise-providers/cache";
 import type { ExerciseEntry } from "@/lib/exercise-providers/types";
+import { lazy } from "@/lib/lazy";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
 
 type ExerciseOutput = ExerciseEntry & {
   source_type: "professional" | "ai_suggested";

@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { requireVerifiedProfessional } from "@/lib/auth/sessionServer";
 import { consumeHourly, HOURLY_LIMITS, limitResponse } from "@/lib/rateLimit";
+import { lazy } from "@/lib/lazy";
 
-const openai = new OpenAI({
+const openai = lazy(() => new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-});
+}));
 
 // Clinician-only paid AI operation (OpenAI). The former anonymous "demo"
 // path (one free call per IP, counted in demo_usage) had no caller in the

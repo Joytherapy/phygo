@@ -12,11 +12,12 @@ import {
 } from '@/lib/metabolicCalculator';
 import { UI_STRINGS, type AppLang } from '@/lib/i18n/uiStrings';
 import { requireVerifiedProfessional } from '@/lib/auth/sessionServer';
+import { lazy } from '@/lib/lazy';
 
-const supabase = createClient(
+const supabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
 async function getUserId() {
   const cookieStore = cookies();

@@ -23,13 +23,14 @@
 import { createHash } from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
+import { lazy } from '@/lib/lazy';
 
-const adminSupabase = createClient(
+const adminSupabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
 
 /** All languages the dashboard can be used in. Italian is the source language content is authored in. */
 export type AppLang = 'it' | 'en' | 'es' | 'fr';

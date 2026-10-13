@@ -12,11 +12,12 @@ import { createBrowserClient } from '@supabase/ssr'
 import { usePatientContext } from '@/contexts/PatientContext'
 import { useUiStrings } from '@/contexts/LanguageContext'
 import { useClinicalLocked } from '@/lib/useClinicalAccess'
+import { lazy } from '@/lib/lazy'
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+))
 
 type ContentType = 'exercise' | 'clinical_test' | 'questionnaire' | 'condition' | 'anatomical_zone' | 'product'
 

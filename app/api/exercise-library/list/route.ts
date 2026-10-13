@@ -3,16 +3,17 @@ import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 import { getTranslatedExercisesBatch, type ExerciseLang } from '@/lib/exerciseTranslation';
+import { lazy } from '@/lib/lazy';
 
 export const dynamic = 'force-dynamic';
 
 // Legge dalla nuova architettura "Exercise Animatic" (exercises / exercise_translations /
 // exercise_assets), separata dal vecchio provider wger (exercise_cache) e dalla Pro Library
 // editoriale (library_items). Al momento non c'e' alcun gating per piano.
-const adminSupabase = createClient(
+const adminSupabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
 const SIGNED_URL_TTL_SECONDS = 60 * 30; // 30 minuti, come gli altri signed url del progetto
 

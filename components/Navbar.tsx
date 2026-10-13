@@ -14,10 +14,11 @@ import { useRoleTheme } from "@/contexts/RoleThemeContext";
 import { useQuizUi } from "@/lib/i18n/quizStrings";
 import SearchModal from "./SearchModal";
 import LibraryNavMenu, { libraryLinkHrefs } from "./LibraryNavMenu";
-const supabase = createBrowserClient(
+import { lazy } from "@/lib/lazy";
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+));
 
 const linksBeforeLibrary = [
   { label: "Live demo", href: "/#demo" },

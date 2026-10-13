@@ -3,13 +3,14 @@ import { createClient } from '@supabase/supabase-js';
 import { translateContent, type AppLang } from '@/lib/contentTranslation';
 import { getTranslatedCondition, type SupportedLang } from '@/lib/conditionTranslation';
 import { STRUCTURE_FIELD_ORDER } from '@/lib/gastrointestinalFields';
+import { lazy } from '@/lib/lazy';
 
 export const dynamic = 'force-dynamic';
 
-const adminSupabase = createClient(
+const adminSupabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
 function parseLang(value: string | null): AppLang {
   return value === 'en' || value === 'es' || value === 'fr' ? value : 'it';

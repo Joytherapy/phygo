@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { requireQuizUser } from '@/lib/quiz/authServer'
 import { isQuizSubject, isQuizDifficulty } from '@/lib/quiz/subjects'
+import { lazy } from '@/lib/lazy'
 
 // Same service-role client as generate/route.ts — needed here because
 // quiz_questions has no RLS read policy at all, so correct_index/explanation
 // can only be looked up server-side, never by the signed-in user's own client.
-const adminSupabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+const adminSupabase = lazy(() => createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!))
 
 type SubmittedAnswer = { questionId: string; selectedIndex: number }
 

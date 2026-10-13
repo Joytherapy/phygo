@@ -29,10 +29,10 @@ import jsPDF from "jspdf";
 import { refusalMessage, useVerificationStrings } from "@/lib/i18n/verificationStrings";
 import { createBrowserClient } from "@supabase/ssr";
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+));
 
 import {
   CATEGORIES,
@@ -41,6 +41,7 @@ import {
   type Category,
   type Phrase,
 } from "./data";
+import { lazy } from "@/lib/lazy";
 const CATEGORY_ICONS: Record<string, any> = {
   findings: Stethoscope,
   assessment: Target,

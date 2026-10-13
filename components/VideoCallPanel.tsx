@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { Video, PhoneOff, Loader2 } from 'lucide-react'
 import { refusalMessage, useVerificationStrings } from '@/lib/i18n/verificationStrings'
+import { lazy } from '@/lib/lazy'
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+))
 
 type ActiveCall = {
   id: string

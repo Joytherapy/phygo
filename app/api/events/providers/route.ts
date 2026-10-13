@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { lazy } from '@/lib/lazy';
 
 export const dynamic = 'force-dynamic';
 
-const supabase = createClient(
+const supabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+));
 
 // Public list of trusted training-provider organizations (event_sources
 // table). These are course-catalog businesses (New Master, PhisioVit,

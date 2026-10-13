@@ -13,11 +13,12 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { AppLang, APP_LANGS, UI_STRINGS } from '@/lib/i18n/uiStrings'
+import { lazy } from '@/lib/lazy'
 
-const supabase = createBrowserClient(
+const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+))
 
 const STORAGE_KEY = 'phygo-lang'
 
