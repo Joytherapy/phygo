@@ -103,6 +103,9 @@ type Dict = {
   aAccountStatus: string;
   aRequestStatus: string;
   aNoteRemoved: string;
+  closeDocument: string;
+  documentOpenFailed: string;
+  documentLoading: string;
   aCategories: Record<'not_in_register' | 'data_mismatch' | 'document_unreadable' | 'document_not_valid' | 'other', string>;
 };
 
@@ -176,7 +179,7 @@ const en: Dict = {
   aDocument: "2. Document received",
   aRegistry: "3. Check on the official register",
   aDecision: "4. Final decision",
-  aOpenDocument: "Open document (60 s link)",
+  aOpenDocument: "Open document",
   aNoDocument: "No document",
   aOpenRegister: "Open the official register",
   aMatch: "Matches",
@@ -210,6 +213,9 @@ const en: Dict = {
   aAccountStatus: "Account status",
   aRequestStatus: "Request status",
   aNoteRemoved: "note removed after its retention period",
+  closeDocument: "Close",
+  documentOpenFailed: "The document could not be opened. Please try again.",
+  documentLoading: "Opening the document…",
   aCategories: {not_in_register: "Not in the register", data_mismatch: "Data do not match", document_unreadable: "Document unreadable", document_not_valid: "Document not suitable", other: "Other"},
 };
 
@@ -283,7 +289,7 @@ const it: Dict = {
   aDocument: "2. Documento ricevuto",
   aRegistry: "3. Controllo sul registro ufficiale",
   aDecision: "4. Decisione finale",
-  aOpenDocument: "Apri documento (link di 60 s)",
+  aOpenDocument: "Apri documento",
   aNoDocument: "Nessun documento",
   aOpenRegister: "Apri il registro ufficiale",
   aMatch: "Corrisponde",
@@ -317,6 +323,9 @@ const it: Dict = {
   aAccountStatus: "Stato dell'account",
   aRequestStatus: "Stato della richiesta",
   aNoteRemoved: "nota rimossa per scadenza",
+  closeDocument: "Chiudi",
+  documentOpenFailed: "Impossibile aprire il documento. Riprova.",
+  documentLoading: "Apertura del documento…",
   aCategories: {not_in_register: "Non presente nel registro", data_mismatch: "Dati non corrispondenti", document_unreadable: "Documento illeggibile", document_not_valid: "Documento non idoneo", other: "Altro"},
 };
 
@@ -390,7 +399,7 @@ const es: Dict = {
   aDocument: "2. Documento recibido",
   aRegistry: "3. Comprobación en el registro oficial",
   aDecision: "4. Decisión final",
-  aOpenDocument: "Abrir documento (enlace de 60 s)",
+  aOpenDocument: "Abrir documento",
   aNoDocument: "Sin documento",
   aOpenRegister: "Abrir el registro oficial",
   aMatch: "Coincide",
@@ -424,6 +433,9 @@ const es: Dict = {
   aAccountStatus: "Estado de la cuenta",
   aRequestStatus: "Estado de la solicitud",
   aNoteRemoved: "nota eliminada al vencer su plazo de conservación",
+  closeDocument: "Cerrar",
+  documentOpenFailed: "No se ha podido abrir el documento. Inténtalo de nuevo.",
+  documentLoading: "Abriendo el documento…",
   aCategories: {not_in_register: "No figura en el registro", data_mismatch: "Los datos no coinciden", document_unreadable: "Documento ilegible", document_not_valid: "Documento no válido", other: "Otro"},
 };
 
@@ -497,7 +509,7 @@ const fr: Dict = {
   aDocument: "2. Document reçu",
   aRegistry: "3. Vérification sur le registre officiel",
   aDecision: "4. Décision finale",
-  aOpenDocument: "Ouvrir le document (lien de 60 s)",
+  aOpenDocument: "Ouvrir le document",
   aNoDocument: "Aucun document",
   aOpenRegister: "Ouvrir le registre officiel",
   aMatch: "Correspond",
@@ -531,6 +543,9 @@ const fr: Dict = {
   aAccountStatus: "Statut du compte",
   aRequestStatus: "Statut de la demande",
   aNoteRemoved: "note supprimée à la fin de sa durée de conservation",
+  closeDocument: "Fermer",
+  documentOpenFailed: "Impossible d’ouvrir le document. Veuillez réessayer.",
+  documentLoading: "Ouverture du document…",
   aCategories: {not_in_register: "Absent du registre", data_mismatch: "Données non concordantes", document_unreadable: "Document illisible", document_not_valid: "Document non valable", other: "Autre"},
 };
 

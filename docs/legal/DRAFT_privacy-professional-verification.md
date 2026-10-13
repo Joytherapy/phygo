@@ -18,29 +18,26 @@ How the facts were obtained:
 | 1 | Browser → `POST /api/profile/verification` | Vercel. The function runs in **`iad1`, Washington DC, USA** | **The file is processed:** read into memory, then size, extension and first bytes are checked. It is then uploaded to Supabase. It is not written to disk and not logged | Production deployment metadata: `regions: ["iad1"]`. No `regions` in `vercel.json` and no `preferredRegion` in the code, so this is Vercel's default |
 | 1a | Middleware (`middleware.ts`) | Vercel | Runs on every request. It reads only cookies and headers, **not the file** | Code |
 | 2 | Vercel → Supabase Storage | Bucket `verification-documents`, project region **`eu-central-1`, Frankfurt, Germany** | **Stored** | Supabase API (project region). Supabase docs: "Storage objects are hosted in that region" |
-| 3 | User or administrator opens the document | `GET /api/profile/verification/document` and `GET /api/admin/verification/document` (Vercel, `iad1`) | **Metadata only:** the routes read the path and type and create a signed link. They do not read the file | Code |
-| 3a | The browser downloads the file | Directly from Supabase, through its CDN (Cloudflare) | **Copies may be cached** at the CDN node that serves the request and in the browser (see "Caches") | Supabase docs (Smart CDN); storage-js defaults |
+| 3 | User or administrator opens the document | `GET /api/profile/verification/document` (owner) and `GET /api/admin/verification/document` (signed-in administrator only; no token accepted) on Vercel `iad1` | **The file is read by the server** from Storage and streamed to the authorised person. No signed link or Storage address reaches the browser. Responses forbid caching (`private, no-store`) | Code and tests |
+| 3a | The browser shows the document | In-page viewer | Kept **in memory only** and released when the viewer closes. Not stored in the browser cache | Code; browser check |
 | 4 | Administrator console `GET /api/admin/verification` | Vercel, `iad1` | **Metadata only:** declared details, status, history. No path and no file | Code |
 | 5 | Retention route (off) | Vercel, `iad1` | Deletes the file and lists its folder. **No file content** | Code |
 
 **Not involved:** the document is never sent to OpenAI, to the video service or to e-mail. The code has no analytics or monitoring SDK.
 
 ### Caches, copies and logs
-- **Supabase Smart CDN.** It is on, because the Supabase organisation is on the **Pro** plan and Supabase enables it automatically from Pro. Supabase's docs say:
-  - signed-link responses are cached at the CDN edge;
-  - a cached response for the **same link** can still be served after the link's token has expired, until the CDN cache entry expires;
-  - deleting the file invalidates all cached copies within about 60 seconds.
-
-  So "the link expires after 60 seconds" means new downloads need a new link. It does **not** mean every copy disappears after 60 seconds.
-- **Browser cache.** The upload does not set `cacheControl`, so storage-js uses its default of `3600`. A browser that opened the file may keep it for up to 1 hour.
-- **Next.js data cache.** It was empty after the whole test suite ran against the production build of the app with test settings.
-- **Signed-link routes** answer with `Cache-Control: no-store`.
-- **Application logs.** No paths, contents or signed links. There is a test for this.
+- **Supabase Smart CDN.** It is on, because the Supabase organisation is on the **Pro** plan and Supabase enables it automatically from Pro. Supabase's docs say responses are cached at the CDN edge, and that deleting the file invalidates all copies within about 60 seconds. Since this PR:
+  - the browser never downloads from Storage;
+  - the server reads each time with a new random `cacheNonce`, so an edge copy is never served again;
+  - the edge copy itself cannot be prevented from the application. It is documented as residual.
+- **Browser cache.** Document responses are `private, no-store`, and uploads are stored with `max-age=0` instead of Storage's default of one hour.
+- **Next.js data cache.** It was empty after the whole test suite ran against the production build of the app with test settings. The document routes force `no-store`.
+- **Application logs.** No paths, contents, tokens or signed links. There is a test for this.
 - **Vercel log drains:** none configured (API).
 - **Supabase logs.**
   - Storage and API logs record request paths. The object path contains the account id and the request id, not the content.
-  - **Not verified:** whether the signed-link token (a query parameter) is also recorded.
-- **Administrator access through a token.** `requireAdmin` also accepts the cron secret and an admin API token as a bearer token, so whoever holds those can open documents without a personal admin session. The decision is still attributed to the label "api-token".
+  - No signed links are created for these documents any more, so there is no link token to record. The server's reads carry only a random cache nonce.
+- **Administrator access through a token.** It has been removed. Documents and the verification console accept only a signed-in administrator. `CRON_SECRET` opens only the cron routes and the two science batch routes the cron calls.
 
 ### Providers: what was verified and what was not
 | | Supabase | Vercel |
@@ -95,11 +92,10 @@ Found while checking, outside verification:
 `[OWNER DECISION]`
 1. **Function region:** keep `iad1` or move to an EU region (`fra1` Frankfurt or `cdg1` Paris). See the analysis in the PR.
 2. **Vercel plan:** Hobby (non-commercial, no evidence of DPA coverage) or Pro.
-3. **Administrator access by token:** whether documents may be opened with an API token, or only with a personal admin session.
-4. **Who the authorised administrators are:** their role and how many.
-5. **Retention periods:** approve or change the proposal.
-6. **The 60-day transition:** when, and how it is communicated (in-app only, or also by e-mail).
-7. **Data export:** whether users can export their data, and how.
+3. **Who the authorised administrators are:** their role and how many.
+4. **Retention periods:** approve or change the proposal.
+5. **The 60-day transition:** when, and how it is communicated (in-app only, or also by e-mail).
+6. **Data export:** whether users can export their data, and how.
 
 `[TO CONFIRM]` (facts the owner must provide or check)
 1. The controller's identity: legal name, address, VAT or company number. Whether a DPO has been appointed.
@@ -112,7 +108,7 @@ Found while checking, outside verification:
    - whether the account has an applicable DPA (today the evidence says Pro or Enterprise only);
    - the current sub-processor list;
    - the DPF listing on dataprivacyframework.gov.
-5. Whether Supabase logs record the signed-link token.
+5. Whether Supabase logs record the server's read requests (they contain the object path, which includes the account id; no content).
 
 `[LEGAL REVIEW]`
 1. **Legal basis.** Not decided here. The options for the lawyer are:

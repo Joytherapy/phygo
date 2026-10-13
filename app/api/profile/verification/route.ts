@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { evidenceDeadlineFor, requireUser, transitionUntilFor } from "@/lib/auth/sessionServer";
 import { serviceClient } from "@/lib/verification";
 import {
+  DOCUMENT_CACHE_SECONDS,
   VERIFICATION_BUCKET,
   checkDocument,
   documentPath,
@@ -89,7 +90,7 @@ export async function POST(req: Request) {
   const path = documentPath(userId, requestId, type.type.ext);
   const { error: uploadError } = await db.storage
     .from(VERIFICATION_BUCKET)
-    .upload(path, bytes, { contentType: type.type.mime, upsert: false });
+    .upload(path, bytes, { contentType: type.type.mime, upsert: false, cacheControl: DOCUMENT_CACHE_SECONDS });
   if (uploadError) {
     console.error("verification document upload failed");
     return NextResponse.json({ error: "Service unavailable" }, { status: 503 });

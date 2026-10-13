@@ -2,18 +2,20 @@
 //
 // The registration document is stored in a PRIVATE bucket that only the server
 // (service role) can reach. Every read goes through a server-side permission
-// check and returns a signed URL valid for SIGNED_URL_SECONDS. Uploading a
+// check and the file is streamed by the server (lib/verificationDocument.ts):
+// no signed URL or Storage credential ever reaches the browser. Uploading a
 // document never grants anything: the request stays 'pending' until an
 // administrator has checked the official register by hand and approved it.
 //
 // Nothing here queries a register automatically: no official API is integrated.
-// Never log document contents, storage paths of other users or signed URLs.
+// Never log document contents or storage paths.
 import { randomUUID } from "crypto";
 
 export const VERIFICATION_BUCKET = "verification-documents";
 /** Below Vercel's 4.5 MB request body limit for serverless functions. */
 export const MAX_DOCUMENT_BYTES = 4 * 1024 * 1024;
-export const SIGNED_URL_SECONDS = 60;
+/** Cache-Control max-age stored with each uploaded file (Storage default is 3600). */
+export const DOCUMENT_CACHE_SECONDS = "0";
 /** Bump when the declaration text changes; the accepted version is stored with each request. */
 export const DECLARATION_VERSION = "2026-10-12.v1";
 /** Official public register of Italian physiotherapists (FNOFI / OFI), checked by hand. */

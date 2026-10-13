@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Navbar from '@/components/Navbar'
 import { useVerificationStrings } from '@/lib/i18n/verificationStrings'
+import { useVerificationDocumentViewer } from '@/components/VerificationDocumentViewer'
 
 // Internal admin page for reviewing professional verification requests.
 // Access is enforced by /api/admin/verification (requireAdmin); this page
@@ -90,12 +91,8 @@ export default function VerificationAdminPage() {
     return true
   }
 
-  async function openDocument(requestId: string) {
-    const res = await fetch(`/api/admin/verification/document?requestId=${encodeURIComponent(requestId)}`)
-    const body = await res.json().catch(() => ({}))
-    if (res.ok && body.url) window.open(body.url, '_blank', 'noopener,noreferrer')
-    else setError(body.error || 'Error')
-  }
+  const documentViewer = useVerificationDocumentViewer()
+  const openDocument = (requestId: string) => documentViewer.open(`/api/admin/verification/document?requestId=${encodeURIComponent(requestId)}`)
 
   const checkLabel = (c: string) => (c === 'match' ? t.aMatch : c === 'mismatch' ? t.aMismatch : c === 'not_found' ? t.aNotFound : t.aNotChecked)
 
@@ -119,6 +116,7 @@ export default function VerificationAdminPage() {
           ))}
         </div>
         {error && <p className="mt-4 text-sm text-red-600 dark:text-red-300">{error}</p>}
+        <div className="mt-2">{documentViewer.viewer}</div>
         {!error && rows.length === 0 && <p className="mt-6 text-sm text-ink/60 dark:text-white/55">{t.aNoRequests}</p>}
         <ul className="mt-6 space-y-5">
           {rows.map((r) => {

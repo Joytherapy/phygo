@@ -159,11 +159,11 @@ test('4. a user cannot read another user’s document', async () => {
   assert.equal((await call(app.url, 'GET', `/api/profile/verification/document?requestId=${alice.id}&path=${encodeURIComponent(alice.document_path)}`, 'mallory')).status, 404);
   assert.equal((await call(app.url, 'GET', `/api/admin/verification/document?requestId=${alice.id}`, 'mallory')).status, 403);
   assert.equal((await call(app.url, 'GET', `/api/admin/verification/document?requestId=${alice.id}`, null)).status, 401);
-  // Alice reads her own, through a short-lived signed URL.
+  // Alice reads her own, streamed by the server (no signed URL).
   const own = await call(app.url, 'GET', '/api/profile/verification/document', 'alice');
   assert.equal(own.status, 200);
-  assert.equal((await own.json()).expiresIn, 60);
-  assert.equal(fake.state.signRequests.at(-1).path, alice.document_path);
+  assert.deepEqual(Buffer.from(await own.arrayBuffer()), PDF);
+  assert.equal(fake.state.downloads.at(-1).path, alice.document_path);
 });
 
 test('5. a user cannot set the status, the register check or the document path', async () => {
@@ -194,15 +194,15 @@ test('6. a non-administrator cannot record a check or approve, not even for them
   assert.equal(statusOf('mallory'), 'pending');
 });
 
-test('7. the administrator opens the document only through the permission check, for 60 seconds', async () => {
+test('7. the administrator opens the document only through the permission check, streamed with no-store', async () => {
   const r = latestOf('mallory');
+  const signed = fake.state.signRequests.length;
   const res = await call(app.url, 'GET', `/api/admin/verification/document?requestId=${r.id}`, 'admin');
   assert.equal(res.status, 200);
-  assert.equal(res.headers.get('cache-control'), 'no-store');
-  const body = await res.json();
-  assert.match(body.url, /token=/);
-  assert.deepEqual(fake.state.signRequests.at(-1), { bucket: 'verification-documents', path: r.document_path, expiresIn: 60 });
-  assert.ok(!app.logs().includes(body.url), 'signed URLs are never logged');
+  assert.equal(res.headers.get('cache-control'), 'private, no-store, max-age=0, must-revalidate');
+  assert.equal(res.headers.get('content-type'), 'application/pdf');
+  assert.deepEqual(Buffer.from(await res.arrayBuffer()), PDF);
+  assert.equal(fake.state.signRequests.length, signed, 'no signed URL is created');
   assert.equal((await call(app.url, 'GET', '/api/admin/verification/document?requestId=not-a-uuid', 'admin')).status, 400);
 });
 

@@ -1,26 +1,36 @@
-import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/adminServer";
+import { requireAdminSession } from "@/lib/auth/adminServer";
 import { serviceClient } from "@/lib/verification";
-import { SIGNED_URL_SECONDS, VERIFICATION_BUCKET } from "@/lib/verificationEvidence";
+import { documentError, serveVerificationDocument } from "@/lib/verificationDocument";
+import { consumeHourly, HOURLY_LIMITS } from "@/lib/rateLimit";
 
-// A verification document for the reviewing administrator, as a signed URL
-// valid for SIGNED_URL_SECONDS. requireAdmin (PHYGO_ADMIN_EMAILS, server-side
-// only) runs before anything is read. Admin status opens this document and
-// nothing else: it grants no access to patient data.
+// A verification document for a signed-in administrator, streamed by the
+// server (lib/verificationDocument.ts): no signed URL or Storage credential
+// reaches the browser. Only an administrator session is accepted: no bearer
+// token (CRON_SECRET or API token) opens documents. The request id must be a
+// UUID and the storage path comes from that row only; administrator status
+// grants nothing else (no clinical permission, no patient data).
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function GET(req: Request) {
-  const denied = await requireAdmin(req);
-  if (denied) return denied;
-  const requestId = new URL(req.url).searchParams.get("requestId") ?? "";
-  if (!/^[0-9a-f-]{36}$/i.test(requestId)) return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+  const admin = await requireAdminSession();
+  if (!admin.ok) return documentError(admin.response.status, admin.response.status === 401 ? "Not authenticated" : "Forbidden");
+  const params = new URL(req.url).searchParams;
+  const requestId = params.get("requestId") ?? "";
+  if (params.getAll("requestId").length !== 1 || !UUID.test(requestId)) return documentError(400, "Invalid input");
+  const limited = await consumeHourly(`verification-document-admin:${admin.userId}`, HOURLY_LIMITS.verificationDocumentAdmin);
+  if (limited === "limited") return documentError(429, "Too many requests");
+  if (limited !== "allowed") return documentError(503, "Service unavailable");
   const db = serviceClient();
-  if (!db) return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
-  const { data: request } = await db
+  if (!db) return documentError(503, "Service unavailable");
+  const { data, error } = await db
     .from("professional_verification_requests")
-    .select("document_path, document_mime")
+    .select("id, user_id, document_path, document_mime")
     .eq("id", requestId)
     .maybeSingle();
-  if (!request?.document_path) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const { data, error } = await db.storage.from(VERIFICATION_BUCKET).createSignedUrl(request.document_path, SIGNED_URL_SECONDS);
-  if (error || !data?.signedUrl) return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
-  return NextResponse.json({ url: data.signedUrl, mime: request.document_mime, expiresIn: SIGNED_URL_SECONDS }, { headers: { "Cache-Control": "no-store" } });
+  if (error) return documentError(503, "Service unavailable");
+  return serveVerificationDocument(db, data);
 }

@@ -1,25 +1,32 @@
-import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth/sessionServer";
 import { serviceClient } from "@/lib/verification";
-import { SIGNED_URL_SECONDS, VERIFICATION_BUCKET } from "@/lib/verificationEvidence";
+import { documentError, serveVerificationDocument } from "@/lib/verificationDocument";
+import { consumeHourly, HOURLY_LIMITS } from "@/lib/rateLimit";
 
-// The signed-in user's OWN latest verification document, as a short-lived
-// signed URL. The request is looked up by the session's user id only: no id
-// or path from the client is accepted, so another user's file is unreachable.
+// The signed-in user's OWN latest verification document, streamed by the
+// server (lib/verificationDocument.ts): no signed URL or Storage credential
+// reaches the browser. The request is looked up by the session's user id
+// only; any id, path or file name in the URL is ignored, so another user's
+// file is unreachable.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
 export async function GET() {
   const gate = await requireUser();
-  if (!gate.ok) return gate.response;
+  if (!gate.ok) return documentError(gate.response.status, gate.response.status === 401 ? "Not authenticated" : "Forbidden");
+  const limited = await consumeHourly(`verification-document:${gate.user.id}`, HOURLY_LIMITS.verificationDocument);
+  if (limited === "limited") return documentError(429, "Too many requests");
+  if (limited !== "allowed") return documentError(503, "Service unavailable");
   const db = serviceClient();
-  if (!db) return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
-  const { data: request } = await db
+  if (!db) return documentError(503, "Service unavailable");
+  const { data, error } = await db
     .from("professional_verification_requests")
-    .select("document_path, document_mime")
+    .select("id, user_id, document_path, document_mime")
     .eq("user_id", gate.user.id)
     .order("submitted_at", { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (!request?.document_path) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const { data, error } = await db.storage.from(VERIFICATION_BUCKET).createSignedUrl(request.document_path, SIGNED_URL_SECONDS);
-  if (error || !data?.signedUrl) return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
-  return NextResponse.json({ url: data.signedUrl, mime: request.document_mime, expiresIn: SIGNED_URL_SECONDS }, { headers: { "Cache-Control": "no-store" } });
+  if (error) return documentError(503, "Service unavailable");
+  return serveVerificationDocument(db, data);
 }

@@ -22,7 +22,8 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     users, // access token -> user object
     requests: [],
     failTables: new Set(), // tables that answer 500 (to test error handling)
-    storage: new Map(), // "bucket/path" -> { bucket, path, size, contentType }
+    storage: new Map(), // "bucket/path" -> { bucket, path, size, contentType, cacheControl, bytes }
+    downloads: [], // { bucket, path, search, auth } for every object download
     signRequests: [], // { bucket, path, expiresIn } for every signed URL issued
   };
 
@@ -93,8 +94,17 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
       const [, bucket, path] = object;
       const key = `${bucket}/${path}`;
       if (state.storage.has(key) && req.headers['x-upsert'] !== 'true') return send(400, { statusCode: '409', error: 'Duplicate', message: 'The resource already exists' });
-      state.storage.set(key, { bucket, path, size: raw.length, contentType: req.headers['content-type'] ?? null });
+      state.storage.set(key, { bucket, path, size: raw.length, contentType: req.headers['content-type'] ?? null, cacheControl: req.headers['cache-control'] ?? null, bytes: raw });
       return send(200, { Key: key });
+    }
+    // Storage: download an object with the service key (GET /object/<bucket>/<path>).
+    if (object && req.method === 'GET' && !['sign', 'list', 'public', 'authenticated'].includes(object[1])) {
+      const [, bucket, path] = object;
+      state.downloads.push({ bucket, path, search: url.search, auth: req.headers.authorization ?? null });
+      const stored = state.storage.get(`${bucket}/${decodeURIComponent(path)}`);
+      if (!stored) return send(400, { statusCode: '404', error: 'not_found', message: 'Object not found' });
+      res.writeHead(200, { 'content-type': stored.contentType ?? 'application/octet-stream', ...cors });
+      return res.end(stored.bytes ?? Buffer.alloc(0));
     }
     // Storage: remove (DELETE /object/<bucket> with { prefixes }).
     const removeObjects = url.pathname.match(/^\/storage\/v1\/object\/([^/]+)$/);

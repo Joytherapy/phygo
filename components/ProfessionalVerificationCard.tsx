@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { BadgeCheck, Clock, AlertCircle, Loader2, ShieldCheck, FileText, ShieldAlert } from 'lucide-react'
 import { useVerificationStrings, type VerificationStatusKey } from '@/lib/i18n/verificationStrings'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useVerificationDocumentViewer } from '@/components/VerificationDocumentViewer'
 
 // Profile card for professional verification. The status comes from the
 // server and can only be changed by PHYGO; this card only submits a request
@@ -175,11 +176,7 @@ export default function ProfessionalVerificationCard({
     }
   }
 
-  async function openOwnDocument() {
-    const res = await fetch('/api/profile/verification/document')
-    const json = await res.json().catch(() => ({}))
-    if (res.ok && json.url) window.open(json.url, '_blank', 'noopener,noreferrer')
-  }
+  const documentViewer = useVerificationDocumentViewer()
 
   if (hidden) return null
 
@@ -249,10 +246,13 @@ export default function ProfessionalVerificationCard({
           {data.request && (data.request.hasDocument || data.request.documentDeleted) && (
             <p className="mt-3 text-xs text-ink/60 dark:text-white/55">
               {data.request.hasDocument ? (
-                <button type="button" onClick={openOwnDocument} className="inline-flex items-center gap-1 font-semibold text-[#4F7CFF] hover:underline">
-                  <FileText size={12} aria-hidden />
-                  {t.viewDocument}
-                </button>
+                <>
+                  <button type="button" onClick={() => documentViewer.open('/api/profile/verification/document')} disabled={documentViewer.loading} className="inline-flex items-center gap-1 font-semibold text-[#4F7CFF] hover:underline disabled:opacity-60">
+                    <FileText size={12} aria-hidden />
+                    {t.viewDocument}
+                  </button>{' '}
+                  {documentViewer.viewer}
+                </>
               ) : (
                 t.documentRemoved
               )}

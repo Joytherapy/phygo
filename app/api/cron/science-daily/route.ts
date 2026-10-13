@@ -12,8 +12,8 @@ export async function GET(req: Request) {
   }
 
   const origin = new URL(req.url).origin;
-  // The science batch routes are admin-only (lib/auth/adminServer.ts) and
-  // accept CRON_SECRET as a bearer token, so forward it.
+  // The two science batch routes are admin-only (lib/auth/adminServer.ts)
+  // and are the only admin routes that accept CRON_SECRET ({ allowCron: true }).
   const headers = { authorization: `Bearer ${process.env.CRON_SECRET}` };
 
   const fetchRes = await fetch(`${origin}/api/science/fetch-sources`, { headers });

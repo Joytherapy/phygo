@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-import { requireAdmin } from "@/lib/auth/adminServer";
+import { requireAdminSession } from "@/lib/auth/adminServer";
 import { REVIEW_DECISIONS, serviceClient, type ReviewDecision } from "@/lib/verification";
 import { OFFICIAL_REGISTER_URL, REGISTRY_RESULTS, REJECTION_CATEGORIES, type RegistryResult, type RejectionCategory } from "@/lib/verificationEvidence";
 
 // Manual review of professional registrations by a PHYGO administrator
-// (PHYGO_ADMIN_EMAILS, server-side only; see lib/auth/adminServer.ts).
+// (PHYGO_ADMIN_EMAILS, server-side only; see lib/auth/adminServer.ts). Only a
+// signed-in administrator: no bearer token (CRON_SECRET or API token) is
+// accepted, so every check and decision is attributed to a person.
 //
 // The administrator compares four separate things for each request:
 //   1. the user's declaration (legal name, number, territorial Order);
@@ -33,8 +33,8 @@ const OPEN = ["pending", "needs_info"];
 // ?status=reconfirm lists verified accounts with an open request (documents
 // sent without interrupting their access).
 export async function GET(req: Request) {
-  const denied = await requireAdmin(req);
-  if (denied) return denied;
+  const admin = await requireAdminSession();
+  if (!admin.ok) return admin.response;
   const db = serviceClient();
   if (!db) return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   const status = new URL(req.url).searchParams.get("status") ?? "pending";
@@ -76,12 +76,12 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const denied = await requireAdmin(req);
-  if (denied) return denied;
+  const admin = await requireAdminSession();
+  if (!admin.ok) return admin.response;
   const db = serviceClient();
   if (!db) return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-  const reviewer = await reviewerLabel(req);
+  const reviewer = admin.email;
   const note = typeof body.internalNote === "string" ? body.internalNote.trim().slice(0, 1000) || null : null;
 
   // 1. Record the administrator's own check on the official register.
@@ -146,15 +146,4 @@ function refusal(error: { message?: string }) {
   if (known) return NextResponse.json({ error: known[1], code }, { status: known[0] });
   console.error("verification decision not saved:", error.message);
   return NextResponse.json({ error: "Service unavailable: nothing was changed" }, { status: 503 });
-}
-
-/** The reviewing administrator's e-mail, or "api-token" for server-to-server calls. */
-async function reviewerLabel(req: Request): Promise<string> {
-  if (/^Bearer\s+/i.test(req.headers.get("authorization") ?? "")) return "api-token";
-  const cookieStore = cookies();
-  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-    cookies: { get: (name: string) => cookieStore.get(name)?.value },
-  });
-  const { data } = await supabase.auth.getUser();
-  return data.user?.email ?? "admin";
 }
