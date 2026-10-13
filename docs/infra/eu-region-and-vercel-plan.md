@@ -2,6 +2,8 @@
 
 Status: **proposal.** This PR changes only `vercel.json` (`"regions": ["fra1"]`) and adds a measurement script. Nothing has been changed in Vercel, and no plan has been bought.
 
+**Decision in one line:** move to Pro first (needed anyway for commercial use and an applicable DPA), then merge this PR. `fra1` on its own works on Hobby too, but it does not fix the contractual gap.
+
 ## 1. Current state (read on 13 Oct 2026)
 | Item | Value | Source |
 |---|---|---|
@@ -25,6 +27,7 @@ Status: **proposal.** This PR changes only `vercel.json` (`"regions": ["fra1"]`)
   - environment variables;
   - every `maxDuration` and memory setting.
 - **The Hobby plan allows it:** Vercel's documentation says "Hobby plans support any single region". Running *some* functions in another region (per-route regions) would need Pro, and is not proposed.
+- **Tested on the real platform (13 Oct 2026):** the Preview deployment of this PR (`dpl_BJT5mwNUPrsK4bFJ5PXFrS9cqrsq`, commit `79a3a15`) built and is **Ready** with `regions: ["fra1"]` on the current plan. That proves the build and the configuration. It does not prove runtime behaviour with real data: a Preview has no Production variables, and its URL is protected by Vercel Authentication.
 
 ## 3. Compatibility
 | Dependency | Where it runs | Effect of `fra1` |
