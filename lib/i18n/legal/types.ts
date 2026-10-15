@@ -6,9 +6,13 @@
 // Inline conventions inside a block: "**text**" renders bold, and the
 // address hello@phygo.app is turned into a mailto link.
 
-export type LegalBlock = string | { list: string[] };
+/** A list item: plain text, or text with a nested list and/or a closing paragraph. */
+export type LegalListItem = string | { text: string; list?: string[]; after?: string };
 
-export type LegalSection = { title: string; blocks: LegalBlock[] };
+export type LegalBlock = string | { list: LegalListItem[] };
+
+/** id: stable anchor (for example "professional-verification"); default "s<n>". */
+export type LegalSection = { title: string; blocks: LegalBlock[]; id?: string };
 
 export type LegalDoc = {
   metaTitle: string;

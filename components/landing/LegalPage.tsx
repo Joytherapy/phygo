@@ -3,7 +3,7 @@ import { Mail } from "lucide-react";
 import type { Metadata } from "next";
 import type { AppLang } from "@/lib/i18n/uiStrings";
 import { LANDING_LANGS, LANDING_STRINGS, publicPathsFor, type PublicPage } from "@/lib/i18n/landingStrings";
-import { LEGAL_STRINGS, type LegalBlock } from "@/lib/i18n/legal";
+import { LEGAL_STRINGS, type LegalBlock, type LegalListItem } from "@/lib/i18n/legal";
 import PublicShell from "./PublicShell";
 
 const EMAIL = "hello@phygo.app";
@@ -27,16 +27,37 @@ function Inline({ text }: { text: string }) {
   );
 }
 
+const LIST = "list-disc space-y-1.5 pl-5 marker:text-ink/40 dark:marker:text-white/40";
+
+function Item({ item }: { item: LegalListItem }) {
+  if (typeof item === "string") return <li><Inline text={item} /></li>;
+  return (
+    <li>
+      <Inline text={item.text} />
+      {item.list && (
+        <ul className={`mt-1.5 ${LIST}`}>
+          {item.list.map((sub, i) => (
+            <li key={i}><Inline text={sub} /></li>
+          ))}
+        </ul>
+      )}
+      {item.after && <p className="mt-1.5"><Inline text={item.after} /></p>}
+    </li>
+  );
+}
+
 function Block({ block }: { block: LegalBlock }) {
   if (typeof block === "string") return <p><Inline text={block} /></p>;
   return (
-    <ul className="list-disc space-y-1.5 pl-5 marker:text-ink/40 dark:marker:text-white/40">
-      {block.list.map((item) => (
-        <li key={item}><Inline text={item} /></li>
+    <ul className={LIST}>
+      {block.list.map((item, i) => (
+        <Item key={i} item={item} />
       ))}
     </ul>
   );
 }
+
+const anchor = (s: { id?: string }, i: number) => s.id ?? `s${i + 1}`;
 
 export function legalMetadata(lang: AppLang, page: PublicPage): Metadata {
   const doc = page === "contact" ? LEGAL_STRINGS[lang].contact : LEGAL_STRINGS[lang][page];
@@ -64,7 +85,7 @@ export function LegalDocumentPage({ lang, page }: { lang: AppLang; page: "privac
             <ol className="mt-4 space-y-2 border-l border-black/[0.08] dark:border-white/[0.09]">
               {doc.sections.map((s, i) => (
                 <li key={s.title}>
-                  <a href={`#s${i + 1}`} className="-ml-px block border-l border-transparent pl-4 text-[12.5px] leading-snug text-ink/60 transition-colors hover:border-electric hover:text-ink dark:text-white/55 dark:hover:text-white">
+                  <a href={`#${anchor(s, i)}`} className="-ml-px block border-l border-transparent pl-4 text-[12.5px] leading-snug text-ink/60 transition-colors hover:border-electric hover:text-ink dark:text-white/55 dark:hover:text-white">
                     {s.title}
                   </a>
                 </li>
@@ -82,8 +103,8 @@ export function LegalDocumentPage({ lang, page }: { lang: AppLang; page: "privac
           </p>
           <div className="mt-10 space-y-10">
             {doc.sections.map((s, i) => (
-              <section key={s.title} id={`s${i + 1}`} aria-labelledby={`s${i + 1}-title`} className="scroll-mt-28">
-                <h2 id={`s${i + 1}-title`} className="font-display text-lg font-semibold tracking-tight text-ink dark:text-white">
+              <section key={s.title} id={anchor(s, i)} aria-labelledby={`${anchor(s, i)}-title`} className="scroll-mt-28">
+                <h2 id={`${anchor(s, i)}-title`} className="font-display text-lg font-semibold tracking-tight text-ink dark:text-white">
                   {s.title}
                 </h2>
                 <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-ink/70 dark:text-white/65">
