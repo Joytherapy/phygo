@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { Video, PhoneOff, Loader2 } from 'lucide-react'
 import { refusalMessage, useVerificationStrings } from '@/lib/i18n/verificationStrings'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { lazy } from '@/lib/lazy'
 
 const supabase = lazy(() => createBrowserClient(
@@ -17,6 +18,42 @@ type ActiveCall = {
   status: string
 }
 
+type Session = { url: string; token: string }
+
+// The Daily call inside the page, joined with a meeting token from our server
+// through Daily's documented join({ url, token }). The room is private, so its
+// URL alone opens nothing. daily-js passes the token to Daily's own frame in
+// that frame's address (?t=...); it never appears in this page's URL, in the
+// browser history of PHYGO, or in any request to our server after it is issued.
+function DailyFrame({ session, onLeft }: { session: Session; onLeft: () => void }) {
+  const container = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    let cancelled = false
+    let frame: { destroy: () => Promise<void> } | null = null
+    ;(async () => {
+      const { default: DailyIframe } = await import('@daily-co/daily-js')
+      if (cancelled || !container.current) return
+      const f = DailyIframe.createFrame(container.current, {
+        iframeStyle: { width: '100%', height: '100%', border: '0' },
+        showLeaveButton: true,
+      })
+      frame = f
+      f.on('left-meeting', onLeft)
+      try {
+        await f.join({ url: session.url, token: session.token })
+      } catch {
+        onLeft()
+      }
+    })()
+    return () => {
+      cancelled = true
+      frame?.destroy().catch(() => {})
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session])
+  return <div ref={container} className="w-full aspect-video" />
+}
+
 export default function VideoCallPanel({
   patientId,
   canStart,
@@ -27,10 +64,11 @@ export default function VideoCallPanel({
   const [call, setCall] = useState<ActiveCall | null>(null)
   const [loading, setLoading] = useState(true)
   const [starting, setStarting] = useState(false)
-  const [inCall, setInCall] = useState(false)
+  const [session, setSession] = useState<Session | null>(null)
   const [error, setError] = useState<string | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const t = useVerificationStrings()
+  const { lang } = useLanguage()
 
   const loadActiveCall = async () => {
     const { data } = await supabase
@@ -54,6 +92,24 @@ export default function VideoCallPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientId])
 
+  // Every join asks the server for a new token: it checks that this call is
+  // ours (as the clinician or as the patient) and still active.
+  const join = async (target: ActiveCall) => {
+    setError(null)
+    const res = await fetch('/api/video-call/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ callId: target.id, lang }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      setError(refusalMessage(t, res.status, data) ?? (res.status === 410 ? 'This call has ended.' : t.videoFailed))
+      if (res.status === 410) loadActiveCall()
+      return
+    }
+    setSession({ url: data.url, token: data.token })
+  }
+
   const startCall = async () => {
     setStarting(true)
     setError(null)
@@ -65,44 +121,30 @@ export default function VideoCallPanel({
     })
     const data = await res.json().catch(() => ({}))
 
-    if (!res.ok) {
+    if (!res.ok || !data.call) {
       console.error('Errore creazione stanza:', data.error)
       setError(refusalMessage(t, res.status, data) ?? t.videoFailed)
       setStarting(false)
       return
     }
-
-    const { data: { user } } = await supabase.auth.getUser()
-
-    const { data: newCall, error: insertError } = await supabase
-      .from('video_calls')
-      .insert({
-        patient_id: patientId,
-        room_url: data.url,
-        room_name: data.name,
-        created_by: user?.id,
-        status: 'active',
-      })
-      .select('id, room_url, status')
-      .single()
-
-    if (!insertError && newCall) {
-      setCall(newCall)
-      setInCall(true)
-    } else {
-      setError(t.videoSaveFailed)
-    }
+    setCall(data.call)
+    await join(data.call)
     setStarting(false)
   }
 
   const endCall = async () => {
     if (!call) return
-    await supabase
-      .from('video_calls')
-      .update({ status: 'ended', ended_at: new Date().toISOString() })
-      .eq('id', call.id)
-    setCall(null)
-    setInCall(false)
+    setSession(null)
+    if (canStart) {
+      // The clinician ends the call on the server: no new tokens, room deleted.
+      const res = await fetch('/api/video-call/end', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callId: call.id }),
+      })
+      if (!res.ok) setError(t.videoFailed)
+    }
+    loadActiveCall()
   }
 
   if (loading) {
@@ -113,14 +155,10 @@ export default function VideoCallPanel({
     )
   }
 
-  if (call && inCall) {
+  if (call && session) {
     return (
       <div className="rounded-2xl overflow-hidden border border-black/[0.09] dark:border-white/10">
-        <iframe
-          src={call.room_url}
-          allow="camera; microphone; fullscreen; display-capture; autoplay"
-          className="w-full aspect-video"
-        />
+        <DailyFrame session={session} onLeft={() => setSession(null)} />
         <div className="p-3 flex justify-end bg-white dark:bg-white/[0.03]">
           <button
             onClick={endCall}
@@ -134,15 +172,18 @@ export default function VideoCallPanel({
     )
   }
 
-  if (call && !inCall) {
+  if (call && !session) {
     return (
+      <div>
       <button
-        onClick={() => setInCall(true)}
+        onClick={() => join(call)}
         className="w-full flex items-center justify-center gap-2 rounded-2xl border border-[#4F7CFF]/30 bg-[#4F7CFF]/10 py-4 text-sm font-semibold text-[#4F7CFF] hover:bg-[#4F7CFF]/15 transition-colors animate-pulse"
       >
         <Video size={16} />
         Join video call
       </button>
+      {error && <p role="alert" className="text-xs text-red-500 mt-2 text-center">{error}</p>}
+      </div>
     )
   }
 

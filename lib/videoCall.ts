@@ -1,0 +1,97 @@
+// Private Daily video rooms: shared rules for creating rooms, issuing
+// meeting tokens and ending calls. Every check runs on the server.
+//
+// How Daily applies these settings (Daily REST API reference, "rooms" and
+// "meeting tokens"):
+//   - privacy "private": only participants with a valid meeting token can
+//     join (knocking stays off, so there is no other way in);
+//   - a token without room_name opens every room of the domain, so room_name
+//     is always set;
+//   - token exp: after it the token can no longer be used to join; people
+//     already in the call stay unless eject_at_token_exp is set. Token-level
+//     eject settings override the room's, so none is set on the token and the
+//     room's eject_at_room_exp ends the call for everyone at the room's expiry;
+//   - Daily has no single-use tokens: a token can be used again until it
+//     expires. Hence a short exp, max_participants 2, a new token for every
+//     join, and no token once the call has ended (the room is also deleted).
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+// DAILY_API_BASE_URL is only for tests (a local stand-in); leave it unset.
+export const DAILY_API = (process.env.DAILY_API_BASE_URL || "https://api.daily.co/v1").replace(/\/$/, "");
+export const ROOM_TTL_SECONDS = 60 * 60; // a call can last up to one hour, as before
+export const TOKEN_TTL_SECONDS = 10 * 60; // time to enter the call with one token
+export const MAX_PARTICIPANTS = 2; // the clinician and the patient
+/** Names created by /api/video-call/create-room: random, nothing about the patient. */
+export const ROOM_NAME = /^phygo-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export const roomProperties = (now = Date.now()) => ({
+  privacy: "private" as const,
+  properties: {
+    exp: Math.floor(now / 1000) + ROOM_TTL_SECONDS,
+    eject_at_room_exp: true,
+    max_participants: MAX_PARTICIPANTS,
+    enable_knocking: false,
+    enable_chat: true,
+    enable_screenshare: true,
+  },
+});
+
+export type CallRole = "clinician" | "patient";
+
+export type CallAccess =
+  | { ok: true; role: CallRole; call: { id: string; room_name: string; room_url: string; patient_id: string } }
+  | { ok: false; status: 404 | 410 | 503; error: string };
+
+/**
+ * Which role the signed-in user has on this call, if any. Read with the
+ * service role, so it never depends on what the browser can see; the same
+ * answer (404) for "does not exist" and "not yours", so ids cannot be probed.
+ */
+export async function callAccess(db: SupabaseClient, userId: string, callId: string, now = Date.now()): Promise<CallAccess> {
+  const { data: call, error } = await db
+    .from("video_calls")
+    .select("id, patient_id, room_name, room_url, status, created_at")
+    .eq("id", callId)
+    .maybeSingle();
+  if (error) return { ok: false, status: 503, error: "Service unavailable" };
+  if (!call) return { ok: false, status: 404, error: "Call not found" };
+  const { data: patient, error: patientError } = await db
+    .from("patients")
+    .select("user_id, patient_user_id")
+    .eq("id", call.patient_id)
+    .maybeSingle();
+  if (patientError) return { ok: false, status: 503, error: "Service unavailable" };
+  const role: CallRole | null = patient?.user_id === userId ? "clinician" : patient?.patient_user_id === userId ? "patient" : null;
+  if (!role) return { ok: false, status: 404, error: "Call not found" };
+  if (call.status !== "active") return { ok: false, status: 410, error: "This call has ended" };
+  const started = Date.parse(call.created_at);
+  if (!Number.isFinite(started) || now - started > ROOM_TTL_SECONDS * 1000) return { ok: false, status: 410, error: "This call has ended" };
+  // Calls created before private rooms (public rooms) are not reopened.
+  if (!ROOM_NAME.test(call.room_name ?? "")) return { ok: false, status: 410, error: "Start a new call" };
+  return { ok: true, role, call };
+}
+
+const LABELS: Record<string, Record<CallRole, string>> = {
+  it: { clinician: "Fisioterapista", patient: "Paziente" },
+  en: { clinician: "Physiotherapist", patient: "Patient" },
+  es: { clinician: "Fisioterapeuta", patient: "Paciente" },
+  fr: { clinician: "Kinésithérapeute", patient: "Patient" },
+};
+
+/** The properties of the meeting token: one room, a short time to join, the role's rights. */
+export function tokenProperties(roomName: string, role: CallRole, lang: unknown, now = Date.now()) {
+  return {
+    room_name: roomName,
+    nbf: Math.floor(now / 1000) - 30,
+    exp: Math.floor(now / 1000) + TOKEN_TTL_SECONDS,
+    is_owner: role === "clinician",
+    // A role, never a name or an id: the label is all Daily receives about the person.
+    user_name: (LABELS[typeof lang === "string" ? lang : ""] ?? LABELS.it)[role],
+  };
+}
+
+export const dailyHeaders = () => ({
+  Authorization: `Bearer ${process.env.DAILY_API_KEY}`,
+  "Content-Type": "application/json",
+});

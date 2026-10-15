@@ -2,12 +2,13 @@ import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { ownsPatient, requireVerifiedProfessional } from '@/lib/auth/sessionServer'
 import { consumeHourly, HOURLY_LIMITS, limitResponse } from '@/lib/rateLimit'
+import { serviceClient } from '@/lib/verification'
+import { DAILY_API, dailyHeaders, roomProperties } from '@/lib/videoCall'
 
-// Creates a paid Daily.co room for one of the signed-in clinician's own
-// patients. Rooms are created only by the clinician; patients join them from
-// My Phygo through the video_calls row (RLS: their own calls only).
-// DAILY_API_BASE_URL is only for tests (a local stand-in); leave it unset.
-const DAILY_API = (process.env.DAILY_API_BASE_URL || 'https://api.daily.co/v1').replace(/\/$/, '')
+// Creates a private Daily room for one of the signed-in clinician's own
+// patients, and records the call on the server (video_calls), so the room a
+// token is later issued for is never one the browser chose. Nobody can join
+// the room without a meeting token from /api/video-call/token.
 export async function POST(req: NextRequest) {
   const gate = await requireVerifiedProfessional()
   if (!gate.ok) return gate.response
@@ -15,6 +16,8 @@ export async function POST(req: NextRequest) {
   if (!process.env.DAILY_API_KEY) {
     return NextResponse.json({ error: 'Video calls are not configured' }, { status: 503 })
   }
+  const db = serviceClient()
+  if (!db) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
 
   try {
     const { patientId } = await req.json()
@@ -32,34 +35,34 @@ export async function POST(req: NextRequest) {
     if (limited) return limited
 
     // A random name: Daily never receives the patient's id, and the room URL
-    // (shared with the patient) cannot be guessed from anything we know.
+    // cannot be guessed from anything we know.
     const roomName = `phygo-${randomUUID()}`
 
     const res = await fetch(`${DAILY_API}/rooms`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.DAILY_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: roomName,
-        properties: {
-          exp: Math.floor(Date.now() / 1000) + 60 * 60,
-          enable_chat: true,
-          enable_screenshare: true,
-        },
-      }),
+      headers: dailyHeaders(),
+      body: JSON.stringify({ name: roomName, ...roomProperties() }),
     })
 
     if (!res.ok) {
-      const errText = await res.text()
-      console.error('Daily room creation failed:', errText)
+      console.error('Daily room creation failed:', res.status)
       return NextResponse.json({ error: 'Could not create video room' }, { status: 500 })
     }
 
     const data = await res.json()
+    const { data: call, error } = await db
+      .from('video_calls')
+      .insert({ patient_id: patientId, room_url: data.url, room_name: data.name, created_by: gate.user.id, status: 'active' })
+      .select('id, room_url, status')
+      .single()
+    if (error || !call) {
+      // No record, no call: remove the room so it cannot be used.
+      await fetch(`${DAILY_API}/rooms/${encodeURIComponent(roomName)}`, { method: 'DELETE', headers: dailyHeaders() }).catch(() => {})
+      console.error('video call not recorded:', error?.message)
+      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
+    }
 
-    return NextResponse.json({ url: data.url, name: data.name })
+    return NextResponse.json({ call: { id: call.id, room_url: call.room_url, status: call.status } })
   } catch (err) {
     console.error('Errore create-room:', err)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })

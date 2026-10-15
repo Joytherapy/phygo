@@ -189,11 +189,12 @@ test('video rooms: configuration and patient ownership are checked before Daily 
     // The clinician's own patient: a room whose name says nothing about the patient.
     const created = await post(withDaily.url, '/api/video-call/create-room', 'physioA', { patientId: P1 });
     assert.equal(created.status, 200);
-    const { name, url } = await created.json();
+    const { call } = await created.json();
+    const { name } = fake.state.daily.rooms.at(-1);
     assert.match(name, /^phygo-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/, 'random room name');
-    assert.ok(!name.includes(P1) && !url.includes(P1), 'the patient id is never sent to Daily');
-    const again = await (await post(withDaily.url, '/api/video-call/create-room', 'physioA', { patientId: P1 })).json();
-    assert.notEqual(again.name, name, 'a new name every time');
+    assert.ok(!name.includes(P1) && !call.room_url.includes(P1), 'the patient id is never sent to Daily');
+    await post(withDaily.url, '/api/video-call/create-room', 'physioA', { patientId: P1 });
+    assert.notEqual(fake.state.daily.rooms.at(-1).name, name, 'a new name every time');
   } finally {
     await withDaily.stop();
   }
