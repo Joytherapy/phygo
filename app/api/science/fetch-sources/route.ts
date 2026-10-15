@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/adminServer';
 import { createClient } from '@supabase/supabase-js';
 import { lazy } from '@/lib/lazy';
+import { parsePubDate } from '@/lib/science/pubDate';
 
 const supabase = lazy(() => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -72,7 +73,7 @@ export async function GET(req: Request) {
           title: item.title,
           authors,
           journal: item.fulljournalname || item.source,
-          publication_date: item.pubdate ? new Date(item.pubdate).toISOString().split('T')[0] : null,
+          publication_date: parsePubDate(item.pubdate),
           pmid,
           abstract,
           original_url: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`,

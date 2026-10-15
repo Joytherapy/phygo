@@ -103,7 +103,11 @@ export default function MyPhygoHomePage() {
   }
 
   const latestNote = notes[0]
-  const exercises: any[] = Array.isArray(latestNote?.exercises) ? latestNote.exercises : []
+  // Reviewed exercises are objects (name, dosing); otherwise the note keeps
+  // the draft's plain strings. Both are shown; empty entries are not.
+  const exercises: any[] = (Array.isArray(latestNote?.exercises) ? latestNote.exercises : []).filter(
+    (ex: any) => (typeof ex === 'string' ? ex.trim() !== '' : !!ex && typeof ex === 'object')
+  )
 
   return (
     <div className="relative max-w-2xl mx-auto pt-40 pb-24 px-6">
@@ -232,13 +236,15 @@ export default function MyPhygoHomePage() {
               <div className="grid gap-3">
                 {exercises.map((ex: any, i: number) => (
                   <div
-                    key={ex.internal_id || i}
+                    key={ex?.internal_id || i}
                     className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4"
                   >
                     <p className="text-sm font-semibold text-ink dark:text-white">
-                      {ex.name || `Exercise ${i + 1}`}
+                      {/* A note saved without the exercise review keeps the
+                          AI draft's plain strings ("Bridge, 3x10, daily"). */}
+                      {typeof ex === 'string' ? ex : ex?.name || `Exercise ${i + 1}`}
                     </p>
-                    {(ex.dosing?.sets || ex.dosing?.reps) && (
+                    {(ex?.dosing?.sets || ex?.dosing?.reps) && (
                       <p className="text-xs text-ink/60 dark:text-white/50 mt-1">
                         {ex.dosing?.sets && `${ex.dosing.sets} sets`}
                         {ex.dosing?.sets && ex.dosing?.reps && ' × '}

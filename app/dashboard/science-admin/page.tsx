@@ -22,15 +22,11 @@ export default function ScienceAdminPage() {
 
   const loadPapers = () => {
     setLoading(true);
-    fetch('/api/science/list')
+    fetch('/api/science/list?status=pending_review')
       .then((res) => res.json())
-      .then((data) => {
-        const pending = (data.papers || []).filter(
-          (p: Paper) => p.status === 'pending_review'
-        );
-        setPapers(pending);
-        setLoading(false);
-      });
+      .then((data) => setPapers(data.papers || []))
+      .catch(() => setPapers([]))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {

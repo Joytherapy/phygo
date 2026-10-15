@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react'
 
 type Patient = { id: string; name: string }
 
@@ -30,17 +30,21 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const setCurrentPatient = (p: Patient | null) => {
+  // Stable identity: pages list setCurrentPatient in their effect dependencies,
+  // so a new function on every render would re-run those effects (and their
+  // Supabase queries) in an endless loop.
+  const setCurrentPatient = useCallback((p: Patient | null) => {
     setCurrentPatientState(p)
     if (p) {
       sessionStorage.setItem('phygo_current_patient', JSON.stringify(p))
     } else {
       sessionStorage.removeItem('phygo_current_patient')
     }
-  }
+  }, [])
+  const value = useMemo(() => ({ currentPatient, setCurrentPatient }), [currentPatient, setCurrentPatient])
 
   return (
-    <PatientContext.Provider value={{ currentPatient, setCurrentPatient }}>
+    <PatientContext.Provider value={value}>
       {children}
     </PatientContext.Provider>
   )
