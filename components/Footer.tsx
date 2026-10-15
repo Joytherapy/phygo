@@ -1,26 +1,24 @@
-export default function Footer() {
-  return (
-    <footer className="relative border-t border-ink/5 dark:border-white/5 py-12">
-      <div className="mx-auto max-w-7xl px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
-        <a href="/" className="flex items-center gap-2 font-display font-semibold text-ink dark:text-white">
-          <img
-            src="/logo-mark.png"
-            alt="Phygo"
-            className="h-7 w-7 rounded-md object-cover"
-          />
-          Phygo
-        </a>
+import type { AppLang } from "@/lib/i18n/uiStrings";
+import { LANDING_STRINGS } from "@/lib/i18n/landingStrings";
+import { buildConditionIndexPath } from "@/lib/publicLibrary";
+import LandingFooter from "@/components/landing/LandingFooter";
 
-        <div className="flex items-center gap-6 text-sm text-ink/60 dark:text-white/50">
-          <a href="/library/condition" className="hover:text-ink dark:hover:text-white transition-colors">Library</a>
-          <a href="/privacy" className="hover:text-ink dark:hover:text-white transition-colors">Privacy</a>
-          <a href="/terms" className="hover:text-ink dark:hover:text-white transition-colors">Terms</a>
-          <a href="/contact" className="hover:text-ink dark:hover:text-white transition-colors">Contact</a>
-        </div>
-      </div>
-      <p className="mt-8 text-center text-xs text-ink/30 dark:text-white/30">
-        © {new Date().getFullYear()} Phygo. All rights reserved.
-      </p>
-    </footer>
-  );
+// Footer of the public clinical library pages. It reuses the localized
+// landing footer so labels and destinations (privacy, terms, contact) follow
+// the page language. Language links default to the library index in each
+// language; detail pages pass the same condition in each language.
+export default function Footer({
+  lang = "it",
+  langHrefs,
+}: {
+  lang?: AppLang;
+  langHrefs?: Record<AppLang, string>;
+}) {
+  const hrefs = langHrefs ?? {
+    it: buildConditionIndexPath("it"),
+    en: buildConditionIndexPath("en"),
+    es: buildConditionIndexPath("es"),
+    fr: buildConditionIndexPath("fr"),
+  };
+  return <LandingFooter lang={lang} footer={LANDING_STRINGS[lang].footer} libraryHref={buildConditionIndexPath(lang)} langHrefs={hrefs} />;
 }

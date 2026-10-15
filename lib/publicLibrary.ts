@@ -88,3 +88,11 @@ export function parseConditionId(idSlug: string): number | null {
   const id = parseInt(match[1], 10);
   return Number.isFinite(id) ? id : null;
 }
+
+/** The library index in every language (language switchers on the index pages). */
+export const LIBRARY_INDEX_HREFS: Record<Lang, string> = {
+  it: buildConditionIndexPath('it'),
+  en: buildConditionIndexPath('en'),
+  es: buildConditionIndexPath('es'),
+  fr: buildConditionIndexPath('fr'),
+};

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import Navbar from '@/components/Navbar';
+import PublicHeader from '@/components/landing/PublicHeader';
+import { LIBRARY_INDEX_HREFS } from '@/lib/publicLibrary';
 import Footer from '@/components/Footer';
 import ConditionSearchList from '../../../library/condition/_components/ConditionSearchList';
 import LanguageSwitcher from '@/components/library/LanguageSwitcher';
@@ -37,7 +38,7 @@ export default async function ConditionLibraryIndexPageES() {
 
   return (
     <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
-      <Navbar />
+      <PublicHeader lang="es" langHrefs={LIBRARY_INDEX_HREFS} />
 
       <div
         className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
@@ -46,7 +47,7 @@ export default async function ConditionLibraryIndexPageES() {
         }}
       />
 
-      <div className="relative max-w-4xl mx-auto px-6 pt-40 pb-24">
+      <main id="main-content" className="relative max-w-4xl mx-auto px-6 pt-40 pb-24">
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]" />
@@ -67,9 +68,9 @@ export default async function ConditionLibraryIndexPageES() {
         </div>
 
         <ConditionSearchList items={conditions} lang="es" />
-      </div>
+      </main>
 
-      <Footer />
+      <Footer lang="es" />
     </div>
   );
 }

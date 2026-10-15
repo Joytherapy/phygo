@@ -31,6 +31,7 @@ module.exports = {
         display: ["var(--font-display)", "sans-serif"],
         sans: ["var(--font-sans)", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
       },
       borderRadius: {
         xl2: "20px",
@@ -78,6 +79,14 @@ module.exports = {
           "0%": { backgroundPosition: "200% 0" },
           "100%": { backgroundPosition: "-200% 0" },
         },
+        wave: {
+          "0%, 100%": { transform: "scaleY(0.35)" },
+          "50%": { transform: "scaleY(1)" },
+        },
+        caret: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0" },
+        },
       },
       animation: {
         float: "float 6s ease-in-out infinite",
@@ -86,6 +95,9 @@ module.exports = {
         drift: "drift 14s ease-in-out infinite",
         marquee: "marquee 32s linear infinite",
         shimmer: "shimmer 2.5s linear infinite",
+        wave: "wave 1.1s ease-in-out infinite",
+        caret: "caret 1s steps(1) infinite",
+        "marquee-slow": "marquee 90s linear infinite",
       },
       transitionTimingFunction: {
         premium: "cubic-bezier(0.22, 1, 0.36, 1)",

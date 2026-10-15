@@ -1,15 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { GraduationCap, Stethoscope, Loader2 } from "lucide-react";
-import { useRoleUi, type PracticeStage } from "@/lib/i18n/roleStrings";
+import { ROLE_STRINGS, type PracticeStage } from "@/lib/i18n/roleStrings";
+import { useEntryLang } from "@/lib/i18n/useEntryLang";
+import { ENTRY_STRINGS } from "@/lib/i18n/entryStrings";
 
 export default function OnboardingPage() {
+  return (
+    <Suspense fallback={null}>
+      <Onboarding />
+    </Suspense>
+  );
+}
+
+function Onboarding() {
   const router = useRouter();
   const supabase = createClient();
-  const roleUi = useRoleUi();
+  // No LanguageProvider exists before the dashboard (and a new profile's
+  // preferred_language defaults to 'it'), so this page follows the language
+  // the visitor chose on the public site — see lib/i18n/useEntryLang.ts.
+  const lang = useEntryLang();
+  const roleUi = ROLE_STRINGS[lang];
+  const t = ENTRY_STRINGS[lang].onboarding;
 
   const [step, setStep] = useState<"name" | "role">("name");
   const [name, setName] = useState("");
@@ -45,14 +60,16 @@ export default function OnboardingPage() {
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      setError("Session expired — please sign in again.");
+      setError(t.sessionExpired);
       setSelectingRole(null);
       return;
     }
 
     const { error } = await supabase
       .from("profiles")
-      .update({ practice_stage: stage })
+      // preferred_language: keep the language chosen on the public site, so
+      // the dashboard (LanguageContext) opens in it instead of the 'it' default.
+      .update({ practice_stage: stage, preferred_language: lang })
       .eq("id", user.id);
 
     if (error) {
@@ -66,7 +83,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white dark:bg-[#08090b] px-4">
+    <main id="main-content" className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white dark:bg-[#08090b] px-4">
       <div
         className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
         style={{
@@ -83,10 +100,10 @@ export default function OnboardingPage() {
           </div>
 
           <h1 className="mb-1 text-center text-2xl font-semibold text-ink dark:text-white">
-            Welcome to Phygo
+            {t.welcome}
           </h1>
           <p className="mb-8 text-center text-sm text-ink/55 dark:text-white/50">
-            What should we call you?
+            {t.askName}
           </p>
 
           <form onSubmit={handleNameSubmit} className="space-y-4">
@@ -96,7 +113,8 @@ export default function OnboardingPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
-              placeholder="e.g. Andrea"
+              placeholder={t.namePlaceholder}
+              aria-label={t.askName}
               autoFocus
             />
 
@@ -108,7 +126,7 @@ export default function OnboardingPage() {
               className="w-full rounded-xl py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(79,124,255,0.35)] transition-transform hover:scale-[1.02] disabled:opacity-50"
               style={{ background: "linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)" }}
             >
-              {loading ? "Saving..." : roleUi.onboarding.continue}
+              {loading ? t.saving : roleUi.onboarding.continue}
             </button>
           </form>
         </div>
@@ -120,7 +138,7 @@ export default function OnboardingPage() {
             {roleUi.onboarding.roleQuestion}
           </h1>
           <p className="mb-8 text-center text-sm text-ink/55 dark:text-white/50">
-            {name ? `${name}, ` : ""}this shapes your PHYGO home — you can change it anytime from your profile.
+            {name ? `${name}, ` : ""}{t.roleSub}
           </p>
 
           <div className="space-y-3">
@@ -158,6 +176,6 @@ export default function OnboardingPage() {
           {error && <p className="mt-4 text-xs text-red-500 text-center">{error}</p>}
         </div>
       )}
-    </div>
+    </main>
   );
 }

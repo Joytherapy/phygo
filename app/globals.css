@@ -173,3 +173,62 @@ button:focus-visible {
 .tilt-perspective {
   perspective: 1200px;
 }
+
+/* ── Public landing page (/, /it, /es, /fr) ─────────────────────────────
+   "Clinical precision" motif: hairline rules, corner ticks and a faint dot
+   grid, like the margins of a measurement chart. Prefixed lp- so nothing
+   here leaks into the dashboard. */
+.lp-accent {
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  font-size: 1.08em;
+  line-height: 0.95;
+  background: linear-gradient(100deg, #4f7cff 0%, #3fa8d8 55%, #22b085 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding-right: 0.06em;
+}
+.dark .lp-accent {
+  background-image: linear-gradient(100deg, #8fadff 0%, #6fc6e8 50%, #5ee5b8 100%);
+}
+.lp-dots {
+  background-image: radial-gradient(rgba(11, 13, 18, 0.09) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.dark .lp-dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+}
+.lp-ticks {
+  position: relative;
+}
+.lp-ticks::before,
+.lp-ticks::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  border-color: rgba(79, 124, 255, 0.55);
+  border-style: solid;
+}
+.lp-ticks::before {
+  top: -7px;
+  left: -7px;
+  border-width: 1px 0 0 1px;
+}
+.lp-ticks::after {
+  bottom: -7px;
+  right: -7px;
+  border-width: 0 1px 1px 0;
+}
+.lp-fade-x {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.lp-marquee:hover .lp-marquee-track,
+.lp-marquee:focus-within .lp-marquee-track {
+  animation-play-state: paused;
+}

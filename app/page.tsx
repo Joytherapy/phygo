@@ -1,45 +1,16 @@
-import IntroLoader from "@/components/IntroLoader";
-import AmbientMesh from "@/components/AmbientMesh";
-import ScrollProgress from "@/components/ScrollProgress";
-import CursorSpotlight from "@/components/CursorSpotlight";
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import HowItWorks from "@/components/HowItWorks";
-import Features from "@/components/Features";
-import PhygoWorld from "@/components/PhygoWorld";
-import TryItLive from "@/components/TryItLive";
-import BeforeAfter from "@/components/BeforeAfter";
-import TrustPillars from "@/components/TrustPillars";
-import Pricing from "@/components/Pricing";
-import FAQ from "@/components/FAQ";
-import SignatureIllustration from "@/components/SignatureIllustration";
-import FinalCTA from "@/components/FinalCTA";
-import Footer from "@/components/Footer";
+import type { Metadata } from "next";
+import LandingPage from "@/components/landing/LandingPage";
+import { buildLandingMetadata } from "@/lib/landing/landingMetadata";
+
+// English landing page (international default, x-default). The same page is
+// served in Italian, Spanish and French at /it, /es and /fr. Library figures
+// are read live and refreshed hourly.
+export const revalidate = 3600;
+
+export function generateMetadata(): Promise<Metadata> {
+  return buildLandingMetadata("en");
+}
 
 export default function Home() {
-  return (
-    <>
-      <IntroLoader />
-      <ScrollProgress />
-      <main id="main-content" className="relative min-h-screen bg-[#f6f7f9] dark:bg-ink overflow-x-hidden">
-        <AmbientMesh />
-        <CursorSpotlight />
-        <Navbar />
-        <Hero />
-        <HowItWorks />
-        <Features />
-        <PhygoWorld />
-        <TryItLive />
-        <BeforeAfter />
-        <TrustPillars />
-        <Pricing />
-        <FAQ />
-        <div className="mx-auto max-w-3xl px-6 opacity-70">
-          <SignatureIllustration className="w-full h-20" />
-        </div>
-        <FinalCTA />
-        <Footer />
-      </main>
-    </>
-  );
+  return <LandingPage lang="en" />;
 }
