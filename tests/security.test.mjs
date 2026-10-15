@@ -5,6 +5,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { startFakeSupabase, sessionCookie } from './support/fake-supabase.mjs';
+import { verificationRpc } from './support/verification-rpc.mjs';
 import { startApp } from './support/app.mjs';
 
 const FAKE_PORT = Number(process.env.FAKE_SUPABASE_PORT ?? 54329);
@@ -26,6 +27,7 @@ let fake;
 let app;
 before(async () => {
   fake = await startFakeSupabase({
+    rpc: verificationRpc,
     port: FAKE_PORT,
     users,
     tables: {

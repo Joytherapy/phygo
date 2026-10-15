@@ -281,6 +281,9 @@ Before pasting a file into the SQL editor, you can check it on your Mac with `sh
 | `sql/2026-10_patient_management_B_policies_PROPOSED.sql` | `1f732a5aad9a5c3e944d95443eceada5e5e806cdf116f39ecfa9f67b47660d70` |
 | `sql/2026-10_security_demo_usage_policies_PROPOSED.sql` | `3f0c6f26d2569784601c63a683fdcc77a48128c267477d6b33697859437ae599` |
 | `sql/2026-10_patient_management_R_freeze_PROPOSED.sql` (emergency only) | `ab13dabed7c3d80a23c51eb57e1a50eda574308a8aa9149ce21fb72305d6b7de` |
+| `sql/2026-10_verification_evidence_PROPOSED.sql` (**not part of the 12 Oct release**; evidence PR, not applied) | `84611656465c8403fa6b04f6d5f675f96b2723a0588d40c5bcee21905ac57932` |
+| `sql/2026-10_verification_evidence_access_PROPOSED.sql` (**not part of the 12 Oct release**; evidence PR, not applied) | `e1e80d8c556e689497d9e5cf3811ab9be80ce1697dbc9a17c7868e88c908df04` |
+| `sql/2026-10_verification_evidence_backfill_PROPOSED.sql` (**not part of the 12 Oct release**; evidence PR, not applied; starts the 60-day clock) | `d8b30c4ffc14633c649272b9d2afe3d8eb61e786e76fe57d6b9cea4eb0553406` |
 
 If a file changes after this table, the table must be updated in the same commit.
 
@@ -596,7 +599,7 @@ Then review the verification requests.
 
 | Problem | What to do | Takes effect |
 |---|---|---|
-| The wrong person has access | Reject them in the admin page, or `delete from professional_transition_accounts where user_id = '<id>'` | Immediately |
+| The wrong person has access | Reject them in the admin page (this also deletes their transition-list entry, once SQL 1 of the evidence PR is applied), or `delete from professional_transition_accounts where user_id = '<id>'` | Immediately |
 | A legitimate clinician is blocked | Add them to the list, or approve them | Immediately |
 | Suspected over-permission in the patient rules (emergency stop) | Apply `sql/2026-10_patient_management_R_freeze_PROPOSED.sql` | Immediately |
 | The application misbehaves after the deploy | Roll the **code** back (Vercel) only to a deployment that contains **PR #7 or later**, or fix forward | Next deployment |
@@ -606,7 +609,7 @@ Then review the verification requests.
 - clinicians still read their own records;
 - patients keep My Phygo, appointment requests and invitation redemption;
 - the server routes (clinical AI, video, metabolic data) keep their own check: verified or listed only;
-- to undo it, re-run Part A (step 4). The list is untouched.
+- to undo it, re-run Part A (step 4). The list is untouched. Once `sql/2026-10_verification_evidence_access_PROPOSED.sql` is applied, re-run it right after Part A: Part A alone restores the earlier rule, which ignores the evidence deadlines.
 
 **Why a code rollback to PR #7 is safe:**
 - Under #7's code, every patient write still goes through the step 7 rules (Part B).

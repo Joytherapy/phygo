@@ -278,5 +278,174 @@ expect "self-verification still refused after rollback" "$(as authenticated $B "
 q -f sql/2026-10_professional_verification_PROPOSED.sql >/dev/null
 expect "verification migration re-applies after rollback" "$(as authenticated $B "update profiles set registration_number = 'R-10' where id = '$B'")" denied
 
+echo "verification evidence (sql/2026-10_verification_evidence_PROPOSED.sql, applied twice)"
+EV=sql/2026-10_verification_evidence_PROPOSED.sql
+EA=sql/2026-10_verification_evidence_access_PROPOSED.sql
+EB=sql/2026-10_verification_evidence_backfill_PROPOSED.sql
+BEFORE_EVIDENCE="$(cm $V)$(cm $L)$(cm $U)$(cm $R)"
+for i in 1 2; do q -f $EV >/dev/null; done
+expect "the evidence file alone changes nobody's access (V, L, U, R)" "$(cm $V)$(cm $L)$(cm $U)$(cm $R)" "$BEFORE_EVIDENCE"
+expect "the three tables have RLS on; only the deadline table has a policy" "$(q -c "select count(*) filter (where c.relrowsecurity) || '/' || (select count(*) from pg_policies where tablename in ('professional_verification_requests', 'professional_verification_reviews', 'professional_evidence_deadlines')) from pg_class c where c.relname in ('professional_verification_requests', 'professional_verification_reviews', 'professional_evidence_deadlines')")" "3/1"
+# svc <sql>: runs as the service role (the server); prints the result, or the error code / reason
+svc() { local out; if out=$(psql -q -At -v ON_ERROR_STOP=1 -d "$DB" -c "set role service_role; $1" 2>&1); then echo "$out"; else echo "$out" | grep -oE 'verification:[a-z_]+|permission denied|cannot be [a-z]+|removed only with|violates [a-z ]+constraint|simulated [a-z ]+failure' | head -1; fi; }
+# submit <user> <request id> <first> <last> <order> <number>: the server's call after uploading the document
+submit() { svc "select verification_submit('$1', '$2', '$3', '$4', 'IT', '$5', '$6', '$1/$2/doc.pdf', 'application/pdf', 1000, 'v1')->>'kept_verified'"; }
+# decide <user> <decision> <message> <category>: on the account's latest request, as the console sends it
+decide() { svc "select verification_decide('$1', '$2', $3, $4, 'internal note', 'admin@test.invalid', (select id from professional_verification_requests where user_id = '$1' order by submitted_at desc limit 1))->>'action'"; }
+check() { svc "select verification_record_check('$1', '$2', null, 'admin@test.invalid')"; }
+status() { q -c "select professional_status from profiles where id = '$1'"; }
+rstatus() { q -c "select status from professional_verification_requests where id = '$1'"; }
+actions() { q -c "select string_agg(action, ',' order by created_at, action) from professional_verification_reviews where user_id = '$1'"; }
+reviews() { q -c "select count(*) from professional_verification_reviews"; }
+q -c "update profiles set professional_status = 'verified', registry_country = 'IT', registry_name = 'OFI Lombardia', registration_number = '1234' where id = '$V'" >/dev/null
+RV1=61000000-0000-0000-0000-000000000001; RV2=61000000-0000-0000-0000-000000000002; RV3=61000000-0000-0000-0000-000000000003
+
+echo "  already verified accounts"
+expect "same name, number and Order (spaces and case aside): stays verified" "$(submit $V $RV1 Maria Rossi 'ofi  lombardia' 1234)/$(status $V)/$(cm $V)" "true/verified/t"
+expect "its request is open and marked as sent while verified" "$(rstatus $RV1)/$(q -c "select submitted_while_verified from professional_verification_requests where id = '$RV1'")" "pending/t"
+expect "confirmation without a recorded match is refused" "$(decide $V verified null null)" "verification:registry_not_matched"
+expect "the refused confirmation changed nothing" "$(status $V)/$(rstatus $RV1)/$(reviews)" "verified/pending/0"
+check $RV1 match >/dev/null
+expect "after a match the administrator confirms validity" "$(decide $V verified null null)/$(status $V)/$(rstatus $RV1)" "confirmed/verified/verified"
+expect "history: register check, then confirmation" "$(actions $V)" "registry_check,confirmed"
+expect "a different legal name sends the account back to review" "$(submit $V $RV2 Marta Rossi 'OFI Lombardia' 1234)/$(status $V)/$(cm $V)" "false/pending/f"
+expect "a newer request supersedes the open one and returns its file for deletion" "$(svc "select verification_submit('$V', '$RV3', 'Marta', 'Rossi', 'IT', 'OFI Lombardia', '1234', '$V/$RV3/doc.pdf', 'application/pdf', 1000, 'v1')->>'superseded_paths'")/$(rstatus $RV2)" "[\"$V/$RV2/doc.pdf\"]/superseded"
+check $RV3 match >/dev/null
+expect "the new details are approved after a match" "$(decide $V verified null null)/$(status $V)" "verified/verified"
+q -c "update profiles set registration_number = '9999' where id = '$U'; update profiles set professional_status = 'verified', registry_country = 'IT', registry_name = 'OFI Lombardia', registration_number = '5555' where id = '$L'" >/dev/null
+expect "needs_info on a verified account keeps it verified (no interruption)" "$(decide $V needs_info "'Please send a clearer copy.'" null)/$(status $V)/$(cm $V)" "needs_info/verified/t"
+expect "a decided request is not rewritten by later decisions" "$(rstatus $RV3)" "verified"
+RU=61000000-0000-0000-0000-000000000004
+submit $U $RU Ugo Neri 'OFI Lazio' 9999 >/dev/null
+
+echo "  decisions are complete or not applied at all"
+q -c "create function phygo_test_fail() returns trigger language plpgsql as \$\$ begin raise exception 'simulated history failure'; end \$\$;
+      create trigger phygo_test_fail before insert on professional_verification_reviews for each row execute function phygo_test_fail();" >/dev/null
+BEFORE="$(status $V)/$(rstatus $RV3)/$(reviews)/$(q -c "select coalesce(verification_message, '-') from profiles where id = '$V'")"
+expect "a failed history write aborts the revocation" "$(decide $V rejected "'Revoked.'" "'other'")" "simulated history failure"
+expect "profile, request and history unchanged after the failure" "$(status $V)/$(rstatus $RV3)/$(reviews)/$(q -c "select coalesce(verification_message, '-') from profiles where id = '$V'")" "$BEFORE"
+expect "a failed history write aborts the register check" "$(check $RU match)/$(q -c "select registry_check from professional_verification_requests where id = '$RU'")" "simulated history failure/not_checked"
+RF=61000000-0000-0000-0000-0000000000f1
+q -c "drop trigger phygo_test_fail on professional_verification_reviews;
+      create trigger phygo_test_fail before update on profiles for each row execute function phygo_test_fail();" >/dev/null
+expect "a failed profile write aborts the submission" "$(submit $U $RF Ugo Neri 'OFI Lazio' 9999)/$(q -c "select count(*) from professional_verification_requests where id = '$RF'")" "simulated history failure/0"
+q -c "drop trigger phygo_test_fail on profiles; drop function phygo_test_fail();" >/dev/null
+expect "a message is required to ask for information or reject" "$(decide $V rejected null "'other'")" "verification:message_required"
+expect "a rejection needs a category" "$(decide $V rejected "'No.'" null)" "verification:category_required"
+expect "unknown decisions are refused" "$(decide $V approved null null)" "verification:invalid_decision"
+expect "a decision naming an older request is refused (a newer one arrived)" "$(svc "select verification_decide('$V', 'needs_info', 'x', null, null, 'a', '$RV1')")/$(svc "select verification_decide('$V', 'needs_info', 'x', null, null, 'a', null)")" "verification:stale/verification:stale"
+expect "a decision naming another account's request is refused" "$(svc "select verification_decide('$U', 'needs_info', 'x', null, null, 'a', '$RV3')")" "verification:stale"
+check $RU match >/dev/null
+q -c "update professional_verification_requests set document_path = null where id = '$RU'" >/dev/null
+expect "approval without the document is refused" "$(decide $U verified null null)" "verification:no_document"
+q -c "update professional_verification_requests set document_path = '$U/$RU/doc.pdf' where id = '$RU'; update profiles set registration_number = '0000' where id = '$U'" >/dev/null
+expect "approval is refused when the profile no longer matches the request" "$(decide $U verified null null)" "verification:details_changed"
+q -c "update profiles set registration_number = '9999' where id = '$U'" >/dev/null
+expect "the revocation of a verified account is recorded" "$(decide $V rejected "'Verification revoked.'" "'other'")/$(status $V)/$(cm $V)" "revoked/rejected/f"
+expect "the revocation points at the latest request, which keeps its approval" "$(q -c "select request_id from professional_verification_reviews where user_id = '$V' and action = 'revoked'")/$(rstatus $RV3)" "$RV3/verified"
+LISTED_BEFORE="$(q -c "select count(*) from professional_transition_accounts where user_id = '$L'")"
+expect "an account verified before documents can be revoked, with history" "$(decide $L rejected "'Not in the register.'" "'not_in_register'")/$(q -c "select coalesce(request_id::text, 'none') || '/' || rejection_category from professional_verification_reviews where user_id = '$L'")" "revoked/none/not_in_register"
+expect "the rejection also removed it from the transition list" "$LISTED_BEFORE/$(q -c "select count(*) from professional_transition_accounts where user_id = '$L'")" "1/0"
+RL=61000000-0000-0000-0000-0000000000a1
+expect "a new request makes it pending again, without patient management" "$(submit $L $RL Lia Bianchi 'OFI Lombardia' 5555)/$(status $L)/$(cm $L)" "false/pending/f"
+# Only the owner can give the temporary access back, from the SQL editor (used again below).
+q -c "insert into professional_transition_accounts (user_id, until, added_by) values ('$L', now() + interval '30 days', 'owner')" >/dev/null
+expect "after the owner adds it back, the transition applies again" "$(cm $L)" t
+q -c "update profiles set professional_status = 'not_applicable' where id = '$L'" >/dev/null
+
+echo "  the history is protected"
+HV=$(q -c "select id from professional_verification_reviews where user_id = '$V' and action = 'confirmed'")
+expect "the server cannot change a history entry" "$(svc "update professional_verification_reviews set action = 'verified' where id = '$HV'")" "cannot be changed"
+expect "the server cannot rewrite an internal note" "$(svc "update professional_verification_reviews set internal_note = 'edited' where id = '$HV'")" "cannot be changed"
+expect "the server cannot delete history entries" "$(svc "delete from professional_verification_reviews where id = '$HV'")" "permission denied"
+expect "even the owner cannot delete an entry directly" "$(runs <(echo "delete from professional_verification_reviews where id = '$HV';"))" refused
+expect "even the owner cannot truncate the history" "$(runs <(echo "truncate professional_verification_reviews;"))" refused
+expect "the note can be removed once at the end of its retention" "$(svc "update professional_verification_reviews set internal_note = null, note_redacted_at = now() where id = '$HV' returning action")" "confirmed"
+expect "a removed note cannot be redacted again or changed" "$(svc "update professional_verification_reviews set note_redacted_at = now() where id = '$HV'")" "cannot be changed"
+expect "an entry cannot point at another account's request" "$(svc "insert into professional_verification_reviews (user_id, request_id, action, reviewer) values ('$U', '$RV3', 'verified', 'x')")" "violates foreign key constraint"
+for who in V U; do
+  id=${!who}
+  expect "$who cannot read verification requests, even their own" "$(as authenticated $id "select count(*) from professional_verification_requests")" denied
+  expect "$who cannot read the review history" "$(as authenticated $id "select count(*) from professional_verification_reviews")" denied
+  expect "$who cannot insert a request directly" "$(as authenticated $id "insert into professional_verification_requests (user_id, legal_first_name, legal_last_name, registry_country, registry_name, registration_number, declaration_version, declaration_accepted_at) values ('$id', 'A', 'B', 'IT', 'OFI', '1', 'v1', now())")" denied
+  expect "$who cannot change a status or a register check" "$(as authenticated $id "update professional_verification_requests set status = 'verified', registry_check = 'match' where user_id = '$id'")" denied
+  expect "$who cannot point a request at another document" "$(as authenticated $id "update professional_verification_requests set document_path = '$U/x/y.pdf'")" denied
+  expect "$who cannot call the submission function" "$(as authenticated $id "select verification_submit('$id', gen_random_uuid(), 'A', 'B', 'IT', 'OFI', '1', null, null, null, 'v1')")" denied
+  expect "$who cannot record a register check" "$(as authenticated $id "select verification_record_check('$RU', 'match', null, 'me')")" denied
+  expect "$who cannot decide, not even on themselves" "$(as authenticated $id "select verification_decide('$id', 'verified', null, null, null, 'me', null)")" denied
+  expect "$who cannot create or extend an evidence deadline" "$(as authenticated $id "insert into professional_evidence_deadlines (user_id, due_at, added_by) values ('$id', now() + interval '10 days', 'me')")" denied
+done
+expect "anon cannot read requests or call the functions" "$(as anon $V "select count(*) from professional_verification_requests")/$(as anon $V "select verification_decide('$V', 'verified', null, null, null, 'x', null)")" "denied/denied"
+expect "even the server cannot store a document path outside the owner's folder" "$(svc "insert into professional_verification_requests (user_id, legal_first_name, legal_last_name, registry_country, registry_name, registration_number, document_path, declaration_version, declaration_accepted_at) values ('$V', 'A', 'B', 'IT', 'OFI', '1', '$U/x/y.pdf', 'v1', now())")" "violates check constraint"
+expect "unknown check results are refused" "$(svc "update professional_verification_requests set registry_check = 'probably' where id = '$RV3'")" "violates check constraint"
+expect "documents of another type are refused" "$(svc "update professional_verification_requests set document_mime = 'text/html' where id = '$RV3'")" "violates check constraint"
+expect "bucket is private, 4 MB, PDF/JPEG/PNG only" "$(q -c "select public || '/' || file_size_limit || '/' || array_to_string(allowed_mime_types, ',') from storage.buckets where id = 'verification-documents'")" "false/4194304/application/pdf,image/jpeg,image/png"
+expect "no storage policy mentions the verification bucket" "$(q -c "select count(*) from pg_policies where schemaname = 'storage' and (coalesce(qual, '') || coalesce(with_check, '')) like '%verification-documents%'")" 0
+q -c "insert into storage.objects (bucket_id, name) values ('verification-documents', '$V/$RV3/doc.pdf')" >/dev/null
+expect "V cannot list or read verification documents, even their own" "$(psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$V'; select count(*) from storage.objects where bucket_id = 'verification-documents'")" 0
+expect "U cannot read another user's verification document" "$(psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$U'; select count(*) from storage.objects where bucket_id = 'verification-documents'")" 0
+expect "a user cannot upload into the verification bucket directly" "$(as authenticated $V "insert into storage.objects (bucket_id, name) values ('verification-documents', '$V/x/new.pdf')")" denied
+expect "a user cannot delete a verification document" "$(as authenticated $V "delete from storage.objects where bucket_id = 'verification-documents'"; q -c "select count(*) from storage.objects where bucket_id = 'verification-documents'")" "$(printf 'ok\n1')"
+expect "the workspace bucket keeps working for its owner" "$(as authenticated $V "insert into storage.objects (bucket_id, name) values ('workspace-files', '$V/notes.pdf')")" ok
+expect "retention of an old request removes it with its history (documented path)" "$(svc "delete from professional_verification_requests where id = '$RV2' returning status"; q -c "select count(*) from professional_verification_reviews where request_id = '$RV2'")" "$(printf 'superseded\n0')"
+
+echo "  60-day evidence deadline (access file, then backfill)"
+G1=70000000-0000-0000-0000-000000000001; G2=70000000-0000-0000-0000-000000000002; G3=70000000-0000-0000-0000-000000000003; G4=70000000-0000-0000-0000-000000000004
+PG2=70000000-0000-0000-0000-0000000000b2
+q -c "insert into auth.users (id) values ('$G1'), ('$G2'), ('$G3'), ('$G4');
+      update profiles set professional_status = 'verified', registry_country = 'IT', registry_name = 'OFI Toscana', registration_number = 'G' || right(id::text, 1) where id in ('$G1', '$G2', '$G3', '$G4');
+      insert into patients (id, user_id, name) values ('$PG2', '$G2', 'Synthetic G2');
+      insert into notes (patient_id, user_id, assessment) values ('$PG2', '$G2', 'kept');
+      insert into professional_evidence_deadlines (user_id, due_at, added_by) values ('$G1', now() + interval '60 days', 'owner');
+      insert into professional_evidence_deadlines (user_id, due_at, added_at, added_by) values
+        ('$G2', now() - interval '1 day', now() - interval '61 days', 'owner'),
+        ('$G4', now() - interval '1 day', now() - interval '61 days', 'owner');
+      insert into professional_evidence_deadlines (user_id, due_at, added_at, added_by, satisfied_at) values ('$G3', now() - interval '1 day', now() - interval '61 days', 'owner', now() - interval '5 days');
+      insert into professional_transition_accounts (user_id, until, added_by) values ('$G4', now() + interval '30 days', 'owner');" >/dev/null
+expect "deadlines longer than 90 days are refused" "$(svc "update professional_evidence_deadlines set due_at = added_at + interval '91 days' where user_id = '$G1'")" "violates check constraint"
+expect "users see only their own deadline" "$(psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$G2'; select count(*) from professional_evidence_deadlines")" 1
+expect "users cannot clear their own deadline" "$(as authenticated $G2 "update professional_evidence_deadlines set satisfied_at = now() where user_id = '$G2'")" denied
+expect "before the access file the database does not apply deadlines" "$(cm $G2)" t
+expect "the backfill refuses before the access file" "$(runs $EB)" refused
+for i in 1 2; do q -f $EA >/dev/null; done
+expect "deadline in the future: unchanged" "$(cm $G1)" t
+expect "deadline passed without a confirmed document: no patient management" "$(cm $G2)" f
+expect "deadline passed but document confirmed: unchanged" "$(cm $G3)" t
+expect "a transition-list entry cannot bypass a passed deadline" "$(cm $G4)" f
+expect "the transition list still works for unverified accounts" "$(q -c "update profiles set professional_status = 'not_applicable' where id = '$L'" >/dev/null; cm $L)" t
+expect "a rejection still wins over the list" "$(cm $R)" f
+expect "past the deadline the account still reads its patients and notes" "$(psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$G2'; select (select count(*) from patients) || '/' || (select count(*) from notes)")" "1/1"
+expect "past the deadline it cannot create or change patients or notes" "$(as authenticated $G2 "insert into patients (id, user_id, name) values (gen_random_uuid(), '$G2', 'n')")/$(as authenticated $G2 "insert into notes (patient_id, user_id) values ('$PG2', '$G2')")/$(as authenticated $G2 "delete from patients where id = '$PG2'"; q -c "select count(*) from patients where id = '$PG2'")" "denied/denied/ok
+1"
+expect "nothing was deleted and the account stays verified" "$(q -c "select (select count(*) from notes where patient_id = '$PG2') || '/' || professional_status from profiles where id = '$G2'")" "1/verified"
+RG2=61000000-0000-0000-0000-0000000000a2
+expect "sending the same document details keeps the account verified but still restricted" "$(submit $G2 $RG2 Gina Verdi 'OFI Toscana' G2)/$(status $G2)/$(cm $G2)" "true/verified/f"
+check $RG2 match >/dev/null
+expect "once the administrator confirms, access returns and the deadline is satisfied" "$(decide $G2 verified null null)/$(cm $G2)/$(q -c "select satisfied_at is not null from professional_evidence_deadlines where user_id = '$G2'")" "confirmed/t/t"
+expect "V cannot see another clinician's patient (no admin bypass)" "$(psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$V'; select count(*) from patients where id = '$PG2'")" 0
+q -f sql/2026-10_patient_management_R_freeze_PROPOSED.sql >/dev/null
+expect "freeze still stops everyone" "$(cm $G1)" f
+q -f sql/2026-10_patient_management_A_transition_list_PROPOSED.sql >/dev/null
+expect "undo with Part A alone would ignore the deadline (documented: re-run the access file too)" "$(cm $G4)" t
+q -f $EA >/dev/null
+expect "after re-running the access file the deadline applies again" "$(cm $G4)/$(cm $G1)" "f/t"
+
+q -c "insert into auth.users (id) values ('70000000-0000-0000-0000-000000000005'); update profiles set professional_status = 'verified' where id = '70000000-0000-0000-0000-000000000005'" >/dev/null
+expect "backfill: preview lists only verified accounts without an approved document" "$(q -c "select count(*) from profiles p where p.professional_status = 'verified' and not exists (select 1 from professional_verification_requests r where r.user_id = p.id and r.status = 'verified') and not exists (select 1 from professional_evidence_deadlines d where d.user_id = p.id)")" 1
+q -f $EB >/dev/null
+expect "backfill adds a 60-day deadline to the new legacy account" "$(q -c "select round(extract(epoch from due_at - now()) / 86400) from professional_evidence_deadlines where user_id = '70000000-0000-0000-0000-000000000005'")" 60
+expect "backfill leaves existing deadlines as they were" "$(q -c "select count(*) from professional_evidence_deadlines where due_at < now()")" 3
+expect "backfill skips accounts with an approved document" "$(q -c "select count(*) from professional_evidence_deadlines d join professional_verification_requests r on r.user_id = d.user_id and r.status = 'verified' where d.added_at > now() - interval '1 minute'")" 0
+expect "re-running the backfill adds nobody twice" "$(q -f $EB >/dev/null; q -c "select count(*) from professional_evidence_deadlines")" 5
+expect "the new account keeps access until its deadline" "$(cm 70000000-0000-0000-0000-000000000005)" t
+
+echo "  rollbacks"
+expect "the evidence rollback refuses while requests exist" "$(runs "$(block $EV)")" refused
+expect "after the refused rollback requests, history and deadlines are intact" "$(q -c "select (select count(*) > 0 from professional_verification_requests) and (select count(*) > 0 from professional_verification_reviews) and (select count(*) = 5 from professional_evidence_deadlines)")" t
+expect "deleting an account removes its requests, history and deadline (cascade)" "$(q -c "delete from auth.users where id = '$G2'" >/dev/null; q -c "select (select count(*) from professional_verification_requests where user_id = '$G2') + (select count(*) from professional_verification_reviews where user_id = '$G2') + (select count(*) from professional_evidence_deadlines where user_id = '$G2')")" 0
+q -f sql/2026-10_patient_management_A_transition_list_PROPOSED.sql >/dev/null
+expect "access rollback (re-run Part A) restores the earlier rule" "$(cm $G4)" t
+q -f $EA >/dev/null
+
 psql -q -d postgres -c "drop database $DB" >/dev/null
 [ $fail = 0 ] && echo "ALL SQL CHECKS PASSED" || { echo "SOME SQL CHECKS FAILED"; exit 1; }

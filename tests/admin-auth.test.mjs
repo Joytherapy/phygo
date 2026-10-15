@@ -10,6 +10,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { startFakeSupabase, sessionCookie } from './support/fake-supabase.mjs';
+import { verificationRpc } from './support/verification-rpc.mjs';
 import { startApp } from './support/app.mjs';
 
 const FAKE_PORT = Number(process.env.FAKE_SUPABASE_PORT ?? 54329);
@@ -53,6 +54,7 @@ let app;
 before(async () => {
   fake = await startFakeSupabase({
     port: FAKE_PORT,
+    rpc: verificationRpc,
     users: Object.fromEntries(Object.entries(people).map(([k, u]) => [`tok-${k}`, u])),
     tables: {
       profiles: [
@@ -124,7 +126,7 @@ test('a signed-in administrator keeps working, and decisions carry their identit
   for (const path of ['/api/library/admin', '/api/events/admin']) {
     assert.ok(![401, 403].includes((await call('GET', path, { who: 'admin' })).status), `GET ${path}`);
   }
-  const decision = await call('POST', '/api/admin/verification', { who: 'admin', body: { userId: people.applicant.id, decision: 'needs_info', message: 'Please add the register name.' } });
+  const decision = await call('POST', '/api/admin/verification', { who: 'admin', body: { userId: people.applicant.id, requestId: null, decision: 'needs_info', message: 'Please add the register name.' } });
   assert.equal(decision.status, 200);
   const applicant = fake.state.tables.profiles.find((p) => p.id === people.applicant.id);
   assert.equal(applicant.professional_status, 'needs_info');

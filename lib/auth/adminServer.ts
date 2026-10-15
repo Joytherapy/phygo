@@ -20,9 +20,9 @@ import { timingSafeEqual } from 'crypto'
 //   PHYGO_ADMIN_API_TOKEN   optional bearer token for local maintenance
 //                           scripts (seed-*.js, link-*.js, tag-zones.js)
 //
-// The professional verification console is stricter:
+// Professional verification (the console, decisions and documents) is stricter:
 // requireAdminSession() accepts only a signed-in administrator, never a
-// token, so every decision has a person behind it.
+// token, so every decision and every document opened has a person behind it.
 //
 // Fails closed: if none of these are configured, nobody is an admin.
 

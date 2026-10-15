@@ -276,10 +276,12 @@ export default function ProfilePage() {
           {/* Only the badge next to the photo by default: students never see the
               card (verification is for qualified physiotherapists), and once
               verified it collapses into the badge, which reopens it. A student
-              who switches to professional sees it right away. */}
+              who switches to professional sees it right away. A verified
+              account stays open while it must send its document (deadline)
+              or while its document is being checked. */}
           <ProfessionalVerificationCard
             onChange={setVerification}
-            hidden={practiceStage === 'student' || (verification?.status === 'verified' && !showVerification)}
+            hidden={practiceStage === 'student' || (verification?.status === 'verified' && !verification.evidenceDueAt && !verification.openRequest && !showVerification)}
           />
 
           <div>

@@ -10,23 +10,31 @@
 // in.(...), order=<col>.asc|desc, offset/limit, single/maybeSingle (Accept
 // header), insert/update/upsert/delete on simple tables, and primary-key
 // conflicts (23505) for the tables listed in `primaryKeys`.
+// Database functions (POST /rest/v1/rpc/<name>) are answered by the `rpc`
+// handlers given by the test: (args, state) => result, or throw
+// { message } for a database error (PostgREST answers 400 with it).
+// /__control/fail?table=rpc:<name> makes a function fail as a server error.
 import http from 'node:http';
 
-export async function startFakeSupabase({ port, tables = {}, users = {}, primaryKeys = { ask_phygo_usage: 'ip' } }) {
+export async function startFakeSupabase({ port, tables = {}, users = {}, primaryKeys = { ask_phygo_usage: 'ip' }, rpc = {} }) {
   const state = {
     tables: structuredClone(tables),
     users, // access token -> user object
     requests: [],
     failTables: new Set(), // tables that answer 500 (to test error handling)
+    storage: new Map(), // "bucket/path" -> { bucket, path, size, contentType, cacheControl, bytes }
+    downloads: [], // { bucket, path, search, auth } for every object download
+    signRequests: [], // { bucket, path, expiresIn } for every signed URL issued
   };
 
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, `http://127.0.0.1:${port}`);
-    const body = await new Promise((resolve) => {
-      let b = '';
-      req.on('data', (c) => (b += c));
-      req.on('end', () => resolve(b));
+    const raw = await new Promise((resolve) => {
+      const chunks = [];
+      req.on('data', (c) => chunks.push(c));
+      req.on('end', () => resolve(Buffer.concat(chunks)));
     });
+    const body = raw.toString();
     state.requests.push({ method: req.method, path: url.pathname, search: url.search, auth: req.headers.authorization ?? null });
     // Browser pages (Playwright checks) call Supabase directly from another origin.
     const cors = {
@@ -60,6 +68,52 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     }
     if (url.pathname.startsWith('/auth/v1/')) return send(401, { msg: 'not supported in tests' });
 
+    // Storage: one signed URL for one object (createSignedUrl).
+    const signOne = url.pathname.match(/^\/storage\/v1\/object\/sign\/([^/]+)\/(.+)$/);
+    if (signOne && req.method === 'POST') {
+      const [, bucket, path] = signOne;
+      const { expiresIn } = JSON.parse(body || '{}');
+      if (!state.storage.has(`${bucket}/${path}`)) return send(400, { statusCode: '404', error: 'not_found', message: 'Object not found' });
+      state.signRequests.push({ bucket, path, expiresIn });
+      return send(200, { signedURL: `/object/sign/${bucket}/${path}?token=test` });
+    }
+    // Storage: list a folder (POST /object/list/<bucket> with { prefix, search }).
+    const list = url.pathname.match(/^\/storage\/v1\/object\/list\/([^/]+)$/);
+    if (list && req.method === 'POST') {
+      const { prefix = '', search = '' } = JSON.parse(body || '{}');
+      const folder = prefix ? `${list[1]}/${prefix.replace(/\/$/, '')}/` : `${list[1]}/`;
+      const names = [...state.storage.keys()]
+        .filter((k) => k.startsWith(folder) && !k.slice(folder.length).includes('/'))
+        .map((k) => k.slice(folder.length))
+        .filter((name) => name.includes(search));
+      return send(200, names.map((name) => ({ name, id: name })));
+    }
+    // Storage: upload (createBucket is not supported; buckets are implicit).
+    const object = url.pathname.match(/^\/storage\/v1\/object\/([^/]+)\/(.+)$/);
+    if (object && (req.method === 'POST' || req.method === 'PUT') && object[1] !== 'sign') {
+      const [, bucket, path] = object;
+      const key = `${bucket}/${path}`;
+      if (state.storage.has(key) && req.headers['x-upsert'] !== 'true') return send(400, { statusCode: '409', error: 'Duplicate', message: 'The resource already exists' });
+      state.storage.set(key, { bucket, path, size: raw.length, contentType: req.headers['content-type'] ?? null, cacheControl: req.headers['cache-control'] ?? null, bytes: raw });
+      return send(200, { Key: key });
+    }
+    // Storage: download an object with the service key (GET /object/<bucket>/<path>).
+    if (object && req.method === 'GET' && !['sign', 'list', 'public', 'authenticated'].includes(object[1])) {
+      const [, bucket, path] = object;
+      state.downloads.push({ bucket, path, search: url.search, auth: req.headers.authorization ?? null });
+      const stored = state.storage.get(`${bucket}/${decodeURIComponent(path)}`);
+      if (!stored) return send(400, { statusCode: '404', error: 'not_found', message: 'Object not found' });
+      res.writeHead(200, { 'content-type': stored.contentType ?? 'application/octet-stream', ...cors });
+      return res.end(stored.bytes ?? Buffer.alloc(0));
+    }
+    // Storage: remove (DELETE /object/<bucket> with { prefixes }).
+    const removeObjects = url.pathname.match(/^\/storage\/v1\/object\/([^/]+)$/);
+    if (removeObjects && req.method === 'DELETE') {
+      const { prefixes = [] } = JSON.parse(body || '{}');
+      const removed = prefixes.filter((p) => state.storage.delete(`${removeObjects[1]}/${p}`)).map((name) => ({ name }));
+      return send(200, removed);
+    }
+
     // Storage: signed URLs for private buckets.
     const sign = url.pathname.match(/^\/storage\/v1\/object\/sign\/([^/]+)$/);
     if (sign && req.method === 'POST') {
@@ -77,6 +131,17 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     if (url.pathname === '/daily/v1/rooms' && req.method === 'POST') {
       const { name } = JSON.parse(body || '{}');
       return send(200, { name, url: `https://test.invalid/${name}` });
+    }
+
+    const fn = url.pathname.match(/^\/rest\/v1\/rpc\/([a-z_]+)$/);
+    if (fn && req.method === 'POST') {
+      if (state.failTables.has(`rpc:${fn[1]}`)) return send(500, { message: `simulated failure on ${fn[1]}`, code: 'XX000' });
+      if (!rpc[fn[1]]) return send(404, { code: 'PGRST202', message: `function ${fn[1]} not found` });
+      try {
+        return send(200, rpc[fn[1]](JSON.parse(body || '{}'), state) ?? null);
+      } catch (e) {
+        return send(400, { code: 'P0001', message: e.message });
+      }
     }
 
     const rest = url.pathname.match(/^\/rest\/v1\/([a-z_]+)$/);
@@ -104,8 +169,16 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
       let out = rows.filter(match);
       const order = url.searchParams.get('order');
       if (order) {
-        const [col, dir] = order.split('.');
-        out = [...out].sort((a, b) => (a[col] < b[col] ? -1 : a[col] > b[col] ? 1 : 0) * (dir === 'desc' ? -1 : 1));
+        // order=a.desc,b.asc: compare column by column, as PostgREST does.
+        const keys = order.split(',').map((k) => k.split('.'));
+        const cmp = (a, b) => {
+          for (const [col, dir] of keys) {
+            const c = (a[col] < b[col] ? -1 : a[col] > b[col] ? 1 : 0) * (dir === 'desc' ? -1 : 1);
+            if (c) return c;
+          }
+          return 0;
+        };
+        out = [...out].sort(cmp);
       }
       const offset = Number(url.searchParams.get('offset') ?? 0);
       const limit = url.searchParams.has('limit') ? Number(url.searchParams.get('limit')) : 1000; // PostgREST max-rows

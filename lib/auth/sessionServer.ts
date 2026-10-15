@@ -7,7 +7,8 @@
 //   Patient accounts (a row in patients.patient_user_id) and student accounts
 //   (profiles.practice_stage) are refused, mirroring middleware.ts.
 // - requireVerifiedProfessional(): a professional whose registration PHYGO
-//   has verified (profiles.professional_status = 'verified'), or a listed
+//   has verified (profiles.professional_status = 'verified') and whose
+//   evidence deadline, if any, has not passed unconfirmed; or a listed
 //   pre-existing account during the bounded transition (see below).
 //
 // Lookups use the caller's own session (anon key + cookie), so Row Level
@@ -141,10 +142,57 @@ export async function transitionUntilFor(
  * The same rule decides patient management in the database (can_manage_patients()).
  * Patients and students are refused before any of this (requireProfessional).
  */
+export type EvidenceDeadline = { dueAt: string; satisfied: boolean; overdue: boolean };
+
+/**
+ * The account's deadline to send its registration document, if it was
+ * verified before documents were required (table
+ * professional_evidence_deadlines, sql/2026-10_verification_evidence_PROPOSED.sql;
+ * rows are added only by the owner's backfill). Users can read only their own
+ * row. Returns null when there is none, or "error" when it cannot be read
+ * (callers fail closed). The database applies the same rule to patient records
+ * (sql/2026-10_verification_evidence_access_PROPOSED.sql).
+ */
+export async function evidenceDeadlineFor(supabase: SupabaseClient, userId: string): Promise<EvidenceDeadline | null | "error"> {
+  const { data, error } = await supabase
+    .from("professional_evidence_deadlines")
+    .select("due_at, satisfied_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) {
+    console.error("evidence deadline lookup failed:", error.message);
+    return "error";
+  }
+  if (!data?.due_at) return null;
+  const due = new Date(data.due_at);
+  if (Number.isNaN(due.getTime())) return "error";
+  const satisfied = !!data.satisfied_at;
+  return { dueAt: due.toISOString(), satisfied, overdue: !satisfied && due.getTime() <= Date.now() };
+}
+
 export async function requireVerifiedProfessional(): Promise<Gate> {
   const gate = await requireProfessional();
   if (!gate.ok) return gate;
-  if (gate.professionalStatus === "verified") return gate;
+  if (gate.professionalStatus === "verified") {
+    // Verified before documents were required, and the deadline has passed
+    // without a confirmed document: clinical functions stop, data stays.
+    const deadline = await evidenceDeadlineFor(gate.supabase, gate.user.id);
+    if (deadline === "error") return { ok: false, response: unavailable() };
+    if (!deadline?.overdue) return gate;
+    return {
+      ok: false,
+      response: NextResponse.json(
+        {
+          error: "Registration document required",
+          message: "The deadline to send your registration document has passed. Send it from your profile; once a PHYGO administrator confirms it, this feature is unlocked again. Your data has not been deleted.",
+          code: "verification_evidence_overdue",
+          verificationStatus: gate.professionalStatus,
+          evidenceDueAt: deadline.dueAt,
+        },
+        { status: 403 },
+      ),
+    };
+  }
   const until = await transitionUntilFor(gate.supabase, gate.user.id, gate.professionalStatus);
   if (until === "error") return { ok: false, response: unavailable() };
   if (until) {
