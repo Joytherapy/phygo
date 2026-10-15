@@ -2,6 +2,20 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // Without Supabase (Vercel Previews have no Production variables, by
+  // design) creating the client throws and every page, the landing page
+  // included, answered 500 MIDDLEWARE_INVOCATION_FAILED. Public pages are
+  // served as they are; the dashboard still requires a session, so it goes
+  // to the login page. With the variables set (Production) nothing changes.
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    if (request.nextUrl.pathname.startsWith('/dashboard')) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+    return NextResponse.next()
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
