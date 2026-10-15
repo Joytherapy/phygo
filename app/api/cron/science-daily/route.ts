@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { hasCronSecret } from '@/lib/auth/adminServer';
+import { step } from '@/lib/scienceCron';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,14 +17,16 @@ export async function GET(req: Request) {
   // and are the only admin routes that accept CRON_SECRET ({ allowCron: true }).
   const headers = { authorization: `Bearer ${process.env.CRON_SECRET}` };
 
-  const fetchRes = await fetch(`${origin}/api/science/fetch-sources`, { headers });
-  const fetchData = await fetchRes.json();
+  const fetchStep = await step(`${origin}/api/science/fetch-sources`, headers);
+  const summarizeStep = await step(`${origin}/api/science/summarize-all`, headers);
 
-  const summarizeRes = await fetch(`${origin}/api/science/summarize-all`, { headers });
-  const summarizeData = await summarizeRes.json();
-
-  return NextResponse.json({
-    fetch: fetchData,
-    summarize: summarizeData,
-  });
+  // Same shape as before when both succeed; a failed step makes the cron
+  // answer 502, so the run shows as failed in Vercel.
+  return NextResponse.json(
+    {
+      fetch: fetchStep.ok ? fetchStep.data : fetchStep,
+      summarize: summarizeStep.ok ? summarizeStep.data : summarizeStep,
+    },
+    { status: fetchStep.ok && summarizeStep.ok ? 200 : 502 },
+  );
 }
