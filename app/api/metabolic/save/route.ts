@@ -152,7 +152,8 @@ export async function POST(req: Request) {
       .single();
 
     if (error) {
-      console.error('metabolic save error:', error);
+      // Code and message only: a constraint error's details repeat the row (weight, notes, patient).
+      console.error('metabolic save error:', error.code, error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -174,7 +175,7 @@ export async function POST(req: Request) {
         },
       });
       if (refError) {
-        console.error('metabolic clinical reference insert error:', refError);
+        console.error('metabolic clinical reference insert error:', refError.code, refError.message);
       }
     }
 
@@ -221,7 +222,7 @@ export async function GET(req: Request) {
 
     const { data, error } = await query;
     if (error) {
-      console.error('metabolic history error:', error);
+      console.error('metabolic history error:', error.code, error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
