@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ownsPatient, requireVerifiedProfessional } from '@/lib/auth/sessionServer'
 import { consumeHourly, HOURLY_LIMITS, limitResponse } from '@/lib/rateLimit'
 import { serviceClient } from '@/lib/verification'
-import { DAILY_API, dailyHeaders, roomProperties } from '@/lib/videoCall'
+import { DAILY_API, dailyHeaders, ROOM_NAME, roomNameFor, roomProperties } from '@/lib/videoCall'
 
 // Creates a private Daily room for one of the signed-in clinician's own
 // patients, and records the call on the server (video_calls), so the room a
@@ -34,9 +34,11 @@ export async function POST(req: NextRequest) {
     const limited = limitResponse(await consumeHourly(`ai:video-room:${gate.user.id}`, HOURLY_LIMITS.videoRoom))
     if (limited) return limited
 
-    // A random name: Daily never receives the patient's id, and the room URL
-    // cannot be guessed from anything we know.
-    const roomName = `phygo-${randomUUID()}`
+    // The call id is chosen here and the room is named after it with a keyed
+    // hash (lib/videoCall.ts): Daily never receives the patient's id, the URL
+    // cannot be guessed, and a row naming another call's room gets no token.
+    const callId = randomUUID()
+    const roomName = roomNameFor(callId)
 
     const res = await fetch(`${DAILY_API}/rooms`, {
       method: 'POST',
@@ -50,9 +52,23 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await res.json()
+    // A new call replaces any earlier active one for this patient (a call left
+    // with Daily's own Leave button, a closed tab, or an old public room), so a
+    // stale row never hides the new call.
+    const { data: previous } = await db
+      .from('video_calls')
+      .update({ status: 'ended', ended_at: new Date().toISOString() })
+      .eq('patient_id', patientId)
+      .eq('status', 'active')
+      .select('room_name')
+    for (const p of previous ?? []) {
+      if (ROOM_NAME.test(p.room_name ?? '')) {
+        await fetch(`${DAILY_API}/rooms/${encodeURIComponent(p.room_name)}`, { method: 'DELETE', headers: dailyHeaders() }).catch(() => {})
+      }
+    }
     const { data: call, error } = await db
       .from('video_calls')
-      .insert({ patient_id: patientId, room_url: data.url, room_name: data.name, created_by: gate.user.id, status: 'active' })
+      .insert({ id: callId, patient_id: patientId, room_url: data.url, room_name: data.name, created_by: gate.user.id, status: 'active' })
       .select('id, room_url, status')
       .single()
     if (error || !call) {

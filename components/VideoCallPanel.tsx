@@ -33,13 +33,13 @@ function DailyFrame({ session, onLeft }: { session: Session; onLeft: () => void 
     ;(async () => {
       const { default: DailyIframe } = await import('@daily-co/daily-js')
       if (cancelled || !container.current) return
-      const f = DailyIframe.createFrame(container.current, {
-        iframeStyle: { width: '100%', height: '100%', border: '0' },
-        showLeaveButton: true,
-      })
-      frame = f
-      f.on('left-meeting', onLeft)
       try {
+        const f = DailyIframe.createFrame(container.current, {
+          iframeStyle: { width: '100%', height: '100%', border: '0' },
+          showLeaveButton: true,
+        })
+        frame = f
+        f.on('left-meeting', onLeft)
         await f.join({ url: session.url, token: session.token })
       } catch {
         onLeft()
@@ -76,6 +76,10 @@ export default function VideoCallPanel({
       .select('id, room_url, status')
       .eq('patient_id', patientId)
       .eq('status', 'active')
+      // Only a call that can still be joined: rooms last one hour, and old
+      // public rooms (session-…) are never reopened.
+      .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
+      .like('room_name', 'phygo-%')
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()

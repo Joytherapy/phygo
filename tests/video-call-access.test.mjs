@@ -13,6 +13,7 @@
 // Synthetic people and patients only, against the fake Supabase and the
 // Daily stand-in; the network guard refuses any real host.
 import { test, before, after } from 'node:test';
+import { createHmac } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { startFakeSupabase, sessionCookie } from './support/fake-supabase.mjs';
 import { startApp } from './support/app.mjs';
@@ -28,7 +29,10 @@ const people = {
   patientTwo: person('p2@test.invalid'), // My Phygo account of P2 (same clinician as P1)
 };
 const P = (k) => `0d200000-0000-4000-8000-00000000000${k}`;
-const NAME = /^phygo-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const NAME = /^phygo-[0-9a-f]{32}$/;
+const DAILY_KEY = 'test-daily-key-never-sent';
+// The server's rule (lib/videoCall.ts roomNameFor): the room is named after the call id with a keyed hash.
+const roomNameFor = (callId) => `phygo-${createHmac('sha256', DAILY_KEY).update(`phygo-room:${callId}`).digest('hex').slice(0, 32)}`;
 const pro = (who, status) => ({ id: people[who].id, practice_stage: 'professional', professional_status: status, plan: 'free', display_name: who });
 
 let fake;
@@ -54,7 +58,7 @@ before(async () => {
       ask_phygo_usage: [],
     },
   });
-  app = await startApp({ fakeUrl: fake.url, port: 3435, env: { DAILY_API_KEY: 'test-daily-key-never-sent' } });
+  app = await startApp({ fakeUrl: fake.url, port: 3435, env: { DAILY_API_KEY: DAILY_KEY } });
 });
 after(async () => {
   await app?.stop();
@@ -75,7 +79,8 @@ const start = async (who, patientId) => {
   return (await res.json()).call;
 };
 const addCall = (patientId, fields = {}) => {
-  const row = { id: crypto.randomUUID(), patient_id: patientId, room_name: `phygo-${crypto.randomUUID()}`, status: 'active', created_at: new Date().toISOString(), ...fields };
+  const id = crypto.randomUUID();
+  const row = { id, patient_id: patientId, room_name: roomNameFor(id), status: 'active', created_at: new Date().toISOString(), ...fields };
   row.room_url ??= `https://test.invalid/${row.room_name}`;
   fake.state.tables.video_calls.push(row);
   return row;
@@ -94,6 +99,7 @@ test('a new room is private, for two people, closed at expiry, and recorded by t
   const ttl = room.properties.exp - Date.now() / 1000;
   assert.ok(ttl > 3500 && ttl <= 3600, `room open for one hour (${ttl}s)`);
   assert.match(room.name, NAME);
+  assert.equal(room.name, roomNameFor(callP1.id), 'the room is bound to this call');
   assert.ok(!JSON.stringify(room).includes(P(1)) && !JSON.stringify(callP1).includes(P(1)), 'no patient id in the room or its URL');
   const row = fake.state.tables.video_calls.find((c) => c.id === callP1.id);
   assert.equal(row.room_name, room.name, 'the call is recorded with the room the server created');
@@ -202,4 +208,30 @@ test('ending a call: only its clinician; then no token for anyone, and the room 
   assert.equal((await token('physioA', callP1.id)).status, 410);
   assert.equal((await token('patientOne', callP1.id)).status, 410);
   assert.equal(tokensIssued(), before);
+});
+
+test('a row naming another call\'s room gets no token (clinicians can still write video_calls from the browser)', async () => {
+  // Physio B learns the name of a live room of physio A and records it on their own patient.
+  const victim = addCall(P(2));
+  const forged = addCall(P(3), { room_name: victim.room_name, room_url: victim.room_url });
+  const before = tokensIssued();
+  assert.equal((await token('physioB', forged.id)).status, 410, 'the room does not belong to this call id');
+  const wrongUrl = addCall(P(3));
+  wrongUrl.room_url = `https://test.invalid/${victim.room_name}`;
+  assert.equal((await token('physioB', wrongUrl.id)).status, 410, 'the URL must be the call\'s own room');
+  assert.equal(tokensIssued(), before, 'Daily was not asked for a token');
+});
+
+test('a stale call never blocks the clinician: it can be ended, and a new call replaces it', async () => {
+  const stale = addCall(P(1), { created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString() });
+  const legacy = addCall(P(1), { room_name: `session-${P(1)}-1791880000000` });
+  assert.equal((await token('physioA', stale.id)).status, 410, 'no token for it');
+  assert.equal((await post('/api/video-call/end', 'physioA', { callId: stale.id })).status, 200, 'but the clinician can end it');
+  assert.equal(fake.state.tables.video_calls.find((c) => c.id === stale.id).status, 'ended');
+  assert.ok(!fake.state.daily.deleted.includes(legacy.room_name));
+  const fresh = await start('physioA', P(1));
+  assert.equal(fake.state.tables.video_calls.find((c) => c.id === legacy.id).status, 'ended', 'starting a call ends the older active ones');
+  const active = fake.state.tables.video_calls.filter((c) => c.patient_id === P(1) && c.status === 'active');
+  assert.deepEqual(active.map((c) => c.id), [fresh.id], 'one active call per patient');
+  assert.equal((await post('/api/video-call/end', 'patientOne', { callId: fresh.id })).status, 403, 'the patient still cannot end it');
 });
