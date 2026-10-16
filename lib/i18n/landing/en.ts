@@ -90,6 +90,7 @@ export const en: LandingDict = {
     cta: 'Start free as a student',
     ctaNote: 'Choose “Student” when you set up your account. Patient tools and AI session notes are for professional accounts; you can switch once you are qualified.',
     caption: 'Real PHYGO screens; workspace items are sample content.',
+    modelCredit: '3D models',
   },
   physiotherapists: {
     eyebrow: 'For physiotherapists',

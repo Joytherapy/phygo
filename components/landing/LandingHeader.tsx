@@ -130,7 +130,7 @@ export default function LandingHeader({
           PHYGO
         </a>
 
-        <nav className="hidden lg:block">
+        <nav className="hidden xl:block">
           <ul className="flex items-center gap-0.5 xl:gap-1">
             {links.map((l) => (
               <li key={l.href}>
@@ -194,7 +194,7 @@ export default function LandingHeader({
 
           <a
             href={loginHref(lang)}
-            className="hidden lg:inline-flex whitespace-nowrap rounded-full px-3 py-2 text-[13.5px] font-medium text-ink/70 transition-colors hover:text-ink dark:text-white/65 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+            className="hidden xl:inline-flex whitespace-nowrap rounded-full px-3 py-2 text-[13.5px] font-medium text-ink/70 transition-colors hover:text-ink dark:text-white/65 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
           >
             {nav.login}
           </a>
@@ -211,7 +211,7 @@ export default function LandingHeader({
             aria-expanded={menuOpen}
             aria-controls="landing-mobile-menu"
             aria-label={menuOpen ? nav.closeMenu : nav.openMenu}
-            className="flex lg:hidden h-10 w-10 items-center justify-center rounded-full text-ink dark:text-white hover:bg-ink/[0.05] dark:hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+            className="flex xl:hidden h-10 w-10 items-center justify-center rounded-full text-ink dark:text-white hover:bg-ink/[0.05] dark:hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
           >
             {menuOpen ? <X size={20} aria-hidden /> : <Menu size={20} aria-hidden />}
           </button>
@@ -226,7 +226,7 @@ export default function LandingHeader({
             animate={{ opacity: 1, height: "calc(100dvh - 4rem)" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: EASE }}
-            className="lg:hidden overflow-y-auto border-t border-black/[0.06] dark:border-white/[0.07]"
+            className="xl:hidden overflow-y-auto border-t border-black/[0.06] dark:border-white/[0.07]"
           >
             <nav className="px-4 pb-10 pt-4">
               <ul className="divide-y divide-black/[0.06] dark:divide-white/[0.07]">

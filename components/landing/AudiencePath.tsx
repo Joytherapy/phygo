@@ -20,6 +20,7 @@ export default function AudiencePath({
   extras,
   ctaHref,
   footer,
+  credits,
 }: {
   id: "students" | "physiotherapists";
   path: PathDict;
@@ -29,6 +30,8 @@ export default function AudiencePath({
   ctaHref: string;
   /** Extra content under the extras list (e.g. a library link). */
   footer?: ReactNode;
+  /** Attribution shown under the caption (e.g. licensed 3D models). */
+  credits?: ReactNode;
 }) {
   const [active, setActive] = useState(0);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -123,12 +126,15 @@ export default function AudiencePath({
                 shot={shots[i]}
                 alt={step.alt}
                 sizes="(min-width: 1152px) 640px, (min-width: 1024px) 56vw, 100vw"
-                className={shots[i].width < 700 ? "mx-auto max-w-[520px]" : ""}
+                className={shots[i].height > shots[i].width ? "mx-auto max-w-[400px]" : shots[i].width < 700 ? "mx-auto max-w-[520px]" : ""}
               />
             </div>
           ))}
         </div>
-        <p className="mt-4 text-[13px] text-ink/60 dark:text-white/60 lg:text-right">{path.caption}</p>
+        <p className="mt-4 text-[13px] leading-relaxed text-ink/60 dark:text-white/60 lg:text-right">
+          {path.caption}
+          {credits && <span className="block">{credits}</span>}
+        </p>
 
         <div className="mt-10 grid grid-cols-1 gap-8 rounded-2xl border border-black/[0.08] bg-white p-6 dark:border-white/[0.08] dark:bg-white/[0.03] sm:p-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:gap-12">
           <div className="min-w-0">

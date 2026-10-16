@@ -92,6 +92,7 @@ export const fr: LandingDict = {
     cta: 'Commencer en tant qu’étudiant',
     ctaNote: 'Choisissez « Étudiant » lors de la configuration du compte. Les outils patients et les notes de séance avec IA sont réservés aux comptes professionnels ; vous pourrez basculer une fois diplômé.',
     caption: 'Écrans réels de PHYGO ; les contenus du workspace sont des exemples.',
+    modelCredit: 'Modèles 3D',
   },
   physiotherapists: {
     eyebrow: 'Pour les kinésithérapeutes',

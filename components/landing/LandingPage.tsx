@@ -61,6 +61,22 @@ export default async function LandingPage({ lang }: { lang: AppLang }) {
             shots={shots.students}
             extras={[...figureItems, ...t.students.extras]}
             ctaHref={signup}
+            credits={
+              <>
+                {t.students.modelCredit}: TurboSquid #1398841 (Standard License) ·{" "}
+                <a href="https://sketchfab.com/3d-models/human-brain-c9c9d4d671b94345952d012cc2ea7a24" className="underline underline-offset-2 hover:text-ink dark:hover:text-white">
+                  “Human Brain”
+                </a>{" "}
+                (
+                <a href="https://sketchfab.com/agher08" className="underline underline-offset-2 hover:text-ink dark:hover:text-white">
+                  agher08
+                </a>
+                ),{" "}
+                <a href="https://creativecommons.org/licenses/by/4.0/" className="underline underline-offset-2 hover:text-ink dark:hover:text-white">
+                  CC BY 4.0
+                </a>
+              </>
+            }
             footer={
               <div className="mt-5">
                 <p className="text-[13px] leading-relaxed text-ink/60 dark:text-white/60">{f.translationNote}</p>

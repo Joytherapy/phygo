@@ -45,7 +45,7 @@ export default function Hero({
               shot={bodymap}
               alt={hero.secondImageAlt}
               sizes="(min-width: 640px) 170px, 120px"
-              className="absolute bottom-0 left-0 w-[30%] max-w-[180px] ring-4 ring-[#f7f8fa] dark:ring-[#0a0e17]"
+              className="absolute bottom-0 left-0 w-[26%] max-w-[160px] ring-4 ring-[#f7f8fa] dark:ring-[#0a0e17]"
             />
           </div>
           <figcaption className="mt-3 text-[13px] leading-snug text-ink/60 dark:text-white/60">{hero.caption}</figcaption>

@@ -65,7 +65,7 @@ export interface LandingDict {
     choose: string;
     paths: { students: { title: string; text: string; link: string }; physiotherapists: { title: string; text: string; link: string } };
   };
-  students: AudiencePath;
+  students: AudiencePath & { /** Prefix of the 3D model credits under the student screens. */ modelCredit: string };
   physiotherapists: AudiencePath & {
     /** Added to the extras only when video calls are configured (DAILY_API_KEY). */
     videoItem: string;
