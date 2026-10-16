@@ -19,7 +19,7 @@ export default function PricingSection({
 
         <div className="mt-12 grid grid-cols-1 overflow-hidden rounded-2xl border border-black/[0.08] bg-white dark:border-white/[0.1] dark:bg-white/[0.03] lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
           <div className="min-w-0 p-6 sm:p-8">
-            <p className="text-[13px] font-semibold text-emerald-dark dark:text-emerald">{free.label}</p>
+            <p className="text-[13px] font-semibold text-[#0f7a5c] dark:text-emerald">{free.label}</p>
             <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
               <h3 className="font-display text-2xl font-semibold text-ink dark:text-white">{free.name}</h3>
               <p className="font-display text-2xl font-semibold text-ink/60 dark:text-white/60">{free.price}</p>

@@ -63,7 +63,7 @@ export const it: LandingDict = {
         alt: 'Mappa corporea 3D di PHYGO: un modello anatomico del corpo intero con la ricerca per zona e l’interruttore raggi X',
       },
       {
-        label: 'Neuroanatomia',
+        label: 'Neuro\u00adanatomia', // soft hyphen: fits the 2-column tabs at 320px
         title: 'Cervello, nervi e circuiti',
         text: 'Un cervello in 3D con le strutture profonde, più nervi periferici e circuiti neurali, collegati alle condizioni neurologiche della libreria.',
         alt: 'Mappa cerebrale di PHYGO: un modello 3D rotante del cervello umano',

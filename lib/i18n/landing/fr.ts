@@ -65,7 +65,7 @@ export const fr: LandingDict = {
         alt: 'Carte du corps 3D de PHYGO : un modèle anatomique du corps entier avec une recherche par zone et un bouton rayons X',
       },
       {
-        label: 'Neuroanatomie',
+        label: 'Neuro\u00adanatomie', // soft hyphen: fits the 2-column tabs at 320px
         title: 'Cerveau, nerfs et circuits',
         text: 'Un cerveau en 3D avec ses structures profondes, ainsi que les nerfs périphériques et les circuits neuronaux, reliés aux pathologies neurologiques de la bibliothèque.',
         alt: 'Carte du cerveau de PHYGO : un modèle 3D rotatif du cerveau humain',

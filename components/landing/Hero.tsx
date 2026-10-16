@@ -27,7 +27,7 @@ export default function Hero({
           <p className="text-[13px] font-semibold tracking-wide text-electric-dark dark:text-electric-light">{hero.eyebrow}</p>
           <h1
             id="hero-title"
-            className="mt-4 text-balance font-display text-[2rem] font-semibold leading-[1.12] tracking-[-0.025em] text-ink dark:text-white sm:text-[2.6rem] lg:text-[2.75rem]"
+            className="mt-4 text-balance font-display text-[1.75rem] font-semibold leading-[1.15] tracking-[-0.025em] text-ink dark:text-white sm:text-[2.6rem] lg:text-[2.75rem]"
           >
             {hero.title}
           </h1>

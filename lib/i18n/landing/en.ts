@@ -63,7 +63,7 @@ export const en: LandingDict = {
         alt: 'PHYGO 3D body map: an anatomical model of the whole body with a zone search field and an X-ray switch',
       },
       {
-        label: 'Neuroanatomy',
+        label: 'Neuro\u00adanatomy', // soft hyphen: fits the 2-column tabs at 320px
         title: 'Brain, nerves and circuits',
         text: 'A 3D brain with its deep structures, plus peripheral nerves and neural circuits, linked to the neurological conditions in the library.',
         alt: 'PHYGO brain map: a rotating 3D model of the human brain',

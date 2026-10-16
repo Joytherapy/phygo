@@ -55,6 +55,8 @@ export default async function LandingPage({ lang }: { lang: AppLang }) {
         <LandingHeader lang={lang} nav={t.nav} libraryHref={libraryHref} />
         <main id="main-content">
           <Hero hero={t.hero} signup={signup} draft={shots.draft} bodymap={shots.bodymap} />
+          {/* "Platform" in the shared app navbar (components/Navbar.tsx) points at /#features. */}
+          <div id="features" className="scroll-mt-16" />
           <AudiencePath
             id="students"
             path={t.students}
