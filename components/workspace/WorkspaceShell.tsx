@@ -1,7 +1,9 @@
 'use client'
 
+import { AlertCircle, X } from 'lucide-react'
 import Navbar from '@/components/Navbar'
-import WorkspaceSidebar from './WorkspaceSidebar'
+import WorkspaceSidebar, { WorkspaceMobileNav } from './WorkspaceSidebar'
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
 
 // The calmer, "study environment" shell for every /dashboard/workspace/*
 // page — same PHYGO chrome (Navbar, color tokens) as the rest of the
@@ -35,13 +37,20 @@ import WorkspaceSidebar from './WorkspaceSidebar'
 // the dashboard are completely unaffected. No portals are used anywhere in
 // the Workspace component tree (menus/dialogs all render inline, verified
 // via grep), so every dropdown, color picker and dialog inherits this too.
+// actionError: a failed rename/star/delete/restore (see
+// lib/workspace/useWorkspaceMutation.ts), shown above the page content.
 export default function WorkspaceShell({
   children,
   fullscreen = false,
+  actionError = null,
+  onDismissActionError,
 }: {
   children: React.ReactNode
   fullscreen?: boolean
+  actionError?: string | null
+  onDismissActionError?: () => void
 }) {
+  const t = useDashboardUi()
   if (fullscreen) {
     return (
       <div className="dark fixed inset-0 z-40 flex flex-col bg-white dark:bg-[#08090b] transition-colors">{children}</div>
@@ -83,7 +92,29 @@ export default function WorkspaceShell({
       <div className="relative max-w-[1600px] mx-auto pt-32 md:pt-36 pb-24 px-4 sm:px-6 lg:px-10">
         <div className="flex gap-8">
           <WorkspaceSidebar />
-          <main className="flex-1 min-w-0">{children}</main>
+          <main id="main-content" className="flex-1 min-w-0">
+            <WorkspaceMobileNav />
+            {actionError && (
+              <div
+                role="alert"
+                className="mb-6 flex items-start gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300"
+              >
+                <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden />
+                <p className="flex-1">{actionError}</p>
+                {onDismissActionError && (
+                  <button
+                    type="button"
+                    onClick={onDismissActionError}
+                    aria-label={t.common.close}
+                    className="-my-2 -mr-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full hover:bg-red-500/10"
+                  >
+                    <X size={14} aria-hidden />
+                  </button>
+                )}
+              </div>
+            )}
+            {children}
+          </main>
         </div>
       </div>
     </div>

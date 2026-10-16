@@ -12,12 +12,15 @@ import EmptyState from '@/components/workspace/EmptyState'
 import ErrorState from '@/components/workspace/ErrorState'
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient'
 import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
+import { useWorkspaceMutation } from '@/lib/workspace/useWorkspaceMutation'
 import type { WorkspaceDocument, WorkspaceFolder, WorkspaceNotebook } from '@/lib/workspace/types'
 
 export default function WorkspaceFolderPage() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
   const ui = useWorkspaceUi()
+  const t = useDashboardUi()
   const supabase = getSupabaseBrowserClient()
 
   const [loading, setLoading] = useState(true)
@@ -50,12 +53,13 @@ export default function WorkspaceFolderPage() {
       .maybeSingle()
 
     if (folderError) {
-      setError(folderError.message)
+      console.error('Folder could not be loaded:', folderError)
+      setError('load_failed')
       setLoading(false)
       return
     }
     if (!current) {
-      setError('Folder not found.')
+      setError('not_found')
       setLoading(false)
       return
     }
@@ -103,6 +107,14 @@ export default function WorkspaceFolderPage() {
         .order('updated_at', { ascending: false }),
     ])
 
+    if (subRes.error || docsRes.error || notebooksRes.error) {
+      // Without this, a failed query showed the folder as empty.
+      console.error('Folder contents could not be loaded:', subRes.error || docsRes.error || notebooksRes.error)
+      setError('load_failed')
+      setLoading(false)
+      return
+    }
+
     setFolder(current)
     setBreadcrumbs(chain)
     setSubfolders(subRes.data || [])
@@ -114,6 +126,8 @@ export default function WorkspaceFolderPage() {
   useEffect(() => {
     load()
   }, [load])
+
+  const { mutate, actionError, dismissActionError } = useWorkspaceMutation(load)
 
   const filteredSubfolders = searchQuery
     ? subfolders.filter((f) => f.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -127,7 +141,7 @@ export default function WorkspaceFolderPage() {
 
   const toggleFolderStar = async (f: WorkspaceFolder) => {
     setSubfolders((prev) => prev.map((x) => (x.id === f.id ? { ...x, starred: !x.starred } : x)))
-    await fetch(`/api/workspace/folders/${f.id}`, {
+    await mutate(`/api/workspace/folders/${f.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ starred: !f.starred }),
@@ -136,7 +150,7 @@ export default function WorkspaceFolderPage() {
 
   const renameFolder = async (f: WorkspaceFolder, name: string) => {
     setSubfolders((prev) => prev.map((x) => (x.id === f.id ? { ...x, name } : x)))
-    await fetch(`/api/workspace/folders/${f.id}`, {
+    await mutate(`/api/workspace/folders/${f.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
@@ -145,12 +159,12 @@ export default function WorkspaceFolderPage() {
 
   const deleteFolder = async (f: WorkspaceFolder) => {
     setSubfolders((prev) => prev.filter((x) => x.id !== f.id))
-    await fetch(`/api/workspace/folders/${f.id}`, { method: 'DELETE' })
+    await mutate(`/api/workspace/folders/${f.id}`, { method: 'DELETE' })
   }
 
   const changeFolderColor = async (f: WorkspaceFolder, color: string | null) => {
     setSubfolders((prev) => prev.map((x) => (x.id === f.id ? { ...x, color } : x)))
-    await fetch(`/api/workspace/folders/${f.id}`, {
+    await mutate(`/api/workspace/folders/${f.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ color }),
@@ -159,7 +173,7 @@ export default function WorkspaceFolderPage() {
 
   const toggleDocumentStar = async (d: WorkspaceDocument) => {
     setDocuments((prev) => prev.map((x) => (x.id === d.id ? { ...x, starred: !x.starred } : x)))
-    await fetch(`/api/workspace/documents/${d.id}`, {
+    await mutate(`/api/workspace/documents/${d.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ starred: !d.starred }),
@@ -168,7 +182,7 @@ export default function WorkspaceFolderPage() {
 
   const renameDocument = async (d: WorkspaceDocument, name: string) => {
     setDocuments((prev) => prev.map((x) => (x.id === d.id ? { ...x, name } : x)))
-    await fetch(`/api/workspace/documents/${d.id}`, {
+    await mutate(`/api/workspace/documents/${d.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
@@ -177,7 +191,7 @@ export default function WorkspaceFolderPage() {
 
   const deleteDocument = async (d: WorkspaceDocument) => {
     setDocuments((prev) => prev.filter((x) => x.id !== d.id))
-    await fetch(`/api/workspace/documents/${d.id}`, { method: 'DELETE' })
+    await mutate(`/api/workspace/documents/${d.id}`, { method: 'DELETE' })
   }
 
   const downloadDocument = async (d: WorkspaceDocument) => {
@@ -188,7 +202,7 @@ export default function WorkspaceFolderPage() {
 
   const toggleNotebookStar = async (nb: WorkspaceNotebook) => {
     setNotebooks((prev) => prev.map((x) => (x.id === nb.id ? { ...x, starred: !x.starred } : x)))
-    await fetch(`/api/workspace/notebooks/${nb.id}`, {
+    await mutate(`/api/workspace/notebooks/${nb.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ starred: !nb.starred }),
@@ -197,7 +211,7 @@ export default function WorkspaceFolderPage() {
 
   const renameNotebook = async (nb: WorkspaceNotebook, name: string) => {
     setNotebooks((prev) => prev.map((x) => (x.id === nb.id ? { ...x, name } : x)))
-    await fetch(`/api/workspace/notebooks/${nb.id}`, {
+    await mutate(`/api/workspace/notebooks/${nb.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
@@ -206,12 +220,12 @@ export default function WorkspaceFolderPage() {
 
   const deleteNotebook = async (nb: WorkspaceNotebook) => {
     setNotebooks((prev) => prev.filter((x) => x.id !== nb.id))
-    await fetch(`/api/workspace/notebooks/${nb.id}`, { method: 'DELETE' })
+    await mutate(`/api/workspace/notebooks/${nb.id}`, { method: 'DELETE' })
   }
 
   if (loading) {
     return (
-      <WorkspaceShell>
+      <WorkspaceShell actionError={actionError} onDismissActionError={dismissActionError}>
         <div className="flex items-center justify-center py-24 text-ink/55 dark:text-white/40">
           <Loader2 size={18} className="animate-spin" />
         </div>
@@ -221,24 +235,26 @@ export default function WorkspaceFolderPage() {
 
   if (error || !folder) {
     return (
-      <WorkspaceShell>
-        <ErrorState message={error || 'Folder not found.'} onRetry={load} />
+      <WorkspaceShell actionError={actionError} onDismissActionError={dismissActionError}>
+        <ErrorState message={error === 'load_failed' ? t.workspace.loadError : t.workspace.folderNotFound} onRetry={error === 'load_failed' ? load : undefined} />
       </WorkspaceShell>
     )
   }
 
   return (
-    <WorkspaceShell>
-      <nav className="flex items-center flex-wrap gap-1.5 text-sm text-ink/60 dark:text-white/50 mb-4">
-        <button onClick={() => router.push('/dashboard/workspace')} className="hover:text-ink dark:hover:text-white transition-colors">
+    <WorkspaceShell actionError={actionError} onDismissActionError={dismissActionError}>
+      <nav className="flex items-center flex-wrap gap-x-1 text-sm text-ink/60 dark:text-white/50 mb-4">
+        <button type="button" onClick={() => router.push('/dashboard/workspace')} className="-ml-1 min-h-[40px] rounded-lg px-1 hover:text-ink dark:hover:text-white transition-colors">
           {ui.folder.root}
         </button>
         {breadcrumbs.map((b) => (
           <span key={b.id} className="flex items-center gap-1.5">
-            <ChevronRight size={13} className="text-ink/25 dark:text-white/25" />
+            <ChevronRight size={13} className="text-ink/25 dark:text-white/25" aria-hidden />
             <button
+              type="button"
               onClick={() => router.push(`/dashboard/workspace/folder/${b.id}`)}
-              className={`flex items-center gap-1.5 hover:text-ink dark:hover:text-white transition-colors ${
+              aria-current={b.id === folder.id ? 'page' : undefined}
+              className={`flex min-h-[40px] items-center gap-1.5 rounded-lg px-1 hover:text-ink dark:hover:text-white transition-colors ${
                 b.id === folder.id ? 'text-ink dark:text-white font-medium' : ''
               }`}
             >
