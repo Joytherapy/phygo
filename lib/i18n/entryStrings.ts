@@ -50,6 +50,7 @@ type EntryDict = {
     creating: string;
     create: string;
     inviteInvalid: string;
+    inviteConfirmEmail: string;
     haveAccount: string;
     noAccountHint: string;
     professionalLink: string;
@@ -102,6 +103,8 @@ const en: EntryDict = {
     create: 'Create account',
     inviteInvalid:
       'Your account was created, but this invite link is invalid or expired. Please ask your physiotherapist for a new one.',
+    inviteConfirmEmail:
+      'Your account was created. Confirm your email with the message we sent you, then open this invite link again and enter the same email and password.',
     haveAccount: 'Already have an account?',
     noAccountHint: 'New to My Phygo? Your physiotherapist sends you a personal invitation link to create your account.',
     professionalLink: 'Physiotherapist or student? Log in here',
@@ -154,6 +157,8 @@ const it: EntryDict = {
     create: 'Crea account',
     inviteInvalid:
       'Il tuo account è stato creato, ma questo link di invito non è valido o è scaduto. Chiedi al tuo fisioterapista di inviartene uno nuovo.',
+    inviteConfirmEmail:
+      'Il tuo account è stato creato. Conferma la tua email con il messaggio che ti abbiamo inviato, poi riapri questo link di invito e inserisci la stessa email e la stessa password.',
     haveAccount: 'Hai già un account?',
     noAccountHint: 'Prima volta su My Phygo? Il tuo fisioterapista ti invia un link di invito personale per creare l’account.',
     professionalLink: 'Sei un fisioterapista o uno studente? Accedi qui',
@@ -206,6 +211,8 @@ const es: EntryDict = {
     create: 'Crear cuenta',
     inviteInvalid:
       'Tu cuenta se ha creado, pero este enlace de invitación no es válido o ha caducado. Pide a tu fisioterapeuta uno nuevo.',
+    inviteConfirmEmail:
+      'Tu cuenta se ha creado. Confirma tu correo con el mensaje que te hemos enviado, luego vuelve a abrir este enlace de invitación e introduce el mismo correo y la misma contraseña.',
     haveAccount: '¿Ya tienes cuenta?',
     noAccountHint: '¿Es tu primera vez en My Phygo? Tu fisioterapeuta te envía un enlace de invitación personal para crear tu cuenta.',
     professionalLink: '¿Eres fisioterapeuta o estudiante? Inicia sesión aquí',
@@ -258,6 +265,8 @@ const fr: EntryDict = {
     create: 'Créer un compte',
     inviteInvalid:
       'Votre compte a été créé, mais ce lien d’invitation n’est pas valide ou a expiré. Demandez-en un nouveau à votre kinésithérapeute.',
+    inviteConfirmEmail:
+      'Votre compte a été créé. Confirmez votre e-mail avec le message que nous vous avons envoyé, puis rouvrez ce lien d’invitation et saisissez le même e-mail et le même mot de passe.',
     haveAccount: 'Vous avez déjà un compte ?',
     noAccountHint: 'Première visite sur My Phygo ? Votre kinésithérapeute vous envoie un lien d’invitation personnel pour créer votre compte.',
     professionalLink: 'Kinésithérapeute ou étudiant ? Connectez-vous ici',

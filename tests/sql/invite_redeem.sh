@@ -64,7 +64,19 @@ q -c "update patients set patient_user_id = null where id = '$PA';
       insert into patient_invites (patient_id, code, expires_at) values ('$PA', 'RELINK', now() + interval '7 days')" >/dev/null
 expect "after the clinician unlinks, a new invitation links a new account" "$(redeem authenticated $NEWPAT RELINK)" ok
 expect "  ...linked to the new account" "$(linked $PA)" "$NEWPAT"
+q -c "insert into patient_invites (patient_id, code, expires_at) values ('$PB', 'SELF', now() + interval '7 days'), ('$PB', 'SECONDREC', now() + interval '7 days')" >/dev/null
+expect "a clinician cannot link themselves to their own record" "$(redeem authenticated $CLIN SELF)" refused
+expect "an account already on one record cannot take a second one" "$(redeem authenticated $NEWPAT SECONDREC)" refused
+expect "  ...the second record stays unlinked" "$(linked $PB)" none
 expect "the redeeming account becomes a patient" "$(q -c "select role from profiles where id = '$NEWPAT'")" patient
+
+echo "two codes for the same record redeemed at the same time"
+reset
+race() { psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$1'; begin; select redeem_patient_invite('$2'); select pg_sleep(1); commit;" >"${TMPDIR:-/tmp}/phygo_race_$2.out" 2>&1 && echo ok || echo refused; }
+race $PAT FIRST > "${TMPDIR:-/tmp}/phygo_race_a" & race $INTRUDER SECOND > "${TMPDIR:-/tmp}/phygo_race_b" & wait
+expect "exactly one of the two wins" "$(cat "${TMPDIR:-/tmp}/phygo_race_a" "${TMPDIR:-/tmp}/phygo_race_b" | sort | tr '\n' ' ')" "ok refused "
+expect "  ...no deadlock" "$(cat "${TMPDIR:-/tmp}"/phygo_race_*.out | grep -c deadlock || true)" 0
+expect "  ...the record has one owner, the winner" "$(linked $PA | grep -cE "^($PAT|$INTRUDER)$")" 1
 
 echo "rollback block restores the live definition"
 sed -n '/^--   begin;/,/^--   commit;/p' "$FILE" | sed 's/^--   //' > "${TMPDIR:-/tmp}/phygo_invite_rollback.sql"

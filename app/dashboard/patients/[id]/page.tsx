@@ -264,6 +264,9 @@ export default function PatientDetailPage() {
       .eq('id', patientId)
 
     if (!error) {
+      // Open invitation links are withdrawn with the access: an old link must
+      // not link the record to someone again.
+      await supabase.from('patient_invites').delete().eq('patient_id', patientId).is('used_at', null)
       setPatient((prev) => (prev ? { ...prev, patient_user_id: null } : prev))
     }
   }
