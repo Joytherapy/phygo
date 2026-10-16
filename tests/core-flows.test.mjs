@@ -107,6 +107,8 @@ test('PubMed dates: unusual values give a date or null, never an exception', asy
     assert.equal(parsePubDate('2026 Spring'), '2026-03-01');
     assert.equal(parsePubDate('2025 Dec-2026 Jan'), '2025-12-01');
     assert.equal(parsePubDate('2026 Feb 31'), '2026-02-01');
+    assert.equal(parsePubDate('2026/03/15'), '2026-03-15');
+    assert.equal(parsePubDate('2026-03-15'), '2026-03-15');
     assert.equal(parsePubDate(''), null);
     assert.equal(parsePubDate(undefined), null);
     assert.equal(parsePubDate('Spring'), null);

@@ -22,8 +22,13 @@ function forgetOnAccountChange() {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !key) return
   watching = true
-  createBrowserClient(url, key).auth.onAuthStateChange((event) => {
-    if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') cached = null
+  // supabase-js also emits SIGNED_IN on every tab refocus: only a different
+  // account (or signing out) drops the cached answer.
+  let lastUser: string | null | undefined
+  createBrowserClient(url, key).auth.onAuthStateChange((event, session) => {
+    const user = session?.user?.id ?? null
+    if (event === 'SIGNED_OUT' || (lastUser !== undefined && user !== lastUser)) cached = null
+    lastUser = user
   })
 }
 

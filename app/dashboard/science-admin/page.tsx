@@ -23,8 +23,14 @@ export default function ScienceAdminPage() {
   const loadPapers = () => {
     setLoading(true);
     fetch('/api/science/list?status=pending_review')
-      .then((res) => res.json())
-      .then((data) => setPapers(data.papers || []))
+      .then(async (res) => {
+        if (res.status === 401 || res.status === 403) {
+          alert('Accesso riservato agli amministratori.');
+          return [];
+        }
+        return (await res.json()).papers || [];
+      })
+      .then((list) => setPapers(list))
       .catch(() => setPapers([]))
       .finally(() => setLoading(false));
   };
