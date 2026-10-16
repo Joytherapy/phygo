@@ -6,6 +6,11 @@ import { GET as summarizeAll } from '@/app/api/science/summarize-all/route';
 
 export const dynamic = 'force-dynamic';
 
+const counts = (data: unknown) =>
+  data && typeof data === 'object'
+    ? Object.entries(data as Record<string, unknown>).filter(([, v]) => typeof v === 'number').map(([k, v]) => `${k}=${v}`).join(' ')
+    : '';
+
 export async function GET(req: Request) {
   // hasCronSecret() fails closed when CRON_SECRET is unset — the previous
   // inline check compared against `Bearer undefined`, which any caller
@@ -23,6 +28,10 @@ export async function GET(req: Request) {
 
   const fetchStep = await step('fetch-sources', () => fetchSources(request('/api/science/fetch-sources')));
   const summarizeStep = await step('summarize-all', () => summarizeAll(request('/api/science/summarize-all')));
+
+  // One line per run, counts only (no titles or bodies), so the run can be
+  // checked in the Vercel logs: e.g. "fetch-sources 200 imported=12 totalFound=40".
+  console.log(`science cron: fetch-sources ${fetchStep.status} ${counts(fetchStep.data)}; summarize-all ${summarizeStep.status} ${counts(summarizeStep.data)}`);
 
   // Same shape as before when both succeed; a failed step makes the cron
   // answer 502, so the run shows as failed in Vercel.
