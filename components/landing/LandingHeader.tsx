@@ -98,13 +98,13 @@ export default function LandingHeader({
   };
 
   // Absolute so the header also works on the legal pages; on the landing
-  // itself "/it#tour" is a same-document jump.
+  // itself "/it#students" is a same-document jump.
   const home = LANDING_PATH[lang];
   const links = [
-    { label: nav.audiences, href: `${home}#audiences` },
-    { label: nav.tour, href: `${home}#tour` },
+    { label: nav.students, href: `${home}#students` },
+    { label: nav.physiotherapists, href: `${home}#physiotherapists` },
     { label: nav.library, href: libraryHref },
-    { label: nav.world, href: `${home}#world` },
+    { label: nav.trust, href: `${home}#trust` },
     { label: nav.pricing, href: `${home}#pricing` },
     { label: nav.faq, href: `${home}#faq` },
   ];
@@ -115,7 +115,7 @@ export default function LandingHeader({
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
         scrolled || menuOpen
-          ? "border-b border-black/[0.06] dark:border-white/[0.07] bg-[#f6f7f9]/80 dark:bg-ink/75 backdrop-blur-xl"
+          ? "border-b border-black/[0.06] dark:border-white/[0.07] bg-[#f7f8fa]/90 dark:bg-[#0a0e17]/85 backdrop-blur-xl"
           : "border-b border-transparent"
       }`}
     >
@@ -200,7 +200,7 @@ export default function LandingHeader({
           </a>
           <a
             href={signupHref(lang)}
-            className="hidden sm:inline-flex items-center whitespace-nowrap rounded-full bg-ink px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-ink/85 dark:bg-white dark:text-ink dark:hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2"
+            className="hidden sm:inline-flex items-center whitespace-nowrap rounded-full bg-electric-dark px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#2f51c4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2"
           >
             {nav.startFree}
           </a>
@@ -260,7 +260,7 @@ export default function LandingHeader({
               <div className="mt-8 flex items-center gap-3">
                 <a
                   href={signupHref(lang)}
-                  className="flex-1 rounded-full bg-ink py-3.5 text-center text-sm font-semibold text-white dark:bg-white dark:text-ink"
+                  className="flex-1 rounded-full bg-electric-dark py-3.5 text-center text-sm font-semibold text-white"
                 >
                   {nav.startFree}
                 </a>

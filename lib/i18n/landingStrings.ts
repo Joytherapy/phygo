@@ -5,9 +5,7 @@
 // Every visible string, aria label and metadata field of the landing page
 // lives here. Each language is written natively rather than translated
 // literally. Conventions:
-// - "*text*" marks the serif-italic accent inside a headline (see Rich in
-//   components/landing/ui.tsx); "\n" marks a deliberate line break.
-// - "{n}", "{name}", "{conditions}", "{exercises}" are filled at render time.
+// - "{n}" is filled at render time with a live, rounded-down library figure.
 // - French typography (narrow no-break spaces before ; : ! ? and inside « »)
 //   is applied automatically by frenchTypography() below.
 
@@ -17,27 +15,31 @@ import { it } from './landing/it';
 import { es } from './landing/es';
 import { fr } from './landing/fr';
 
-export type CoverageLabelKey =
-  | 'goals'
-  | 'clinical_tests'
-  | 'red_flags'
-  | 'contraindications'
-  | 'typical_exercises'
-  | 'progression_criteria'
-  | 'return_to_activity_criteria'
-  | 'outcome_measures'
-  | 'source'
-  | 'phased';
+type Step = { label: string; title: string; text: string; alt: string };
+type Group = { title: string; items: string[] };
 
-type TitleText = { title: string; text: string };
+/** One audience path (students or physiotherapists): same structure, same visual weight. */
+export type AudiencePath = {
+  eyebrow: string;
+  title: string;
+  intro: string;
+  tablistLabel: string;
+  /** Four real screens, shown as tabs. */
+  steps: [Step, Step, Step, Step];
+  extrasTitle: string;
+  extras: string[];
+  cta: string;
+  ctaNote: string;
+  caption: string;
+};
 
 export interface LandingDict {
   meta: { title: string; description: string; descriptionNoCount: string; ogLocale: string };
   nav: {
-    audiences: string;
-    tour: string;
-    world: string;
+    students: string;
+    physiotherapists: string;
     library: string;
+    trust: string;
     pricing: string;
     faq: string;
     login: string;
@@ -54,172 +56,50 @@ export interface LandingDict {
     eyebrow: string;
     title: string;
     sub: string;
-    conditionsPhrase: string;
-    conditionsFallback: string;
-    exercisesPhrase: string;
-    exercisesFallback: string;
-    ctaPrimary: string;
-    ctaSecondary: string;
-    assurances: string[];
+    cta: string;
+    note: string;
+    imageAlt: string;
+    secondImageAlt: string;
     caption: string;
-    stage: {
-      windowTitle: string;
-      draft: string;
-      sidebar: string[];
-      voiceLabel: string;
-      voiceText: string;
-      linkedLabel: string;
-      evidence: string;
-      exerciseLabel: string;
-      phasesLabel: string;
-      reviewSave: string;
-      ariaLabel: string;
-    };
+    /** The two audience cards under the hero (#students, #physiotherapists). */
+    choose: string;
+    paths: { students: { title: string; text: string; link: string }; physiotherapists: { title: string; text: string; link: string } };
   };
-  proof: {
+  students: AudiencePath;
+  physiotherapists: AudiencePath & {
+    /** Added to the extras only when video calls are configured (DAILY_API_KEY). */
+    videoItem: string;
+    patients: { title: string; text: string; cta: string };
+  };
+  /** Live library figures (rounded down) with number-free fallbacks. */
+  figures: {
     conditions: string;
-    exercises: string;
+    conditionsFallback: string;
     protocols: string;
-    languages: string;
-    mapsValue: string;
-    maps: string;
+    protocolsFallback: string;
+    exercises: string;
+    exercisesFallback: string;
+    libraryCta: string;
+    translationNote: string;
   };
-  audiences: {
+  trust: {
     eyebrow: string;
     title: string;
     intro: string;
-    spine: string;
-    /** Students, physiotherapists, patients (My Phygo) — in this order. */
-    paths: {
-      label: string;
-      title: string;
-      text: string;
-      items: string[];
-      /** Shown only when video calls are configured (DAILY_API_KEY). */
-      videoItem: string;
-      note: string;
-      cta: string;
-      hint: string;
-    }[];
+    /** What the AI does, what stays with you, safeguards in place. */
+    columns: [Group, Group, Group];
+    privacy: string;
   };
-  story: {
-    eyebrow: string;
-    title: string;
-    intro: string;
-    caseLabel: string;
-    roles: { phygo: string; you: string };
-    /** Schedule, document, plan, export, follow up — in this order. */
-    chapters: { kicker: string; title: string; text: string; videoText: string; phygo: string; you: string }[];
-    agenda: {
-      title: string;
-      days: string[];
-      patientA: string;
-      patientB: string;
-      patientC: string;
-      inPerson: string;
-      remote: string;
-      request: string;
-      requestWhen: string;
-      confirm: string;
-      decline: string;
-      call: string;
-      callText: string;
-    };
-    listening: string;
-    languagesPill: string;
-    transcript: string;
-    soapLabels: [string, string, string, string];
-    soap: [string, string, string, string];
-    reasoning: { label: string; text: string }[];
-    linkedLabel: string;
-    exercises: { name: string; dose: string }[];
-    videoLabel: string;
-    fromLibrary: string;
-    phasesLabel: string;
-    current: string;
-    pdf: { file: string; sections: string[]; download: string; scanTitle: string; scanText: string; scanNote: string };
-    record: { title: string; entries: { when: string; text: string }[]; references: string; next: string };
-    review: string;
-    savedTo: string;
-    portalTitle: string;
-    portalText: string;
-    caption: string;
-    chapterNav: string;
-  };
-  library: {
-    eyebrow: string;
-    title: string;
-    titleNoCount: string;
-    intro: string;
-    countLabel: string;
-    namesLabel: string;
-    growthLabel: string;
-    growthNote: string;
-    todayLabel: string;
-    goalLabel: string;
-    templateNote: string;
-    coverageTitle: string;
-    coverageLive: string;
-    fields: Record<CoverageLabelKey, string>;
-    coverageNote: string;
-    featuredKicker: string;
-    evidence: string;
-    levels: Record<string, string>;
-    tabs: { goals: string; clinical_tests: string; red_flags: string; typical_exercises: string };
-    phasesLabel: string;
-    excerptTranslated: string;
-    excerptSource: string;
-    openEntry: string;
-    cta: string;
-    languages: string;
-    tablistLabel: string;
-  };
-  anatomy: {
-    eyebrow: string;
-    title: string;
-    intro: string;
-    body: TitleText & { regions: string[]; caption: string; svgLabel: string };
-    /** `alt` labels the rotating brain video; `modelCredit` prefixes the CC BY credit. */
-    brain: TitleText & { alt: string; caption: string; modelCredit: string };
-    systemsLabel: string;
-    systems: string[];
-  };
-  /** PHYGO World: Evidence Hub + Events (the dashboard's "Phygo World" menu, minus the placeholder shop). */
-  world: {
-    eyebrow: string;
-    title: string;
-    intro: string;
-    evidence: TitleText & { studyType: string; fields: string[]; relevance: string; publish: string };
-    events: TitleText & { filters: string[]; rows: { type: string; format: string }[]; save: string; nearYou: string; note: string };
-    caption: string;
-    cta: string;
-  };
-  tools: {
-    eyebrow: string;
-    title: string;
-    intro: string;
-    columns: (TitleText & { items: string[] })[];
-  };
-  trust: { eyebrow: string; title: string; intro: string; items: TitleText[]; privacy: string };
   pricing: {
     eyebrow: string;
     title: string;
     sub: string;
-    /** The only offer that exists today: a free account. */
-    today: { label: string; name: string; price: string; text: string; items: string[]; limits: string; cta: string };
+    free: { label: string; name: string; price: string; items: string[]; limits: string; cta: string };
     /** Paid plans are planned, not purchasable (there is no checkout). */
-    planned: { label: string; status: string; note: string };
-    monthly: string;
-    annual: string;
-    save: string;
-    perMonth: string;
-    custom: string;
-    billingLabel: string;
-    notYet: string;
-    tiers: { description: string; features: string[]; cta: string }[];
+    planned: { title: string; text: string };
   };
   faq: { eyebrow: string; title: string; items: { q: string; a: string }[] };
-  final: { title: string; text: string; cta: string; secondary: string; note: string };
+  final: { title: string; text: string; cta: string; note: string };
   footer: {
     tagline: string;
     product: string;
@@ -232,7 +112,6 @@ export interface LandingDict {
     navLabel: string;
     languageLabel: string;
   };
-  common: { illustrative: string };
 }
 
 /** Applies French typographic spacing to every string in a dictionary. */
@@ -308,13 +187,4 @@ export function fill(template: string, vars: Record<string, string | number>): s
 
 export function formatNumber(lang: AppLang, n: number): string {
   return new Intl.NumberFormat(LANDING_LOCALE[lang]).format(n);
-}
-
-export function formatPrice(lang: AppLang, amount: number): string {
-  return new Intl.NumberFormat(LANDING_LOCALE[lang], {
-    style: 'currency',
-    currency: 'USD',
-    currencyDisplay: 'narrowSymbol',
-    maximumFractionDigits: 0,
-  }).format(amount);
 }
