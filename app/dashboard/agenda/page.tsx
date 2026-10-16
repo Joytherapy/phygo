@@ -25,6 +25,8 @@ import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
 import { useClinicalLocked } from '@/lib/useClinicalAccess'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useAgendaUi, localeForLang } from '@/lib/i18n/agendaStrings'
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
+import ErrorState from '@/components/workspace/ErrorState'
 import { cancelAppointment } from '@/lib/appointments'
 import { lazy } from '@/lib/lazy'
 
@@ -49,6 +51,8 @@ const START_HOUR = 7
 const END_HOUR = 21
 const ROW_HEIGHT = 44
 const TOTAL_ROWS = (END_HOUR - START_HOUR) * 2
+// Slot preselected when adding from a day (not from a clicked slot): 09:00.
+const DEFAULT_SLOT = (9 - START_HOUR) * 2
 
 function buildSlots(locale: string) {
   return Array.from({ length: TOTAL_ROWS }, (_, i) => {
@@ -79,11 +83,16 @@ export default function AgendaPage() {
   const router = useRouter()
   const { lang } = useLanguage()
   const ui = useAgendaUi()
+  const t = useDashboardUi()
   const locked = useClinicalLocked()
   const locale = localeForLang(lang)
   const SLOTS = buildSlots(locale)
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [statusError, setStatusError] = useState<string | null>(null)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [searchError, setSearchError] = useState(false)
   const [weekOffset, setWeekOffset] = useState(0)
   const [mounted, setMounted] = useState(false)
 
@@ -107,17 +116,29 @@ export default function AgendaPage() {
     setMounted(true)
   }, [])
 
+  // A failed load shows an error with Retry instead of an empty calendar that
+  // would read as "no appointments".
   const loadAppointments = async () => {
-    const { data, error } = await supabase
-      .from('appointments')
-      .select('id, patient_id, scheduled_at, duration_minutes, session_type, status, patients(name)')
-      .neq('status', 'cancelled')
-      .order('scheduled_at', { ascending: true })
-
-    if (!error) {
+    try {
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('id, patient_id, scheduled_at, duration_minutes, session_type, status, patients(name)')
+        .neq('status', 'cancelled')
+        .order('scheduled_at', { ascending: true })
+      if (error) throw error
       setAppointments((data as any) || [])
+      setLoadError(false)
+    } catch (err) {
+      console.error('Appointments could not be loaded:', err)
+      setLoadError(true)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
+  }
+
+  const retryLoad = () => {
+    setLoading(true)
+    loadAppointments()
   }
 
   useEffect(() => {
@@ -125,10 +146,31 @@ export default function AgendaPage() {
   }, [])
 
   const updateStatus = async (id: string, status: 'confirmed' | 'cancelled') => {
-    if (locked) return
-    await supabase.from('appointments').update({ status }).eq('id', id)
+    if (locked || updatingId) return
+    setUpdatingId(id)
+    setStatusError(null)
+    try {
+      const { error } = await supabase.from('appointments').update({ status }).eq('id', id)
+      if (error) throw error
+    } catch (err) {
+      console.error('Appointment request could not be updated:', err)
+      setStatusError(t.agenda.statusError)
+    }
     await loadAppointments()
+    setUpdatingId(null)
   }
+
+  // Escape closes whichever dialog is open (not while a cancellation is running).
+  useEffect(() => {
+    if (!showAddModal && !selected) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      if (showAddModal && !addSaving) setShowAddModal(false)
+      else if (selected && !cancelling) setSelected(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [showAddModal, selected, addSaving, cancelling])
 
   const openDetails = (a: Appointment) => {
     setSelected(a)
@@ -188,7 +230,8 @@ export default function AgendaPage() {
     setAddSessionType('video')
     setPatientQuery('')
     setPatientResults([])
-        setSelectedPatient(null)
+    setSearchError(false)
+    setSelectedPatient(null)
     setAddError(null)
     setAddNote('')
     setShowAddModal(true)
@@ -209,13 +252,22 @@ export default function AgendaPage() {
       return
     }
     setSearchingPatients(true)
-    const { data } = await supabase
-      .from('patients')
-      .select('id, name')
-      .ilike('name', `%${text.trim()}%`)
-      .limit(6)
-    setPatientResults(data || [])
-    setSearchingPatients(false)
+    setSearchError(false)
+    try {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('id, name')
+        .ilike('name', `%${text.trim()}%`)
+        .limit(6)
+      if (error) throw error
+      setPatientResults(data || [])
+    } catch (err) {
+      console.error('Patient search failed:', err)
+      setPatientResults([])
+      setSearchError(true)
+    } finally {
+      setSearchingPatients(false)
+    }
   }
 
   const handleConfirmAdd = async () => {
@@ -227,7 +279,7 @@ export default function AgendaPage() {
     const scheduledAt = new Date(addDay)
     scheduledAt.setHours(slot.hour, slot.minute, 0, 0)
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
 
     const { error } = await supabase.from('appointments').insert({
       patient_id: selectedPatient.id,
@@ -258,14 +310,15 @@ export default function AgendaPage() {
         style={{ background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)' }}
       />
 
-      <div className="relative max-w-6xl mx-auto pt-40 pb-24 px-6">
+      <main id="main-content" className="relative max-w-6xl mx-auto pt-32 sm:pt-40 pb-24 px-4 sm:px-6">
         <motion.button
+          type="button"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-1.5 text-sm text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
+          className="-ml-2 inline-flex min-h-[40px] items-center gap-1.5 rounded-full px-2 text-sm text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white mb-6 transition-colors"
         >
-          <ArrowLeft size={15} />
+          <ArrowLeft size={15} aria-hidden />
           {ui.page.backToPatients}
         </motion.button>
 
@@ -279,45 +332,62 @@ export default function AgendaPage() {
             </h1>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex w-full sm:w-auto flex-col-reverse sm:flex-row sm:items-center gap-2">
             <button
-              onClick={() => openAddModal(weekDays[0], 4)}
+              type="button"
+              onClick={() => openAddModal(weekDays.find(isToday) ?? weekDays[0], DEFAULT_SLOT)}
               disabled={locked}
-              className="flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white shadow-[0_6px_16px_rgba(79,124,255,0.35)] transition-transform hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="flex min-h-[40px] items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(79,124,255,0.35)] transition-transform hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
             >
-              <Plus size={14} />
+              <Plus size={14} aria-hidden />
               {ui.page.newAppointment}
             </button>
-            <button
-              onClick={() => setWeekOffset(weekOffset - 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-black/10 dark:border-white/10 text-ink/60 dark:text-white/60 hover:border-[#4F7CFF]/40 transition-colors"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <button
-              onClick={() => setWeekOffset(0)}
-              className="rounded-full px-4 py-2 text-xs font-semibold text-ink/60 dark:text-white/60 border border-black/10 dark:border-white/10 hover:border-[#4F7CFF]/40 transition-colors"
-            >
-              {mounted ? weekLabel() : '···'}
-            </button>
-            <button
-              onClick={() => setWeekOffset(weekOffset + 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-black/10 dark:border-white/10 text-ink/60 dark:text-white/60 hover:border-[#4F7CFF]/40 transition-colors"
-            >
-              <ChevronRight size={16} />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setWeekOffset(weekOffset - 1)}
+                aria-label={t.agenda.previousWeek}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 dark:border-white/10 text-ink/70 dark:text-white/70 hover:border-[#4F7CFF]/40 transition-colors"
+              >
+                <ChevronLeft size={16} aria-hidden />
+              </button>
+              <button
+                type="button"
+                onClick={() => setWeekOffset(0)}
+                title={t.agenda.backToThisWeek}
+                aria-live="polite"
+                className="min-h-[40px] flex-1 sm:flex-none whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10 hover:border-[#4F7CFF]/40 transition-colors"
+              >
+                {mounted ? weekLabel() : '···'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setWeekOffset(weekOffset + 1)}
+                aria-label={t.agenda.nextWeek}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 dark:border-white/10 text-ink/70 dark:text-white/70 hover:border-[#4F7CFF]/40 transition-colors"
+              >
+                <ChevronRight size={16} aria-hidden />
+              </button>
+            </div>
           </div>
         </div>
 
         <ClinicalAccessNotice />
 
         {loading || !mounted ? (
-          <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-16 text-center">
-            <Loader2 size={20} className="mx-auto animate-spin text-ink/30 dark:text-white/30" />
+          <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-16 text-center" aria-busy="true">
+            <Loader2 size={20} className="mx-auto animate-spin text-ink/30 dark:text-white/30" aria-hidden />
           </div>
+        ) : loadError ? (
+          <ErrorState message={t.agenda.loadError} onRetry={retryLoad} />
         ) : (
           <>
+            {statusError && (
+              <p role="alert" className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300">
+                {statusError}
+              </p>
+            )}
             {pendingRequests.length > 0 && (
               <div className="mb-6">
                 <p className="text-xs font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400 mb-3">
@@ -343,18 +413,24 @@ export default function AgendaPage() {
                       </div>
                       <div className="flex gap-2 shrink-0">
                         <button
+                          type="button"
                           onClick={() => updateStatus(req.id, 'confirmed')}
-                          disabled={locked}
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white hover:bg-emerald-600 transition-colors"
+                          disabled={locked || updatingId !== null}
+                          aria-label={`${t.agenda.confirmRequest}: ${req.patients?.name || ui.common.patientFallback}`}
+                          title={t.agenda.confirmRequest}
+                          className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                          <Check size={14} />
+                          {updatingId === req.id ? <Loader2 size={15} className="animate-spin" aria-hidden /> : <Check size={15} aria-hidden />}
                         </button>
                         <button
+                          type="button"
                           onClick={() => updateStatus(req.id, 'cancelled')}
-                          disabled={locked}
-                          className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+                          disabled={locked || updatingId !== null}
+                          aria-label={`${t.agenda.declineRequest}: ${req.patients?.name || ui.common.patientFallback}`}
+                          title={t.agenda.declineRequest}
+                          className="flex h-10 w-10 items-center justify-center rounded-full bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                          <X size={14} />
+                          <X size={15} aria-hidden />
                         </button>
                       </div>
                     </div>
@@ -363,7 +439,79 @@ export default function AgendaPage() {
               </div>
             )}
 
-            <div className="rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden">
+            {/* Phones: the 7-column grid needs ~900px and hid most days behind a
+                sideways scroll, so small screens get the same week as a list. */}
+            <ol className="md:hidden space-y-3" data-testid="agenda-week-list">
+              {weekDays.map((d) => {
+                const dayAppointments = appointmentsForDay(d)
+                const dayLabel = d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })
+                return (
+                  <li
+                    key={d.toISOString()}
+                    className={`rounded-2xl border bg-white/95 dark:bg-white/[0.03] p-3 ${
+                      isToday(d) ? 'border-[#4F7CFF]/40' : 'border-black/[0.09] dark:border-white/10'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2 pl-1">
+                      <p className={`text-sm font-semibold capitalize ${isToday(d) ? 'text-[#4F7CFF]' : 'text-ink dark:text-white'}`}>
+                        {dayLabel}
+                        {isToday(d) && (
+                          <span className="ml-2 rounded-full bg-[#4F7CFF]/15 px-2 py-0.5 text-[11px] font-semibold normal-case">{ui.common.today}</span>
+                        )}
+                      </p>
+                      {!locked && (
+                        <button
+                          type="button"
+                          onClick={() => openAddModal(d, DEFAULT_SLOT)}
+                          aria-label={t.agenda.addOnDay.replace('{day}', dayLabel)}
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink/60 dark:text-white/60 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+                        >
+                          <Plus size={16} aria-hidden />
+                        </button>
+                      )}
+                    </div>
+                    {dayAppointments.length === 0 ? (
+                      <p className="pl-1 pb-1 text-xs text-ink/50 dark:text-white/40">{t.agenda.noAppointmentsDay}</p>
+                    ) : (
+                      <ul className="mt-1 space-y-1.5">
+                        {dayAppointments.map((a) => (
+                          <li key={a.id}>
+                            <button
+                              type="button"
+                              onClick={() => openDetails(a)}
+                              className="flex w-full min-h-[48px] items-center gap-3 rounded-xl border border-black/[0.06] dark:border-white/[0.08] px-3 py-2 text-left hover:border-[#4F7CFF]/40 transition-colors"
+                            >
+                              <span
+                                className="h-8 w-1 shrink-0 rounded-full"
+                                style={{ background: a.session_type === 'video' ? '#4F7CFF' : '#22B888' }}
+                                aria-hidden
+                              />
+                              <span className="w-12 shrink-0 text-sm font-bold tabular-nums text-ink dark:text-white">
+                                {new Date(a.scheduled_at).toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })}
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate text-sm font-medium text-ink dark:text-white">
+                                  {a.patients?.name || ui.common.patientFallback}
+                                </span>
+                                <span className="flex items-center gap-1 text-xs text-ink/60 dark:text-white/50">
+                                  {a.session_type === 'video' ? <Video size={12} aria-hidden /> : <MapPin size={12} aria-hidden />}
+                                  {a.session_type === 'video' ? ui.common.videoCall : ui.common.inPerson}
+                                  {' · '}
+                                  {a.duration_minutes}′
+                                </span>
+                              </span>
+                              <ChevronRight size={16} className="shrink-0 text-ink/30 dark:text-white/30" aria-hidden />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                )
+              })}
+            </ol>
+
+            <div className="hidden md:block rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden">
               <div className="overflow-x-auto">
                 <div style={{ minWidth: 900 }}>
                   <div className="flex border-b border-black/[0.09] dark:border-white/10">
@@ -375,7 +523,7 @@ export default function AgendaPage() {
                           isToday(d) ? 'bg-[#4F7CFF]/5' : ''
                         }`}
                       >
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50">
                           {d.toLocaleDateString(locale, { weekday: 'short' })}
                         </p>
                         <p
@@ -395,7 +543,7 @@ export default function AgendaPage() {
                         slot.isHour ? (
                           <div
                             key={i}
-                            className="absolute right-2 -translate-y-1/2 text-[10px] font-medium text-ink/30 dark:text-white/30"
+                            className="absolute right-2 -translate-y-1/2 text-[11px] font-medium text-ink/45 dark:text-white/40"
                             style={{ top: i * ROW_HEIGHT }}
                           >
                             {slot.display}
@@ -464,7 +612,7 @@ export default function AgendaPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 mt-4">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-4">
               <div className="flex items-center gap-1.5">
                 <span
                   className="h-2.5 w-2.5 rounded-full"
@@ -479,11 +627,11 @@ export default function AgendaPage() {
                 />
                 <span className="text-xs text-ink/60 dark:text-white/50">{ui.common.inPerson}</span>
               </div>
-              <span className="text-xs text-ink/30 dark:text-white/30">{ui.page.legendHint}</span>
+              {!locked && <span className="hidden md:inline text-xs text-ink/50 dark:text-white/40">{ui.page.legendHint}</span>}
             </div>
           </>
         )}
-      </div>
+      </main>
 
       <AnimatePresence>
         {showAddModal && addDay && (
@@ -491,7 +639,7 @@ export default function AgendaPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-6"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
             onClick={() => setShowAddModal(false)}
           >
             <motion.div
@@ -499,20 +647,24 @@ export default function AgendaPage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#12131a] shadow-2xl p-6"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="new-appointment-title"
+              className="w-full max-w-sm max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#12131a] shadow-2xl p-6"
             >
               <p className="text-xs font-semibold uppercase tracking-wide text-[#4F7CFF] mb-1">
                 {ui.modal.newAppointmentEyebrow}
               </p>
-              <p className="text-sm font-bold text-ink dark:text-white mb-4">
+              <p id="new-appointment-title" className="text-sm font-bold text-ink dark:text-white mb-4">
                 {addDay.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })}
               </p>
 
               <div className="mb-4">
-                <label className="text-xs font-medium text-ink/60 dark:text-white/50 mb-1.5 block">
+                <label htmlFor="appt-time" className="text-xs font-medium text-ink/60 dark:text-white/50 mb-1.5 block">
                   {ui.modal.timeLabel}
                 </label>
                 <select
+                  id="appt-time"
                   value={addSlotIndex}
                   onChange={(e) => setAddSlotIndex(Number(e.target.value))}
                   className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.03] px-3 py-2.5 text-sm outline-none focus:border-[#4F7CFF] text-ink dark:text-white"
@@ -538,10 +690,12 @@ export default function AgendaPage() {
                       {selectedPatient.name}
                     </span>
                     <button
+                      type="button"
                       onClick={() => setSelectedPatient(null)}
-                      className="text-ink/30 dark:text-white/30 hover:text-red-500 transition-colors"
+                      aria-label={t.agenda.removePatient}
+                      className="-my-2 -mr-2 flex h-10 w-10 items-center justify-center rounded-full text-ink/40 dark:text-white/40 hover:text-red-500 transition-colors"
                     >
-                      <X size={14} />
+                      <X size={14} aria-hidden />
                     </button>
                   </div>
                 ) : (
@@ -550,6 +704,7 @@ export default function AgendaPage() {
                     <input
                       autoFocus
                       type="text"
+                      aria-label={ui.modal.patientLabel}
                       value={patientQuery}
                       onChange={(e) => searchPatients(e.target.value)}
                       placeholder={ui.modal.searchPlaceholder}
@@ -558,7 +713,10 @@ export default function AgendaPage() {
                     {searchingPatients && (
                       <p className="text-[11px] text-ink/55 dark:text-white/40 mt-1.5">{ui.modal.searching}</p>
                     )}
-                    {!searchingPatients && patientQuery && patientResults.length === 0 && (
+                    {!searchingPatients && searchError && (
+                      <p role="alert" className="text-xs text-red-500 mt-1.5">{t.agenda.searchError}</p>
+                    )}
+                    {!searchingPatients && !searchError && patientQuery && patientResults.length === 0 && (
                       <p className="text-[11px] text-ink/55 dark:text-white/40 mt-1.5">{ui.modal.noPatientsFound}</p>
                     )}
                     {patientResults.length > 0 && (
@@ -566,11 +724,12 @@ export default function AgendaPage() {
                         {patientResults.map((p) => (
                           <button
                             key={p.id}
+                            type="button"
                             onClick={() => {
                               setSelectedPatient(p)
                               setPatientResults([])
                             }}
-                            className="w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-[#4F7CFF]/10 transition-colors"
+                            className="w-full flex min-h-[40px] items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-[#4F7CFF]/10 transition-colors"
                           >
                             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/15 text-[#4F7CFF]">
                               <User size={12} />
@@ -586,6 +745,8 @@ export default function AgendaPage() {
 
               <div className="grid grid-cols-2 gap-2 mb-5">
                 <button
+                  type="button"
+                  aria-pressed={addSessionType === 'video'}
                   onClick={() => setAddSessionType('video')}
                   className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold border transition-colors ${
                     addSessionType === 'video'
@@ -597,6 +758,8 @@ export default function AgendaPage() {
                   {ui.common.video}
                 </button>
                 <button
+                  type="button"
+                  aria-pressed={addSessionType === 'in_person'}
                   onClick={() => setAddSessionType('in_person')}
                   className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold border transition-colors ${
                     addSessionType === 'in_person'
@@ -610,10 +773,11 @@ export default function AgendaPage() {
               </div>
 
               <div className="mb-4">
-                <label className="text-xs font-medium text-ink/60 dark:text-white/50 mb-1.5 block">
+                <label htmlFor="appt-note" className="text-xs font-medium text-ink/60 dark:text-white/50 mb-1.5 block">
                   {ui.modal.noteLabel}
                 </label>
                 <textarea
+                  id="appt-note"
                   value={addNote}
                   onChange={(e) => setAddNote(e.target.value)}
                   rows={2}
@@ -622,7 +786,7 @@ export default function AgendaPage() {
                 />
               </div>
 
-              {addError && <p className="text-xs text-red-500 mb-3 text-center">{addError}</p>}
+              {addError && <p role="alert" className="text-xs text-red-500 mb-3 text-center">{addError}</p>}
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowAddModal(false)}
@@ -651,7 +815,7 @@ export default function AgendaPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-6"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
             onClick={closeDetails}
           >
             <motion.div
@@ -689,7 +853,7 @@ export default function AgendaPage() {
                 <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-4">
                   <p className="text-sm font-semibold text-ink dark:text-white">{ui.cancelFlow.confirmQuestion}</p>
                   <p className="text-xs text-ink/60 dark:text-white/50 mt-1 mb-3">{ui.cancelFlow.confirmDetail}</p>
-                  {cancelError && <p className="text-xs text-red-500 mb-3">{cancelError}</p>}
+                  {cancelError && <p role="alert" className="text-xs text-red-500 mb-3">{cancelError}</p>}
                   <div className="flex gap-2">
                     <button
                       onClick={() => setConfirmingCancel(false)}
