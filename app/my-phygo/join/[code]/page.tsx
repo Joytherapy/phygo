@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { Loader2, Smartphone } from 'lucide-react'
+import { useEntryLang } from '@/lib/i18n/useEntryLang'
+import { ENTRY_STRINGS, localizeAuthError } from '@/lib/i18n/entryStrings'
+import { myPhygoLoginHref } from '@/lib/i18n/landingStrings'
 import { lazy } from '@/lib/lazy'
 
 const supabase = lazy(() => createBrowserClient(
@@ -12,6 +15,16 @@ const supabase = lazy(() => createBrowserClient(
 ))
 
 export default function JoinInvitePage() {
+  return (
+    <Suspense fallback={null}>
+      <JoinInvite />
+    </Suspense>
+  )
+}
+
+function JoinInvite() {
+  const lang = useEntryLang()
+  const t = ENTRY_STRINGS[lang].portal
   const params = useParams()
   const router = useRouter()
   const code = params.code as string
@@ -29,7 +42,7 @@ export default function JoinInvitePage() {
     const { error: signUpError } = await supabase.auth.signUp({ email, password })
 
     if (signUpError) {
-      setError(signUpError.message)
+      setError(localizeAuthError(signUpError.message, ENTRY_STRINGS[lang].login))
       setLoading(false)
       return
     }
@@ -39,9 +52,7 @@ export default function JoinInvitePage() {
     })
 
     if (redeemError) {
-      setError(
-        'Your account was created, but this invite link is invalid or expired. Please ask your physiotherapist for a new one.'
-      )
+      setError(t.inviteInvalid)
       setLoading(false)
       return
     }
@@ -56,16 +67,18 @@ export default function JoinInvitePage() {
       </div>
 
       <h1 className="font-display text-3xl font-bold tracking-tight text-ink dark:text-white mb-2">
-        Welcome to My Phygo
+        {t.joinTitle}
       </h1>
       <p className="text-sm text-ink/60 dark:text-white/50 mb-8">
-        Your physiotherapist has invited you. Create your account to access your treatment plan, session history, and more.
+        {t.joinSub}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-sm font-medium text-ink/60 dark:text-white/50">Email</label>
+          <label htmlFor="join-email" className="text-sm font-medium text-ink/60 dark:text-white/55">{t.email}</label>
           <input
+            id="join-email"
+            autoComplete="email"
             type="email"
             required
             value={email}
@@ -74,8 +87,10 @@ export default function JoinInvitePage() {
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-ink/60 dark:text-white/50">Password</label>
+          <label htmlFor="join-password" className="text-sm font-medium text-ink/60 dark:text-white/55">{t.password}</label>
           <input
+            id="join-password"
+            autoComplete="new-password"
             type="password"
             required
             minLength={6}
@@ -85,7 +100,7 @@ export default function JoinInvitePage() {
           />
         </div>
 
-        {error && <p className="text-xs text-red-500">{error}</p>}
+        {error && <p role="alert" className="text-xs text-red-500">{error}</p>}
 
         <button
           type="submit"
@@ -94,14 +109,14 @@ export default function JoinInvitePage() {
           style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
         >
           {loading && <Loader2 size={15} className="animate-spin" />}
-          {loading ? 'Creating your account...' : 'Create account'}
+          {loading ? t.creating : t.create}
         </button>
       </form>
 
       <p className="text-xs text-ink/55 dark:text-white/40 mt-6 text-center">
-        Already have an account?{' '}
-        <a href="/my-phygo/login" className="text-[#4F7CFF] font-medium hover:underline">
-          Sign in
+        {t.haveAccount}{' '}
+        <a href={myPhygoLoginHref(lang)} className="text-[#3A5FE0] dark:text-[#7B9DFF] font-medium hover:underline">
+          {t.signIn}
         </a>
       </p>
     </div>

@@ -85,7 +85,19 @@ function computeSourceHash(record: ConditionRecord): string {
 }
 
 /** Translated view of a condition: same shape as ConditionRecord, values in the target language (falls back to Italian per-field if translation is only partial). */
-export type TranslatedCondition = ConditionRecord & { _translationStale?: boolean; _translationFailed?: boolean };
+export type TranslatedCondition = ConditionRecord & {
+  _translationStale?: boolean;
+  _translationFailed?: boolean;
+  /** Fields that have Italian content but no translation, so the Italian text is shown for them. */
+  _untranslatedFields?: TranslatableField[];
+};
+
+function untranslatedFields(
+  translated: Partial<Record<TranslatableField, string | null>>,
+  base: ConditionRecord
+): TranslatableField[] {
+  return TRANSLATABLE_FIELDS.filter((f) => !translated[f] && !!base[f]);
+}
 
 async function translateFieldsWithOpenAI(
   record: ConditionRecord,
@@ -189,6 +201,7 @@ export async function getTranslatedCondition(
       return_to_activity_criteria:
         cached.return_to_activity_criteria ?? base.return_to_activity_criteria,
       outcome_measures: cached.outcome_measures ?? base.outcome_measures,
+      _untranslatedFields: untranslatedFields(cached, base),
     };
   }
 
@@ -235,6 +248,7 @@ export async function getTranslatedCondition(
     return_to_activity_criteria:
       translated.return_to_activity_criteria ?? base.return_to_activity_criteria,
     outcome_measures: translated.outcome_measures ?? base.outcome_measures,
+    _untranslatedFields: untranslatedFields(translated, base),
   };
 }
 
