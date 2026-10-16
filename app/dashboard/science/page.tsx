@@ -62,10 +62,9 @@ export default function SciencePage() {
   useEffect(() => {
     fetch('/api/science/list')
       .then((res) => res.json())
-      .then((data) => {
-        setPapers(data.papers || []);
-        setLoading(false);
-      });
+      .then((data) => setPapers(data.papers || []))
+      .catch(() => setPapers([]))
+      .finally(() => setLoading(false));
   }, []);
 
   const filteredPapers = papers.filter((paper) =>

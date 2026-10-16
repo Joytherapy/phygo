@@ -31,8 +31,10 @@ const assessmentLower = normalize(textForMatching);
     let matchedKeyword: string | null = null;
 
 const match = data?.find((row) => {
-  const keywords = row.condition_keywords
+  // A row without keywords cannot match (and must not break the lookup for the others).
+  const keywords = String(row.condition_keywords ?? '')
   .split(',')
+  .filter((k: string) => k.trim())
   .map((k: string) => normalize(k.trim()));
 
   const found = keywords.find((keyword: string) => assessmentLower.includes(keyword));
@@ -50,8 +52,16 @@ const match = data?.find((row) => {
         .from('rehab_phases')
         .select('*')
         .eq('condition_id', match.id)
-        .order('phase_number', { ascending: true });
-      phases = phasesData || [];
+        .order('phase_number', { ascending: true })
+        .order('id', { ascending: false });
+      // Same rule as the condition page: one entry per phase number, keeping
+      // the most recent copy (a few protocols were imported twice).
+      const seen = new Set<number>();
+      phases = (phasesData || []).filter((p: any) => {
+        if (seen.has(p.phase_number)) return false;
+        seen.add(p.phase_number);
+        return true;
+      });
     }
 
     let finalMatch = match;
