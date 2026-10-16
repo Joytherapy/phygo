@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ownsPatient, requireVerifiedProfessional } from '@/lib/auth/sessionServer'
 import { consumeHourly, HOURLY_LIMITS, limitResponse } from '@/lib/rateLimit'
 import { serviceClient } from '@/lib/verification'
-import { DAILY_API, dailyHeaders, ROOM_NAME, roomNameFor, roomProperties } from '@/lib/videoCall'
+import { DAILY_API, dailyHeaders, deleteRoom, ROOM_NAME, roomNameFor, roomProperties } from '@/lib/videoCall'
 
 // Creates a private Daily room for one of the signed-in clinician's own
 // patients, and records the call on the server (video_calls), so the room a
@@ -63,7 +63,8 @@ export async function POST(req: NextRequest) {
       .select('room_name')
     for (const p of previous ?? []) {
       if (ROOM_NAME.test(p.room_name ?? '')) {
-        await fetch(`${DAILY_API}/rooms/${encodeURIComponent(p.room_name)}`, { method: 'DELETE', headers: dailyHeaders() }).catch(() => {})
+        const closed = await deleteRoom(p.room_name)
+        if (!closed.ok) console.error('earlier video call ended, Daily room not deleted:', closed.status)
       }
     }
     const { data: call, error } = await db

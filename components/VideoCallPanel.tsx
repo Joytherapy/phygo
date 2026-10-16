@@ -66,6 +66,9 @@ export default function VideoCallPanel({
   const [starting, setStarting] = useState(false)
   const [session, setSession] = useState<Session | null>(null)
   const [error, setError] = useState<string | null>(null)
+  // A call ended on the server whose Daily room could not be closed: the
+  // clinician can try again (the server answers 200 only once the room is gone).
+  const [unclosed, setUnclosed] = useState<string | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const t = useVerificationStrings()
   const { lang } = useLanguage()
@@ -136,18 +139,27 @@ export default function VideoCallPanel({
     setStarting(false)
   }
 
+  // The clinician ends the call on the server: no new tokens, room deleted.
+  const closeCall = async (callId: string) => {
+    const res = await fetch('/api/video-call/end', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ callId }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (res.ok) {
+      setUnclosed(null)
+      setError(null)
+    } else {
+      setUnclosed(data.code === 'room_not_closed' ? callId : null)
+      setError(data.code === 'room_not_closed' ? 'The call has ended, but the video room could not be closed.' : t.videoFailed)
+    }
+  }
+
   const endCall = async () => {
     if (!call) return
     setSession(null)
-    if (canStart) {
-      // The clinician ends the call on the server: no new tokens, room deleted.
-      const res = await fetch('/api/video-call/end', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ callId: call.id }),
-      })
-      if (!res.ok) setError(t.videoFailed)
-    }
+    if (canStart) await closeCall(call.id)
     loadActiveCall()
   }
 
@@ -210,7 +222,16 @@ export default function VideoCallPanel({
         {starting ? <Loader2 size={16} className="animate-spin" /> : <Video size={16} />}
         {starting ? 'Starting...' : 'Start Video Call'}
       </button>
-      {error && <p className="text-xs text-red-500 mt-2 text-center">{error}</p>}
+      {error && <p role="alert" className="text-xs text-red-500 mt-2 text-center">{error}</p>}
+      {unclosed && (
+        <button
+          onClick={() => closeCall(unclosed)}
+          className="mt-2 mx-auto flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
+        >
+          <PhoneOff size={13} />
+          Close video room
+        </button>
+      )}
     </div>
   )
 }

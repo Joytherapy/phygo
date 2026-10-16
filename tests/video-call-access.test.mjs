@@ -235,3 +235,41 @@ test('a stale call never blocks the clinician: it can be ended, and a new call r
   assert.deepEqual(active.map((c) => c.id), [fresh.id], 'one active call per patient');
   assert.equal((await post('/api/video-call/end', 'patientOne', { callId: fresh.id })).status, 403, 'the patient still cannot end it');
 });
+
+test('Daily refuses to delete the room: the call still ends, the clinician is told, and can close the room again', async () => {
+  const call = await start('physioA', P(2));
+  const roomName = fake.state.tables.video_calls.find((c) => c.id === call.id).room_name;
+  const attempts = () => fake.state.daily.deleteAttempts.filter((n) => n === roomName).length;
+  fake.state.daily.deleteFailures.push(500, 500);
+  const res = await post('/api/video-call/end', 'physioA', { callId: call.id });
+  assert.equal(res.status, 502, 'never a 200 while the room is still open');
+  assert.equal((await res.json()).code, 'room_not_closed');
+  assert.equal(attempts(), 2, 'deletion is tried twice');
+  assert.ok(!fake.state.daily.deleted.includes(roomName));
+  const row = fake.state.tables.video_calls.find((c) => c.id === call.id);
+  assert.equal(row.status, 'ended', 'no new token in the meantime');
+  const endedAt = row.ended_at;
+  const before = tokensIssued();
+  assert.equal((await token('physioA', call.id)).status, 410);
+  assert.equal((await token('patientTwo', call.id)).status, 410);
+  assert.equal(tokensIssued(), before, 'Daily was not asked for a token');
+  // Ending the same call again only retries the room.
+  assert.equal((await post('/api/video-call/end', 'patientTwo', { callId: call.id })).status, 403, 'the patient still cannot end it');
+  assert.equal((await post('/api/video-call/end', 'physioB', { callId: call.id })).status, 404, 'nor another clinician');
+  const retry = await post('/api/video-call/end', 'physioA', { callId: call.id });
+  assert.equal(retry.status, 200);
+  assert.ok(fake.state.daily.deleted.includes(roomName), 'the room is deleted on retry');
+  assert.equal(fake.state.tables.video_calls.find((c) => c.id === call.id).ended_at, endedAt, 'the end time is kept');
+});
+
+test('closing the room: one transient refusal is retried, and a room Daily no longer has counts as closed', async () => {
+  const call = await start('physioA', P(2));
+  const roomName = fake.state.tables.video_calls.find((c) => c.id === call.id).room_name;
+  fake.state.daily.deleteFailures.push(503);
+  assert.equal((await post('/api/video-call/end', 'physioA', { callId: call.id })).status, 200);
+  assert.ok(fake.state.daily.deleted.includes(roomName), 'deleted on the second attempt');
+  const gone = await start('physioA', P(2));
+  fake.state.daily.deleteFailures.push(404);
+  assert.equal((await post('/api/video-call/end', 'physioA', { callId: gone.id })).status, 200, 'already gone (404) is closed');
+  assert.equal(fake.state.tables.video_calls.find((c) => c.id === gone.id).status, 'ended');
+});

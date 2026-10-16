@@ -66,7 +66,7 @@ export const roomProperties = (now = Date.now()) => ({
 export type CallRole = "clinician" | "patient";
 
 export type CallAccess =
-  | { ok: true; role: CallRole; call: { id: string; room_name: string; room_url: string; patient_id: string } }
+  | { ok: true; role: CallRole; call: { id: string; room_name: string; room_url: string; patient_id: string; status: string } }
   | { ok: false; status: 404 | 410 | 503; error: string };
 
 /**
@@ -79,8 +79,9 @@ export async function callAccess(
   userId: string,
   callId: string,
   now = Date.now(),
-  // Ending a call: the clinician may always close their own active call, even
-  // an expired or an old public one, so a stale row never blocks a new call.
+  // Ending a call: the clinician may always close their own call, even an
+  // expired or an old public one, so a stale row never blocks a new call, and
+  // an ended one, so closing its Daily room can be tried again.
   { toEnd = false }: { toEnd?: boolean } = {},
 ): Promise<CallAccess> {
   const { data: call, error } = await db
@@ -98,8 +99,8 @@ export async function callAccess(
   if (patientError) return { ok: false, status: 503, error: "Service unavailable" };
   const role: CallRole | null = patient?.user_id === userId ? "clinician" : patient?.patient_user_id === userId ? "patient" : null;
   if (!role) return { ok: false, status: 404, error: "Call not found" };
-  if (call.status !== "active") return { ok: false, status: 410, error: "This call has ended" };
   if (toEnd) return { ok: true, role, call };
+  if (call.status !== "active") return { ok: false, status: 410, error: "This call has ended" };
   const started = Date.parse(call.created_at);
   if (!Number.isFinite(started) || now - started > ROOM_TTL_SECONDS * 1000) return { ok: false, status: 410, error: "This call has ended" };
   // Calls created before private rooms (public rooms), and rows whose room is
@@ -125,6 +126,21 @@ export function tokenProperties(roomName: string, role: CallRole, lang: unknown,
     // A role, never a name or an id: the label is all Daily receives about the person.
     user_name: (LABELS[typeof lang === "string" ? lang : ""] ?? LABELS.it)[role],
   };
+}
+
+/**
+ * Deletes a Daily room, which disconnects everyone in it and makes every token
+ * issued for it useless. Tried twice; a room Daily no longer has (404) counts
+ * as closed. Returns the last status Daily gave when it could not be deleted.
+ */
+export async function deleteRoom(roomName: string): Promise<{ ok: true } | { ok: false; status: number | "network error" }> {
+  let status: number | "network error" = "network error";
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const res = await fetch(`${DAILY_API}/rooms/${encodeURIComponent(roomName)}`, { method: "DELETE", headers: dailyHeaders() }).catch(() => null);
+    if (res && (res.ok || res.status === 404)) return { ok: true };
+    status = res?.status ?? "network error";
+  }
+  return { ok: false, status };
 }
 
 export const dailyHeaders = () => ({

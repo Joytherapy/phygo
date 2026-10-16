@@ -19,7 +19,8 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     requests: [],
     failTables: new Set(), // tables that answer 500 (to test error handling)
     // Daily stand-in: what PHYGO asked Daily for (room bodies, token properties, deleted rooms).
-    daily: { rooms: [], tokens: [], deleted: [] },
+    // deleteFailures: statuses the next room deletions answer with (e.g. [500, 500]), to test refusals.
+    daily: { rooms: [], tokens: [], deleted: [], deleteAttempts: [], deleteFailures: [] },
   };
 
   const server = http.createServer(async (req, res) => {
@@ -88,6 +89,9 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     }
     const dailyRoom = url.pathname.match(/^\/daily\/v1\/rooms\/([^/]+)$/);
     if (dailyRoom && req.method === 'DELETE') {
+      state.daily.deleteAttempts.push(decodeURIComponent(dailyRoom[1]));
+      const failure = state.daily.deleteFailures.shift();
+      if (failure) return send(failure, { error: failure === 404 ? 'not-found' : 'synthetic-failure' });
       state.daily.deleted.push(decodeURIComponent(dailyRoom[1]));
       return send(200, { deleted: true, name: decodeURIComponent(dailyRoom[1]) });
     }
