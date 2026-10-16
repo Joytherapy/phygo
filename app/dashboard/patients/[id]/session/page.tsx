@@ -13,6 +13,8 @@ import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
 import { useClinicalLocked } from '@/lib/useClinicalAccess'
 import AppointmentScheduler from '@/components/AppointmentScheduler'
 import { useUiStrings } from '@/contexts/LanguageContext'
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
+import ErrorState from '@/components/workspace/ErrorState'
 import { lazy } from '@/lib/lazy'
 
 const supabase = lazy(() => createBrowserClient(
@@ -27,6 +29,7 @@ type Patient = {
 
 export default function PatientSessionPage() {
   const ui = useUiStrings()
+  const t = useDashboardUi()
   const params = useParams()
   const router = useRouter()
   const locked = useClinicalLocked()
@@ -35,12 +38,15 @@ export default function PatientSessionPage() {
   const { setCurrentPatient } = usePatientContext()
   const [patient, setPatient] = useState<Patient | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [tab, setTab] = useState<'session' | 'video'>('session')
   const [savedMessage, setSavedMessage] = useState(false)
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
+      setLoadFailed(false)
+      const { data, error } = await supabase
         .from('patients')
         .select('id, name')
         .eq('id', patientId)
@@ -49,11 +55,16 @@ export default function PatientSessionPage() {
       if (data) {
         setPatient(data)
         setCurrentPatient({ id: data.id, name: data.name })
+      } else if (error && error.code !== 'PGRST116') {
+        // PGRST116 = no such patient (or not yours). Anything else is a failed
+        // request and gets Retry instead of a misleading "patient not found".
+        console.error('Patient could not be loaded:', error)
+        setLoadFailed(true)
       }
       setLoading(false)
     }
     load()
-  }, [patientId, setCurrentPatient])
+  }, [patientId, setCurrentPatient, reloadKey])
 
   if (loading) {
     return (
@@ -68,7 +79,19 @@ export default function PatientSessionPage() {
     return (
       <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b]">
         <Navbar />
-        <div className="pt-40 text-center text-ink/55 dark:text-white/40">{ui.patients.patientNotFound}</div>
+        <main id="main-content" className="max-w-xl mx-auto px-4 pt-40">
+          {loadFailed ? (
+            <ErrorState
+              message={t.home.loadErrorBody}
+              onRetry={() => {
+                setLoading(true)
+                setReloadKey((k) => k + 1)
+              }}
+            />
+          ) : (
+            <p className="text-center text-ink/60 dark:text-white/50">{ui.patients.patientNotFound}</p>
+          )}
+        </main>
       </div>
     )
   }
@@ -77,19 +100,22 @@ export default function PatientSessionPage() {
     <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
       <Navbar />
 
-      <div className="relative max-w-4xl mx-auto pt-40 pb-20 px-6">
+      <main id="main-content" className="relative max-w-4xl mx-auto pt-32 sm:pt-40 pb-20 px-4 sm:px-6">
         <motion.button
+          type="button"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onClick={() => router.push(`/dashboard/patients/${patientId}`)}
-          className="flex items-center gap-1.5 text-sm text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white mb-6 transition-colors"
+          className="-ml-2 inline-flex min-h-[40px] max-w-full items-center gap-1.5 rounded-full px-2 text-sm text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white mb-4 transition-colors"
         >
-          <ArrowLeft size={15} />
+          <ArrowLeft size={15} className="shrink-0" aria-hidden />
           {ui.patients.backToPatientName.replace('{name}', patient.name)}
         </motion.button>
 
-        <div className="flex items-center gap-2 mb-8">
+        <div className="flex flex-wrap items-center gap-2 mb-8" role="group">
           <button
+            type="button"
+            aria-pressed={tab === 'session'}
             onClick={() => setTab('session')}
             className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
               tab === 'session'
@@ -101,6 +127,8 @@ export default function PatientSessionPage() {
             {ui.patients.sessionNoteTab}
           </button>
           <button
+            type="button"
+            aria-pressed={tab === 'video'}
             onClick={() => setTab('video')}
             className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
               tab === 'video'
@@ -117,7 +145,7 @@ export default function PatientSessionPage() {
         <ClinicalAccessNotice />
 
         {savedMessage && (
-          <div className="mb-6 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400">
+          <div role="status" className="mb-6 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400">
             {ui.patients.noteSavedMessage.replace('{name}', patient.name)}
           </div>
         )}
@@ -146,7 +174,7 @@ export default function PatientSessionPage() {
         {tab === 'video' && (
           <VideoCallPanel patientId={patientId} canStart={!locked} />
         )}
-      </div>
+      </main>
     </div>
   )
 }

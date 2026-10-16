@@ -8,11 +8,14 @@ import EmptyState from '@/components/workspace/EmptyState'
 import ErrorState from '@/components/workspace/ErrorState'
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient'
 import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
+import { useWorkspaceMutation } from '@/lib/workspace/useWorkspaceMutation'
 import type { WorkspaceDocument, WorkspaceFolder, WorkspaceNotebook } from '@/lib/workspace/types'
 
 export default function WorkspaceTrashPage() {
   const router = useRouter()
   const ui = useWorkspaceUi()
+  const t = useDashboardUi()
   const supabase = getSupabaseBrowserClient()
 
   const [loading, setLoading] = useState(true)
@@ -56,7 +59,8 @@ export default function WorkspaceTrashPage() {
     ])
 
     if (f.error || d.error || n.error) {
-      setError(f.error?.message || d.error?.message || n.error?.message || 'Failed to load Trash')
+      console.error('Trash could not be loaded:', f.error || d.error || n.error)
+      setError('load_failed')
       setLoading(false)
       return
     }
@@ -71,9 +75,11 @@ export default function WorkspaceTrashPage() {
     load()
   }, [load])
 
+  const { mutate, actionError, dismissActionError } = useWorkspaceMutation(load)
+
   const restoreFolder = async (f: WorkspaceFolder) => {
     setFolders((prev) => prev.filter((x) => x.id !== f.id))
-    await fetch(`/api/workspace/folders/${f.id}`, {
+    await mutate(`/api/workspace/folders/${f.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ restore: true }),
@@ -82,7 +88,7 @@ export default function WorkspaceTrashPage() {
 
   const restoreDocument = async (d: WorkspaceDocument) => {
     setDocuments((prev) => prev.filter((x) => x.id !== d.id))
-    await fetch(`/api/workspace/documents/${d.id}`, {
+    await mutate(`/api/workspace/documents/${d.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ restore: true }),
@@ -92,18 +98,18 @@ export default function WorkspaceTrashPage() {
   const deleteForeverFolder = async (f: WorkspaceFolder) => {
     setFolders((prev) => prev.filter((x) => x.id !== f.id))
     setConfirmingDeleteId(null)
-    await fetch(`/api/workspace/folders/${f.id}?permanent=1`, { method: 'DELETE' })
+    await mutate(`/api/workspace/folders/${f.id}?permanent=1`, { method: 'DELETE' })
   }
 
   const deleteForeverDocument = async (d: WorkspaceDocument) => {
     setDocuments((prev) => prev.filter((x) => x.id !== d.id))
     setConfirmingDeleteId(null)
-    await fetch(`/api/workspace/documents/${d.id}?permanent=1`, { method: 'DELETE' })
+    await mutate(`/api/workspace/documents/${d.id}?permanent=1`, { method: 'DELETE' })
   }
 
   const restoreNotebook = async (nb: WorkspaceNotebook) => {
     setNotebooks((prev) => prev.filter((x) => x.id !== nb.id))
-    await fetch(`/api/workspace/notebooks/${nb.id}`, {
+    await mutate(`/api/workspace/notebooks/${nb.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ restore: true }),
@@ -113,12 +119,12 @@ export default function WorkspaceTrashPage() {
   const deleteForeverNotebook = async (nb: WorkspaceNotebook) => {
     setNotebooks((prev) => prev.filter((x) => x.id !== nb.id))
     setConfirmingDeleteId(null)
-    await fetch(`/api/workspace/notebooks/${nb.id}?permanent=1`, { method: 'DELETE' })
+    await mutate(`/api/workspace/notebooks/${nb.id}?permanent=1`, { method: 'DELETE' })
   }
 
   if (loading) {
     return (
-      <WorkspaceShell>
+      <WorkspaceShell actionError={actionError} onDismissActionError={dismissActionError}>
         <div className="flex items-center justify-center py-24 text-ink/55 dark:text-white/40">
           <Loader2 size={18} className="animate-spin" />
         </div>
@@ -128,8 +134,8 @@ export default function WorkspaceTrashPage() {
 
   if (error) {
     return (
-      <WorkspaceShell>
-        <ErrorState message={error} onRetry={load} />
+      <WorkspaceShell actionError={actionError} onDismissActionError={dismissActionError}>
+        <ErrorState message={t.workspace.loadError} onRetry={load} />
       </WorkspaceShell>
     )
   }
@@ -137,7 +143,7 @@ export default function WorkspaceTrashPage() {
   const empty = folders.length === 0 && documents.length === 0 && notebooks.length === 0
 
   return (
-    <WorkspaceShell>
+    <WorkspaceShell actionError={actionError} onDismissActionError={dismissActionError}>
       <h1 className="font-display text-3xl font-bold tracking-tight text-ink dark:text-white mb-8">{ui.nav.trash}</h1>
 
       {empty ? (
@@ -227,16 +233,19 @@ function TrashActions({
       <div className="flex items-center gap-1.5 shrink-0">
         <span className="text-xs text-red-500 font-medium mr-1">{ui.item.deleteForever}?</span>
         <button
+          type="button"
           onClick={onConfirmDelete}
-          className="rounded-full px-3 py-1.5 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
+          className="min-h-[40px] rounded-full px-3 py-1.5 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
         >
           {ui.item.deleteForever}
         </button>
         <button
+          type="button"
           onClick={onCancelDelete}
-          className="flex h-7 w-7 items-center justify-center rounded-full text-ink/55 dark:text-white/40 hover:bg-ink/5 dark:hover:bg-white/10"
+          aria-label={ui.dialog.cancel}
+          className="flex h-10 w-10 items-center justify-center rounded-full text-ink/55 dark:text-white/40 hover:bg-ink/5 dark:hover:bg-white/10"
         >
-          <X size={14} />
+          <X size={14} aria-hidden />
         </button>
       </div>
     )
@@ -244,17 +253,21 @@ function TrashActions({
   return (
     <div className="flex items-center gap-1.5 shrink-0">
       <button
+        type="button"
         onClick={onRestore}
-        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ink/60 dark:text-white/60 border border-black/10 dark:border-white/10 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+        className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ink/60 dark:text-white/60 border border-black/10 dark:border-white/10 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
       >
         <RotateCcw size={12} />
         {ui.item.restore}
       </button>
       <button
+        type="button"
         onClick={onAskDelete}
-        className="flex h-7 w-7 items-center justify-center rounded-full text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-colors"
+        aria-label={ui.item.deleteForever}
+        title={ui.item.deleteForever}
+        className="flex h-10 w-10 items-center justify-center rounded-full text-red-500/80 hover:bg-red-500/10 hover:text-red-500 transition-colors"
       >
-        <Trash2 size={14} />
+        <Trash2 size={14} aria-hidden />
       </button>
     </div>
   )

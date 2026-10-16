@@ -39,17 +39,19 @@ export default function WorkspaceHeader({
           {subtitle && <p className="mt-1 text-sm text-ink/60 dark:text-white/50">{subtitle}</p>}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
+            type="button"
             onClick={() => setNewFolderOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+            className="inline-flex min-h-[40px] items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
           >
             <FolderPlus size={14} />
             {ui.home.newFolder}
           </button>
           <button
+            type="button"
             onClick={() => setNewNotebookOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
+            className="inline-flex min-h-[40px] items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
           >
             <BookOpen size={14} />
             {ui.home.newNotebook}
@@ -61,6 +63,8 @@ export default function WorkspaceHeader({
       <div className="relative mt-5">
         <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
         <input
+          type="search"
+          aria-label={ui.search.placeholder}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={ui.search.placeholder}

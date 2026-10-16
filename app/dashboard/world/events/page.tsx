@@ -7,6 +7,8 @@ import { Search, Sparkles, Wifi, MapPin, SlidersHorizontal, X, Building2, ArrowU
 import Navbar from '@/components/Navbar'
 import EventCard, { type EventRecord } from '@/components/EventCard'
 import { useUiStrings } from '@/contexts/LanguageContext'
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
+import ErrorState from '@/components/workspace/ErrorState'
 
 const PAGE_SIZE = 15
 
@@ -51,6 +53,7 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
 
 export default function EventsPage() {
   const ui = useUiStrings()
+  const t = useDashboardUi()
   const router = useRouter()
 
   const [query, setQuery] = useState('')
@@ -61,6 +64,8 @@ export default function EventsPage() {
   const [total, setTotal] = useState(0)
   const [offset, setOffset] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [loadingMore, setLoadingMore] = useState(false)
 
   const [featured, setFeatured] = useState<EventRecord[]>([])
@@ -91,19 +96,26 @@ export default function EventsPage() {
   useEffect(() => {
     const handle = setTimeout(() => {
       setLoading(true)
+      setLoadError(false)
       fetch(`/api/events/list?${buildParams({}, 0)}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setEvents(data.events || [])
+        .then(async (res) => {
+          const data = await res.json().catch(() => ({}))
+          // A failed request used to render as "no events found".
+          if (!res.ok || !Array.isArray(data.events)) throw new Error(`events list: ${res.status}`)
+          setEvents(data.events)
           setTotal(data.total || 0)
           setOffset(0)
           setLoading(false)
         })
-        .catch(() => setLoading(false))
+        .catch((err) => {
+          console.error('Events could not be loaded:', err)
+          setLoadError(true)
+          setLoading(false)
+        })
     }, 250)
     return () => clearTimeout(handle)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, filters])
+  }, [query, filters, reloadKey])
 
   // Featured / Online rails — independent of the active filters, hidden
   // once the user starts filtering/searching so the page doesn't feel
@@ -346,6 +358,8 @@ export default function EventsPage() {
           <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
             <p className="text-sm text-ink/60 dark:text-white/50">{ui.events.loadingEvents}</p>
           </div>
+        ) : loadError ? (
+          <ErrorState message={t.library.loadError} onRetry={() => setReloadKey((k) => k + 1)} />
         ) : events.length === 0 ? (
           <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
             <p className="text-sm text-ink/60 dark:text-white/50">{ui.events.noEventsFound}</p>

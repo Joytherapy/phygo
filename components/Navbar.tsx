@@ -12,6 +12,7 @@ import { APP_LANGS } from "@/lib/i18n/uiStrings";
 import { useRoleUi } from "@/lib/i18n/roleStrings";
 import { useRoleTheme } from "@/contexts/RoleThemeContext";
 import { useQuizUi } from "@/lib/i18n/quizStrings";
+import { useDashboardUi } from "@/lib/i18n/dashboardStrings";
 import SearchModal from "./SearchModal";
 import LibraryNavMenu, { libraryLinkHrefs } from "./LibraryNavMenu";
 import { lazy } from "@/lib/lazy";
@@ -69,6 +70,7 @@ export default function Navbar() {
   const ui = useUiStrings();
   const roleUi = useRoleUi();
   const quizUi = useQuizUi();
+  const t = useDashboardUi();
   const [initials, setInitials] = useState("··");
   // Profile photo chosen on the Profile page (profiles.avatar_url, a public
   // Supabase Storage URL — see app/dashboard/profile/page.tsx). Falls back to
@@ -116,9 +118,29 @@ export default function Navbar() {
   // Mobile menu rows: no underline space, so active is a filled dot + full
   // opacity/weight instead.
   const mobileLinkClass = (active: boolean) =>
-    `flex items-center gap-2 text-sm py-1.5 transition-colors ${
+    `flex items-center gap-2 text-sm min-h-[44px] transition-colors ${
       active ? "font-semibold text-ink dark:text-white" : "font-medium text-ink/80 dark:text-white/80"
     }`;
+  // Hover menus (Library, World, language, account) also open on click/tap and
+  // from the keyboard: Enter/Space opens, Escape closes and focus leaving the
+  // menu closes it. Before, they only reacted to mouse hover, so keyboard and
+  // touch users could not reach Profile, Workspace or Sign out on tablets.
+  const menuProps = (setter: (v: boolean) => void) => ({
+    onMouseEnter: () => setter(true),
+    onMouseLeave: () => setter(false),
+    onKeyDown: (e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setter(false);
+        (e.currentTarget.querySelector("button") as HTMLButtonElement | null)?.focus();
+      }
+    },
+    onBlur: (e: React.FocusEvent<HTMLDivElement>) => {
+      if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setter(false);
+    },
+  });
+  const iconButtonClass =
+    "flex h-10 w-10 items-center justify-center rounded-full text-ink/60 hover:text-ink hover:bg-ink/5 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/10 transition-colors";
+
   const [dark, setDark] = useState(() => {
     if (typeof window === "undefined") return true;
     const stored = window.localStorage.getItem("phygo-theme");
@@ -163,6 +185,12 @@ export default function Navbar() {
   useEffect(() => {
     if (open) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
   useEffect(() => {
@@ -226,14 +254,18 @@ export default function Navbar() {
           )}
 
           {isDashboard && (
-            <div
-              className="relative"
-              onMouseEnter={() => setLibraryOpen(true)}
-              onMouseLeave={() => setLibraryOpen(false)}
-            >
-              <button aria-current={isLibraryNavActive ? "page" : undefined} className={desktopDropdownTriggerClass(isLibraryNavActive)}>
+            <div className="relative" {...menuProps(setLibraryOpen)}>
+              <button
+                type="button"
+                aria-current={isLibraryNavActive ? "page" : undefined}
+                aria-expanded={libraryOpen}
+                aria-haspopup="true"
+                onClick={() => setLibraryOpen(true)}
+                className={desktopDropdownTriggerClass(isLibraryNavActive)}
+              >
                 {ui.nav.library}
                 <svg
+                  aria-hidden="true"
                   width="10"
                   height="6"
                   viewBox="0 0 10 6"
@@ -285,14 +317,18 @@ export default function Navbar() {
           )}
 
           {isDashboard && (
-            <div
-              className="relative"
-              onMouseEnter={() => setWorldOpen(true)}
-              onMouseLeave={() => setWorldOpen(false)}
-            >
-              <button aria-current={isWorldNavActive ? "page" : undefined} className={desktopDropdownTriggerClass(isWorldNavActive)}>
+            <div className="relative" {...menuProps(setWorldOpen)}>
+              <button
+                type="button"
+                aria-current={isWorldNavActive ? "page" : undefined}
+                aria-expanded={worldOpen}
+                aria-haspopup="true"
+                onClick={() => setWorldOpen(true)}
+                className={desktopDropdownTriggerClass(isWorldNavActive)}
+              >
                 {ui.nav.world}
                 <svg
+                  aria-hidden="true"
                   width="10"
                   height="6"
                   viewBox="0 0 10 6"
@@ -354,9 +390,10 @@ export default function Navbar() {
                 {currentPatient.name}
               </span>
               <button
-                aria-label="Clear current patient"
+                type="button"
+                aria-label={t.nav.clearPatient}
                 onClick={() => setCurrentPatient(null)}
-                className="flex h-4 w-4 items-center justify-center rounded-full hover:bg-[#4F7CFF]/20 transition-colors"
+                className="-my-1 flex h-7 w-7 items-center justify-center rounded-full hover:bg-[#4F7CFF]/20 transition-colors"
               >
                 <X size={11} />
               </button>
@@ -365,25 +402,26 @@ export default function Navbar() {
 
                    {isDashboard && (
             <button
-              aria-label="Search"
+              type="button"
+              aria-label={t.nav.search}
               onClick={() => setSearchOpen(true)}
               data-cursor-hover
-              className="flex h-9 w-9 items-center justify-center rounded-full text-ink/60 hover:text-ink hover:bg-ink/5 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/10 transition-colors"
+              className={iconButtonClass}
             >
               <Search size={17} />
             </button>
           )}
 
           {isDashboard && (
-            <div
-              className="relative hidden sm:block"
-              onMouseEnter={() => setLangOpen(true)}
-              onMouseLeave={() => setLangOpen(false)}
-            >
+            <div className="relative hidden sm:block" {...menuProps(setLangOpen)}>
               <button
-                aria-label="Change language"
+                type="button"
+                aria-label={t.nav.changeLanguage}
+                aria-expanded={langOpen}
+                aria-haspopup="true"
+                onClick={() => setLangOpen(true)}
                 data-cursor-hover
-                className="flex items-center gap-1 h-9 px-2.5 rounded-full text-ink/60 hover:text-ink hover:bg-ink/5 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/10 transition-colors text-[11px] font-bold uppercase tracking-wide"
+                className="flex items-center gap-1 h-10 px-2.5 rounded-full text-ink/60 hover:text-ink hover:bg-ink/5 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/10 transition-colors text-[11px] font-bold uppercase tracking-wide"
               >
                 <Globe size={15} />
                 {lang}
@@ -400,9 +438,10 @@ export default function Navbar() {
                       {APP_LANGS.map((l) => (
                         <button
                           key={l}
+                          type="button"
                           onClick={() => setLang(l)}
                           aria-current={l === lang ? "true" : undefined}
-                          className={`flex-1 rounded-lg py-1.5 text-[10px] font-bold uppercase tracking-wide transition-colors ${
+                          className={`flex-1 rounded-lg py-2 text-[11px] font-bold uppercase tracking-wide transition-colors ${
                             l === lang
                               ? "bg-gradient-to-r from-[var(--brand-from)] to-[var(--brand-to)] text-white brand-glow"
                               : "text-ink/55 dark:text-white/40 hover:text-ink dark:hover:text-white"
@@ -419,22 +458,24 @@ export default function Navbar() {
           )}
 
           <button
-            aria-label="Toggle dark mode"
+            type="button"
+            aria-label={t.nav.toggleTheme}
             onClick={() => setDark((d) => !d)}
             data-cursor-hover
-            className="flex h-9 w-9 items-center justify-center rounded-full text-ink/60 hover:text-ink hover:bg-ink/5 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/10 transition-colors"
+            className={iconButtonClass}
           >
             {mounted ? (dark ? <Sun size={17} /> : <Moon size={17} />) : <span className="block h-[17px] w-[17px]" />}
           </button>
 
           {isDashboard ? (
-            <div
-              className="relative hidden sm:block"
-              onMouseEnter={() => setAccountOpen(true)}
-              onMouseLeave={() => setAccountOpen(false)}
-            >
+            <div className="relative hidden sm:block" {...menuProps(setAccountOpen)}>
               <button
-                className={`flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-white text-xs font-bold brand-glow ${avatarUrl ? "ring-2 ring-white/70 dark:ring-white/10" : ""}`}
+                type="button"
+                aria-label={t.nav.account}
+                aria-expanded={accountOpen}
+                aria-haspopup="true"
+                onClick={() => setAccountOpen(true)}
+                className={`flex h-10 w-10 items-center justify-center overflow-hidden rounded-full text-white text-xs font-bold brand-glow ${avatarUrl ? "ring-2 ring-white/70 dark:ring-white/10" : ""}`}
                 style={avatarUrl ? undefined : { background: "linear-gradient(135deg, color-mix(in srgb, var(--brand-from) 100%, white 20%) 0%, var(--brand-from) 45%, var(--brand-to) 100%)" }}
               >
                 {avatarUrl ? (
@@ -470,6 +511,7 @@ export default function Navbar() {
                         </a>
                       )}
                       <button
+                        type="button"
                         onClick={handleSignOut}
                         className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 dark:text-white/70 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
                       >
@@ -492,9 +534,12 @@ export default function Navbar() {
           )}
 
           <button
-            aria-label="Open menu"
+            type="button"
+            aria-label={open ? t.nav.closeMenu : t.nav.openMenu}
+            aria-expanded={open}
+            aria-controls="mobile-nav-menu"
             onClick={() => setOpen((o) => !o)}
-            className="md:hidden flex h-9 w-9 items-center justify-center rounded-full text-ink dark:text-white"
+            className="md:hidden flex h-10 w-10 items-center justify-center rounded-full text-ink dark:text-white"
           >
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -502,13 +547,14 @@ export default function Navbar() {
       </nav>
 
       {currentPatient && (
-        <div className="sm:hidden absolute top-16 left-4 right-4 flex items-center justify-center gap-1.5 rounded-full py-1.5 bg-[#4F7CFF]/10 text-[#4F7CFF]">
+        <div className="sm:hidden absolute top-16 left-4 right-4 flex items-center justify-center gap-1.5 rounded-full pl-3 pr-1 py-1.5 bg-[#4F7CFF]/10 text-[#4F7CFF]">
           <User size={12} />
-          <span className="text-xs font-semibold">{ui.nav.currentPatient}: {currentPatient.name}</span>
+          <span className="min-w-0 truncate text-xs font-semibold">{ui.nav.currentPatient}: {currentPatient.name}</span>
           <button
-            aria-label="Clear current patient"
+            type="button"
+            aria-label={t.nav.clearPatient}
             onClick={() => setCurrentPatient(null)}
-            className="ml-1 flex h-4 w-4 items-center justify-center rounded-full hover:bg-[#4F7CFF]/20 transition-colors"
+            className="-my-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-[#4F7CFF]/20 transition-colors"
           >
             <X size={11} />
           </button>
@@ -519,7 +565,8 @@ export default function Navbar() {
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute top-16 left-4 right-4 glass-strong rounded-xl2 shadow-soft p-4 flex flex-col gap-3 md:hidden"
+          id="mobile-nav-menu"
+          className="absolute top-16 left-4 right-4 max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain rounded-xl2 border border-black/10 dark:border-white/10 bg-white/[0.97] dark:bg-[#14161c]/[0.97] backdrop-blur-2xl shadow-soft p-4 flex flex-col gap-1 md:hidden"
         >
           {!isDashboard &&
             linksBeforeLibrary.map((l) => (
@@ -627,9 +674,10 @@ export default function Navbar() {
                 {APP_LANGS.map((l) => (
                   <button
                     key={l}
+                    type="button"
                     onClick={() => setLang(l)}
                     aria-current={l === lang ? "true" : undefined}
-                    className={`flex-1 rounded-lg py-1.5 text-[10px] font-bold uppercase tracking-wide transition-colors ${
+                    className={`flex-1 rounded-lg min-h-[40px] text-xs font-bold uppercase tracking-wide transition-colors ${
                       l === lang
                         ? "bg-gradient-to-r from-[var(--brand-from)] to-[var(--brand-to)] text-white brand-glow"
                         : "text-ink/55 dark:text-white/40"
@@ -655,13 +703,26 @@ export default function Navbar() {
             </>
           )}
 
+          {isDashboard && (
+            <a
+              href="/dashboard/profile"
+              onClick={() => setOpen(false)}
+              aria-current={pathname?.startsWith("/dashboard/profile") ? "page" : undefined}
+              className={mobileLinkClass(pathname?.startsWith("/dashboard/profile") ?? false)}
+            >
+              <User size={14} />
+              {ui.nav.profile}
+            </a>
+          )}
+
           {isDashboard ? (
             <button
+              type="button"
               onClick={() => {
                 setOpen(false);
                 handleSignOut();
               }}
-              className="flex items-center gap-2 rounded-full bg-ink dark:bg-white text-white dark:text-ink text-sm font-semibold px-4 py-2 mt-1"
+              className="flex items-center justify-center gap-2 rounded-full bg-ink dark:bg-white text-white dark:text-ink text-sm font-semibold px-4 min-h-[44px] mt-2"
             >
               <LogOut size={14} />
               {ui.nav.signOut}
