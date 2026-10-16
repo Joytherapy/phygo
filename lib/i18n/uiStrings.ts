@@ -1137,6 +1137,11 @@ interface UiDict {
     tipLabel: string;
     zoneLabel: string;
   };
+  liveStructuring: {
+    writeInstead: string;
+    textInputPlaceholder: string;
+    generateNote: string;
+  };
 }
 
 export const UI_STRINGS: Record<AppLang, UiDict> = {
@@ -2541,6 +2546,11 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       tipLabel: 'Suggerimento',
       zoneLabel: 'Zona',
     },
+    liveStructuring: {
+      writeInstead: 'Scrivi invece',
+      textInputPlaceholder: 'Scrivi qui le tue osservazioni sulla seduta...',
+      generateNote: 'Genera nota',
+    },
   },
   en: {
     clinicalActionBar: {
@@ -3942,6 +3952,11 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       instructionsLabel: 'Instructions',
       tipLabel: 'Tip',
       zoneLabel: 'Zone',
+    },
+    liveStructuring: {
+      writeInstead: 'Write instead',
+      textInputPlaceholder: 'Write your session observations here...',
+      generateNote: 'Generate note',
     },
   },
   es: {
@@ -5345,6 +5360,11 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       tipLabel: 'Consejo',
       zoneLabel: 'Zona',
     },
+    liveStructuring: {
+      writeInstead: 'Escribir en su lugar',
+      textInputPlaceholder: 'Escribe aquí tus observaciones sobre la sesión...',
+      generateNote: 'Generar nota',
+    },
   },
   fr: {
     clinicalActionBar: {
@@ -6746,6 +6766,11 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       instructionsLabel: 'Instructions',
       tipLabel: 'Conseil',
       zoneLabel: 'Zone',
+    },
+    liveStructuring: {
+      writeInstead: 'Écrire plutôt',
+      textInputPlaceholder: 'Écrivez ici vos observations sur la séance...',
+      generateNote: 'Générer la note',
     },
   },
 };

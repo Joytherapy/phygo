@@ -27,6 +27,7 @@ import {
 
 import jsPDF from "jspdf";
 import { refusalMessage, useVerificationStrings } from "@/lib/i18n/verificationStrings";
+import { useUiStrings } from "@/contexts/LanguageContext";
 import { createBrowserClient } from "@supabase/ssr";
 
 const supabase = lazy(() => createBrowserClient(
@@ -72,6 +73,7 @@ export default function LiveStructuring({
   onSaved?: () => void;
 }) {
   const verificationUi = useVerificationStrings();
+  const ui = useUiStrings().liveStructuring;
   const [phase, setPhase] = useState<Phase>("idle");
 
   const [phrases, setPhrases] = useState<Phrase[]>([]);
@@ -1719,7 +1721,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
       </div>
     )}
 
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {exerciseEntries.map((ex: any, i: number) => {
         const key = ex.internal_id || String(i);
         const isOpen = expandedExercise === key;
@@ -1728,26 +1730,26 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
         return (
           <div
             key={key}
-            className={`rounded-2xl bg-mist/60 dark:bg-white/5 p-4 flex flex-col gap-3 ${(isOpen || isEditing) ? "sm:col-span-2" : ""}`}
+            className={`min-w-0 rounded-2xl bg-mist/60 dark:bg-white/5 p-3 sm:p-4 flex flex-col gap-3 ${(isOpen || isEditing) ? "sm:col-span-2" : ""}`}
           >
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               <div
                 onClick={() => !isEditing && hasDetails && setExpandedExercise(isOpen ? null : key)}
-                className={`flex gap-3 flex-1 min-w-0 ${!isEditing && hasDetails ? "cursor-pointer" : ""}`}
+                className={`flex gap-2 sm:gap-3 flex-1 min-w-0 ${!isEditing && hasDetails ? "cursor-pointer" : ""}`}
               >
                 {ex.media?.image_url ? (
                   <img
                     src={ex.media.image_url}
                     alt={ex.name}
-                    className="h-16 w-16 rounded-xl object-cover shrink-0 bg-black/5 dark:bg-white/10"
+                    className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl object-cover shrink-0 bg-black/5 dark:bg-white/10"
                   />
                 ) : (
-                  <div className="h-16 w-16 rounded-xl shrink-0 bg-black/5 dark:bg-white/10 flex items-center justify-center text-[10px] text-ink/30 dark:text-white/30 text-center px-1">
+                  <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl shrink-0 bg-black/5 dark:bg-white/10 flex items-center justify-center text-[10px] text-ink/30 dark:text-white/30 text-center px-1">
                     No image
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-ink dark:text-white truncate">
+                  <p className="text-sm font-semibold text-ink dark:text-white line-clamp-2 [overflow-wrap:anywhere] sm:line-clamp-1">
                     {ex.name}
                   </p>
                   {ex.primary_muscle && (
@@ -1777,7 +1779,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                   </div>
                 </div>
               </div>
-              <div className="flex items-start gap-1 shrink-0">
+              <div className="flex items-start gap-0.5 sm:gap-1 shrink-0">
                 <button
                   onClick={() => setEditingExercise(isEditing ? null : key)}
                   className="p-1.5 rounded-lg text-ink/55 dark:text-white/40 hover:bg-black/5 dark:hover:bg-white/10 hover:text-electric transition-colors"
@@ -2005,7 +2007,7 @@ style={{
 
             >
               <FileText size={13} />
-Write instead
+{ui.writeInstead}
 </button>
 )}
 {variant === "full" && (
@@ -2094,7 +2096,7 @@ Write instead
             <textarea
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
-              placeholder="Scrivi qui le tue osservazioni sulla seduta..."
+              placeholder={ui.textInputPlaceholder}
               className="w-full rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 p-2.5 text-xs text-ink/80 dark:text-white/80 focus:outline-none focus:ring-2 focus:ring-electric/30"
               rows={4}
             />
@@ -2104,7 +2106,7 @@ Write instead
               data-cursor-hover
               className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-electric to-emerald px-4 py-2 text-[11px] font-semibold text-white shadow-glow transition-transform hover:scale-[1.03] disabled:opacity-50"
             >
-              Genera nota
+              {ui.generateNote}
             </button>
           </div>
         )}
