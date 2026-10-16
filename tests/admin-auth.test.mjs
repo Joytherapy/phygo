@@ -153,39 +153,41 @@ test('the daily cron still runs: it needs CRON_SECRET and its calls to the batch
   assert.match(String(body.summarize?.message), /sintesi/);
 });
 
-test('the cron reports a reply that is not JSON instead of crashing (12 and 15 Oct 2026)', async () => {
-  // lib/scienceCron.ts compiled to plain JavaScript, against a stand-in for a
-  // platform error page (HTML), a JSON error and a server that is not there.
+test('the cron reports a reply that is not JSON, or an exception, instead of crashing', async () => {
+  // lib/scienceCron.ts compiled to plain JavaScript, against handlers that
+  // answer an HTML error page, a JSON error, or throw.
   const { default: ts } = await import('typescript');
   const { mkdtempSync, readFileSync, writeFileSync, rmSync } = await import('node:fs');
   const { tmpdir } = await import('node:os');
   const { join } = await import('node:path');
   const dir = mkdtempSync(join(tmpdir(), 'phygo-cron-'));
-  const http = await import('node:http');
-  const server = http.createServer((req, res) => {
-    if (req.url === '/html') {
-      res.writeHead(504, { 'content-type': 'text/html' });
-      return res.end('<!DOCTYPE html><html><body>An error occurred</body></html>');
-    }
-    res.writeHead(500, { 'content-type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Import failed' }));
-  });
-  await new Promise((ok) => server.listen(0, '127.0.0.1', ok));
-  const base = `http://127.0.0.1:${server.address().port}`;
   try {
     const out = ts.transpileModule(readFileSync('lib/scienceCron.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 } }).outputText;
     writeFileSync(join(dir, 'scienceCron.mjs'), out);
     const { step } = await import(join(dir, 'scienceCron.mjs'));
-    const html = await step(`${base}/html`, {});
-    assert.deepEqual(html, { status: 504, ok: false, error: 'non-JSON response (text/html)' }, 'no exception: status and type are reported');
-    const json = await step(`${base}/json`, {});
+    const html = await step('html', async () => new Response('<!DOCTYPE html><html><body>Authentication Required</body></html>', { status: 401, headers: { 'content-type': 'text/html' } }));
+    assert.deepEqual(html, { status: 401, ok: false, error: 'non-JSON response (text/html)' }, 'no exception: status and type are reported');
+    const json = await step('json', async () => Response.json({ error: 'Import failed' }, { status: 500 }));
     assert.deepEqual(json, { status: 500, ok: false, data: { error: 'Import failed' } });
-    const down = await step('http://127.0.0.1:9/', {});
-    assert.deepEqual(down, { status: 0, ok: false, error: 'unreachable' });
+    const thrown = await step('throws', async () => { throw new Error('boom'); });
+    assert.deepEqual(thrown, { status: 0, ok: false, error: 'exception' });
   } finally {
-    server.close();
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('the cron runs the batch routes in its own function, never over HTTP to its deployment URL', async () => {
+  // On 12, 15 and 16 Oct 2026 the cron fetched its own generated deployment URL,
+  // which Vercel's Standard Deployment Protection answers with an HTML login
+  // page: the batch routes were never reached. The test environment has no
+  // deployment protection, so this is checked on the source.
+  const { readFileSync } = await import('node:fs');
+  const source = readFileSync('app/api/cron/science-daily/route.ts', 'utf8');
+  assert.doesNotMatch(source, /\bfetch\s*\(/, 'no fetch() in the cron route');
+  assert.doesNotMatch(readFileSync('lib/scienceCron.ts', 'utf8'), /\bfetch\s*\(/, 'no fetch() in its helper');
+  assert.doesNotMatch(source, /VERCEL_URL/, 'no generated deployment URL');
+  assert.match(source, /from '@\/app\/api\/science\/fetch-sources\/route'/);
+  assert.match(source, /from '@\/app\/api\/science\/summarize-all\/route'/);
 });
 
 test('a maintenance token set to the same value as CRON_SECRET does not reopen the other admin routes', async () => {

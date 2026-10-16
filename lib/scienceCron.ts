@@ -1,27 +1,31 @@
 // One step of the daily science cron (app/api/cron/science-daily/route.ts).
 export type Step = { status: number; ok: boolean; data?: unknown; error?: string };
 
-// Calls one science batch route and never throws: a reply that is not JSON
-// (for example a platform error page after a timeout) is reported with its
-// status and content type instead of crashing the cron, which is how it
-// failed on 12 and 15 Oct 2026 ("Unexpected token '<'"). Bodies are not
-// logged.
-export async function step(url: string, headers: Record<string, string>): Promise<Step> {
+// Runs one science batch route handler in the same function and never throws:
+// an exception, or a reply that is not JSON, is reported with its status and
+// content type instead of crashing the cron. Bodies are not logged.
+//
+// The handlers are called directly, not over HTTP. The cron used to fetch its
+// own deployment URL (phygo-<hash>.vercel.app), which Vercel's Standard
+// Deployment Protection answers with its HTML login page: on 12, 15 and 16 Oct
+// 2026 the two batch routes were never reached ("Unexpected token '<'", and no
+// log line for either route in the same minute).
+export async function step(name: string, run: () => Promise<Response>): Promise<Step> {
   let res: Response;
   try {
-    res = await fetch(url, { headers, cache: 'no-store' });
+    res = await run();
   } catch {
-    console.error(`science cron: ${new URL(url).pathname} unreachable`);
-    return { status: 0, ok: false, error: 'unreachable' };
+    console.error(`science cron: ${name} threw`);
+    return { status: 0, ok: false, error: 'exception' };
   }
   const type = res.headers.get('content-type') ?? '';
   const text = await res.text();
   try {
     const data = JSON.parse(text);
-    if (!res.ok) console.error(`science cron: ${new URL(url).pathname} answered ${res.status}`);
+    if (!res.ok) console.error(`science cron: ${name} answered ${res.status}`);
     return { status: res.status, ok: res.ok, data };
   } catch {
-    console.error(`science cron: ${new URL(url).pathname} answered ${res.status} with ${type || 'no content type'}, not JSON`);
+    console.error(`science cron: ${name} answered ${res.status} with ${type || 'no content type'}, not JSON`);
     return { status: res.status, ok: false, error: `non-JSON response (${type || 'no content type'})` };
   }
 }
