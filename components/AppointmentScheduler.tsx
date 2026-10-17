@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Clock, Video, MapPin, Check, X, Loader2, Plus, Sparkles, CalendarX } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useAgendaUi, localeForLang } from '@/lib/i18n/agendaStrings'
+import { MY_PHYGO_STRINGS } from '@/lib/i18n/myPhygoStrings'
 import { cancelAppointment } from '@/lib/appointments'
 import { lazy } from '@/lib/lazy'
 
@@ -46,6 +47,7 @@ export default function AppointmentScheduler({
   const { lang } = useLanguage()
   const ui = useAgendaUi()
   const locale = localeForLang(lang)
+  const sched = MY_PHYGO_STRINGS[lang].scheduler
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [showPicker, setShowPicker] = useState(false)
@@ -263,12 +265,16 @@ export default function AppointmentScheduler({
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => updateStatus(req.id, 'confirmed')}
+                  aria-label={sched.acceptRequest}
+                  title={sched.acceptRequest}
                   className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white hover:scale-110 transition-transform"
                 >
                   <Check size={14} />
                 </button>
                 <button
                   onClick={() => updateStatus(req.id, 'cancelled')}
+                  aria-label={sched.declineRequest}
+                  title={sched.declineRequest}
                   className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white hover:scale-110 transition-transform"
                 >
                   <X size={14} />
@@ -480,7 +486,7 @@ export default function AppointmentScheduler({
                   />
                   {new Date(a.scheduled_at).toLocaleDateString(locale, { day: 'numeric', month: 'short' })} · {a.session_type === 'video' ? ui.common.video : ui.common.inPersonShort}
                 </span>
-                <span className="text-ink/30 dark:text-white/30 capitalize">{a.status}</span>
+                <span className="text-ink/30 dark:text-white/30">{sched.status[a.status] ?? a.status}</span>
               </div>
             ))}
           </div>
