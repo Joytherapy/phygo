@@ -39,10 +39,24 @@ function JoinInvite() {
     setLoading(true)
     setError(null)
 
-    const { error: signUpError } = await supabase.auth.signUp({ email, password })
-
-    if (signUpError) {
-      setError(localizeAuthError(signUpError.message, ENTRY_STRINGS[lang].login))
+    // The invitation is accepted by a signed-in account only (the database
+    // refuses anonymous calls). A new account gets a session at once unless
+    // e-mail confirmation is on; an existing account (for example after
+    // confirming the e-mail) signs in with the same e-mail and password.
+    const signUp = await supabase.auth.signUp({ email, password })
+    let session = signUp.data.session
+    if (signUp.error) {
+      const exists = /already (been )?registered/i.test(signUp.error.message)
+      const signIn = exists ? await supabase.auth.signInWithPassword({ email, password }) : null
+      if (!signIn || signIn.error) {
+        setError(localizeAuthError((signIn?.error ?? signUp.error).message, ENTRY_STRINGS[lang].login))
+        setLoading(false)
+        return
+      }
+      session = signIn.data.session
+    }
+    if (!session) {
+      setError(t.inviteConfirmEmail)
       setLoading(false)
       return
     }

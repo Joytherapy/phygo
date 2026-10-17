@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
-import { requireQuizUser } from '@/lib/quiz/authServer'
+import { requireAdmin } from '@/lib/auth/adminServer'
 import { isQuizSubject, isQuizDifficulty, isQuizLanguage, type QuizLanguage } from '@/lib/quiz/subjects'
 import { lazy } from '@/lib/lazy'
 
@@ -13,12 +13,9 @@ import { lazy } from '@/lib/lazy'
 // by many small requests (same pattern as /api/quiz/generate's lazy
 // top-up) instead of one long-running request that could time out.
 //
-// SECURITY NOTE: gated the same way as every other quiz route (any logged-in
-// user, via requireQuizUser) rather than an admin-only check, because this
-// app has no admin-role concept yet. Acceptable while PHYGO has a single
-// real user (the founder, testing); flag for a real admin check before
-// wider launch, since a malicious authenticated user could otherwise burn
-// OpenAI budget by hitting this repeatedly.
+// Administrators only (a signed-in admin or the maintenance token): each call
+// spends an OpenAI request and deletes shared questions the model rejects, so
+// it is not open to every account.
 const adminSupabase = lazy(() => createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!))
 const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }))
 
@@ -101,8 +98,8 @@ Includi il campo "index" per permettere l'abbinamento anche se l'ordine cambia. 
 }
 
 export async function POST(req: NextRequest) {
-  const { unauthorized } = await requireQuizUser()
-  if (unauthorized) return unauthorized
+  const denied = await requireAdmin(req)
+  if (denied) return denied
 
   let body: any
   try {

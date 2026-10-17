@@ -135,11 +135,12 @@ const formatSince = (dateStr: string, ui: ReturnType<typeof useUiStrings>) => {
   return years === 1 ? ui.patients.since1Year : ui.patients.sinceYears.replace('{years}', String(years))
 }
 
+// 12 characters from a 32-letter alphabet (60 bits), from the browser's
+// cryptographic generator: an invitation link must not be guessable.
 const generateInviteCode = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  let code = ''
-  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)]
-  return code
+  const bytes = crypto.getRandomValues(new Uint8Array(12))
+  return Array.from(bytes, (b) => chars[b % chars.length]).join('')
 }
 
 export default function PatientDetailPage() {
@@ -263,6 +264,9 @@ export default function PatientDetailPage() {
       .eq('id', patientId)
 
     if (!error) {
+      // Open invitation links are withdrawn with the access: an old link must
+      // not link the record to someone again.
+      await supabase.from('patient_invites').delete().eq('patient_id', patientId).is('used_at', null)
       setPatient((prev) => (prev ? { ...prev, patient_user_id: null } : prev))
     }
   }
