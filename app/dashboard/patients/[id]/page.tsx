@@ -44,10 +44,16 @@ type Note = {
 }
 
 // The whole history, read in pages so that no note is left out whatever its
-// age (PostgREST answers at most 1000 rows per request). Row-level security
-// decides which notes come back: the clinician's own notes on their own
-// patient ("Users can view their own notes").
+// age (PostgREST answers at most "max rows" per request, 1000 by default, and
+// a project may set it lower). Each page starts after the rows already
+// received and the reading stops only at an empty page, so a lower server
+// limit never cuts the history short; the order has a tie-breaker (id) so
+// pages never overlap or skip, duplicates are dropped, and a page cap stops a
+// server that would ignore the range. Row-level security decides which notes
+// come back: the clinician's own notes on their own patient ("Users can view
+// their own notes").
 const NOTES_PAGE_SIZE = 500
+const NOTES_MAX_PAGES = 200
 
 // Newest first; notes with the same timestamp keep a stable order.
 const sortNotesNewestFirst = (rows: Note[]) =>
@@ -183,23 +189,26 @@ export default function PatientDetailPage() {
 
   const loadNotes = useCallback(async () => {
     setNotesStatus('loading')
-    const rows: Note[] = []
-    for (let from = 0; ; from += NOTES_PAGE_SIZE) {
+    const byId = new Map<string, Note>()
+    let received = 0
+    for (let page = 0; page < NOTES_MAX_PAGES; page++) {
       const { data, error } = await supabase
         .from('notes')
         .select('id, assessment, plan, created_at')
         .eq('patient_id', patientId)
         .order('created_at', { ascending: false })
-        .range(from, from + NOTES_PAGE_SIZE - 1)
+        .order('id', { ascending: false })
+        .range(received, received + NOTES_PAGE_SIZE - 1)
       if (error) {
         console.error('Errore caricamento storico note:', error.code, error.message)
         setNotesStatus('error')
         return
       }
-      rows.push(...((data ?? []) as Note[]))
-      if (!data || data.length < NOTES_PAGE_SIZE) break
+      if (!data || data.length === 0) break
+      received += data.length
+      for (const n of data as Note[]) byId.set(n.id, n)
     }
-    setNotes(sortNotesNewestFirst(rows))
+    setNotes(sortNotesNewestFirst([...byId.values()]))
     setNotesStatus('ready')
   }, [patientId])
 

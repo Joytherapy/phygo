@@ -110,6 +110,27 @@ test('a long history is read in pages and shown complete', { skip }, async () =>
   }
 });
 
+test('a server that returns fewer rows than asked (a lower "max rows") still gives the complete history', { skip }, async () => {
+  const ctx = await browser.newContext({ locale: 'it-IT' });
+  try {
+    const [name, value] = sessionCookie('tok-clin', U).split(/=(.*)/s);
+    await ctx.addCookies([{ name, value, url: app.url }]);
+    const page = await ctx.newPage();
+    // As if the project's PostgREST "max rows" were 100: every notes request answers at most 100 rows.
+    await page.route('**/rest/v1/notes?**', (route) => {
+      const url = new URL(route.request().url());
+      if (url.searchParams.has('limit')) url.searchParams.set('limit', String(Math.min(100, Number(url.searchParams.get('limit')))));
+      return route.continue({ url: url.toString() });
+    });
+    await page.goto(`${app.url}/dashboard/patients/${LONG}`);
+    await page.getByText('Long 0', { exact: true }).waitFor();
+    await page.waitForFunction(() => document.querySelectorAll('p').length > 0);
+    assert.equal(await page.getByText(/^Long \d+$/).count(), 620, 'all 620 notes, none cut off and none twice');
+  } finally {
+    await ctx.close();
+  }
+});
+
 test('no notes: the empty history message, not an error', { skip }, async () => {
   const { ctx, page } = await openPatient(EMPTY);
   try {
