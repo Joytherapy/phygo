@@ -31,12 +31,13 @@ const CLINICIAN_ID = '84000000-0000-4000-8000-000000000002';
 const PATIENT_ID = '84100000-0000-4000-8000-000000000001';
 
 // Data written by the clinician: shown untranslated in every language.
-const DATA = ['Synthetic Patient', 'Synthetic summary for the patient.', 'Synthetic bridge', 'Synthetic assessment'];
+// (Not the clinician's assessment: with PR #25 the patient no longer receives it.)
+const DATA = ['Synthetic Patient', 'Synthetic summary for the patient.', 'Synthetic bridge', 'Synthetic squat'];
 
 const EXPECT = {
   it: {
     home: ['Bentornato/a', '41 anni', 'Profilo metabolico', 'Scopri le attrezzature', 'Dall\'ultima seduta', 'I tuoi esercizi',
-      '3 serie × 10 ripetizioni', 'Esercizio 2', '1 serie × 1 ripetizione', 'Storico delle sedute', 'Seduta registrata',
+      '3 serie × 10 ripetizioni', '1 serie × 1 ripetizione', 'Storico delle sedute', 'Seduta registrata',
       'Nessuna chiamata attiva al momento.', 'Prossimo appuntamento', 'Completato', 'Consigliati per te'],
     dates: [/15 set 2026/, /marzo/],
     shop: ['Indietro', 'Attrezzatura', 'Negozio', 'Attrezzature selezionate per supportare il tuo recupero.', 'prodotti selezionati',
@@ -44,7 +45,7 @@ const EXPECT = {
   },
   en: {
     home: ['Welcome back', '41 years old', 'Metabolic profile', 'Browse equipment', 'From your last session', 'Your exercises',
-      '3 sets × 10 reps', 'Exercise 2', '1 set × 1 rep', 'Session history', 'Session recorded',
+      '3 sets × 10 reps', '1 set × 1 rep', 'Session history', 'Session recorded',
       'No active call right now.', 'Next appointment', 'Completed', 'Recommended for you'],
     dates: [/Sep 15, 2026/, /March/],
     shop: ['Back', 'Equipment', 'Shop', 'Equipment picks that support your recovery.', 'curated picks',
@@ -52,7 +53,7 @@ const EXPECT = {
   },
   es: {
     home: ['Bienvenido/a de nuevo', '41 años', 'Perfil metabólico', 'Explorar equipamiento', 'De tu última sesión', 'Tus ejercicios',
-      '3 series × 10 repeticiones', 'Ejercicio 2', '1 serie × 1 repetición', 'Historial de sesiones', 'Sesión registrada',
+      '3 series × 10 repeticiones', '1 serie × 1 repetición', 'Historial de sesiones', 'Sesión registrada',
       'No hay ninguna llamada activa en este momento.', 'Próxima cita', 'Completada', 'Recomendados para ti'],
     dates: [/15 sept?\.? 2026/, /marzo/],
     shop: ['Volver', 'Equipamiento', 'Tienda', 'Equipamiento seleccionado para apoyar tu recuperación.', 'productos seleccionados',
@@ -60,7 +61,7 @@ const EXPECT = {
   },
   fr: {
     home: ['Bon retour', '41 ans', 'Profil métabolique', 'Découvrir les équipements', 'De votre dernière séance', 'Vos exercices',
-      '3 séries × 10 répétitions', 'Exercice 2', '1 série × 1 répétition', 'Historique des séances', 'Séance enregistrée',
+      '3 séries × 10 répétitions', '1 série × 1 répétition', 'Historique des séances', 'Séance enregistrée',
       'Aucun appel en cours pour le moment.', 'Prochain rendez-vous', 'Terminé', 'Recommandés pour vous'],
     dates: [/15 sept\.? 2026/, /mars/],
     shop: ['Retour', 'Boutique', 'Une sélection d’équipements pour accompagner votre rétablissement.',
@@ -71,7 +72,7 @@ const EXPECT = {
 // The texts that used to be hard-coded in English.
 const ENGLISH_HOME = ['Welcome back', 'years old', 'Metabolic profile', 'Your calorie target and macros for today', 'Browse equipment',
   'Explore products that support your recovery', 'Recommended for you', 'From your last session', 'Your exercises', '3 sets', '10 reps',
-  'Exercise 2', 'Session history', 'Session recorded', 'No active call right now.', 'Join video call', 'Next appointment', 'completed', 'Completed'];
+  'Session history', 'Session recorded', 'No active call right now.', 'Join video call', 'Next appointment', 'completed', 'Completed'];
 const ENGLISH_SHOP = ['Back', 'Equipment picks that support your recovery.', 'curated picks', 'All ·', 'Pelvic Floor', 'Low Back',
   'Body Composition', 'View on Amazon', 'High-Density Foam Roller'];
 
@@ -91,7 +92,7 @@ before(async () => {
         {
           id: '84200000-0000-4000-8000-000000000001', patient_id: PATIENT_ID, user_id: CLINICIAN_ID, created_at: '2026-09-15T10:00:00Z',
           assessment: 'Synthetic assessment', plan: 'Synthetic plan', summary_for_patient: 'Synthetic summary for the patient.',
-          exercises: [{ internal_id: 'ex-1', name: 'Synthetic bridge', dosing: { sets: 3, reps: 10 } }, { internal_id: 'ex-2', dosing: { sets: 1, reps: 1 } }],
+          exercises: [{ internal_id: 'ex-1', name: 'Synthetic bridge', dosing: { sets: 3, reps: 10 } }, { internal_id: 'ex-2', name: 'Synthetic squat', dosing: { sets: 1, reps: 1 } }],
         },
         { id: '84200000-0000-4000-8000-000000000002', patient_id: PATIENT_ID, user_id: CLINICIAN_ID, created_at: '2026-08-20T10:00:00Z', assessment: null, plan: null, summary_for_patient: null, exercises: [] },
       ],
