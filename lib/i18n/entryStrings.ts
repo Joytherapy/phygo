@@ -15,6 +15,7 @@ type EntryDict = {
     email: string;
     password: string;
     wait: string;
+    serviceUnavailable: string;
     loginCta: string;
     signupCta: string;
     noAccount: string;
@@ -65,6 +66,7 @@ const en: EntryDict = {
     email: 'Email',
     password: 'Password',
     wait: 'Please wait…',
+    serviceUnavailable: "The service isn't available right now. Please try again in a moment.",
     loginCta: 'Log in',
     signupCta: 'Create account',
     noAccount: "Don't have an account?",
@@ -117,6 +119,7 @@ const it: EntryDict = {
     email: 'Email',
     password: 'Password',
     wait: 'Attendi…',
+    serviceUnavailable: 'Il servizio non è disponibile in questo momento. Riprova tra poco.',
     loginCta: 'Accedi',
     signupCta: 'Crea account',
     noAccount: 'Non hai un account?',
@@ -169,6 +172,7 @@ const es: EntryDict = {
     email: 'Correo electrónico',
     password: 'Contraseña',
     wait: 'Un momento…',
+    serviceUnavailable: 'El servicio no está disponible en este momento. Inténtalo de nuevo en unos instantes.',
     loginCta: 'Iniciar sesión',
     signupCta: 'Crear cuenta',
     noAccount: '¿No tienes cuenta?',
@@ -221,6 +225,7 @@ const fr: EntryDict = {
     email: 'E-mail',
     password: 'Mot de passe',
     wait: 'Patientez…',
+    serviceUnavailable: "Le service n'est pas disponible pour le moment. Réessayez dans un instant.",
     loginCta: 'Se connecter',
     signupCta: 'Créer un compte',
     noAccount: 'Pas encore de compte ?',

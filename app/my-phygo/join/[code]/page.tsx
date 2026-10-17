@@ -8,6 +8,7 @@ import { useEntryLang } from '@/lib/i18n/useEntryLang'
 import { ENTRY_STRINGS, localizeAuthError } from '@/lib/i18n/entryStrings'
 import { myPhygoLoginHref } from '@/lib/i18n/landingStrings'
 import { lazy } from '@/lib/lazy'
+import { rememberPortalLanguage } from '@/lib/myPhygo/language'
 
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,25 +40,36 @@ function JoinInvite() {
     setLoading(true)
     setError(null)
 
-    const { error: signUpError } = await supabase.auth.signUp({ email, password })
+    // If the sign-in service cannot be reached (or is not configured, as in
+    // Vercel Previews), say so instead of leaving the button on "Please wait".
+    try {
+      const { error: signUpError } = await supabase.auth.signUp({ email, password })
 
-    if (signUpError) {
-      setError(localizeAuthError(signUpError.message, ENTRY_STRINGS[lang].login))
+      if (signUpError) {
+        setError(signUpError.name === 'AuthRetryableFetchError'
+          ? ENTRY_STRINGS[lang].login.serviceUnavailable
+          : localizeAuthError(signUpError.message, ENTRY_STRINGS[lang].login))
+        setLoading(false)
+        return
+      }
+
+      const { error: redeemError } = await supabase.rpc('redeem_patient_invite', {
+        invite_code: code,
+      })
+
+      if (redeemError) {
+        setError(t.inviteInvalid)
+        setLoading(false)
+        return
+      }
+
+      await rememberPortalLanguage(supabase, lang)
+      router.push('/my-phygo/home')
+    } catch (err) {
+      console.error('Sign-in unavailable:', err instanceof Error ? err.message : err)
+      setError(ENTRY_STRINGS[lang].login.serviceUnavailable)
       setLoading(false)
-      return
     }
-
-    const { error: redeemError } = await supabase.rpc('redeem_patient_invite', {
-      invite_code: code,
-    })
-
-    if (redeemError) {
-      setError(t.inviteInvalid)
-      setLoading(false)
-      return
-    }
-
-    router.push('/my-phygo/home')
   }
 
   return (

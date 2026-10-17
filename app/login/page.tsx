@@ -37,32 +37,40 @@ function LoginForm() {
     setMessage(null);
     setLoading(true);
 
-    if (mode === "login") {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    // If the sign-in service cannot be reached (or is not configured, as in
+    // Vercel Previews), say so instead of leaving the button on "Please wait".
+    try {
+      if (mode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-      if (error) {
-        setError(localizeAuthError(error.message, t));
+        if (error) {
+          setError(error.name === "AuthRetryableFetchError" ? t.serviceUnavailable : localizeAuthError(error.message, t));
+        } else {
+          router.push("/dashboard");
+          router.refresh();
+          return; // stays on "Please wait" while the dashboard opens
+        }
       } else {
-        router.push("/dashboard");
-        router.refresh();
-      }
-    } else {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
 
-      if (error) {
-        setError(localizeAuthError(error.message, t));
-      } else {
-        router.push("/onboarding");
-        router.refresh();
+        if (error) {
+          setError(error.name === "AuthRetryableFetchError" ? t.serviceUnavailable : localizeAuthError(error.message, t));
+        } else {
+          router.push("/onboarding");
+          router.refresh();
+          return;
+        }
       }
+    } catch (err) {
+      console.error("Sign-in unavailable:", err instanceof Error ? err.message : err);
+      setError(t.serviceUnavailable);
     }
-
     setLoading(false);
   };
 

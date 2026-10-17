@@ -8,6 +8,7 @@ import { useEntryLang } from '@/lib/i18n/useEntryLang'
 import { ENTRY_STRINGS } from '@/lib/i18n/entryStrings'
 import { loginHref } from '@/lib/i18n/landingStrings'
 import { lazy } from '@/lib/lazy'
+import { rememberPortalLanguage } from '@/lib/myPhygo/language'
 
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -37,14 +38,25 @@ function MyPhygoLogin() {
     setLoading(true)
     setError(null)
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
-
-    if (signInError) {
-      setError(t.loginError)
+    // If the sign-in service cannot be reached (or is not configured, as in
+    // Vercel Previews), say so instead of leaving the button on "Please wait".
+    let signInError: unknown = null
+    try {
+      signInError = (await supabase.auth.signInWithPassword({ email, password })).error
+    } catch (err) {
+      console.error('Sign-in unavailable:', err instanceof Error ? err.message : err)
+      setError(ENTRY_STRINGS[lang].login.serviceUnavailable)
       setLoading(false)
       return
     }
 
+    if (signInError) {
+      setError((signInError as { name?: string }).name === 'AuthRetryableFetchError' ? ENTRY_STRINGS[lang].login.serviceUnavailable : t.loginError)
+      setLoading(false)
+      return
+    }
+
+    await rememberPortalLanguage(supabase, lang)
     router.push('/my-phygo/home')
   }
 

@@ -483,7 +483,7 @@ export default function Navbar() {
             </div>
           ) : (
             <MagneticButton
-              href="/login?mode=signup"
+              href={`/login?mode=signup&lang=${lang}`}
               strength={10}
               className="hidden sm:inline-flex items-center rounded-full bg-ink dark:bg-white text-white dark:text-ink text-sm font-semibold px-4 py-2 shadow-soft hover:shadow-lift transition-shadow"
             >
@@ -668,7 +668,7 @@ export default function Navbar() {
             </button>
           ) : (
             <a
-              href="/login?mode=signup"
+              href={`/login?mode=signup&lang=${lang}`}
               onClick={() => setOpen(false)}
               className="inline-flex items-center justify-center rounded-full bg-ink dark:bg-white text-white dark:text-ink text-sm font-semibold px-4 py-2 mt-1"
             >
