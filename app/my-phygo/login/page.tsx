@@ -37,10 +37,20 @@ function MyPhygoLogin() {
     setLoading(true)
     setError(null)
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    // If the sign-in service cannot be reached (or is not configured, as in
+    // Vercel Previews), say so instead of leaving the button on "Please wait".
+    let signInError: unknown = null
+    try {
+      signInError = (await supabase.auth.signInWithPassword({ email, password })).error
+    } catch (err) {
+      console.error('Sign-in unavailable:', err instanceof Error ? err.message : err)
+      setError(ENTRY_STRINGS[lang].login.serviceUnavailable)
+      setLoading(false)
+      return
+    }
 
     if (signInError) {
-      setError(t.loginError)
+      setError((signInError as { name?: string }).name === 'AuthRetryableFetchError' ? ENTRY_STRINGS[lang].login.serviceUnavailable : t.loginError)
       setLoading(false)
       return
     }
