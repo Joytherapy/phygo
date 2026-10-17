@@ -6,7 +6,7 @@
 // clinical background live in patient_details, which only the owning clinician
 // can read (sql/2026-10-17_patient_profile_PROPOSED.sql). Row-level security
 // decides who reads and writes; the form validates first, the database again.
-import { useCallback, useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { ContactRound, Pencil, RotateCcw, Smartphone, Phone, HeartPulse, Users } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -73,7 +73,12 @@ export default function PatientProfileCard({ patient, locked, onSaved }: Props) 
   const [details, setDetails] = useState<PatientDetails | null>(null)
   const [detailsStatus, setDetailsStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [editing, setEditing] = useState(false)
+  const editingRef = useRef(false)
+  editingRef.current = editing
   const [form, setForm] = useState<ProfileForm | null>(null)
+  // True only when the form's clinical fields hold the loaded record: the
+  // clinical part is never saved from fields that were not filled from it.
+  const [detailsInForm, setDetailsInForm] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof ProfileForm, FieldError>>>({})
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
@@ -90,8 +95,15 @@ export default function PatientProfileCard({ patient, locked, onSaved }: Props) 
       setDetailsStatus('error')
       return
     }
-    setDetails((data as PatientDetails | null) ?? null)
+    const loaded = (data as PatientDetails | null) ?? null
+    setDetails(loaded)
     setDetailsStatus('ready')
+    // Loaded while the form is open (Retry after a failed load): its clinical
+    // fields were locked and empty, so they take the loaded values now.
+    if (editingRef.current) {
+      setForm((f) => (f ? { ...f, ...Object.fromEntries(DETAIL_FIELDS.map((k) => [k, loaded?.[k] ?? ''])) } : f))
+      setDetailsInForm(true)
+    }
   }, [patient.id])
 
   useEffect(() => {
@@ -100,6 +112,7 @@ export default function PatientProfileCard({ patient, locked, onSaved }: Props) 
 
   const startEditing = () => {
     setForm(formFromRecord(patient, details))
+    setDetailsInForm(detailsStatus === 'ready')
     setErrors({})
     setMessage(null)
     setEditing(true)
@@ -134,7 +147,7 @@ export default function PatientProfileCard({ patient, locked, onSaved }: Props) 
     // overwritten with empty fields) and only if there is something to keep.
     let detailsSaved = true
     const hasDetails = DETAIL_FIELDS.some((k) => checked.details[k] !== null)
-    if (detailsStatus === 'ready' && (details || hasDetails)) {
+    if (detailsInForm && detailsStatus === 'ready' && (details || hasDetails)) {
       const { data: { user } } = await supabase.auth.getUser()
       const { data: row, error: detailsError } = await supabase
         .from('patient_details')

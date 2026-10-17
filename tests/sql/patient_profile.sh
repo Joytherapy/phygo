@@ -64,7 +64,8 @@ expect "the linked patient reads their own row, as today" "$(val authenticated $
 expect "another patient reads nothing of it" "$(val authenticated $PAT2 "select count(*) from patients where id = '$PA'")" 0
 expect "another clinician reads nothing of it" "$(val authenticated $OTHER "select count(*) from patients where id = '$PA'")" 0
 expect "anonymous callers read nothing" "$(val anon '' "select count(*) from patients")" 0
-expect "a date of birth in the future is refused" "$(try authenticated $CLIN "update patients set birth_date = current_date + 1 where id = '$PA'")" refused
+expect "a date of birth in the future is refused" "$(try authenticated $CLIN "update patients set birth_date = current_date + 2 where id = '$PA'")" refused
+expect "  ...with one day of tolerance for time zones (local today vs UTC)" "$(try authenticated $CLIN "update patients set birth_date = current_date + 1 where id = '$PA'")" ok
 expect "a date of birth before 1900 is refused" "$(try authenticated $CLIN "update patients set birth_date = '1899-12-31' where id = '$PA'")" refused
 expect "today is accepted" "$(try authenticated $CLIN "update patients set birth_date = current_date where id = '$PA'")" ok
 expect "a malformed e-mail is refused" "$(try authenticated $CLIN "update patients set contact_email = 'not-an-email' where id = '$PA'")" refused
@@ -87,6 +88,7 @@ expect "another clinician cannot create them for this patient" "$(try authentica
 expect "nobody can create them in someone else's name" "$(try authenticated $CLIN "insert into patient_details (patient_id, user_id) values ('$PB', '$CLIN')")" refused
 expect "the linked patient cannot create or change them" "$(try authenticated $PAT "insert into patient_details (patient_id, user_id) values ('$PA', '$PAT')")" refused
 expect "an unverified clinician cannot create them" "$(try authenticated $UNVER "insert into patient_details (patient_id, user_id) values ('$PU', '$UNVER')")" refused
+expect "signed-in users have only select, insert and update on the table" "$(q -c "select string_agg(privilege_type, ',' order by privilege_type) from information_schema.role_table_grants where table_name = 'patient_details' and grantee = 'authenticated'")" "INSERT,SELECT,UPDATE"
 expect "nobody deletes them from the browser" "$(rows authenticated $CLIN "delete from patient_details where patient_id = '$PA' returning 1")" refused
 expect "a malformed emergency phone is refused" "$(try authenticated $CLIN "update patient_details set emergency_contact_phone = 'x' where patient_id = '$PA'")" refused
 expect "they go with the patient (cascade)" "$(q -c "delete from patients where id = '$PA'; select count(*) from patient_details where patient_id = '$PA'")" 0

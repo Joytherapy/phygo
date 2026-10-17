@@ -92,11 +92,14 @@ alter table public.patients
     and coalesce(char_length(province), 0) <= 60 and coalesce(char_length(country), 0) <= 60);
 
 -- A date of birth in the future is refused when it is written (existing rows
--- have no date of birth, so nothing is checked retroactively).
+-- have no date of birth, so nothing is checked retroactively). The database
+-- day is UTC, while the clinician's "today" is local (Italy is UTC+1/+2): one
+-- day of tolerance, so a date of birth entered as "today" just after local
+-- midnight is not refused; the app itself refuses future dates in local time.
 create or replace function public.patients_birth_date_not_future() returns trigger
 language plpgsql set search_path = public, pg_temp as $$
 begin
-  if new.birth_date is not null and new.birth_date > current_date then
+  if new.birth_date is not null and new.birth_date > current_date + 1 then
     raise exception 'birth_date cannot be in the future' using errcode = '23514';
   end if;
   return new;
@@ -128,9 +131,11 @@ create table if not exists public.patient_details (
 );
 
 alter table public.patient_details enable row level security;
-revoke all on public.patient_details from anon;
+-- Exactly select/insert/update for signed-in users (row policies below), nothing
+-- for anon; Supabase's default privileges (delete, truncate, references,
+-- trigger) are removed.
+revoke all on public.patient_details from anon, authenticated;
 grant select, insert, update on public.patient_details to authenticated;
-revoke delete on public.patient_details from authenticated;
 
 drop policy if exists "Physios read details of their own patients" on public.patient_details;
 create policy "Physios read details of their own patients" on public.patient_details for select

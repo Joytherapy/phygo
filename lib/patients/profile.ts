@@ -110,16 +110,22 @@ export type FieldError = 'required' | DateError | 'email' | 'phone' | 'postal_co
 const LIMITS: Partial<Record<keyof ProfileForm, number>> = {
   first_name: 100, last_name: 100, contact_email: 254, address_street: 200, address_number: 20,
   postal_code: 12, city: 100, province: 60, country: 60, emergency_contact_name: 200, emergency_contact_relation: 100,
-  medical_history: 5000, past_surgeries: 5000, medications: 5000, allergies: 5000, rehab_precautions: 5000, main_condition: 500,
+  medical_history: 5000, past_surgeries: 5000, medications: 5000, allergies: 5000, rehab_precautions: 5000,
 }
 
-/** The form, filled from the record. Records created before this change have only `name`: it goes in the first-name field. */
+/**
+ * The form, filled from the record. Records created before this change have
+ * only `name`: it is offered split at its last space (first name, surname), for
+ * the clinician to check; a single word goes in the first-name field.
+ */
 export function formFromRecord(p: PatientIdentity, details: Partial<PatientDetails> | null): ProfileForm {
   const s = (v: string | null | undefined) => v ?? ''
   const hasParts = !!(p.first_name || p.last_name)
+  const legacy = p.name.trim().replace(/\s+/g, ' ')
+  const cut = legacy.lastIndexOf(' ')
   return {
-    first_name: hasParts ? s(p.first_name) : p.name,
-    last_name: hasParts ? s(p.last_name) : '',
+    first_name: hasParts ? s(p.first_name) : cut > 0 ? legacy.slice(0, cut) : legacy,
+    last_name: hasParts ? s(p.last_name) : cut > 0 ? legacy.slice(cut + 1) : '',
     birth_date: formatItalianDate(p.birth_date),
     gender: s(p.gender),
     main_condition: s(p.main_condition),

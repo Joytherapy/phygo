@@ -105,10 +105,14 @@ test('what is written: empty optional fields become null, the name is composed, 
   assert.equal(withDate.details.allergies, 'Synthetic allergy');
 });
 
-test('a record from before this change: its name fills the first-name field, nothing is invented', () => {
+test('a record from before this change: its name is offered split into first name and surname, nothing is invented', () => {
   const f = P.formFromRecord({ name: 'Mario Bianchi', first_name: null, last_name: null, birth_date: null, age: 61, gender: 'male', main_condition: 'Synthetic', phone: null, contact_email: null, address_street: null, address_number: null, postal_code: null, city: null, province: null, country: null }, null);
-  assert.equal(f.first_name, 'Mario Bianchi');
-  assert.equal(f.last_name, '');
+  assert.equal(f.first_name, 'Mario');
+  assert.equal(f.last_name, 'Bianchi');
+  const one = P.formFromRecord({ name: 'Cher', first_name: null, last_name: null, birth_date: null, age: null, gender: null, main_condition: null, phone: null, contact_email: null, address_street: null, address_number: null, postal_code: null, city: null, province: null, country: null }, null);
+  assert.deepEqual([one.first_name, one.last_name], ['Cher', ''], 'a single word is not split');
+  const long = P.validateProfile({ ...emptyForm(), main_condition: 'x'.repeat(3000) }, TODAY);
+  assert.equal(long.ok, true, 'an existing long main condition never blocks a save');
   assert.equal(f.birth_date, '');
   assert.equal(f.gender, 'male');
   assert.equal(f.main_condition, 'Synthetic');
@@ -187,7 +191,9 @@ test('invalid values are refused in the form, before anything is sent', { skip }
   const { ctx, page, card } = await openPatient(LEGACY);
   try {
     await card.getByRole('button', { name: 'Modifica' }).click();
-    assert.equal(await page.getByLabel(/^Nome/).first().inputValue(), 'Synthetic Legacy', 'the old name is offered as first name');
+    assert.equal(await page.getByLabel(/^Nome/).first().inputValue(), 'Synthetic', 'the old name is offered split');
+    assert.equal(await page.getByLabel(/^Cognome/).inputValue(), 'Legacy');
+    await page.getByLabel(/^Cognome/).fill('');
     await page.getByLabel(/^Data di nascita/).fill('31/02/1980');
     await page.getByLabel(/^Email di contatto/).fill('not-an-email');
     await page.getByLabel(/^Telefono/).first().fill('12');
@@ -315,6 +321,38 @@ test('on a phone the sections stack and nothing overflows', { skip }, async () =
     const box = await page.getByLabel(/^Cognome/).boundingBox();
     assert.ok(box && box.x >= 0 && box.x + box.width <= 375, 'fields fit the screen');
   } finally {
+    await ctx.close();
+  }
+});
+
+test('a failed load, then Edit, Retry and Save: the clinical part is shown and kept, never emptied', { skip }, async () => {
+  fake.state.failTables.add('patient_details');
+  const ctx = await browser.newContext({ locale: 'it-IT' });
+  try {
+    const [name, value] = sessionCookie('tok-clin', U).split(/=(.*)/s);
+    await ctx.addCookies([{ name, value, url: app.url }]);
+    const page = await ctx.newPage();
+    await page.goto(`${app.url}/dashboard/patients/${FULL}`);
+    const card = page.getByTestId('patient-profile');
+    await card.getByTestId('details-error').first().waitFor();
+    await card.getByRole('button', { name: 'Modifica' }).click();
+    fake.state.failTables.delete('patient_details');
+    await card.getByTestId('details-error').first().getByRole('button', { name: 'Riprova' }).click();
+    await page.waitForFunction(() => {
+      const el = [...document.querySelectorAll('textarea')].find((t) => t.name === 'allergies');
+      return el && !el.disabled;
+    });
+    assert.equal(await page.getByLabel(/^Allergie/).inputValue(), 'Synthetic allergy', 'the loaded values fill the form');
+    await page.getByLabel(/^Città/).fill('Siena');
+    await card.getByRole('button', { name: 'Salva' }).click();
+    await card.getByText('Dati del paziente salvati.').waitFor();
+    const details = fake.state.tables.patient_details.find((d) => d.patient_id === FULL);
+    assert.equal(details.allergies, 'Synthetic allergy', 'not emptied');
+    assert.equal(details.medications, 'Synthetic drug');
+    assert.equal(details.emergency_contact_name, 'Synthetic Contact');
+    assert.equal(fake.state.tables.patients.find((p) => p.id === FULL).city, 'Siena');
+  } finally {
+    fake.state.failTables.delete('patient_details');
     await ctx.close();
   }
 });
