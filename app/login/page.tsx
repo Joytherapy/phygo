@@ -6,6 +6,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useEntryLang } from "@/lib/i18n/useEntryLang";
 import { ENTRY_STRINGS, localizeAuthError } from "@/lib/i18n/entryStrings";
 import { publicPath, myPhygoLoginHref } from "@/lib/i18n/landingStrings";
+import BrandMark from "@/components/BrandMark";
 
 export default function LoginPage() {
   return (
@@ -85,9 +86,7 @@ function LoginForm() {
 
       <div className="relative w-full max-w-sm rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.04] backdrop-blur-2xl shadow-2xl p-8">
         <div className="flex justify-center mb-6">
-          <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7CFF] to-[#32D6A0] text-white text-lg font-bold shadow-[0_8px_24px_rgba(79,124,255,0.35)]">
-            P
-          </span>
+          <BrandMark />
         </div>
 
         <h1 className="mb-1 text-center text-2xl font-semibold text-ink dark:text-white">

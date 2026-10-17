@@ -6,6 +6,7 @@ import { Menu, X, Moon, Sun, User, LogOut, Search, Globe, BookOpen, ListChecks }
 import { usePathname, useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import MagneticButton from "./MagneticButton";
+import BrandMark from "./BrandMark";
 import { usePatientContext } from "@/contexts/PatientContext";
 import { useLanguage, useUiStrings } from "@/contexts/LanguageContext";
 import { APP_LANGS } from "@/lib/i18n/uiStrings";
@@ -188,14 +189,9 @@ export default function Navbar() {
       >
         <a
           href={isDashboard ? (isStudent ? "/dashboard/workspace" : "/dashboard") : "/"}
-          className="flex items-center gap-2.5 font-display font-semibold text-lg tracking-tight text-ink dark:text-white"
+          className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
         >
-          <img
-            src="/logo-mark.png"
-            alt="Phygo"
-            className="h-10 w-10 rounded-lg object-cover shadow-soft"
-          />
-          Phygo
+          <BrandMark />
         </a>
 
         <div className="hidden md:flex items-center gap-8">
