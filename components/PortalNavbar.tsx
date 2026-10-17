@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { LogOut } from 'lucide-react'
 import { lazy } from '@/lib/lazy'
 import { useUiStrings } from '@/contexts/LanguageContext'
+import Link from 'next/link'
 import BrandMark from './BrandMark'
 
 const supabase = lazy(() => createBrowserClient(
@@ -24,9 +25,9 @@ export default function PortalNavbar() {
   return (
     <header className="fixed top-0 inset-x-0 z-50 flex justify-center px-4 pt-4">
       <nav className="w-full max-w-2xl flex items-center justify-between rounded-xl2 px-4 sm:px-6 py-3 glass-strong shadow-soft">
-        <a href="/my-phygo/home" aria-label="My PHYGO" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric">
+        <Link href="/my-phygo/home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric">
           <BrandMark prefix="My" />
-        </a>
+        </Link>
 
         <button
           onClick={handleSignOut}

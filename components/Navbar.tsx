@@ -189,7 +189,6 @@ export default function Navbar() {
       >
         <a
           href={isDashboard ? (isStudent ? "/dashboard/workspace" : "/dashboard") : "/"}
-          aria-label="PHYGO"
           className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
         >
           <BrandMark />

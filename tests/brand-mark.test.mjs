@@ -52,7 +52,7 @@ after(async () => {
 });
 
 // The brand in the page header: the image next to the PHYGO text, measured as rendered.
-async function brandOf(path, who) {
+async function brandOf(path, who, scope = 'header') {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   try {
     if (who) {
@@ -61,7 +61,7 @@ async function brandOf(path, who) {
     }
     const page = await ctx.newPage();
     await page.goto(`${app.url}${path}`);
-    const img = page.locator('header img[src="/logo-mark.png"]').first();
+    const img = page.locator(`${scope} img[src="/logo-mark.png"]`).first();
     await img.waitFor();
     return await img.evaluate((el) => {
       const text = el.nextElementSibling ?? el.parentElement;
@@ -82,12 +82,13 @@ async function brandOf(path, who) {
   }
 }
 
-test('dashboard and My Phygo show the logo and wordmark exactly as the landing page', { skip }, async () => {
+test('dashboard, My Phygo and the login card show the logo and wordmark exactly as the landing page', { skip }, async () => {
   const landing = await brandOf('/');
   assert.equal(landing.word, 'PHYGO');
   const dashboard = await brandOf('/dashboard', 'clin');
   const portal = await brandOf('/my-phygo/home', 'pat');
-  for (const [where, b] of [['dashboard', dashboard], ['My Phygo', portal]]) {
+  const login = await brandOf('/login?lang=en', null, 'main');
+  for (const [where, b] of [['dashboard', dashboard], ['My Phygo', portal], ['login card', login]]) {
     assert.deepEqual(b, landing, `${where} brand = landing brand`);
   }
 });
