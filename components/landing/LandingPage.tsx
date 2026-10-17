@@ -1,97 +1,115 @@
 import type { AppLang } from "@/lib/i18n/uiStrings";
-import { LANDING_STRINGS, fill, formatNumber } from "@/lib/i18n/landingStrings";
+import { LANDING_STRINGS, fill, formatNumber, myPhygoLoginHref, signupHref } from "@/lib/i18n/landingStrings";
 import { buildConditionIndexPath } from "@/lib/publicLibrary";
 import { getLandingData, roundDown } from "@/lib/landing/landingData";
-import { landingSerif } from "./fonts";
+import { landingShots } from "@/lib/landing/screenshots";
 import MotionProvider from "./MotionProvider";
 import HtmlLang from "./HtmlLang";
 import LandingHeader from "./LandingHeader";
 import Hero from "./Hero";
-import ProofStrip from "./ProofStrip";
-import StoryTour from "./StoryTour";
-import LibraryShowcase from "./LibraryShowcase";
-import AnatomySection from "./AnatomySection";
-import WorldSection from "./WorldSection";
-import ToolsShelf from "./ToolsShelf";
-import AudiencesSection from "./AudiencesSection";
+import AudiencePath from "./AudiencePath";
 import TrustSection from "./TrustSection";
 import PricingSection from "./PricingSection";
 import FaqSection from "./FaqSection";
 import FinalCta from "./FinalCta";
 import LandingFooter from "./LandingFooter";
+import { TextLink } from "./ui";
 
 // One landing page, rendered for "/" (English), "/it", "/es" and "/fr". All
-// copy comes from lib/i18n/landingStrings.ts; all figures and library content
-// from lib/landing/landingData.ts (live, anon-key reads, revalidated hourly).
+// copy comes from lib/i18n/landingStrings.ts; library figures from
+// lib/landing/landingData.ts (live, anon-key reads, revalidated hourly); the
+// product images are real screens listed in lib/landing/screenshots.ts.
+//
+// Two primary audiences of equal weight, one brand:
+//   hero (both audiences + path chooser) -> #students -> #physiotherapists
+//   -> privacy & AI -> pricing -> FAQ -> final call to action.
+// #students and #physiotherapists are stable anchors for campaigns; both
+// sections are the same AudiencePath component. Both CTAs lead to the same
+// sign-up; the role (Student / Physiotherapist) is chosen during onboarding.
 export default async function LandingPage({ lang }: { lang: AppLang }) {
   const t = LANDING_STRINGS[lang];
   const data = await getLandingData(lang);
   const libraryHref = buildConditionIndexPath(lang);
+  const signup = signupHref(lang);
+  const shots = landingShots(lang);
   // Video calls (Daily.co) exist in the code but only work when the
   // DAILY_API_KEY is configured; the page mentions them only in that case.
   // Only the presence of the variable is read, never its value.
   const videoCalls = Boolean(process.env.DAILY_API_KEY);
 
-  const conditions = roundDown(data.total);
-  const exercises = roundDown(data.exercises);
-  const conditionsText = conditions
-    ? fill(t.hero.conditionsPhrase, { n: formatNumber(lang, conditions) })
-    : t.hero.conditionsFallback;
-  const exercisesText = exercises
-    ? fill(t.hero.exercisesPhrase, { n: formatNumber(lang, exercises) })
-    : t.hero.exercisesFallback;
+  // Live figures, rounded down; number-free wording when unavailable.
+  const f = t.figures;
+  const figure = (n: number | null, phrase: string, fallback: string) => (n ? fill(phrase, { n: formatNumber(lang, n) }) : fallback);
+  const figureItems = [
+    figure(roundDown(data.total), f.conditions, f.conditionsFallback),
+    figure(roundDown(data.phasedProtocols, 10), f.protocols, f.protocolsFallback),
+    figure(roundDown(data.exercises), f.exercises, f.exercisesFallback),
+  ];
+  const physio = t.physiotherapists;
+  const physioExtras = videoCalls ? [...physio.extras, physio.videoItem] : physio.extras;
 
   return (
     <MotionProvider>
       <HtmlLang lang={lang} skipLabel={t.nav.skip} />
-      <div className={`${landingSerif.variable} relative min-h-screen overflow-x-clip bg-[#f6f7f9] dark:bg-ink`} lang={lang}>
+      <div className="relative min-h-screen overflow-x-clip bg-[#f7f8fa] text-ink dark:bg-[#0a0e17] dark:text-white" lang={lang}>
         <LandingHeader lang={lang} nav={t.nav} libraryHref={libraryHref} />
         <main id="main-content">
-          <Hero
-            hero={t.hero}
-            story={t.story}
-            conditionsText={conditionsText}
-            exercisesText={exercisesText}
-            condition={data.story}
-            libraryExercise={data.libraryExercise}
+          <Hero hero={t.hero} signup={signup} draft={shots.draft} bodymap={shots.bodymap} />
+          {/* "Platform" in the shared app navbar (components/Navbar.tsx) points at /#features. */}
+          <div id="features" className="scroll-mt-16" />
+          <AudiencePath
+            id="students"
+            path={t.students}
+            shots={shots.students}
+            extras={[...figureItems, ...t.students.extras]}
+            ctaHref={signup}
+            credits={
+              <>
+                {t.students.modelCredit}: TurboSquid #1398841 (Standard License) ·{" "}
+                <a href="https://sketchfab.com/3d-models/human-brain-c9c9d4d671b94345952d012cc2ea7a24" className="underline underline-offset-2 hover:text-ink dark:hover:text-white">
+                  “Human Brain”
+                </a>{" "}
+                (
+                <a href="https://sketchfab.com/agher08" className="underline underline-offset-2 hover:text-ink dark:hover:text-white">
+                  agher08
+                </a>
+                ),{" "}
+                <a href="https://creativecommons.org/licenses/by/4.0/" className="underline underline-offset-2 hover:text-ink dark:hover:text-white">
+                  CC BY 4.0
+                </a>
+              </>
+            }
+            footer={
+              <div className="mt-5">
+                <p className="text-[13px] leading-relaxed text-ink/60 dark:text-white/60">{f.translationNote}</p>
+                <TextLink href={libraryHref} className="mt-3">
+                  {f.libraryCta}
+                </TextLink>
+              </div>
+            }
           />
-          <ProofStrip
-            lang={lang}
-            proof={t.proof}
-            total={data.total}
-            exercises={data.exercises}
-            phasedProtocols={data.phasedProtocols}
+          <AudiencePath
+            id="physiotherapists"
+            path={physio}
+            shots={shots.physiotherapists}
+            extras={physioExtras}
+            ctaHref={signup}
+            footer={
+              <p className="mt-6 border-t border-black/[0.08] pt-5 text-[14px] leading-relaxed text-ink/70 dark:border-white/[0.08] dark:text-white/70">
+                <span className="font-semibold text-ink dark:text-white">{physio.patients.title}</span> {physio.patients.text}{" "}
+                <a
+                  href={myPhygoLoginHref(lang)}
+                  className="rounded font-semibold text-electric-dark underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric dark:text-electric-light"
+                >
+                  {physio.patients.cta}
+                </a>
+              </p>
+            }
           />
-          <AudiencesSection lang={lang} audiences={t.audiences} videoCalls={videoCalls} />
-          <StoryTour
-            story={t.story}
-            evidenceLabel={t.library.evidence}
-            highLabel={t.library.levels.high}
-            condition={data.story}
-            libraryExercise={data.libraryExercise}
-            videoCalls={videoCalls}
-          />
-          {/* "Platform" in the shared app navbar points at /#features */}
-          <div id="features" className="scroll-mt-16">
-            <LibraryShowcase
-              lang={lang}
-              library={t.library}
-              total={data.total}
-              rounded={conditions}
-              coverage={data.coverage}
-              phasedProtocols={data.phasedProtocols}
-              featured={data.featured}
-              sampleNames={data.sampleNames}
-              libraryHref={libraryHref}
-            />
-            <AnatomySection anatomy={t.anatomy} />
-            <WorldSection lang={lang} world={t.world} />
-            <ToolsShelf tools={t.tools} />
-          </div>
           <TrustSection lang={lang} trust={t.trust} />
           <PricingSection lang={lang} pricing={t.pricing} />
           <FaqSection faq={t.faq} />
-          <FinalCta final={t.final} libraryHref={libraryHref} />
+          <FinalCta final={t.final} signup={signup} />
         </main>
         <LandingFooter lang={lang} footer={t.footer} libraryHref={libraryHref} />
       </div>

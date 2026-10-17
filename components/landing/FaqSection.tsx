@@ -1,64 +1,23 @@
-"use client";
-
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import type { LandingDict } from "@/lib/i18n/landingStrings";
-import { EASE, SectionHeader } from "./ui";
+import { CONTAINER, SectionHeading } from "./ui";
 
+// Native <details>: keyboard and screen-reader support without client JavaScript.
 export default function FaqSection({ faq }: { faq: LandingDict["faq"] }) {
-  const [open, setOpen] = useState<number | null>(0);
-
   return (
-    <section id="faq" aria-labelledby="faq-title" className="relative scroll-mt-16 py-24 sm:py-32">
-      <div className="mx-auto grid grid-cols-1 max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr]">
-        <div className="lg:sticky lg:top-28 lg:self-start">
-          <SectionHeader id="faq-title" index="09" eyebrow={faq.eyebrow} title={faq.title} />
-        </div>
-
-        <div className="border-t border-black/[0.08] dark:border-white/[0.09]">
-          {faq.items.map((item, i) => {
-            const isOpen = open === i;
-            return (
-              <div key={item.q} className="border-b border-black/[0.08] dark:border-white/[0.09]">
-                <h3>
-                  <button
-                    type="button"
-                    onClick={() => setOpen(isOpen ? null : i)}
-                    aria-expanded={isOpen}
-                    aria-controls={`faq-panel-${i}`}
-                    id={`faq-button-${i}`}
-                    className="flex w-full items-center justify-between gap-6 py-6 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-electric"
-                  >
-                    <span className="font-display text-[1.05rem] font-medium leading-snug text-ink dark:text-white sm:text-lg">{item.q}</span>
-                    <motion.span
-                      animate={{ rotate: isOpen ? 45 : 0 }}
-                      transition={{ duration: 0.3, ease: EASE }}
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-black/10 text-ink dark:border-white/15 dark:text-white"
-                    >
-                      <Plus size={15} aria-hidden />
-                    </motion.span>
-                  </button>
-                </h3>
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.35, ease: EASE }}
-                      className="overflow-hidden"
-                      id={`faq-panel-${i}`}
-                      role="region"
-                      aria-labelledby={`faq-button-${i}`}
-                    >
-                      <p className="max-w-2xl pb-7 pr-12 text-[15px] leading-relaxed text-ink/65 dark:text-white/60">{item.a}</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
+    <section id="faq" aria-labelledby="faq-title" className="scroll-mt-20 border-t border-black/[0.07] py-20 dark:border-white/[0.08] sm:py-28">
+      <div className={`${CONTAINER} grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16`}>
+        <SectionHeading id="faq-title" eyebrow={faq.eyebrow} title={faq.title} />
+        <div className="min-w-0 border-t border-black/10 dark:border-white/10">
+          {faq.items.map((item) => (
+            <details key={item.q} className="group border-b border-black/10 dark:border-white/10">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 rounded py-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-electric [&::-webkit-details-marker]:hidden">
+                <h3 className="min-w-0 font-display text-[16.5px] font-medium leading-snug text-ink dark:text-white">{item.q}</h3>
+                <Plus size={18} aria-hidden className="shrink-0 text-ink/60 transition-transform group-open:rotate-45 motion-reduce:transition-none dark:text-white/60" />
+              </summary>
+              <p className="max-w-2xl pb-6 pr-8 text-[15px] leading-relaxed text-ink/70 dark:text-white/70">{item.a}</p>
+            </details>
+          ))}
         </div>
       </div>
     </section>

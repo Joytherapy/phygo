@@ -17,7 +17,7 @@ export default function LandingFooter({
 }) {
   const home = LANDING_PATH[lang];
   const links = [
-    { label: footer.product, href: `${home}#tour` },
+    { label: footer.product, href: `${home}#students` },
     { label: footer.library, href: libraryHref },
     { label: footer.pricing, href: `${home}#pricing` },
     { label: footer.privacy, href: publicPath(lang, "privacy") },
