@@ -1,0 +1,75 @@
+{
+  "_comment": "FORMAT EXAMPLE ONLY - not clinical content. Every text value describes what goes in the field. Drafts may be incomplete; source_checked and clinical_review_pending records must fill every template field (or mark it not applicable with a reason) and cite a checkable source for each one.",
+  "conditions": [
+    {
+      "slug": "esempio-formato-condizione",
+      "review_status": "draft",
+      "condition_name": "ESEMPIO - nome preferito della condizione (in italiano, lingua canonica)",
+      "synonyms": ["sinonimo italiano", "english name", "nombre en español", "nom en français"],
+      "specialty": "musculoskeletal | neurological | sports | cardiorespiratory | pelvic_health | oncology | ...",
+      "body_region": "regione anatomica, oppure field_status.body_region = not_applicable con motivo",
+      "evidence_level": "moderate",
+      "clinical_presentation": "Quadro generale, presentazione tipica, sintomi, limitazioni funzionali - dalle fonti",
+      "assessment_considerations": "Anamnesi e valutazione - dalle fonti",
+      "clinical_tests": "Test clinici con scopo e limiti (accuratezza solo se riportata dalla fonte)",
+      "red_flags": "Red flag, criteri di invio e di urgenza (obbligatorio, mai not_applicable)",
+      "differential_diagnosis": "Diagnosi differenziali supportate dalle fonti",
+      "contraindications": "Controindicazioni, precauzioni, sicurezza (obbligatorio, mai not_applicable)",
+      "goals": "Obiettivi riabilitativi",
+      "typical_exercises": "Interventi ed esercizi tipici",
+      "progression_criteria": "Criteri di progressione e regressione",
+      "outcome_measures": "Misure di outcome appropriate",
+      "field_status": {
+        "return_to_activity_criteria": { "status": "not_applicable", "reason": "Esempio: condizione per cui non esiste un ritorno all'attività definito" }
+      },
+      "sources": [
+        {
+          "citation": "Autori. Titolo esatto dell'articolo o della linea guida. Rivista Anno;Volume:Pagine",
+          "source_type": "guideline",
+          "year": 2024,
+          "doi": "10.0000/esempio",
+          "supports": ["clinical_presentation", "red_flags", "goals"]
+        }
+      ]
+    }
+  ],
+  "protocols": [
+    {
+      "slug": "esempio-formato-protocollo",
+      "review_status": "draft",
+      "title": "ESEMPIO - titolo del protocollo",
+      "condition_ids": [1],
+      "population": "Popolazione a cui si rivolge",
+      "inclusion_criteria": "Criteri di inclusione",
+      "exclusion_criteria": "Criteri di esclusione",
+      "baseline_assessment": "Valutazione iniziale",
+      "precautions": "Controindicazioni e precauzioni di sicurezza",
+      "outcome_measures": "Misure di outcome e quando ripeterle",
+      "reassessment_points": "Momenti di rivalutazione",
+      "return_criteria": "Criteri di ritorno all'attività o allo sport, se applicabili",
+      "phases": [
+        {
+          "phase_number": 1,
+          "phase_name": "Nome della fase 1",
+          "phase_goals": "Scopo clinico della fase",
+          "typical_duration": "Durata tipica secondo la fonte (non copiata da altri protocolli)",
+          "criteria_to_progress": "Criteri per passare alla fase 2",
+          "regression_criteria": "Quando tornare indietro",
+          "exercises": [
+            { "exercise_id": "00000000-0000-4000-8000-000000000001", "dosage": "Dosaggio specifico di questa fase, dalla fonte", "progression_note": "Come progredire" }
+          ]
+        },
+        {
+          "phase_number": 2,
+          "phase_name": "Nome della fase 2",
+          "phase_criteria_to_start": "Criteri per iniziare",
+          "phase_goals": "Scopo clinico della fase",
+          "exercises": []
+        }
+      ],
+      "sources": [
+        { "citation": "Autori. Titolo. Rivista Anno", "source_type": "systematic_review", "pmid": "1", "supports": ["phases", "precautions"] }
+      ]
+    }
+  ]
+}
