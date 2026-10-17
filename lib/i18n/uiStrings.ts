@@ -886,6 +886,8 @@ interface UiDict {
     statLinkedItems: string;
     noteHistoryHeading: string;
     noNotesYet: string;
+    notesLoadError: string;
+    notesRetry: string;
     generateFirstNote: string;
     noAssessmentRecorded: string;
     treatmentPlanHeading: string;
@@ -2254,6 +2256,8 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       statLinkedItems: 'Elementi collegati',
       noteHistoryHeading: 'Storico note',
       noNotesYet: 'Ancora nessuna nota per questo paziente.',
+      notesLoadError: 'Non è stato possibile caricare lo storico delle note. Le note non sono state modificate.',
+      notesRetry: 'Riprova',
       generateFirstNote: 'Genera la prima nota di sessione per iniziare lo storico.',
       noAssessmentRecorded: 'Nessuna valutazione registrata.',
       treatmentPlanHeading: 'Piano di trattamento e riferimenti clinici',
@@ -3656,6 +3660,8 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       statLinkedItems: 'Linked items',
       noteHistoryHeading: 'Note history',
       noNotesYet: 'No notes yet for this patient.',
+      notesLoadError: "The note history couldn't be loaded. Your notes have not been changed.",
+      notesRetry: 'Try again',
       generateFirstNote: 'Generate the first session note to start their history.',
       noAssessmentRecorded: 'No assessment recorded.',
       treatmentPlanHeading: 'Treatment plan & clinical references',
@@ -5058,6 +5064,8 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       statLinkedItems: 'Elementos vinculados',
       noteHistoryHeading: 'Historial de notas',
       noNotesYet: 'Aún no hay notas para este paciente.',
+      notesLoadError: 'No se pudo cargar el historial de notas. Las notas no se han modificado.',
+      notesRetry: 'Reintentar',
       generateFirstNote: 'Genera la primera nota de sesión para iniciar su historial.',
       noAssessmentRecorded: 'No se registró ninguna evaluación.',
       treatmentPlanHeading: 'Plan de tratamiento y referencias clínicas',
@@ -6460,6 +6468,8 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       statLinkedItems: 'Éléments liés',
       noteHistoryHeading: 'Historique des notes',
       noNotesYet: 'Aucune note pour ce patient pour le moment.',
+      notesLoadError: "L'historique des notes n'a pas pu être chargé. Les notes n'ont pas été modifiées.",
+      notesRetry: 'Réessayer',
       generateFirstNote: 'Générez la première note de séance pour démarrer son historique.',
       noAssessmentRecorded: 'Aucune évaluation enregistrée.',
       treatmentPlanHeading: 'Plan de traitement et références cliniques',
