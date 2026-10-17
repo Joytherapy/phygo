@@ -5,3 +5,6 @@ out
 *.log
 .env*.local
 Claude outputs/
+
+# pdf.js worker, copied at build time by next.config.js
+/public/pdfjs/
