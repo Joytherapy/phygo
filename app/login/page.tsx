@@ -51,6 +51,7 @@ function LoginForm() {
         } else {
           router.push("/dashboard");
           router.refresh();
+          return; // stays on "Please wait" while the dashboard opens
         }
       } else {
         const { error } = await supabase.auth.signUp({
@@ -63,14 +64,14 @@ function LoginForm() {
         } else {
           router.push("/onboarding");
           router.refresh();
+          return;
         }
       }
     } catch (err) {
       console.error("Sign-in unavailable:", err instanceof Error ? err.message : err);
       setError(t.serviceUnavailable);
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   return (

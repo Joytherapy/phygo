@@ -5,7 +5,9 @@
 //     the browser language (an English landing on an Italian browser used to
 //     open the sign-up page in Italian);
 //   - when the sign-in service cannot be reached, the login pages say so and
-//     the button comes back, instead of staying on "Please wait" forever.
+//     the button comes back, instead of staying on "Please wait" forever;
+//   - a patient who signs in to My Phygo in a language keeps it: it is saved in
+//     their profile, which the portal reads first (the profile default is 'it').
 // Skipped when Playwright/Chromium are not installed on this machine.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -27,12 +29,18 @@ for (const [base, name] of [[process.cwd() + '/', 'playwright'], ['/opt/node22/l
 }
 const skip = !playwright || !fs.existsSync(CHROMIUM) ? 'Playwright/Chromium not available' : false;
 
+const PAT = { id: '86000000-0000-4000-8000-000000000001', email: 'patient@test.invalid', email_confirmed_at: '2026-01-01T00:00:00Z', role: 'authenticated' };
+
 let fake;
 let app;
 let browser;
 before(async () => {
   if (skip) return;
-  fake = await startFakeSupabase({ port: FAKE_PORT, users: {}, tables: { conditions: [], exercises: [], profiles: [] } });
+  fake = await startFakeSupabase({
+    port: FAKE_PORT,
+    users: { 'tok-pat': PAT },
+    tables: { conditions: [], exercises: [], profiles: [{ id: PAT.id, practice_stage: 'patient', plan: 'free', preferred_language: 'it' }] },
+  });
   app = await startApp({ fakeUrl: fake.url, port: APP_PORT });
   browser = await playwright.chromium.launch({ executablePath: CHROMIUM });
 });
@@ -86,7 +94,7 @@ test('login: if the sign-in service cannot be reached, the page says so and the 
     await page.getByLabel(/email/i).fill('nobody@test.invalid');
     await page.getByLabel(/password/i).fill('synthetic-password');
     await page.locator('form button[type="submit"]').click();
-    await page.getByRole('alert').getByText("Sign-in isn't available right now.", { exact: false }).waitFor({ timeout: 15000 });
+    await page.getByRole('alert').getByText("The service isn't available right now.", { exact: false }).waitFor({ timeout: 15000 });
     assert.doesNotMatch(await page.locator('form button[type="submit"]').innerText(), /wait/i, 'not stuck on "Please wait"');
   } finally {
     await ctx.close();
@@ -102,8 +110,29 @@ test('My Phygo login: the same when the service cannot be reached', { skip }, as
     await page.locator('input[type="email"]').fill('nobody@test.invalid');
     await page.locator('input[type="password"]').fill('synthetic-password');
     await page.locator('form button[type="submit"]').click();
-    await page.getByText("Sign-in isn't available right now.", { exact: false }).waitFor({ timeout: 15000 });
+    await page.getByText("The service isn't available right now.", { exact: false }).waitFor({ timeout: 15000 });
     assert.equal(await page.locator('form button[type="submit"]').isDisabled(), false, 'the button comes back');
+  } finally {
+    await ctx.close();
+  }
+});
+
+test('My Phygo login in English saves English as the patient\'s language', { skip }, async () => {
+  const ctx = await italianBrowser();
+  try {
+    const page = await ctx.newPage();
+    // The fake has no password sign-in: answer it with a session for the synthetic patient.
+    await page.route('**/auth/v1/token**', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ access_token: 'tok-pat', refresh_token: 'refresh-tok-pat', token_type: 'bearer', expires_in: 86400, expires_at: Math.floor(Date.now() / 1000) + 86400, user: PAT }),
+    }));
+    await page.goto(`${app.url}/my-phygo/login?lang=en`);
+    await page.locator('input[type="email"]').fill(PAT.email);
+    await page.locator('input[type="password"]').fill('synthetic-password');
+    await page.locator('form button[type="submit"]').click();
+    await page.waitForURL(/\/my-phygo\/home/, { timeout: 15000 });
+    assert.equal(fake.state.tables.profiles.find((r) => r.id === PAT.id).preferred_language, 'en');
   } finally {
     await ctx.close();
   }
