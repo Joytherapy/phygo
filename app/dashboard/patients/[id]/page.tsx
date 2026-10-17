@@ -13,18 +13,18 @@ import { usePatientContext } from '@/contexts/PatientContext'
 import WeightTrendChart from '@/components/WeightTrendChart'
 import type { AdaptiveInsightResult } from '@/lib/metabolicCalculator'
 import { lazy } from '@/lib/lazy'
+import PatientProfileCard from '@/components/patients/PatientProfileCard'
+import { displayAge, type PatientIdentity } from '@/lib/patients/profile'
 
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 ))
 
-type Patient = {
+// select('*'): the record, with the identity and contact columns of
+// sql/2026-10-17_patient_profile_PROPOSED.sql once applied (null until then).
+type Patient = PatientIdentity & {
   id: string
-  name: string
-  age: number | null
-  main_condition: string | null
-  gender: string | null
   created_at: string
   patient_user_id: string | null
 }
@@ -353,9 +353,9 @@ export default function PatientDetailPage() {
                 {patient.name}
               </h1>
               <div className="flex items-center gap-2 mt-2 flex-wrap">
-                {patient.age && (
+                {displayAge(patient) && (
                   <span className="text-sm text-ink/55 dark:text-white/40">
-                    {ui.patients.yearsOld.replace('{age}', String(patient.age))}
+                    {ui.patients.yearsOld.replace('{age}', String(displayAge(patient)!.years))}
                   </span>
                 )}
                 {patient.main_condition && (
@@ -500,6 +500,12 @@ export default function PatientDetailPage() {
             <p className="text-2xl font-bold text-ink dark:text-white">{clinicalRefs.length}</p>
           </div>
         </motion.div>
+
+        <PatientProfileCard
+          patient={patient}
+          locked={locked}
+          onSaved={(updated) => setPatient((p) => (p ? { ...p, ...updated } : p))}
+        />
 
         <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
           <div className="flex items-start justify-between gap-3 mb-6">
