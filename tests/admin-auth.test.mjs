@@ -141,15 +141,53 @@ test('the daily cron still runs: it needs CRON_SECRET and its calls to the batch
   assert.equal((await call('GET', '/api/cron/science-daily', { bearer: API_TOKEN })).status, 401, 'the API token is not a cron secret');
   assert.equal((await call('GET', '/api/cron/science-daily', { who: 'admin' })).status, 401, 'a session is not a cron secret');
   const res = await call('GET', '/api/cron/science-daily', { bearer: CRON });
-  assert.equal(res.status, 200);
   const body = await res.json();
   // Both forwarded calls passed the authorization check. fetch-sources then stops
-  // at PubMed, which the test network guard blocks; summarize-all finds no papers.
-  for (const part of [body.fetch, body.summarize]) {
-    assert.notEqual(part?.error, 'unauthorized');
-    assert.notEqual(part?.error, 'forbidden');
-  }
+  // at PubMed, which the test network guard blocks (a 500 in JSON), so the run is
+  // reported as failed (502) with that step's status; summarize-all finds no papers.
+  assert.equal(res.status, 502);
+  assert.equal(body.fetch.status, 500);
+  assert.equal(body.fetch.data?.error, 'Import failed');
+  assert.ok(![401, 403].includes(body.fetch.status), 'fetch-sources accepted CRON_SECRET');
+  assert.notEqual(body.summarize?.error, 'unauthorized');
   assert.match(String(body.summarize?.message), /sintesi/);
+});
+
+test('the cron reports a reply that is not JSON, or an exception, instead of crashing', async () => {
+  // lib/scienceCron.ts compiled to plain JavaScript, against handlers that
+  // answer an HTML error page, a JSON error, or throw.
+  const { default: ts } = await import('typescript');
+  const { mkdtempSync, readFileSync, writeFileSync, rmSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const dir = mkdtempSync(join(tmpdir(), 'phygo-cron-'));
+  try {
+    const out = ts.transpileModule(readFileSync('lib/scienceCron.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 } }).outputText;
+    writeFileSync(join(dir, 'scienceCron.mjs'), out);
+    const { step } = await import(join(dir, 'scienceCron.mjs'));
+    const html = await step('html', async () => new Response('<!DOCTYPE html><html><body>Authentication Required</body></html>', { status: 401, headers: { 'content-type': 'text/html' } }));
+    assert.deepEqual(html, { status: 401, ok: false, error: 'non-JSON response (text/html)' }, 'no exception: status and type are reported');
+    const json = await step('json', async () => Response.json({ error: 'Import failed' }, { status: 500 }));
+    assert.deepEqual(json, { status: 500, ok: false, data: { error: 'Import failed' } });
+    const thrown = await step('throws', async () => { throw new Error('boom'); });
+    assert.deepEqual(thrown, { status: 0, ok: false, error: 'exception' });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('the cron runs the batch routes in its own function, never over HTTP to its deployment URL', async () => {
+  // On 12, 15 and 16 Oct 2026 the cron fetched its own generated deployment URL,
+  // which Vercel's Standard Deployment Protection answers with an HTML login
+  // page: the batch routes were never reached. The test environment has no
+  // deployment protection, so this is checked on the source.
+  const { readFileSync } = await import('node:fs');
+  const source = readFileSync('app/api/cron/science-daily/route.ts', 'utf8');
+  assert.doesNotMatch(source, /\bfetch\s*\(/, 'no fetch() in the cron route');
+  assert.doesNotMatch(readFileSync('lib/scienceCron.ts', 'utf8'), /\bfetch\s*\(/, 'no fetch() in its helper');
+  assert.doesNotMatch(source, /VERCEL_URL/, 'no generated deployment URL');
+  assert.match(source, /from '@\/app\/api\/science\/fetch-sources\/route'/);
+  assert.match(source, /from '@\/app\/api\/science\/summarize-all\/route'/);
 });
 
 test('a maintenance token set to the same value as CRON_SECRET does not reopen the other admin routes', async () => {
