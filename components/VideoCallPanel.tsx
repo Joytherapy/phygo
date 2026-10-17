@@ -6,6 +6,7 @@ import { Video, PhoneOff, Loader2 } from 'lucide-react'
 import { refusalMessage, useVerificationStrings } from '@/lib/i18n/verificationStrings'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { lazy } from '@/lib/lazy'
+import { MY_PHYGO_STRINGS } from '@/lib/i18n/myPhygoStrings'
 
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -72,6 +73,7 @@ export default function VideoCallPanel({
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const t = useVerificationStrings()
   const { lang } = useLanguage()
+  const v = MY_PHYGO_STRINGS[lang].video
 
   const loadActiveCall = async () => {
     const { data } = await supabase
@@ -110,7 +112,7 @@ export default function VideoCallPanel({
     })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) {
-      setError(refusalMessage(t, res.status, data) ?? (res.status === 410 ? 'This call has ended.' : t.videoFailed))
+      setError(refusalMessage(t, res.status, data) ?? (res.status === 410 ? v.callEnded : t.videoFailed))
       if (res.status === 410) loadActiveCall()
       return
     }
@@ -152,7 +154,7 @@ export default function VideoCallPanel({
       setError(null)
     } else {
       setUnclosed(data.code === 'room_not_closed' ? callId : null)
-      setError(data.code === 'room_not_closed' ? 'The call has ended, but the video room could not be closed.' : t.videoFailed)
+      setError(data.code === 'room_not_closed' ? v.roomNotClosed : t.videoFailed)
     }
   }
 
@@ -181,7 +183,7 @@ export default function VideoCallPanel({
             className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
           >
             <PhoneOff size={13} />
-            {canStart ? 'End call' : 'Leave call'}
+            {canStart ? v.endCall : v.leaveCall}
           </button>
         </div>
       </div>
@@ -196,7 +198,7 @@ export default function VideoCallPanel({
         className="w-full flex items-center justify-center gap-2 rounded-2xl border border-[#4F7CFF]/30 bg-[#4F7CFF]/10 py-4 text-sm font-semibold text-[#4F7CFF] hover:bg-[#4F7CFF]/15 transition-colors animate-pulse"
       >
         <Video size={16} />
-        Join video call
+        {v.joinCall}
       </button>
       {error && <p role="alert" className="text-xs text-red-500 mt-2 text-center">{error}</p>}
       </div>
@@ -206,7 +208,7 @@ export default function VideoCallPanel({
   if (!canStart) {
     return (
       <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-10 text-center">
-        <p className="text-sm text-ink/55 dark:text-white/40">No active call right now.</p>
+        <p className="text-sm text-ink/55 dark:text-white/40">{v.noActiveCall}</p>
       </div>
     )
   }
@@ -220,7 +222,7 @@ export default function VideoCallPanel({
         style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
       >
         {starting ? <Loader2 size={16} className="animate-spin" /> : <Video size={16} />}
-        {starting ? 'Starting...' : 'Start Video Call'}
+        {starting ? v.starting : v.startCall}
       </button>
       {error && <p role="alert" className="text-xs text-red-500 mt-2 text-center">{error}</p>}
       {unclosed && (
@@ -229,7 +231,7 @@ export default function VideoCallPanel({
           className="mt-2 mx-auto flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
         >
           <PhoneOff size={13} />
-          Close video room
+          {v.closeRoom}
         </button>
       )}
     </div>

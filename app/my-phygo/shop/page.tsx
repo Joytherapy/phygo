@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
@@ -15,7 +15,9 @@ import {
   Scale,
   Apple,
 } from 'lucide-react'
-import { products, categories, type Product } from '@/lib/products'
+import { getProducts, categories, type Product } from '@/lib/products'
+import { useLanguage, useUiStrings } from '@/contexts/LanguageContext'
+import { MY_PHYGO_STRINGS } from '@/lib/i18n/myPhygoStrings'
 
 const CATEGORY_STYLE: Record<Product['category'], { icon: any; gradient: string; glow: string }> = {
   'Pelvic Floor': {
@@ -73,6 +75,12 @@ export default function PatientShopPage() {
 function PatientShopPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { lang } = useLanguage()
+  const ui = useUiStrings().shop
+  const t = MY_PHYGO_STRINGS[lang].shop
+  // Same catalogue (ids, categories, prices, links) in every language; only
+  // the product names and descriptions are translated.
+  const products = useMemo(() => getProducts(lang), [lang])
   const initialCategory = searchParams.get('category')
   const [activeCategory, setActiveCategory] = useState<string | null>(
     (initialCategory && categories.includes(initialCategory as Product['category'])) ? initialCategory : null
@@ -93,7 +101,7 @@ function PatientShopPageInner() {
         className="flex items-center gap-1.5 text-sm text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white mb-8 transition-colors"
       >
         <ArrowLeft size={15} />
-        Back
+        {t.back}
       </motion.button>
 
       <motion.div
@@ -109,21 +117,21 @@ function PatientShopPageInner() {
               style={{ background: 'linear-gradient(90deg, #4F7CFF, #32D6A0)' }}
             />
             <p className="text-xs font-semibold tracking-[0.25em] uppercase text-[#4F7CFF]">
-              Equipment
+              {ui.eyebrow}
             </p>
           </div>
           <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight leading-none text-ink dark:text-white">
-            Shop
+            {ui.heading}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]">.</span>
           </h1>
           <p className="text-base text-ink/55 dark:text-white/40 mt-3 max-w-md">
-            Equipment picks that support your recovery.
+            {t.subtitle}
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-full border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl px-4 py-2.5">
           <Sparkles size={13} className="text-[#4F7CFF]" />
           <span className="text-xs font-semibold text-ink/60 dark:text-white/60">
-            {products.length} curated picks
+            {products.length} {ui.curatedPicksSuffix}
           </span>
         </div>
       </motion.div>
@@ -138,7 +146,7 @@ function PatientShopPageInner() {
           }`}
           style={activeCategory === null ? { background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
         >
-          All · {products.length}
+          {ui.allLabel} · {products.length}
         </button>
         {categories.map((cat) => {
           const style = CATEGORY_STYLE[cat]
@@ -158,7 +166,7 @@ function PatientShopPageInner() {
                   : undefined
               }
             >
-              {cat} · {countFor(cat)}
+              {ui.categoryLabels[cat]} · {countFor(cat)}
             </button>
           )
         })}
@@ -200,7 +208,7 @@ function PatientShopPageInner() {
                 <div className="flex items-center gap-1.5 mb-2">
                   <span className="h-1.5 w-1.5 rounded-full" style={{ background: style.gradient }} />
                   <span className="text-[10px] font-bold uppercase tracking-wider text-ink/55 dark:text-white/40">
-                    {product.category}
+                    {ui.categoryLabels[product.category]}
                   </span>
                 </div>
                 <p className="text-sm font-bold text-ink dark:text-white mb-1.5 leading-snug">
@@ -217,7 +225,7 @@ function PatientShopPageInner() {
                   className="flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-semibold text-white transition-transform hover:scale-[1.02]"
                   style={{ background: style.gradient }}
                 >
-                  View on Amazon
+                  {ui.viewOnAmazonCta}
                   <ExternalLink size={12} />
                 </a>
               </div>

@@ -6,6 +6,7 @@ import { Flame, Activity, Ruler, Check, Loader2, Search, User, Pencil, X, Printe
 import { usePatientContext } from '@/contexts/PatientContext';
 import { useUiStrings, useLanguage } from '@/contexts/LanguageContext';
 import { getFoodExamplesByMacro } from '@/lib/foodExamples';
+import { localeForLang } from '@/lib/i18n/agendaStrings';
 import type {
   ActivityLevel,
   Goal,
@@ -150,7 +151,7 @@ export default function MetabolicCalculator({
 
   const invalid = result && result.warnings.length > 0;
   const patientNameForPrint = mode === 'professional' ? currentPatient?.name ?? null : null;
-  const printedOn = new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+  const printedOn = new Date().toLocaleDateString(localeForLang(lang), { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <div className="max-w-3xl">
