@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { Flame, ArrowLeft, Calendar, RefreshCw, Sparkles, TrendingUp, TrendingDown, Minus, Scale, ArrowRight, Target } from 'lucide-react'
-import { useUiStrings } from '@/contexts/LanguageContext'
+import { useLanguage, useUiStrings } from '@/contexts/LanguageContext'
+import { localeForLang } from '@/lib/i18n/agendaStrings'
 import MetabolicCalculator from '@/components/MetabolicCalculator'
 import WeightTrendChart from '@/components/WeightTrendChart'
 import { calculateGoalProjection, type AdaptiveInsightResult } from '@/lib/metabolicCalculator'
@@ -42,6 +43,7 @@ export default function MyPhygoLifeMetabolicPage() {
   const router = useRouter()
   const ui = useUiStrings().myPhygoLife
   const calcUi = useUiStrings().metabolicCalculator
+  const { lang } = useLanguage()
   const [checking, setChecking] = useState(true)
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [adaptiveInsight, setAdaptiveInsight] = useState<AdaptiveInsightResult | null>(null)
@@ -219,7 +221,7 @@ export default function MyPhygoLifeMetabolicPage() {
                         {goalProjection.achievable
                           ? interpolate(calcUi.projectionAchievable, {
                               days: goalProjection.daysRemaining,
-                              date: new Date(goalProjection.projectedDate).toLocaleDateString(undefined, {
+                              date: new Date(goalProjection.projectedDate).toLocaleDateString(localeForLang(lang), {
                                 day: 'numeric',
                                 month: 'long',
                                 year: 'numeric',
@@ -291,7 +293,7 @@ export default function MyPhygoLifeMetabolicPage() {
                     <Calendar size={14} className="text-ink/30 dark:text-white/30 shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-ink/55 dark:text-white/40">
-                        {new Date(h.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                        {new Date(h.created_at).toLocaleDateString(localeForLang(lang), { day: 'numeric', month: 'short', year: 'numeric' })}
                       </p>
                       <p className="text-sm text-ink/70 dark:text-white/70">
                         {h.weight_kg} kg — TDEE {h.tdee} {calcUi.kcalPerDaySuffix}

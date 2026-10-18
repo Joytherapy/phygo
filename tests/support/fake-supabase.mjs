@@ -18,6 +18,9 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     users, // access token -> user object
     requests: [],
     failTables: new Set(), // tables that answer 500 (to test error handling)
+    // Daily stand-in: what PHYGO asked Daily for (room bodies, token properties, deleted rooms).
+    // deleteFailures: statuses the next room deletions answer with (e.g. [500, 500]), to test refusals.
+    daily: { rooms: [], tokens: [], deleted: [], deleteAttempts: [], deleteFailures: [] },
   };
 
   const server = http.createServer(async (req, res) => {
@@ -75,8 +78,22 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
 
     // Daily stand-in: room creation answers with a synthetic room, so tests can count calls.
     if (url.pathname === '/daily/v1/rooms' && req.method === 'POST') {
-      const { name } = JSON.parse(body || '{}');
-      return send(200, { name, url: `https://test.invalid/${name}` });
+      const room = JSON.parse(body || '{}');
+      state.daily.rooms.push(room);
+      return send(200, { name: room.name, url: `https://test.invalid/${room.name}` });
+    }
+    if (url.pathname === '/daily/v1/meeting-tokens' && req.method === 'POST') {
+      const { properties } = JSON.parse(body || '{}');
+      state.daily.tokens.push(properties);
+      return send(200, { token: `synthetic-token-${state.daily.tokens.length}` });
+    }
+    const dailyRoom = url.pathname.match(/^\/daily\/v1\/rooms\/([^/]+)$/);
+    if (dailyRoom && req.method === 'DELETE') {
+      state.daily.deleteAttempts.push(decodeURIComponent(dailyRoom[1]));
+      const failure = state.daily.deleteFailures.shift();
+      if (failure) return send(failure, { error: failure === 404 ? 'not-found' : 'synthetic-failure' });
+      state.daily.deleted.push(decodeURIComponent(dailyRoom[1]));
+      return send(200, { deleted: true, name: decodeURIComponent(dailyRoom[1]) });
     }
 
     const rest = url.pathname.match(/^\/rest\/v1\/([a-z_]+)$/);
@@ -122,13 +139,24 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
       if (pk && !url.searchParams.get('on_conflict') && items.some((item) => rows.some((r) => r[pk] === item[pk]))) {
         return send(409, { code: '23505', message: `duplicate key value violates unique constraint "${table}_pkey"` });
       }
+      const written = [];
       for (const item of items) {
         const conflict = url.searchParams.get('on_conflict');
         const existing = conflict ? rows.find((r) => conflict.split(',').every((c) => r[c] === item[c])) : null;
-        if (existing) Object.assign(existing, item);
-        else rows.push({ id: item.id ?? `row-${rows.length + 1}`, ...item });
+        if (existing) written.push(Object.assign(existing, item));
+        else {
+          // Database defaults: a generated uuid and the creation time.
+          const row = { id: item.id ?? crypto.randomUUID(), created_at: item.created_at ?? new Date().toISOString(), ...item };
+          rows.push(row);
+          written.push(row);
+        }
       }
-      return send(201, items);
+      // .insert(...).select().single() asks for one object, as PostgREST answers it.
+      if ((req.headers.accept ?? '').includes('vnd.pgrst.object')) {
+        if (written.length !== 1) return send(406, { code: 'PGRST116', message: 'JSON object requested, multiple (or no) rows returned' });
+        return send(201, written[0]);
+      }
+      return send(201, written);
     }
     if (req.method === 'PATCH') {
       const patch = JSON.parse(body || '{}');

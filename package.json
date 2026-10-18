@@ -10,6 +10,7 @@
     "test:integration": "bash tests/run.sh"
   },
   "dependencies": {
+    "@daily-co/daily-js": "0.92.2",
     "@react-three/drei": "^9.114.3",
     "@react-three/fiber": "^8.17.10",
     "@supabase/ssr": "^0.12.3",

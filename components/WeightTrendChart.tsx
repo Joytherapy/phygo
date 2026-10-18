@@ -1,6 +1,8 @@
 'use client';
 
 import { useId, useMemo, useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { localeForLang } from '@/lib/i18n/agendaStrings';
 
 export type WeightTrendPoint = { date: string; weightKg: number };
 
@@ -24,6 +26,7 @@ export default function WeightTrendChart({
   height?: number;
 }) {
   const gradientId = useId();
+  const { lang } = useLanguage();
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   const chart = useMemo(() => {
@@ -134,7 +137,7 @@ export default function WeightTrendChart({
             transform: tooltipFlip ? 'translate(-100%, 0)' : 'translate(0, 0)',
           }}
         >
-          {new Date(hovered.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} · {hovered.weightKg} kg
+          {new Date(hovered.date).toLocaleDateString(localeForLang(lang), { day: 'numeric', month: 'short' })} · {hovered.weightKg} kg
         </div>
       )}
     </div>

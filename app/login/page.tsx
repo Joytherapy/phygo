@@ -6,6 +6,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useEntryLang } from "@/lib/i18n/useEntryLang";
 import { ENTRY_STRINGS, localizeAuthError } from "@/lib/i18n/entryStrings";
 import { publicPath, myPhygoLoginHref } from "@/lib/i18n/landingStrings";
+import BrandMark from "@/components/BrandMark";
 
 export default function LoginPage() {
   return (
@@ -37,32 +38,40 @@ function LoginForm() {
     setMessage(null);
     setLoading(true);
 
-    if (mode === "login") {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    // If the sign-in service cannot be reached (or is not configured, as in
+    // Vercel Previews), say so instead of leaving the button on "Please wait".
+    try {
+      if (mode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-      if (error) {
-        setError(localizeAuthError(error.message, t));
+        if (error) {
+          setError(error.name === "AuthRetryableFetchError" ? t.serviceUnavailable : localizeAuthError(error.message, t));
+        } else {
+          router.push("/dashboard");
+          router.refresh();
+          return; // stays on "Please wait" while the dashboard opens
+        }
       } else {
-        router.push("/dashboard");
-        router.refresh();
-      }
-    } else {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
 
-      if (error) {
-        setError(localizeAuthError(error.message, t));
-      } else {
-        router.push("/onboarding");
-        router.refresh();
+        if (error) {
+          setError(error.name === "AuthRetryableFetchError" ? t.serviceUnavailable : localizeAuthError(error.message, t));
+        } else {
+          router.push("/onboarding");
+          router.refresh();
+          return;
+        }
       }
+    } catch (err) {
+      console.error("Sign-in unavailable:", err instanceof Error ? err.message : err);
+      setError(t.serviceUnavailable);
     }
-
     setLoading(false);
   };
 
@@ -77,9 +86,7 @@ function LoginForm() {
 
       <div className="relative w-full max-w-sm rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.04] backdrop-blur-2xl shadow-2xl p-8">
         <div className="flex justify-center mb-6">
-          <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7CFF] to-[#32D6A0] text-white text-lg font-bold shadow-[0_8px_24px_rgba(79,124,255,0.35)]">
-            P
-          </span>
+          <BrandMark />
         </div>
 
         <h1 className="mb-1 text-center text-2xl font-semibold text-ink dark:text-white">

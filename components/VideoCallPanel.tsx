@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { Video, PhoneOff, Loader2 } from 'lucide-react'
 import { refusalMessage, useVerificationStrings } from '@/lib/i18n/verificationStrings'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { lazy } from '@/lib/lazy'
+import { MY_PHYGO_STRINGS } from '@/lib/i18n/myPhygoStrings'
 
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,6 +19,42 @@ type ActiveCall = {
   status: string
 }
 
+type Session = { url: string; token: string }
+
+// The Daily call inside the page, joined with a meeting token from our server
+// through Daily's documented join({ url, token }). The room is private, so its
+// URL alone opens nothing. daily-js passes the token to Daily's own frame in
+// that frame's address (?t=...); it never appears in this page's URL, in the
+// browser history of PHYGO, or in any request to our server after it is issued.
+function DailyFrame({ session, onLeft }: { session: Session; onLeft: () => void }) {
+  const container = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    let cancelled = false
+    let frame: { destroy: () => Promise<void> } | null = null
+    ;(async () => {
+      const { default: DailyIframe } = await import('@daily-co/daily-js')
+      if (cancelled || !container.current) return
+      try {
+        const f = DailyIframe.createFrame(container.current, {
+          iframeStyle: { width: '100%', height: '100%', border: '0' },
+          showLeaveButton: true,
+        })
+        frame = f
+        f.on('left-meeting', onLeft)
+        await f.join({ url: session.url, token: session.token })
+      } catch {
+        onLeft()
+      }
+    })()
+    return () => {
+      cancelled = true
+      frame?.destroy().catch(() => {})
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session])
+  return <div ref={container} className="w-full aspect-video" />
+}
+
 export default function VideoCallPanel({
   patientId,
   canStart,
@@ -27,10 +65,15 @@ export default function VideoCallPanel({
   const [call, setCall] = useState<ActiveCall | null>(null)
   const [loading, setLoading] = useState(true)
   const [starting, setStarting] = useState(false)
-  const [inCall, setInCall] = useState(false)
+  const [session, setSession] = useState<Session | null>(null)
   const [error, setError] = useState<string | null>(null)
+  // A call ended on the server whose Daily room could not be closed: the
+  // clinician can try again (the server answers 200 only once the room is gone).
+  const [unclosed, setUnclosed] = useState<string | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const t = useVerificationStrings()
+  const { lang } = useLanguage()
+  const v = MY_PHYGO_STRINGS[lang].video
 
   const loadActiveCall = async () => {
     const { data } = await supabase
@@ -38,6 +81,10 @@ export default function VideoCallPanel({
       .select('id, room_url, status')
       .eq('patient_id', patientId)
       .eq('status', 'active')
+      // Only a call that can still be joined: rooms last one hour, and old
+      // public rooms (session-…) are never reopened.
+      .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
+      .like('room_name', 'phygo-%')
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
@@ -54,6 +101,24 @@ export default function VideoCallPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientId])
 
+  // Every join asks the server for a new token: it checks that this call is
+  // ours (as the clinician or as the patient) and still active.
+  const join = async (target: ActiveCall) => {
+    setError(null)
+    const res = await fetch('/api/video-call/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ callId: target.id, lang }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      setError(refusalMessage(t, res.status, data) ?? (res.status === 410 ? v.callEnded : t.videoFailed))
+      if (res.status === 410) loadActiveCall()
+      return
+    }
+    setSession({ url: data.url, token: data.token })
+  }
+
   const startCall = async () => {
     setStarting(true)
     setError(null)
@@ -65,44 +130,39 @@ export default function VideoCallPanel({
     })
     const data = await res.json().catch(() => ({}))
 
-    if (!res.ok) {
+    if (!res.ok || !data.call) {
       console.error('Errore creazione stanza:', data.error)
       setError(refusalMessage(t, res.status, data) ?? t.videoFailed)
       setStarting(false)
       return
     }
-
-    const { data: { user } } = await supabase.auth.getUser()
-
-    const { data: newCall, error: insertError } = await supabase
-      .from('video_calls')
-      .insert({
-        patient_id: patientId,
-        room_url: data.url,
-        room_name: data.name,
-        created_by: user?.id,
-        status: 'active',
-      })
-      .select('id, room_url, status')
-      .single()
-
-    if (!insertError && newCall) {
-      setCall(newCall)
-      setInCall(true)
-    } else {
-      setError(t.videoSaveFailed)
-    }
+    setCall(data.call)
+    await join(data.call)
     setStarting(false)
+  }
+
+  // The clinician ends the call on the server: no new tokens, room deleted.
+  const closeCall = async (callId: string) => {
+    const res = await fetch('/api/video-call/end', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ callId }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (res.ok) {
+      setUnclosed(null)
+      setError(null)
+    } else {
+      setUnclosed(data.code === 'room_not_closed' ? callId : null)
+      setError(data.code === 'room_not_closed' ? v.roomNotClosed : t.videoFailed)
+    }
   }
 
   const endCall = async () => {
     if (!call) return
-    await supabase
-      .from('video_calls')
-      .update({ status: 'ended', ended_at: new Date().toISOString() })
-      .eq('id', call.id)
-    setCall(null)
-    setInCall(false)
+    setSession(null)
+    if (canStart) await closeCall(call.id)
+    loadActiveCall()
   }
 
   if (loading) {
@@ -113,43 +173,42 @@ export default function VideoCallPanel({
     )
   }
 
-  if (call && inCall) {
+  if (call && session) {
     return (
       <div className="rounded-2xl overflow-hidden border border-black/[0.09] dark:border-white/10">
-        <iframe
-          src={call.room_url}
-          allow="camera; microphone; fullscreen; display-capture; autoplay"
-          className="w-full aspect-video"
-        />
+        <DailyFrame session={session} onLeft={() => setSession(null)} />
         <div className="p-3 flex justify-end bg-white dark:bg-white/[0.03]">
           <button
             onClick={endCall}
             className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
           >
             <PhoneOff size={13} />
-            {canStart ? 'End call' : 'Leave call'}
+            {canStart ? v.endCall : v.leaveCall}
           </button>
         </div>
       </div>
     )
   }
 
-  if (call && !inCall) {
+  if (call && !session) {
     return (
+      <div>
       <button
-        onClick={() => setInCall(true)}
+        onClick={() => join(call)}
         className="w-full flex items-center justify-center gap-2 rounded-2xl border border-[#4F7CFF]/30 bg-[#4F7CFF]/10 py-4 text-sm font-semibold text-[#4F7CFF] hover:bg-[#4F7CFF]/15 transition-colors animate-pulse"
       >
         <Video size={16} />
-        Join video call
+        {v.joinCall}
       </button>
+      {error && <p role="alert" className="text-xs text-red-500 mt-2 text-center">{error}</p>}
+      </div>
     )
   }
 
   if (!canStart) {
     return (
       <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-10 text-center">
-        <p className="text-sm text-ink/55 dark:text-white/40">No active call right now.</p>
+        <p className="text-sm text-ink/55 dark:text-white/40">{v.noActiveCall}</p>
       </div>
     )
   }
@@ -163,9 +222,18 @@ export default function VideoCallPanel({
         style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
       >
         {starting ? <Loader2 size={16} className="animate-spin" /> : <Video size={16} />}
-        {starting ? 'Starting...' : 'Start Video Call'}
+        {starting ? v.starting : v.startCall}
       </button>
-      {error && <p className="text-xs text-red-500 mt-2 text-center">{error}</p>}
+      {error && <p role="alert" className="text-xs text-red-500 mt-2 text-center">{error}</p>}
+      {unclosed && (
+        <button
+          onClick={() => closeCall(unclosed)}
+          className="mt-2 mx-auto flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
+        >
+          <PhoneOff size={13} />
+          {v.closeRoom}
+        </button>
+      )}
     </div>
   )
 }

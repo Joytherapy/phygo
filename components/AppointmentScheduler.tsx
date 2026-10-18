@@ -7,6 +7,7 @@ import { Calendar, Clock, Video, MapPin, Check, X, Loader2, Plus, Sparkles, Cale
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useAgendaUi, localeForLang } from '@/lib/i18n/agendaStrings'
 import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
+import { MY_PHYGO_STRINGS } from '@/lib/i18n/myPhygoStrings'
 import { cancelAppointment } from '@/lib/appointments'
 import { lazy } from '@/lib/lazy'
 
@@ -48,6 +49,7 @@ export default function AppointmentScheduler({
   const ui = useAgendaUi()
   const t = useDashboardUi()
   const locale = localeForLang(lang)
+  const sched = MY_PHYGO_STRINGS[lang].scheduler
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [showPicker, setShowPicker] = useState(false)
@@ -498,7 +500,7 @@ export default function AppointmentScheduler({
                   />
                   {new Date(a.scheduled_at).toLocaleDateString(locale, { day: 'numeric', month: 'short' })} · {a.session_type === 'video' ? ui.common.video : ui.common.inPersonShort}
                 </span>
-                <span className="text-ink/30 dark:text-white/30 capitalize">{a.status}</span>
+                <span className="text-ink/30 dark:text-white/30">{sched.status[a.status] ?? a.status}</span>
               </div>
             ))}
           </div>
