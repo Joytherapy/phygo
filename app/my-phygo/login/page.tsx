@@ -8,7 +8,7 @@ import { useEntryLang } from '@/lib/i18n/useEntryLang'
 import { ENTRY_STRINGS } from '@/lib/i18n/entryStrings'
 import { loginHref } from '@/lib/i18n/landingStrings'
 import { lazy } from '@/lib/lazy'
-import { rememberPortalLanguage } from '@/lib/myPhygo/language'
+import { rememberLanguage } from '@/lib/i18n/rememberLanguage'
 
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -56,7 +56,7 @@ function MyPhygoLogin() {
       return
     }
 
-    await rememberPortalLanguage(supabase, lang)
+    await rememberLanguage(supabase, lang)
     router.push('/my-phygo/home')
   }
 
