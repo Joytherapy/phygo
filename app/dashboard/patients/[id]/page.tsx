@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
@@ -42,6 +42,26 @@ type Note = {
   plan: string | null
   created_at: string
 }
+
+// The whole history, read in pages so that no note is left out whatever its
+// age (PostgREST answers at most "max rows" per request, 1000 by default, and
+// a project may set it lower). Each page starts after the rows already
+// received and the reading stops only at an empty page, so a lower server
+// limit never cuts the history short; the order has a tie-breaker (id) so
+// pages never overlap or skip, duplicates are dropped, and a page cap stops a
+// server that would ignore the range. Row-level security decides which notes
+// come back: the clinician's own notes on their own patient ("Users can view
+// their own notes").
+const NOTES_PAGE_SIZE = 500
+const NOTES_MAX_PAGES = 200
+
+// Newest first; notes with the same timestamp keep a stable order.
+const sortNotesNewestFirst = (rows: Note[]) =>
+  [...rows].sort((a, b) => {
+    const diff = Date.parse(b.created_at) - Date.parse(a.created_at)
+    if (diff) return diff
+    return a.id < b.id ? 1 : a.id > b.id ? -1 : 0
+  })
 
 type MetabolicProfile = {
   id: string
@@ -152,6 +172,8 @@ export default function PatientDetailPage() {
 
   const [patient, setPatient] = useState<Patient | null>(null)
   const [notes, setNotes] = useState<Note[]>([])
+  // 'error' is a failed load, never shown as an empty history.
+  const [notesStatus, setNotesStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [loading, setLoading] = useState(true)
 
   const [metabolicHistory, setMetabolicHistory] = useState<MetabolicProfile[]>([])
@@ -165,6 +187,31 @@ export default function PatientDetailPage() {
   const [inviteError, setInviteError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
+  const loadNotes = useCallback(async () => {
+    setNotesStatus('loading')
+    const byId = new Map<string, Note>()
+    let received = 0
+    for (let page = 0; page < NOTES_MAX_PAGES; page++) {
+      const { data, error } = await supabase
+        .from('notes')
+        .select('id, assessment, plan, created_at')
+        .eq('patient_id', patientId)
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+        .range(received, received + NOTES_PAGE_SIZE - 1)
+      if (error) {
+        console.error('Errore caricamento storico note:', error.code, error.message)
+        setNotesStatus('error')
+        return
+      }
+      if (!data || data.length === 0) break
+      received += data.length
+      for (const n of data as Note[]) byId.set(n.id, n)
+    }
+    setNotes(sortNotesNewestFirst([...byId.values()]))
+    setNotesStatus('ready')
+  }, [patientId])
+
   useEffect(() => {
     const load = async () => {
       const { data: patientData } = await supabase
@@ -175,13 +222,7 @@ export default function PatientDetailPage() {
 
       setPatient(patientData)
 
-      const { data: notesData } = await supabase
-        .from('notes')
-        .select('id, assessment, plan, created_at')
-        .eq('patient_id', patientId)
-        .order('created_at', { ascending: false })
-
-      setNotes(notesData || [])
+      await loadNotes()
 
       const { data: refsData, error: refsError } = await supabase
         .from('patient_clinical_references')
@@ -213,7 +254,7 @@ export default function PatientDetailPage() {
     }
 
     load()
-  }, [patientId])
+  }, [patientId, loadNotes])
 
   const openInCalculator = () => {
     if (patient) setCurrentPatient({ id: patient.id, name: patient.name })
@@ -465,7 +506,7 @@ export default function PatientDetailPage() {
                 {ui.patients.statSessions}
               </span>
             </div>
-            <p className="text-2xl font-bold text-ink dark:text-white">{notes.length}</p>
+            <p className="text-2xl font-bold text-ink dark:text-white">{notesStatus === 'ready' ? notes.length : '—'}</p>
           </div>
 
           <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
@@ -516,14 +557,30 @@ export default function PatientDetailPage() {
                 </p>
               </div>
             </div>
-            {notes.length > 0 && (
+            {notesStatus === 'ready' && notes.length > 0 && (
               <span className="shrink-0 rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF] text-xs font-bold px-2.5 py-1">
                 {notes.length}
               </span>
             )}
           </div>
 
-          {notes.length === 0 ? (
+          {notesStatus === 'loading' ? (
+            <div role="status" className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-14 text-center text-sm text-ink/55 dark:text-white/40">
+              {ui.common.loading}
+            </div>
+          ) : notesStatus === 'error' ? (
+            <div role="alert" data-testid="notes-error" className="rounded-2xl border border-red-500/25 bg-red-500/[0.04] py-10 px-6 text-center flex flex-col items-center gap-3">
+              <p className="text-sm text-ink/70 dark:text-white/70">{ui.patients.notesLoadError}</p>
+              <button
+                type="button"
+                onClick={() => loadNotes()}
+                className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white bg-[#4F7CFF] hover:bg-[#3D68E8] transition-colors"
+              >
+                <RotateCcw size={13} />
+                {ui.patients.notesRetry}
+              </button>
+            </div>
+          ) : notes.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-14 text-center flex flex-col items-center gap-3">
               <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF]">
                 <div className="absolute inset-0 rounded-full bg-[#4F7CFF]/20 blur-lg" />
