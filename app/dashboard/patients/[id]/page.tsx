@@ -8,7 +8,9 @@ import { ArrowLeft, Plus, FileText, Calendar, Activity, Stethoscope, ClipboardLi
 import Navbar from '@/components/Navbar'
 import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
 import { useClinicalLocked } from '@/lib/useClinicalAccess'
-import { useUiStrings } from '@/contexts/LanguageContext'
+import { useLanguage, useUiStrings } from '@/contexts/LanguageContext'
+import LanguageMenu from '@/components/LanguageMenu'
+import type { AppLang } from '@/lib/i18n/uiStrings'
 import { usePatientContext } from '@/contexts/PatientContext'
 import WeightTrendChart from '@/components/WeightTrendChart'
 import type { AdaptiveInsightResult } from '@/lib/metabolicCalculator'
@@ -161,7 +163,14 @@ export default function PatientDetailPage() {
   const [removingRefId, setRemovingRefId] = useState<string | null>(null)
 
   const [inviteLoading, setInviteLoading] = useState(false)
-  const [inviteLink, setInviteLink] = useState<string | null>(null)
+  const [inviteCode, setInviteCode] = useState<string | null>(null)
+  // The invitation opens in the patient's language (?lang=); it starts as the
+  // clinician's and can be changed before the link is shared.
+  const { lang: clinicianLang } = useLanguage()
+  const [inviteLang, setInviteLang] = useState<AppLang | null>(null)
+  const inviteLink = inviteCode
+    ? `${window.location.origin}/my-phygo/join/${inviteCode}?lang=${inviteLang ?? clinicianLang}`
+    : null
   const [inviteError, setInviteError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
@@ -236,7 +245,7 @@ export default function PatientDetailPage() {
     })
 
     if (!error) {
-      setInviteLink(`${window.location.origin}/my-phygo/join/${code}`)
+      setInviteCode(code)
     } else {
       console.error('Errore creazione invito:', error)
       setInviteError(ui.patients.inviteError)
@@ -444,6 +453,10 @@ export default function PatientDetailPage() {
                 {copied ? <Check size={13} /> : <Copy size={13} />}
                 {copied ? ui.patients.copied : ui.patients.copyButton}
               </button>
+            </div>
+            <div className="mt-3 flex items-center gap-2 text-xs text-ink/60 dark:text-white/50">
+              <span>{ui.patients.inviteLanguageLabel}</span>
+              <LanguageMenu value={inviteLang ?? clinicianLang} onChange={setInviteLang} />
             </div>
           </motion.div>
         )}

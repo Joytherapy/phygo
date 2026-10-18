@@ -6,7 +6,9 @@
 //   - signing in without choosing a language leaves the account's as it is;
 //   - the login page, the invitation page and the My Phygo portal each have a
 //     language menu; inside the portal the choice is saved to the patient's
-//     profile.
+//     profile;
+//   - the invitation link a clinician generates carries the patient's language
+//     (?lang=), the clinician's by default, changeable before sharing.
 // Skipped when Playwright/Chromium are not installed on this machine.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -44,8 +46,9 @@ before(async () => {
         { id: CLIN.id, practice_stage: 'professional', professional_status: 'verified', plan: 'free', preferred_language: 'it' },
         { id: PAT.id, practice_stage: 'patient', plan: 'free', preferred_language: 'it' },
       ],
-      patients: [{ id: '87100000-0000-4000-8000-000000000001', user_id: CLIN.id, patient_user_id: PAT.id, name: 'Synthetic Patient', age: 40, gender: null, main_condition: null, created_at: '2026-08-01T09:00:00Z' }],
-      notes: [], appointments: [], video_calls: [], patient_clinical_references: [], metabolic_profiles: [], professional_transition_accounts: [], conditions: [], exercises: [],
+      patients: [{ id: '87100000-0000-4000-8000-000000000001', user_id: CLIN.id, patient_user_id: PAT.id, name: 'Synthetic Patient', age: 40, gender: null, main_condition: null, created_at: '2026-08-01T09:00:00Z' },
+        { id: '87100000-0000-4000-8000-000000000002', user_id: CLIN.id, patient_user_id: null, name: 'Synthetic Invitee', age: 35, gender: null, main_condition: null, created_at: '2026-08-02T09:00:00Z' }],
+      notes: [], appointments: [], video_calls: [], patient_clinical_references: [], metabolic_profiles: [], professional_transition_accounts: [], conditions: [], exercises: [], patient_invites: [],
     },
   });
   app = await startApp({ fakeUrl: fake.url, port: APP_PORT });
@@ -153,6 +156,36 @@ test('My Phygo portal: the language menu changes the portal and saves the patien
     assert.equal(profileOf(PAT.id).preferred_language, 'fr');
     await page.reload();
     await page.getByText('Bon retour').first().waitFor({ timeout: 15000 });
+  } finally {
+    await ctx.close();
+  }
+});
+
+test('invitation link: opens in the patient\'s language, the clinician\'s by default', { skip }, async () => {
+  setProfileLang(CLIN.id, 'it');
+  const ctx = await italianBrowser();
+  try {
+    const [name, value] = sessionCookie('tok-clin', CLIN).split(/=(.*)/s);
+    await ctx.addCookies([{ name, value, url: app.url }]);
+    const page = await ctx.newPage();
+    await page.goto(`${app.url}/dashboard/patients/87100000-0000-4000-8000-000000000002`);
+    await page.getByRole('button', { name: 'Invita al portale' }).click();
+    const link = page.locator('input[readonly][value*="/my-phygo/join/"]');
+    await link.waitFor({ timeout: 15000 });
+    assert.match(await link.inputValue(), /\/my-phygo\/join\/[A-Z0-9]+\?lang=it$/);
+    await page.getByTestId('language-menu').last().selectOption('en');
+    assert.match(await link.inputValue(), /\/my-phygo\/join\/[A-Z0-9]+\?lang=en$/);
+    const code = (await link.inputValue()).match(/join\/([A-Z0-9]+)/)[1];
+    assert.ok(fake.state.tables.patient_invites.some((r) => r.code === code), 'the invitation was stored');
+    // The patient opens it on an Italian browser: the page is in English.
+    const patientCtx = await italianBrowser();
+    try {
+      const p2 = await patientCtx.newPage();
+      await p2.goto(await link.inputValue());
+      await p2.getByRole('heading', { level: 1, name: 'Welcome to My Phygo' }).waitFor();
+    } finally {
+      await patientCtx.close();
+    }
   } finally {
     await ctx.close();
   }
