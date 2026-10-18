@@ -130,12 +130,13 @@ test('dashboard home: a refused patient insert is reported, the form stays open'
     await page.getByText('Synthetic Patient One').waitFor();
     await control('?table=patients');
     await page.getByRole('button', { name: 'Nuovo paziente' }).last().click();
-    await page.locator('#np-name').fill('Synthetic Patient Three');
+    await page.locator('#np-first').fill('Synthetic');
+    await page.locator('#np-last').fill('Patient Three');
     await page.getByRole('button', { name: 'Salva paziente' }).click();
     const err = page.getByTestId('create-patient-error');
     await err.waitFor();
     assert.match(await err.textContent(), /non è stato salvato/);
-    assert.equal(await page.locator('#np-name').inputValue(), 'Synthetic Patient Three', 'typed data is kept');
+    assert.equal(await page.locator('#np-last').inputValue(), 'Patient Three', 'typed data is kept');
   } finally {
     await control('');
     await close();
