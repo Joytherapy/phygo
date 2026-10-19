@@ -14,8 +14,8 @@ import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
 import VideoCallPanel from '@/components/VideoCallPanel'
 import LiveStructuring from '@/components/liveStructuring/LiveStructuring'
 import ErrorState from '@/components/workspace/ErrorState'
-import { Card } from '@/components/dashboard/HomeCards'
-import { PageBackdrop, PAGE_BG, SECONDARY_BTN, CHIP } from '@/components/ui/premium'
+import { Card, Avatar } from '@/components/dashboard/HomeCards'
+import { PageBackdrop, PageEyebrow, PAGE_BG, SECONDARY_BTN } from '@/components/ui/premium'
 import { usePatientContext } from '@/contexts/PatientContext'
 import { useUiStrings } from '@/contexts/LanguageContext'
 import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
@@ -98,13 +98,13 @@ export default function PatientCallPage() {
         {ui.patients.backToPatientName.replace('{name}', patient.name)}
       </button>
 
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div className="min-w-0">
-          <p className={`inline-flex items-center gap-2 rounded-full px-3 py-1 font-mono text-[11px] uppercase tracking-[0.16em] ${CHIP}`}>
-            <Video size={12} aria-hidden />
-            {h.videoCall}
-          </p>
-          <h1 className="mt-3 break-words font-display text-3xl font-semibold tracking-[-0.03em] text-ink dark:text-white sm:text-4xl">{patient.name}</h1>
+      <div className="mb-7 flex flex-wrap items-center justify-between gap-5">
+        <div className="flex min-w-0 items-center gap-4">
+          <Avatar name={patient.name} linked={linked} size={56} />
+          <div className="min-w-0">
+            <PageEyebrow icon={Video}>{h.videoCall}</PageEyebrow>
+            <h1 className="mt-1.5 break-words font-display text-3xl font-semibold tracking-[-0.035em] text-ink dark:text-white sm:text-[40px] sm:leading-[1.1]">{patient.name}</h1>
+          </div>
         </div>
         <button
           type="button"
@@ -122,7 +122,7 @@ export default function PatientCallPage() {
       <div className={`grid items-start gap-4 ${showNotes ? 'lg:grid-cols-[minmax(0,1fr)_420px]' : ''}`}>
         <Card glow className="p-3 sm:p-4" data-testid="call-stage">
           {linked ? (
-            <VideoCallPanel patientId={patientId} canStart={!locked} stage />
+            <VideoCallPanel patientId={patientId} canStart={!locked} stage stageBadge={h.privateRoom} />
           ) : (
             <div className="flex flex-col items-start gap-4 p-4 sm:p-6" data-testid="call-needs-portal">
               <span className="grid h-12 w-12 place-items-center rounded-2xl border border-black/[0.06] bg-black/[0.03] text-ink/70 dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-white/80">
@@ -141,16 +141,16 @@ export default function PatientCallPage() {
         </Card>
 
         {showNotes && (
-          <Card className="p-4 sm:p-5" data-testid="call-notes">
-            <h2 className="font-display text-base font-semibold text-ink dark:text-white">{h.callNotes}</h2>
-            <p className="mb-4 mt-1 text-xs text-ink/55 dark:text-white/50">{h.callNotesHint}</p>
+          <Card className="p-5 sm:p-6" data-testid="call-notes">
+            <h2 className="font-display text-lg font-semibold tracking-[-0.01em] text-ink dark:text-white">{h.callNotes}</h2>
+            <p className="mb-5 mt-1 text-[13px] leading-relaxed text-ink/55 dark:text-white/50">{h.callNotesHint}</p>
             {savedMessage && (
               <p role="status" className="mb-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
                 {ui.patients.noteSavedMessage.replace('{name}', patient.name)}
               </p>
             )}
             {!locked && (
-              <LiveStructuring instanceId={`call-${patientId}`} variant="full" patientId={patientId} onSaved={() => setSavedMessage(true)} />
+              <LiveStructuring instanceId={`call-${patientId}`} variant="full" compact={showNotes} patientId={patientId} onSaved={() => setSavedMessage(true)} />
             )}
           </Card>
         )}

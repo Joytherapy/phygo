@@ -4,6 +4,9 @@
 // dark, as on the landing page. Class strings live here (a folder Tailwind
 // scans) so every page uses exactly the same ones.
 
+import type { ReactNode } from 'react'
+import type { LucideIcon } from 'lucide-react'
+
 export const ACCENT = 'linear-gradient(135deg, #A5B4FF 0%, #7C83FF 50%, #A78BFA 100%)'
 export const ACCENT_SOLID = '#8B95FF'
 
@@ -56,5 +59,17 @@ export function PageBackdrop() {
         }}
       />
     </div>
+  )
+}
+
+/** Small label above a page title: an accent icon and an uppercase word. */
+export function PageEyebrow({ icon: Icon, children }: { icon: LucideIcon; children: ReactNode }) {
+  return (
+    <p className="inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-ink/55 dark:text-white/55">
+      <span className="grid h-5 w-5 place-items-center rounded-md text-white shadow-[0_4px_12px_-4px_rgba(124,131,255,0.8)]" style={{ background: ACCENT }}>
+        <Icon size={11} aria-hidden />
+      </span>
+      {children}
+    </p>
   )
 }

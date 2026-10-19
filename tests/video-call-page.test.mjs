@@ -108,3 +108,22 @@ test('the note page has no video call tab; it links to the call page instead', {
     await close();
   }
 });
+
+test('on a phone the call stage and its button fit the screen', { skip }, async () => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'it-IT', reducedMotion: 'reduce' });
+  const [name, value] = sessionCookie('tok-clin', U).split(/=(.*)/s);
+  await ctx.addCookies([{ name, value, url: app.url }]);
+  const page = await ctx.newPage();
+  try {
+    await page.goto(`${app.url}/dashboard/patients/${LINKED}/call`);
+    const button = page.getByTestId('call-stage').getByRole('button', { name: 'Avvia videochiamata' });
+    await button.waitFor({ timeout: 15000 });
+    const stage = await page.getByTestId('call-stage').boundingBox();
+    const box = await button.boundingBox();
+    assert.ok(stage.x >= 0 && stage.x + stage.width <= 390, `stage inside the screen (${stage.x}, ${stage.width})`);
+    assert.ok(box.x >= stage.x && box.x + box.width <= stage.x + stage.width, `button inside the stage (${box.x}, ${box.width})`);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, 'no horizontal scroll');
+  } finally {
+    await ctx.close();
+  }
+});

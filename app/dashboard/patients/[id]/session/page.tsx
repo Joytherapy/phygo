@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Video } from 'lucide-react'
+import { ArrowLeft, Video, NotebookPen } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import LiveStructuring from '@/components/liveStructuring/LiveStructuring'
 import { usePatientContext } from '@/contexts/PatientContext'
@@ -15,9 +15,9 @@ import { useUiStrings } from '@/contexts/LanguageContext'
 import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
 import ErrorState from '@/components/workspace/ErrorState'
 import { lazy } from '@/lib/lazy'
-import { PageBackdrop, PAGE_BG, SECONDARY_BTN, CHIP } from '@/components/ui/premium'
+import { PageBackdrop, PageEyebrow, PAGE_BG, SECONDARY_BTN } from '@/components/ui/premium'
 import { useHomeUi } from '@/lib/i18n/homeStrings'
-import { Card } from '@/components/dashboard/HomeCards'
+import { Card, Avatar } from '@/components/dashboard/HomeCards'
 
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -116,12 +116,13 @@ export default function PatientSessionPage() {
           {ui.patients.backToPatientName.replace('{name}', patient.name)}
         </motion.button>
 
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <div className="min-w-0">
-            <p className={`inline-flex items-center rounded-full px-3 py-1 font-mono text-[11px] uppercase tracking-[0.16em] ${CHIP}`}>
-              {ui.patients.sessionNoteTab}
-            </p>
-            <h1 className="mt-3 break-words font-display text-3xl font-semibold tracking-[-0.03em] text-ink dark:text-white sm:text-4xl">{patient.name}</h1>
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-5">
+          <div className="flex min-w-0 items-center gap-4">
+            <Avatar name={patient.name} linked={!!patient.patient_user_id} size={56} />
+            <div className="min-w-0">
+              <PageEyebrow icon={NotebookPen}>{h.sessionNote}</PageEyebrow>
+              <h1 className="mt-1.5 break-words font-display text-3xl font-semibold tracking-[-0.035em] text-ink dark:text-white sm:text-[40px] sm:leading-[1.1]">{patient.name}</h1>
+            </div>
           </div>
           {patient.patient_user_id && (
             <button
@@ -150,7 +151,7 @@ export default function PatientSessionPage() {
           </Card>
         )}
 
-        <Card className="p-4 sm:p-6">
+        <Card className="p-5 sm:p-7">
           <LiveStructuring
             instanceId={`session-${patientId}`}
             variant="full"

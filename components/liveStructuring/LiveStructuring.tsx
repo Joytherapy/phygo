@@ -22,6 +22,9 @@ import {
   X,
   BookOpen,
   ExternalLink,
+  ChevronDown,
+  Languages,
+  PenLine,
 
 } from "lucide-react";
 
@@ -42,6 +45,24 @@ import {
   type Phrase,
 } from "./data";
 import { lazy } from "@/lib/lazy";
+import { useLiveUi, DICTATION_LOCALE } from "@/lib/i18n/liveStructuringStrings";
+import { ACCENT, CHIP, ICON_TILE, INPUT_FOCUS, PRIMARY_BTN, SECONDARY_BTN } from "@/components/ui/premium";
+
+// One look for every block of the panel (a quiet tile inside the page card).
+const BLOCK = "mt-4 rounded-[22px] border border-black/[0.06] bg-white/70 p-5 sm:p-6 dark:border-white/[0.07] dark:bg-white/[0.025]";
+const FIELD = `w-full rounded-xl border border-black/[0.08] bg-white px-3 py-2 text-sm text-ink outline-none transition placeholder:text-ink/35 dark:border-white/[0.1] dark:bg-white/[0.04] dark:text-white dark:placeholder:text-white/30 ${INPUT_FOCUS}`;
+const LABEL = "text-[12px] font-semibold text-ink/60 dark:text-white/50";
+
+function BlockTitle({ icon: Icon, children, tone = "neutral" }: { icon: any; children: React.ReactNode; tone?: "neutral" | "amber" }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl ${tone === "amber" ? "border border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400" : ICON_TILE}`}>
+        <Icon size={15} aria-hidden />
+      </span>
+      <h3 className="font-display text-[15px] font-semibold tracking-[-0.01em] text-ink dark:text-white">{children}</h3>
+    </div>
+  );
+}
 const CATEGORY_ICONS: Record<string, any> = {
   findings: Stethoscope,
   assessment: Target,
@@ -64,14 +85,18 @@ export default function LiveStructuring({
   className = "",
   patientId,
   onSaved,
+  compact = false,
 }: {
   instanceId: string;
   variant?: "hero" | "full";
   className?: string;
   patientId?: string;
   onSaved?: () => void;
+  /** Narrow column (beside the video call): one tile per row. */
+  compact?: boolean;
 }) {
   const verificationUi = useVerificationStrings();
+  const { s: t, lang } = useLiveUi();
   const [phase, setPhase] = useState<Phase>("idle");
 
   const [phrases, setPhrases] = useState<Phrase[]>([]);
@@ -180,11 +205,11 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         setScanSummary(
           data.summary ||
             refusalMessage(verificationUi, res.status, data) ||
-            "Could not analyze document."
+            t.scanError
         );
       } catch (err) {
         console.error("Scan analysis failed:", err);
-        setScanSummary("Could not analyze document.");
+        setScanSummary(t.scanError);
       } finally {
         setScanAnalyzing(false);
       }
@@ -209,7 +234,12 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     useState<string | null>(null);
 
   const [isLiveVoice, setIsLiveVoice] = useState(false);
-const [recordingLang, setRecordingLang] = useState("it-IT");
+const [recordingLang, setRecordingLang] = useState(DICTATION_LOCALE[lang]);
+  // Dictation follows the app language until the clinician picks another one.
+  const langTouched = useRef(false);
+  useEffect(() => {
+    if (!langTouched.current) setRecordingLang(DICTATION_LOCALE[lang]);
+  }, [lang]);
 
   const [voiceSupported, setVoiceSupported] = useState(false);
 
@@ -591,13 +621,11 @@ setFinalNote((prev: any) =>
         );
       } catch (err) {
         console.error("Errore generazione nota reale:", err);
-        setAiError(
-          "Non sono riuscito a generare la nota clinica. Riprova."
-        );
+        setAiError(t.noteError);
         setPhase("idle");
       }
     },
-    [instanceId, recordingLang, patientId, onSaved]
+    [instanceId, recordingLang, patientId, onSaved, t]
   );
 
   const startVoice = () => {
@@ -817,14 +845,14 @@ const askPhygoAI = async () => {
       body: JSON.stringify({ question: askQuestion, noteContext }),
     });
         if (res.status === 429) {
-      setAskAnswer("Hai raggiunto il limite di domande per questa ora. Riprova più tardi o passa a un piano superiore.");
+      setAskAnswer(t.askLimit);
       return;
     }
     const data = await res.json();
-    setAskAnswer(data.answer || "Non sono riuscito a generare una risposta.");
+    setAskAnswer(data.answer || t.askNoAnswer);
   } catch (err) {
     console.error("Errore ask-phygo:", err);
-    setAskAnswer("Errore durante la richiesta. Riprova.");
+    setAskAnswer(t.askError);
   } finally {
     setAskLoading(false);
   }
@@ -880,17 +908,17 @@ const addSection = (title: string, content?: string) => {
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
-    doc.text("Clinical Note - Phygo", marginLeft, y);
+    doc.text(t.pdfTitle, marginLeft, y);
     y += 8;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.text(new Date().toLocaleString(), marginLeft, y);
     y += 12;
 
-    addSection("Subjective", finalNote.subjective);
-    addSection("Objective", finalNote.objective);
-    addSection("Assessment", finalNote.assessment);
-    addSection("Plan", finalNote.plan);
+    addSection(t.subjective, finalNote.subjective);
+    addSection(t.objective, finalNote.objective);
+    addSection(t.assessment, finalNote.assessment);
+    addSection(t.plan, finalNote.plan);
 
     if (exerciseEntries.length > 0) {
       if (y > 260) {
@@ -899,16 +927,16 @@ const addSection = (title: string, content?: string) => {
       }
       doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
-      doc.text("Exercises", marginLeft, y);
+      doc.text(t.exercises, marginLeft, y);
       y += 7;
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
       exerciseEntries.forEach((ex: any) => {
         const dosingParts: string[] = [];
-        if (ex.dosing?.sets) dosingParts.push(`${ex.dosing.sets} sets`);
-        if (ex.dosing?.reps) dosingParts.push(`${ex.dosing.reps} reps`);
+        if (ex.dosing?.sets) dosingParts.push(t.sets(ex.dosing.sets));
+        if (ex.dosing?.reps) dosingParts.push(t.reps(ex.dosing.reps));
         if (ex.dosing?.duration_seconds) dosingParts.push(`${ex.dosing.duration_seconds}s`);
-        if (ex.dosing?.frequency_per_week) dosingParts.push(`${ex.dosing.frequency_per_week}x/week`);
+        if (ex.dosing?.frequency_per_week) dosingParts.push(t.perWeek(ex.dosing.frequency_per_week));
         const dosingText = dosingParts.length ? ` (${dosingParts.join(", ")})` : "";
         const mainLine = `- ${sanitizeForPdf(ex.name)}${dosingText}`;
         const lines = doc.splitTextToSize(mainLine, usableWidth);
@@ -936,7 +964,7 @@ const addSection = (title: string, content?: string) => {
       });
       y += 6;
     } else if (finalNote._exercisesText) {
-      addSection("Exercises", finalNote._exercisesText);
+      addSection(t.exercises, finalNote._exercisesText);
     } else if (Array.isArray(finalNote.exercises) && finalNote.exercises.length) {
       if (y > 260) {
         doc.addPage();
@@ -944,7 +972,7 @@ const addSection = (title: string, content?: string) => {
       }
       doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
-      doc.text("Exercises", marginLeft, y);
+      doc.text(t.exercises, marginLeft, y);
       y += 7;
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
@@ -962,12 +990,12 @@ const addSection = (title: string, content?: string) => {
       y += 6;
     }
 
-    addSection("Patient Summary", finalNote.summaryForPatient);
+    addSection(t.patientSummary, finalNote.summaryForPatient);
 
 if (clinicalInsight) {
   addSection(
-    "Clinical Insights",
-    `${clinicalInsight.condition_name}\n\nGoals: ${clinicalInsight.goals}\nClinical Tests: ${clinicalInsight.clinical_tests}\nRed Flags: ${clinicalInsight.red_flags}\nTypical Exercises: ${clinicalInsight.typical_exercises}\n\nSource: ${clinicalInsight.source} (${clinicalInsight.source_date})`
+    t.clinicalInsights,
+    `${clinicalInsight.condition_name}\n\n${t.goals}: ${clinicalInsight.goals}\n${t.clinicalTests}: ${clinicalInsight.clinical_tests}\n${t.redFlags}: ${clinicalInsight.red_flags}\n${t.typicalExercises}: ${clinicalInsight.typical_exercises}\n\n${t.source}: ${clinicalInsight.source} (${clinicalInsight.source_date})`
   );
 }
 
@@ -975,10 +1003,10 @@ if (rehabPhases.length > 0) {
   const phasesText = rehabPhases
     .map(
       (p) =>
-        `Phase ${p.phase_number}: ${p.phase_name} (${p.typical_duration})\nGoals: ${p.phase_goals}\nExercises: ${p.phase_exercises}\nProgress when: ${p.criteria_to_progress}`
+        `${t.phase(p.phase_number)}: ${p.phase_name} (${p.typical_duration})\n${t.phaseGoals}${p.phase_goals}\n${t.phaseExercises}${p.phase_exercises}\n${t.progressWhen}${p.criteria_to_progress}`
     )
     .join("\n\n");
-  addSection("Rehab Protocol", phasesText);
+  addSection(t.rehabProtocol, phasesText);
 }
 
 doc.save(`phygo-note-${Date.now()}.pdf`);
@@ -997,1119 +1025,813 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
       (isLiveVoice || typedIds.has(p.id))
   );
 
+  const isFull = variant === "full";
+  const statusLabel =
+    phase === "idle"
+      ? t.ready
+      : phase === "typing" || phase === "listening"
+      ? t.listening
+      : phase === "pause"
+      ? t.analyzing
+      : phase === "flying"
+      ? t.generating
+      : t.completedIn(elapsed ?? "0");
+  const canDictate = isFull && voiceSupported;
+
   return (
     <div className={className}>
-<div className="relative overflow-hidden rounded-[28px] glass-strong shadow-lift p-7 sm:p-9">
-
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#7C83FF]/60 to-transparent" />
+      <div className={isFull ? "relative" : "relative overflow-hidden rounded-[28px] glass-strong shadow-lift p-7 sm:p-9"}>
 
         {/* Status */}
-        <div className="mb-6 flex items-center justify-between">
-
-          <div className="flex items-center gap-3">
-
-            <motion.span
-              className={`h-2.5 w-2.5 rounded-full ${
-                phase === "idle"
-                  ? "bg-ink/20 dark:bg-white/20"
-                  : "bg-emerald"
-              }`}
-              animate={
-                phase === "idle"
-                  ? {}
-                  : {
-                      scale: [1, 1.6, 1],
-                      opacity: [1, .55, 1],
-                    }
-              }
-              transition={{
-                duration: 1.2,
-                repeat: Infinity,
-              }}
-            />
-
-            <div className="flex flex-col">
-
-              <span className="eyebrow text-ink/55 dark:text-white/40">
-
-                {phase === "idle" && "Ready"}
-
-                {(phase === "typing" || phase === "listening") &&
-                  "Listening..."}
-
-                {phase === "pause" &&
-                  "Analyzing conversation..."}
-
-                {phase === "flying" &&
-                  "Generating clinical documentation..."}
-
-                {phase === "done" &&
-                  `Completed in ${elapsed}s`}
-
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <span role="status" className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[12px] font-medium ${CHIP}`}>
+              <span className="relative flex h-2 w-2">
+                {phase !== "idle" && phase !== "done" && (
+                  <span className="absolute inset-0 rounded-full bg-[#8B95FF] opacity-60 motion-safe:animate-ping" />
+                )}
+                <span
+                  className={`relative h-2 w-2 rounded-full ${
+                    phase === "idle" ? "bg-ink/25 dark:bg-white/30" : phase === "done" ? "bg-emerald-500" : "bg-[#8B95FF]"
+                  }`}
+                />
               </span>
-
-              {phase !== "idle" && (
-                <div className="mt-2 h-1.5 w-48 overflow-hidden rounded-full bg-black/8 dark:bg-white/8">
-
-                  <motion.div
-                    className="h-full rounded-full bg-gradient-to-r from-[#7C83FF] via-[#6E8FFF] to-[#A78BFA]"
-                    animate={{ width: `${progress}%` }}
-                    transition={{
-                      duration: .35,
-                    }}
-                  />
-
-                </div>
-              )}
-
-            </div>
-
+              {statusLabel}
+            </span>
+            {activeLabel && phase !== "idle" && (
+              <span className={`rounded-full px-3 py-1 text-[12px] font-medium ${CHIP}`}>
+                {isLiveVoice ? t.liveSession : t.aiDemo}
+              </span>
+            )}
           </div>
 
-          {activeLabel && phase !== "idle" && (
-            <span className="rounded-full bg-mist px-3 py-1 text-[11px] font-semibold text-ink/55 dark:bg-white/10 dark:text-white/60">
-              {isLiveVoice ? "LIVE SESSION" : "AI DEMO"}
-            </span>
-          )}
-          <select
-  value={recordingLang}
-  onChange={(e) => setRecordingLang(e.target.value)}
-className="text-[11px] rounded-lg border border-black/15 dark:border-white/10 bg-black/[0.04] dark:bg-white/10 px-2 py-1"
->
-  <option value="it-IT">🇮🇹 Italiano</option>
-  <option value="en-US">🇬🇧 English</option>
-  <option value="es-ES">🇪🇸 Español</option>
-  <option value="fr-FR">🇫🇷 Français</option>
-</select>
-
-
+          <label className="relative inline-flex items-center">
+            <span className="sr-only">{t.recordingLanguage}</span>
+            <Languages size={13} aria-hidden className="pointer-events-none absolute left-3 text-ink/50 dark:text-white/50" />
+            <select
+              value={recordingLang}
+              onChange={(e) => {
+                langTouched.current = true;
+                setRecordingLang(e.target.value);
+              }}
+              className={`appearance-none rounded-full py-1.5 pl-8 pr-8 text-[12px] font-medium outline-none ${CHIP} ${INPUT_FOCUS}`}
+            >
+              <option value="it-IT">Italiano</option>
+              <option value="en-US">English</option>
+              <option value="es-ES">Español</option>
+              <option value="fr-FR">Français</option>
+            </select>
+            <ChevronDown size={13} aria-hidden className="pointer-events-none absolute right-3 text-ink/50 dark:text-white/50" />
+          </label>
         </div>
 
-<div className={`grid gap-6 items-start ${variant === "full" ? "grid-cols-1" : "sm:grid-cols-2"}`}>
+        {phase !== "idle" && (
+          <div className="mb-6 h-1 w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.06]">
+            <motion.div className="h-full rounded-full" style={{ background: ACCENT }} animate={{ width: `${progress}%` }} transition={{ duration: 0.35 }} />
+          </div>
+        )}
+
+        <div className={`grid items-start gap-6 ${isFull ? "grid-cols-1" : "sm:grid-cols-2"}`}>
 
           {/* Transcript */}
-
           <div className="flex min-h-[170px] flex-col">
 
             {phase === "idle" && (
-              <div className="flex flex-1 flex-col items-center justify-center gap-5 py-8 text-center">
+              <div className="flex flex-1 flex-col items-center justify-center gap-6 py-8 text-center">
+                <div className="relative grid h-28 w-28 place-items-center">
+                  <span aria-hidden className="absolute inset-2 rounded-full opacity-50 blur-2xl dark:opacity-60" style={{ background: ACCENT }} />
+                  <span aria-hidden className="absolute inset-0 rounded-full border border-[#8B95FF]/25 motion-safe:animate-[ping_3.2s_cubic-bezier(0,0,0.2,1)_infinite]" />
+                  <span aria-hidden className="absolute inset-3 rounded-full border border-[#8B95FF]/20" />
+                  {canDictate ? (
+                    <button
+                      type="button"
+                      onClick={startVoice}
+                      aria-label={t.startRecording}
+                      className="relative grid h-[76px] w-[76px] place-items-center rounded-full text-white shadow-[0_18px_40px_-12px_rgba(124,131,255,0.7),inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8B95FF]/30"
+                      style={{ background: ACCENT }}
+                    >
+                      <Mic size={28} aria-hidden />
+                    </button>
+                  ) : (
+                    <span
+                      className="relative grid h-[76px] w-[76px] place-items-center rounded-full text-white shadow-[0_18px_40px_-12px_rgba(124,131,255,0.7),inset_0_1px_0_rgba(255,255,255,0.35)]"
+                      style={{ background: ACCENT }}
+                    >
+                      <Mic size={28} aria-hidden />
+                    </span>
+                  )}
+                </div>
 
-                <motion.span
-                  animate={{
-                    scale: [1, 1.08, 1],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                  }}
-                  className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#7C83FF] to-[#A78BFA] text-white shadow-glow"
-                >
-                  <Mic size={24} />
-                </motion.span>
-
-                <p className="max-w-[250px] text-sm leading-relaxed text-ink/55 dark:text-white/55">
-                  {variant === "full"
-                    ? "Speak naturally. Phygo structures everything automatically."
-                    : "Watch AI transform a real consultation into structured documentation."}
+                <p className="max-w-[280px] text-[15px] leading-relaxed text-ink/60 dark:text-white/60">
+                  {isFull ? t.intro : t.introHero}
                 </p>
 
                 {aiError && (
-                  <p className="max-w-[250px] text-xs text-red-500">
+                  <p role="alert" className="max-w-[300px] text-xs text-red-500">
                     {aiError}
                   </p>
                 )}
-
               </div>
             )}
 
             {isTranscriptPhase && (
               <>
-
-                <div className="mb-4 flex h-8 items-end gap-[3px]">
-
-                  {Array.from({ length: 20 }).map((_, i) => (
+                <div aria-hidden className="mb-4 flex h-8 items-end gap-[3px]">
+                  {Array.from({ length: 24 }).map((_, i) => (
                     <motion.span
                       key={i}
                       className="w-[3px] rounded-full bg-gradient-to-t from-[#7C83FF] to-[#A78BFA]"
-                      animate={{
-                        height: [5, 10 + ((i * 4) % 24), 5],
-                      }}
+                      animate={{ height: [5, 10 + ((i * 4) % 24), 5] }}
                       transition={{
-                        duration: .9,
-                        repeat:
-                          phase === "typing" ||
-                          phase === "listening"
-                            ? Infinity
-                            : 0,
-                        delay: i * .03,
+                        duration: 0.9,
+                        repeat: phase === "typing" || phase === "listening" ? Infinity : 0,
+                        delay: i * 0.03,
                       }}
                     />
                   ))}
-
                 </div>
 
                 <div className="flex-1 space-y-3">
-
-                  {isLiveVoice &&
-                    phase === "listening" && (
-                      <p className="italic text-sm leading-relaxed text-ink/60 dark:text-white/60">
-                        {interim ||
-                          "Start speaking... Phygo is listening in real time."}
-                      </p>
+                  {isLiveVoice && phase === "listening" && (
+                    <p className="text-[15px] italic leading-relaxed text-ink/60 dark:text-white/60">
+                      {interim || t.startSpeaking}
+                    </p>
                   )}
 
                   <AnimatePresence mode="popLayout">
-
                     {visiblePhrases.map((p) => (
                       <motion.p
                         key={p.id}
                         layout
                         layoutId={`${instanceId}-${p.id}`}
-                        initial={{
-                          opacity: 0,
-                          y: 8,
-                          filter: "blur(0px)",
-                        }}
-                        animate={{
-                          opacity: 1,
-                          y: 0,
-                          filter: "blur(0px)",
-                        }}
-                        exit={{
-                          opacity: 0,
-                          filter: "blur(6px)",
-                          transition: { duration: 0.25 },
-                        }}
-                        transition={{
-                          duration: .4,
-                        }}
+                        initial={{ opacity: 0, y: 8, filter: "blur(0px)" }}
+                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                        exit={{ opacity: 0, filter: "blur(6px)", transition: { duration: 0.25 } }}
+                        transition={{ duration: 0.4 }}
                         className="text-sm leading-relaxed text-ink/75 dark:text-white/75"
                       >
                         {p.text}
                       </motion.p>
                     ))}
-
                   </AnimatePresence>
-
                 </div>
-
               </>
             )}
 
             {phase === "done" && (
               <motion.div
-                initial={{ opacity: 0, scale: .96 }}
+                initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-1 flex-col items-center justify-center gap-4 py-7 text-center"
+                className="flex flex-1 flex-col items-center justify-center gap-4 py-6 text-center"
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald/10">
-                  <CheckCircle2
-                    className="text-emerald"
-                    size={30}
-                  />
-                </div>
+                <span className="grid h-14 w-14 place-items-center rounded-full bg-emerald-500/10 text-emerald-500 ring-1 ring-emerald-500/20">
+                  <CheckCircle2 size={28} aria-hidden />
+                </span>
 
                 <div>
-                  <h3 className="font-semibold text-ink dark:text-white">
-                    Documentation ready
-                  </h3>
-
-                  <p className="mt-1 max-w-[250px] text-sm leading-relaxed text-ink/55 dark:text-white/55">
-                    SOAP note, treatment plan and clinical summary generated automatically.
-                  </p>
+                  <h3 className="font-display text-lg font-semibold tracking-[-0.01em] text-ink dark:text-white">{t.docReady}</h3>
+                  <p className="mt-1 max-w-[280px] text-sm leading-relaxed text-ink/55 dark:text-white/55">{t.docReadyBody}</p>
                 </div>
 
                 {isLiveVoice && finalNote && (
                   <div className="mt-1 flex flex-wrap items-center justify-center gap-2">
-                    <button
-                      onClick={downloadPdf}
-                      data-cursor-hover
-                      className="inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-[11px] font-semibold text-white transition-transform hover:scale-[1.03] dark:bg-white dark:text-ink"
-                    >
-                      <Download size={13} />
-                      Download PDF
-                    </button>
-
                     {patientId && (
                       <button
+                        type="button"
                         onClick={saveNoteToPatient}
                         disabled={noteSaveStatus === "saving"}
-                        data-cursor-hover
-                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold text-white transition-transform hover:scale-[1.03] disabled:opacity-60 disabled:hover:scale-100 ${
-                          noteSaveStatus === "error" ? "bg-red-500" : "bg-gradient-to-r from-[#7C83FF] to-[#A78BFA]"
+                        className={`inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 text-sm font-semibold transition disabled:opacity-60 ${
+                          noteSaveStatus === "error"
+                            ? "bg-red-500 text-white"
+                            : noteSaveStatus === "saved"
+                            ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                            : PRIMARY_BTN
                         }`}
                       >
-                        <CheckCircle2 size={13} />
+                        <CheckCircle2 size={15} aria-hidden />
                         {noteSaveStatus === "saving"
-                          ? "Saving..."
+                          ? t.saving
                           : noteSaveStatus === "saved"
-                          ? "Saved to Patient ✓"
+                          ? t.saved
                           : noteSaveStatus === "error"
-                          ? "Couldn't save — retry"
-                          : "Save to Patient"}
+                          ? t.saveError
+                          : t.saveToPatient}
                       </button>
                     )}
+                    <button
+                      type="button"
+                      onClick={downloadPdf}
+                      className={`inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 text-sm font-semibold transition ${SECONDARY_BTN}`}
+                    >
+                      <Download size={15} aria-hidden />
+                      {t.downloadPdf}
+                    </button>
                   </div>
                 )}
 
                 {patientId && noteSaveStatus === "idle" && (
-                  <p className="max-w-[280px] text-[11px] leading-relaxed text-ink/55 dark:text-white/40">
-                    Review the note and exercises below, edit anything you like, then save to the patient's chart.
-                  </p>
+                  <p className="max-w-[300px] text-xs leading-relaxed text-ink/55 dark:text-white/45">{t.reviewHint}</p>
                 )}
-
               </motion.div>
             )}
           </div>
 
-          {/* AI Output */}
+          {/* Structured note */}
+          <div className={`grid grid-cols-1 gap-3 ${compact ? "" : "sm:grid-cols-2"}`}>
+            {CATEGORIES.map((cat) => {
+              const items = isLiveVoice
+                ? aiPhrases.filter((p) => p.cat === cat.key)
+                : phrases.filter((p) => movedIds.has(p.id) && p.cat === cat.key);
+              const Icon = CATEGORY_ICONS[cat.key] || Stethoscope;
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              return (
+                <motion.div
+                  key={cat.key}
+                  data-testid={`note-${cat.key}`}
+                  animate={
+                    justFilled === cat.key
+                      ? { scale: [1, 1.015, 1], boxShadow: "0 0 0 2px rgba(139,149,255,.45)" }
+                      : { scale: 1, boxShadow: "0 0 0 0 rgba(0,0,0,0)" }
+                  }
+                  transition={{ duration: 0.45 }}
+                  className="rounded-2xl border border-black/[0.06] bg-white/70 p-4 dark:border-white/[0.06] dark:bg-white/[0.025]"
+                >
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${ICON_TILE}`}>
+                        <Icon size={14} aria-hidden />
+                      </span>
+                      <span className="truncate text-[13px] font-semibold text-ink/80 dark:text-white/80">
+                        {t.categories[cat.key]}
+                      </span>
+                    </div>
+                    {items.length > 0 && <CheckCircle2 size={15} aria-hidden className="shrink-0 text-emerald-500" />}
+                  </div>
 
-  {CATEGORIES.map((cat) => {
-
-    const items = isLiveVoice
-      ? aiPhrases.filter((p) => p.cat === cat.key)
-      : phrases.filter(
-          (p) => movedIds.has(p.id) && p.cat === cat.key
-        );
-
-    const Icon = CATEGORY_ICONS[cat.key] || Stethoscope;
-
-    return (
-      <motion.div
-        key={cat.key}
-        animate={
-          justFilled === cat.key
-            ? {
-                scale: [1, 1.02, 1],
-                boxShadow:
-                  "0 0 0 2px rgba(50,214,160,.35)",
-              }
-            : {
-                scale: 1,
-                boxShadow:
-                  "0 0 0 0 rgba(0,0,0,0)",
-              }
-        }
-        transition={{
-          duration: .45,
-        }}
-        className="rounded-2xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] p-5 shadow-soft"
-      >
-
-        <div className="mb-3 flex items-center justify-between">
-
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#7C83FF]/10 text-[#7C83FF]">
-              <Icon size={14} />
-            </span>
-            <span className="eyebrow text-ink/55 dark:text-white/40">
-              {cat.label}
-            </span>
+                  <div className="min-h-[52px] space-y-2.5">
+                    {items.length === 0 && (
+                      <div aria-hidden className="space-y-2 pt-1">
+                        <div className="h-2 w-4/5 rounded-full bg-black/[0.045] dark:bg-white/[0.05]" />
+                        <div className="h-2 w-1/2 rounded-full bg-black/[0.035] dark:bg-white/[0.04]" />
+                      </div>
+                    )}
+                    <AnimatePresence>
+                      {items.map((p) => (
+                        <motion.p
+                          key={p.id}
+                          layout
+                          layoutId={`${instanceId}-${p.id}`}
+                          transition={{ duration: 0.28 }}
+                          contentEditable={isLiveVoice}
+                          suppressContentEditableWarning
+                          onBlur={(e) => updatePhraseText(p.id, e.currentTarget.textContent || "")}
+                          className={`text-[13px] leading-relaxed text-ink/75 dark:text-white/75 ${phraseFields[p.id] === "_exercisesText" ? "whitespace-pre-line " : ""} ${
+                            isLiveVoice ? "-mx-1.5 cursor-text rounded-lg px-1.5 outline-none focus:bg-black/[0.04] focus:ring-2 focus:ring-[#8B95FF]/25 dark:focus:bg-white/[0.06]" : ""
+                          }`}
+                        >
+                          {p.text}
+                        </motion.p>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
 
-          {items.length > 0 && (
-            <CheckCircle2
-              size={14}
-              className="text-emerald"
-            />
-          )}
+          {/* Clinical reasoning — distinct from the "assessment" field: hypotheses,
+              differentials and missing information as separate items, always in
+              cautious language, never an autonomous diagnosis. Red flags are
+              always shown and highlighted. */}
+          {finalNote?.clinicalReasoning && (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className={BLOCK}>
+              <BlockTitle icon={Target}>{t.clinicalReasoning}</BlockTitle>
 
-        </div>
-
-        <div className="space-y-2.5 min-h-[74px]">
-
-          <AnimatePresence>
-
-            {items.map((p) => (
-              <motion.p
-                key={p.id}
-                layout
-                layoutId={`${instanceId}-${p.id}`}
-                transition={{
-                  duration: .28,
-                }}
-                contentEditable={isLiveVoice}
-                suppressContentEditableWarning
-                onBlur={(e) =>
-                  updatePhraseText(p.id, e.currentTarget.textContent || "")
-                }
-className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseFields[p.id] === "_exercisesText" ? "whitespace-pre-line " : ""} ${
-                  isLiveVoice
-                    ? "cursor-text rounded px-1 -mx-1 outline-none focus:bg-black/5 dark:focus:bg-white/10"
-                    : ""
-                }`}
-              >
-                {p.text}
-              </motion.p>
-            ))}
-
-          </AnimatePresence>
-
-
-        </div>
-
-      </motion.div>
-    );
-  })}
-
-</div>
-
-{/* Ragionamento clinico — distinto dal campo "assessment" (che resta una
-    prosa unica): qui l'AI mostra ipotesi/differenziali/elementi a
-    favore-contro/informazioni mancanti come voci separate, sempre con
-    linguaggio cauto ("possibile", "considera"), mai come diagnosi
-    autonoma. I red flags/precauzioni sono sempre presenti (mai omessi
-    per silenzio) e messi in evidenza. */}
-{finalNote?.clinicalReasoning && (
-  <motion.div
-    initial={{ opacity: 0, y: 12 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4 }}
-    className="mt-4 rounded-[24px] border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-soft"
-  >
-    <div className="flex items-center gap-2 mb-4">
-      <Target size={15} className="text-[#7C83FF]" />
-      <span className="eyebrow text-ink/55 dark:text-white/40">
-        Clinical Reasoning
-      </span>
-    </div>
-
-    {Array.isArray(finalNote.clinicalReasoning.hypotheses) && finalNote.clinicalReasoning.hypotheses.length > 0 && (
-      <div className="mb-4">
-        <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1.5">Clinical Hypotheses</p>
-        <ul className="space-y-1">
-          {finalNote.clinicalReasoning.hypotheses.map((h: string, i: number) => (
-            <li key={i} className="text-sm text-ink/70 dark:text-white/70 leading-relaxed flex gap-2">
-              <span className="shrink-0 text-[#7C83FF] font-semibold">{i === 0 ? "①" : i === 1 ? "②" : "③"}</span>
-              {h}
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
-
-    {Array.isArray(finalNote.clinicalReasoning.differentials) && finalNote.clinicalReasoning.differentials.length > 0 && (
-      <div className="mb-4">
-        <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1.5">Differential Considerations</p>
-        <ul className="space-y-1">
-          {finalNote.clinicalReasoning.differentials.map((d: string, i: number) => (
-            <li key={i} className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">— {d}</li>
-          ))}
-        </ul>
-      </div>
-    )}
-
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-      {finalNote.clinicalReasoning.supportingFindings && (
-        <div>
-          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Supporting Findings</p>
-          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{finalNote.clinicalReasoning.supportingFindings}</p>
-        </div>
-      )}
-      {finalNote.clinicalReasoning.findingsAgainst && (
-        <div>
-          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Findings Against</p>
-          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{finalNote.clinicalReasoning.findingsAgainst}</p>
-        </div>
-      )}
-      {finalNote.clinicalReasoning.missingInformation && (
-        <div>
-          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Missing Information</p>
-          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{finalNote.clinicalReasoning.missingInformation}</p>
-        </div>
-      )}
-      {finalNote.clinicalReasoning.suggestedAssessments && (
-        <div>
-          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Suggested Additional Assessments</p>
-          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{finalNote.clinicalReasoning.suggestedAssessments}</p>
-        </div>
-      )}
-    </div>
-
-    {finalNote.clinicalReasoning.redFlagsPrecautions && (
-      <div className="flex gap-3 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-4">
-        <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-500" />
-        <div>
-          <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-1">Red Flags / Precautions</p>
-          <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">{finalNote.clinicalReasoning.redFlagsPrecautions}</p>
-        </div>
-      </div>
-    )}
-
-    <p className="mt-4 pt-3 border-t border-black/[0.08] dark:border-white/10 text-[11px] text-ink/55 dark:text-white/40">
-      Clinical decision support only — not an autonomous diagnosis. Clinical judgment and final decisions remain with the treating professional.
-    </p>
-  </motion.div>
-)}
-
-            {clinicalInsight && (
-  <motion.div
-    initial={{ opacity: 0, y: 12 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4 }}
-    className="mt-4 relative overflow-hidden rounded-[24px] border border-[#0F1B2E]/10 dark:border-white/10 bg-gradient-to-br from-[#0F1B2E]/[0.02] to-white dark:from-white/[0.02] dark:to-white/[0.03] p-6 shadow-soft"
-  >
-    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald/50 to-transparent" />
-
-    <div className="flex items-start justify-between mb-5 gap-3">
-      <div>
-        <span className="eyebrow text-emerald-600 dark:text-emerald-400">
-          Clinical Insights
-        </span>
-        <h4 className="mt-1 text-base font-semibold text-ink dark:text-white">
-          {clinicalInsight.condition_name}
-        </h4>
-      </div>
-      {evidenceLevel && (
-        <span className="shrink-0 rounded-full bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
-          {evidenceLevel === "high" ? "★★★★☆ Strong" : "★★★☆☆ Moderate"}
-        </span>
-      )}
-    </div>
-
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-      <div className="flex gap-3">
-        <Target size={16} className="mt-0.5 shrink-0 text-[#7C83FF]" />
-        <div>
-          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Goals</p>
-          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.goals}</p>
-        </div>
-      </div>
-      <div className="flex gap-3">
-        <Stethoscope size={16} className="mt-0.5 shrink-0 text-[#7C83FF]" />
-        <div>
-          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Clinical Tests</p>
-          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.clinical_tests}</p>
-        </div>
-      </div>
-      <div className="flex gap-3">
-        <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-500" />
-        <div>
-          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Red Flags</p>
-          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.red_flags}</p>
-        </div>
-      </div>
-      <div className="flex gap-3">
-        <Dumbbell size={16} className="mt-0.5 shrink-0 text-[#7C83FF]" />
-        <div>
-          <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Typical Exercises</p>
-          <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.typical_exercises}</p>
-        </div>
-      </div>
-    </div>
-
-    <div className="mt-5 pt-4 border-t border-black/[0.08] dark:border-white/10 flex items-center justify-between flex-wrap gap-2">
-      <p className="font-mono text-[11px] tracking-tight text-ink/45 dark:text-white/45">
-        {clinicalInsight.source} ({clinicalInsight.source_date}) — Clinical decision support, not a diagnosis.
-      </p>
-      {matchedKeyword && (
-        <button
-          onClick={() => setShowWhy(!showWhy)}
-          className="text-xs font-medium text-[#7C83FF] hover:underline"
-        >
-          Why this suggestion?
-        </button>
-      )}
-    </div>
-
-    {showWhy && matchedKeyword && (
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="mt-2 text-xs text-ink/60 dark:text-white/50"
-      >
-        Suggested because the note mentions: "{matchedKeyword}"
-      </motion.p>
-    )}
-
-    <div className="mt-4">
-      <button
-        onClick={() => setShowAskPhygo((prev) => !prev)}
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#7C83FF] hover:underline"
-      >
-        <Sparkles size={12} />
-        Ask Phygo AI for more insight
-      </button>
-      {showAskPhygo && (
-        <div className="mt-3 space-y-2 rounded-2xl bg-mist/60 dark:bg-white/5 p-4">
-          <textarea
-            value={askQuestion}
-            onChange={(e) => setAskQuestion(e.target.value)}
-            placeholder="e.g. What else should I consider for this case?"
-            className="w-full rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 p-2.5 text-xs text-ink/80 dark:text-white/80 focus:outline-none focus:ring-2 focus:ring-[#7C83FF]/30"
-            rows={2}
-          />
-          <button
-            onClick={askPhygoAI}
-            disabled={askLoading}
-            className="rounded-full bg-ink dark:bg-white px-4 py-1.5 text-[11px] font-semibold text-white dark:text-ink disabled:opacity-50"
-          >
-            {askLoading ? "Thinking..." : "Ask"}
-          </button>
-          {askAnswer && (
-            <p className="text-xs text-ink/70 dark:text-white/70 whitespace-pre-line leading-relaxed pt-1">
-              {askAnswer}
-            </p>
-          )}
-        </div>
-      )}
-    </div>
-  </motion.div>
-)}
-
-{/* Evidenze scientifiche rilevanti — dalla libreria Scienza/PubMed già
-    esistente (research_papers + research_summaries), non un elenco
-    generico: filtrate per parola chiave sulla condizione primaria e solo
-    tra i paper con status "published" (già passati da revisione editoriale
-    in science/admin/review). Mai il testo dell'abstract, solo la sintesi
-    strutturata già scritta per questo scopo (why_it_matters). */}
-{(papersLoading || relevantPapers.length > 0) && (
-  <motion.div
-    initial={{ opacity: 0, y: 12 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4, delay: 0.025 }}
-    className="mt-4 rounded-[24px] border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-soft"
-  >
-    <div className="flex items-center gap-2 mb-4">
-      <BookOpen size={15} className="text-[#7C83FF]" />
-      <span className="eyebrow text-ink/55 dark:text-white/40">
-        Relevant Scientific Evidence
-      </span>
-    </div>
-
-    {papersLoading && (
-      <p className="text-xs text-ink/55 dark:text-white/40">Searching the evidence library...</p>
-    )}
-
-    {!papersLoading && relevantPapers.length === 0 && (
-      <p className="text-xs text-ink/55 dark:text-white/40">
-        No matching published paper found in the Phygo Science library for this case.
-      </p>
-    )}
-
-    {!papersLoading && relevantPapers.length > 0 && (
-      <div className="space-y-4">
-        {relevantPapers.map((paper: any) => (
-          <div
-            key={paper.id}
-            className="rounded-2xl bg-mist/50 dark:bg-white/[0.04] p-4"
-          >
-            <div className="flex items-start justify-between gap-3 mb-1.5">
-              <p className="text-sm font-semibold text-ink dark:text-white leading-snug">
-                {paper.title}
-              </p>
-              {paper.study_type && (
-                <span className="shrink-0 rounded-full bg-[#7C83FF]/10 px-2.5 py-0.5 text-[10px] font-semibold text-[#7C83FF]">
-                  {paper.study_type}
-                </span>
-              )}
-            </div>
-            <p className="text-[11px] text-ink/45 dark:text-white/45 mb-2">
-              {[
-                paper.authors,
-                paper.journal,
-                paper.publication_date ? String(paper.publication_date).slice(0, 4) : null,
-                paper.pmid ? `PMID ${paper.pmid}` : null,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-            {paper.why_it_matters && (
-              <p className="text-xs text-ink/65 dark:text-white/65 leading-relaxed mb-2">
-                <span className="font-semibold text-ink/80 dark:text-white/80">Why it's relevant: </span>
-                {paper.why_it_matters}
-              </p>
-            )}
-            {paper.original_url && (
-              <a
-                href={paper.original_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#7C83FF] hover:underline"
-              >
-                View source
-                <ExternalLink size={10} />
-              </a>
-            )}
-          </div>
-        ))}
-      </div>
-    )}
-
-    <p className="mt-4 pt-3 border-t border-black/[0.08] dark:border-white/10 text-[11px] text-ink/55 dark:text-white/40">
-      Showing a paper here does not by itself validate a treatment — clinical judgment remains with the treating professional.
-    </p>
-  </motion.div>
-)}
-
-{exerciseEntries.length > 0 && (
-  <motion.div
-    initial={{ opacity: 0, y: 12 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4, delay: 0.05 }}
-    className="mt-4 rounded-[24px] border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-soft"
-  >
-    <div className="flex items-center justify-between mb-4">
-      <span className="eyebrow text-ink/55 dark:text-white/40">
-        Exercises
-      </span>
-      <button
-        onClick={() => setShowAddExercise((prev) => !prev)}
-        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold"
-        style={{ background: "rgba(124,131,255,0.12)", color: "#7C83FF" }}
-      >
-        {showAddExercise ? <X size={12} /> : <Plus size={12} />}
-        {showAddExercise ? "Cancel" : "Add exercise"}
-      </button>
-    </div>
-
-    {showAddExercise && (
-      <div className="mb-4 rounded-2xl bg-mist/60 dark:bg-white/5 p-4">
-        <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
-          <input
-            type="text"
-            value={exerciseSearchQuery}
-            onChange={(e) => searchExerciseDb(e.target.value)}
-            placeholder="Search exercises (e.g. plank, bridge, squat)..."
-            autoFocus
-            className="w-full text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 pl-9 pr-3 py-2 outline-none focus:border-[#7C83FF]"
-          />
-        </div>
-        {exerciseSearching && (
-          <p className="text-xs text-ink/55 dark:text-white/40 mt-2">Searching...</p>
-        )}
-        {!exerciseSearching && exerciseSearchQuery && exerciseSearchResults.length === 0 && (
-          <p className="text-xs text-ink/55 dark:text-white/40 mt-2">No exercises found.</p>
-        )}
-        {exerciseSearchResults.length > 0 && (
-          <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
-            {exerciseSearchResults.map((result: any) => (
-              <div
-                key={result.internal_id}
-                onClick={() => addExerciseToList(result)}
-                className="flex items-center gap-3 rounded-xl bg-white dark:bg-white/10 p-2.5 cursor-pointer hover:bg-[#7C83FF]/5 dark:hover:bg-[#7C83FF]/10 transition-colors"
-              >
-                {result.media?.image_url ? (
-                  <img
-                    src={result.media.image_url}
-                    alt={result.name}
-                    className="h-10 w-10 rounded-lg object-cover shrink-0 bg-black/5 dark:bg-white/10"
-                  />
-                ) : (
-                  <div className="h-10 w-10 rounded-lg shrink-0 bg-black/5 dark:bg-white/10" />
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-ink dark:text-white truncate">
-                    {result.name}
-                  </p>
-                  {result.primary_muscle && (
-                    <p className="text-[10px] text-ink/55 dark:text-white/40">
-                      {result.primary_muscle}
-                    </p>
-                  )}
-                </div>
-                <Plus size={14} className="text-[#7C83FF] shrink-0" />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    )}
-
-    <div className="grid gap-4 sm:grid-cols-2">
-      {exerciseEntries.map((ex: any, i: number) => {
-        const key = ex.internal_id || String(i);
-        const isOpen = expandedExercise === key;
-        const isEditing = editingExercise === key;
-        const hasDetails = ex.description || (Array.isArray(ex.instructions) && ex.instructions.length > 0);
-        return (
-          <div
-            key={key}
-            className={`rounded-2xl bg-mist/60 dark:bg-white/5 p-4 flex flex-col gap-3 ${(isOpen || isEditing) ? "sm:col-span-2" : ""}`}
-          >
-            <div className="flex gap-3">
-              <div
-                onClick={() => !isEditing && hasDetails && setExpandedExercise(isOpen ? null : key)}
-                className={`flex gap-3 flex-1 min-w-0 ${!isEditing && hasDetails ? "cursor-pointer" : ""}`}
-              >
-                {ex.media?.image_url ? (
-                  <img
-                    src={ex.media.image_url}
-                    alt={ex.name}
-                    className="h-16 w-16 rounded-xl object-cover shrink-0 bg-black/5 dark:bg-white/10"
-                  />
-                ) : (
-                  <div className="h-16 w-16 rounded-xl shrink-0 bg-black/5 dark:bg-white/10 flex items-center justify-center text-[10px] text-ink/30 dark:text-white/30 text-center px-1">
-                    No image
+              <div className="mt-5 space-y-5">
+                {Array.isArray(finalNote.clinicalReasoning.hypotheses) && finalNote.clinicalReasoning.hypotheses.length > 0 && (
+                  <div>
+                    <p className={`${LABEL} mb-2`}>{t.hypotheses}</p>
+                    <ol className="space-y-2">
+                      {finalNote.clinicalReasoning.hypotheses.map((h: string, i: number) => (
+                        <li key={i} className="flex gap-3 text-sm leading-relaxed text-ink/75 dark:text-white/75">
+                          <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[11px] font-semibold ${CHIP}`}>{i + 1}</span>
+                          {h}
+                        </li>
+                      ))}
+                    </ol>
                   </div>
                 )}
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-ink dark:text-white truncate">
-                    {ex.name}
-                  </p>
-                  {ex.primary_muscle && (
-                    <p className="text-[11px] text-ink/55 dark:text-white/40 mt-0.5">
-                      {ex.primary_muscle}
-                    </p>
-                  )}
-                  {!isEditing && (ex.dosing?.sets || ex.dosing?.reps || ex.dosing?.duration_seconds) && (
-                    <p className="text-[11px] text-ink/60 dark:text-white/50 mt-1">
-                      {ex.dosing?.sets && `${ex.dosing.sets} sets`}
-                      {ex.dosing?.sets && ex.dosing?.reps && " × "}
-                      {ex.dosing?.reps && `${ex.dosing.reps} reps`}
-                      {ex.dosing?.duration_seconds && ` · ${ex.dosing.duration_seconds}s`}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-2 mt-1.5">
-                    {ex.provider === "custom" && (
-                      <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">
-                        Custom exercise
-                      </span>
-                    )}
-                    {!isEditing && hasDetails && (
-                      <span className="text-[10px] font-medium text-[#7C83FF]">
-                        {isOpen ? "Hide details ▲" : "How to do it ▼"}
-                      </span>
-                    )}
+
+                {Array.isArray(finalNote.clinicalReasoning.differentials) && finalNote.clinicalReasoning.differentials.length > 0 && (
+                  <div>
+                    <p className={`${LABEL} mb-2`}>{t.differentials}</p>
+                    <ul className="space-y-1.5">
+                      {finalNote.clinicalReasoning.differentials.map((d: string, i: number) => (
+                        <li key={i} className="flex gap-2.5 text-sm leading-relaxed text-ink/75 dark:text-white/75">
+                          <span aria-hidden className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#8B95FF]" />
+                          {d}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                </div>
-              </div>
-              <div className="flex items-start gap-1 shrink-0">
-                <button
-                  onClick={() => setEditingExercise(isEditing ? null : key)}
-                  className="p-1.5 rounded-lg text-ink/55 dark:text-white/40 hover:bg-black/5 dark:hover:bg-white/10 hover:text-[#7C83FF] transition-colors"
-                >
-                  <Pencil size={13} />
-                </button>
-                <button
-                  onClick={() => removeExercise(key)}
-                  className="p-1.5 rounded-lg text-ink/55 dark:text-white/40 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 transition-colors"
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            </div>
-
-            {isEditing && (
-              <div className="pt-2 border-t border-black/[0.08] dark:border-white/10 grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-[10px] text-ink/55 dark:text-white/40">Sets</label>
-                  <input
-                    type="number"
-                    value={ex.dosing?.sets ?? ""}
-                    onChange={(e) => updateExerciseDosing(key, "sets", e.target.value)}
-                    className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-ink/55 dark:text-white/40">Reps</label>
-                  <input
-                    type="number"
-                    value={ex.dosing?.reps ?? ""}
-                    onChange={(e) => updateExerciseDosing(key, "reps", e.target.value)}
-                    className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-ink/55 dark:text-white/40">Duration (s)</label>
-                  <input
-                    type="number"
-                    value={ex.dosing?.duration_seconds ?? ""}
-                    onChange={(e) => updateExerciseDosing(key, "duration_seconds", e.target.value)}
-                    className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-ink/55 dark:text-white/40">Freq/week</label>
-                  <input
-                    type="number"
-                    value={ex.dosing?.frequency_per_week ?? ""}
-                    onChange={(e) => updateExerciseDosing(key, "frequency_per_week", e.target.value)}
-                    className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="text-[10px] text-ink/55 dark:text-white/40">Notes</label>
-                  <textarea
-                    value={ex.dosing?.notes ?? ""}
-                    onChange={(e) => updateExerciseDosing(key, "notes", e.target.value)}
-                    rows={2}
-                    className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 px-2 py-1.5"
-                  />
-                </div>
-                <button
-                  onClick={() => setEditingExercise(null)}
-                  className="col-span-2 mt-1 rounded-full px-4 py-1.5 text-[11px] font-semibold text-white self-start bg-gradient-to-r from-[#7C83FF] to-[#A78BFA]"
-                >
-                  Done
-                </button>
-              </div>
-            )}
-
-            {!isEditing && isOpen && hasDetails && (
-              <div className="pt-2 border-t border-black/[0.08] dark:border-white/10">
-                {ex.description && (
-                  <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
-                    {ex.description}
-                  </p>
                 )}
-                {Array.isArray(ex.instructions) && ex.instructions.length > 0 && (
-                  <ol className="mt-2 text-xs text-ink/60 dark:text-white/60 leading-relaxed space-y-1 list-decimal list-inside">
-                    {ex.instructions.map((step: string, j: number) => (
-                      <li key={j}>{step}</li>
+
+                <div className={`grid grid-cols-1 gap-4 ${compact ? "" : "sm:grid-cols-2"}`}>
+                  {[
+                    [t.supportingFindings, finalNote.clinicalReasoning.supportingFindings],
+                    [t.findingsAgainst, finalNote.clinicalReasoning.findingsAgainst],
+                    [t.missingInfo, finalNote.clinicalReasoning.missingInformation],
+                    [t.suggestedAssessments, finalNote.clinicalReasoning.suggestedAssessments],
+                  ]
+                    .filter(([, v]) => v)
+                    .map(([label, value]) => (
+                      <div key={label as string}>
+                        <p className={`${LABEL} mb-1`}>{label}</p>
+                        <p className="text-sm leading-relaxed text-ink/75 dark:text-white/75">{value}</p>
+                      </div>
                     ))}
-                  </ol>
+                </div>
+
+                {finalNote.clinicalReasoning.redFlagsPrecautions && (
+                  <div className="flex gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/[0.07] p-4">
+                    <AlertTriangle size={16} aria-hidden className="mt-0.5 shrink-0 text-amber-500" />
+                    <div>
+                      <p className="mb-1 text-[12px] font-semibold text-amber-700 dark:text-amber-400">{t.redFlagsPrecautions}</p>
+                      <p className="text-sm leading-relaxed text-amber-900 dark:text-amber-200/90">{finalNote.clinicalReasoning.redFlagsPrecautions}</p>
+                    </div>
+                  </div>
                 )}
               </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  </motion.div>
-)}
 
-{rehabPhases.length > 0 && (
-  <motion.div
-    initial={{ opacity: 0, y: 12 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4, delay: 0.1 }}
-    className="mt-4 rounded-[24px] border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-soft"
-  >
-    <span className="eyebrow text-ink/55 dark:text-white/40 mb-4 block">
-      Rehab Protocol
-    </span>
+              <p className="mt-5 border-t border-black/[0.06] pt-3 text-[11px] leading-relaxed text-ink/50 dark:border-white/[0.07] dark:text-white/40">{t.reasoningDisclaimer}</p>
+            </motion.div>
+          )}
 
-    <div className="grid gap-4 sm:grid-cols-3">
-      {rehabPhases.map((phase) => (
-<div
-  key={phase.id}
-  className={`rounded-2xl bg-mist/60 dark:bg-white/5 p-4 ${
-    (phase.phase_exercises?.length || 0) > 300 ? "sm:col-span-3" : ""
-  }`}
->
-          <div className="flex items-center gap-2 mb-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#7C83FF] text-[11px] font-bold text-white">
-              {phase.phase_number}
-            </span>
-            <p className="text-sm font-semibold text-ink dark:text-white">
-              {phase.phase_name}
-            </p>
-          </div>
-          <p className="text-[11px] text-ink/55 dark:text-white/40 mb-3">
-            {phase.typical_duration}
-          </p>
-          <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
-            <span className="font-medium text-ink/70 dark:text-white/70">Goals: </span>
-            {phase.phase_goals}
-          </p>
-          <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed mb-2">
-            <span className="font-medium text-ink/70 dark:text-white/70">Exercises: </span>
-<span className="whitespace-pre-line">{formatPhaseText(phase.phase_exercises)}
-</span>
-          </p>
-          <p className="text-[11px] text-ink/55 dark:text-white/40 leading-relaxed">
-            <span className="font-medium">Progress when: </span>
-            {phase.criteria_to_progress}
-          </p>
-        </div>
-      ))}
-    </div>
-  </motion.div>
-)}
+          {clinicalInsight && (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className={`relative overflow-hidden ${BLOCK}`}>
+              <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#8B95FF]/60 to-transparent" />
 
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <BlockTitle icon={Sparkles}>{t.clinicalInsights}</BlockTitle>
+                  <p className="mt-3 text-base font-semibold text-ink dark:text-white">{clinicalInsight.condition_name}</p>
+                </div>
+                {evidenceLevel && (
+                  <span className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold ${CHIP}`}>
+                    {evidenceLevel === "high" ? t.evidenceStrong : t.evidenceModerate}
+                  </span>
+                )}
+              </div>
 
+              <div className={`mt-5 grid grid-cols-1 gap-5 ${compact ? "" : "sm:grid-cols-2"}`}>
+                {[
+                  [Target, t.goals, clinicalInsight.goals, false],
+                  [Stethoscope, t.clinicalTests, clinicalInsight.clinical_tests, false],
+                  [AlertTriangle, t.redFlags, clinicalInsight.red_flags, true],
+                  [Dumbbell, t.typicalExercises, clinicalInsight.typical_exercises, false],
+                ].map(([Icon, label, value, warn]: any) => (
+                  <div key={label} className="flex gap-3">
+                    <Icon size={16} aria-hidden className={`mt-0.5 shrink-0 ${warn ? "text-amber-500" : "text-[#8B95FF]"}`} />
+                    <div>
+                      <p className={`${LABEL} mb-1`}>{label}</p>
+                      <p className="text-sm leading-relaxed text-ink/75 dark:text-white/75">{value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-black/[0.06] pt-4 dark:border-white/[0.07]">
+                <p className="text-[11px] text-ink/50 dark:text-white/40">
+                  {clinicalInsight.source} ({clinicalInsight.source_date}) · {t.insightDisclaimer}
+                </p>
+                {matchedKeyword && (
+                  <button type="button" onClick={() => setShowWhy(!showWhy)} aria-expanded={showWhy} className="text-xs font-semibold text-[#7C83FF] hover:underline">
+                    {t.whySuggestion}
+                  </button>
+                )}
+              </div>
+
+              {showWhy && matchedKeyword && (
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2 text-xs text-ink/60 dark:text-white/50">
+                  {t.whyBecause(matchedKeyword)}
+                </motion.p>
+              )}
+
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAskPhygo((prev) => !prev)}
+                  aria-expanded={showAskPhygo}
+                  className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold ${SECONDARY_BTN}`}
+                >
+                  <Sparkles size={13} aria-hidden className="text-[#8B95FF]" />
+                  {t.askMore}
+                </button>
+                {showAskPhygo && (
+                  <div className="mt-3 space-y-2.5 rounded-2xl border border-black/[0.06] bg-black/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.03]">
+                    <textarea value={askQuestion} onChange={(e) => setAskQuestion(e.target.value)} placeholder={t.askPlaceholder} rows={2} className={FIELD} />
+                    <button
+                      type="button"
+                      onClick={askPhygoAI}
+                      disabled={askLoading}
+                      className={`inline-flex min-h-[36px] items-center rounded-full px-4 text-xs font-semibold disabled:opacity-50 ${PRIMARY_BTN}`}
+                    >
+                      {askLoading ? t.thinking : t.ask}
+                    </button>
+                    {askAnswer && <p className="whitespace-pre-line pt-1 text-sm leading-relaxed text-ink/75 dark:text-white/75">{askAnswer}</p>}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Relevant evidence from the existing Science/PubMed library, only
+              published papers matching the primary condition, and only the
+              structured summary written for this purpose (why_it_matters). */}
+          {(papersLoading || relevantPapers.length > 0) && (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.025 }} className={BLOCK}>
+              <BlockTitle icon={BookOpen}>{t.evidenceTitle}</BlockTitle>
+
+              <div className="mt-4">
+                {papersLoading && <p className="text-xs text-ink/55 dark:text-white/40">{t.evidenceSearching}</p>}
+
+                {!papersLoading && relevantPapers.length === 0 && <p className="text-xs text-ink/55 dark:text-white/40">{t.evidenceNone}</p>}
+
+                {!papersLoading && relevantPapers.length > 0 && (
+                  <div className="space-y-3">
+                    {relevantPapers.map((paper: any) => (
+                      <div key={paper.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.03]">
+                        <div className="mb-1.5 flex items-start justify-between gap-3">
+                          <p className="text-sm font-semibold leading-snug text-ink dark:text-white">{paper.title}</p>
+                          {paper.study_type && (
+                            <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${CHIP}`}>{paper.study_type}</span>
+                          )}
+                        </div>
+                        <p className="mb-2 text-[11px] text-ink/50 dark:text-white/45">
+                          {[
+                            paper.authors,
+                            paper.journal,
+                            paper.publication_date ? String(paper.publication_date).slice(0, 4) : null,
+                            paper.pmid ? `PMID ${paper.pmid}` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
+                        {paper.why_it_matters && (
+                          <p className="mb-2 text-xs leading-relaxed text-ink/65 dark:text-white/65">
+                            <span className="font-semibold text-ink/80 dark:text-white/80">{t.whyRelevant}</span>
+                            {paper.why_it_matters}
+                          </p>
+                        )}
+                        {paper.original_url && (
+                          <a href={paper.original_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#7C83FF] hover:underline">
+                            {t.viewSource}
+                            <ExternalLink size={10} aria-hidden />
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <p className="mt-4 border-t border-black/[0.06] pt-3 text-[11px] leading-relaxed text-ink/50 dark:border-white/[0.07] dark:text-white/40">{t.evidenceDisclaimer}</p>
+            </motion.div>
+          )}
+
+          {exerciseEntries.length > 0 && (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.05 }} className={BLOCK}>
+              <div className="flex items-center justify-between gap-3">
+                <BlockTitle icon={Dumbbell}>{t.exercises}</BlockTitle>
+                <button
+                  type="button"
+                  onClick={() => setShowAddExercise((prev) => !prev)}
+                  aria-expanded={showAddExercise}
+                  className={`inline-flex min-h-[34px] items-center gap-1.5 rounded-full px-3 text-xs font-semibold ${SECONDARY_BTN}`}
+                >
+                  {showAddExercise ? <X size={13} aria-hidden /> : <Plus size={13} aria-hidden />}
+                  {showAddExercise ? t.cancel : t.addExercise}
+                </button>
+              </div>
+
+              {showAddExercise && (
+                <div className="mt-4 rounded-2xl border border-black/[0.06] bg-black/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.03]">
+                  <div className="relative">
+                    <Search size={14} aria-hidden className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/35 dark:text-white/35" />
+                    <input
+                      type="text"
+                      value={exerciseSearchQuery}
+                      onChange={(e) => searchExerciseDb(e.target.value)}
+                      placeholder={t.searchExercises}
+                      aria-label={t.searchExercises}
+                      autoFocus
+                      className={`${FIELD} pl-9`}
+                    />
+                  </div>
+                  {exerciseSearching && <p className="mt-2 text-xs text-ink/55 dark:text-white/40">{t.searching}</p>}
+                  {!exerciseSearching && exerciseSearchQuery && exerciseSearchResults.length === 0 && (
+                    <p className="mt-2 text-xs text-ink/55 dark:text-white/40">{t.noExercises}</p>
+                  )}
+                  {exerciseSearchResults.length > 0 && (
+                    <div className="mt-3 max-h-64 space-y-2 overflow-y-auto">
+                      {exerciseSearchResults.map((result: any) => (
+                        <button
+                          type="button"
+                          key={result.internal_id}
+                          onClick={() => addExerciseToList(result)}
+                          className="flex w-full items-center gap-3 rounded-xl border border-black/[0.05] bg-white p-2.5 text-left transition-colors hover:border-[#8B95FF]/40 dark:border-white/[0.06] dark:bg-white/[0.04]"
+                        >
+                          {result.media?.image_url ? (
+                            <img src={result.media.image_url} alt="" className="h-10 w-10 shrink-0 rounded-lg bg-black/5 object-cover dark:bg-white/10" />
+                          ) : (
+                            <div className="h-10 w-10 shrink-0 rounded-lg bg-black/5 dark:bg-white/10" />
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-xs font-semibold text-ink dark:text-white">{result.name}</p>
+                            {result.primary_muscle && <p className="text-[10px] text-ink/55 dark:text-white/40">{result.primary_muscle}</p>}
+                          </div>
+                          <Plus size={14} aria-hidden className="shrink-0 text-[#7C83FF]" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className={`mt-4 grid gap-3 ${compact ? "" : "sm:grid-cols-2"}`}>
+                {exerciseEntries.map((ex: any, i: number) => {
+                  const key = ex.internal_id || String(i);
+                  const isOpen = expandedExercise === key;
+                  const isEditing = editingExercise === key;
+                  const hasDetails = ex.description || (Array.isArray(ex.instructions) && ex.instructions.length > 0);
+                  return (
+                    <div
+                      key={key}
+                      className={`flex flex-col gap-3 rounded-2xl border border-black/[0.05] bg-black/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.03] ${isOpen || isEditing ? "sm:col-span-2" : ""}`}
+                    >
+                      <div className="flex gap-3">
+                        <div
+                          onClick={() => !isEditing && hasDetails && setExpandedExercise(isOpen ? null : key)}
+                          className={`flex min-w-0 flex-1 gap-3 ${!isEditing && hasDetails ? "cursor-pointer" : ""}`}
+                        >
+                          {ex.media?.image_url ? (
+                            <img src={ex.media.image_url} alt={ex.name} className="h-16 w-16 shrink-0 rounded-xl bg-black/5 object-cover dark:bg-white/10" />
+                          ) : (
+                            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-black/5 px-1 text-center text-[10px] text-ink/35 dark:bg-white/10 dark:text-white/35">
+                              {t.noImage}
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold text-ink dark:text-white">{ex.name}</p>
+                            {ex.primary_muscle && <p className="mt-0.5 text-[11px] text-ink/55 dark:text-white/45">{ex.primary_muscle}</p>}
+                            {!isEditing && (ex.dosing?.sets || ex.dosing?.reps || ex.dosing?.duration_seconds) && (
+                              <p className="mt-1 text-[11px] text-ink/65 dark:text-white/55">
+                                {[
+                                  ex.dosing?.sets ? t.sets(ex.dosing.sets) : null,
+                                  ex.dosing?.reps ? t.reps(ex.dosing.reps) : null,
+                                  ex.dosing?.duration_seconds ? `${ex.dosing.duration_seconds}s` : null,
+                                ]
+                                  .filter(Boolean)
+                                  .join(" · ")}
+                              </p>
+                            )}
+                            <div className="mt-1.5 flex items-center gap-2">
+                              {ex.provider === "custom" && (
+                                <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">{t.customExercise}</span>
+                              )}
+                              {!isEditing && hasDetails && (
+                                <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-[#7C83FF]">
+                                  {isOpen ? t.hideDetails : t.howTo}
+                                  <ChevronDown size={12} aria-hidden className={isOpen ? "rotate-180" : ""} />
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex shrink-0 items-start gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setEditingExercise(isEditing ? null : key)}
+                            aria-label={t.editExercise}
+                            className="rounded-lg p-1.5 text-ink/55 transition-colors hover:bg-black/5 hover:text-[#7C83FF] dark:text-white/45 dark:hover:bg-white/10"
+                          >
+                            <Pencil size={14} aria-hidden />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeExercise(key)}
+                            aria-label={t.removeExercise}
+                            className="rounded-lg p-1.5 text-ink/55 transition-colors hover:bg-red-50 hover:text-red-500 dark:text-white/45 dark:hover:bg-red-500/10"
+                          >
+                            <Trash2 size={14} aria-hidden />
+                          </button>
+                        </div>
+                      </div>
+
+                      {isEditing && (
+                        <div className="grid grid-cols-2 gap-2 border-t border-black/[0.06] pt-3 dark:border-white/[0.07]">
+                          {[
+                            ["sets", t.setsLabel],
+                            ["reps", t.repsLabel],
+                            ["duration_seconds", t.durationLabel],
+                            ["frequency_per_week", t.freqLabel],
+                          ].map(([field, label]) => (
+                            <label key={field} className="block">
+                              <span className="text-[11px] text-ink/55 dark:text-white/45">{label}</span>
+                              <input
+                                type="number"
+                                value={ex.dosing?.[field] ?? ""}
+                                onChange={(e) => updateExerciseDosing(key, field, e.target.value)}
+                                className={`${FIELD} mt-1 py-1.5 text-xs`}
+                              />
+                            </label>
+                          ))}
+                          <label className="col-span-2 block">
+                            <span className="text-[11px] text-ink/55 dark:text-white/45">{t.notesLabel}</span>
+                            <textarea
+                              value={ex.dosing?.notes ?? ""}
+                              onChange={(e) => updateExerciseDosing(key, "notes", e.target.value)}
+                              rows={2}
+                              className={`${FIELD} mt-1 py-1.5 text-xs`}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setEditingExercise(null)}
+                            className={`col-span-2 mt-1 inline-flex min-h-[34px] items-center justify-self-start rounded-full px-4 text-xs font-semibold ${PRIMARY_BTN}`}
+                          >
+                            {t.done}
+                          </button>
+                        </div>
+                      )}
+
+                      {!isEditing && isOpen && hasDetails && (
+                        <div className="border-t border-black/[0.06] pt-3 dark:border-white/[0.07]">
+                          {ex.description && <p className="text-xs leading-relaxed text-ink/65 dark:text-white/60">{ex.description}</p>}
+                          {Array.isArray(ex.instructions) && ex.instructions.length > 0 && (
+                            <ol className="mt-2 list-inside list-decimal space-y-1 text-xs leading-relaxed text-ink/65 dark:text-white/60">
+                              {ex.instructions.map((step: string, j: number) => (
+                                <li key={j}>{step}</li>
+                              ))}
+                            </ol>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+
+          {rehabPhases.length > 0 && (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className={BLOCK}>
+              <BlockTitle icon={FileText}>{t.rehabProtocol}</BlockTitle>
+
+              <div className={`mt-4 grid gap-3 ${compact ? "" : "sm:grid-cols-3"}`}>
+                {rehabPhases.map((rp) => (
+                  <div
+                    key={rp.id}
+                    className={`rounded-2xl border border-black/[0.05] bg-black/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.03] ${
+                      !compact && (rp.phase_exercises?.length || 0) > 300 ? "sm:col-span-3" : ""
+                    }`}
+                  >
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-bold text-white" style={{ background: ACCENT }}>
+                        {rp.phase_number}
+                      </span>
+                      <p className="text-sm font-semibold text-ink dark:text-white">{rp.phase_name}</p>
+                    </div>
+                    <p className="mb-3 text-[11px] text-ink/55 dark:text-white/45">{rp.typical_duration}</p>
+                    <p className="mb-2 text-xs leading-relaxed text-ink/65 dark:text-white/60">
+                      <span className="font-semibold text-ink/75 dark:text-white/75">{t.phaseGoals}</span>
+                      {rp.phase_goals}
+                    </p>
+                    <p className="mb-2 text-xs leading-relaxed text-ink/65 dark:text-white/60">
+                      <span className="font-semibold text-ink/75 dark:text-white/75">{t.phaseExercises}</span>
+                      <span className="whitespace-pre-line">{formatPhaseText(rp.phase_exercises)}</span>
+                    </p>
+                    <p className="text-[11px] leading-relaxed text-ink/55 dark:text-white/45">
+                      <span className="font-semibold">{t.progressWhen}</span>
+                      {rp.criteria_to_progress}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </div>
 
         {/* Controls */}
-
-
-        <div className="mt-7 flex flex-wrap items-center gap-2">
-
-          {EXAMPLES.map((ex) => (
-  <button
-    key={ex.id}
-    onClick={() => runExample(ex.id)}
-    data-cursor-hover
-    className="rounded-full px-3 py-1.5 text-[10px] font-medium transition-all hover:scale-[1.02]"
-    style={
-      activeLabel === ex.label && !isLiveVoice
-        ? { background: "#0e0f12", color: "#ffffff" }
-        : {
-            background: "rgba(168,85,247,0.06)",
-            color: "rgba(168,85,247,0.75)",
-            border: "1px solid rgba(168,85,247,0.15)",
-          }
-    }
-  >
-    {ex.label}
-  </button>
-))}
-
-
-
-          {variant === "full" &&
-            voiceSupported && (
-              <>
-
+        {!isFull && (
+          <div className="mt-7 flex flex-wrap items-center gap-2">
+            <span className="mr-1 text-[11px] font-medium text-ink/45 dark:text-white/40">{t.examples}</span>
+            {EXAMPLES.map((ex) => (
               <button
-                onClick={
-                  phase === "listening"
-                    ? stopVoice
-                    : startVoice
-                }
-                data-cursor-hover
-className="ml-auto inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#7C83FF] to-[#A78BFA] px-5 py-2.5 text-[12px] font-bold text-white shadow-[0_8px_24px_rgba(124,131,255,0.4)] transition-transform hover:scale-[1.05]"
+                key={ex.id}
+                type="button"
+                onClick={() => runExample(ex.id)}
+                className={`rounded-full px-3 py-1.5 text-[11px] font-medium transition ${
+                  activeLabel === ex.label && !isLiveVoice ? PRIMARY_BTN : SECONDARY_BTN
+                }`}
               >
-                {phase === "listening" ? (
-                  <Square
-                    size={11}
-                    fill="currentColor"
-                  />
-                ) : (
-                  <Mic size={13} />
-                )}
-
-                {phase === "listening"
-                  ? "Stop Recording"
-                  : "Start Recording"}
+                {ex.label}
               </button>
-              
-        </>
-
-
-          )}
-
-                    {variant === "full" &&
-            !voiceSupported && (
-              <span className="ml-auto flex items-center gap-2 text-[11px] text-ink/35 dark:text-white/35">
-                <Sparkles size={12} />
-                Voice mode works best in Chrome.
-              </span>
-          )}
-
-          {variant === "full" && (
-            <button
-  onClick={() => setShowTextInput((prev) => !prev)}
-  data-cursor-hover
-className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[12px] font-bold transition-all hover:scale-[1.05] ${voiceSupported ? "" : "ml-auto"}`}
-style={{
-  background: "rgba(124,131,255,0.16)",
-  color: "#7C83FF",
-  border: "1.5px solid rgba(124,131,255,0.35)",
-}}
-
-            >
-              <FileText size={13} />
-Write instead
-</button>
-)}
-{variant === "full" && (
-  <div className="w-full flex flex-col gap-2">
-  <input
-  type="text"
-  value={clinicalContext}
-  onChange={(e) => setClinicalContext(e.target.value)}
-  placeholder="Clinical context (optional): e.g. suspected osteoarthritis, acute trauma"
-  className="w-full mb-2 text-[11px] rounded-lg border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/10 px-2 py-1.5"
-/>
-<p className="text-[10px] text-ink/55 dark:text-white/40 mt-1">
-  Tip: hold Cmd (or Ctrl on Windows) and select multiple files together to analyze them as one case.
-</p>
- <label
-  data-cursor-hover
-  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold ${
-    !finalNote ? "cursor-not-allowed opacity-40" : ""
-  }`}
-  style={{
-    background: "rgba(50,214,160,0.10)",
-    color: "#1a9c74",
-    border: "1px solid rgba(50,214,160,0.22)",
-  }}
-  onClick={(e) => {
-    if (!finalNote) e.preventDefault();
-  }}
->
-
-    <ImagePlus size={13} />
-    Upload scan
-    <input
-      type="file"
-      accept="image/*"
-      multiple
-      onChange={handleImageUpload}
-      disabled={!finalNote}
-
-      className="hidden"
-    />
-  </label>
-  {!finalNote && (
-  <p className="text-[10px] text-ink/55 dark:text-white/40 mt-1">
-    Available after generating a session note
-  </p>
-)}
-
-  </div>
-  )}
-  {uploadedFileNames.length > 0 && (
-  <p className="text-[11px] text-ink/60 dark:text-white/50 mt-2">
-    {uploadedFileNames.length === 1
-      ? `1 file: ${uploadedFileNames[0]}`
-      : `${uploadedFileNames.length} files: ${uploadedFileNames.join(", ")}`}
-  </p>
-)}
-
-  {scanAnalyzing && (
-  <span className="text-[11px] text-ink/60 dark:text-white/50 italic">
-    Analyzing document...
-  </span>
-)}
-
-{scanSummary && !scanAnalyzing && (
-  <div
-    className="mt-3 w-full rounded-xl px-3.5 py-2.5 text-[12px] leading-relaxed"
-    style={{
-      background: "rgba(50,214,160,0.06)",
-      border: "1px solid rgba(50,214,160,0.18)",
-      color: "inherit",
-    }}
-  >
-    <span className="font-semibold text-[11px] uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
-      Document summary
-    </span>
-<p className="mt-1 whitespace-pre-line">{scanSummary}</p>
-  </div>
-)}
-
-
-
-        </div>
-
-        {variant === "full" && showTextInput && (
-          <div className="mt-4 space-y-2 rounded-2xl bg-mist/60 dark:bg-white/5 p-4">
-            <textarea
-              value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
-              placeholder="Scrivi qui le tue osservazioni sulla seduta..."
-              className="w-full rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 p-2.5 text-xs text-ink/80 dark:text-white/80 focus:outline-none focus:ring-2 focus:ring-[#7C83FF]/30"
-              rows={4}
-            />
-            <button
-              onClick={submitTextInput}
-              disabled={!textInput.trim()}
-              data-cursor-hover
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#7C83FF] to-[#A78BFA] px-4 py-2 text-[11px] font-semibold text-white shadow-glow transition-transform hover:scale-[1.03] disabled:opacity-50"
-            >
-              Genera nota
-            </button>
+            ))}
           </div>
         )}
 
+        {isFull && (
+          <>
+            <div className="mt-6 flex flex-wrap items-center gap-2">
+              {voiceSupported ? (
+                <button
+                  type="button"
+                  onClick={phase === "listening" ? stopVoice : startVoice}
+                  className={`inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 text-sm font-semibold transition ${PRIMARY_BTN}`}
+                >
+                  {phase === "listening" ? <Square size={12} fill="currentColor" aria-hidden /> : <Mic size={15} aria-hidden />}
+                  {phase === "listening" ? t.stopRecording : t.startRecording}
+                </button>
+              ) : (
+                <span className="flex items-center gap-2 text-xs text-ink/50 dark:text-white/40">
+                  <Sparkles size={13} aria-hidden />
+                  {t.voiceChrome}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowTextInput((prev) => !prev)}
+                aria-expanded={showTextInput}
+                className={`inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 text-sm font-semibold transition ${SECONDARY_BTN}`}
+              >
+                <PenLine size={15} aria-hidden />
+                {t.writeInstead}
+              </button>
+            </div>
 
+            {showTextInput && (
+              <div className="mt-4 space-y-3 rounded-2xl border border-black/[0.06] bg-black/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.03]">
+                <textarea
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  placeholder={t.writePlaceholder}
+                  aria-label={t.writePlaceholder}
+                  className={FIELD}
+                  rows={4}
+                />
+                <button
+                  type="button"
+                  onClick={submitTextInput}
+                  disabled={!textInput.trim()}
+                  className={`inline-flex min-h-[40px] items-center gap-2 rounded-full px-5 text-sm font-semibold transition disabled:opacity-50 ${PRIMARY_BTN}`}
+                >
+                  <Sparkles size={14} aria-hidden />
+                  {t.generateNote}
+                </button>
+              </div>
+            )}
+
+            <div className="mt-6 space-y-3 border-t border-black/[0.06] pt-5 dark:border-white/[0.07]">
+              <input
+                type="text"
+                value={clinicalContext}
+                onChange={(e) => setClinicalContext(e.target.value)}
+                placeholder={t.contextPlaceholder}
+                aria-label={t.contextPlaceholder}
+                className={`${FIELD} text-xs`}
+              />
+              <div className="flex flex-wrap items-center gap-3">
+                <label
+                  className={`inline-flex min-h-[36px] items-center gap-2 rounded-full px-4 text-xs font-semibold ${SECONDARY_BTN} ${
+                    !finalNote ? "cursor-not-allowed opacity-45" : "cursor-pointer"
+                  }`}
+                  onClick={(e) => {
+                    if (!finalNote) e.preventDefault();
+                  }}
+                >
+                  <ImagePlus size={14} aria-hidden />
+                  {t.uploadScan}
+                  <input type="file" accept="image/*" multiple onChange={handleImageUpload} disabled={!finalNote} className="hidden" />
+                </label>
+                <p className="min-w-0 flex-1 text-[11px] leading-relaxed text-ink/50 dark:text-white/40">
+                  {finalNote ? t.multiFileTip : t.uploadAfterNote}
+                </p>
+              </div>
+
+              {uploadedFileNames.length > 0 && <p className="text-[11px] text-ink/60 dark:text-white/50">{t.files(uploadedFileNames)}</p>}
+
+              {scanAnalyzing && <p className="text-[11px] italic text-ink/60 dark:text-white/50">{t.analyzingDoc}</p>}
+
+              {scanSummary && !scanAnalyzing && (
+                <div className="rounded-2xl border border-black/[0.06] bg-black/[0.02] px-4 py-3 text-[13px] leading-relaxed dark:border-white/[0.06] dark:bg-white/[0.03]">
+                  <span className={LABEL}>{t.docSummary}</span>
+                  <p className="mt-1 whitespace-pre-line text-ink/75 dark:text-white/75">{scanSummary}</p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

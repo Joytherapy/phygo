@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import { Video, PhoneOff, Loader2 } from 'lucide-react'
+import { Video, PhoneOff, Loader2, Lock, User } from 'lucide-react'
 import { refusalMessage, useVerificationStrings } from '@/lib/i18n/verificationStrings'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { lazy } from '@/lib/lazy'
@@ -57,14 +57,37 @@ function DailyFrame({ session, onLeft }: { session: Session; onLeft: () => void 
 
 // On the clinician's call page the states before and between calls sit on a
 // full-size stage, so the page keeps the call's shape before it starts.
-function Stage({ on, children }: { on: boolean; children: React.ReactNode }) {
+function Stage({ on, badge, children }: { on: boolean; badge?: string; children: React.ReactNode }) {
   if (!on) return <>{children}</>
   return (
-    <div className="relative grid aspect-video min-h-[280px] place-items-center overflow-hidden rounded-[18px] bg-black/[0.03] dark:bg-black/40">
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60" style={{ background: 'radial-gradient(60% 60% at 50% 40%, rgba(124,131,255,0.18), transparent 70%)' }} />
-      <div className="relative flex w-full max-w-sm flex-col items-center gap-5 px-6 text-center">
-        <span aria-hidden className="grid h-16 w-16 place-items-center rounded-full border border-black/[0.06] bg-white/70 text-ink/70 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-white/80">
-          <Video size={24} />
+    <div className="relative grid min-h-[340px] w-full min-w-0 place-items-center overflow-hidden rounded-[18px] sm:aspect-video sm:min-h-[300px] bg-gradient-to-b from-[#eef0fb] to-[#f8f8fb] ring-1 ring-inset ring-black/[0.05] dark:from-[#0d0e15] dark:to-[#060709] dark:ring-white/[0.06]">
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(55% 60% at 50% 38%, rgba(124,131,255,0.22), transparent 70%)' }} />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-50 dark:opacity-100"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(124,131,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(124,131,255,0.07) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+          maskImage: 'radial-gradient(ellipse at 50% 45%, #000 20%, transparent 70%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at 50% 45%, #000 20%, transparent 70%)',
+        }}
+      />
+      {badge && (
+        <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-black/[0.06] bg-white/70 px-3 py-1 text-[11px] font-medium text-ink/70 backdrop-blur dark:border-white/[0.08] dark:bg-white/[0.06] dark:text-white/70">
+          <Lock size={11} aria-hidden />
+          {badge}
+        </span>
+      )}
+      <div aria-hidden className="pointer-events-none absolute bottom-4 right-4 hidden h-[72px] w-[112px] place-items-center rounded-xl border border-black/[0.06] bg-white/60 text-ink/30 backdrop-blur sm:grid dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/25">
+        <User size={20} />
+      </div>
+      <div className="relative flex w-full max-w-sm flex-col items-center gap-6 px-6 text-center">
+        <span aria-hidden className="relative grid h-20 w-20 place-items-center">
+          <span className="absolute inset-0 rounded-full border border-[#8B95FF]/30 motion-safe:animate-[ping_3.2s_cubic-bezier(0,0,0.2,1)_infinite]" />
+          <span className="absolute -inset-3 rounded-full border border-[#8B95FF]/10" />
+          <span className="relative grid h-16 w-16 place-items-center rounded-full border border-black/[0.06] bg-white/80 text-ink/75 shadow-[0_12px_32px_-12px_rgba(124,131,255,0.6)] dark:border-white/[0.1] dark:bg-white/[0.07] dark:text-white/85">
+            <Video size={24} />
+          </span>
         </span>
         <div className="w-full">{children}</div>
       </div>
@@ -76,11 +99,14 @@ export default function VideoCallPanel({
   patientId,
   canStart,
   stage = false,
+  stageBadge,
 }: {
   patientId: string
   canStart: boolean
   /** Show the idle states on a full-size stage (the clinician's call page). */
   stage?: boolean
+  /** Small label in the stage corner (e.g. "Private room"). */
+  stageBadge?: string
 }) {
   const [call, setCall] = useState<ActiveCall | null>(null)
   const [loading, setLoading] = useState(true)
@@ -187,7 +213,7 @@ export default function VideoCallPanel({
 
   if (loading) {
     return (
-      <Stage on={stage}>
+      <Stage on={stage} badge={stageBadge}>
         <div className={stage ? 'py-2 text-center' : 'rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-10 text-center'}>
           <Loader2 size={18} className="mx-auto animate-spin text-ink/30 dark:text-white/30" />
         </div>
@@ -214,7 +240,7 @@ export default function VideoCallPanel({
 
   if (call && !session) {
     return (
-      <Stage on={stage}>
+      <Stage on={stage} badge={stageBadge}>
       <div>
       <button
         onClick={() => join(call)}
@@ -238,7 +264,7 @@ export default function VideoCallPanel({
   }
 
   return (
-    <Stage on={stage}>
+    <Stage on={stage} badge={stageBadge}>
     <div>
       <button
         onClick={startCall}

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Plus, FileText, Calendar, Activity, Stethoscope, ClipboardList, Smartphone, Copy, Check, RotateCcw, Dumbbell, ClipboardCheck, MapPin, ShoppingBag, X, ChevronRight, Sparkles, Flame, TrendingUp, TrendingDown, Minus, Video } from 'lucide-react'
+import { ArrowLeft, Plus, FileText, Calendar, Activity, Stethoscope, ClipboardList, Smartphone, Copy, Check, RotateCcw, Dumbbell, ClipboardCheck, MapPin, ShoppingBag, X, ChevronRight, UserRound, Sparkles, Flame, TrendingUp, TrendingDown, Minus, Video } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
 import { useClinicalLocked } from '@/lib/useClinicalAccess'
@@ -17,8 +17,8 @@ import type { AdaptiveInsightResult } from '@/lib/metabolicCalculator'
 import { lazy } from '@/lib/lazy'
 import PatientProfileCard from '@/components/patients/PatientProfileCard'
 import { displayAge, type PatientIdentity } from '@/lib/patients/profile'
-import { PageBackdrop, PAGE_BG, PRIMARY_BTN, SECONDARY_BTN, CHIP } from '@/components/ui/premium'
-import { Avatar } from '@/components/dashboard/HomeCards'
+import { PageBackdrop, PageEyebrow, PAGE_BG, PRIMARY_BTN, SECONDARY_BTN, CHIP, ICON_TILE } from '@/components/ui/premium'
+import { Avatar, Card } from '@/components/dashboard/HomeCards'
 import { useHomeUi } from '@/lib/i18n/homeStrings'
 
 const supabase = lazy(() => createBrowserClient(
@@ -370,9 +370,10 @@ export default function PatientDetailPage() {
           className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-8"
         >
           <div className="flex min-w-0 items-center gap-4">
-            <Avatar name={patient.name} linked={!!patient.patient_user_id} size={64} />
+            <Avatar name={patient.name} linked={!!patient.patient_user_id} size={72} />
             <div className="min-w-0">
-              <h1 className="break-words font-display text-3xl font-semibold tracking-[-0.03em] text-ink dark:text-white sm:text-4xl">
+              <PageEyebrow icon={UserRound}>{h.patientRecord}</PageEyebrow>
+              <h1 className="mt-1.5 break-words font-display text-3xl font-semibold tracking-[-0.035em] text-ink dark:text-white sm:text-[40px] sm:leading-[1.1]">
                 {patient.name}
               </h1>
               <div className="flex items-center gap-2 mt-2 flex-wrap">
@@ -493,47 +494,22 @@ export default function PatientDetailPage() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10"
         >
-          <div className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <ClipboardList size={13} className="text-ink/45 dark:text-white/45" />
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
-                {ui.patients.statSessions}
-              </span>
-            </div>
-            <p className="font-display text-2xl font-semibold tracking-tight tabular-nums text-ink dark:text-white">{notesStatus === 'ready' ? notes.length : '—'}</p>
-          </div>
-
-          <div className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <Calendar size={13} className="text-ink/45 dark:text-white/45" />
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
-                {ui.patients.statLastSession}
-              </span>
-            </div>
-            <p className="font-display text-2xl font-semibold tracking-tight tabular-nums text-ink dark:text-white">
-              {lastSessionDate ? lastSessionDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '—'}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <Activity size={13} className="text-ink/45 dark:text-white/45" />
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
-                {ui.patients.statPatientSince}
-              </span>
-            </div>
-            <p className="font-display text-2xl font-semibold tracking-tight tabular-nums text-ink dark:text-white">{formatSince(patient.created_at, ui)}</p>
-          </div>
-
-          <div className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <Dumbbell size={13} className="text-ink/45 dark:text-white/45" />
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
-                {ui.patients.statLinkedItems}
-              </span>
-            </div>
-            <p className="font-display text-2xl font-semibold tracking-tight tabular-nums text-ink dark:text-white">{clinicalRefs.length}</p>
-          </div>
+          {[
+            { icon: ClipboardList, label: ui.patients.statSessions, value: notesStatus === 'ready' ? String(notes.length) : '—' },
+            { icon: Calendar, label: ui.patients.statLastSession, value: lastSessionDate ? lastSessionDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '—' },
+            { icon: Activity, label: ui.patients.statPatientSince, value: formatSince(patient.created_at, ui) },
+            { icon: Dumbbell, label: ui.patients.statLinkedItems, value: String(clinicalRefs.length) },
+          ].map(({ icon: Icon, label, value }) => (
+            <Card key={label} className="p-4 sm:p-5">
+              <div className="flex items-center gap-2.5">
+                <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${ICON_TILE}`}>
+                  <Icon size={14} aria-hidden />
+                </span>
+                <span className="min-w-0 truncate text-[12px] font-medium text-ink/60 dark:text-white/50">{label}</span>
+              </div>
+              <p className="mt-3 font-display text-[28px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-ink dark:text-white">{value}</p>
+            </Card>
+          ))}
         </motion.div>
 
         <PatientProfileCard
@@ -565,7 +541,7 @@ export default function PatientDetailPage() {
           </div>
 
           {notesStatus === 'loading' ? (
-            <div role="status" className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-14 text-center text-sm text-ink/55 dark:text-white/40">
+            <div role="status" className="rounded-2xl border border-black/[0.05] bg-black/[0.015] dark:border-white/[0.06] dark:bg-white/[0.02] py-14 text-center text-sm text-ink/55 dark:text-white/40">
               {ui.common.loading}
             </div>
           ) : notesStatus === 'error' ? (
@@ -581,7 +557,7 @@ export default function PatientDetailPage() {
               </button>
             </div>
           ) : notes.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-14 text-center flex flex-col items-center gap-3">
+            <div className="rounded-2xl border border-black/[0.05] bg-black/[0.015] dark:border-white/[0.06] dark:bg-white/[0.02] py-14 text-center flex flex-col items-center gap-3">
               <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75">
                 <FileText size={20} className="relative" />
               </div>
@@ -646,7 +622,7 @@ export default function PatientDetailPage() {
           </div>
 
           {clinicalRefs.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-14 text-center flex flex-col items-center gap-3">
+            <div className="rounded-2xl border border-black/[0.05] bg-black/[0.015] dark:border-white/[0.06] dark:bg-white/[0.02] py-14 text-center flex flex-col items-center gap-3">
               <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75">
                 <Dumbbell size={20} className="relative" />
               </div>
@@ -761,7 +737,7 @@ export default function PatientDetailPage() {
           </div>
 
           {metabolicHistory.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-14 text-center flex flex-col items-center gap-3">
+            <div className="rounded-2xl border border-black/[0.05] bg-black/[0.015] dark:border-white/[0.06] dark:bg-white/[0.02] py-14 text-center flex flex-col items-center gap-3">
               <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75">
                 <Flame size={20} className="relative" />
               </div>

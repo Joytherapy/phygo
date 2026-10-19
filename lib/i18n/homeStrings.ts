@@ -59,6 +59,9 @@ interface HomeDict {
   callNotesHint: string
   showNotes: string
   hideNotes: string
+  privateRoom: string
+  sessionNote: string
+  patientRecord: string
 }
 
 const it: HomeDict = {
@@ -112,6 +115,9 @@ const it: HomeDict = {
   callNotesHint: 'Detta o scrivi mentre parli con il paziente: la nota viene strutturata e salvata nella sua scheda.',
   showNotes: 'Mostra appunti',
   hideNotes: 'Nascondi appunti',
+  privateRoom: 'Stanza privata',
+  sessionNote: 'Nota di sessione',
+  patientRecord: 'Scheda paziente',
 }
 
 const en: HomeDict = {
@@ -165,6 +171,9 @@ const en: HomeDict = {
   callNotesHint: "Dictate or type while you talk with the patient: the note is structured and saved to their record.",
   showNotes: 'Show notes',
   hideNotes: 'Hide notes',
+  privateRoom: 'Private room',
+  sessionNote: 'Session note',
+  patientRecord: 'Patient record',
 }
 
 const es: HomeDict = {
@@ -218,6 +227,9 @@ const es: HomeDict = {
   callNotesHint: 'Dicta o escribe mientras hablas con el paciente: la nota se estructura y se guarda en su ficha.',
   showNotes: 'Mostrar notas',
   hideNotes: 'Ocultar notas',
+  privateRoom: 'Sala privada',
+  sessionNote: 'Nota de sesión',
+  patientRecord: 'Ficha del paciente',
 }
 
 const fr: HomeDict = {
@@ -271,6 +283,9 @@ const fr: HomeDict = {
   callNotesHint: 'Dictez ou écrivez pendant que vous parlez au patient : la note est structurée et enregistrée dans sa fiche.',
   showNotes: 'Afficher les notes',
   hideNotes: 'Masquer les notes',
+  privateRoom: 'Salle privée',
+  sessionNote: 'Note de séance',
+  patientRecord: 'Dossier patient',
 }
 
 export const HOME_STRINGS: Record<AppLang, HomeDict> = { it, en, es, fr }
