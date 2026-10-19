@@ -62,6 +62,18 @@ interface HomeDict {
   privateRoom: string
   sessionNote: string
   patientRecord: string
+  notesTitle: string
+  notesSubtitle: string
+  notesRangeMonth: string
+  notesRange3m: string
+  notesRangeAll: string
+  notesSearch: string
+  notesEmptyTitle: string
+  notesEmptyBody: string
+  notesNoMatch: string
+  notesLoadError: string
+  notesNoText: string
+  notesCount: (n: number) => string
 }
 
 const it: HomeDict = {
@@ -118,6 +130,18 @@ const it: HomeDict = {
   privateRoom: 'Stanza privata',
   sessionNote: 'Nota di sessione',
   patientRecord: 'Scheda paziente',
+  notesTitle: 'Note di seduta',
+  notesSubtitle: 'Le note che hai salvato nelle schede dei tuoi pazienti. Apri una nota per vedere la scheda.',
+  notesRangeMonth: 'Questo mese',
+  notesRange3m: 'Ultimi 3 mesi',
+  notesRangeAll: 'Tutte',
+  notesSearch: 'Cerca per paziente…',
+  notesEmptyTitle: 'Nessuna nota in questo periodo',
+  notesEmptyBody: 'Le note si creano da "Genera nuova nota" nella scheda di un paziente e si salvano con "Salva nella scheda".',
+  notesNoMatch: 'Nessuna nota per questo paziente nel periodo scelto.',
+  notesLoadError: 'Non è stato possibile caricare le note. Riprova.',
+  notesNoText: 'Nota senza testo',
+  notesCount: (n) => (n === 1 ? '1 nota' : `${n} note`),
 }
 
 const en: HomeDict = {
@@ -174,6 +198,18 @@ const en: HomeDict = {
   privateRoom: 'Private room',
   sessionNote: 'Session note',
   patientRecord: 'Patient record',
+  notesTitle: 'Session notes',
+  notesSubtitle: "The notes you saved in your patients' records. Open a note to see the record.",
+  notesRangeMonth: 'This month',
+  notesRange3m: 'Last 3 months',
+  notesRangeAll: 'All',
+  notesSearch: 'Search by patient…',
+  notesEmptyTitle: 'No notes in this period',
+  notesEmptyBody: 'Notes are created with "Generate new note" in a patient\'s record and saved with "Save to the record".',
+  notesNoMatch: 'No notes for this patient in the chosen period.',
+  notesLoadError: 'The notes could not be loaded. Please try again.',
+  notesNoText: 'Note without text',
+  notesCount: (n) => (n === 1 ? '1 note' : `${n} notes`),
 }
 
 const es: HomeDict = {
@@ -230,6 +266,18 @@ const es: HomeDict = {
   privateRoom: 'Sala privada',
   sessionNote: 'Nota de sesión',
   patientRecord: 'Ficha del paciente',
+  notesTitle: 'Notas de sesión',
+  notesSubtitle: 'Las notas que guardaste en las fichas de tus pacientes. Abre una nota para ver la ficha.',
+  notesRangeMonth: 'Este mes',
+  notesRange3m: 'Últimos 3 meses',
+  notesRangeAll: 'Todas',
+  notesSearch: 'Buscar por paciente…',
+  notesEmptyTitle: 'No hay notas en este periodo',
+  notesEmptyBody: 'Las notas se crean con "Generar nueva nota" en la ficha de un paciente y se guardan con "Guardar en la ficha".',
+  notesNoMatch: 'No hay notas de este paciente en el periodo elegido.',
+  notesLoadError: 'No se pudieron cargar las notas. Inténtalo de nuevo.',
+  notesNoText: 'Nota sin texto',
+  notesCount: (n) => (n === 1 ? '1 nota' : `${n} notas`),
 }
 
 const fr: HomeDict = {
@@ -286,6 +334,18 @@ const fr: HomeDict = {
   privateRoom: 'Salle privée',
   sessionNote: 'Note de séance',
   patientRecord: 'Dossier patient',
+  notesTitle: 'Notes de séance',
+  notesSubtitle: 'Les notes que vous avez enregistrées dans les dossiers de vos patients. Ouvrez une note pour voir le dossier.',
+  notesRangeMonth: 'Ce mois-ci',
+  notesRange3m: '3 derniers mois',
+  notesRangeAll: 'Toutes',
+  notesSearch: 'Rechercher par patient…',
+  notesEmptyTitle: 'Aucune note sur cette période',
+  notesEmptyBody: 'Les notes se créent avec « Générer une nouvelle note » dans le dossier d\'un patient et s\'enregistrent avec « Enregistrer dans le dossier ».',
+  notesNoMatch: 'Aucune note pour ce patient sur la période choisie.',
+  notesLoadError: "Les notes n'ont pas pu être chargées. Réessayez.",
+  notesNoText: 'Note sans texte',
+  notesCount: (n) => (n === 1 ? '1 note' : `${n} notes`),
 }
 
 export const HOME_STRINGS: Record<AppLang, HomeDict> = { it, en, es, fr }
