@@ -19,7 +19,7 @@
 // V1 scope: a single Q&A thread, kept in memory for this reading session
 // only (not persisted) — no new DB table for chat history yet.
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Sparkles, Send, X, Loader2 } from 'lucide-react'
 import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -32,11 +32,13 @@ export default function AskPhygoPanel({ contextLabel, onClose }: { contextLabel?
   const [question, setQuestion] = useState('')
   const [turns, setTurns] = useState<Turn[]>([])
   const [loading, setLoading] = useState(false)
+  const fieldRef = useRef<HTMLTextAreaElement>(null)
 
   const ask = async () => {
     const q = question.trim()
     if (!q || loading) return
     setQuestion('')
+    if (fieldRef.current) fieldRef.current.style.height = ''
     setLoading(true)
     setTurns((prev) => [...prev, { question: q }])
 
@@ -88,7 +90,7 @@ export default function AskPhygoPanel({ contextLabel, onClose }: { contextLabel?
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
-        {turns.length === 0 && <p className="text-sm text-ink/55 dark:text-white/40">{ui.ask.empty}</p>}
+        {turns.length === 0 && <p className="text-sm text-ink/55 dark:text-white/40">{contextLabel ? ui.ask.empty : ui.ask.emptyGeneral}</p>}
         {turns.map((t, i) => (
           <div key={i} className="space-y-1.5">
             <p className="text-sm font-medium text-ink dark:text-white">{t.question}</p>
@@ -104,18 +106,27 @@ export default function AskPhygoPanel({ contextLabel, onClose }: { contextLabel?
       </div>
 
       <div className="border-t border-black/[0.09] dark:border-white/10 p-3">
-        <div className="flex items-center gap-2">
-          <input
+        <div className="flex items-end gap-2">
+          {/* A textarea, not an input: long questions and placeholders wrap
+              instead of being cut off; it grows with the text up to 8rem. */}
+          <textarea
+            ref={fieldRef}
+            rows={2}
             value={question}
-            onChange={(e) => setQuestion(e.target.value)}
+            onChange={(e) => {
+              setQuestion(e.target.value)
+              e.currentTarget.style.height = 'auto'
+              e.currentTarget.style.height = `${Math.min(e.currentTarget.scrollHeight, 128)}px`
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
                 ask()
               }
             }}
-            placeholder={ui.ask.placeholder}
-            className="flex-1 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/5 px-4 py-2 text-sm text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 focus:outline-none focus:border-[#7C83FF]/40"
+            placeholder={contextLabel ? ui.ask.placeholder : ui.ask.placeholderGeneral}
+            aria-label={contextLabel ? ui.ask.placeholder : ui.ask.placeholderGeneral}
+            className="max-h-32 min-h-[44px] flex-1 resize-none rounded-2xl border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/5 px-4 py-2.5 text-sm leading-5 text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/35 focus:outline-none focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15"
           />
           <button
             onClick={ask}
