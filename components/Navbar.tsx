@@ -217,12 +217,15 @@ export default function Navbar() {
       >
         <a
           href={isDashboard ? (isStudent ? "/dashboard/workspace" : "/dashboard") : "/"}
-          className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C83FF]"
+          className="shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C83FF]"
         >
           <BrandMark />
         </a>
 
-        <div className="hidden md:flex items-center gap-8">
+        {/* From lg up only: between md and lg the logo, these links and the
+            right-hand controls (with a current patient) did not fit and
+            overlapped, so there they live in the menu below like on phones. */}
+        <div className="hidden lg:flex min-w-0 items-center gap-6 whitespace-nowrap xl:gap-8">
           {!isDashboard &&
             linksBeforeLibrary.map((l) => (
               <a
@@ -376,7 +379,7 @@ export default function Navbar() {
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {currentPatient && (
             <div className="hidden sm:flex items-center gap-1.5 rounded-full pl-1 pr-2 py-1 bg-[#7C83FF]/10 text-[#7C83FF]">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#7C83FF] text-white">
@@ -535,7 +538,7 @@ export default function Navbar() {
             aria-expanded={open}
             aria-controls="mobile-nav-menu"
             onClick={() => setOpen((o) => !o)}
-            className="md:hidden flex h-10 w-10 items-center justify-center rounded-full text-ink dark:text-white"
+            className="lg:hidden flex h-10 w-10 items-center justify-center rounded-full text-ink dark:text-white"
           >
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -562,7 +565,7 @@ export default function Navbar() {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           id="mobile-nav-menu"
-          className="absolute top-16 left-4 right-4 max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain rounded-xl2 border border-black/10 dark:border-white/10 bg-white/[0.97] dark:bg-[#14161c]/[0.97] backdrop-blur-2xl shadow-soft p-4 flex flex-col gap-1 md:hidden"
+          className="absolute top-16 left-4 right-4 max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain rounded-xl2 border border-black/10 dark:border-white/10 bg-white/[0.97] dark:bg-[#14161c]/[0.97] backdrop-blur-2xl shadow-soft p-4 flex flex-col gap-1 lg:hidden"
         >
           {!isDashboard &&
             linksBeforeLibrary.map((l) => (
