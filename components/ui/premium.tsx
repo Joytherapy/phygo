@@ -51,7 +51,7 @@ export const CHIP =
 /** Focus ring and border for inputs. */
 export const INPUT_FOCUS = 'focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15'
 
-/** Aurora, grain and a faint grid behind a page: decoration only. */
+/** Aurora and grain behind a page: decoration only (no grid: it read as rows of rectangles). */
 export function PageBackdrop() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -62,15 +62,6 @@ export function PageBackdrop() {
         style={{
           backgroundImage:
             "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-        }}
-      />
-      <div
-        className="absolute inset-0 hidden opacity-40 dark:block"
-        style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px)',
-          backgroundSize: '56px 56px',
-          maskImage: 'radial-gradient(ellipse at 50% 0%, #000 25%, transparent 70%)',
-          WebkitMaskImage: 'radial-gradient(ellipse at 50% 0%, #000 25%, transparent 70%)',
         }}
       />
     </div>
