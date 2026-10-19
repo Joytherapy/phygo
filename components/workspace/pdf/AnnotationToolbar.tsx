@@ -110,7 +110,7 @@ export default function AnnotationToolbar({
 
   const btn = (active: boolean) =>
     `flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-      active ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+      active ? 'bg-[#7C83FF]/10 text-[#7C83FF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
     }`
 
   const isInkTool = tool === 'pen' || tool === 'line' || tool === 'rect' || tool === 'ellipse'
@@ -222,12 +222,12 @@ export default function AnnotationToolbar({
                 aria-label={`${ui.annotate.thickness} ${w}`}
                 title={`${ui.annotate.thickness} ${w}`}
                 className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                  width === w ? 'bg-[#4F7CFF]/10' : 'hover:bg-ink/5 dark:hover:bg-white/10'
+                  width === w ? 'bg-[#7C83FF]/10' : 'hover:bg-ink/5 dark:hover:bg-white/10'
                 }`}
               >
                 <span
                   className="rounded-full"
-                  style={{ width: Math.max(4, w * 2), height: Math.max(4, w * 2), backgroundColor: width === w ? '#4F7CFF' : 'currentColor', opacity: width === w ? 1 : 0.4 }}
+                  style={{ width: Math.max(4, w * 2), height: Math.max(4, w * 2), backgroundColor: width === w ? '#7C83FF' : 'currentColor', opacity: width === w ? 1 : 0.4 }}
                 />
               </button>
             ))}
@@ -258,12 +258,12 @@ export default function AnnotationToolbar({
                 aria-label={`${ui.annotate.thickness} ${w}`}
                 title={`${ui.annotate.thickness} ${w}`}
                 className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                  markerWidth === w ? 'bg-[#4F7CFF]/10' : 'hover:bg-ink/5 dark:hover:bg-white/10'
+                  markerWidth === w ? 'bg-[#7C83FF]/10' : 'hover:bg-ink/5 dark:hover:bg-white/10'
                 }`}
               >
                 <span
                   className="rounded-sm"
-                  style={{ width: Math.max(6, w * 0.7), height: Math.max(6, w * 0.5), backgroundColor: markerWidth === w ? '#4F7CFF' : 'currentColor', opacity: markerWidth === w ? 1 : 0.4 }}
+                  style={{ width: Math.max(6, w * 0.7), height: Math.max(6, w * 0.5), backgroundColor: markerWidth === w ? '#7C83FF' : 'currentColor', opacity: markerWidth === w ? 1 : 0.4 }}
                 />
               </button>
             ))}
@@ -282,7 +282,7 @@ export default function AnnotationToolbar({
                 aria-label={`${ui.annotate.eraserSize} ${s}`}
                 title={`${ui.annotate.eraserSize} ${s}`}
                 className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                  eraserSize === s ? 'bg-[#4F7CFF]/10' : 'hover:bg-ink/5 dark:hover:bg-white/10'
+                  eraserSize === s ? 'bg-[#7C83FF]/10' : 'hover:bg-ink/5 dark:hover:bg-white/10'
                 }`}
               >
                 <span
@@ -290,7 +290,7 @@ export default function AnnotationToolbar({
                   style={{
                     width: Math.min(22, Math.max(6, s * 0.55)),
                     height: Math.min(22, Math.max(6, s * 0.55)),
-                    borderColor: eraserSize === s ? '#4F7CFF' : 'currentColor',
+                    borderColor: eraserSize === s ? '#7C83FF' : 'currentColor',
                     opacity: eraserSize === s ? 1 : 0.4,
                   }}
                 />
@@ -350,7 +350,7 @@ export default function AnnotationToolbar({
                 aria-label={`${ui.annotate.textSize} ${s}`}
                 title={`${ui.annotate.textSize} ${s}`}
                 className={`flex h-8 w-8 items-center justify-center rounded-lg font-medium transition-colors ${
-                  textFontSize === s ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+                  textFontSize === s ? 'bg-[#7C83FF]/10 text-[#7C83FF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
                 }`}
                 style={{ fontSize: Math.min(18, Math.max(9, s * 0.7)) }}
               >

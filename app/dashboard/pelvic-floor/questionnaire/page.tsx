@@ -62,7 +62,7 @@ export default function PelvicFloorQuestionnairePage() {
 
   if (loadError) {
     return (
-      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white transition-colors">
+      <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white transition-colors">
         <Navbar />
         <div className="relative max-w-2xl mx-auto px-6 pt-40 pb-24">
           <p className="text-center text-sm text-red-500 py-10">{ui.pelvicFloorAnamnesis.errorLoading}</p>
@@ -73,7 +73,7 @@ export default function PelvicFloorQuestionnairePage() {
 
   if (!data) {
     return (
-      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white transition-colors">
+      <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white transition-colors">
         <Navbar />
         <div className="relative max-w-2xl mx-auto px-6 pt-40 pb-24">
           <p className="text-center text-sm text-ink/60 dark:text-white/50 py-10">{ui.pelvicFloorAnamnesis.loading}</p>
@@ -110,7 +110,7 @@ export default function PelvicFloorQuestionnairePage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -271,7 +271,7 @@ export default function PelvicFloorQuestionnairePage() {
               {sections.map((s) => (
                 <div
                   key={s.key}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                  className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5"
                 >
                   <p className="text-sm font-bold text-ink dark:text-white mb-3">{s.title}</p>
                   <div className="space-y-2">

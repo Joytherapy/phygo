@@ -155,7 +155,7 @@ export default function WorkspaceTrashPage() {
               key={f.id}
               className="flex items-center gap-3 rounded-xl2 border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3.5"
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#4F7CFF]/10 text-[#4F7CFF]">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75">
                 <Folder size={15} />
               </span>
               <p className="min-w-0 flex-1 text-sm font-medium text-ink dark:text-white truncate">{f.name}</p>
@@ -174,7 +174,7 @@ export default function WorkspaceTrashPage() {
               key={nb.id}
               className="flex items-center gap-3 rounded-xl2 border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3.5"
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#4F7CFF]/10 text-[#4F7CFF]">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75">
                 <BookOpen size={15} />
               </span>
               <p className="min-w-0 flex-1 text-sm font-medium text-ink dark:text-white truncate">{nb.name}</p>
@@ -193,7 +193,7 @@ export default function WorkspaceTrashPage() {
               key={d.id}
               className="flex items-center gap-3 rounded-xl2 border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3.5"
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#32D6A0]/10 text-[#32D6A0]">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75">
                 <FileText size={15} />
               </span>
               <p className="min-w-0 flex-1 text-sm font-medium text-ink dark:text-white truncate">{d.name}</p>

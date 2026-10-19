@@ -271,7 +271,7 @@ export default function TextAnnotationLayer({
           // when the user picked one from the toolbar.
           onPointerDown={handleDraftPointerDown}
           className={`absolute rounded-lg backdrop-blur-sm ${
-            backgroundColor ? 'border border-[#4F7CFF]/40 shadow-lift' : 'border border-dashed border-[#4F7CFF]/50'
+            backgroundColor ? 'border border-[#7C83FF]/40 shadow-lift' : 'border border-dashed border-[#7C83FF]/50'
           }`}
           style={{
             left: `${draft.x * 100}%`,

@@ -58,11 +58,11 @@ export default function ScienceAdminPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
       <div className="relative max-w-4xl mx-auto pt-40 pb-20 px-6">
-        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#4F7CFF] mb-3">
+        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#7C83FF] mb-3">
           Admin
         </p>
         <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white mb-2">
@@ -85,7 +85,7 @@ export default function ScienceAdminPage() {
             {papers.map((paper) => (
               <div
                 key={paper.id}
-                className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5"
               >
                 <div className="flex items-center gap-2 mb-2">
                   {paper.study_type && (
@@ -111,8 +111,7 @@ export default function ScienceAdminPage() {
                   <button
                     onClick={() => handleAction(paper.id, 'approve')}
                     disabled={processingId === paper.id}
-                    className="rounded-full px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
-                    style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                    className="rounded-full px-4 py-2 text-xs font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 disabled:opacity-50"
                   >
                     Approve
                   </button>
@@ -123,7 +122,7 @@ export default function ScienceAdminPage() {
                   >
                     Reject
                   </button>
-                  <a href={paper.original_url} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-[#4F7CFF] hover:underline ml-auto">
+                  <a href={paper.original_url} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-[#7C83FF] hover:underline ml-auto">
                     View original
                   </a>
                 </div>

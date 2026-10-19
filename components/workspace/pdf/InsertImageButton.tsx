@@ -138,7 +138,7 @@ export default function InsertImageButton({ onInsert }: { onInsert: (data: Image
         aria-label={ui.annotate.insertImage}
         title={ui.annotate.insertImage}
         className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-          menuOpen ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+          menuOpen ? 'bg-[#7C83FF]/10 text-[#7C83FF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
         } disabled:opacity-50`}
       >
         {busy ? <Loader2 size={15} className="animate-spin" /> : <ImagePlus size={15} />}

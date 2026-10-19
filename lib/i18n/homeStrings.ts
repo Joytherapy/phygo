@@ -51,6 +51,17 @@ interface HomeDict {
   daysAgo: (n: number) => string
   newPatientTitle: string
   newPatientHint: string
+  videoCall: string
+  startVideoCall: string
+  videoCallWith: (name: string) => string
+  videoNeedsPortal: string
+  callNotes: string
+  callNotesHint: string
+  showNotes: string
+  hideNotes: string
+  privateRoom: string
+  sessionNote: string
+  patientRecord: string
 }
 
 const it: HomeDict = {
@@ -96,6 +107,17 @@ const it: HomeDict = {
   daysAgo: (n) => (n === 0 ? 'Oggi' : n === 1 ? 'Ieri' : `${n} giorni fa`),
   newPatientTitle: 'Nuovo paziente',
   newPatientHint: "Indirizzo, contatto d'emergenza e informazioni cliniche si completano nella scheda del paziente.",
+  videoCall: 'Videochiamata',
+  startVideoCall: 'Avvia videochiamata',
+  videoCallWith: (name) => `Videochiamata con ${name}`,
+  videoNeedsPortal: 'Per la videochiamata il paziente deve prima entrare in My Phygo: invialo dal pulsante qui sotto.',
+  callNotes: 'Appunti della seduta',
+  callNotesHint: 'Detta o scrivi mentre parli con il paziente: la nota viene strutturata e salvata nella sua scheda.',
+  showNotes: 'Mostra appunti',
+  hideNotes: 'Nascondi appunti',
+  privateRoom: 'Stanza privata',
+  sessionNote: 'Nota di sessione',
+  patientRecord: 'Scheda paziente',
 }
 
 const en: HomeDict = {
@@ -141,6 +163,17 @@ const en: HomeDict = {
   daysAgo: (n) => (n === 0 ? 'Today' : n === 1 ? 'Yesterday' : `${n} days ago`),
   newPatientTitle: 'New patient',
   newPatientHint: 'Address, emergency contact and clinical information are completed on the patient record.',
+  videoCall: 'Video call',
+  startVideoCall: 'Start video call',
+  videoCallWith: (name) => `Video call with ${name}`,
+  videoNeedsPortal: 'For a video call the patient must first join My Phygo: invite them with the button below.',
+  callNotes: 'Session notes',
+  callNotesHint: "Dictate or type while you talk with the patient: the note is structured and saved to their record.",
+  showNotes: 'Show notes',
+  hideNotes: 'Hide notes',
+  privateRoom: 'Private room',
+  sessionNote: 'Session note',
+  patientRecord: 'Patient record',
 }
 
 const es: HomeDict = {
@@ -186,6 +219,17 @@ const es: HomeDict = {
   daysAgo: (n) => (n === 0 ? 'Hoy' : n === 1 ? 'Ayer' : `Hace ${n} días`),
   newPatientTitle: 'Nuevo paciente',
   newPatientHint: 'La dirección, el contacto de emergencia y la información clínica se completan en la ficha del paciente.',
+  videoCall: 'Videollamada',
+  startVideoCall: 'Iniciar videollamada',
+  videoCallWith: (name) => `Videollamada con ${name}`,
+  videoNeedsPortal: 'Para la videollamada, el paciente debe unirse primero a My Phygo: invítalo con el botón de abajo.',
+  callNotes: 'Notas de la sesión',
+  callNotesHint: 'Dicta o escribe mientras hablas con el paciente: la nota se estructura y se guarda en su ficha.',
+  showNotes: 'Mostrar notas',
+  hideNotes: 'Ocultar notas',
+  privateRoom: 'Sala privada',
+  sessionNote: 'Nota de sesión',
+  patientRecord: 'Ficha del paciente',
 }
 
 const fr: HomeDict = {
@@ -231,6 +275,17 @@ const fr: HomeDict = {
   daysAgo: (n) => (n === 0 ? "Aujourd'hui" : n === 1 ? 'Hier' : `Il y a ${n} jours`),
   newPatientTitle: 'Nouveau patient',
   newPatientHint: "L'adresse, le contact d'urgence et les informations cliniques se complètent dans la fiche du patient.",
+  videoCall: 'Visioconférence',
+  startVideoCall: 'Démarrer la visio',
+  videoCallWith: (name) => `Visioconférence avec ${name}`,
+  videoNeedsPortal: "Pour la visio, le patient doit d'abord rejoindre My Phygo : invitez-le avec le bouton ci-dessous.",
+  callNotes: 'Notes de séance',
+  callNotesHint: 'Dictez ou écrivez pendant que vous parlez au patient : la note est structurée et enregistrée dans sa fiche.',
+  showNotes: 'Afficher les notes',
+  hideNotes: 'Masquer les notes',
+  privateRoom: 'Salle privée',
+  sessionNote: 'Note de séance',
+  patientRecord: 'Dossier patient',
 }
 
 export const HOME_STRINGS: Record<AppLang, HomeDict> = { it, en, es, fr }

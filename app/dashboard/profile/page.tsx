@@ -11,6 +11,7 @@ import VerificationBadge from '@/components/VerificationBadge'
 import { useUiStrings } from '@/contexts/LanguageContext'
 import { useRoleUi, type PracticeStage } from '@/lib/i18n/roleStrings'
 import { lazy } from '@/lib/lazy'
+import { PageBackdrop } from '@/components/ui/premium'
 
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -156,7 +157,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b]">
+      <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608]">
         <Navbar />
         <div className="pt-40 text-center text-ink/55 dark:text-white/40">{common.loading}</div>
       </div>
@@ -164,13 +165,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
-        style={{ background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)' }}
-      />
+      <PageBackdrop />
 
       <div className="relative max-w-2xl mx-auto pt-40 pb-24 px-6">
         <motion.button
@@ -189,8 +187,8 @@ export default function ProfilePage() {
           transition={{ duration: 0.5 }}
           className="mb-10"
         >
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-[#4F7CFF]/20 dark:border-[#4F7CFF]/25 bg-gradient-to-r from-[#4F7CFF]/[0.07] to-[#32D6A0]/[0.07] backdrop-blur-xl text-[11px] font-semibold tracking-[0.15em] uppercase mb-3">
-            <span className="bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] bg-clip-text text-transparent">{t.eyebrow}</span>
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-[#7C83FF]/20 dark:border-[#7C83FF]/25 bg-gradient-to-r from-[#7C83FF]/[0.07] to-[#A78BFA]/[0.07] backdrop-blur-xl text-[11px] font-semibold tracking-[0.15em] uppercase mb-3">
+            <span className="bg-gradient-to-r from-[#7C83FF] to-[#A78BFA] bg-clip-text text-transparent">{t.eyebrow}</span>
           </div>
           <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white">
             {t.heading}
@@ -211,7 +209,7 @@ export default function ProfilePage() {
             ) : (
               <div
                 className="flex h-20 w-20 items-center justify-center rounded-full text-white text-xl font-bold shadow-lg"
-                style={{ background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' }}
               >
                 {getInitials(displayName)}
               </div>
@@ -219,7 +217,7 @@ export default function ProfilePage() {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingAvatar}
-              className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-[#12131a] border border-black/10 dark:border-white/10 shadow-md text-ink/60 dark:text-white/60 hover:text-[#4F7CFF] transition-colors"
+              className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-[#12131a] border border-black/10 dark:border-white/10 shadow-md text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white transition-colors"
             >
               {uploadingAvatar ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
             </button>
@@ -254,7 +252,7 @@ export default function ProfilePage() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder={t.displayNamePlaceholder}
-              className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+              className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15 text-ink dark:text-white"
             />
           </div>
 
@@ -267,7 +265,7 @@ export default function ProfilePage() {
               onChange={(e) => setBio(e.target.value)}
               rows={4}
               placeholder={t.bioPlaceholder}
-              className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white resize-none"
+              className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15 text-ink dark:text-white resize-none"
             />
           </div>
 
@@ -292,7 +290,7 @@ export default function ProfilePage() {
                   key={c.id}
                   className="flex items-center gap-3 rounded-xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] px-4 py-2.5"
                 >
-                  <Award size={14} className="text-[#4F7CFF] shrink-0" />
+                  <Award size={14} className="text-[#7C83FF] shrink-0" />
                   <span className="text-sm text-ink dark:text-white flex-1">{c.label}</span>
                   <button
                     onClick={() => removeCredential(c.id)}
@@ -310,11 +308,11 @@ export default function ProfilePage() {
                 onChange={(e) => setNewCredential(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addCredential()}
                 placeholder={t.credentialPlaceholder}
-                className="flex-1 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-2.5 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+                className="flex-1 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-2.5 text-sm outline-none transition focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15 text-ink dark:text-white"
               />
               <button
                 onClick={addCredential}
-                className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold text-[#4F7CFF] border border-[#4F7CFF]/30 hover:bg-[#4F7CFF]/10 transition-colors"
+                className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold text-[#7C83FF] border border-[#7C83FF]/30 hover:bg-[#7C83FF]/10 transition-colors"
               >
                 <Plus size={14} />
                 {t.add}
@@ -334,7 +332,7 @@ export default function ProfilePage() {
                 <button
                   onClick={() => setConfirmingActivate(true)}
                   className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white shadow-soft transition-transform hover:scale-[1.02]"
-                  style={{ background: 'linear-gradient(90deg, #32D6A0 0%, #4F7CFF 100%)' }}
+                  style={{ background: 'linear-gradient(90deg, #A78BFA 0%, #7C83FF 100%)' }}
                 >
                   <GraduationCap size={14} />
                   {roleUi.transition.cta}
@@ -348,7 +346,7 @@ export default function ProfilePage() {
                       onClick={handleActivateProfessional}
                       disabled={activating}
                       className="flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white disabled:opacity-60"
-                      style={{ background: 'linear-gradient(90deg, #32D6A0 0%, #4F7CFF 100%)' }}
+                      style={{ background: 'linear-gradient(90deg, #A78BFA 0%, #7C83FF 100%)' }}
                     >
                       {activating && <Loader2 size={12} className="animate-spin" />}
                       {roleUi.transition.confirm}
@@ -376,8 +374,7 @@ export default function ProfilePage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-[1.01] disabled:opacity-60"
-            style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+            className="w-full flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 transition-transform hover:scale-[1.01] disabled:opacity-60"
           >
             {saving && <Loader2 size={14} className="animate-spin" />}
             {saved && <Check size={14} />}

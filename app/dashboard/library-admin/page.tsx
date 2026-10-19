@@ -122,11 +122,11 @@ export default function LibraryAdminPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] transition-colors">
       <Navbar />
 
       <div className="relative max-w-3xl mx-auto pt-40 pb-24 px-6">
-        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#4F7CFF] mb-3">Admin</p>
+        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#7C83FF] mb-3">Admin</p>
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white mb-2">
@@ -136,8 +136,7 @@ export default function LibraryAdminPage() {
           </div>
           <button
             onClick={() => setEditing(emptyItem())}
-            className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white"
-            style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+            className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90"
           >
             <Plus size={16} /> New item
           </button>
@@ -261,8 +260,7 @@ export default function LibraryAdminPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="mt-5 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-              style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+              className="mt-5 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 disabled:opacity-50"
             >
               <Save size={16} /> {saving ? 'Saving…' : 'Save item'}
             </button>
@@ -276,7 +274,7 @@ export default function LibraryAdminPage() {
             {items.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4"
+                className="flex items-center justify-between rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-4"
               >
                 <div>
                   <p className="text-sm font-semibold text-ink dark:text-white">{item.title}</p>
@@ -287,7 +285,7 @@ export default function LibraryAdminPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setEditing(item)}
-                    className="text-xs font-semibold text-[#4F7CFF] hover:underline"
+                    className="text-xs font-semibold text-[#7C83FF] hover:underline"
                   >
                     Edit
                   </button>

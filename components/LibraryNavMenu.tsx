@@ -99,7 +99,7 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={navUi.searchPlaceholder}
-          className="w-full rounded-lg border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/5 pl-8 pr-3 py-1.5 text-xs text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 outline-none focus:border-[#4F7CFF]/40 transition-colors"
+          className="w-full rounded-lg border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/5 pl-8 pr-3 py-1.5 text-xs text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 outline-none focus:border-[#7C83FF]/40 transition-colors"
         />
       </div>
 

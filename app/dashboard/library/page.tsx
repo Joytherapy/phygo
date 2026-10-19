@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Search, Lock } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ClinicalActionBar from '@/components/ClinicalActionBar';
+import { PageBackdrop } from '@/components/ui/premium'
 
 interface Step {
   label: string;
@@ -43,7 +44,7 @@ interface Category {
 
 const levelColor: Record<string, string> = {
   Gentle: '#32D6A0',
-  Active: '#4F7CFF',
+  Active: '#7C83FF',
   Challenge: '#A855F7',
 };
 
@@ -94,7 +95,7 @@ export default function LibraryPage() {
 
   if (forbidden) {
     return (
-      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] transition-colors">
+      <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] transition-colors">
         <Navbar />
         <div className="relative max-w-lg mx-auto pt-48 pb-24 px-6 text-center">
           <Lock size={32} className="mx-auto mb-4 text-ink/30 dark:text-white/30" />
@@ -110,21 +111,18 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
-        style={{ background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)' }}
-      />
+      <PageBackdrop />
 
       <div className="relative max-w-5xl mx-auto pt-40 pb-24 px-6">
-         <div className="inline-flex items-center gap-2 rounded-full border border-[#4F7CFF]/20 bg-[#4F7CFF]/10 px-3.5 py-1.5 mb-5">
-          <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }} />
-<p className="text-xs font-semibold tracking-[0.15em] uppercase text-[#4F7CFF]">Members Only</p>
+         <div className="inline-flex items-center gap-2 rounded-full border border-[#7C83FF]/20 bg-[#7C83FF]/10 px-3.5 py-1.5 mb-5">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' }} />
+<p className="text-xs font-semibold tracking-[0.15em] uppercase text-[#7C83FF]">Members Only</p>
         </div>
         <h1 className="font-display text-6xl font-bold tracking-tight mb-3 text-ink dark:text-white">
-          Pro <span style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Library</span>
+          Pro <span style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Library</span>
         </h1>
         <p className="text-base text-ink/60 dark:text-white/50 mb-8 max-w-lg">
           Curated, clinically structured content — ready to bring straight into a session.
@@ -147,7 +145,7 @@ export default function LibraryPage() {
                   }`}
                   style={
                     activeCategory === cat.id
-                      ? { background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }
+                      ? { background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' }
                       : {}
                   }
                 >
@@ -164,7 +162,7 @@ export default function LibraryPage() {
                     onClick={() => setActiveSubcategory(sub.id)}
                     className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold border transition-colors ${
                       activeSubcategory === sub.id
-                        ? 'border-[#4F7CFF] text-[#4F7CFF] bg-[#4F7CFF]/10'
+                        ? 'border-[#7C83FF] text-[#7C83FF] bg-[#7C83FF]/10'
                         : 'border-black/10 dark:border-white/15 text-ink/60 dark:text-white/50'
                     }`}
                   >
@@ -175,15 +173,15 @@ export default function LibraryPage() {
             )}
 
             <div className="relative mb-6">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none flex items-center justify-center h-6 w-6 rounded-full bg-[#4F7CFF]/15">
-                <Search size={14} strokeWidth={2.5} className="text-[#4F7CFF]" />
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none flex items-center justify-center h-6 w-6 rounded-full bg-[#7C83FF]/15">
+                <Search size={14} strokeWidth={2.5} className="text-[#7C83FF]" />
               </div>
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search items…"
-                className="relative w-full text-sm rounded-full border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] pl-14 pr-4 py-3.5 outline-none focus:border-[#4F7CFF] text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40"
+                className="relative w-full text-sm rounded-full border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] pl-14 pr-4 py-3.5 outline-none focus:border-[#7C83FF] text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40"
               />
             </div>
 
@@ -191,7 +189,7 @@ export default function LibraryPage() {
               {filteredItems.map((item) => (
                 <div
                   key={item.id}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl hover:border-[#4F7CFF]/40 transition-colors"
+                  className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] hover:border-black/15 dark:hover:border-white/20 transition-colors"
                 >
                   <button
                     onClick={() => setOpenItem(item)}
@@ -210,7 +208,7 @@ export default function LibraryPage() {
                     <div className="p-5 pb-3">
                       <span
                         className="inline-block text-xs px-2.5 py-1 rounded-full text-white font-medium mb-2"
-                        style={{ background: levelColor[item.level] || '#4F7CFF' }}
+                        style={{ background: levelColor[item.level] || '#7C83FF' }}
                       >
                         {item.level}
                       </span>
@@ -253,7 +251,7 @@ export default function LibraryPage() {
             )}
             <span
               className="inline-block text-xs px-2.5 py-1 rounded-full text-white font-medium mb-3"
-              style={{ background: levelColor[openItem.level] || '#4F7CFF' }}
+              style={{ background: levelColor[openItem.level] || '#7C83FF' }}
             >
               {openItem.level}
             </span>

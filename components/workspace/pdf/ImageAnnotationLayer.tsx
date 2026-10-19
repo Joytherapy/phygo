@@ -210,7 +210,7 @@ export default function ImageAnnotationLayer({
                 <div
                   onPointerDown={(e) => handleResizeStart(e, a)}
                   aria-label="Resize"
-                  className="absolute -bottom-1.5 -right-1.5 h-3.5 w-3.5 cursor-nwse-resize rounded-full border-2 border-white dark:border-[#0c0d12] bg-[#4F7CFF] opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute -bottom-1.5 -right-1.5 h-3.5 w-3.5 cursor-nwse-resize rounded-full border-2 border-white dark:border-[#0c0d12] bg-[#7C83FF] opacity-0 group-hover:opacity-100 transition-opacity"
                   style={{ touchAction: 'none' }}
                 />
               </>

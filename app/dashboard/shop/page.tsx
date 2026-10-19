@@ -17,6 +17,7 @@ import Navbar from '@/components/Navbar'
 import ClinicalActionBar from '@/components/ClinicalActionBar'
 import { getProducts, categories, type Product } from '@/lib/products'
 import { useUiStrings, useLanguage } from '@/contexts/LanguageContext'
+import { PageBackdrop } from '@/components/ui/premium'
 
 const CATEGORY_STYLE: Record<Product['category'], { icon: any; gradient: string; glow: string }> = {
   'Pelvic Floor': {
@@ -26,8 +27,8 @@ const CATEGORY_STYLE: Record<Product['category'], { icon: any; gradient: string;
   },
   'Low Back': {
     icon: ShieldHalf,
-    gradient: 'linear-gradient(135deg, #4F7CFF 0%, #6E8FFF 100%)',
-    glow: 'rgba(79,124,255,0.25)',
+    gradient: 'linear-gradient(135deg, #7C83FF 0%, #6E8FFF 100%)',
+    glow: 'rgba(124,131,255,0.25)',
   },
   Posture: {
     icon: PersonStanding,
@@ -73,13 +74,10 @@ export default function ShopPage() {
   const countFor = (cat: string) => products.filter((p) => p.category === cat).length
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] rounded-full opacity-20 dark:opacity-25 blur-[160px]"
-        style={{ background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(244,114,182,0.4) 50%, rgba(50,214,160,0.5) 100%)' }}
-      />
+      <PageBackdrop />
 
       <div className="relative max-w-5xl mx-auto pt-40 pb-24 px-6">
         <motion.div
@@ -92,22 +90,22 @@ export default function ShopPage() {
             <div className="flex items-center gap-2 mb-3">
               <span
                 className="h-1.5 w-1.5 rounded-full animate-pulse"
-                style={{ background: 'linear-gradient(90deg, #4F7CFF, #32D6A0)' }}
+                style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' }}
               />
-              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-[#4F7CFF]">
+              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-[#7C83FF]">
                 {ui.shop.eyebrow}
               </p>
             </div>
             <h1 className="font-display text-5xl font-bold tracking-tight leading-none text-ink dark:text-white">
               {ui.shop.heading}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]">.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7C83FF] to-[#A78BFA]">.</span>
             </h1>
             <p className="text-base text-ink/55 dark:text-white/40 mt-3 max-w-md">
               {ui.shop.subtitle}
             </p>
           </div>
           <div className="flex items-center gap-2 rounded-full border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl px-4 py-2.5">
-            <Sparkles size={13} className="text-[#4F7CFF]" />
+            <Sparkles size={13} className="text-[#7C83FF]" />
             <span className="text-xs font-semibold text-ink/60 dark:text-white/60">
               {products.length} {ui.shop.curatedPicksSuffix}
             </span>
@@ -119,10 +117,10 @@ export default function ShopPage() {
             onClick={() => setActiveCategory(null)}
             className={`shrink-0 rounded-full px-5 py-2.5 text-xs font-semibold transition-all ${
               activeCategory === null
-                ? 'text-white shadow-[0_6px_16px_rgba(79,124,255,0.35)] scale-[1.03]'
+                ? 'text-white shadow-[0_6px_16px_rgba(124,131,255,0.35)] scale-[1.03]'
                 : 'text-ink/60 dark:text-white/60 bg-black/[0.04] dark:bg-white/5 hover:bg-black/[0.07] dark:hover:bg-white/10'
             }`}
-            style={activeCategory === null ? { background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
+            style={activeCategory === null ? { background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' } : undefined}
           >
             {ui.shop.allLabel} · {products.length}
           </button>

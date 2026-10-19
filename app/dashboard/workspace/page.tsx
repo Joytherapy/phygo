@@ -320,9 +320,9 @@ export default function WorkspaceHomePage() {
               </h2>
               <Link
                 href={`/dashboard/workspace/document/${continueDoc.id}`}
-                className="rounded-[28px] border border-[#4F7CFF]/20 bg-gradient-to-br from-[#4F7CFF]/[0.06] to-[#32D6A0]/[0.06] p-4 sm:p-6 flex items-center gap-4 sm:gap-5 hover:border-[#4F7CFF]/40 transition-colors"
+                className="rounded-[28px] border border-[#7C83FF]/20 bg-gradient-to-br from-[#7C83FF]/[0.06] to-[#A78BFA]/[0.06] p-4 sm:p-6 flex items-center gap-4 sm:gap-5 hover:border-black/15 dark:hover:border-white/20 transition-colors"
               >
-                <span className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-white dark:bg-white/10 text-[#4F7CFF] shadow-soft">
+                <span className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-white dark:bg-white/10 text-[#7C83FF] shadow-soft">
                   <FileText size={22} />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -333,7 +333,7 @@ export default function WorkspaceHomePage() {
                       : ui.item.lastOpened}
                   </p>
                 </div>
-                <span className="shrink-0 rounded-full px-4 py-2 text-xs font-semibold text-white" style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }} aria-hidden>
+                <span className="shrink-0 rounded-full px-4 py-2 text-xs font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90"  aria-hidden>
                   {ui.item.open}
                 </span>
               </Link>

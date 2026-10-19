@@ -232,7 +232,7 @@ export default function HematologyPage() {
       : rehab.some(matchesRehab);
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -410,7 +410,7 @@ export default function HematologyPage() {
                   <button
                     key={c.id}
                     onClick={() => setSelectedCondition(c)}
-                    className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-colors hover:border-[#E11D48]/40"
+                    className="text-left rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 transition-colors hover:border-[#E11D48]/40"
                   >
                     <p className="text-sm font-semibold text-ink dark:text-white mb-2">{c.condition_name}</p>
                     <EvidenceBadge level={c.evidence_level} />
@@ -456,7 +456,7 @@ export default function HematologyPage() {
                         {items.map((t) => (
                           <div
                             key={t.id}
-                            className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                            className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{t.name}</p>
                             {t.procedure && (
@@ -515,7 +515,7 @@ export default function HematologyPage() {
                         {items.map((r) => (
                           <div
                             key={r.id}
-                            className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                            className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{r.name}</p>
                             {r.description && (

@@ -68,7 +68,7 @@ export default function WorkspaceHeader({
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={ui.search.placeholder}
-          className="w-full max-w-sm rounded-full border border-black/10 dark:border-white/10 bg-white/90 dark:bg-white/[0.03] pl-9 pr-4 py-2.5 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+          className="w-full max-w-sm rounded-full border border-black/10 dark:border-white/10 bg-white/90 dark:bg-white/[0.03] pl-9 pr-4 py-2.5 text-sm outline-none transition focus:border-[#7C83FF] focus:ring-4 focus:ring-[#7C83FF]/10 text-ink dark:text-white"
         />
       </div>
 

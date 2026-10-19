@@ -63,7 +63,7 @@ export default function VerificationAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f7f9] dark:bg-[#08090b]">
+    <div className="min-h-screen bg-[#f7f7f8] dark:bg-[#050608]">
       <Navbar />
       <main id="main-content" className="mx-auto max-w-4xl px-4 pb-20 pt-28">
         <h1 className="text-2xl font-semibold text-ink dark:text-white">Professional verification requests</h1>

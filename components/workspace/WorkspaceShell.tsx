@@ -66,7 +66,7 @@ export default function WorkspaceShell({
           PHYGO blue→green to a Student cyan→violet via html[data-role] — the
           main visible "stacco" between Student and Professional, since this
           shell is the Student home surface. color-mix reproduces the exact
-          original rgba(79,124,255,0.5)/rgba(50,214,160,0.4) look for
+          original rgba(124,131,255,0.5)/rgba(167,139,250,0.4) look for
           Professional (unchanged), just parameterized by the CSS vars.
           A second, smaller and more saturated orb layers underneath for a
           richer, less flat "premium" depth than a single soft blur. */}

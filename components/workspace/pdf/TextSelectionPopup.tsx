@@ -194,7 +194,7 @@ export default function TextSelectionPopup({
           setPopup(null)
         }}
         className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-white transition-transform hover:scale-105"
-        style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+        style={{ background: 'linear-gradient(90deg, #7C83FF 0%, #A78BFA 100%)' }}
       >
         <BookOpen size={12} />
         {ui.studyPanel.explore}

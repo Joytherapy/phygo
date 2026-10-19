@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Plus, FileText, Calendar, Activity, Stethoscope, ClipboardList, Smartphone, Copy, Check, RotateCcw, Dumbbell, ClipboardCheck, MapPin, ShoppingBag, X, ChevronRight, Sparkles, Flame, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { ArrowLeft, Plus, FileText, Calendar, Activity, Stethoscope, ClipboardList, Smartphone, Copy, Check, RotateCcw, Dumbbell, ClipboardCheck, MapPin, ShoppingBag, X, ChevronRight, UserRound, Sparkles, Flame, TrendingUp, TrendingDown, Minus, Video } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
 import { useClinicalLocked } from '@/lib/useClinicalAccess'
@@ -17,6 +17,9 @@ import type { AdaptiveInsightResult } from '@/lib/metabolicCalculator'
 import { lazy } from '@/lib/lazy'
 import PatientProfileCard from '@/components/patients/PatientProfileCard'
 import { displayAge, type PatientIdentity } from '@/lib/patients/profile'
+import { PageBackdrop, PageEyebrow, PAGE_BG, PRIMARY_BTN, SECONDARY_BTN, CHIP, ICON_TILE } from '@/components/ui/premium'
+import { Avatar, Card } from '@/components/dashboard/HomeCards'
+import { useHomeUi } from '@/lib/i18n/homeStrings'
 
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,12 +32,6 @@ type Patient = PatientIdentity & {
   id: string
   created_at: string
   patient_user_id: string | null
-}
-
-const avatarGradient = (gender: string | null) => {
-  if (gender === 'male') return 'linear-gradient(135deg, #4F7CFF 0%, #6E8FFF 100%)'
-  if (gender === 'female') return 'linear-gradient(135deg, #F472B6 0%, #C084FC 100%)'
-  return 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)'
 }
 
 
@@ -93,9 +90,9 @@ type ClinicalReference = {
 }
 
 const REFERENCE_TYPE_META: Record<ClinicalReferenceType, { icon: typeof Activity; color: string }> = {
-  exercise: { icon: Dumbbell, color: '#32D6A0' },
-  clinical_test: { icon: ClipboardCheck, color: '#4F7CFF' },
-  questionnaire: { icon: ClipboardList, color: '#F59E0B' },
+  exercise: { icon: Dumbbell, color: '#8B95FF' },
+  clinical_test: { icon: ClipboardCheck, color: '#A78BFA' },
+  questionnaire: { icon: ClipboardList, color: '#94A3B8' },
   condition: { icon: Stethoscope, color: '#EC4899' },
   anatomical_zone: { icon: MapPin, color: '#A855F7' },
   product: { icon: ShoppingBag, color: '#6366F1' },
@@ -139,12 +136,6 @@ const getReferenceHref = (ref: ClinicalReference): string | null => {
 const formatRefDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 
-const getInitials = (name: string) => {
-  const parts = name.trim().split(/\s+/)
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-}
-
 const formatSince = (dateStr: string, ui: ReturnType<typeof useUiStrings>) => {
   const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24))
   if (days < 1) return ui.patients.sinceToday
@@ -166,6 +157,7 @@ const generateInviteCode = () => {
 
 export default function PatientDetailPage() {
   const ui = useUiStrings()
+  const h = useHomeUi()
   const params = useParams()
   const router = useRouter()
   const locked = useClinicalLocked()
@@ -335,7 +327,7 @@ export default function PatientDetailPage() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b]">
+      <div className={`relative min-h-screen ${PAGE_BG}`}>
         <Navbar />
         <div className="pt-40 text-center text-ink/55 dark:text-white/40">{ui.common.loading}</div>
       </div>
@@ -344,7 +336,7 @@ export default function PatientDetailPage() {
 
   if (!patient) {
     return (
-      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b]">
+      <div className={`relative min-h-screen ${PAGE_BG}`}>
         <Navbar />
         <div className="pt-40 text-center text-ink/55 dark:text-white/40">{ui.patients.patientNotFound}</div>
       </div>
@@ -354,23 +346,9 @@ export default function PatientDetailPage() {
   const lastSessionDate = notes.length > 0 ? new Date(notes[0].created_at) : null
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className={`relative min-h-screen overflow-hidden transition-colors ${PAGE_BG}`}>
       <Navbar />
-
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
-        style={{
-          background: 'radial-gradient(circle, rgba(79,124,255,0.6)0%, rgba(50,214,160,0.5) 100%)',
-        }}
-      />
-
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.06]"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-        }}
-      />
+      <PageBackdrop />
 
       <div className="relative max-w-4xl mx-auto pt-40 pb-20 px-6">
         <motion.button
@@ -391,15 +369,11 @@ export default function PatientDetailPage() {
           transition={{ duration: 0.5 }}
           className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-8"
         >
-          <div className="flex items-center gap-4">
-            <div
-              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-white text-lg font-bold shadow-[0_8px_24px_rgba(79,124,255,0.35)]"
-              style={{ background: avatarGradient(patient.gender) }}
-            >
-              {getInitials(patient.name)}
-            </div>
-            <div>
-              <h1 className="font-display text-3xl font-bold tracking-tight text-ink dark:text-white">
+          <div className="flex min-w-0 items-center gap-4">
+            <Avatar name={patient.name} linked={!!patient.patient_user_id} size={72} />
+            <div className="min-w-0">
+              <PageEyebrow icon={UserRound}>{h.patientRecord}</PageEyebrow>
+              <h1 className="mt-1.5 break-words font-display text-3xl font-semibold tracking-[-0.035em] text-ink dark:text-white sm:text-[40px] sm:leading-[1.1]">
                 {patient.name}
               </h1>
               <div className="flex items-center gap-2 mt-2 flex-wrap">
@@ -409,14 +383,14 @@ export default function PatientDetailPage() {
                   </span>
                 )}
                 {patient.main_condition && (
-                  <span className="inline-flex items-center gap-1.5rounded-full bg-[#4F7CFF]/10 px-3 py-1 text-xs font-semibold text-[#4F7CFF]">
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${CHIP}`}>
                     <Stethoscope size={11} />
                     {patient.main_condition}
                   </span>
                 )}
                 {patient.patient_user_id && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                    <Smartphone size={11} />
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${CHIP}`}>
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                     {ui.patients.portalActive}
                   </span>
                 )}
@@ -428,16 +402,25 @@ export default function PatientDetailPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => router.push('/dashboard/agenda')}
-                className="flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10 hover:border-[#4F7CFF]/40 transition-colors"
+                className={`flex min-h-[46px] items-center gap-2 rounded-2xl px-4 text-sm font-semibold transition-colors ${SECONDARY_BTN}`}
               >
                 <Calendar size={16} />
                 {ui.patients.scheduleButton}
               </button>
+              {patient.patient_user_id && (
+                <button
+                  onClick={() => router.push(`/dashboard/patients/${patientId}/call`)}
+                  disabled={locked}
+                  className={`flex min-h-[46px] items-center gap-2 rounded-2xl px-4 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${SECONDARY_BTN}`}
+                >
+                  <Video size={16} />
+                  {h.videoCall}
+                </button>
+              )}
               <button
                 onClick={() => router.push(`/dashboard/patients/${patientId}/session`)}
                 disabled={locked}
-                className="flex-1 flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                className="flex-1 flex min-h-[46px] items-center justify-center gap-2 rounded-2xl px-6 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 <Plus size={16} />
                 {ui.patients.generateNewNoteButton}
@@ -448,7 +431,7 @@ export default function PatientDetailPage() {
               <button
                 onClick={handleInvite}
                 disabled={inviteLoading || locked}
-                className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold border border-black/10 dark:border-white/10 text-ink/70 dark:text-white/70 hover:border-[#4F7CFF]/40 hover:text-[#4F7CFF] transition-colors disabled:opacity-60"
+                className={`flex min-h-[46px] items-center justify-center gap-2 rounded-2xl px-6 text-sm font-semibold transition-colors disabled:opacity-60 ${SECONDARY_BTN}`}
               >
                 <Smartphone size={16} />
                 {inviteLoading ? ui.patients.generatingInvite : ui.patients.inviteToPortalButton}
@@ -472,7 +455,7 @@ export default function PatientDetailPage() {
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8 rounded-2xl border border-[#4F7CFF]/20 bg-[#4F7CFF]/5 p-5"
+            className="mb-8 rounded-[24px] border border-black/[0.06] bg-white/90 p-5 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.04]"
           >
             <p className="text-sm font-semibold text-ink dark:text-white mb-1">
               {ui.patients.inviteReadyHeading}
@@ -488,8 +471,7 @@ export default function PatientDetailPage() {
               />
               <button
                 onClick={copyInviteLink}
-                className="shrink-0 flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-white transition-colors"
-                style={{ background: copied ? '#32D6A0' : '#4F7CFF' }}
+                className={`shrink-0 flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${copied ? 'bg-emerald-500 text-white' : PRIMARY_BTN}`}
               >
                 {copied ? <Check size={13} /> : <Copy size={13} />}
                 {copied ? ui.patients.copied : ui.patients.copyButton}
@@ -512,47 +494,22 @@ export default function PatientDetailPage() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10"
         >
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <ClipboardList size={13} className="text-[#4F7CFF]" />
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
-                {ui.patients.statSessions}
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-ink dark:text-white">{notesStatus === 'ready' ? notes.length : '—'}</p>
-          </div>
-
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <Calendar size={13} className="text-[#32D6A0]" />
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
-                {ui.patients.statLastSession}
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-ink dark:text-white">
-              {lastSessionDate ? lastSessionDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '—'}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <Activity size={13} className="text-amber-500" />
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
-                {ui.patients.statPatientSince}
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-ink dark:text-white">{formatSince(patient.created_at, ui)}</p>
-          </div>
-
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <Dumbbell size={13} className="text-[#EC4899]" />
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">
-                {ui.patients.statLinkedItems}
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-ink dark:text-white">{clinicalRefs.length}</p>
-          </div>
+          {[
+            { icon: ClipboardList, label: ui.patients.statSessions, value: notesStatus === 'ready' ? String(notes.length) : '—' },
+            { icon: Calendar, label: ui.patients.statLastSession, value: lastSessionDate ? lastSessionDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '—' },
+            { icon: Activity, label: ui.patients.statPatientSince, value: formatSince(patient.created_at, ui) },
+            { icon: Dumbbell, label: ui.patients.statLinkedItems, value: String(clinicalRefs.length) },
+          ].map(({ icon: Icon, label, value }) => (
+            <Card key={label} className="p-4 sm:p-5">
+              <div className="flex items-center gap-2.5">
+                <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${ICON_TILE}`}>
+                  <Icon size={14} aria-hidden />
+                </span>
+                <span className="min-w-0 truncate text-[12px] font-medium text-ink/60 dark:text-white/50">{label}</span>
+              </div>
+              <p className="mt-3 font-display text-[28px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-ink dark:text-white">{value}</p>
+            </Card>
+          ))}
         </motion.div>
 
         <PatientProfileCard
@@ -561,10 +518,10 @@ export default function PatientDetailPage() {
           onSaved={(updated) => setPatient((p) => (p ? { ...p, ...updated } : p))}
         />
 
-        <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
+        <div className="rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.055] dark:to-white/[0.018] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-6 sm:p-7">
           <div className="flex items-start justify-between gap-3 mb-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4F7CFF]/15 to-[#4F7CFF]/5 text-[#4F7CFF]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-black/[0.06] bg-black/[0.03] text-ink/70 dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-white/80">
                 <FileText size={18} />
               </div>
               <div>
@@ -577,14 +534,14 @@ export default function PatientDetailPage() {
               </div>
             </div>
             {notesStatus === 'ready' && notes.length > 0 && (
-              <span className="shrink-0 rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF] text-xs font-bold px-2.5 py-1">
+              <span className="shrink-0 rounded-full bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75 text-xs font-bold px-2.5 py-1">
                 {notes.length}
               </span>
             )}
           </div>
 
           {notesStatus === 'loading' ? (
-            <div role="status" className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-14 text-center text-sm text-ink/55 dark:text-white/40">
+            <div role="status" className="rounded-2xl border border-black/[0.05] bg-black/[0.015] dark:border-white/[0.06] dark:bg-white/[0.02] py-14 text-center text-sm text-ink/55 dark:text-white/40">
               {ui.common.loading}
             </div>
           ) : notesStatus === 'error' ? (
@@ -593,16 +550,15 @@ export default function PatientDetailPage() {
               <button
                 type="button"
                 onClick={() => loadNotes()}
-                className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white bg-[#4F7CFF] hover:bg-[#3D68E8] transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 transition-colors"
               >
                 <RotateCcw size={13} />
                 {ui.patients.notesRetry}
               </button>
             </div>
           ) : notes.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-14 text-center flex flex-col items-center gap-3">
-              <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF]">
-                <div className="absolute inset-0 rounded-full bg-[#4F7CFF]/20 blur-lg" />
+            <div className="rounded-2xl border border-black/[0.05] bg-black/[0.015] dark:border-white/[0.06] dark:bg-white/[0.02] py-14 text-center flex flex-col items-center gap-3">
+              <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75">
                 <FileText size={20} className="relative" />
               </div>
               <p className="text-ink/55 dark:text-white/40">
@@ -620,9 +576,9 @@ export default function PatientDetailPage() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.35, delay: i * 0.05 }}
-                  className="group rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-start gap-4 shadow-soft hover:border-[#4F7CFF]/30 hover:shadow-md transition-all"
+                  className="group rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 flex items-start gap-4 shadow-soft hover:border-black/15 dark:hover:border-white/20 hover:shadow-md transition-all"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF] group-hover:scale-105 transition-transform">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75 group-hover:scale-105 transition-transform">
                     <FileText size={16} />
                   </div>
                   <div className="min-w-0">
@@ -643,10 +599,10 @@ export default function PatientDetailPage() {
           )}
         </div>
 
-        <div className="mt-8 rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
+        <div className="mt-8 rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.055] dark:to-white/[0.018] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-6 sm:p-7">
           <div className="flex items-start justify-between gap-3 mb-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#32D6A0]/15 to-[#32D6A0]/5 text-[#32D6A0]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-black/[0.06] bg-black/[0.03] text-ink/70 dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-white/80">
                 <Sparkles size={18} />
               </div>
               <div>
@@ -659,16 +615,15 @@ export default function PatientDetailPage() {
               </div>
             </div>
             {clinicalRefs.length > 0 && (
-              <span className="shrink-0 rounded-full bg-[#32D6A0]/10 text-[#32D6A0] text-xs font-bold px-2.5 py-1">
+              <span className="shrink-0 rounded-full bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75 text-xs font-bold px-2.5 py-1">
                 {clinicalRefs.length}
               </span>
             )}
           </div>
 
           {clinicalRefs.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-14 text-center flex flex-col items-center gap-3">
-              <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#32D6A0]/10 text-[#32D6A0]">
-                <div className="absolute inset-0 rounded-full bg-[#32D6A0]/20 blur-lg" />
+            <div className="rounded-2xl border border-black/[0.05] bg-black/[0.015] dark:border-white/[0.06] dark:bg-white/[0.02] py-14 text-center flex flex-col items-center gap-3">
+              <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75">
                 <Dumbbell size={20} className="relative" />
               </div>
               <p className="text-ink/55 dark:text-white/40">
@@ -704,7 +659,7 @@ export default function PatientDetailPage() {
                           }
                         : undefined
                     }
-                    className={`rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 flex items-start gap-4 shadow-soft transition-colors ${
+                    className={`rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 flex items-start gap-4 shadow-soft transition-colors ${
                       href
                         ? 'cursor-pointer hover:border-black/15 dark:hover:border-white/25 hover:bg-white/90 dark:hover:bg-white/[0.06]'
                         : 'hover:border-black/10 dark:hover:border-white/20'
@@ -757,10 +712,10 @@ export default function PatientDetailPage() {
           )}
         </div>
 
-        <div className="mt-8 rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7">
+        <div className="mt-8 rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.055] dark:to-white/[0.018] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-6 sm:p-7">
           <div className="flex items-start justify-between gap-3 mb-6 flex-wrap">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6366F1]/15 to-[#6366F1]/5 text-[#6366F1]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-black/[0.06] bg-black/[0.03] text-ink/70 dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-white/80">
                 <Flame size={18} />
               </div>
               <div>
@@ -774,8 +729,7 @@ export default function PatientDetailPage() {
             </div>
             <button
               onClick={openInCalculator}
-              className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white transition-transform hover:scale-105"
-              style={{ background: 'linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%)' }}
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 transition-transform"
             >
               <Plus size={13} />
               {metabolicHistory.length === 0 ? ui.patients.newCalculationCta : ui.patients.viewFullCalculatorCta}
@@ -783,9 +737,8 @@ export default function PatientDetailPage() {
           </div>
 
           {metabolicHistory.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-14 text-center flex flex-col items-center gap-3">
-              <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#6366F1]/10 text-[#6366F1]">
-                <div className="absolute inset-0 rounded-full bg-[#6366F1]/20 blur-lg" />
+            <div className="rounded-2xl border border-black/[0.05] bg-black/[0.015] dark:border-white/[0.06] dark:bg-white/[0.02] py-14 text-center flex flex-col items-center gap-3">
+              <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75">
                 <Flame size={20} className="relative" />
               </div>
               <p className="text-ink/55 dark:text-white/40">
@@ -807,19 +760,19 @@ export default function PatientDetailPage() {
                         {ui.patients.latestProfileLabel} · {formatRefDate(latestProfile.created_at)}
                       </p>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
+                        <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-3">
                           <p className="text-lg font-bold text-ink dark:text-white">{latestProfile.tdee}</p>
                           <p className="text-[10px] text-ink/55 dark:text-white/40">TDEE</p>
                         </div>
-                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
+                        <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-3">
                           <p className="text-lg font-bold text-ink dark:text-white">{latestProfile.protein_g}g</p>
                           <p className="text-[10px] text-ink/55 dark:text-white/40">{ui.metabolicCalculator.proteinLabel}</p>
                         </div>
-                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
+                        <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-3">
                           <p className="text-lg font-bold text-ink dark:text-white">{latestProfile.carbs_g}g</p>
                           <p className="text-[10px] text-ink/55 dark:text-white/40">{ui.metabolicCalculator.carbsLabel}</p>
                         </div>
-                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-3">
+                        <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-3">
                           <p className="text-lg font-bold text-ink dark:text-white">{latestProfile.fat_g}g</p>
                           <p className="text-[10px] text-ink/55 dark:text-white/40">{ui.metabolicCalculator.fatLabel}</p>
                         </div>
@@ -831,7 +784,7 @@ export default function PatientDetailPage() {
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-2">
                           {ui.patients.weightTrendHeading}
                         </p>
-                        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+                        <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
                           <WeightTrendChart data={chronological.map((h) => ({ date: h.created_at, weightKg: h.weight_kg }))} height={120} />
                         </div>
                       </div>

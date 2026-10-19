@@ -119,7 +119,7 @@ export default function EventDetailPage() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] transition-colors">
+      <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] transition-colors">
         <Navbar />
         <div className="pt-40 text-center text-ink/55 dark:text-white/40">{ui.events.loadingEvents}</div>
       </div>
@@ -128,7 +128,7 @@ export default function EventDetailPage() {
 
   if (notFound || !event) {
     return (
-      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] transition-colors">
+      <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] transition-colors">
         <Navbar />
         <div className="pt-40 text-center text-ink/55 dark:text-white/40">{ui.events.eventNotFound}</div>
       </div>
@@ -158,7 +158,7 @@ export default function EventDetailPage() {
       : '#8A93A6'
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -287,7 +287,7 @@ export default function EventDetailPage() {
 
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-3">
+    <div className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-4 flex items-center gap-3">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/10">{icon}</div>
       <div className="min-w-0">
         <p className="text-[10px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40">{label}</p>

@@ -81,7 +81,7 @@ export default function FirstAidDetailPage() {
   const activeProtocol = protocols.find((p) => p.country === activeCountry);
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -144,7 +144,7 @@ export default function FirstAidDetailPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-6 space-y-5"
+                  className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-6 space-y-5"
                 >
                   <div className="flex flex-wrap gap-4 text-xs text-ink/60 dark:text-white/50">
                     {activeProtocol.emergency_number && (

@@ -38,8 +38,8 @@ export default function NotebookCard({
       className="group relative flex aspect-[3/4] flex-col overflow-hidden rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lift hover:border-black/[0.1] dark:hover:border-white/20"
     >
       <div className="relative flex flex-1 items-center justify-center">
-        <span className="absolute left-0 top-3 bottom-3 w-1 rounded-r bg-[#4F7CFF]/30" />
-        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#4F7CFF]/10 text-[#4F7CFF]">
+        <span className="absolute left-0 top-3 bottom-3 w-1 rounded-r bg-[#7C83FF]/30" />
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#7C83FF]/10 text-[#7C83FF]">
           <BookOpen size={26} strokeWidth={1.7} />
         </span>
       </div>
@@ -71,9 +71,9 @@ export default function NotebookCard({
                 if (e.key === 'Enter') commitRename()
                 if (e.key === 'Escape') setRenaming(false)
               }}
-              className="w-full rounded-lg border border-[#4F7CFF]/40 bg-white dark:bg-[#12131a] px-1.5 py-0.5 text-xs text-ink dark:text-white outline-none"
+              className="w-full rounded-lg border border-[#7C83FF]/40 bg-white dark:bg-[#12131a] px-1.5 py-0.5 text-xs text-ink dark:text-white outline-none"
             />
-            <button onClick={commitRename} className="text-[#4F7CFF] shrink-0">
+            <button onClick={commitRename} className="text-[#7C83FF] shrink-0">
               <Check size={13} />
             </button>
             <button onClick={() => setRenaming(false)} className="text-ink/55 dark:text-white/40 shrink-0">

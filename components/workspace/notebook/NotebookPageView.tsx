@@ -279,7 +279,7 @@ export default function NotebookPageView({
               aria-label={ui.notebook.pageSettings}
               title={ui.notebook.pageSettings}
               className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                settingsOpen ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+                settingsOpen ? 'bg-[#7C83FF]/10 text-[#7C83FF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
               }`}
             >
               <Settings2 size={15} />
@@ -294,7 +294,7 @@ export default function NotebookPageView({
                         key={f}
                         onClick={() => onChangePageSettings({ format: f })}
                         className={`flex-1 rounded-lg border px-2 py-1 text-[11px] font-medium transition-colors ${
-                          format === f ? 'border-[#4F7CFF] bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'border-black/10 dark:border-white/10 text-ink/60 dark:text-white/60'
+                          format === f ? 'border-[#7C83FF] bg-[#7C83FF]/10 text-[#7C83FF]' : 'border-black/10 dark:border-white/10 text-ink/60 dark:text-white/60'
                         }`}
                       >
                         {formatLabel(f)}
@@ -311,7 +311,7 @@ export default function NotebookPageView({
                         onClick={() => onChangePageSettings({ paperColor: c })}
                         aria-label={c}
                         className={`h-6 w-6 rounded-full border transition-transform ${
-                          paperColor === c ? 'scale-110 border-[#4F7CFF]' : 'border-black/10 dark:border-white/20'
+                          paperColor === c ? 'scale-110 border-[#7C83FF]' : 'border-black/10 dark:border-white/20'
                         }`}
                         style={{ backgroundColor: c }}
                       />
@@ -327,7 +327,7 @@ export default function NotebookPageView({
                         onClick={() => onChangePageSettings({ template: t })}
                         title={templateLabel(t)}
                         className={`flex-1 h-7 rounded-lg border transition-colors ${
-                          page.template === t ? 'border-[#4F7CFF] ring-2 ring-[#4F7CFF]/20' : 'border-black/10 dark:border-white/10'
+                          page.template === t ? 'border-[#7C83FF] ring-2 ring-[#7C83FF]/20' : 'border-black/10 dark:border-white/10'
                         }`}
                         style={{ backgroundColor: paperColor, backgroundImage: templateBackground(t, paperColor), backgroundSize: t === 'grid' ? '8px 8px' : t === 'dotted' ? '8px 8px' : undefined }}
                       />

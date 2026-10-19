@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar';
 import ClinicalActionBar from '@/components/ClinicalActionBar';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 import type { GeriatricPrinciple, ZoneDetail } from '@/lib/brainMapContent';
+import { PageBackdrop } from '@/components/ui/premium'
 
 const IMAGE_BASE =
   'https://dckmumxswheamyymerea.supabase.co/storage/v1/object/public/library-images';
@@ -57,7 +58,7 @@ export default function BrainZoneHubPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f7f7f8] dark:bg-[#050608] flex items-center justify-center">
         <Navbar />
         <p className="text-ink/55 dark:text-white/40">{ui.common.loading}</p>
       </div>
@@ -66,13 +67,13 @@ export default function BrainZoneHubPage() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f7f7f8] dark:bg-[#050608] flex items-center justify-center">
         <Navbar />
         <div className="text-center">
           <p className="text-ink/60 dark:text-white/60 mb-4">{ui.brainMap.zone.zoneNotFound}</p>
           <button
             onClick={() => router.push('/dashboard/brain-map')}
-            className="text-sm font-semibold text-[#4F7CFF]"
+            className="text-sm font-semibold text-[#7C83FF]"
           >
             {'←'} {ui.brainMap.zone.backToBrainMap}
           </button>
@@ -84,15 +85,10 @@ export default function BrainZoneHubPage() {
   const { zone, conditions, info, geriatricPrinciples } = data;
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
-        style={{
-          background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)',
-        }}
-      />
+      <PageBackdrop />
 
       <div className="relative max-w-4xl mx-auto px-6 pt-40 pb-24">
         <button
@@ -105,7 +101,7 @@ export default function BrainZoneHubPage() {
 
         <div className="mb-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
-            <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#7C83FF] to-[#A78BFA]" />
             {ui.brainMap.zone.badge}
           </div>
 
@@ -163,7 +159,7 @@ export default function BrainZoneHubPage() {
             {geriatricPrinciples.map((g) => (
               <div
                 key={g.slug}
-                className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5"
               >
                 <p className="text-sm font-semibold mb-1">{g.title}</p>
                 <p className="text-sm text-ink/60 dark:text-white/60 leading-relaxed">
