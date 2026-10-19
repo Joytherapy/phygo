@@ -82,13 +82,35 @@ async function brandOf(path, who, scope = 'header') {
   }
 }
 
-test('dashboard, My Phygo and the login card show the logo and wordmark exactly as the landing page', { skip }, async () => {
+test('dashboard and My Phygo headers show the logo and wordmark exactly as the landing page', { skip }, async () => {
   const landing = await brandOf('/');
   assert.equal(landing.word, 'PHYGO');
   const dashboard = await brandOf('/dashboard', 'clin');
   const portal = await brandOf('/my-phygo/home', 'pat');
-  const login = await brandOf('/login?lang=en', null, 'main');
-  for (const [where, b] of [['dashboard', dashboard], ['My Phygo', portal], ['login card', login]]) {
+  for (const [where, b] of [['dashboard', dashboard], ['My Phygo', portal]]) {
     assert.deepEqual(b, landing, `${where} brand = landing brand`);
+  }
+});
+
+// On the sign-in card the heading already names PHYGO ("Log in to your PHYGO
+// account"), so the card shows the mark alone, larger, instead of "P" + "PHYGO".
+test('the login card shows the mark alone, labelled PHYGO for screen readers', { skip }, async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  try {
+    const page = await ctx.newPage();
+    await page.goto(`${app.url}/login?lang=en`);
+    const img = page.locator('main img[src="/logo-mark.png"]').first();
+    await img.waitFor();
+    const info = await img.evaluate((el) => ({
+      alt: el.getAttribute('alt'),
+      width: Math.round(el.getBoundingClientRect().width),
+      siblingText: (el.parentElement?.textContent ?? '').trim(),
+    }));
+    assert.equal(info.alt, 'PHYGO');
+    assert.ok(info.width >= 44, `mark is larger than the 28px header mark (got ${info.width}px)`);
+    assert.equal(info.siblingText, '', 'no wordmark next to the mark');
+    assert.match(await page.locator('main').innerText(), /PHYGO/, 'the card copy still names PHYGO');
+  } finally {
+    await ctx.close();
   }
 });
