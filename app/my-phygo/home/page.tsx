@@ -4,13 +4,15 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
-import { FileText, Calendar, Dumbbell, ClipboardList, ShoppingBag, ExternalLink, ArrowRight, Flame } from 'lucide-react'
+import Link from 'next/link'
+import { FileText, Calendar, Dumbbell, ClipboardList, ShoppingBag, ExternalLink, ArrowRight, Flame, Target } from 'lucide-react'
 import VideoCallPanel from '@/components/VideoCallPanel'
 import AppointmentScheduler from '@/components/AppointmentScheduler'
 import { lazy } from '@/lib/lazy'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { localeForLang } from '@/lib/i18n/agendaStrings'
 import { MY_PHYGO_STRINGS } from '@/lib/i18n/myPhygoStrings'
+import { MyAvatar, useMyProfile } from '@/components/myPhygo/MyProfileContext'
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -41,6 +43,8 @@ export default function MyPhygoHomePage() {
   const router = useRouter()
   const { lang } = useLanguage()
   const t = MY_PHYGO_STRINGS[lang].home
+  const tp = MY_PHYGO_STRINGS[lang].profile
+  const { profile, photoUrl } = useMyProfile()
   const [patient, setPatient] = useState<PatientRecord | null>(null)
   const [notes, setNotes] = useState<NoteRecord[]>([])
   const [products, setProducts] = useState<RecommendedProduct[]>([])
@@ -58,7 +62,8 @@ export default function MyPhygoHomePage() {
 
       const { data: patientData } = await supabase
         .from('patients')
-        .select('id, name, age, main_condition')        .eq('patient_user_id', user.id)
+        .select('id, name, age, main_condition')
+        .eq('patient_user_id', user.id)
         .single()
 
       if (!patientData) {
@@ -108,6 +113,7 @@ export default function MyPhygoHomePage() {
   }
 
   const latestNote = notes[0]
+  const displayName = profile?.displayName || patient.name
   const exercises: any[] = Array.isArray(latestNote?.exercises) ? latestNote.exercises : []
 
   return (
@@ -121,13 +127,33 @@ export default function MyPhygoHomePage() {
         <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#6B73F0] dark:text-[#A5B4FF] mb-2">
           {t.welcomeBack}
         </p>
-        <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white">
-          {patient.name}
-        </h1>
-                {patient.age && (
+        <div className="flex items-center gap-4">
+          <Link href="/my-phygo/profile" aria-label={tp.navLabel} className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B95FF]">
+            <MyAvatar name={displayName} photoUrl={photoUrl} size={56} />
+          </Link>
+          <h1 className="min-w-0 break-words font-display text-4xl font-bold tracking-tight text-ink dark:text-white">
+            {displayName}
+          </h1>
+        </div>
+        {patient.age && (
           <p className="text-sm text-ink/60 dark:text-white/50 mt-2">{t.yearsOld(patient.age)}</p>
         )}
       </motion.div>
+
+      {profile?.goal && (
+        <div data-testid="my-goal" className="mb-8 flex items-start gap-3 rounded-2xl border border-black/[0.06] bg-white/90 p-5 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#7C83FF] to-[#A78BFA] text-white">
+            <Target size={16} aria-hidden />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink/50 dark:text-white/45">{tp.yourGoal}</p>
+            <p className="mt-1 break-words text-[15px] font-medium leading-snug text-ink dark:text-white">{profile.goal}</p>
+          </div>
+          <Link href="/my-phygo/profile" className="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold text-[#6B73F0] transition-colors hover:bg-[#7C83FF]/10 dark:text-[#A5B4FF]">
+            {tp.editGoal}
+          </Link>
+        </div>
+      )}
 
       <div className="mb-8">
         <AppointmentScheduler patientId={patient.id} mode="patient" />
