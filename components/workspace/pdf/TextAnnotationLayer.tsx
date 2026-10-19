@@ -8,7 +8,7 @@
 // Stored as its own 'text' annotation row (TextAnnotationData: x, y, body,
 // color, fontSize) — never text baked into the PDF itself.
 
-import { useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { X, GripVertical } from 'lucide-react'
 import type { AnnotationTool, TextAnnotationData, WorkspaceAnnotation } from '@/lib/workspace/types'
 import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
@@ -20,13 +20,17 @@ import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
 export const DEFAULT_FONT_SIZE = 14
 export const DEFAULT_BOX_WIDTH = 0.26 // normalized fraction of page width for a fresh note
 
-// Free-form per-note resize range (the A-/A+ buttons below) — deliberately
-// wider than the toolbar's own preset steps (AnnotationToolbar's TEXT_SIZES)
-// since an already-written note should be adjustable to whatever fits,
-// not just snapped to the same four presets used at creation time.
-const MIN_FONT_SIZE = 8
-const MAX_FONT_SIZE = 36
-const FONT_SIZE_STEP = 2
+// Word-style sizes offered by the toolbar's size menu and stepped through by
+// the A-/A+ buttons (on the toolbar and on each note).
+export const FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 72]
+export const MIN_FONT_SIZE = FONT_SIZES[0]
+export const MAX_FONT_SIZE = FONT_SIZES[FONT_SIZES.length - 1]
+/** The next size up (dir 1) or down (dir -1) in FONT_SIZES from `current`. */
+export function stepFontSize(current: number, dir: 1 | -1): number {
+  if (dir === 1) return FONT_SIZES.find((s) => s > current) ?? MAX_FONT_SIZE
+  return [...FONT_SIZES].reverse().find((s) => s < current) ?? MIN_FONT_SIZE
+}
+const MIN_BOX_PX = 90 // narrowest a box can be dragged to
 
 export default function TextAnnotationLayer({
   annotations,
@@ -37,6 +41,7 @@ export default function TextAnnotationLayer({
   onCreate,
   onUpdate,
   onDelete,
+  onSelectNote,
 }: {
   annotations: WorkspaceAnnotation[] // this page's 'text' annotations only
   tool: AnnotationTool
@@ -53,18 +58,55 @@ export default function TextAnnotationLayer({
   onCreate: (data: TextAnnotationData) => void
   onUpdate: (id: string, data: Partial<TextAnnotationData>) => void
   onDelete: (id: string) => void
+  /** A note was selected (its font size) or the selection cleared (null), so
+   *  the toolbar's size menu can show the selected note's size, as in Word.
+   *  While a note is selected, a size chosen in the toolbar applies to it. */
+  onSelectNote?: (fontSize: number | null) => void
 }) {
   const ui = useWorkspaceUi()
   const layerRef = useRef<HTMLDivElement>(null)
   const [draft, setDraft] = useState<{ x: number; y: number; body: string } | null>(null)
   const dragState = useRef<{ id: string; startX: number; startY: number; origX: number; origY: number; currentX: number; currentY: number } | null>(null)
   const [dragPreview, setDragPreview] = useState<{ id: string; x: number; y: number } | null>(null)
+  const [resizePreview, setResizePreview] = useState<{ id: string; width: number; height?: number } | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+
+  const select = (a: WorkspaceAnnotation | null) => {
+    setSelectedId(a ? a.id : null)
+    onSelectNote?.(a ? ((a.data as TextAnnotationData).fontSize ?? DEFAULT_FONT_SIZE) : null)
+  }
+
+  // A size picked in the toolbar while a note is selected resizes that note's
+  // text. Selecting a note first syncs the toolbar to the note's own size, so
+  // that change is a no-op here (same size) and never rewrites the note.
+  const annotationsRef = useRef(annotations)
+  annotationsRef.current = annotations
+  const lastFontSize = useRef(fontSize)
+  useEffect(() => {
+    if (lastFontSize.current === fontSize) return
+    lastFontSize.current = fontSize
+    if (!selectedId) return
+    const note = annotationsRef.current.find((a) => a.id === selectedId)
+    if (note && ((note.data as TextAnnotationData).fontSize ?? DEFAULT_FONT_SIZE) !== fontSize) onUpdate(selectedId, { fontSize })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fontSize])
+
+  // The selection goes away with the note, or when no tool can edit notes.
+  useEffect(() => {
+    if (selectedId && !annotations.some((a) => a.id === selectedId)) select(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [annotations, selectedId])
 
   const layerActive = tool === 'text'
   const boxesInteractive = tool === 'text' || tool === 'select'
+  useEffect(() => {
+    if (!boxesInteractive && selectedId) select(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boxesInteractive])
 
   const handleLayerClick = (e: ReactMouseEvent<HTMLDivElement>) => {
     if (!layerActive || e.target !== layerRef.current) return
+    select(null)
     const rect = layerRef.current!.getBoundingClientRect()
     setDraft({ x: (e.clientX - rect.left) / rect.width, y: (e.clientY - rect.top) / rect.height, body: '' })
   }
@@ -78,8 +120,45 @@ export default function TextAnnotationLayer({
 
   const resizeNote = (a: WorkspaceAnnotation, dir: 1 | -1) => {
     const current = (a.data as TextAnnotationData).fontSize ?? DEFAULT_FONT_SIZE
-    const next = Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, current + dir * FONT_SIZE_STEP))
-    if (next !== current) onUpdate(a.id, { fontSize: next })
+    const next = stepFontSize(current, dir)
+    if (next === current) return
+    onUpdate(a.id, { fontSize: next })
+    if (selectedId === a.id) onSelectNote?.(next)
+  }
+
+  // Drag the right edge (width), the bottom edge (height) or the corner
+  // (both). Sizes are stored as page fractions like x/y, so a box keeps its
+  // proportions on any zoom; one update is saved when the drag ends.
+  const handleResizeStart = (e: ReactPointerEvent, a: WorkspaceAnnotation, axis: 'x' | 'y' | 'xy') => {
+    e.stopPropagation()
+    e.preventDefault()
+    const rect = layerRef.current?.getBoundingClientRect()
+    const box = (e.currentTarget as HTMLElement).parentElement?.getBoundingClientRect()
+    if (!rect || !box) return
+    select(a)
+    const startX = e.clientX
+    const startY = e.clientY
+    const origW = box.width / rect.width
+    const origH = box.height / rect.height
+    const data = a.data as TextAnnotationData
+    const minH = ((data.fontSize ?? DEFAULT_FONT_SIZE) * 1.5 + 34) / rect.height
+    let next: { id: string; width: number; height?: number } = { id: a.id, width: data.width ?? DEFAULT_BOX_WIDTH, height: data.height }
+    const move = (ev: PointerEvent) => {
+      const width = axis === 'y' ? next.width : Math.min(1 - data.x, Math.max(MIN_BOX_PX / rect.width, origW + (ev.clientX - startX) / rect.width))
+      const height = axis === 'x' ? next.height : Math.min(1 - data.y, Math.max(minH, origH + (ev.clientY - startY) / rect.height))
+      next = { id: a.id, width, height }
+      setResizePreview(next)
+    }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      setResizePreview(null)
+      const patch: Partial<TextAnnotationData> = { width: next.width }
+      if (next.height !== undefined) patch.height = next.height
+      onUpdate(a.id, patch)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
   }
 
   const handleDragStart = (e: ReactPointerEvent, annotation: WorkspaceAnnotation) => {
@@ -122,8 +201,9 @@ export default function TextAnnotationLayer({
   // the note's own background/border, i.e. the part with nothing else to do.
   const handleBoxPointerDown = (e: ReactPointerEvent<HTMLDivElement>, annotation: WorkspaceAnnotation) => {
     if (!boxesInteractive) return
+    if (selectedId !== annotation.id) select(annotation)
     const target = e.target as HTMLElement
-    if (target.closest('textarea, button')) return
+    if (target.closest('textarea, button, [data-resize]')) return
     handleDragStart(e, annotation)
   }
 
@@ -173,69 +253,86 @@ export default function TextAnnotationLayer({
       {annotations.map((a) => {
         const data = a.data as TextAnnotationData
         const pos = dragPreview && dragPreview.id === a.id ? dragPreview : { x: data.x, y: data.y }
+        const size = resizePreview && resizePreview.id === a.id ? resizePreview : { width: data.width ?? DEFAULT_BOX_WIDTH, height: data.height }
+        const selected = boxesInteractive && selectedId === a.id
+        const noteFontSize = data.fontSize ?? DEFAULT_FONT_SIZE
         // NO BACKGROUND BY DEFAULT (per user request): a note with no
         // persisted `backgroundColor` renders fully transparent — just the
         // text floating over the page — with a border that only appears on
-        // hover/focus as an editing affordance, instead of the old hardcoded
-        // bg-white/90 dark:bg-[#171821]/90 box (which, combined with the
-        // default dark text color, was reading as near-invisible dark-on-
-        // dark text in dark mode). A note WITH a chosen background keeps a
-        // visible box at all times, exactly like a real sticky note.
+        // hover/focus as an editing affordance. A note WITH a chosen
+        // background keeps a visible box at all times, like a sticky note.
         const bg = data.backgroundColor ?? null
+        const handle = 'absolute z-10 opacity-0 group-hover:opacity-100 transition-opacity'
         return (
           <div
             key={a.id}
+            data-testid="text-note"
+            data-selected={selected ? 'true' : undefined}
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => handleBoxPointerDown(e, a)}
-            className={`group absolute rounded-lg backdrop-blur-sm transition-colors ${
-              bg
+            className={`group absolute flex flex-col rounded-lg backdrop-blur-sm transition-colors ${
+              selected
+                ? 'border border-[#8B95FF] ring-2 ring-[#8B95FF]/30'
+                : bg
                 ? 'border border-black/10 dark:border-white/15 shadow-soft'
                 : 'border border-transparent hover:border-black/10 dark:hover:border-white/15 focus-within:border-black/20 dark:focus-within:border-white/20'
-            }`}
+            } ${bg ? 'shadow-soft' : ''}`}
             style={{
               left: `${pos.x * 100}%`,
               top: `${pos.y * 100}%`,
-              width: `${(data.width ?? DEFAULT_BOX_WIDTH) * 100}%`,
+              width: `${size.width * 100}%`,
+              height: size.height !== undefined ? `${size.height * 100}%` : undefined,
               pointerEvents: boxesInteractive ? 'auto' : 'none',
-              minWidth: 90,
+              minWidth: MIN_BOX_PX,
               backgroundColor: bg ?? 'transparent',
               cursor: boxesInteractive ? 'grab' : undefined,
             }}
           >
             {boxesInteractive && (
-              <div className="flex items-center justify-between px-1.5 pt-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+              // Floating bar above the box, in its own dark style so it reads
+              // on white and dark paper alike (the page is not themed).
+              <div
+                className={`absolute -top-8 left-0 z-20 flex h-7 items-center gap-0.5 rounded-lg bg-[#121319]/95 px-1 text-white shadow-[0_8px_24px_-8px_rgba(0,0,0,0.5)] ring-1 ring-white/10 transition-opacity ${
+                  selected ? 'opacity-100' : 'pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100'
+                }`}
+              >
                 <button
                   onPointerDown={(e) => handleDragStart(e, a)}
                   aria-label="Move"
-                  className="flex h-5 w-5 items-center justify-center rounded text-ink/30 dark:text-white/30 hover:text-ink dark:hover:text-white cursor-grab active:cursor-grabbing"
+                  className="flex h-6 w-6 items-center justify-center rounded text-white/60 hover:bg-white/10 hover:text-white cursor-grab active:cursor-grabbing"
                   style={{ touchAction: 'none' }}
                 >
-                  <GripVertical size={12} />
+                  <GripVertical size={13} />
                 </button>
-                <div className="flex items-center gap-0.5">
-                  <button
-                    onClick={() => resizeNote(a, -1)}
-                    aria-label={ui.annotate.textSize}
-                    title={ui.annotate.textSize}
-                    className="flex h-5 w-5 items-center justify-center rounded text-[9px] font-medium leading-none text-ink/30 dark:text-white/30 hover:text-ink dark:hover:text-white"
-                  >
-                    A
-                  </button>
-                  <button
-                    onClick={() => resizeNote(a, 1)}
-                    aria-label={ui.annotate.textSize}
-                    title={ui.annotate.textSize}
-                    className="flex h-5 w-5 items-center justify-center rounded text-sm font-medium leading-none text-ink/30 dark:text-white/30 hover:text-ink dark:hover:text-white"
-                  >
-                    A
-                  </button>
-                </div>
+                <span className="mx-0.5 h-4 w-px bg-white/15" />
+                <button
+                  onClick={() => resizeNote(a, -1)}
+                  disabled={noteFontSize <= MIN_FONT_SIZE}
+                  aria-label={ui.annotate.textSmaller}
+                  title={ui.annotate.textSmaller}
+                  className="flex h-6 w-6 items-center justify-center rounded text-[11px] font-semibold leading-none text-white/75 hover:bg-white/10 hover:text-white disabled:opacity-30"
+                >
+                  A−
+                </button>
+                <span className="min-w-[1.6rem] text-center text-[11px] font-semibold tabular-nums text-white/90" aria-label={ui.annotate.textSize}>
+                  {noteFontSize}
+                </span>
+                <button
+                  onClick={() => resizeNote(a, 1)}
+                  disabled={noteFontSize >= MAX_FONT_SIZE}
+                  aria-label={ui.annotate.textBigger}
+                  title={ui.annotate.textBigger}
+                  className="flex h-6 w-6 items-center justify-center rounded text-[13px] font-semibold leading-none text-white/75 hover:bg-white/10 hover:text-white disabled:opacity-30"
+                >
+                  A+
+                </button>
+                <span className="mx-0.5 h-4 w-px bg-white/15" />
                 <button
                   onClick={() => onDelete(a.id)}
                   aria-label={ui.item.delete}
-                  className="flex h-5 w-5 items-center justify-center rounded text-ink/30 dark:text-white/30 hover:text-red-500"
+                  className="flex h-6 w-6 items-center justify-center rounded text-white/60 hover:bg-red-500/20 hover:text-red-300"
                 >
-                  <X size={12} />
+                  <X size={13} />
                 </button>
               </div>
             )}
@@ -251,14 +348,47 @@ export default function TextAnnotationLayer({
               // has to specifically look for this marker on
               // document.activeElement.
               data-note-textarea="true"
+              onFocus={() => {
+                if (selectedId !== a.id) select(a)
+              }}
               onBlur={(e) => {
                 const body = e.target.value.trim()
                 if (body && body !== data.body) onUpdate(a.id, { body })
               }}
               rows={2}
-              className="w-full resize-none bg-transparent px-2 pb-2 pt-1 text-sm outline-none"
-              style={{ color: data.color, fontSize: data.fontSize ?? DEFAULT_FONT_SIZE, cursor: boxesInteractive ? 'text' : undefined }}
+              className={`w-full resize-none bg-transparent px-2 py-1.5 text-sm outline-none ${size.height !== undefined ? 'min-h-0 flex-1' : ''}`}
+              style={{ color: data.color, fontSize: noteFontSize, lineHeight: 1.35, cursor: boxesInteractive ? 'text' : undefined }}
             />
+            {boxesInteractive && (
+              <>
+                {/* Resize handles: right edge = width, bottom edge = height, corner = both. */}
+                <span
+                  data-resize="x"
+                  onPointerDown={(e) => handleResizeStart(e, a, 'x')}
+                  className={`${handle} -right-1 top-3 bottom-3 w-2 cursor-ew-resize ${selected ? 'opacity-100' : ''}`}
+                  style={{ touchAction: 'none' }}
+                >
+                  <span className="absolute inset-y-0 left-1/2 my-auto h-6 w-1 -translate-x-1/2 rounded-full bg-[#8B95FF]/70" />
+                </span>
+                <span
+                  data-resize="y"
+                  onPointerDown={(e) => handleResizeStart(e, a, 'y')}
+                  className={`${handle} -bottom-1 left-3 right-3 h-2 cursor-ns-resize ${selected ? 'opacity-100' : ''}`}
+                  style={{ touchAction: 'none' }}
+                >
+                  <span className="absolute inset-x-0 top-1/2 mx-auto h-1 w-6 -translate-y-1/2 rounded-full bg-[#8B95FF]/70" />
+                </span>
+                <span
+                  data-resize="xy"
+                  role="button"
+                  aria-label={ui.annotate.resizeBox}
+                  title={ui.annotate.resizeBox}
+                  onPointerDown={(e) => handleResizeStart(e, a, 'xy')}
+                  className={`${handle} -bottom-1.5 -right-1.5 h-3.5 w-3.5 cursor-nwse-resize rounded-full border-2 border-white bg-[#8B95FF] shadow dark:border-[#0c0d12] ${selected ? 'opacity-100' : ''}`}
+                  style={{ touchAction: 'none' }}
+                />
+              </>
+            )}
           </div>
         )
       })}

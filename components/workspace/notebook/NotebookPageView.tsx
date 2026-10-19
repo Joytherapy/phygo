@@ -413,6 +413,7 @@ export default function NotebookPageView({
             color={textColor}
             backgroundColor={textBackground}
             fontSize={textFontSize}
+            onSelectNote={(size) => size !== null && setTextFontSize(size)}
             onCreate={(data) => onCreateAnnotation({ type: 'text', data })}
             onUpdate={onUpdateAnnotation}
             onDelete={onDeleteAnnotation}

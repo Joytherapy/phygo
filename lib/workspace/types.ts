@@ -115,6 +115,9 @@ export type TextAnnotationData = {
   color: string
   fontSize?: number
   width?: number
+  /** Box height as a fraction of the page height, set by dragging the box's
+   *  bottom edge or corner; absent = the box fits two lines (the default). */
+  height?: number
   backgroundColor?: string | null
 }
 
