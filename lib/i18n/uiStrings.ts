@@ -1169,7 +1169,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     nav: {
       patients: 'Pazienti',
       library: 'Libreria',
-      world: 'Phygo World',
+      world: 'PHYGO World',
       schedule: 'Agenda',
       profile: 'Profilo',
       signOut: 'Esci',
@@ -1209,7 +1209,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       shop: { label: 'Negozio', description: 'Attrezzature consigliate' },
     },
     events: {
-      badge: 'Phygo World',
+      badge: 'PHYGO World',
       heading: 'Eventi',
       subtitle: 'Scopri congressi, corsi ed esperienze che stanno plasmando la fisioterapia, la sanità e la performance umana.',
       searchPlaceholder: 'Cerca per nome, argomento, città o paese...',
@@ -2574,7 +2574,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     nav: {
       patients: 'Patients',
       library: 'Library',
-      world: 'Phygo World',
+      world: 'PHYGO World',
       schedule: 'Schedule',
       profile: 'Profile',
       signOut: 'Sign out',
@@ -2614,7 +2614,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       shop: { label: 'Shop', description: 'Recommended equipment' },
     },
     events: {
-      badge: 'Phygo World',
+      badge: 'PHYGO World',
       heading: 'Events',
       subtitle: 'Discover courses, conferences, congresses and experiences shaping physiotherapy, healthcare and human performance.',
       searchPlaceholder: 'Search by name, topic, city or country...',
@@ -3979,7 +3979,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     nav: {
       patients: 'Pacientes',
       library: 'Biblioteca',
-      world: 'Phygo World',
+      world: 'PHYGO World',
       schedule: 'Agenda',
       profile: 'Perfil',
       signOut: 'Cerrar sesión',
@@ -4019,7 +4019,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       shop: { label: 'Tienda', description: 'Equipamiento recomendado' },
     },
     events: {
-      badge: 'Phygo World',
+      badge: 'PHYGO World',
       heading: 'Eventos',
       subtitle: 'Descubre congresos, cursos y experiencias que están dando forma a la fisioterapia, la salud y el rendimiento humano.',
       searchPlaceholder: 'Busca por nombre, tema, ciudad o país...',
@@ -5384,7 +5384,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     nav: {
       patients: 'Patients',
       library: 'Bibliothèque',
-      world: 'Phygo World',
+      world: 'PHYGO World',
       schedule: 'Agenda',
       profile: 'Profil',
       signOut: 'Déconnexion',
@@ -5424,7 +5424,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       shop: { label: 'Boutique', description: 'Équipements recommandés' },
     },
     events: {
-      badge: 'Phygo World',
+      badge: 'PHYGO World',
       heading: 'Événements',
       subtitle: 'Découvrez congrès, cours et expériences qui façonnent la physiothérapie, la santé et la performance humaine.',
       searchPlaceholder: 'Rechercher par nom, sujet, ville ou pays...',
