@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { FileText, FolderOpen, Loader2 } from 'lucide-react'
@@ -13,11 +14,14 @@ import EmptyState from '@/components/workspace/EmptyState'
 import ErrorState from '@/components/workspace/ErrorState'
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient'
 import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
+import { useWorkspaceMutation } from '@/lib/workspace/useWorkspaceMutation'
 import type { WorkspaceDocument, WorkspaceFolder, WorkspaceNotebook } from '@/lib/workspace/types'
 
 export default function WorkspaceHomePage() {
   const router = useRouter()
   const ui = useWorkspaceUi()
+  const t = useDashboardUi()
   const supabase = getSupabaseBrowserClient()
 
   const [loading, setLoading] = useState(true)
@@ -78,9 +82,9 @@ export default function WorkspaceHomePage() {
     ])
 
     if (foldersRes.error || documentsRes.error || notebooksRes.error || recentRes.error) {
-      setError(
-        foldersRes.error?.message || documentsRes.error?.message || notebooksRes.error?.message || recentRes.error?.message || 'Failed to load Workspace'
-      )
+      // The raw database message goes to the console; the screen gets a clear, localized one.
+      console.error('Workspace could not be loaded:', foldersRes.error || documentsRes.error || notebooksRes.error || recentRes.error)
+      setError('load_failed')
       setLoading(false)
       return
     }
@@ -95,6 +99,8 @@ export default function WorkspaceHomePage() {
   useEffect(() => {
     load()
   }, [load])
+
+  const { mutate, actionError, dismissActionError } = useWorkspaceMutation(load)
 
   // Workspace-wide search (not folder-scoped) — filenames + folder names,
   // per the V1 search scope in the implementation brief §23.
@@ -140,7 +146,7 @@ export default function WorkspaceHomePage() {
 
   const toggleFolderStar = async (folder: WorkspaceFolder) => {
     setFolders((prev) => prev.map((f) => (f.id === folder.id ? { ...f, starred: !f.starred } : f)))
-    await fetch(`/api/workspace/folders/${folder.id}`, {
+    await mutate(`/api/workspace/folders/${folder.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ starred: !folder.starred }),
@@ -149,7 +155,7 @@ export default function WorkspaceHomePage() {
 
   const renameFolder = async (folder: WorkspaceFolder, name: string) => {
     setFolders((prev) => prev.map((f) => (f.id === folder.id ? { ...f, name } : f)))
-    await fetch(`/api/workspace/folders/${folder.id}`, {
+    await mutate(`/api/workspace/folders/${folder.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
@@ -158,12 +164,12 @@ export default function WorkspaceHomePage() {
 
   const deleteFolder = async (folder: WorkspaceFolder) => {
     setFolders((prev) => prev.filter((f) => f.id !== folder.id))
-    await fetch(`/api/workspace/folders/${folder.id}`, { method: 'DELETE' })
+    await mutate(`/api/workspace/folders/${folder.id}`, { method: 'DELETE' })
   }
 
   const changeFolderColor = async (folder: WorkspaceFolder, color: string | null) => {
     setFolders((prev) => prev.map((f) => (f.id === folder.id ? { ...f, color } : f)))
-    await fetch(`/api/workspace/folders/${folder.id}`, {
+    await mutate(`/api/workspace/folders/${folder.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ color }),
@@ -172,7 +178,7 @@ export default function WorkspaceHomePage() {
 
   const toggleDocumentStar = async (doc: WorkspaceDocument) => {
     setDocuments((prev) => prev.map((d) => (d.id === doc.id ? { ...d, starred: !d.starred } : d)))
-    await fetch(`/api/workspace/documents/${doc.id}`, {
+    await mutate(`/api/workspace/documents/${doc.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ starred: !doc.starred }),
@@ -181,7 +187,7 @@ export default function WorkspaceHomePage() {
 
   const renameDocument = async (doc: WorkspaceDocument, name: string) => {
     setDocuments((prev) => prev.map((d) => (d.id === doc.id ? { ...d, name } : d)))
-    await fetch(`/api/workspace/documents/${doc.id}`, {
+    await mutate(`/api/workspace/documents/${doc.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
@@ -190,7 +196,7 @@ export default function WorkspaceHomePage() {
 
   const deleteDocument = async (doc: WorkspaceDocument) => {
     setDocuments((prev) => prev.filter((d) => d.id !== doc.id))
-    await fetch(`/api/workspace/documents/${doc.id}`, { method: 'DELETE' })
+    await mutate(`/api/workspace/documents/${doc.id}`, { method: 'DELETE' })
   }
 
   const downloadDocument = async (doc: WorkspaceDocument) => {
@@ -201,7 +207,7 @@ export default function WorkspaceHomePage() {
 
   const toggleNotebookStar = async (nb: WorkspaceNotebook) => {
     setNotebooks((prev) => prev.map((x) => (x.id === nb.id ? { ...x, starred: !x.starred } : x)))
-    await fetch(`/api/workspace/notebooks/${nb.id}`, {
+    await mutate(`/api/workspace/notebooks/${nb.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ starred: !nb.starred }),
@@ -210,7 +216,7 @@ export default function WorkspaceHomePage() {
 
   const renameNotebook = async (nb: WorkspaceNotebook, name: string) => {
     setNotebooks((prev) => prev.map((x) => (x.id === nb.id ? { ...x, name } : x)))
-    await fetch(`/api/workspace/notebooks/${nb.id}`, {
+    await mutate(`/api/workspace/notebooks/${nb.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
@@ -219,12 +225,12 @@ export default function WorkspaceHomePage() {
 
   const deleteNotebook = async (nb: WorkspaceNotebook) => {
     setNotebooks((prev) => prev.filter((x) => x.id !== nb.id))
-    await fetch(`/api/workspace/notebooks/${nb.id}`, { method: 'DELETE' })
+    await mutate(`/api/workspace/notebooks/${nb.id}`, { method: 'DELETE' })
   }
 
   if (loading) {
     return (
-      <WorkspaceShell>
+      <WorkspaceShell actionError={actionError} onDismissActionError={dismissActionError}>
         <div className="flex items-center justify-center py-24 text-ink/55 dark:text-white/40">
           <Loader2 size={18} className="animate-spin" />
         </div>
@@ -234,8 +240,8 @@ export default function WorkspaceHomePage() {
 
   if (error) {
     return (
-      <WorkspaceShell>
-        <ErrorState message={error} onRetry={load} />
+      <WorkspaceShell actionError={actionError} onDismissActionError={dismissActionError}>
+        <ErrorState message={t.workspace.loadError} onRetry={load} />
       </WorkspaceShell>
     )
   }
@@ -243,7 +249,7 @@ export default function WorkspaceHomePage() {
   const continueDoc = recent.find((d) => d.page_count && d.page_count > 0) || recent[0]
 
   return (
-    <WorkspaceShell>
+    <WorkspaceShell actionError={actionError} onDismissActionError={dismissActionError}>
       <WorkspaceHeader
         title={ui.home.title}
         subtitle={ui.home.subtitle}
@@ -312,11 +318,11 @@ export default function WorkspaceHomePage() {
               <h2 className="text-sm font-semibold text-ink/60 dark:text-white/50 uppercase tracking-wide mb-3">
                 {ui.home.continueReading}
               </h2>
-              <div
-                onClick={() => router.push(`/dashboard/workspace/document/${continueDoc.id}`)}
-                className="cursor-pointer rounded-[28px] border border-[#4F7CFF]/20 bg-gradient-to-br from-[#4F7CFF]/[0.06] to-[#32D6A0]/[0.06] p-6 flex items-center gap-5 hover:border-[#4F7CFF]/40 transition-colors"
+              <Link
+                href={`/dashboard/workspace/document/${continueDoc.id}`}
+                className="rounded-[28px] border border-[#4F7CFF]/20 bg-gradient-to-br from-[#4F7CFF]/[0.06] to-[#32D6A0]/[0.06] p-4 sm:p-6 flex items-center gap-4 sm:gap-5 hover:border-[#4F7CFF]/40 transition-colors"
               >
-                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white dark:bg-white/10 text-[#4F7CFF] shadow-soft">
+                <span className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-white dark:bg-white/10 text-[#4F7CFF] shadow-soft">
                   <FileText size={22} />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -327,10 +333,10 @@ export default function WorkspaceHomePage() {
                       : ui.item.lastOpened}
                   </p>
                 </div>
-                <span className="shrink-0 rounded-full px-4 py-2 text-xs font-semibold text-white" style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}>
+                <span className="shrink-0 rounded-full px-4 py-2 text-xs font-semibold text-white" style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }} aria-hidden>
                   {ui.item.open}
                 </span>
-              </div>
+              </Link>
             </motion.section>
           )}
 

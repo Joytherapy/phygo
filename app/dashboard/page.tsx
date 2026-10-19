@@ -1,14 +1,29 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, X, User, Users, FileText, Activity, Search, ChevronRight } from 'lucide-react'
-import Link from 'next/link'
+import { Plus, X, Users, Search, AlertCircle, Sparkles } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
+import ErrorState from '@/components/workspace/ErrorState'
+import {
+  Card, BRAND_GRADIENT, NextPatientCard, NoUpcomingCard, TodoCard, StatTile, Sparkline, Bars, Ring, PatientCard, Skeleton, InlineError,
+  type NextView, type TodoItem,
+} from '@/components/dashboard/HomeCards'
 import { useClinicalLocked } from '@/lib/useClinicalAccess'
-import { useUiStrings } from '@/contexts/LanguageContext'
+import { useLanguage, useUiStrings } from '@/contexts/LanguageContext'
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
+import { useHomeUi } from '@/lib/i18n/homeStrings'
+import { localeForLang } from '@/lib/i18n/agendaStrings'
+import { PATIENT_PROFILE_STRINGS } from '@/lib/i18n/patientProfileStrings'
+import {
+  ageFromBirthDate, composeName, displayAge, isValidEmail, isValidPhone, parseItalianDate, type FieldError,
+} from '@/lib/patients/profile'
+import {
+  appointmentsPerWeekday, daysBetween, followUps, isConfirmed, isToday, lastNoteByPatient, laterToday, nextAppointment,
+  nextByPatient, notesPerWeek, pendingRequests, weekBounds, type HomeAppointment, type HomeNote,
+} from '@/lib/dashboard/home'
 import { lazy } from '@/lib/lazy'
 
 const supabase = lazy(() => createBrowserClient(
@@ -19,366 +34,610 @@ const supabase = lazy(() => createBrowserClient(
 type Patient = {
   id: string
   name: string
+  first_name?: string | null
+  last_name?: string | null
+  birth_date?: string | null
   age: number | null
   main_condition: string | null
   gender: string | null
+  patient_user_id?: string | null
   created_at: string
 }
 
-const avatarGradient = (gender: string | null) => {
-  if (gender === 'male') return 'linear-gradient(135deg, #4F7CFF 0%, #6E8FFF 100%)'
-  if (gender === 'female') return 'linear-gradient(135deg, #F472B6 0%, #C084FC 100%)'
-  return 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)'
-}
+// Each block is loading (undefined), unavailable because its query failed
+// (null), or real data. Never a placeholder number.
+type Loaded<T> = T | null | undefined
 
-const getInitials = (name: string) => {
-  const parts = name.trim().split(/\s+/)
-  if (!parts[0]) return '··'
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-}
+// PostgREST returns at most this many rows per request (max-rows).
+const ROW_CAP = 1000
 
-const STAT_STYLES = [
-  { gradient: 'linear-gradient(135deg, #4F7CFF 0%, #6E8FFF 100%)', glow: 'rgba(79,124,255,0.25)' },
-  { gradient: 'linear-gradient(135deg, #32D6A0 0%, #22B888 100%)', glow: 'rgba(50,214,160,0.25)' },
-  { gradient: 'linear-gradient(135deg, #F472B6 0%, #C084FC 100%)', glow: 'rgba(244,114,182,0.25)' },
-]
+const INPUT_CLASS =
+  'w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.03] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white aria-[invalid=true]:border-red-500/60'
+
+const EMPTY_FORM = { first: '', last: '', birth: '', gender: '', condition: '', phone: '', email: '' }
+type NewForm = typeof EMPTY_FORM
+type FormErrors = Partial<Record<keyof NewForm, FieldError>>
+
+function validateNew(f: NewForm, today: Date): FormErrors {
+  const e: FormErrors = {}
+  if (!f.first.trim()) e.first = 'required'
+  if (!f.last.trim()) e.last = 'required'
+  if (f.first.trim().length > 100) e.first = 'too_long'
+  if (f.last.trim().length > 100) e.last = 'too_long'
+  if (f.birth.trim()) {
+    const p = parseItalianDate(f.birth, today)
+    if (!p.ok) e.birth = p.error
+  }
+  if (f.phone.trim() && !isValidPhone(f.phone.trim())) e.phone = 'phone'
+  if (f.email.trim() && !isValidEmail(f.email.trim())) e.email = 'email'
+  return e
+}
 
 export default function DashboardPage() {
   const ui = useUiStrings()
+  const t = useDashboardUi()
+  const h = useHomeUi()
+  const { lang } = useLanguage()
+  const p = PATIENT_PROFILE_STRINGS[lang]
+  const locale = localeForLang(lang)
   const locked = useClinicalLocked()
+
   const [patients, setPatients] = useState<Patient[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [name, setName] = useState('')
-  const [age, setAge] = useState('')
-  const [condition, setCondition] = useState('')
-  const [gender, setGender] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [greeting, setGreeting] = useState<{ time: string | null; name: string | null }>({ time: null, name: null })
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [appointments, setAppointments] = useState<Loaded<HomeAppointment[]>>(undefined)
+  const [notes, setNotes] = useState<Loaded<HomeNote[]>>(undefined)
+  const [now, setNow] = useState<Date | null>(null)
+  const [displayName, setDisplayName] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  const [busyRequest, setBusyRequest] = useState<string | null>(null)
+  const [requestError, setRequestError] = useState<string | null>(null)
+
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState<NewForm>(EMPTY_FORM)
+  const [formErrors, setFormErrors] = useState<FormErrors>({})
+  const [saving, setSaving] = useState(false)
+  const [createError, setCreateError] = useState<string | null>(null)
+
+  const loadPatients = useCallback(async () => {
+    setLoadState('loading')
+    try {
+      const { data, error } = await supabase.from('patients').select('*').order('created_at', { ascending: false })
+      if (error) throw error
+      setPatients(data || [])
+      setLoadState('ready')
+    } catch (err) {
+      console.error('Patients could not be loaded:', err)
+      setLoadState('error')
+    }
+  }, [])
+
+  // From the start of this week (for the week counter) onwards; the database
+  // rules return only this clinician's appointments, as in the Agenda.
+  const loadAppointments = useCallback(async () => {
+    setAppointments(undefined)
+    const from = weekBounds(new Date()).start
+    try {
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('id, patient_id, scheduled_at, duration_minutes, session_type, status, requested_by, patients(name)')
+        .neq('status', 'cancelled')
+        .gte('scheduled_at', from.toISOString())
+        .order('scheduled_at', { ascending: true })
+        .limit(ROW_CAP)
+      if (error) throw error
+      setAppointments(((data as unknown as HomeAppointment[]) || []).filter((a) => new Date(a.scheduled_at) >= from && a.status !== 'cancelled'))
+    } catch (err) {
+      console.error('Appointments could not be loaded:', err)
+      setAppointments(null)
+    }
+  }, [])
+
+  // The clinician's own notes of the last year: last session per patient,
+  // notes this month and the weekly trend.
+  const loadNotes = useCallback(async (uid: string) => {
+    const since = new Date()
+    since.setFullYear(since.getFullYear() - 1)
+    try {
+      const { data, error } = await supabase
+        .from('notes')
+        .select('patient_id, created_at')
+        .eq('user_id', uid)
+        .gte('created_at', since.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(ROW_CAP)
+      if (error) throw error
+      setNotes(((data as HomeNote[]) || []).filter((n) => new Date(n.created_at) >= since))
+    } catch (err) {
+      console.error('Notes could not be loaded:', err)
+      setNotes(null)
+    }
+  }, [])
 
   useEffect(() => {
-    const hour = new Date().getHours()
-    const timeGreeting =
-      hour < 12 ? ui.patients.greetingMorning : hour < 18 ? ui.patients.greetingAfternoon : ui.patients.greetingEvening
+    setNow(new Date())
+    const tick = setInterval(() => setNow(new Date()), 60_000)
+    loadPatients()
+    loadAppointments()
+    supabase.auth.getUser().then(
+      ({ data: { user } }) => {
+        setDisplayName(user?.user_metadata?.display_name || null)
+        if (user) {
+          loadNotes(user.id)
+        } else setNotes(null)
+      },
+      () => setNotes(null)
+    )
+    return () => clearInterval(tick)
+  }, [loadPatients, loadAppointments, loadNotes])
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      const displayName = user?.user_metadata?.display_name
-      setGreeting({ time: timeGreeting, name: displayName || null })
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ui])
-
-  const loadPatients = async () => {
-    setLoading(true)
-    const { data, error } = await supabase
-      .from('patients')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    if (!error && data) {
-      setPatients(data)
+  const answerRequest = async (id: string, status: 'confirmed' | 'cancelled') => {
+    setBusyRequest(id)
+    setRequestError(null)
+    try {
+      const { error } = await supabase.from('appointments').update({ status }).eq('id', id)
+      if (error) throw error
+    } catch (err) {
+      console.error('Appointment request could not be updated:', err)
+      setRequestError(h.requestError)
     }
-    setLoading(false)
+    setBusyRequest(null)
+    await loadAppointments()
   }
 
-  useEffect(() => {
-    loadPatients()
-  }, [])
+  const setField = (k: keyof NewForm, v: string) => {
+    setForm((f) => ({ ...f, [k]: v }))
+    if (formErrors[k]) setFormErrors((e) => ({ ...e, [k]: undefined }))
+  }
+
+  const toggleForm = () => {
+    setShowForm((v) => !v)
+    setCreateError(null)
+    setFormErrors({})
+  }
 
   const handleCreatePatient = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (locked) return
+    if (locked || saving) return
+    const today = new Date()
+    const errors = validateNew(form, today)
+    setFormErrors(errors)
+    if (Object.keys(errors).length) return
     setSaving(true)
+    setCreateError(null)
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      setSaving(false)
-      return
-    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setCreateError(t.home.createError)
+        return
+      }
+      const birth = form.birth.trim() ? parseItalianDate(form.birth, today) : null
+      const birthIso = birth && birth.ok ? birth.iso : null
+      const { error } = await supabase.from('patients').insert({
+        user_id: user.id,
+        first_name: form.first.trim(),
+        last_name: form.last.trim(),
+        name: composeName(form.first, form.last),
+        birth_date: birthIso,
+        age: birthIso ? ageFromBirthDate(birthIso, today) : null,
+        gender: form.gender || null,
+        main_condition: form.condition.trim() || null,
+        phone: form.phone.trim() || null,
+        contact_email: form.email.trim() || null,
+      })
 
-    const { error } = await supabase.from('patients').insert({
-      user_id: user.id,
-      name,
-      age: age ? parseInt(age) : null,
-      main_condition: condition || null,
-      gender: gender || null,
-    })
+      if (error) {
+        console.error('Patient could not be created:', error)
+        // 42501: refused by the database rules (can_manage_patients()).
+        setCreateError(error.code === '42501' ? t.home.createDenied : t.home.createError)
+        return
+      }
 
-    if (!error) {
-      setName('')
-      setAge('')
-      setCondition('')
-      setGender('')
+      setForm(EMPTY_FORM)
       setShowForm(false)
       await loadPatients()
+    } catch (err) {
+      console.error('Patient could not be created:', err)
+      setCreateError(t.common.networkError)
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
   }
 
-  const filteredPatients = patients.filter((p) =>
-    p.name.toLowerCase().includes(search.trim().toLowerCase())
+  /* ---------- derived views ---------- */
+
+  const byId = useMemo(() => new Map(patients.map((pt) => [pt.id, pt])), [patients])
+  const lastNote = useMemo(() => (notes ? lastNoteByPatient(notes) : null), [notes])
+  const nextOf = useMemo(() => (appointments && now ? nextByPatient(appointments, now) : null), [appointments, now])
+
+  const time = (iso: string) => new Date(iso).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
+  const dayLabel = (d: Date) => {
+    if (!now) return ''
+    const diff = daysBetween(now, d)
+    if (diff === 0) return h.today
+    if (diff === 1) return h.tomorrow
+    return d.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })
+  }
+  const detailOf = (pt: Patient | undefined) => {
+    if (!pt) return ''
+    const age = displayAge({ birth_date: pt.birth_date ?? null, age: pt.age })
+    return [age ? ui.patients.yearsOld.replace('{age}', String(age.years)) : '', pt.main_condition || ''].filter(Boolean).join(' · ')
+  }
+  const lastLabelOf = (id: string) => {
+    if (notes === undefined) return '…'
+    if (!lastNote || !now) return '—'
+    const d = lastNote.get(id)
+    return d ? h.daysAgo(daysBetween(d, now)) : h.noSessionsYet
+  }
+  const nameOf = (a: HomeAppointment) => byId.get(a.patient_id)?.name || a.patients?.name || '—'
+
+  const next = appointments && now ? nextAppointment(appointments, now) : null
+  let nextView: NextView | null = null
+  if (next && now) {
+    const a = next.appointment
+    const pt = byId.get(a.patient_id)
+    const start = new Date(a.scheduled_at)
+    const minutes = Math.max(1, Math.round((start.getTime() - now.getTime()) / 60000))
+    nextView = {
+      patientId: a.patient_id,
+      name: nameOf(a),
+      detail: detailOf(pt),
+      time: time(a.scheduled_at),
+      dayLabel: dayLabel(start),
+      duration: h.minutes(a.duration_minutes || 30),
+      status: next.inProgress ? h.inProgress : isToday(a, now) ? h.startsIn(minutes) : dayLabel(start),
+      inProgress: next.inProgress,
+      video: a.session_type === 'video',
+      typeLabel: a.session_type === 'video' ? h.video : h.inPerson,
+      lastSession: lastLabelOf(a.patient_id),
+      linked: !!pt?.patient_user_id,
+      linkedLabel: pt?.patient_user_id ? h.myPhygoOn : h.myPhygoOff,
+    }
+  }
+  const later =
+    appointments && now
+      ? laterToday(appointments, now, next?.appointment.id ?? null).map((a) => ({ id: a.id, time: time(a.scheduled_at), name: nameOf(a), patientId: a.patient_id }))
+      : []
+
+  const requests = appointments && now ? pendingRequests(appointments, now) : []
+  const todayCount = appointments && now ? appointments.filter((a) => isConfirmed(a) && isToday(a, now)).length : null
+
+  let todo: TodoItem[] | undefined
+  if (appointments !== undefined && notes !== undefined && loadState !== 'loading' && now) {
+    todo = [
+      ...requests.map((a) => {
+        const when = `${dayLabel(new Date(a.scheduled_at))} ${time(a.scheduled_at)}`
+        return { kind: 'request' as const, id: a.id, name: nameOf(a), text: a.session_type === 'video' ? h.requestVideo(when) : h.requestInPerson(when) }
+      }),
+      ...(lastNote && nextOf
+        ? followUps(patients.map((pt) => pt.id).filter((pid) => !requests.some((r) => r.patient_id === pid)), lastNote, nextOf, now).map((f) => ({
+            kind: 'followup' as const,
+            id: `f-${f.patientId}`,
+            patientId: f.patientId,
+            name: byId.get(f.patientId)?.name || '—',
+            text: h.followUp(f.days),
+          }))
+        : []),
+    ]
+  }
+
+  const monthStart = now ? new Date(now.getFullYear(), now.getMonth(), 1) : null
+  const patientsValue: Loaded<number> = loadState === 'loading' ? undefined : loadState === 'error' ? null : patients.length
+  const newThisMonth = monthStart ? patients.filter((pt) => new Date(pt.created_at) >= monthStart).length : 0
+  const notesMonth: Loaded<number> = notes === undefined ? undefined : notes === null || !monthStart ? null : notes.filter((n) => new Date(n.created_at) >= monthStart).length
+  const weekCount: Loaded<number> =
+    appointments === undefined || !now ? undefined : appointments === null ? null : appointmentsPerWeekday(appointments, now).reduce((s, v) => s + v, 0)
+  const linkedCount = patients.filter((pt) => pt.patient_user_id).length
+  const linkedValue: Loaded<number> = patientsValue === undefined ? undefined : patientsValue === null ? null : linkedCount
+
+  const greetingTime = !now ? null : now.getHours() < 12 ? ui.patients.greetingMorning : now.getHours() < 18 ? ui.patients.greetingAfternoon : ui.patients.greetingEvening
+  const dateLine = now ? now.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' }) : ''
+
+  const filteredPatients = patients.filter((pt) => pt.name.toLowerCase().includes(search.trim().toLowerCase()))
+
+  const newPatientButton = (extra: string) => (
+    <button
+      type="button"
+      onClick={toggleForm}
+      disabled={locked}
+      aria-expanded={showForm}
+      aria-controls="new-patient-form"
+      className={`flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-5 min-h-[46px] text-sm font-semibold text-white shadow-[0_14px_36px_-12px_rgba(79,124,255,0.75)] transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 ${extra}`}
+      style={{ background: BRAND_GRADIENT }}
+    >
+      {showForm ? <X size={16} aria-hidden /> : <Plus size={16} aria-hidden />}
+      {showForm ? ui.patients.cancel : ui.patients.newPatient}
+    </button>
+  )
+
+  const field = (k: keyof NewForm, label: string, opts: { required?: boolean; placeholder?: string; type?: string; inputMode?: 'numeric' | 'tel' | 'email'; autoComplete?: string } = {}) => (
+    <div>
+      <label htmlFor={`np-${k}`} className="text-sm font-medium text-ink/70 dark:text-white/60">
+        {label}
+        {opts.required && <span aria-hidden className="text-[#4F7CFF]"> *</span>}
+      </label>
+      <input
+        id={`np-${k}`}
+        type={opts.type || 'text'}
+        inputMode={opts.inputMode}
+        required={opts.required}
+        autoComplete={opts.autoComplete || 'off'}
+        placeholder={opts.placeholder}
+        value={form[k]}
+        onChange={(e) => setField(k, e.target.value)}
+        aria-invalid={formErrors[k] ? true : undefined}
+        aria-describedby={formErrors[k] ? `np-${k}-error` : undefined}
+        className={INPUT_CLASS}
+      />
+      {formErrors[k] && (
+        <p id={`np-${k}-error`} className="mt-1 text-xs text-red-600 dark:text-red-300">
+          {p.errors[formErrors[k]!]}
+        </p>
+      )}
+    </div>
   )
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen overflow-hidden bg-[#f5f6f8] transition-colors dark:bg-[#06070a]">
       <Navbar />
 
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
-        style={{
-          background:
-            'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(244,114,182,0.35) 50%, rgba(50,214,160,0.5) 100%)',
-        }}
-      />
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.06] mix-blend-overlay"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' /%3E%3C/svg%3E\")",
-        }}
-      />
+      {/* aurora and a faint grid, the same palette as the landing */}
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-40 -top-56 h-[620px] w-[820px] rounded-full opacity-25 blur-[120px] dark:opacity-30" style={{ background: 'radial-gradient(circle, #4F7CFF, transparent 65%)' }} />
+        <div className="absolute -right-48 -top-40 h-[560px] w-[720px] rounded-full opacity-20 blur-[120px] dark:opacity-20" style={{ background: 'radial-gradient(circle, #32D6A0, transparent 65%)' }} />
+        <div
+          className="absolute inset-0 hidden opacity-40 dark:block"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px)',
+            backgroundSize: '56px 56px',
+            maskImage: 'radial-gradient(ellipse at 50% 0%, #000 25%, transparent 70%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at 50% 0%, #000 25%, transparent 70%)',
+          }}
+        />
+      </div>
 
-      <div className="relative max-w-4xl mx-auto pt-40 pb-20 px-6">
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex items-start justify-between mb-12"
-        >
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span
-                className="h-1.5 w-1.5 rounded-full animate-pulse"
-                style={{ background: 'linear-gradient(90deg, #4F7CFF, #32D6A0)' }}
-              />
-              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-[#4F7CFF]">
-                {ui.patients.eyebrow}
-              </p>
-            </div>
-            <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight leading-tight text-ink dark:text-white">              {greeting.time ? (greeting.name ? `${greeting.time}, ${greeting.name}` : greeting.time) : ui.patients.greetingDefault}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]">.</span>
+      <main id="main-content" className="relative mx-auto max-w-6xl px-4 pb-28 pt-28 sm:px-6 sm:pb-20 sm:pt-36">
+        <motion.header initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-7 flex flex-col gap-5 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(50,214,160,0.15),0_0_12px_#32D6A0]" />
+              {dateLine || ui.patients.eyebrow}
+            </p>
+            <h1 className="mt-3 break-words font-display text-3xl font-bold leading-tight tracking-tight text-ink dark:text-white sm:text-4xl lg:text-5xl">
+              <span className="bg-gradient-to-r from-ink via-ink to-[#3A5FE0] bg-clip-text text-transparent dark:from-white dark:via-[#c9d6ff] dark:to-[#6ee7c4]">
+                {greetingTime ? (displayName ? `${greetingTime}, ${displayName}` : greetingTime) : ui.patients.greetingDefault}
+              </span>
+              <span className="bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] bg-clip-text text-transparent">.</span>
             </h1>
-            <p className="text-base text-ink/55 dark:text-white/40 mt-3">
-              {ui.patients.subtitle}
+            <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[15px] text-ink/60 dark:text-white/55" data-testid="brief">
+              {todayCount === null ? (
+                <span>{ui.patients.subtitle}</span>
+              ) : (
+                <>
+                  <span>{todayCount ? <b className="font-semibold text-ink dark:text-white">{h.briefAppointments(todayCount)}</b> : h.briefNoAppointments}</span>
+                  {requests.length > 0 && <span className="text-amber-700 dark:text-amber-300">{h.briefRequests(requests.length)}</span>}
+                </>
+              )}
             </p>
           </div>
-                   <div className="hidden sm:flex items-center gap-2">
-            <button
-              onClick={() => setShowForm(!showForm)}
-              disabled={locked}
-              className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              style={{
-                background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)',
-              }}
-            >
-              {showForm ? <X size={16} /> : <Plus size={16} />}
-              {showForm ? ui.patients.cancel : ui.patients.newPatient}
-            </button>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="grid grid-cols-3 gap-4 mb-8"
-        >
-          {[
-            { icon: Users, label: ui.patients.statPatients, value: patients.length },
-            { icon: FileText, label: ui.patients.statNotesThisMonth, value: 0 },
-            { icon: Activity, label: ui.patients.statActivePlans, value: patients.length },
-          ].map((stat, i) => (
-            <div
-              key={i}
-              className="group relative rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-soft hover:shadow-lg transition-shadow duration-300 overflow-hidden"
-            >
-              <div
-                className="pointer-events-none absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-25 blur-2xl transition-transform duration-500 group-hover:scale-125"
-                style={{ background: STAT_STYLES[i].gradient }}
-              />
-              <div
-                className="relative flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-soft mb-3"
-                style={{ background: STAT_STYLES[i].gradient }}
-              >
-                <stat.icon size={16} />
-              </div>
-              <p className="relative font-display text-2xl font-bold text-ink dark:text-white">
-                {stat.value}
-              </p>
-              <p className="relative text-xs text-ink/55 dark:text-white/40 mt-0.5">{stat.label}</p>
-            </div>
-          ))}
-        </motion.div>
+          <div className="hidden sm:flex">{newPatientButton('')}</div>
+        </motion.header>
 
         <ClinicalAccessNotice />
-
-               <div className="mb-6 sm:hidden">
-          <button
-            onClick={() => setShowForm(!showForm)}
-            disabled={locked}
-            className="w-full flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
-          >
-            {showForm ? <X size={16} /> : <Plus size={16} />}
-            {showForm ? ui.patients.cancel : ui.patients.newPatient}
-          </button>
-        </div>
-
-        <div className="relative mb-8">
-          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/30 dark:text-white/30" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={ui.patients.searchPlaceholder}
-            className="w-full rounded-full border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl pl-11 pr-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
-          />
-        </div>
 
         <AnimatePresence>
           {showForm && (
             <motion.form
+              id="new-patient-form"
               initial={{ opacity: 0, y: -10, height: 0 }}
               animate={{ opacity: 1, y: 0, height: 'auto' }}
               exit={{ opacity: 0, y: -10, height: 0 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
               onSubmit={handleCreatePatient}
-              className="mb-10 rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.04] backdrop-blur-2xl shadow-2xl p-8 space-y-5 overflow-hidden"
+              noValidate
+              className="mb-8 overflow-hidden"
             >
-              <div>
-                <label className="text-sm font-medium text-ink/60 dark:text-white/50">
-                  {ui.patients.formNameLabel}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-ink/60 dark:text-white/50">
-                  {ui.patients.formGenderLabel}
-                </label>
-                <div className="flex gap-2 mt-1.5">
-                  {[
-                    { value: 'male', label: ui.patients.genderMale },
-                    { value: 'female', label: ui.patients.genderFemale },
-                    { value: '', label: ui.patients.genderNotSpecified },
-                  ].map((opt) => (
-                    <button
-                      key={opt.label}
-                      type="button"
-                      onClick={() => setGender(opt.value)}
-                      className={`rounded-full px-4 py-2 text-sm font-medium border transition-colors ${
-                        gender === opt.value
-                          ? 'text-white border-transparent'
-                          : 'text-ink/60 dark:text-white/50 border-black/10 dark:border-white/10'
-                      }`}
-                      style={
-                        gender === opt.value
-                          ? { background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }
-                          : undefined
-                      }
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
+              <Card glow className="space-y-5 p-5 sm:p-8">
+                <div>
+                  <h2 className="font-display text-xl font-bold text-ink dark:text-white">{h.newPatientTitle}</h2>
+                  <p className="mt-1 text-xs text-ink/55 dark:text-white/50">{p.requiredHint}</p>
                 </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-ink/60 dark:text-white/50">
-                  {ui.patients.formAgeLabel}
-                </label>
-                <input
-                  type="number"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-ink/60 dark:text-white/50">
-                  {ui.patients.formConditionLabel}
-                </label>
-                <input
-                  type="text"
-                  value={condition}
-                  onChange={(e) => setCondition(e.target.value)}
-                  className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-full px-7 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105 disabled:opacity-60"
-                style={{
-                  background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)',
-                }}
-              >
-                {saving ? ui.patients.savingButton : ui.patients.savePatientButton}
-              </button>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {field('first', p.labels.first_name, { required: true, autoComplete: 'off' })}
+                  {field('last', p.labels.last_name, { required: true })}
+                  {field('birth', p.labels.birth_date, { placeholder: p.birthDateFormat, inputMode: 'numeric' })}
+                  <div role="group" aria-labelledby="np-gender-label">
+                    <p id="np-gender-label" className="text-sm font-medium text-ink/70 dark:text-white/60">{p.labels.gender}</p>
+                    <div className="mt-1.5 flex flex-wrap gap-2">
+                      {[
+                        { value: 'male', label: p.genderOptions.male },
+                        { value: 'female', label: p.genderOptions.female },
+                        { value: '', label: p.genderOptions.none },
+                      ].map((opt) => (
+                        <button
+                          key={opt.label}
+                          type="button"
+                          onClick={() => setField('gender', opt.value)}
+                          aria-pressed={form.gender === opt.value}
+                          className={`min-h-[44px] rounded-xl border px-4 text-sm font-medium transition-colors ${
+                            form.gender === opt.value ? 'border-transparent text-white' : 'border-black/10 text-ink/70 dark:border-white/10 dark:text-white/60'
+                          }`}
+                          style={form.gender === opt.value ? { background: BRAND_GRADIENT } : undefined}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="sm:col-span-2">{field('condition', p.labels.main_condition)}</div>
+                  {field('phone', p.labels.phone, { type: 'tel', inputMode: 'tel' })}
+                  {field('email', p.labels.contact_email, { type: 'email', inputMode: 'email' })}
+                </div>
+                <p className="text-xs text-ink/50 dark:text-white/45">{h.newPatientHint}</p>
+                {createError && (
+                  <p role="alert" data-testid="create-patient-error" className="flex items-start gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300">
+                    <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden />
+                    <span>{createError}</span>
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  disabled={saving || locked}
+                  className="min-h-[46px] rounded-2xl px-7 text-sm font-semibold text-white shadow-[0_14px_36px_-12px_rgba(79,124,255,0.75)] transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100"
+                  style={{ background: BRAND_GRADIENT }}
+                >
+                  {saving ? ui.patients.savingButton : ui.patients.savePatientButton}
+                </button>
+              </Card>
             </motion.form>
           )}
         </AnimatePresence>
 
-        {loading ? (
-          <p className="text-ink/55 dark:text-white/40">{ui.common.loading}</p>
-        ) : patients.length === 0 ? (
-          <div className="rounded-[28px] border border-dashed border-black/10 dark:border-white/15 py-20 text-center">
-            <p className="text-ink/55 dark:text-white/40">
-              {ui.patients.noPatientsYet}
-            </p>
+        <div className="mb-6 sm:hidden">{newPatientButton('w-full')}</div>
+
+        {/* focus: what happens next, and what is waiting */}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.05 }} className="grid gap-4 lg:grid-cols-12">
+          <div className="min-w-0 lg:col-span-8">
+            {appointments === undefined || !now ? (
+              <Card className="space-y-4 p-6 sm:p-7">
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-14 w-2/3" />
+                <Skeleton className="h-11 w-1/2" />
+              </Card>
+            ) : appointments === null ? (
+              <Card className="p-6">
+                <InlineError message={h.appointmentsError} retry={t.common.retry} onRetry={loadAppointments} />
+              </Card>
+            ) : nextView ? (
+              <NextPatientCard
+                title={next && isToday(next.appointment, now) ? h.nextPatient : h.nextAppointment}
+                view={nextView}
+                later={later}
+                labels={{ startSession: h.startSession, openRecord: h.openRecord, lastSession: h.lastSession, laterToday: h.laterToday, openAgenda: h.openAgenda }}
+              />
+            ) : (
+              <NoUpcomingCard title={h.noUpcomingTitle} body={h.noUpcomingBody} cta={h.openAgenda} />
+            )}
           </div>
-        ) : filteredPatients.length === 0 ? (
-          <div className="rounded-[28px] border border-dashed border-black/10 dark:border-white/15 py-16 text-center">
-            <p className="text-ink/55 dark:text-white/40">
-              {ui.patients.noPatientsMatch.replace('{search}', search)}
-            </p>
+          <div className="min-w-0 lg:col-span-4">
+            <TodoCard
+              title={h.todo}
+              items={appointments === null ? [] : todo}
+              empty={h.todoEmpty}
+              busyId={busyRequest}
+              error={requestError}
+              labels={{ accept: h.accept, decline: h.decline }}
+              onAnswer={answerRequest}
+            />
           </div>
-        ) : (
-          <div className="space-y-2">
-            <AnimatePresence>
-              {filteredPatients.map((patient, i) => (
-                                <Link href={`/dashboard/patients/${patient.id}`} key={patient.id} className="block">
-                  <motion.div
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: Math.min(i, 20) * 0.03 }}
-                    exit={{ opacity: 0 }}
-                    whileHover={{ y: -2 }}
-                    className="group w-full rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl px-4 py-3.5 flex items-center gap-3.5 shadow-soft transition-all hover:shadow-lg hover:border-[#4F7CFF]/30 cursor-pointer"
-                  >
-                    <div
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white text-xs font-bold shadow-soft"
-                      style={{
-                        background: avatarGradient(patient.gender),
-                      }}
-                    >
-                      {getInitials(patient.name)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-ink dark:text-white truncate">{patient.name}</p>
-                      <p className="text-xs text-ink/60 dark:text-white/40 truncate">
-                        {patient.age ? ui.patients.yearsOld.replace('{age}', String(patient.age)) : ''}
-                        {patient.age && patient.main_condition ? ' · ' : ''}
-                        {patient.main_condition || ''}
-                      </p>
-                    </div>
-                    <ChevronRight
-                      size={16}
-                      className="shrink-0 text-ink/20 dark:text-white/20 opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0"
-                    />
-                  </motion.div>
-                </Link>
+        </motion.div>
+
+        {/* counters: real figures only */}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mt-4 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 [&>*]:min-w-0">
+          <StatTile index={0} label={h.statPatients} value={patientsValue} extra={newThisMonth ? h.statNewThisMonth(newThisMonth) : undefined} unavailable={t.common.unavailable} loading={ui.common.loading} />
+          <StatTile
+            index={1}
+            label={h.statNotesThisMonth}
+            value={notesMonth}
+            chart={notes && now ? <Sparkline id="notes-spark" values={notesPerWeek(notes, now)} color="#32D6A0" /> : undefined}
+            unavailable={t.common.unavailable}
+            loading={ui.common.loading}
+          />
+          <StatTile
+            index={2}
+            label={h.statWeekAppointments}
+            value={weekCount}
+            href="/dashboard/agenda"
+            chart={appointments && now ? <Bars values={appointmentsPerWeekday(appointments, now)} highlight={(now.getDay() + 6) % 7} /> : undefined}
+            unavailable={t.common.unavailable}
+            loading={ui.common.loading}
+          />
+          <StatTile
+            index={3}
+            label={h.statOnMyPhygo}
+            value={linkedValue}
+            extra={patientsValue ? h.statOfTotal(patientsValue) : undefined}
+            chart={patientsValue ? <span className="text-ink dark:text-white"><Ring part={linkedCount} total={patientsValue} /></span> : undefined}
+            unavailable={t.common.unavailable}
+            loading={ui.common.loading}
+          />
+        </motion.div>
+
+        {/* patients */}
+        <section className="mt-10" aria-labelledby="patients-heading">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 id="patients-heading" className="font-display text-xl font-bold tracking-tight text-ink dark:text-white">
+              {h.patientsHeading}
+              {loadState === 'ready' && patients.length > 0 && <span className="ml-2 font-mono text-sm font-medium text-ink/40 dark:text-white/35">{patients.length}</span>}
+            </h2>
+            {loadState !== 'error' && (patients.length > 0 || loadState === 'loading') && (
+              <div className="relative sm:w-80">
+                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/40 dark:text-white/40" aria-hidden />
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={ui.patients.searchPlaceholder}
+                  aria-label={ui.patients.searchPlaceholder}
+                  className="min-h-[44px] w-full rounded-2xl border border-black/[0.08] bg-white/80 pl-11 pr-4 text-sm text-ink outline-none backdrop-blur-xl transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 dark:border-white/10 dark:bg-white/[0.035] dark:text-white"
+                />
+              </div>
+            )}
+          </div>
+
+          {loadState === 'loading' ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
+              <span className="sr-only" role="status">{ui.common.loading}</span>
+              {[0, 1, 2].map((i) => (
+                <Card key={i} className="space-y-3 p-4">
+                  <Skeleton className="h-11 w-2/3" />
+                  <Skeleton className="h-12" />
+                </Card>
               ))}
-            </AnimatePresence>
-          </div>
-        )}
-      </div>
+            </div>
+          ) : loadState === 'error' ? (
+            <ErrorState title={t.home.loadErrorTitle} message={t.home.loadErrorBody} onRetry={loadPatients} />
+          ) : patients.length === 0 ? (
+            <Card className="px-6 py-14 text-center">
+              <span className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-[#4F7CFF]/10 text-[#4F7CFF]">
+                <Users size={20} aria-hidden />
+              </span>
+              <p className="text-ink/70 dark:text-white/60">{ui.patients.noPatientsYet}</p>
+              {!locked && !showForm && (
+                <button type="button" onClick={toggleForm} className="mt-5 hidden min-h-[44px] items-center gap-2 rounded-2xl px-5 text-sm font-semibold text-white sm:inline-flex" style={{ background: BRAND_GRADIENT }}>
+                  <Sparkles size={15} aria-hidden />
+                  {t.home.addFirstPatient}
+                </button>
+              )}
+            </Card>
+          ) : filteredPatients.length === 0 ? (
+            <Card className="px-6 py-14 text-center">
+              <p className="break-words text-ink/70 dark:text-white/60">{ui.patients.noPatientsMatch.replace('{search}', search)}</p>
+            </Card>
+          ) : (
+            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredPatients.map((pt, i) => {
+                const nx = nextOf?.get(pt.id)
+                return (
+                  <motion.li key={pt.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i, 20) * 0.03 }}>
+                    <PatientCard
+                      id={pt.id}
+                      name={pt.name}
+                      detail={detailOf(pt)}
+                      lastLabel={h.lastSession}
+                      last={lastLabelOf(pt.id)}
+                      nextLabel={h.nextSession}
+                      next={appointments === undefined ? '…' : nx ? `${dayLabel(nx)} ${nx.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}` : '—'}
+                      linked={!!pt.patient_user_id}
+                      linkedLabel={pt.patient_user_id ? h.myPhygoOn : h.myPhygoOff}
+                    />
+                  </motion.li>
+                )
+              })}
+            </ul>
+          )}
+        </section>
+      </main>
     </div>
   )
 }

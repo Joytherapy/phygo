@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Clock, Video, MapPin, Check, X, Loader2, Plus, Sparkles, CalendarX } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useAgendaUi, localeForLang } from '@/lib/i18n/agendaStrings'
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
 import { MY_PHYGO_STRINGS } from '@/lib/i18n/myPhygoStrings'
 import { cancelAppointment } from '@/lib/appointments'
 import { lazy } from '@/lib/lazy'
@@ -46,6 +47,7 @@ export default function AppointmentScheduler({
 }) {
   const { lang } = useLanguage()
   const ui = useAgendaUi()
+  const t = useDashboardUi()
   const locale = localeForLang(lang)
   const sched = MY_PHYGO_STRINGS[lang].scheduler
   const [appointments, setAppointments] = useState<Appointment[]>([])
@@ -60,6 +62,7 @@ export default function AppointmentScheduler({
   const [confirmingCancel, setConfirmingCancel] = useState(false)
   const [cancelling, setCancelling] = useState(false)
   const [cancelError, setCancelError] = useState<string | null>(null)
+  const [statusError, setStatusError] = useState<string | null>(null)
 
   const days = nextDays(14)
 
@@ -128,7 +131,10 @@ export default function AppointmentScheduler({
   }
 
   const updateStatus = async (id: string, status: 'confirmed' | 'cancelled') => {
-    await supabase.from('appointments').update({ status }).eq('id', id)
+    setStatusError(null)
+    const { error: updateError } = await supabase.from('appointments').update({ status }).eq('id', id)
+    // A refused update (e.g. database rules) used to fail silently.
+    if (updateError) setStatusError(t.agenda.statusError)
     await loadAppointments()
   }
 
@@ -236,8 +242,9 @@ export default function AppointmentScheduler({
                 </div>
               ) : (
                 <button
+                  type="button"
                   onClick={() => setConfirmingCancel(true)}
-                  className="relative mt-3 flex items-center gap-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:underline"
+                  className="relative mt-2 -ml-2 flex min-h-[40px] items-center gap-1.5 rounded-full px-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:underline"
                 >
                   <CalendarX size={13} />
                   {ui.cancelFlow.cancelAppointment}
@@ -249,6 +256,11 @@ export default function AppointmentScheduler({
 
       {mode === 'physio' && pendingRequests.length > 0 && (
         <div className="mb-4 space-y-2">
+          {statusError && (
+            <p role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-700 dark:text-red-300">
+              {statusError}
+            </p>
+          )}
           {pendingRequests.map((req) => (
             <motion.div
               key={req.id}
@@ -264,20 +276,22 @@ export default function AppointmentScheduler({
               </div>
               <div className="flex gap-2 shrink-0">
                 <button
+                  type="button"
                   onClick={() => updateStatus(req.id, 'confirmed')}
-                  aria-label={sched.acceptRequest}
-                  title={sched.acceptRequest}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500 text-white hover:scale-110 transition-transform"
+                  aria-label={t.agenda.confirmRequest}
+                  title={t.agenda.confirmRequest}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-white hover:scale-110 transition-transform"
                 >
-                  <Check size={14} />
+                  <Check size={15} aria-hidden />
                 </button>
                 <button
+                  type="button"
                   onClick={() => updateStatus(req.id, 'cancelled')}
-                  aria-label={sched.declineRequest}
-                  title={sched.declineRequest}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white hover:scale-110 transition-transform"
+                  aria-label={t.agenda.declineRequest}
+                  title={t.agenda.declineRequest}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-red-600 text-white hover:scale-110 transition-transform"
                 >
-                  <X size={14} />
+                  <X size={15} aria-hidden />
                 </button>
               </div>
             </motion.div>

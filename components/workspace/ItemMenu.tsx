@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { MoreHorizontal } from 'lucide-react'
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
 
 export type ItemMenuAction = {
   key: string
@@ -15,6 +16,7 @@ export type ItemMenuAction = {
 // Shared "..." action menu for FolderCard/DocumentCard — every action here is
 // wired to a real handler by the caller; this component never invents one.
 export default function ItemMenu({ actions }: { actions: ItemMenuAction[] }) {
+  const t = useDashboardUi()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -23,18 +25,28 @@ export default function ItemMenu({ actions }: { actions: ItemMenuAction[] }) {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
     window.addEventListener('mousedown', handler)
-    return () => window.removeEventListener('mousedown', handler)
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('mousedown', handler)
+      window.removeEventListener('keydown', onKey)
+    }
   }, [open])
 
   return (
     <div ref={ref} className="relative" onClick={(e) => e.stopPropagation()}>
       <button
-        aria-label="More actions"
+        type="button"
+        aria-label={t.workspace.moreActions}
+        aria-expanded={open}
+        aria-haspopup="menu"
         onClick={() => setOpen((o) => !o)}
-        className="flex h-7 w-7 items-center justify-center rounded-full text-ink/55 dark:text-white/40 hover:bg-ink/5 dark:hover:bg-white/10 hover:text-ink dark:hover:text-white transition-colors"
+        className="-m-1.5 flex h-10 w-10 items-center justify-center rounded-full text-ink/55 dark:text-white/40 hover:bg-ink/5 dark:hover:bg-white/10 hover:text-ink dark:hover:text-white transition-colors"
       >
-        <MoreHorizontal size={15} />
+        <MoreHorizontal size={16} aria-hidden />
       </button>
       <AnimatePresence>
         {open && (
@@ -47,11 +59,12 @@ export default function ItemMenu({ actions }: { actions: ItemMenuAction[] }) {
             {actions.map((a) => (
               <button
                 key={a.key}
+                type="button"
                 onClick={() => {
                   setOpen(false)
                   a.onSelect()
                 }}
-                className={`w-full flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
+                className={`w-full flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                   a.destructive
                     ? 'text-red-500 hover:bg-red-500/10'
                     : 'text-ink/70 dark:text-white/70 hover:bg-ink/5 dark:hover:bg-white/10'

@@ -5,6 +5,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Search, X, ChevronDown, Stethoscope, ChevronRight, BookOpen } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings';
+import ErrorState from '@/components/workspace/ErrorState';
 
 // Sezione "Patologie" del dashboard (menu Libreria) — elenco di tutte le
 // condizioni cliniche di `knowledge_base` con ricerca + filtro per sistema,
@@ -200,6 +202,7 @@ export default function ConditionsLibraryPage() {
   const lang: Lang = rawLang === 'en' || rawLang === 'es' || rawLang === 'fr' ? rawLang : 'it';
   const ui = UI[lang];
   const systemLabels = SYSTEM_LABELS[lang];
+  const t = useDashboardUi();
 
   const [conditions, setConditions] = useState<ConditionSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -208,14 +211,25 @@ export default function ConditionsLibraryPage() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [detailCache, setDetailCache] = useState<Map<number, ConditionDetail>>(new Map());
   const [loadingDetailId, setLoadingDetailId] = useState<number | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const [detailErrorId, setDetailErrorId] = useState<number | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
+  // A failed request shows an error with Retry; before, it rendered as
+  // "no conditions found", which reads as missing content.
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setLoadError(false);
     fetch(`/api/conditions-library/list?lang=${lang}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (!cancelled) setConditions(data.conditions || []);
+      .then(async (r) => {
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok || !Array.isArray(data.conditions)) throw new Error(`conditions list: ${r.status}`);
+        if (!cancelled) setConditions(data.conditions);
+      })
+      .catch((err) => {
+        console.error('Conditions could not be loaded:', err);
+        if (!cancelled) setLoadError(true);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -223,7 +237,7 @@ export default function ConditionsLibraryPage() {
     return () => {
       cancelled = true;
     };
-  }, [lang]);
+  }, [lang, reloadKey]);
 
   const systemCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -248,17 +262,23 @@ export default function ConditionsLibraryPage() {
       return;
     }
     setExpandedId(id);
-    if (!detailCache.has(id)) {
-      setLoadingDetailId(id);
-      fetch(`/api/conditions-library/${id}?lang=${lang}`)
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.condition) {
-            setDetailCache((prev) => new Map(prev).set(id, data.condition));
-          }
-        })
-        .finally(() => setLoadingDetailId((cur) => (cur === id ? null : cur)));
-    }
+    if (!detailCache.has(id)) loadDetail(id);
+  };
+
+  const loadDetail = (id: number) => {
+    setLoadingDetailId(id);
+    setDetailErrorId((cur) => (cur === id ? null : cur));
+    fetch(`/api/conditions-library/${id}?lang=${lang}`)
+      .then(async (r) => {
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok || !data.condition) throw new Error(`condition ${id}: ${r.status}`);
+        setDetailCache((prev) => new Map(prev).set(id, data.condition));
+      })
+      .catch((err) => {
+        console.error('Condition detail could not be loaded:', err);
+        setDetailErrorId(id);
+      })
+      .finally(() => setLoadingDetailId((cur) => (cur === id ? null : cur)));
   };
 
   return (
@@ -331,8 +351,10 @@ export default function ConditionsLibraryPage() {
               <div key={i} className="h-14 rounded-2xl bg-ink/5 dark:bg-white/5 animate-pulse" />
             ))}
           </div>
+        ) : loadError ? (
+          <ErrorState message={t.library.loadError} onRetry={() => setReloadKey((k) => k + 1)} />
         ) : filtered.length === 0 ? (
-          <p className="text-sm text-ink/55 dark:text-white/40">{ui.noResults}</p>
+          <p className="text-sm text-ink/60 dark:text-white/50">{ui.noResults}</p>
         ) : (
           <div className="space-y-2">
             {filtered.map((c) => {
@@ -346,7 +368,8 @@ export default function ConditionsLibraryPage() {
                   <button
                     type="button"
                     onClick={() => toggleExpand(c.id)}
-                    className="w-full flex items-center justify-between gap-3 px-5 py-3.5 text-left hover:bg-ink/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+                    aria-expanded={isOpen}
+                    className="w-full min-h-[48px] flex items-center justify-between gap-3 px-5 py-3.5 text-left hover:bg-ink/[0.02] dark:hover:bg-white/[0.02] transition-colors"
                   >
                     <span className="flex items-center gap-2.5 min-w-0">
                       <BookOpen size={15} className="shrink-0 text-[#4F7CFF]" />
@@ -386,6 +409,17 @@ export default function ConditionsLibraryPage() {
                                 </div>
                               )}
                             </>
+                          ) : detailErrorId === c.id ? (
+                            <div role="alert" className="flex flex-wrap items-center gap-3 py-3">
+                              <p className="text-sm text-red-600 dark:text-red-400">{t.library.loadError}</p>
+                              <button
+                                type="button"
+                                onClick={() => loadDetail(c.id)}
+                                className="min-h-[40px] rounded-full border border-black/15 dark:border-white/15 px-4 text-sm font-semibold text-ink/80 dark:text-white/80 hover:bg-ink/5 dark:hover:bg-white/10"
+                              >
+                                {t.common.retry}
+                              </button>
+                            </div>
                           ) : null}
                         </div>
                       </motion.div>
