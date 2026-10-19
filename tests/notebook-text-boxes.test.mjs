@@ -130,3 +130,45 @@ test('a selected note follows the toolbar size and can be resized from its corne
     await ctx.close();
   }
 });
+
+test('a new box can be resized while it is still being written', { skip }, async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 }, locale: 'it-IT', reducedMotion: 'reduce' });
+  const [name, value] = sessionCookie('tok-clin', U).split(/=(.*)/s);
+  await ctx.addCookies([{ name, value, url: app.url }]);
+  const page = await ctx.newPage();
+  try {
+    await page.goto(`${app.url}/dashboard/workspace/notebook/${NB}`);
+    await page.getByTestId('text-note').first().waitFor({ timeout: 20000 });
+    await page.getByRole('button', { name: 'Testo', exact: true }).click();
+
+    // Click empty paper well below the existing note, then type.
+    const existing = await page.getByTestId('text-note').first().boundingBox();
+    await page.mouse.click(existing.x + 40, existing.y + existing.height + 260);
+    const draft = page.getByTestId('text-draft');
+    await draft.waitFor();
+    await page.keyboard.type('Nuova nota in scrittura');
+
+    const before = await draft.boundingBox();
+    const corner = draft.getByRole('button', { name: 'Ridimensiona riquadro' });
+    const c = await corner.boundingBox();
+    await page.mouse.move(c.x + c.width / 2, c.y + c.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(c.x + 200, c.y + 100, { steps: 8 });
+    await page.mouse.up();
+
+    const after = await draft.boundingBox();
+    assert.ok(after.width > before.width + 150 && after.height > before.height + 70, `draft grew (${before.width}x${before.height} -> ${after.width}x${after.height})`);
+    assert.equal(await draft.locator('textarea').inputValue(), 'Nuova nota in scrittura', 'the text is kept');
+    assert.equal(await draft.locator('textarea').evaluate((el) => el === document.activeElement), true, 'still writing in the box');
+
+    // Clicking away saves the note with its new size.
+    const countBefore = fake.state.tables.workspace_annotations.length;
+    await page.mouse.click(existing.x + 900, existing.y + 600);
+    await until(() => fake.state.tables.workspace_annotations.length === countBefore + 1, 'new note saved');
+    const created = fake.state.tables.workspace_annotations.at(-1).data;
+    assert.equal(created.body, 'Nuova nota in scrittura');
+    assert.ok(created.width > 0.26 && typeof created.height === 'number', `saved with its size (${created.width}, ${created.height})`);
+  } finally {
+    await ctx.close();
+  }
+});

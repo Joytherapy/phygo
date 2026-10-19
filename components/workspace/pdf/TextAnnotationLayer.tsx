@@ -65,7 +65,7 @@ export default function TextAnnotationLayer({
 }) {
   const ui = useWorkspaceUi()
   const layerRef = useRef<HTMLDivElement>(null)
-  const [draft, setDraft] = useState<{ x: number; y: number; body: string } | null>(null)
+  const [draft, setDraft] = useState<{ x: number; y: number; body: string; width?: number; height?: number } | null>(null)
   const dragState = useRef<{ id: string; startX: number; startY: number; origX: number; origY: number; currentX: number; currentY: number } | null>(null)
   const [dragPreview, setDragPreview] = useState<{ id: string; x: number; y: number } | null>(null)
   const [resizePreview, setResizePreview] = useState<{ id: string; width: number; height?: number } | null>(null)
@@ -115,7 +115,11 @@ export default function TextAnnotationLayer({
     if (!draft) return
     const body = draft.body.trim()
     setDraft(null)
-    if (body) onCreate({ x: draft.x, y: draft.y, body, color, fontSize, width: DEFAULT_BOX_WIDTH, backgroundColor })
+    if (body) {
+      const data: TextAnnotationData = { x: draft.x, y: draft.y, body, color, fontSize, width: draft.width ?? DEFAULT_BOX_WIDTH, backgroundColor }
+      if (draft.height !== undefined) data.height = draft.height
+      onCreate(data)
+    }
   }
 
   const resizeNote = (a: WorkspaceAnnotation, dir: 1 | -1) => {
@@ -218,9 +222,40 @@ export default function TextAnnotationLayer({
   // pointerdown stops that default focus-shift/blur, so starting a drag from
   // the border no longer commits (or loses focus from) the note you're still
   // writing — you can keep typing after moving it, exactly like before.
+  // The box being written can be resized too (same edges and corner as a
+  // saved note). preventDefault keeps the focus, and the text, in the box.
+  const handleDraftResizeStart = (e: ReactPointerEvent, axis: 'x' | 'y' | 'xy') => {
+    e.stopPropagation()
+    e.preventDefault()
+    const rect = layerRef.current?.getBoundingClientRect()
+    const box = (e.currentTarget as HTMLElement).parentElement?.getBoundingClientRect()
+    if (!rect || !box || !draft) return
+    const startX = e.clientX
+    const startY = e.clientY
+    const origW = box.width / rect.width
+    const origH = box.height / rect.height
+    const minH = (fontSize * 1.5 + 16) / rect.height
+    const { x: dx0, y: dy0 } = draft
+    const move = (ev: PointerEvent) => {
+      setDraft((d) => {
+        if (!d) return d
+        const next = { ...d }
+        if (axis !== 'y') next.width = Math.min(1 - dx0, Math.max(MIN_BOX_PX / rect.width, origW + (ev.clientX - startX) / rect.width))
+        if (axis !== 'x') next.height = Math.min(1 - dy0, Math.max(minH, origH + (ev.clientY - startY) / rect.height))
+        return next
+      })
+    }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+  }
+
   const handleDraftPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement
-    if (target.closest('textarea')) return
+    if (target.closest('textarea, [data-resize]')) return
     e.preventDefault()
     const startX = e.clientX
     const startY = e.clientY
@@ -400,13 +435,15 @@ export default function TextAnnotationLayer({
           // no background is selected (the default), a solid preview box
           // when the user picked one from the toolbar.
           onPointerDown={handleDraftPointerDown}
-          className={`absolute rounded-lg backdrop-blur-sm ${
+          data-testid="text-draft"
+          className={`absolute flex flex-col rounded-lg backdrop-blur-sm ${
             backgroundColor ? 'border border-[#7C83FF]/40 shadow-lift' : 'border border-dashed border-[#7C83FF]/50'
           }`}
           style={{
             left: `${draft.x * 100}%`,
             top: `${draft.y * 100}%`,
-            width: `${DEFAULT_BOX_WIDTH * 100}%`,
+            width: `${(draft.width ?? DEFAULT_BOX_WIDTH) * 100}%`,
+            height: draft.height !== undefined ? `${draft.height * 100}%` : undefined,
             pointerEvents: 'auto',
             minWidth: 90,
             backgroundColor: backgroundColor ?? 'transparent',
@@ -423,8 +460,34 @@ export default function TextAnnotationLayer({
             }}
             rows={2}
             placeholder={ui.annotate.textPlaceholder}
-            className="w-full resize-none bg-transparent px-2 py-1.5 text-sm outline-none placeholder:text-ink/30 dark:placeholder:text-white/30"
-            style={{ color, fontSize, cursor: 'text' }}
+            className={`w-full resize-none bg-transparent px-2 py-1.5 text-sm outline-none placeholder:text-ink/30 dark:placeholder:text-white/30 ${draft.height !== undefined ? 'min-h-0 flex-1' : ''}`}
+            style={{ color, fontSize, lineHeight: 1.35, cursor: 'text' }}
+          />
+          {/* Resize handles while writing: right edge, bottom edge, corner. */}
+          <span
+            data-resize="x"
+            onPointerDown={(e) => handleDraftResizeStart(e, 'x')}
+            className="absolute -right-1 top-3 bottom-3 z-10 w-2 cursor-ew-resize"
+            style={{ touchAction: 'none' }}
+          >
+            <span className="absolute inset-y-0 left-1/2 my-auto h-6 w-1 -translate-x-1/2 rounded-full bg-[#8B95FF]/70" />
+          </span>
+          <span
+            data-resize="y"
+            onPointerDown={(e) => handleDraftResizeStart(e, 'y')}
+            className="absolute -bottom-1 left-3 right-3 z-10 h-2 cursor-ns-resize"
+            style={{ touchAction: 'none' }}
+          >
+            <span className="absolute inset-x-0 top-1/2 mx-auto h-1 w-6 -translate-y-1/2 rounded-full bg-[#8B95FF]/70" />
+          </span>
+          <span
+            data-resize="xy"
+            role="button"
+            aria-label={ui.annotate.resizeBox}
+            title={ui.annotate.resizeBox}
+            onPointerDown={(e) => handleDraftResizeStart(e, 'xy')}
+            className="absolute -bottom-1.5 -right-1.5 z-10 h-3.5 w-3.5 cursor-nwse-resize rounded-full border-2 border-white bg-[#8B95FF] shadow dark:border-[#0c0d12]"
+            style={{ touchAction: 'none' }}
           />
         </div>
       )}
