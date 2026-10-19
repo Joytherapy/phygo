@@ -232,3 +232,37 @@ button:focus-visible {
 .lp-marquee:focus-within .lp-marquee-track {
   animation-play-state: paused;
 }
+
+/* Dashboard home: a slow light running around the focus card's edge, and a
+   soft spotlight that follows the pointer on cards. Both are decoration only
+   and stop for people who prefer reduced motion. */
+@property --phygo-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes phygo-edge-spin {
+  to {
+    --phygo-angle: 360deg;
+  }
+}
+.phygo-edge-light {
+  background: conic-gradient(
+    from var(--phygo-angle),
+    transparent 0deg,
+    rgba(165, 180, 255, 0.65) 50deg,
+    transparent 110deg,
+    transparent 230deg,
+    rgba(167, 139, 250, 0.4) 290deg,
+    transparent 350deg
+  );
+  animation: phygo-edge-spin 10s linear infinite;
+}
+.phygo-spotlight {
+  background: radial-gradient(420px circle at var(--spot-x, 50%) var(--spot-y, 0%), rgba(255, 255, 255, 0.06), transparent 45%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .phygo-edge-light {
+    animation: none;
+  }
+}

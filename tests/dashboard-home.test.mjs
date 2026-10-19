@@ -139,6 +139,8 @@ test('next patient: name, time, video, last session, and the actions open the se
   try {
     const card = page.getByTestId('next-patient');
     await card.waitFor({ timeout: 15000 });
+    // The last session comes from the notes, which may arrive after the appointments.
+    await card.getByText('3 giorni fa').waitFor({ timeout: 15000 });
     const text = await card.innerText();
     // Near midnight the appointment 40 minutes from now falls on tomorrow.
     const sameDay = new Date(Date.now() + 40 * 60000).getDate() === new Date().getDate();
