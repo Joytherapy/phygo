@@ -3,10 +3,12 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
-import { useEntryLang } from "@/lib/i18n/useEntryLang";
+import { useChosenEntryLang, useEntryLang, useSetEntryLang } from "@/lib/i18n/useEntryLang";
+import { rememberLanguage } from "@/lib/i18n/rememberLanguage";
 import { ENTRY_STRINGS, localizeAuthError } from "@/lib/i18n/entryStrings";
 import { publicPath, myPhygoLoginHref } from "@/lib/i18n/landingStrings";
 import BrandMark from "@/components/BrandMark";
+import LanguageMenu from "@/components/LanguageMenu";
 
 export default function LoginPage() {
   return (
@@ -21,6 +23,8 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const supabase = createClient();
   const lang = useEntryLang();
+  const chosenLang = useChosenEntryLang();
+  const setEntryLang = useSetEntryLang();
   const t = ENTRY_STRINGS[lang].login;
 
   const [mode, setMode] = useState<"login" | "signup">(() =>
@@ -50,6 +54,9 @@ function LoginForm() {
         if (error) {
           setError(error.name === "AuthRetryableFetchError" ? t.serviceUnavailable : localizeAuthError(error.message, t));
         } else {
+          // The language chosen on the site or on this page becomes the
+          // account's, so the dashboard opens in it (it defaults to 'it').
+          if (chosenLang) await rememberLanguage(supabase, chosenLang);
           router.push("/dashboard");
           router.refresh();
           return; // stays on "Please wait" while the dashboard opens
@@ -85,6 +92,7 @@ function LoginForm() {
       />
 
       <div className="relative w-full max-w-sm rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.04] backdrop-blur-2xl shadow-2xl p-8">
+        <LanguageMenu value={lang} onChange={setEntryLang} className="absolute right-4 top-4" />
         <div className="flex justify-center mb-6">
           <BrandMark />
         </div>

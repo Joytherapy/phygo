@@ -877,6 +877,7 @@ interface UiDict {
     resetPortalConfirm: string;
     inviteReadyHeading: string;
     inviteShareText: string;
+    inviteLanguageLabel: string;
     copied: string;
     copyButton: string;
     inviteError: string;
@@ -2247,6 +2248,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       resetPortalConfirm: "Questo disconnetterà l'account portale attuale di {name}. Dovrà usare un nuovo link di invito per accedere di nuovo. Continuare?",
       inviteReadyHeading: 'Link di invito pronto — valido 7 giorni',
       inviteShareText: 'Condividi questo link con {name} per accedere al portale My Phygo.',
+      inviteLanguageLabel: 'Lingua del paziente:',
       copied: 'Copiato',
       copyButton: 'Copia',
       inviteError: "Impossibile creare l'invito. Riprova.",
@@ -3651,6 +3653,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       resetPortalConfirm: "This will disconnect {name}'s current portal account. They will need a new invite link to log in again. Continue?",
       inviteReadyHeading: 'Invite link ready — valid for 7 days',
       inviteShareText: 'Share this with {name} so they can access their My Phygo portal.',
+      inviteLanguageLabel: "Patient's language:",
       copied: 'Copied',
       copyButton: 'Copy',
       inviteError: 'Could not create invite. Please try again.',
@@ -5055,6 +5058,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       resetPortalConfirm: 'Esto desconectará la cuenta actual del portal de {name}. Necesitará un nuevo enlace de invitación para volver a iniciar sesión. ¿Continuar?',
       inviteReadyHeading: 'Enlace de invitación listo — válido 7 días',
       inviteShareText: 'Comparte esto con {name} para que pueda acceder a su portal My Phygo.',
+      inviteLanguageLabel: 'Idioma del paciente:',
       copied: 'Copiado',
       copyButton: 'Copiar',
       inviteError: 'No se pudo crear la invitación. Inténtalo de nuevo.',
@@ -6459,6 +6463,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       resetPortalConfirm: "Cela déconnectera le compte portail actuel de {name}. Il/elle aura besoin d'un nouveau lien d'invitation pour se reconnecter. Continuer ?",
       inviteReadyHeading: "Lien d'invitation prêt — valable 7 jours",
       inviteShareText: "Partagez ceci avec {name} pour qu'il/elle puisse accéder à son portail My Phygo.",
+      inviteLanguageLabel: 'Langue du patient :',
       copied: 'Copié',
       copyButton: 'Copier',
       inviteError: "Impossible de créer l'invitation. Veuillez réessayer.",
