@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react'
 import { Plus, Check, X, Star, Trash2, Pencil, Ban } from 'lucide-react'
 import Navbar from '@/components/Navbar'
-import { useUiStrings } from '@/contexts/LanguageContext'
+import { useLanguage, useUiStrings } from '@/contexts/LanguageContext'
+import { useAdminStrings } from '@/lib/i18n/adminStrings'
+import { localeForLang } from '@/lib/i18n/agendaStrings'
 
 interface AdminEvent {
   id: string
@@ -49,6 +51,9 @@ const emptyForm = () => ({
 // how events get into the system today.
 export default function EventsAdminPage() {
   const ui = useUiStrings()
+  const { lang } = useLanguage()
+  const a = useAdminStrings()
+  const t = a.events
   const [events, setEvents] = useState<AdminEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState<string | null>(null)
@@ -91,7 +96,7 @@ export default function EventsAdminPage() {
     try {
       const res = await fetch(`/api/events/admin/${id}`, { method: 'DELETE' })
       if (!res.ok) {
-        alert(res.status === 403 || res.status === 401 ? 'Accesso riservato agli amministratori.' : 'Eliminazione non riuscita')
+        alert(res.status === 403 || res.status === 401 ? a.common.adminOnly : t.deleteError)
         return
       }
       setEvents((prev) => prev.filter((e) => e.id !== id))
@@ -166,10 +171,10 @@ export default function EventsAdminPage() {
       <Navbar />
 
       <div className="relative max-w-4xl mx-auto pt-40 pb-24 px-6">
-        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#8B95FF] mb-3">Admin</p>
+        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#8B95FF] mb-3">{a.common.eyebrow}</p>
         <div className="flex items-center justify-between gap-4 mb-2 flex-wrap">
           <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white">
-            Events — {ui.events.heading}
+            {t.title}
           </h1>
           <button
             onClick={() => {
@@ -180,20 +185,20 @@ export default function EventsAdminPage() {
             style={{ background: 'linear-gradient(90deg, #8B95FF 0%, #A78BFA 100%)' }}
           >
             <Plus size={14} />
-            {form.id ? 'Edit event' : 'Add event'}
+            {form.id ? t.editEvent : t.addEvent}
           </button>
         </div>
 
         {showForm && (
           <div className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 mb-8 grid sm:grid-cols-2 gap-3">
             <input
-              placeholder="Title"
+              placeholder={t.titlePh}
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               className="sm:col-span-2 rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             />
             <textarea
-              placeholder="Description"
+              placeholder={t.descriptionPh}
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               rows={3}
@@ -233,25 +238,25 @@ export default function EventsAdminPage() {
               className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             />
             <input
-              placeholder="City"
+              placeholder={t.cityPh}
               value={form.city}
               onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
               className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             />
             <input
-              placeholder="Country"
+              placeholder={t.countryPh}
               value={form.country}
               onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))}
               className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             />
             <input
-              placeholder="Official website URL"
+              placeholder={t.officialUrlPh}
               value={form.official_url}
               onChange={(e) => setForm((f) => ({ ...f, official_url: e.target.value }))}
               className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             />
             <input
-              placeholder="Registration URL"
+              placeholder={t.registrationUrlPh}
               value={form.registration_url}
               onChange={(e) => setForm((f) => ({ ...f, registration_url: e.target.value }))}
               className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
@@ -263,13 +268,13 @@ export default function EventsAdminPage() {
             {!form.is_free && (
               <div className="flex gap-2">
                 <input
-                  placeholder="Price"
+                  placeholder={t.pricePh}
                   value={form.price}
                   onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
                   className="flex-1 rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
                 />
                 <input
-                  placeholder="Currency"
+                  placeholder={t.currencyPh}
                   value={form.currency}
                   onChange={(e) => setForm((f) => ({ ...f, currency: e.target.value }))}
                   className="w-24 rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
@@ -284,7 +289,7 @@ export default function EventsAdminPage() {
                 }}
                 className="rounded-full px-4 py-2 text-xs font-semibold text-ink/60 dark:text-white/60"
               >
-                Cancel
+                {a.common.cancel}
               </button>
               <button
                 onClick={submitForm}
@@ -292,7 +297,7 @@ export default function EventsAdminPage() {
                 className="rounded-full px-5 py-2 text-xs font-semibold text-white disabled:opacity-50"
                 style={{ background: 'linear-gradient(90deg, #8B95FF 0%, #A78BFA 100%)' }}
               >
-                {saving ? '...' : form.id ? 'Save changes' : 'Create event'}
+                {saving ? '…' : form.id ? t.saveChanges : t.create}
               </button>
             </div>
           </div>
@@ -303,13 +308,13 @@ export default function EventsAdminPage() {
             onClick={() => setFilter('pending_review')}
             className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${filter === 'pending_review' ? 'text-white bg-gradient-to-r from-[#8B95FF] to-[#A78BFA]' : 'text-ink/60 dark:text-white/60 bg-black/[0.04] dark:bg-white/5'}`}
           >
-            Pending review · {events.filter((e) => e.moderation_status === 'pending_review').length}
+            {t.pendingReview(events.filter((e) => e.moderation_status === 'pending_review').length)}
           </button>
           <button
             onClick={() => setFilter('all')}
             className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${filter === 'all' ? 'text-white bg-gradient-to-r from-[#8B95FF] to-[#A78BFA]' : 'text-ink/60 dark:text-white/60 bg-black/[0.04] dark:bg-white/5'}`}
           >
-            All · {events.length}
+            {t.all(events.length)}
           </button>
         </div>
 
@@ -317,7 +322,7 @@ export default function EventsAdminPage() {
           <p className="text-sm text-ink/60 dark:text-white/50">{ui.events.loadingEvents}</p>
         ) : shown.length === 0 ? (
           <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
-            <p className="text-sm text-ink/60 dark:text-white/50">Nothing here right now.</p>
+            <p className="text-sm text-ink/60 dark:text-white/50">{a.common.nothingHere}</p>
           </div>
         ) : (
           <div className="grid gap-3">
@@ -325,33 +330,33 @@ export default function EventsAdminPage() {
               <div key={event.id} className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5">
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-ink/60 dark:text-white/60">
-                    {event.moderation_status}
+                    {t.moderation[event.moderation_status] ?? event.moderation_status}
                   </span>
                   <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-ink/60 dark:text-white/60">
                     {ui.events.categoryLabels[event.category as keyof typeof ui.events.categoryLabels] || event.category}
                   </span>
                   {event.is_featured && (
                     <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 flex items-center gap-1">
-                      <Star size={10} /> Featured
+                      <Star size={10} /> {t.featured}
                     </span>
                   )}
                 </div>
 
                 <h2 className="text-base font-semibold text-ink dark:text-white mb-1">{event.title}</h2>
                 <p className="text-xs text-ink/60 dark:text-white/50 mb-4">
-                  {new Date(event.start_date).toLocaleDateString()} · {event.city || event.country || event.location_type}
+                  {new Date(event.start_date).toLocaleDateString(localeForLang(lang))} · {event.city || event.country || (event.location_type === 'online' ? ui.events.onlineLabel : event.location_type === 'hybrid' ? ui.events.hybridLabel : ui.events.inPersonLabel)}
                 </p>
 
                 <div className="flex items-center gap-2 flex-wrap">
                   {event.moderation_status === 'pending_review' && (
                     <>
-                      <ActionButton icon={<Check size={12} />} label="Approve" onClick={() => patch(event.id, { moderation_status: 'approved' })} disabled={processingId === event.id} tone="positive" />
-                      <ActionButton icon={<X size={12} />} label="Reject" onClick={() => patch(event.id, { moderation_status: 'rejected' })} disabled={processingId === event.id} tone="negative" />
+                      <ActionButton icon={<Check size={12} />} label={a.common.approve} onClick={() => patch(event.id, { moderation_status: 'approved' })} disabled={processingId === event.id} tone="positive" />
+                      <ActionButton icon={<X size={12} />} label={a.common.reject} onClick={() => patch(event.id, { moderation_status: 'rejected' })} disabled={processingId === event.id} tone="negative" />
                     </>
                   )}
                   <ActionButton
                     icon={<Star size={12} />}
-                    label={event.is_featured ? 'Unfeature' : 'Feature'}
+                    label={event.is_featured ? t.unfeature : t.feature}
                     onClick={() => patch(event.id, { is_featured: !event.is_featured })}
                     disabled={processingId === event.id}
                   />
@@ -366,14 +371,14 @@ export default function EventsAdminPage() {
                   </select>
                   <ActionButton
                     icon={<Ban size={12} />}
-                    label={event.status === 'cancelled' ? 'Uncancel' : 'Cancel'}
+                    label={event.status === 'cancelled' ? t.restore : t.markCancelled}
                     onClick={() => patch(event.id, { status: event.status === 'cancelled' ? 'upcoming' : 'cancelled' })}
                     disabled={processingId === event.id}
                   />
-                  <ActionButton icon={<Pencil size={12} />} label="Edit" onClick={() => startEdit(event)} disabled={processingId === event.id} />
+                  <ActionButton icon={<Pencil size={12} />} label={a.common.edit} onClick={() => startEdit(event)} disabled={processingId === event.id} />
                   <ActionButton
                     icon={<Trash2 size={12} />}
-                    label="Delete"
+                    label={a.common.delete}
                     onClick={() => remove(event.id)}
                     disabled={processingId === event.id}
                     tone="negative"
