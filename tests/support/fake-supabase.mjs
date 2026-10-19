@@ -21,6 +21,9 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     // Daily stand-in: what PHYGO asked Daily for (room bodies, token properties, deleted rooms).
     // deleteFailures: statuses the next room deletions answer with (e.g. [500, 500]), to test refusals.
     daily: { rooms: [], tokens: [], deleted: [], deleteAttempts: [], deleteFailures: [] },
+    // Storage objects ("bucket/path" -> { size, contentType }); missingBuckets answer
+    // like Supabase does for a bucket that was never created.
+    storage: { objects: new Map(), missingBuckets: new Set() },
   };
 
   const server = http.createServer(async (req, res) => {
@@ -36,7 +39,7 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
       'access-control-allow-origin': req.headers.origin ?? '*',
       'access-control-allow-credentials': 'true',
       'access-control-allow-headers': req.headers['access-control-request-headers'] ?? '*',
-      'access-control-allow-methods': 'GET,HEAD,POST,PATCH,DELETE,OPTIONS',
+      'access-control-allow-methods': 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS',
     };
     const send = (status, payload, headers = {}) => {
       res.writeHead(status, { 'content-type': 'application/json', ...cors, ...headers });
@@ -71,6 +74,39 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
         200,
         paths.map((p) => ({ path: p, signedURL: `/object/sign/${sign[1]}/${p}?token=test`, error: null })),
       );
+    }
+
+    // Storage: single-object signed URL, upload, delete, and serving a signed object.
+    const bucketMissing = (bucket) => {
+      if (!state.storage.missingBuckets.has(bucket)) return false;
+      send(400, { statusCode: '404', error: 'Bucket not found', message: 'Bucket not found' });
+      return true;
+    };
+    const signOne = url.pathname.match(/^\/storage\/v1\/object\/sign\/([^/]+)\/(.+)$/);
+    if (signOne && req.method === 'POST') {
+      if (bucketMissing(signOne[1])) return;
+      const key = `${signOne[1]}/${decodeURIComponent(signOne[2])}`;
+      if (!state.storage.objects.has(key)) return send(400, { statusCode: '404', error: 'not_found', message: 'Object not found' });
+      return send(200, { signedURL: `/object/sign/${key}?token=test` });
+    }
+    if (signOne && (req.method === 'GET' || req.method === 'HEAD')) {
+      // A 1x1 PNG stands in for any stored image.
+      res.writeHead(200, { ...cors, 'content-type': 'image/png' });
+      return res.end(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64'));
+    }
+    const objectPath = url.pathname.match(/^\/storage\/v1\/object\/([^/]+)\/(.+)$/);
+    if (objectPath && (req.method === 'POST' || req.method === 'PUT') && objectPath[1] !== 'sign') {
+      if (bucketMissing(objectPath[1])) return;
+      const key = `${objectPath[1]}/${decodeURIComponent(objectPath[2])}`;
+      state.storage.objects.set(key, { size: body.length, contentType: req.headers['content-type'] ?? null });
+      return send(200, { Key: key, Id: key });
+    }
+    const bucketOnly = url.pathname.match(/^\/storage\/v1\/object\/([^/]+)$/);
+    if (bucketOnly && req.method === 'DELETE') {
+      if (bucketMissing(bucketOnly[1])) return;
+      const { prefixes = [] } = JSON.parse(body || '{}');
+      const removed = prefixes.filter((p) => state.storage.objects.delete(`${bucketOnly[1]}/${p}`)).map((name) => ({ name }));
+      return send(200, removed);
     }
 
     // OpenAI stand-in: any call is recorded and refused, so tests can assert none happened.

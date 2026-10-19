@@ -54,6 +54,36 @@ interface MyPhygoDict {
     acceptRequest: string
     declineRequest: string
   }
+  profile: {
+    navLabel: string
+    eyebrow: string
+    title: string
+    subtitle: string
+    photo: string
+    photoHint: string
+    changePhoto: string
+    addPhoto: string
+    removePhoto: string
+    uploading: string
+    photoTooBig: string
+    photoUnsupported: string
+    photoUnavailable: string
+    photoError: string
+    nameLabel: string
+    nameHint: string
+    goalLabel: string
+    goalPlaceholder: string
+    goalHint: string
+    languageLabel: string
+    emailLabel: string
+    save: string
+    saving: string
+    saved: string
+    saveError: string
+    yourGoal: string
+    editGoal: string
+    backHome: string
+  }
 }
 
 // Dosing values come from the clinician's note and may be a number ("3") or a
@@ -100,6 +130,36 @@ const it: MyPhygoDict = {
     acceptRequest: 'Conferma la richiesta',
     declineRequest: 'Rifiuta la richiesta',
   },
+  profile: {
+    navLabel: 'Il mio profilo',
+    eyebrow: 'Il mio profilo',
+    title: 'Personalizza il tuo profilo',
+    subtitle: 'Scegli come vuoi essere chiamato/a, la tua foto e il tuo obiettivo.',
+    photo: 'Foto profilo',
+    photoHint: 'JPG, PNG o WebP, fino a 10 MB. È visibile solo a te nel tuo portale.',
+    changePhoto: 'Cambia foto',
+    addPhoto: 'Aggiungi una foto',
+    removePhoto: 'Rimuovi',
+    uploading: 'Caricamento…',
+    photoTooBig: 'La foto supera i 10 MB: scegline una più leggera.',
+    photoUnsupported: 'Formato non supportato: usa una foto JPG, PNG o WebP.',
+    photoUnavailable: 'Il caricamento delle foto non è ancora attivo. Riprova più tardi.',
+    photoError: 'Non è stato possibile caricare la foto. Riprova.',
+    nameLabel: 'Come vuoi essere chiamato/a',
+    nameHint: 'Il nome che vedi nella tua home. Il tuo fisioterapista continua a vedere il nome della tua scheda.',
+    goalLabel: 'Il mio obiettivo',
+    goalPlaceholder: 'Es. tornare a correre 5 km senza dolore',
+    goalHint: 'Lo ritrovi nella tua home, per ricordarti perché ti alleni.',
+    languageLabel: 'Lingua',
+    emailLabel: 'Email di accesso',
+    save: 'Salva',
+    saving: 'Salvataggio…',
+    saved: 'Profilo salvato',
+    saveError: 'Non è stato possibile salvare. Riprova.',
+    yourGoal: 'Il tuo obiettivo',
+    editGoal: 'Modifica',
+    backHome: 'Torna alla Home',
+  },
 }
 
 const en: MyPhygoDict = {
@@ -141,6 +201,36 @@ const en: MyPhygoDict = {
     status: { requested: 'Requested', confirmed: 'Confirmed', cancelled: 'Cancelled', completed: 'Completed' },
     acceptRequest: 'Confirm request',
     declineRequest: 'Decline request',
+  },
+  profile: {
+    navLabel: 'My profile',
+    eyebrow: 'My profile',
+    title: 'Personalize your profile',
+    subtitle: 'Choose what you want to be called, your photo and your goal.',
+    photo: 'Profile photo',
+    photoHint: 'JPG, PNG or WebP, up to 10 MB. Only you see it in your portal.',
+    changePhoto: 'Change photo',
+    addPhoto: 'Add a photo',
+    removePhoto: 'Remove',
+    uploading: 'Uploading…',
+    photoTooBig: 'The photo is over 10 MB: choose a lighter one.',
+    photoUnsupported: 'Unsupported format: use a JPG, PNG or WebP photo.',
+    photoUnavailable: 'Photo upload is not available yet. Please try again later.',
+    photoError: 'The photo could not be uploaded. Please try again.',
+    nameLabel: 'What should we call you',
+    nameHint: 'The name you see on your home. Your physiotherapist keeps seeing the name on your record.',
+    goalLabel: 'My goal',
+    goalPlaceholder: 'e.g. run 5 km again without pain',
+    goalHint: 'You will find it on your home, to remind you why you train.',
+    languageLabel: 'Language',
+    emailLabel: 'Sign-in email',
+    save: 'Save',
+    saving: 'Saving…',
+    saved: 'Profile saved',
+    saveError: 'Could not save. Please try again.',
+    yourGoal: 'Your goal',
+    editGoal: 'Edit',
+    backHome: 'Back to Home',
   },
 }
 
@@ -184,6 +274,36 @@ const es: MyPhygoDict = {
     acceptRequest: 'Confirmar la solicitud',
     declineRequest: 'Rechazar la solicitud',
   },
+  profile: {
+    navLabel: 'Mi perfil',
+    eyebrow: 'Mi perfil',
+    title: 'Personaliza tu perfil',
+    subtitle: 'Elige cómo quieres que te llamemos, tu foto y tu objetivo.',
+    photo: 'Foto de perfil',
+    photoHint: 'JPG, PNG o WebP, hasta 10 MB. Solo la ves tú en tu portal.',
+    changePhoto: 'Cambiar foto',
+    addPhoto: 'Añadir una foto',
+    removePhoto: 'Quitar',
+    uploading: 'Subiendo…',
+    photoTooBig: 'La foto supera los 10 MB: elige una más ligera.',
+    photoUnsupported: 'Formato no compatible: usa una foto JPG, PNG o WebP.',
+    photoUnavailable: 'La subida de fotos aún no está activa. Inténtalo más tarde.',
+    photoError: 'No se pudo subir la foto. Inténtalo de nuevo.',
+    nameLabel: 'Cómo quieres que te llamemos',
+    nameHint: 'El nombre que ves en tu inicio. Tu fisioterapeuta sigue viendo el nombre de tu ficha.',
+    goalLabel: 'Mi objetivo',
+    goalPlaceholder: 'P. ej. volver a correr 5 km sin dolor',
+    goalHint: 'Lo verás en tu inicio, para recordarte por qué entrenas.',
+    languageLabel: 'Idioma',
+    emailLabel: 'Correo de acceso',
+    save: 'Guardar',
+    saving: 'Guardando…',
+    saved: 'Perfil guardado',
+    saveError: 'No se pudo guardar. Inténtalo de nuevo.',
+    yourGoal: 'Tu objetivo',
+    editGoal: 'Editar',
+    backHome: 'Volver al inicio',
+  },
 }
 
 const fr: MyPhygoDict = {
@@ -225,6 +345,36 @@ const fr: MyPhygoDict = {
     status: { requested: 'Demandé', confirmed: 'Confirmé', cancelled: 'Annulé', completed: 'Terminé' },
     acceptRequest: 'Confirmer la demande',
     declineRequest: 'Refuser la demande',
+  },
+  profile: {
+    navLabel: 'Mon profil',
+    eyebrow: 'Mon profil',
+    title: 'Personnalisez votre profil',
+    subtitle: 'Choisissez comment vous voulez être appelé·e, votre photo et votre objectif.',
+    photo: 'Photo de profil',
+    photoHint: 'JPG, PNG ou WebP, jusqu’à 10 Mo. Vous seul·e la voyez dans votre portail.',
+    changePhoto: 'Changer la photo',
+    addPhoto: 'Ajouter une photo',
+    removePhoto: 'Retirer',
+    uploading: 'Envoi…',
+    photoTooBig: 'La photo dépasse 10 Mo : choisissez-en une plus légère.',
+    photoUnsupported: 'Format non pris en charge : utilisez une photo JPG, PNG ou WebP.',
+    photoUnavailable: "L'envoi de photos n'est pas encore disponible. Réessayez plus tard.",
+    photoError: "La photo n'a pas pu être envoyée. Réessayez.",
+    nameLabel: 'Comment voulez-vous être appelé·e',
+    nameHint: "Le nom affiché sur votre accueil. Votre kinésithérapeute continue de voir le nom de votre dossier.",
+    goalLabel: 'Mon objectif',
+    goalPlaceholder: 'Ex. recourir 5 km sans douleur',
+    goalHint: 'Vous le retrouverez sur votre accueil, pour vous rappeler pourquoi vous vous entraînez.',
+    languageLabel: 'Langue',
+    emailLabel: 'E-mail de connexion',
+    save: 'Enregistrer',
+    saving: 'Enregistrement…',
+    saved: 'Profil enregistré',
+    saveError: "Impossible d'enregistrer. Réessayez.",
+    yourGoal: 'Votre objectif',
+    editGoal: 'Modifier',
+    backHome: 'Retour à l’accueil',
   },
 }
 

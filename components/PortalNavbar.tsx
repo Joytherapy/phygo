@@ -10,6 +10,8 @@ import { useEntryLang, useSetEntryLang } from '@/lib/i18n/useEntryLang'
 import Link from 'next/link'
 import BrandMark from './BrandMark'
 import LanguageMenu from './LanguageMenu'
+import { MyAvatar, useMyProfile } from './myPhygo/MyProfileContext'
+import { useMyPhygoStrings } from '@/lib/i18n/myPhygoStrings'
 
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,6 +23,23 @@ const supabase = lazy(() => createBrowserClient(
 // preference, saved to their profile.
 function EntryLanguageMenu() {
   return <LanguageMenu value={useEntryLang()} onChange={useSetEntryLang()} />
+}
+
+// The patient's photo (or initials): the way into their profile page.
+function ProfileLink() {
+  const { profile, email, photoUrl } = useMyProfile()
+  const label = useMyPhygoStrings().profile.navLabel
+  return (
+    <Link
+      href="/my-phygo/profile"
+      aria-label={label}
+      title={label}
+      data-testid="portal-profile-link"
+      className="ml-1 rounded-full transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B95FF]"
+    >
+      <MyAvatar name={profile?.displayName || email} photoUrl={photoUrl} size={32} />
+    </Link>
+  )
 }
 
 function AccountLanguageMenu() {
@@ -62,6 +81,7 @@ export default function PortalNavbar() {
           >
             <LogOut size={16} />
           </button>
+          {!isEntry && <ProfileLink />}
         </div>
       </nav>
     </header>
