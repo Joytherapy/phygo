@@ -166,7 +166,7 @@ export default function EventsAdminPage() {
       <Navbar />
 
       <div className="relative max-w-4xl mx-auto pt-40 pb-24 px-6">
-        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#22D3EE] mb-3">Admin</p>
+        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#8B95FF] mb-3">Admin</p>
         <div className="flex items-center justify-between gap-4 mb-2 flex-wrap">
           <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white">
             Events — {ui.events.heading}
@@ -177,7 +177,7 @@ export default function EventsAdminPage() {
               setShowForm((s) => !s)
             }}
             className="flex items-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-semibold text-white transition-transform hover:scale-[1.02]"
-            style={{ background: 'linear-gradient(90deg, #22D3EE 0%, #A855F7 100%)' }}
+            style={{ background: 'linear-gradient(90deg, #8B95FF 0%, #A78BFA 100%)' }}
           >
             <Plus size={14} />
             {form.id ? 'Edit event' : 'Add event'}
@@ -190,19 +190,19 @@ export default function EventsAdminPage() {
               placeholder="Title"
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="sm:col-span-2 rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#22D3EE] text-ink dark:text-white"
+              className="sm:col-span-2 rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             />
             <textarea
               placeholder="Description"
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               rows={3}
-              className="sm:col-span-2 rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#22D3EE] text-ink dark:text-white"
+              className="sm:col-span-2 rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             />
             <select
               value={form.category}
               onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#22D3EE] text-ink dark:text-white"
+              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             >
               {Object.entries(ui.events.categoryLabels).map(([k, l]) => (
                 <option key={k} value={k}>{l}</option>
@@ -211,7 +211,7 @@ export default function EventsAdminPage() {
             <select
               value={form.event_type}
               onChange={(e) => setForm((f) => ({ ...f, event_type: e.target.value }))}
-              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#22D3EE] text-ink dark:text-white"
+              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             >
               {Object.entries(ui.events.typeLabels).map(([k, l]) => (
                 <option key={k} value={k}>{l}</option>
@@ -220,7 +220,7 @@ export default function EventsAdminPage() {
             <select
               value={form.location_type}
               onChange={(e) => setForm((f) => ({ ...f, location_type: e.target.value as 'online' | 'in_person' | 'hybrid' }))}
-              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#22D3EE] text-ink dark:text-white"
+              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             >
               <option value="online">{ui.events.onlineLabel}</option>
               <option value="in_person">{ui.events.inPersonLabel}</option>
@@ -230,31 +230,31 @@ export default function EventsAdminPage() {
               type="datetime-local"
               value={form.start_date}
               onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))}
-              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#22D3EE] text-ink dark:text-white"
+              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             />
             <input
               placeholder="City"
               value={form.city}
               onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
-              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#22D3EE] text-ink dark:text-white"
+              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             />
             <input
               placeholder="Country"
               value={form.country}
               onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))}
-              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#22D3EE] text-ink dark:text-white"
+              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             />
             <input
               placeholder="Official website URL"
               value={form.official_url}
               onChange={(e) => setForm((f) => ({ ...f, official_url: e.target.value }))}
-              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#22D3EE] text-ink dark:text-white"
+              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             />
             <input
               placeholder="Registration URL"
               value={form.registration_url}
               onChange={(e) => setForm((f) => ({ ...f, registration_url: e.target.value }))}
-              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#22D3EE] text-ink dark:text-white"
+              className="rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
             />
             <label className="flex items-center gap-2 text-sm text-ink/70 dark:text-white/70">
               <input type="checkbox" checked={form.is_free} onChange={(e) => setForm((f) => ({ ...f, is_free: e.target.checked }))} />
@@ -266,13 +266,13 @@ export default function EventsAdminPage() {
                   placeholder="Price"
                   value={form.price}
                   onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-                  className="flex-1 rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#22D3EE] text-ink dark:text-white"
+                  className="flex-1 rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
                 />
                 <input
                   placeholder="Currency"
                   value={form.currency}
                   onChange={(e) => setForm((f) => ({ ...f, currency: e.target.value }))}
-                  className="w-24 rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#22D3EE] text-ink dark:text-white"
+                  className="w-24 rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
                 />
               </div>
             )}
@@ -290,7 +290,7 @@ export default function EventsAdminPage() {
                 onClick={submitForm}
                 disabled={saving || !form.title || !form.start_date}
                 className="rounded-full px-5 py-2 text-xs font-semibold text-white disabled:opacity-50"
-                style={{ background: 'linear-gradient(90deg, #22D3EE 0%, #A855F7 100%)' }}
+                style={{ background: 'linear-gradient(90deg, #8B95FF 0%, #A78BFA 100%)' }}
               >
                 {saving ? '...' : form.id ? 'Save changes' : 'Create event'}
               </button>
@@ -301,13 +301,13 @@ export default function EventsAdminPage() {
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => setFilter('pending_review')}
-            className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${filter === 'pending_review' ? 'text-white bg-gradient-to-r from-[#22D3EE] to-[#A855F7]' : 'text-ink/60 dark:text-white/60 bg-black/[0.04] dark:bg-white/5'}`}
+            className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${filter === 'pending_review' ? 'text-white bg-gradient-to-r from-[#8B95FF] to-[#A78BFA]' : 'text-ink/60 dark:text-white/60 bg-black/[0.04] dark:bg-white/5'}`}
           >
             Pending review · {events.filter((e) => e.moderation_status === 'pending_review').length}
           </button>
           <button
             onClick={() => setFilter('all')}
-            className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${filter === 'all' ? 'text-white bg-gradient-to-r from-[#22D3EE] to-[#A855F7]' : 'text-ink/60 dark:text-white/60 bg-black/[0.04] dark:bg-white/5'}`}
+            className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${filter === 'all' ? 'text-white bg-gradient-to-r from-[#8B95FF] to-[#A78BFA]' : 'text-ink/60 dark:text-white/60 bg-black/[0.04] dark:bg-white/5'}`}
           >
             All · {events.length}
           </button>

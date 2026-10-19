@@ -8,6 +8,7 @@ import { ROLE_STRINGS, type PracticeStage } from "@/lib/i18n/roleStrings";
 import { useEntryLang } from "@/lib/i18n/useEntryLang";
 import { ENTRY_STRINGS } from "@/lib/i18n/entryStrings";
 import BrandMark from "@/components/BrandMark";
+import { PageBackdrop } from '@/components/ui/premium'
 
 export default function OnboardingPage() {
   return (
@@ -84,16 +85,11 @@ function Onboarding() {
   };
 
   return (
-    <main id="main-content" className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white dark:bg-[#08090b] px-4">
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
-        style={{
-          background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)',
-        }}
-      />
+    <main id="main-content" className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f7f7f8] dark:bg-[#050608] px-4">
+      <PageBackdrop />
 
       {step === "name" && (
-        <div className="relative w-full max-w-sm rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.04] backdrop-blur-2xl shadow-2xl p-8">
+        <div className="relative w-full max-w-sm rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.055] dark:to-white/[0.018] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-8">
           <div className="flex justify-center mb-6">
             <BrandMark />
           </div>
@@ -111,7 +107,7 @@ function Onboarding() {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+              className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 text-sm outline-none transition focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15 text-ink dark:text-white"
               placeholder={t.namePlaceholder}
               aria-label={t.askName}
               autoFocus
@@ -122,8 +118,8 @@ function Onboarding() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(79,124,255,0.35)] transition-transform hover:scale-[1.02] disabled:opacity-50"
-              style={{ background: "linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)" }}
+              className="w-full rounded-xl py-3 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 transition-transform disabled:opacity-50"
+              
             >
               {loading ? t.saving : roleUi.onboarding.continue}
             </button>
@@ -132,7 +128,7 @@ function Onboarding() {
       )}
 
       {step === "role" && (
-        <div className="relative w-full max-w-md rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.04] backdrop-blur-2xl shadow-2xl p-8">
+        <div className="relative w-full max-w-md rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.055] dark:to-white/[0.018] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-8">
           <h1 className="mb-1 text-center text-2xl font-semibold text-ink dark:text-white">
             {roleUi.onboarding.roleQuestion}
           </h1>
@@ -145,9 +141,9 @@ function Onboarding() {
               type="button"
               onClick={() => handleRoleSelect("student")}
               disabled={!!selectingRole}
-              className="w-full flex items-start gap-4 rounded-2xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] p-4 text-left transition hover:border-[#4F7CFF] hover:bg-[#4F7CFF]/[0.04] disabled:opacity-60"
+              className="w-full flex items-start gap-4 rounded-2xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] p-4 text-left transition hover:border-black/15 dark:hover:border-white/20 hover:bg-black/[0.02] dark:hover:bg-white/[0.04] disabled:opacity-60"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#4F7CFF]/10 text-[#4F7CFF]">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75">
                 {selectingRole === "student" ? <Loader2 size={18} className="animate-spin" /> : <GraduationCap size={18} />}
               </span>
               <span>
@@ -160,9 +156,9 @@ function Onboarding() {
               type="button"
               onClick={() => handleRoleSelect("professional")}
               disabled={!!selectingRole}
-              className="w-full flex items-start gap-4 rounded-2xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] p-4 text-left transition hover:border-[#32D6A0] hover:bg-[#32D6A0]/[0.04] disabled:opacity-60"
+              className="w-full flex items-start gap-4 rounded-2xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] p-4 text-left transition hover:border-black/15 dark:hover:border-white/20 hover:bg-black/[0.02] dark:hover:bg-white/[0.04] disabled:opacity-60"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#32D6A0]/10 text-[#32D6A0]">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75">
                 {selectingRole === "professional" ? <Loader2 size={18} className="animate-spin" /> : <Stethoscope size={18} />}
               </span>
               <span>

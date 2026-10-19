@@ -290,19 +290,19 @@ export default function ExerciseLibraryPage() {
     f.type === 'region' ? BODY_ZONE_NAME[f.value] || f.value : f.type === 'tag' ? ui.hiitLabel : f.value;
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
       <PageBackdrop />
 
       <div className="relative max-w-6xl mx-auto pt-40 pb-24 px-6">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#7C83FF]/20 bg-[#7C83FF]/10 px-3.5 py-1.5 mb-5">
-          <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' }} />
-          <p className="eyebrow text-[#7C83FF]">
+        <div className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-black/[0.02] px-4 py-1.5 mb-5 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.03]">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'linear-gradient(135deg, #A5B4FF 0%, #7C83FF 50%, #A78BFA 100%)' }} />
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-ink/70 dark:text-white/70">
             {exercises.length > 0 ? ui.eyebrowCount.replace('{count}', exercises.length.toLocaleString(numberLocale)) : ui.eyebrowDefault}
           </p>
         </div>
-        <h1 className="font-display text-6xl font-bold tracking-tight mb-3 text-[#32D6A0]">
+        <h1 className="font-display text-5xl sm:text-6xl font-semibold tracking-[-0.035em] mb-3 text-ink dark:text-white">
           {ui.headingPart1} {ui.headingPart2}
         </h1>
         <p className="text-base text-ink/50 dark:text-white/50 mb-6 max-w-xl">

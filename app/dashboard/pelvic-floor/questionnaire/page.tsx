@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 import type { PFAnamnesisQuestionContent, PFAnamnesisSectionContent, PFAnamnesisOption } from '@/lib/pelvicFloorAnamnesisContent';
+import { PageBackdrop } from '@/components/ui/premium';
 
 const ACCENT = {
   gradient: 'linear-gradient(90deg, #EC4899 0%, #F43F5E 100%)',
@@ -113,8 +114,9 @@ export default function PelvicFloorQuestionnairePage() {
     <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
+      <PageBackdrop />
       <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-[0.10] dark:opacity-[0.16] blur-[140px]"
         style={{
           background: 'radial-gradient(circle, rgba(236,72,153,0.6) 0%, rgba(244,63,94,0.5) 100%)',
         }}

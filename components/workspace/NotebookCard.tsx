@@ -23,6 +23,7 @@ export default function NotebookCard({
   onDelete: () => void
 }) {
   const ui = useWorkspaceUi()
+  const [menuOpen, setMenuOpen] = useState(false)
   const [renaming, setRenaming] = useState(false)
   const [draftName, setDraftName] = useState(notebook.name)
 
@@ -35,7 +36,7 @@ export default function NotebookCard({
   return (
     <div
       onClick={() => !renaming && onOpen()}
-      className="group relative flex aspect-[3/4] flex-col overflow-hidden rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lift hover:border-black/[0.1] dark:hover:border-white/20"
+      className={`group relative flex aspect-[3/4] flex-col rounded-2xl border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur-xl cursor-pointer transition-all hover:-translate-y-0.5 hover:border-black/15 hover:shadow-[0_20px_44px_-28px_rgba(15,23,42,0.45)] dark:border-white/[0.07] dark:bg-white/[0.035] dark:hover:border-white/20 ${menuOpen ? 'z-30' : ''}`}
     >
       <div className="relative flex flex-1 items-center justify-center">
         <span className="absolute left-0 top-3 bottom-3 w-1 rounded-r bg-[#7C83FF]/30" />
@@ -52,6 +53,7 @@ export default function NotebookCard({
 
       <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
         <ItemMenu
+          onOpenChange={setMenuOpen}
           actions={[
             { key: 'rename', label: ui.item.rename, icon: <Pencil size={13} />, onSelect: () => setRenaming(true) },
             { key: 'star', label: notebook.starred ? ui.item.unstar : ui.item.star, icon: <Star size={13} />, onSelect: onToggleStar },

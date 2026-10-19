@@ -74,7 +74,7 @@ function JoinInvite() {
 
   return (
     <div className="relative max-w-sm mx-auto pt-40 pb-20 px-6">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#4F7CFF]/10 text-[#4F7CFF] mb-6">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75 mb-6">
         <Smartphone size={22} />
       </div>
 
@@ -95,7 +95,7 @@ function JoinInvite() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+            className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15 text-ink dark:text-white"
           />
         </div>
         <div>
@@ -108,7 +108,7 @@ function JoinInvite() {
             minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+            className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15 text-ink dark:text-white"
           />
         </div>
 
@@ -117,8 +117,8 @@ function JoinInvite() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 rounded-full px-7 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105 disabled:opacity-60"
-          style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+          className="w-full flex items-center justify-center gap-2 rounded-full px-7 py-3 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 transition-transform disabled:opacity-60"
+          
         >
           {loading && <Loader2 size={15} className="animate-spin" />}
           {loading ? t.creating : t.create}
@@ -127,7 +127,7 @@ function JoinInvite() {
 
       <p className="text-xs text-ink/55 dark:text-white/40 mt-6 text-center">
         {t.haveAccount}{' '}
-        <a href={myPhygoLoginHref(lang)} className="text-[#3A5FE0] dark:text-[#7B9DFF] font-medium hover:underline">
+        <a href={myPhygoLoginHref(lang)} className="text-[#5B63E6] dark:text-[#A5B4FF] font-medium hover:underline">
           {t.signIn}
         </a>
       </p>

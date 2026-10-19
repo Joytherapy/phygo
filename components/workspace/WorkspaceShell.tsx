@@ -4,6 +4,7 @@ import { AlertCircle, X } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import WorkspaceSidebar, { WorkspaceMobileNav } from './WorkspaceSidebar'
 import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
+import { PageBackdrop } from '@/components/ui/premium'
 
 // The calmer, "study environment" shell for every /dashboard/workspace/*
 // page — same PHYGO chrome (Navbar, color tokens) as the rest of the
@@ -53,13 +54,17 @@ export default function WorkspaceShell({
   const t = useDashboardUi()
   if (fullscreen) {
     return (
-      <div className="dark fixed inset-0 z-40 flex flex-col bg-white dark:bg-[#08090b] transition-colors">{children}</div>
+      // The full-screen reader stays dark (a reading surface), with a dark background to match.
+      <div className="dark fixed inset-0 z-40 flex flex-col bg-[#050608] transition-colors">{children}</div>
     )
   }
 
   return (
-    <div className="dark relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    // Follows the app theme like every other page (a fixed "dark" class here
+    // painted white text on the light background in the light theme).
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
+      <PageBackdrop />
 
       {/* Role-aware ambient glow: reads var(--brand-from)/var(--brand-to) from
           app/globals.css, which RoleThemeProvider switches from the default

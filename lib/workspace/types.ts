@@ -256,7 +256,16 @@ export const TEXT_BACKGROUND_COLORS = ['#FFFFFF', '#FEF3C7', '#DBEAFE', '#DCFCE7
 // Predefined PHYGO folder colors — kept as a fixed, curated set (not a raw
 // color wheel) so the Workspace stays visually calm; see PHYGO Workspace
 // UX/UI overhaul §14. `null` means "no color" (the neutral default look).
-export const FOLDER_COLORS = ['#4F7CFF', '#A855F7', '#F97316', '#EF4444', '#32D6A0', '#EAB308'] as const
+export const FOLDER_COLORS = ['#8B95FF', '#A78BFA', '#5BB8F0', '#4FC79B', '#F0B44C', '#F2879A'] as const
+
+// Folders saved with the previous palette are shown in the matching new hue.
+const LEGACY_FOLDER_COLORS: Record<string, (typeof FOLDER_COLORS)[number]> = {
+  '#4F7CFF': '#8B95FF', '#A855F7': '#A78BFA', '#F97316': '#F0B44C', '#EF4444': '#F2879A', '#32D6A0': '#4FC79B', '#EAB308': '#F0B44C',
+}
+export function folderColor(color: string | null): string | null {
+  if (!color) return null
+  return LEGACY_FOLDER_COLORS[color.toUpperCase()] ?? color
+}
 
 // Shared luminance check — used wherever a surface color (notebook paper,
 // eventually anything else user-pickable) needs to pick a legible default

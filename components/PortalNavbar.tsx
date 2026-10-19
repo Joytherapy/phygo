@@ -41,8 +41,8 @@ export default function PortalNavbar() {
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 flex justify-center px-4 pt-4">
-      <nav className="w-full max-w-2xl flex items-center justify-between rounded-xl2 px-4 sm:px-6 py-3 glass-strong shadow-soft">
-        <Link href="/my-phygo/home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric">
+      <nav className="w-full max-w-2xl flex items-center justify-between rounded-2xl border border-black/[0.06] bg-white/80 px-4 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl sm:px-6 dark:border-white/[0.07] dark:bg-[#0b0c10]/70 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+        <Link href="/my-phygo/home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B95FF]">
           <BrandMark prefix="My" />
         </Link>
 

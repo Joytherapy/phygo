@@ -27,8 +27,8 @@ const CATEGORY_STYLE: Record<Product['category'], { icon: any; gradient: string;
   },
   'Low Back': {
     icon: ShieldHalf,
-    gradient: 'linear-gradient(135deg, #4F7CFF 0%, #6E8FFF 100%)',
-    glow: 'rgba(79,124,255,0.25)',
+    gradient: 'linear-gradient(135deg, #A5B4FF 0%, #7C83FF 100%)',
+    glow: 'rgba(124,131,255,0.25)',
   },
   Posture: {
     icon: PersonStanding,
@@ -37,8 +37,8 @@ const CATEGORY_STYLE: Record<Product['category'], { icon: any; gradient: string;
   },
   Mobility: {
     icon: Move3d,
-    gradient: 'linear-gradient(135deg, #32D6A0 0%, #22B888 100%)',
-    glow: 'rgba(50,214,160,0.25)',
+    gradient: 'linear-gradient(135deg, #6EE7B7 0%, #34A389 100%)',
+    glow: 'rgba(52,163,137,0.22)',
   },
   Recovery: {
     icon: HeartPulse,
@@ -50,8 +50,8 @@ const CATEGORY_STYLE: Record<Product['category'], { icon: any; gradient: string;
   // supportano quella funzione, non una categoria scollegata.
   'Body Composition': {
     icon: Scale,
-    gradient: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
-    glow: 'rgba(99,102,241,0.25)',
+    gradient: 'linear-gradient(135deg, #8B95FF 0%, #A78BFA 100%)',
+    glow: 'rgba(139,149,255,0.25)',
   },
   Nutrition: {
     icon: Apple,
@@ -114,22 +114,22 @@ function PatientShopPageInner() {
           <div className="flex items-center gap-2 mb-3">
             <span
               className="h-1.5 w-1.5 rounded-full animate-pulse"
-              style={{ background: 'linear-gradient(90deg, #4F7CFF, #32D6A0)' }}
+              style={{ background: 'linear-gradient(135deg, #A5B4FF 0%, #7C83FF 50%, #A78BFA 100%)' }}
             />
-            <p className="text-xs font-semibold tracking-[0.25em] uppercase text-[#4F7CFF]">
+            <p className="text-xs font-semibold tracking-[0.25em] uppercase text-[#6B73F0] dark:text-[#A5B4FF]">
               {ui.eyebrow}
             </p>
           </div>
           <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight leading-none text-ink dark:text-white">
             {ui.heading}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]">.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7C83FF] to-[#A78BFA]">.</span>
           </h1>
           <p className="text-base text-ink/55 dark:text-white/40 mt-3 max-w-md">
             {t.subtitle}
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl px-4 py-2.5">
-          <Sparkles size={13} className="text-[#4F7CFF]" />
+        <div className="flex items-center gap-2 rounded-full border border-black/[0.06] bg-white/80 px-4 py-2.5 backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.04]">
+          <Sparkles size={13} className="text-[#7C83FF]" />
           <span className="text-xs font-semibold text-ink/60 dark:text-white/60">
             {products.length} {ui.curatedPicksSuffix}
           </span>
@@ -141,10 +141,9 @@ function PatientShopPageInner() {
           onClick={() => setActiveCategory(null)}
           className={`shrink-0 rounded-full px-5 py-2.5 text-xs font-semibold transition-all ${
             activeCategory === null
-              ? 'text-white shadow-[0_6px_16px_rgba(79,124,255,0.35)] scale-[1.03]'
+              ? 'bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90'
               : 'text-ink/60 dark:text-white/60 bg-black/[0.04] dark:bg-white/5 hover:bg-black/[0.07] dark:hover:bg-white/10'
           }`}
-          style={activeCategory === null ? { background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
         >
           {ui.allLabel} · {products.length}
         </button>
@@ -157,14 +156,9 @@ function PatientShopPageInner() {
               onClick={() => setActiveCategory(cat)}
               className={`shrink-0 flex items-center gap-1.5 rounded-full px-5 py-2.5 text-xs font-semibold transition-all ${
                 isActive
-                  ? 'text-white scale-[1.03]'
+                  ? 'bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90'
                   : 'text-ink/60 dark:text-white/60 bg-black/[0.04] dark:bg-white/5 hover:bg-black/[0.07] dark:hover:bg-white/10'
               }`}
-              style={
-                isActive
-                  ? { background: style.gradient, boxShadow: `0 6px 16px ${style.glow}` }
-                  : undefined
-              }
             >
               {ui.categoryLabels[cat]} · {countFor(cat)}
             </button>
@@ -183,7 +177,7 @@ function PatientShopPageInner() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: Math.min(i, 12) * 0.05 }}
               whileHover={{ y: -4 }}
-              className="group relative rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden flex flex-col shadow-soft hover:shadow-xl transition-shadow duration-300"
+              className="group relative rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.055] dark:to-white/[0.018] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] overflow-hidden flex flex-col transition-shadow duration-300"
             >
               <div
                 className="relative h-32 flex items-center justify-center overflow-hidden"
@@ -222,8 +216,7 @@ function PatientShopPageInner() {
                   href={product.amazonUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-semibold text-white transition-transform hover:scale-[1.02]"
-                  style={{ background: style.gradient }}
+                  className="flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-semibold transition-colors border border-black/[0.08] bg-white text-ink hover:border-black/20 dark:border-white/[0.1] dark:bg-white/[0.04] dark:text-white dark:hover:border-white/25"
                 >
                   {ui.viewOnAmazonCta}
                   <ExternalLink size={12} />

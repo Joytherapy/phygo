@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, X, Users, Search, AlertCircle, Sparkles } from 'lucide-react'
+import { Plus, X, Users, Search, AlertCircle, Sparkles, FileText, CalendarDays, Smartphone } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
 import ErrorState from '@/components/workspace/ErrorState'
@@ -25,7 +25,7 @@ import {
   nextByPatient, notesPerWeek, pendingRequests, weekBounds, type HomeAppointment, type HomeNote,
 } from '@/lib/dashboard/home'
 import { lazy } from '@/lib/lazy'
-import { PageBackdrop, PAGE_BG } from '@/components/ui/premium'
+import { PageBackdrop, PAGE_BG, HUE } from '@/components/ui/premium'
 
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -391,10 +391,12 @@ export default function DashboardPage() {
               {dateLine || ui.patients.eyebrow}
             </p>
             <h1 className="mt-3 break-words font-display text-[34px] font-semibold leading-[1.05] tracking-[-0.035em] text-ink dark:text-white sm:text-5xl lg:text-[60px]">
-              <span className="bg-gradient-to-b from-ink to-ink/70 bg-clip-text text-transparent dark:from-white dark:to-white/55">
+              {/* The gradient is clipped to the text box: the extra bottom padding keeps
+                  descenders (the "y" of "joy", "g", "p") inside it. */}
+              <span className="-mb-[0.18em] inline-block bg-gradient-to-b from-ink to-ink/70 bg-clip-text pb-[0.18em] text-transparent dark:from-white dark:to-white/55">
                 {greetingTime ? (displayName ? `${greetingTime}, ${displayName}` : greetingTime) : ui.patients.greetingDefault}
               </span>
-              <span className="bg-gradient-to-r from-[#A5B4FF] to-[#A78BFA] bg-clip-text text-transparent">.</span>
+              <span className="-mb-[0.18em] inline-block bg-gradient-to-r from-[#A5B4FF] to-[#A78BFA] bg-clip-text pb-[0.18em] text-transparent">.</span>
             </h1>
             <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[15px] text-ink/60 dark:text-white/55" data-testid="brief">
               {todayCount === null ? (
@@ -524,30 +526,36 @@ export default function DashboardPage() {
 
         {/* counters: real figures only */}
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mt-4 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 [&>*]:min-w-0">
-          <StatTile index={0} label={h.statPatients} value={patientsValue} extra={newThisMonth ? h.statNewThisMonth(newThisMonth) : undefined} unavailable={t.common.unavailable} loading={ui.common.loading} />
+          <StatTile index={0} icon={Users} hue="iris" label={h.statPatients} value={patientsValue} extra={newThisMonth ? h.statNewThisMonth(newThisMonth) : undefined} unavailable={t.common.unavailable} loading={ui.common.loading} />
           <StatTile
             index={1}
+            icon={FileText}
+            hue="mint"
             label={h.statNotesThisMonth}
             value={notesMonth}
-            chart={notes && now ? <Sparkline id="notes-spark" values={notesPerWeek(notes, now)} /> : undefined}
+            chart={notes && now ? <Sparkline id="notes-spark" color={HUE.mint.solid} values={notesPerWeek(notes, now)} /> : undefined}
             unavailable={t.common.unavailable}
             loading={ui.common.loading}
           />
           <StatTile
             index={2}
+            icon={CalendarDays}
+            hue="amber"
             label={h.statWeekAppointments}
             value={weekCount}
             href="/dashboard/agenda"
-            chart={appointments && now ? <Bars values={appointmentsPerWeekday(appointments, now)} highlight={(now.getDay() + 6) % 7} /> : undefined}
+            chart={appointments && now ? <Bars color={HUE.amber.solid} values={appointmentsPerWeekday(appointments, now)} highlight={(now.getDay() + 6) % 7} /> : undefined}
             unavailable={t.common.unavailable}
             loading={ui.common.loading}
           />
           <StatTile
             index={3}
+            icon={Smartphone}
+            hue="sky"
             label={h.statOnMyPhygo}
             value={linkedValue}
             extra={patientsValue ? h.statOfTotal(patientsValue) : undefined}
-            chart={patientsValue ? <span className="text-ink dark:text-white"><Ring part={linkedCount} total={patientsValue} /></span> : undefined}
+            chart={patientsValue ? <span className="text-ink dark:text-white"><Ring part={linkedCount} total={patientsValue} from="#93D2F7" to="#4AA6E0" /></span> : undefined}
             unavailable={t.common.unavailable}
             loading={ui.common.loading}
           />

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import { useUiStrings, useLanguage } from '@/contexts/LanguageContext'
+import { PageBackdrop } from '@/components/ui/premium'
 
 type Speaker = { name: string; role?: string } | string
 
@@ -150,9 +151,9 @@ export default function EventDetailPage() {
 
   const verificationColor =
     event.verification_status === 'phygo_verified'
-      ? '#22D3EE'
+      ? '#8B95FF'
       : event.verification_status === 'organizer_verified'
-      ? '#A855F7'
+      ? '#A78BFA'
       : event.verification_status === 'source_verified'
       ? '#818CF8'
       : '#8A93A6'
@@ -161,9 +162,10 @@ export default function EventDetailPage() {
     <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
+      <PageBackdrop />
       <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] rounded-full opacity-20 dark:opacity-30 blur-[160px]"
-        style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.5) 0%, rgba(168,85,247,0.5) 100%)' }}
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] rounded-full opacity-[0.10] dark:opacity-[0.16] blur-[160px]"
+        style={{ background: 'radial-gradient(circle, rgba(139,149,255,0.5) 0%, rgba(167,139,250,0.5) 100%)' }}
       />
 
       <div className="relative max-w-3xl mx-auto pt-36 pb-24 px-6">
@@ -201,14 +203,14 @@ export default function EventDetailPage() {
           )}
 
           <div className="grid sm:grid-cols-2 gap-3 mb-8">
-            <InfoRow icon={<Calendar size={15} className="text-[#22D3EE]" />} label={ui.events.dateLabel} value={endDateLabel && endDateLabel !== dateLabel ? `${dateLabel} → ${endDateLabel}` : dateLabel} />
-            <InfoRow icon={<Clock size={15} className="text-[#22D3EE]" />} label={ui.events.timeLabel} value={`${timeLabel}${event.timezone ? ` (${event.timezone})` : ''}`} />
+            <InfoRow icon={<Calendar size={15} className="text-[#8B95FF]" />} label={ui.events.dateLabel} value={endDateLabel && endDateLabel !== dateLabel ? `${dateLabel} → ${endDateLabel}` : dateLabel} />
+            <InfoRow icon={<Clock size={15} className="text-[#8B95FF]" />} label={ui.events.timeLabel} value={`${timeLabel}${event.timezone ? ` (${event.timezone})` : ''}`} />
             <InfoRow
-              icon={event.location_type === 'online' ? <Wifi size={15} className="text-[#A855F7]" /> : <MapPin size={15} className="text-[#A855F7]" />}
+              icon={event.location_type === 'online' ? <Wifi size={15} className="text-[#A78BFA]" /> : <MapPin size={15} className="text-[#A78BFA]" />}
               label={ui.events.locationLabel}
               value={`${locationLabel}${place ? ` · ${place}` : ''}`}
             />
-            <InfoRow icon={<Globe2 size={15} className="text-[#A855F7]" />} label={ui.events.priceLabel} value={priceLabel} />
+            <InfoRow icon={<Globe2 size={15} className="text-[#A78BFA]" />} label={ui.events.priceLabel} value={priceLabel} />
           </div>
 
           {event.registration_deadline && (
@@ -264,7 +266,7 @@ export default function EventDetailPage() {
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02]"
-              style={{ background: 'linear-gradient(90deg, #22D3EE 0%, #A855F7 100%)' }}
+              style={{ background: 'linear-gradient(90deg, #8B95FF 0%, #A78BFA 100%)' }}
             >
               {ui.events.registerCta}
               <ExternalLink size={14} />
@@ -274,7 +276,7 @@ export default function EventDetailPage() {
               disabled={saving}
               className="flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold border border-black/10 dark:border-white/15 text-ink dark:text-white hover:bg-black/[0.04] dark:hover:bg-white/10 transition-colors disabled:opacity-50"
             >
-              {saved ? <BookmarkCheck size={15} className="text-[#22D3EE]" /> : <Bookmark size={15} />}
+              {saved ? <BookmarkCheck size={15} className="text-[#8B95FF]" /> : <Bookmark size={15} />}
               {saved ? ui.events.savedCta : ui.events.saveEventCta}
             </button>
           </div>

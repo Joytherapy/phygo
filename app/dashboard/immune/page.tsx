@@ -243,11 +243,8 @@ export default function ImmunePage() {
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT.gradient }} />
             {ui.immune.atlasBadge}
           </div>
-          <h1 className="font-display text-6xl font-bold tracking-tight">
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: ACCENT.gradient }}
-            >
+          <h1 className="font-display text-5xl sm:text-6xl font-semibold tracking-[-0.035em] text-ink dark:text-white">
+            <span>
               {ui.immune.heading}
             </span>
           </h1>
@@ -261,10 +258,9 @@ export default function ImmunePage() {
                 onClick={() => setSubView(t.key)}
                 className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   subView === t.key
-                    ? 'text-white'
+                    ? 'bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] dark:bg-white dark:text-ink'
                     : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                 }`}
-                style={subView === t.key ? { background: ACCENT.solid } : undefined}
               >
                 {t.label}
               </button>

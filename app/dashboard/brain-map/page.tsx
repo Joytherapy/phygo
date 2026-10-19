@@ -476,7 +476,7 @@ function BrainMapPageInner() {
             {ui.brainMap.atlasBadge}
           </div>
           <h1 className="font-display text-6xl sm:text-7xl font-bold tracking-tight mb-4">
-            <span className="bg-gradient-to-r from-[#7C83FF] to-[#A78BFA] bg-clip-text text-transparent">
+            <span>
               {ui.brainMap.heading}
             </span>
           </h1>

@@ -8,6 +8,7 @@ import ClinicalActionBar from '@/components/ClinicalActionBar';
 import { X, Search } from 'lucide-react';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 import EvidenceBadge, { SourceCitation } from '@/components/EvidenceBadge';
+import { PageBackdrop } from '@/components/ui/premium';
 
 type SubView = 'anatomy' | 'conditions' | 'assessment' | 'rehab';
 interface StructureItem {
@@ -234,8 +235,9 @@ export default function GastrointestinalPage() {
     <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
+      <PageBackdrop />
       <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-[0.10] dark:opacity-[0.16] blur-[140px]"
         style={{
           background: 'radial-gradient(circle, rgba(245,158,11,0.6) 0%, rgba(34,197,94,0.5) 100%)',
         }}
@@ -247,11 +249,8 @@ export default function GastrointestinalPage() {
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT.gradient }} />
             {ui.gastrointestinal.atlasBadge}
           </div>
-          <h1 className="font-display text-6xl font-bold tracking-tight">
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: ACCENT.gradient }}
-            >
+          <h1 className="font-display text-5xl sm:text-6xl font-semibold tracking-[-0.035em] text-ink dark:text-white">
+            <span>
               {ui.gastrointestinal.heading}
             </span>
           </h1>
@@ -265,10 +264,9 @@ export default function GastrointestinalPage() {
                 onClick={() => setSubView(t.key)}
                 className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   subView === t.key
-                    ? 'text-white'
+                    ? 'bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] dark:bg-white dark:text-ink'
                     : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                 }`}
-                style={subView === t.key ? { background: ACCENT.solid } : undefined}
               >
                 {t.label}
               </button>

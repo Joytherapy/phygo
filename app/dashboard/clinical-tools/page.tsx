@@ -1611,10 +1611,10 @@ function ClinicalToolsPageInner() {
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#8B5CF6]" />
             </span>
             <ClipboardList size={14} className="text-[#6366F1] dark:text-[#A5B4FC]" />
-            <span className="bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] bg-clip-text text-transparent">{ui.clinicalToolkit.badge}</span>
+            <span>{ui.clinicalToolkit.badge}</span>
           </div>
           <h1 className="font-display text-6xl md:text-7xl font-bold tracking-tight">
-            <span className="relative inline-block bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] bg-clip-text text-transparent drop-shadow-[0_2px_24px_rgba(124,131,255,0.25)]">
+            <span className="relative inline-block">
               {ui.clinicalToolkit.headingAccent}{' '}{ui.clinicalToolkit.headingRest}
             </span>
           </h1>

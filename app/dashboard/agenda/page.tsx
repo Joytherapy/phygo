@@ -480,7 +480,7 @@ export default function AgendaPage() {
                             >
                               <span
                                 className="h-8 w-1 shrink-0 rounded-full"
-                                style={{ background: a.session_type === 'video' ? '#7C83FF' : '#94A3B8' }}
+                                style={{ background: a.session_type === 'video' ? '#7C83FF' : '#4FC79B' }}
                                 aria-hidden
                               />
                               <span className="w-12 shrink-0 text-sm font-bold tabular-nums text-ink dark:text-white">
@@ -589,7 +589,7 @@ export default function AgendaPage() {
                                   background:
                                     a.session_type === 'video'
                                       ? 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)'
-                                      : 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                                      : 'linear-gradient(135deg, #86E0BE 0%, #3FAE88 100%)',
                                 }}
                               >
                                 <p className="text-[11px] font-bold leading-tight truncate">
@@ -620,7 +620,7 @@ export default function AgendaPage() {
               <div className="flex items-center gap-1.5">
                 <span
                   className="h-2.5 w-2.5 rounded-full"
-                  style={{ background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)' }}
+                  style={{ background: 'linear-gradient(135deg, #86E0BE 0%, #3FAE88 100%)' }}
                 />
                 <span className="text-xs text-ink/60 dark:text-white/50">{ui.common.inPerson}</span>
               </div>

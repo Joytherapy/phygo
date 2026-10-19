@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import { X, Search, Dumbbell, Layers, Lightbulb, Activity, Zap, Droplets, Baby, Users } from 'lucide-react';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 import EvidenceBadge, { SourceCitation } from '@/components/EvidenceBadge';
+import { PageBackdrop } from '@/components/ui/premium';
 
 type SubView = 'anatomy' | 'conditions' | 'assessment' | 'rehab';
 
@@ -262,8 +263,9 @@ export default function PelvicFloorPage() {
     <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
+      <PageBackdrop />
       <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-[0.10] dark:opacity-[0.16] blur-[140px]"
         style={{
           background: 'radial-gradient(circle, rgba(236,72,153,0.6) 0%, rgba(244,63,94,0.5) 100%)',
         }}
@@ -275,11 +277,8 @@ export default function PelvicFloorPage() {
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT.gradient }} />
             {t.badge}
           </div>
-          <h1 className="font-display text-6xl font-bold tracking-tight">
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: ACCENT.gradient }}
-            >
+          <h1 className="font-display text-5xl sm:text-6xl font-semibold tracking-[-0.035em] text-ink dark:text-white">
+            <span>
               {t.heading}
             </span>
           </h1>
@@ -293,10 +292,9 @@ export default function PelvicFloorPage() {
                 onClick={() => setSubView(s.key)}
                 className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   subView === s.key
-                    ? 'text-white'
+                    ? 'bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] dark:bg-white dark:text-ink'
                     : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                 }`}
-                style={subView === s.key ? { background: ACCENT.solid } : undefined}
               >
                 {s.label}
               </button>
@@ -332,10 +330,9 @@ export default function PelvicFloorPage() {
                   onClick={() => setSexView(sv)}
                   className={`px-4 py-1 rounded-full text-[11px] font-semibold transition-all ${
                     sexView === sv
-                      ? 'text-white'
+                      ? 'bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] dark:bg-white dark:text-ink'
                       : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                   }`}
-                  style={sexView === sv ? { background: ACCENT.solid } : undefined}
                 >
                   {t.sexTabs[sv]}
                 </button>
