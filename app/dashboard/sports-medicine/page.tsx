@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import { X, Search } from 'lucide-react';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
+import { PageBackdrop } from '@/components/ui/premium';
 
 interface ConceptItem {
   id: number;
@@ -73,8 +74,9 @@ export default function SportsMedicinePage() {
     <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
+      <PageBackdrop />
       <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-[0.10] dark:opacity-[0.16] blur-[140px]"
         style={{
           background: 'radial-gradient(circle, rgba(255,154,86,0.6) 0%, rgba(255,107,53,0.5) 100%)',
         }}
@@ -87,7 +89,7 @@ export default function SportsMedicinePage() {
             {ui.sportsMedicine.atlasBadge}
           </div>
           <h1 className="font-display text-5xl sm:text-6xl font-semibold tracking-tight">
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: ACCENT.gradient }}>
+            <span>
               {ui.sportsMedicine.heading}
             </span>
           </h1>

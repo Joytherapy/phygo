@@ -17,7 +17,7 @@ import type { AdaptiveInsightResult } from '@/lib/metabolicCalculator'
 import { lazy } from '@/lib/lazy'
 import PatientProfileCard from '@/components/patients/PatientProfileCard'
 import { displayAge, type PatientIdentity } from '@/lib/patients/profile'
-import { PageBackdrop, PageEyebrow, PAGE_BG, PRIMARY_BTN, SECONDARY_BTN, CHIP, ICON_TILE } from '@/components/ui/premium'
+import { PageBackdrop, PageEyebrow, PAGE_BG, PRIMARY_BTN, SECONDARY_BTN, CHIP, HUE, type Hue } from '@/components/ui/premium'
 import { Avatar, Card } from '@/components/dashboard/HomeCards'
 import { useHomeUi } from '@/lib/i18n/homeStrings'
 
@@ -495,14 +495,14 @@ export default function PatientDetailPage() {
           className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10"
         >
           {[
-            { icon: ClipboardList, label: ui.patients.statSessions, value: notesStatus === 'ready' ? String(notes.length) : '—' },
-            { icon: Calendar, label: ui.patients.statLastSession, value: lastSessionDate ? lastSessionDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '—' },
-            { icon: Activity, label: ui.patients.statPatientSince, value: formatSince(patient.created_at, ui) },
-            { icon: Dumbbell, label: ui.patients.statLinkedItems, value: String(clinicalRefs.length) },
-          ].map(({ icon: Icon, label, value }) => (
+            { icon: ClipboardList, hue: 'iris' as Hue, label: ui.patients.statSessions, value: notesStatus === 'ready' ? String(notes.length) : '—' },
+            { icon: Calendar, hue: 'sky' as Hue, label: ui.patients.statLastSession, value: lastSessionDate ? lastSessionDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '—' },
+            { icon: Activity, hue: 'amber' as Hue, label: ui.patients.statPatientSince, value: formatSince(patient.created_at, ui) },
+            { icon: Dumbbell, hue: 'violet' as Hue, label: ui.patients.statLinkedItems, value: String(clinicalRefs.length) },
+          ].map(({ icon: Icon, hue, label, value }) => (
             <Card key={label} className="p-4 sm:p-5">
               <div className="flex items-center gap-2.5">
-                <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${ICON_TILE}`}>
+                <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${HUE[hue].tile}`}>
                   <Icon size={14} aria-hidden />
                 </span>
                 <span className="min-w-0 truncate text-[12px] font-medium text-ink/60 dark:text-white/50">{label}</span>

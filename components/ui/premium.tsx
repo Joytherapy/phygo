@@ -10,6 +10,21 @@ import type { LucideIcon } from 'lucide-react'
 export const ACCENT = 'linear-gradient(135deg, #A5B4FF 0%, #7C83FF 50%, #A78BFA 100%)'
 export const ACCENT_SOLID = '#8B95FF'
 
+/**
+ * Six soft hues next to the accent, all at the same lightness so none shouts.
+ * They carry meaning (a kind of appointment, a figure, a folder), never
+ * decoration: every screen stays mostly neutral.
+ */
+export type Hue = 'iris' | 'violet' | 'sky' | 'mint' | 'amber' | 'coral'
+export const HUE: Record<Hue, { solid: string; tile: string; gradient: string }> = {
+  iris: { solid: '#8B95FF', gradient: 'linear-gradient(135deg, #A5B4FF 0%, #7C83FF 100%)', tile: 'bg-[#8B95FF]/[0.12] text-[#5B63E6] ring-1 ring-inset ring-[#8B95FF]/25 dark:text-[#B4BCFF]' },
+  violet: { solid: '#A78BFA', gradient: 'linear-gradient(135deg, #C4B5FD 0%, #A78BFA 100%)', tile: 'bg-[#A78BFA]/[0.12] text-[#7C5CE0] ring-1 ring-inset ring-[#A78BFA]/25 dark:text-[#C9B8FF]' },
+  sky: { solid: '#5BB8F0', gradient: 'linear-gradient(135deg, #93D2F7 0%, #4AA6E0 100%)', tile: 'bg-[#5BB8F0]/[0.12] text-[#2B86C4] ring-1 ring-inset ring-[#5BB8F0]/25 dark:text-[#93D2F7]' },
+  mint: { solid: '#4FC79B', gradient: 'linear-gradient(135deg, #86E0BE 0%, #3FAE88 100%)', tile: 'bg-[#4FC79B]/[0.12] text-[#23936B] ring-1 ring-inset ring-[#4FC79B]/25 dark:text-[#86E0BE]' },
+  amber: { solid: '#F0B44C', gradient: 'linear-gradient(135deg, #F7CF85 0%, #E39E2B 100%)', tile: 'bg-[#F0B44C]/[0.14] text-[#A86F0C] ring-1 ring-inset ring-[#F0B44C]/30 dark:text-[#F7CF85]' },
+  coral: { solid: '#F2879A', gradient: 'linear-gradient(135deg, #F8B3C0 0%, #E66A80 100%)', tile: 'bg-[#F2879A]/[0.13] text-[#C94A62] ring-1 ring-inset ring-[#F2879A]/25 dark:text-[#F8B3C0]' },
+}
+
 export const PAGE_BG = 'bg-[#f7f7f8] dark:bg-[#050608]'
 
 export const PRIMARY_BTN =

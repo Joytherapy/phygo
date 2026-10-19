@@ -44,16 +44,16 @@ export default function MyPhygoLifePage() {
         {ui.backToHome}
       </a>
 
-      <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#6366F1] mb-2">{ui.badge}</p>
+      <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#6B73F0] dark:text-[#A5B4FF] mb-2">{ui.badge}</p>
       <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white mb-2">{ui.heading}</h1>
       <p className="text-sm text-ink/60 dark:text-white/50 mb-10">{ui.subtitle}</p>
 
       <a
         href="/my-phygo/life/metabolic"
-        className="flex items-center justify-between rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#6366F1]/30 transition-colors group"
+        className="flex items-center justify-between rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 hover:border-black/15 dark:hover:border-white/20 transition-colors group"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#6366F1]/10 text-[#6366F1]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75">
             <Flame size={16} />
           </div>
           <div>

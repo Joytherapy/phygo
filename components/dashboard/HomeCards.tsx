@@ -6,11 +6,11 @@
 
 import Link from 'next/link'
 import { ReactNode, useEffect, useRef, useState } from 'react'
-import { ArrowRight, Check, Clock, MapPin, Play, UserRound, Video, X, AlertCircle, RotateCcw, CalendarClock } from 'lucide-react'
+import { ArrowRight, Check, Clock, MapPin, Play, UserRound, Video, X, AlertCircle, RotateCcw, CalendarClock, type LucideIcon } from 'lucide-react'
 
 
 export { ACCENT, ACCENT_SOLID, PRIMARY_BTN } from '@/components/ui/premium'
-import { ACCENT, ACCENT_SOLID, PRIMARY_BTN } from '@/components/ui/premium'
+import { ACCENT, ACCENT_SOLID, PRIMARY_BTN, HUE, type Hue } from '@/components/ui/premium'
 
 const EDGE_MASK = {
   padding: 1,
@@ -352,8 +352,12 @@ export function StatTile({
   href,
   unavailable,
   loading,
+  icon: Icon,
+  hue = 'iris',
 }: {
   index: number
+  icon?: LucideIcon
+  hue?: Hue
   label: string
   value: number | null | undefined
   extra?: string
@@ -364,7 +368,14 @@ export function StatTile({
 }) {
   const inner = (
     <>
-      <p className="text-xs text-ink/55 dark:text-white/50">{label}</p>
+      <div className="flex items-center gap-2.5">
+        {Icon && (
+          <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${HUE[hue].tile}`}>
+            <Icon size={14} aria-hidden />
+          </span>
+        )}
+        <p className="text-xs text-ink/55 dark:text-white/50">{label}</p>
+      </div>
       <div className="mt-3 flex items-baseline gap-2">
         <p className="font-display text-[34px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-ink dark:text-white" data-stat={index}>
           {value === undefined ? (
@@ -415,19 +426,19 @@ export function Sparkline({ values, color = ACCENT_SOLID, id }: { values: number
   )
 }
 
-export function Bars({ values, highlight }: { values: number[]; highlight: number }) {
+export function Bars({ values, highlight, color = ACCENT_SOLID }: { values: number[]; highlight: number; color?: string }) {
   const max = Math.max(1, ...values)
   return (
     <svg width={7 * 15} height={40} viewBox={`0 0 ${7 * 15} 40`}>
       {values.map((v, i) => {
         const bh = Math.max(4, (v / max) * 36)
-        return <rect key={i} x={i * 15 + 1} y={40 - bh} width={11} height={bh} rx={3} fill={i === highlight ? ACCENT_SOLID : 'currentColor'} opacity={i === highlight ? 1 : 0.12 + 0.18 * (v / max)} />
+        return <rect key={i} x={i * 15 + 1} y={40 - bh} width={11} height={bh} rx={3} fill={i === highlight ? color : 'currentColor'} opacity={i === highlight ? 1 : 0.12 + 0.18 * (v / max)} />
       })}
     </svg>
   )
 }
 
-export function Ring({ part, total }: { part: number; total: number }) {
+export function Ring({ part, total, from = '#A5B4FF', to = '#A78BFA' }: { part: number; total: number; from?: string; to?: string }) {
   const r = 16
   const c = 2 * Math.PI * r
   const frac = total ? part / total : 0
@@ -435,8 +446,8 @@ export function Ring({ part, total }: { part: number; total: number }) {
     <svg width={42} height={42} viewBox="0 0 42 42">
       <defs>
         <linearGradient id="ring-g">
-          <stop offset="0" stopColor="#A5B4FF" />
-          <stop offset="1" stopColor="#A78BFA" />
+          <stop offset="0" stopColor={from} />
+          <stop offset="1" stopColor={to} />
         </linearGradient>
       </defs>
       <circle cx="21" cy="21" r={r} fill="none" stroke="currentColor" strokeOpacity="0.1" strokeWidth="5" />

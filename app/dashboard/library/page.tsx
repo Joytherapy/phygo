@@ -5,6 +5,8 @@ import { Search, Lock } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ClinicalActionBar from '@/components/ClinicalActionBar';
 import { PageBackdrop } from '@/components/ui/premium'
+import { useLanguage } from '@/contexts/LanguageContext';
+import type { AppLang } from '@/lib/i18n/uiStrings';
 
 interface Step {
   label: string;
@@ -43,12 +45,42 @@ interface Category {
 }
 
 const levelColor: Record<string, string> = {
-  Gentle: '#32D6A0',
+  Gentle: '#34A389',
   Active: '#7C83FF',
-  Challenge: '#A855F7',
+  Challenge: '#A78BFA',
+};
+
+// Page texts in the four app languages (items themselves come from the API).
+const LIB: Record<AppLang, Record<string, string>> = {
+  it: {
+    lockedTitle: 'La Pro Library è una funzione Pro', lockedBody: 'Passa a un piano superiore per sbloccare tutta la libreria di contenuti clinici.',
+    badge: 'Riservata agli iscritti', heading: 'Pro Library', subtitle: 'Contenuti curati e strutturati clinicamente, pronti da portare in seduta.',
+    loading: 'Caricamento…', search: 'Cerca contenuti…', empty: 'Ancora nessun contenuto in questa categoria.',
+    easier: 'Più facile: ', harder: 'Più difficile: ', tip: 'Consiglio: ', safety: 'Sicurezza: ',
+  },
+  en: {
+    lockedTitle: 'Pro Library is a Pro feature', lockedBody: 'Upgrade your plan to unlock the full clinical content library.',
+    badge: 'Members only', heading: 'Pro Library', subtitle: 'Curated, clinically structured content — ready to bring straight into a session.',
+    loading: 'Loading…', search: 'Search items…', empty: 'No items yet in this category.',
+    easier: 'Easier: ', harder: 'Harder: ', tip: 'Tip: ', safety: 'Safety: ',
+  },
+  es: {
+    lockedTitle: 'La Pro Library es una función Pro', lockedBody: 'Mejora tu plan para desbloquear toda la biblioteca de contenido clínico.',
+    badge: 'Solo para miembros', heading: 'Pro Library', subtitle: 'Contenido seleccionado y estructurado clínicamente, listo para llevar a la sesión.',
+    loading: 'Cargando…', search: 'Buscar contenido…', empty: 'Todavía no hay contenido en esta categoría.',
+    easier: 'Más fácil: ', harder: 'Más difícil: ', tip: 'Consejo: ', safety: 'Seguridad: ',
+  },
+  fr: {
+    lockedTitle: 'La Pro Library est une fonction Pro', lockedBody: 'Passez à une offre supérieure pour débloquer toute la bibliothèque de contenus cliniques.',
+    badge: 'Réservé aux membres', heading: 'Pro Library', subtitle: 'Des contenus sélectionnés et structurés cliniquement, prêts à être utilisés en séance.',
+    loading: 'Chargement…', search: 'Rechercher des contenus…', empty: 'Aucun contenu dans cette catégorie pour le moment.',
+    easier: 'Plus facile : ', harder: 'Plus difficile : ', tip: 'Conseil : ', safety: 'Sécurité : ',
+  },
 };
 
 export default function LibraryPage() {
+  const { lang } = useLanguage();
+  const t = LIB[lang] ?? LIB.it;
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [items, setItems] = useState<Item[]>([]);
@@ -95,15 +127,16 @@ export default function LibraryPage() {
 
   if (forbidden) {
     return (
-      <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] transition-colors">
+      <div className="relative min-h-screen overflow-hidden bg-[#f7f7f8] dark:bg-[#050608] transition-colors">
         <Navbar />
+        <PageBackdrop />
         <div className="relative max-w-lg mx-auto pt-48 pb-24 px-6 text-center">
           <Lock size={32} className="mx-auto mb-4 text-ink/30 dark:text-white/30" />
           <h1 className="font-display text-2xl font-bold text-ink dark:text-white mb-2">
-            Pro Library is a Pro feature
+            {t.lockedTitle}
           </h1>
           <p className="text-sm text-ink/60 dark:text-white/50">
-            Upgrade your plan to unlock the full clinical content library.
+            {t.lockedBody}
           </p>
         </div>
       </div>
@@ -117,20 +150,16 @@ export default function LibraryPage() {
       <PageBackdrop />
 
       <div className="relative max-w-5xl mx-auto pt-40 pb-24 px-6">
-         <div className="inline-flex items-center gap-2 rounded-full border border-[#7C83FF]/20 bg-[#7C83FF]/10 px-3.5 py-1.5 mb-5">
-          <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' }} />
-<p className="text-xs font-semibold tracking-[0.15em] uppercase text-[#7C83FF]">Members Only</p>
+        <div className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-black/[0.02] px-4 py-1.5 mb-5 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.03]">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'linear-gradient(135deg, #A5B4FF 0%, #7C83FF 50%, #A78BFA 100%)' }} />
+          <p className="text-xs font-semibold tracking-[0.15em] uppercase text-ink/70 dark:text-white/70">{t.badge}</p>
         </div>
-        <h1 className="font-display text-6xl font-bold tracking-tight mb-3 text-ink dark:text-white">
-          Pro <span style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Library</span>
-        </h1>
-        <p className="text-base text-ink/60 dark:text-white/50 mb-8 max-w-lg">
-          Curated, clinically structured content — ready to bring straight into a session.
-        </p>
+        <h1 className="font-display text-5xl sm:text-6xl font-semibold tracking-[-0.035em] mb-3 text-ink dark:text-white">{t.heading}</h1>
+        <p className="text-base text-ink/60 dark:text-white/50 mb-8 max-w-lg">{t.subtitle}</p>
 
 
         {loading ? (
-          <p className="text-sm text-ink/60 dark:text-white/50">Loading…</p>
+          <p className="text-sm text-ink/60 dark:text-white/50">{t.loading}</p>
         ) : (
           <>
             <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
@@ -140,14 +169,9 @@ export default function LibraryPage() {
                   onClick={() => setActiveCategory(cat.id)}
                   className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                     activeCategory === cat.id
-                      ? 'text-white'
+                      ? 'bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] dark:bg-white dark:text-ink'
                       : 'text-ink/60 dark:text-white/60 bg-black/5 dark:bg-white/5'
                   }`}
-                  style={
-                    activeCategory === cat.id
-                      ? { background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' }
-                      : {}
-                  }
                 >
                   {cat.name}
                 </button>
@@ -162,7 +186,7 @@ export default function LibraryPage() {
                     onClick={() => setActiveSubcategory(sub.id)}
                     className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold border transition-colors ${
                       activeSubcategory === sub.id
-                        ? 'border-[#7C83FF] text-[#7C83FF] bg-[#7C83FF]/10'
+                        ? 'border-ink/30 text-ink bg-black/[0.04] dark:border-white/40 dark:text-white dark:bg-white/[0.08]'
                         : 'border-black/10 dark:border-white/15 text-ink/60 dark:text-white/50'
                     }`}
                   >
@@ -180,7 +204,7 @@ export default function LibraryPage() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search items…"
+                placeholder={t.search}
                 className="relative w-full text-sm rounded-full border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] pl-14 pr-4 py-3.5 outline-none focus:border-[#7C83FF] text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40"
               />
             </div>
@@ -224,7 +248,7 @@ export default function LibraryPage() {
                 </div>
               ))}
               {filteredItems.length === 0 && (
-                <p className="text-sm text-ink/60 dark:text-white/50 col-span-2">No items yet in this category.</p>
+                <p className="text-sm text-ink/60 dark:text-white/50 col-span-2">{t.empty}</p>
               )}
             </div>
           </>
@@ -279,25 +303,25 @@ export default function LibraryPage() {
 
             {openItem.easier_option && (
               <p className="text-xs text-ink/60 dark:text-white/60 mb-1">
-                <span className="font-semibold">Easier: </span>
+                <span className="font-semibold">{t.easier}</span>
                 {openItem.easier_option}
               </p>
             )}
             {openItem.harder_option && (
               <p className="text-xs text-ink/60 dark:text-white/60 mb-1">
-                <span className="font-semibold">Harder: </span>
+                <span className="font-semibold">{t.harder}</span>
                 {openItem.harder_option}
               </p>
             )}
             {openItem.tip && (
               <p className="text-xs text-ink/60 dark:text-white/60 mt-3">
-                <span className="font-semibold">Tip: </span>
+                <span className="font-semibold">{t.tip}</span>
                 {openItem.tip}
               </p>
             )}
             {openItem.safety_note && (
               <p className="text-xs text-red-500 mt-2">
-                <span className="font-semibold">Safety: </span>
+                <span className="font-semibold">{t.safety}</span>
                 {openItem.safety_note}
               </p>
             )}

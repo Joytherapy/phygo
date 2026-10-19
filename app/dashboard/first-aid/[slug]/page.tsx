@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { ArrowLeft } from 'lucide-react';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
+import { PageBackdrop } from '@/components/ui/premium';
 
 interface TopicDetail {
   id: string;
@@ -84,8 +85,9 @@ export default function FirstAidDetailPage() {
     <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
+      <PageBackdrop />
       <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-[0.10] dark:opacity-[0.16] blur-[140px]"
         style={{
           background: 'radial-gradient(circle, rgba(239,68,68,0.6) 0%, rgba(249,115,22,0.5) 100%)',
         }}

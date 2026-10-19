@@ -2366,7 +2366,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     bodyMap: {
       badge: 'Mappa 3D Interattiva del Corpo',
       calibrationBadge: 'Modalità Calibrazione — clicca sul modello',
-      heading: 'Anatomical Navigator',
+      heading: 'Navigatore anatomico',
       subtitle: 'Ruota, ingrandisci ed esplora il modello anatomico 3D — clicca su una zona per aprire condizioni, test e protocolli specifici.',
       legendMuscleZones: 'Zone muscolari',
       legendBoneZones: 'Zone ossee (raggi-X)',
@@ -5176,7 +5176,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     bodyMap: {
       badge: 'Mapa Corporal 3D Interactivo',
       calibrationBadge: 'Modo Calibración — toca el modelo',
-      heading: 'Anatomical Navigator',
+      heading: 'Navegador anatómico',
       subtitle: 'Gira, amplía y explora el modelo anatómico 3D — toca una zona para abrir sus condiciones, pruebas y protocolos.',
       legendMuscleZones: 'Zonas musculares',
       legendBoneZones: 'Zonas óseas (rayos X)',
@@ -6581,7 +6581,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     bodyMap: {
       badge: 'Carte du Corps 3D Interactive',
       calibrationBadge: 'Mode Calibration — touchez le modèle',
-      heading: 'Anatomical Navigator',
+      heading: 'Navigateur anatomique',
       subtitle: 'Faites pivoter, zoomez et explorez le modèle anatomique 3D — touchez une zone pour ouvrir ses pathologies, tests et protocoles.',
       legendMuscleZones: 'Zones musculaires',
       legendBoneZones: 'Zones osseuses (rayons X)',

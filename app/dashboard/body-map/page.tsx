@@ -64,9 +64,7 @@ function BodyMapContent() {
             variants={fadeUp}
             className="font-display font-semibold tracking-tight text-5xl sm:text-6xl"
           >
-            <span className="bg-gradient-to-r from-[#7C83FF] via-[#6D8FFF] to-[#A78BFA] bg-clip-text text-transparent">
-              Anatomical Navigator
-            </span>
+            <span>{ui.bodyMap.heading}</span>
           </motion.h1>
 
           <motion.p
