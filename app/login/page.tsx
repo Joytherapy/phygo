@@ -7,7 +7,7 @@ import { useChosenEntryLang, useEntryLang, useSetEntryLang } from "@/lib/i18n/us
 import { rememberLanguage } from "@/lib/i18n/rememberLanguage";
 import { ENTRY_STRINGS, localizeAuthError } from "@/lib/i18n/entryStrings";
 import { publicPath, myPhygoLoginHref } from "@/lib/i18n/landingStrings";
-import BrandMark from "@/components/BrandMark";
+import { BrandSymbol } from "@/components/BrandMark";
 import LanguageMenu from "@/components/LanguageMenu";
 import { PageBackdrop } from '@/components/ui/premium'
 
@@ -90,7 +90,7 @@ function LoginForm() {
       <div className="relative w-full max-w-sm rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.055] dark:to-white/[0.018] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-8">
         <LanguageMenu value={lang} onChange={setEntryLang} className="absolute right-4 top-4" />
         <div className="flex justify-center mb-6">
-          <BrandMark />
+          <BrandSymbol />
         </div>
 
         <h1 className="mb-1 text-center text-2xl font-semibold text-ink dark:text-white">
