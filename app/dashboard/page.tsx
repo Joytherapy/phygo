@@ -526,13 +526,14 @@ export default function DashboardPage() {
 
         {/* counters: real figures only */}
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mt-4 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 [&>*]:min-w-0">
-          <StatTile index={0} icon={Users} hue="iris" label={h.statPatients} value={patientsValue} extra={newThisMonth ? h.statNewThisMonth(newThisMonth) : undefined} unavailable={t.common.unavailable} loading={ui.common.loading} />
+          <StatTile index={0} icon={Users} hue="iris" href="#patients" label={h.statPatients} value={patientsValue} extra={newThisMonth ? h.statNewThisMonth(newThisMonth) : undefined} unavailable={t.common.unavailable} loading={ui.common.loading} />
           <StatTile
             index={1}
             icon={FileText}
             hue="mint"
             label={h.statNotesThisMonth}
             value={notesMonth}
+            href="/dashboard/notes"
             chart={notes && now ? <Sparkline id="notes-spark" color={HUE.mint.solid} values={notesPerWeek(notes, now)} /> : undefined}
             unavailable={t.common.unavailable}
             loading={ui.common.loading}
@@ -554,6 +555,7 @@ export default function DashboardPage() {
             hue="sky"
             label={h.statOnMyPhygo}
             value={linkedValue}
+            href="#patients"
             extra={patientsValue ? h.statOfTotal(patientsValue) : undefined}
             chart={patientsValue ? <span className="text-ink dark:text-white"><Ring part={linkedCount} total={patientsValue} from="#93D2F7" to="#4AA6E0" /></span> : undefined}
             unavailable={t.common.unavailable}
@@ -562,7 +564,7 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* patients */}
-        <section className="mt-10" aria-labelledby="patients-heading">
+        <section id="patients" className="mt-10 scroll-mt-28" aria-labelledby="patients-heading">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 id="patients-heading" className="font-display text-xl font-bold tracking-tight text-ink dark:text-white">
               {h.patientsHeading}
