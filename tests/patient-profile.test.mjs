@@ -259,6 +259,8 @@ test('saving writes the record and the clinical part, then shows them; the age c
 test('the contact e-mail is kept apart from the My Phygo account', { skip }, async () => {
   const { ctx, card } = await openPatient(FULL);
   try {
+    // The emergency contact and clinical part load separately (patient_details): wait for them.
+    await card.getByText('Synthetic Contact').first().waitFor();
     const text = await card.innerText();
     assert.match(text, /anna\.contact@example\.invalid/);
     assert.match(text, /non è l'account con cui il paziente accede a My PHYGO/);

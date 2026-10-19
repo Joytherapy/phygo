@@ -521,6 +521,7 @@ export default function PdfViewer({
                   color={textColor}
                   backgroundColor={textBackground}
                   fontSize={textFontSize}
+            onSelectNote={(size) => size !== null && setTextFontSize(size)}
                   onCreate={(data) => onCreateAnnotation(pageNumber, { type: 'text', data })}
                   onUpdate={onUpdateAnnotation}
                   onDelete={onDeleteAnnotation}

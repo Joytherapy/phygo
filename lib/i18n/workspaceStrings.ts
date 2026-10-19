@@ -119,6 +119,9 @@ interface WorkspaceDict {
     clearPage: string
     noBackground: string
     textSize: string
+    textSmaller: string
+    textBigger: string
+    resizeBox: string
   }
   ask: {
     button: string
@@ -283,7 +286,7 @@ const it: WorkspaceDict = {
   annotate: {
     select: 'Seleziona', pen: 'Penna', line: 'Linea', rectangle: 'Rettangolo', ellipse: 'Cerchio',
     highlighter: 'Evidenziatore', eraser: 'Gomma', eraserSize: 'Dimensione gomma', text: 'Testo', textPlaceholder: 'Scrivi una nota…', shape: 'Forma',
-    color: 'Colore', thickness: 'Spessore', undo: 'Annulla', redo: 'Ripeti', clearPage: 'Cancella annotazioni pagina', noBackground: 'Nessuno sfondo', textSize: 'Dimensione testo',
+    color: 'Colore', thickness: 'Spessore', undo: 'Annulla', redo: 'Ripeti', clearPage: 'Cancella annotazioni pagina', noBackground: 'Nessuno sfondo', textSize: 'Dimensione testo', textSmaller: 'Riduci testo', textBigger: 'Ingrandisci testo', resizeBox: 'Ridimensiona riquadro',
     insertImage: 'Inserisci immagine', uploadPhoto: 'Carica foto', takePhoto: 'Scatta foto', imageOnly: 'Seleziona un file immagine',
     fileTooLarge: 'File troppo grande (max {max}MB).', sessionExpired: 'Sessione scaduta — accedi di nuovo.',
   },
@@ -399,7 +402,7 @@ const en: WorkspaceDict = {
   annotate: {
     select: 'Select', pen: 'Pen', line: 'Line', rectangle: 'Rectangle', ellipse: 'Circle',
     highlighter: 'Highlighter', eraser: 'Eraser', eraserSize: 'Eraser size', text: 'Text', textPlaceholder: 'Write a note…', shape: 'Shape',
-    color: 'Color', thickness: 'Thickness', undo: 'Undo', redo: 'Redo', clearPage: 'Clear page annotations', noBackground: 'No background', textSize: 'Text size',
+    color: 'Color', thickness: 'Thickness', undo: 'Undo', redo: 'Redo', clearPage: 'Clear page annotations', noBackground: 'No background', textSize: 'Text size', textSmaller: 'Smaller text', textBigger: 'Bigger text', resizeBox: 'Resize box',
     insertImage: 'Insert image', uploadPhoto: 'Upload photo', takePhoto: 'Take photo', imageOnly: 'Please select an image file',
     fileTooLarge: 'File too large (max {max}MB).', sessionExpired: 'Session expired — please sign in again.',
   },
@@ -515,7 +518,7 @@ const es: WorkspaceDict = {
   annotate: {
     select: 'Seleccionar', pen: 'Bolígrafo', line: 'Línea', rectangle: 'Rectángulo', ellipse: 'Círculo',
     highlighter: 'Resaltador', eraser: 'Borrador', eraserSize: 'Tamaño del borrador', text: 'Texto', textPlaceholder: 'Escribe una nota…', shape: 'Forma',
-    color: 'Color', thickness: 'Grosor', undo: 'Deshacer', redo: 'Rehacer', clearPage: 'Borrar anotaciones de la página', noBackground: 'Sin fondo', textSize: 'Tamaño del texto',
+    color: 'Color', thickness: 'Grosor', undo: 'Deshacer', redo: 'Rehacer', clearPage: 'Borrar anotaciones de la página', noBackground: 'Sin fondo', textSize: 'Tamaño del texto', textSmaller: 'Reducir texto', textBigger: 'Ampliar texto', resizeBox: 'Redimensionar cuadro',
     insertImage: 'Insertar imagen', uploadPhoto: 'Subir foto', takePhoto: 'Tomar foto', imageOnly: 'Selecciona un archivo de imagen',
     fileTooLarge: 'Archivo demasiado grande (máx. {max}MB).', sessionExpired: 'Sesión caducada — inicia sesión de nuevo.',
   },
@@ -631,7 +634,7 @@ const fr: WorkspaceDict = {
   annotate: {
     select: 'Sélectionner', pen: 'Stylo', line: 'Ligne', rectangle: 'Rectangle', ellipse: 'Cercle',
     highlighter: 'Surligneur', eraser: 'Gomme', eraserSize: 'Taille de la gomme', text: 'Texte', textPlaceholder: 'Écrivez une note…', shape: 'Forme',
-    color: 'Couleur', thickness: 'Épaisseur', undo: 'Annuler', redo: 'Rétablir', clearPage: 'Effacer les annotations de la page', noBackground: 'Aucun fond', textSize: 'Taille du texte',
+    color: 'Couleur', thickness: 'Épaisseur', undo: 'Annuler', redo: 'Rétablir', clearPage: 'Effacer les annotations de la page', noBackground: 'Aucun fond', textSize: 'Taille du texte', textSmaller: 'Réduire le texte', textBigger: 'Agrandir le texte', resizeBox: 'Redimensionner le cadre',
     insertImage: 'Insérer une image', uploadPhoto: 'Importer une photo', takePhoto: 'Prendre une photo', imageOnly: 'Sélectionnez un fichier image',
     fileTooLarge: 'Fichier trop volumineux (max {max}Mo).', sessionExpired: 'Session expirée — veuillez vous reconnecter.',
   },
