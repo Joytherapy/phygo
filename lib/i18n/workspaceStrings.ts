@@ -130,6 +130,9 @@ interface WorkspaceDict {
     close: string
     disclaimer: string
     empty: string
+    /** Used when no document is open (dashboard, patient pages, library…). */
+    placeholderGeneral: string
+    emptyGeneral: string
     genericError: string
     networkError: string
   }
@@ -352,6 +355,7 @@ const it: WorkspaceDict = {
     button: 'Chiedi a PHYGO', title: 'Chiedi a PHYGO', placeholder: 'Fai una domanda su questo documento…', send: 'Invia',
     thinking: 'PHYGO sta pensando…', limitReached: 'Hai raggiunto il limite di domande per il tuo piano. Riprova più tardi o passa a un piano superiore.',
     close: 'Chiudi', disclaimer: 'Le risposte sono un supporto didattico, non un parere clinico definitivo.', empty: 'Fai la tua prima domanda su questo documento.',
+    placeholderGeneral: 'Chiedi qualcosa a PHYGO…', emptyGeneral: 'Chiedi a PHYGO un dubbio clinico, un concetto da ripassare o un esercizio da proporre.',
     genericError: 'Qualcosa è andato storto.', networkError: 'Errore di rete — riprova.',
   },
 }
@@ -467,6 +471,7 @@ const en: WorkspaceDict = {
     button: 'Ask PHYGO', title: 'Ask PHYGO', placeholder: 'Ask a question about this document…', send: 'Send',
     thinking: 'PHYGO is thinking…', limitReached: "You've reached your plan's question limit. Try again later or upgrade your plan.",
     close: 'Close', disclaimer: 'Answers are study support, not definitive clinical advice.', empty: 'Ask your first question about this document.',
+    placeholderGeneral: 'Ask PHYGO anything…', emptyGeneral: 'Ask PHYGO about a clinical doubt, a concept to review or an exercise to suggest.',
     genericError: 'Something went wrong.', networkError: 'Network error — please try again.',
   },
 }
@@ -582,6 +587,7 @@ const es: WorkspaceDict = {
     button: 'Preguntar a PHYGO', title: 'Preguntar a PHYGO', placeholder: 'Haz una pregunta sobre este documento…', send: 'Enviar',
     thinking: 'PHYGO está pensando…', limitReached: 'Has alcanzado el límite de preguntas de tu plan. Inténtalo más tarde o mejora tu plan.',
     close: 'Cerrar', disclaimer: 'Las respuestas son apoyo de estudio, no un consejo clínico definitivo.', empty: 'Haz tu primera pregunta sobre este documento.',
+    placeholderGeneral: 'Pregunta lo que quieras a PHYGO…', emptyGeneral: 'Pregunta a PHYGO una duda clínica, un concepto para repasar o un ejercicio para proponer.',
     genericError: 'Algo salió mal.', networkError: 'Error de red — inténtalo de nuevo.',
   },
 }
@@ -697,6 +703,7 @@ const fr: WorkspaceDict = {
     button: 'Demander à PHYGO', title: 'Demander à PHYGO', placeholder: 'Posez une question sur ce document…', send: 'Envoyer',
     thinking: 'PHYGO réfléchit…', limitReached: 'Vous avez atteint la limite de questions de votre forfait. Réessayez plus tard ou passez à un forfait supérieur.',
     close: 'Fermer', disclaimer: "Les réponses sont un support d'étude, pas un avis clinique définitif.", empty: 'Posez votre première question sur ce document.',
+    placeholderGeneral: 'Demandez ce que vous voulez à PHYGO…', emptyGeneral: 'Demandez à PHYGO un doute clinique, une notion à revoir ou un exercice à proposer.',
     genericError: "Une erreur s'est produite.", networkError: 'Erreur réseau — veuillez réessayer.',
   },
 }

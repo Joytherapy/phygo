@@ -88,7 +88,7 @@ export default function AskPhygoPanel({ contextLabel, onClose }: { contextLabel?
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
-        {turns.length === 0 && <p className="text-sm text-ink/55 dark:text-white/40">{ui.ask.empty}</p>}
+        {turns.length === 0 && <p className="text-sm text-ink/55 dark:text-white/40">{contextLabel ? ui.ask.empty : ui.ask.emptyGeneral}</p>}
         {turns.map((t, i) => (
           <div key={i} className="space-y-1.5">
             <p className="text-sm font-medium text-ink dark:text-white">{t.question}</p>
@@ -114,7 +114,7 @@ export default function AskPhygoPanel({ contextLabel, onClose }: { contextLabel?
                 ask()
               }
             }}
-            placeholder={ui.ask.placeholder}
+            placeholder={contextLabel ? ui.ask.placeholder : ui.ask.placeholderGeneral}
             className="flex-1 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/5 px-4 py-2 text-sm text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 focus:outline-none focus:border-[#7C83FF]/40"
           />
           <button
