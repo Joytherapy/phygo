@@ -83,6 +83,9 @@ interface MyPhygoDict {
     yourGoal: string
     editGoal: string
     backHome: string
+    clinicianTitle: string
+    clinicianBody: string
+    clinicianCta: string
   }
 }
 
@@ -159,6 +162,9 @@ const it: MyPhygoDict = {
     yourGoal: 'Il tuo obiettivo',
     editGoal: 'Modifica',
     backHome: 'Torna alla Home',
+    clinicianTitle: 'Questo è il tuo account professionale',
+    clinicianBody: 'My Phygo è il portale dei tuoi pazienti: qui non vengono mostrati dati di pazienti e il tuo profilo professionale non viene modificato. Per provare My Phygo usa un account paziente separato, con un’altra email e in una finestra in incognito.',
+    clinicianCta: 'Vai alla dashboard',
   },
 }
 
@@ -231,6 +237,9 @@ const en: MyPhygoDict = {
     yourGoal: 'Your goal',
     editGoal: 'Edit',
     backHome: 'Back to Home',
+    clinicianTitle: 'This is your professional account',
+    clinicianBody: 'My Phygo is your patients’ portal: no patient data is shown here and your professional profile is not changed. To try My Phygo, use a separate patient account, with another email, in a private window.',
+    clinicianCta: 'Go to the dashboard',
   },
 }
 
@@ -303,6 +312,9 @@ const es: MyPhygoDict = {
     yourGoal: 'Tu objetivo',
     editGoal: 'Editar',
     backHome: 'Volver al inicio',
+    clinicianTitle: 'Esta es tu cuenta profesional',
+    clinicianBody: 'My Phygo es el portal de tus pacientes: aquí no se muestran datos de pacientes y tu perfil profesional no se modifica. Para probar My Phygo usa una cuenta de paciente aparte, con otro email y en una ventana de incógnito.',
+    clinicianCta: 'Ir al panel',
   },
 }
 
@@ -375,6 +387,9 @@ const fr: MyPhygoDict = {
     yourGoal: 'Votre objectif',
     editGoal: 'Modifier',
     backHome: 'Retour à l’accueil',
+    clinicianTitle: 'Ceci est votre compte professionnel',
+    clinicianBody: 'My Phygo est le portail de vos patients : aucune donnée de patient n’y est affichée et votre profil professionnel n’est pas modifié. Pour essayer My Phygo, utilisez un compte patient distinct, avec un autre e-mail, dans une fenêtre de navigation privée.',
+    clinicianCta: 'Aller au tableau de bord',
   },
 }
 

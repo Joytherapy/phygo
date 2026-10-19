@@ -13,6 +13,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { localeForLang } from '@/lib/i18n/agendaStrings'
 import { MY_PHYGO_STRINGS } from '@/lib/i18n/myPhygoStrings'
 import { MyAvatar, useMyProfile } from '@/components/myPhygo/MyProfileContext'
+import ClinicianNotice from '@/components/myPhygo/ClinicianNotice'
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -44,7 +45,7 @@ export default function MyPhygoHomePage() {
   const { lang } = useLanguage()
   const t = MY_PHYGO_STRINGS[lang].home
   const tp = MY_PHYGO_STRINGS[lang].profile
-  const { profile, photoUrl } = useMyProfile()
+  const { profile, photoUrl, isClinician } = useMyProfile()
   const [patient, setPatient] = useState<PatientRecord | null>(null)
   const [notes, setNotes] = useState<NoteRecord[]>([])
   const [products, setProducts] = useState<RecommendedProduct[]>([])
@@ -96,7 +97,9 @@ export default function MyPhygoHomePage() {
     load()
   }, [router])
 
-  if (loading) {
+  if (isClinician) return <ClinicianNotice />
+
+  if (loading || isClinician === null) {
     return (
       <div className="relative pt-40 text-center text-ink/55 dark:text-white/40">{t.loading}</div>
     )

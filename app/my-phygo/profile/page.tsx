@@ -13,6 +13,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import LanguageMenu from '@/components/LanguageMenu'
 import { useMyPhygoStrings } from '@/lib/i18n/myPhygoStrings'
 import { MyAvatar, myPhygoSupabase as supabase, useMyProfile } from '@/components/myPhygo/MyProfileContext'
+import ClinicianNotice from '@/components/myPhygo/ClinicianNotice'
 import { AVATAR_TYPES, removeAvatar, uploadAvatar, type AvatarError } from '@/lib/myPhygo/avatar'
 import { PageEyebrow, PRIMARY_BTN, SECONDARY_BTN, INPUT_FOCUS, SURFACE } from '@/components/ui/premium'
 
@@ -23,7 +24,7 @@ export default function MyPhygoProfilePage() {
   const router = useRouter()
   const t = useMyPhygoStrings().profile
   const { lang, setLang } = useLanguage()
-  const { userId, email, profile, photoUrl, reload } = useMyProfile()
+  const { userId, email, profile, photoUrl, isClinician, reload } = useMyProfile()
   const [name, setName] = useState('')
   const [goal, setGoal] = useState('')
   const [loaded, setLoaded] = useState(false)
@@ -98,6 +99,11 @@ export default function MyPhygoProfilePage() {
   const label = 'mb-1.5 block text-sm font-medium text-ink/75 dark:text-white/70'
   const field = `w-full rounded-xl border border-black/[0.08] bg-white px-4 py-3 text-sm text-ink outline-none transition placeholder:text-ink/35 dark:border-white/[0.1] dark:bg-white/[0.04] dark:text-white dark:placeholder:text-white/30 ${INPUT_FOCUS}`
   const hint = 'mt-1.5 text-xs leading-relaxed text-ink/50 dark:text-white/45'
+
+  // A clinician's account shares this profiles row with the professional
+  // profile: never offer to change its name, bio or photo from here.
+  if (isClinician) return <ClinicianNotice />
+  if (isClinician === null) return <div className="relative pt-40" aria-busy="true" />
 
   return (
     <div className="relative mx-auto max-w-2xl px-6 pb-24 pt-36">

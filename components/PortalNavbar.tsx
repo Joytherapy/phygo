@@ -27,8 +27,9 @@ function EntryLanguageMenu() {
 
 // The patient's photo (or initials): the way into their profile page.
 function ProfileLink() {
-  const { profile, email, photoUrl } = useMyProfile()
+  const { profile, email, photoUrl, isClinician } = useMyProfile()
   const label = useMyPhygoStrings().profile.navLabel
+  if (isClinician !== false) return null
   return (
     <Link
       href="/my-phygo/profile"
