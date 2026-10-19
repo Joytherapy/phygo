@@ -1,9 +1,9 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
-import { Loader2, Smartphone } from 'lucide-react'
+import { Loader2, LogOut, Smartphone } from 'lucide-react'
 import { useEntryLang } from '@/lib/i18n/useEntryLang'
 import { ENTRY_STRINGS, localizeAuthError } from '@/lib/i18n/entryStrings'
 import { myPhygoLoginHref } from '@/lib/i18n/landingStrings'
@@ -34,6 +34,22 @@ function JoinInvite() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // The account already signed in on this browser (e.g. the physiotherapist
+  // testing the link). The invitation must never be redeemed with it:
+  // redeem_patient_invite links the record to whoever is signed in.
+  const [signedInEmail, setSignedInEmail] = useState<string | null | undefined>(undefined)
+
+  useEffect(() => {
+    supabase.auth
+      .getUser()
+      .then(({ data: { user } }) => setSignedInEmail(user ? user.email ?? '' : null))
+      .catch(() => setSignedInEmail(null))
+  }, [])
+
+  const signOutFirst = async () => {
+    await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
+    setSignedInEmail(null)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,12 +59,24 @@ function JoinInvite() {
     // If the sign-in service cannot be reached (or is not configured, as in
     // Vercel Previews), say so instead of leaving the button on "Please wait".
     try {
-      const { error: signUpError } = await supabase.auth.signUp({ email, password })
+      // Never leave another account's session in place while redeeming.
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
+      const { data: signUp, error: signUpError } = await supabase.auth.signUp({ email, password })
 
       if (signUpError) {
         setError(signUpError.name === 'AuthRetryableFetchError'
           ? ENTRY_STRINGS[lang].login.serviceUnavailable
           : localizeAuthError(signUpError.message, ENTRY_STRINGS[lang].login))
+        setLoading(false)
+        return
+      }
+
+      // Redeem only with the session of the account just created. No session
+      // (an existing email, or one waiting for confirmation) means stop here:
+      // the invitation stays unused for the patient.
+      if (!signUp.session || !signUp.user || signUp.session.user.id !== signUp.user.id) {
+        await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
+        setError(t.needsNewAccount)
         setLoading(false)
         return
       }
@@ -85,45 +113,60 @@ function JoinInvite() {
         {t.joinSub}
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="join-email" className="text-sm font-medium text-ink/60 dark:text-white/55">{t.email}</label>
-          <input
-            id="join-email"
-            autoComplete="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15 text-ink dark:text-white"
-          />
+      {signedInEmail ? (
+        <div role="status" data-testid="join-signed-in" className="rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-5">
+          <p className="text-sm font-semibold text-ink dark:text-white">{t.signedInAs(signedInEmail)}</p>
+          <p className="mt-1.5 text-sm leading-relaxed text-ink/65 dark:text-white/60">{t.signedInHint}</p>
+          <button
+            type="button"
+            onClick={signOutFirst}
+            className="mt-4 inline-flex min-h-[40px] items-center gap-2 rounded-full bg-ink px-5 text-sm font-semibold text-white transition hover:bg-ink/90 dark:bg-white dark:text-ink dark:hover:bg-white/90"
+          >
+            <LogOut size={15} aria-hidden />
+            {t.signOutContinue}
+          </button>
         </div>
-        <div>
-          <label htmlFor="join-password" className="text-sm font-medium text-ink/60 dark:text-white/55">{t.password}</label>
-          <input
-            id="join-password"
-            autoComplete="new-password"
-            type="password"
-            required
-            minLength={6}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15 text-ink dark:text-white"
-          />
-        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="join-email" className="text-sm font-medium text-ink/60 dark:text-white/55">{t.email}</label>
+            <input
+              id="join-email"
+              autoComplete="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15 text-ink dark:text-white"
+            />
+          </div>
+          <div>
+            <label htmlFor="join-password" className="text-sm font-medium text-ink/60 dark:text-white/55">{t.password}</label>
+            <input
+              id="join-password"
+              autoComplete="new-password"
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15 text-ink dark:text-white"
+            />
+          </div>
 
-        {error && <p role="alert" className="text-xs text-red-500">{error}</p>}
+          {error && <p role="alert" className="text-xs text-red-500">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-2 rounded-full px-7 py-3 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 transition-transform disabled:opacity-60"
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 rounded-full px-7 py-3 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 transition-transform disabled:opacity-60"
           
-        >
-          {loading && <Loader2 size={15} className="animate-spin" />}
-          {loading ? t.creating : t.create}
-        </button>
-      </form>
+          >
+            {loading && <Loader2 size={15} className="animate-spin" />}
+            {loading ? t.creating : t.create}
+          </button>
+        </form>
+      )}
 
       <p className="text-xs text-ink/55 dark:text-white/40 mt-6 text-center">
         {t.haveAccount}{' '}

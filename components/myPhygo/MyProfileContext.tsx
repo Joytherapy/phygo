@@ -18,17 +18,22 @@ type Ctx = {
   email: string | null
   profile: MyProfile | null
   photoUrl: string | null
+  /** The signed-in account owns patient records: it is a clinician's account,
+   *  not a patient's. My Phygo then shows no patient data and never writes the
+   *  shared profiles row (name, bio, photo of the professional profile). */
+  isClinician: boolean | null
   /** Re-reads the profile (after a save) and refreshes the photo URL. */
   reload: () => Promise<void>
 }
 
-const MyProfileContext = createContext<Ctx>({ userId: null, email: null, profile: null, photoUrl: null, reload: async () => {} })
+const MyProfileContext = createContext<Ctx>({ userId: null, email: null, profile: null, photoUrl: null, isClinician: null, reload: async () => {} })
 
 export function MyProfileProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null)
   const [email, setEmail] = useState<string | null>(null)
   const [profile, setProfile] = useState<MyProfile | null>(null)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
+  const [isClinician, setIsClinician] = useState<boolean | null>(null)
 
   const reload = useCallback(async () => {
     const supabase = myPhygoSupabase
@@ -36,7 +41,17 @@ export function MyProfileProvider({ children }: { children: ReactNode }) {
     if (!user) return
     setUserId(user.id)
     setEmail(user.email ?? null)
-    const { data } = await supabase.from('profiles').select('display_name, bio, avatar_url').eq('id', user.id).maybeSingle()
+    const [{ data }, { data: owned }] = await Promise.all([
+      supabase.from('profiles').select('display_name, bio, avatar_url').eq('id', user.id).maybeSingle(),
+      supabase.from('patients').select('id').eq('user_id', user.id).limit(1),
+    ])
+    const clinician = (owned?.length ?? 0) > 0
+    setIsClinician(clinician)
+    if (clinician) {
+      setProfile(null)
+      setPhotoUrl(null)
+      return
+    }
     const next: MyProfile = { displayName: data?.display_name ?? null, goal: data?.bio ?? null, avatarPath: data?.avatar_url ?? null }
     setProfile(next)
     setPhotoUrl(await avatarUrl(supabase, next.avatarPath))
@@ -46,16 +61,21 @@ export function MyProfileProvider({ children }: { children: ReactNode }) {
     reload().catch((err) => console.error('My Phygo profile could not be loaded:', err))
   }, [reload])
 
-  return <MyProfileContext.Provider value={{ userId, email, profile, photoUrl, reload }}>{children}</MyProfileContext.Provider>
+  return <MyProfileContext.Provider value={{ userId, email, profile, photoUrl, isClinician, reload }}>{children}</MyProfileContext.Provider>
 }
 
 export function useMyProfile() {
   return useContext(MyProfileContext)
 }
 
+// Titles are not part of the initials: "dr andrea" is "A", not "DA".
+const TITLES = /^(dr|dra|dott|dott\.?ssa|dottssa|prof|prof\.?ssa|sig|sig\.?ra|mr|mrs|ms|mme|mlle)\.?$/i
+
 export function initialsOf(name: string | null | undefined) {
-  const parts = (name ?? '').trim().split(/\s+/).filter(Boolean)
-  return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '·'
+  const parts = (name ?? '').trim().split(/\s+/).filter((p) => p && !TITLES.test(p))
+  const first = parts[0]?.[0] ?? ''
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : ''
+  return (first + last).toUpperCase() || '·'
 }
 
 /** Round photo, or the initials on the accent ring when there is no photo. */
