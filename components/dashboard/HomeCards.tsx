@@ -8,13 +8,20 @@ import Link from 'next/link'
 import { ReactNode } from 'react'
 import { ArrowRight, Check, Clock, MapPin, Play, UserRound, Video, X, AlertCircle, RotateCcw, CalendarClock } from 'lucide-react'
 
-export const BRAND_GRADIENT = 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)'
+
+// Premium palette: monochrome surfaces and one accent (periwinkle to violet,
+// the colours of the PHYGO mark), used sparingly for focus details.
+export const ACCENT = 'linear-gradient(135deg, #A5B4FF 0%, #7C83FF 50%, #A78BFA 100%)'
+export const ACCENT_SOLID = '#8B95FF'
+// The main action: ink on light, white on dark, as on the landing page.
+export const PRIMARY_BTN =
+  'bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90'
 
 export function Card({ children, className = '', glow = false, ...rest }: { children: ReactNode; className?: string; glow?: boolean } & React.HTMLAttributes<HTMLElement>) {
   return (
     <section
       {...rest}
-      className={`relative min-w-0 overflow-hidden rounded-[24px] border border-black/[0.07] bg-white/80 shadow-[0_18px_40px_-24px_rgba(15,23,42,0.25)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.035] dark:shadow-none ${className}`}
+      className={`relative min-w-0 overflow-hidden rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.055] dark:to-white/[0.018] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ${className}`}
     >
       {/* thin light edge, brighter at the top-left corner */}
       <span
@@ -23,8 +30,8 @@ export function Card({ children, className = '', glow = false, ...rest }: { chil
         style={{
           padding: 1,
           background: glow
-            ? 'linear-gradient(140deg, rgba(124,156,255,0.55), transparent 40%, transparent 65%, rgba(50,214,160,0.45))'
-            : 'linear-gradient(140deg, rgba(255,255,255,0.16), transparent 35%, transparent 70%, rgba(79,124,255,0.22))',
+            ? 'linear-gradient(140deg, rgba(165,180,255,0.5), transparent 38%, transparent 68%, rgba(167,139,250,0.3))'
+            : 'linear-gradient(140deg, rgba(255,255,255,0.14), transparent 35%, transparent 75%, rgba(255,255,255,0.05))',
           WebkitMask: 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
           WebkitMaskComposite: 'xor',
           maskComposite: 'exclude',
@@ -47,9 +54,9 @@ export function Avatar({ name, linked, size = 44 }: { name: string; linked: bool
     <span
       aria-hidden
       className="grid shrink-0 place-items-center rounded-full p-[2px]"
-      style={{ width: size, height: size, background: linked ? 'conic-gradient(from 200deg, #4F7CFF, #32D6A0, #4F7CFF)' : 'rgba(127,127,127,0.25)' }}
+      style={{ width: size, height: size, background: linked ? 'conic-gradient(from 210deg, #A5B4FF, #7C83FF, #A78BFA, #A5B4FF)' : 'rgba(127,127,127,0.22)' }}
     >
-      <span className="grid h-full w-full place-items-center rounded-full bg-white text-[13px] font-bold text-ink dark:bg-[#0d0f14] dark:text-white">
+      <span className="grid h-full w-full place-items-center rounded-full bg-[#f4f4f6] text-[13px] font-semibold tracking-wide text-ink dark:bg-[#111218] dark:text-white">
         {initials(name)}
       </span>
     </span>
@@ -104,16 +111,17 @@ export function NextPatientCard({
 }) {
   return (
     <Card glow className="p-5 sm:p-7" data-testid="next-patient">
-      <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-30 blur-3xl dark:opacity-40" style={{ background: 'radial-gradient(circle, #4F7CFF, transparent 65%)' }} />
+      <div aria-hidden className="pointer-events-none absolute -right-28 -top-28 h-80 w-80 rounded-full opacity-[0.18] blur-3xl dark:opacity-30" style={{ background: 'radial-gradient(circle, #7C83FF, transparent 65%)' }} />
       <div className="relative flex flex-wrap items-center gap-2">
-        <span className="inline-flex items-center gap-2 rounded-full bg-[#4F7CFF]/10 px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-[#3A5FE0] dark:text-[#9db4ff]">
+        <span className="inline-flex items-center gap-2 rounded-full border border-black/[0.06] bg-black/[0.03] px-3 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-ink/70 dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-white/75">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: ACCENT }} />
           {title}
         </span>
-        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${view.inProgress ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-ink/[0.05] text-ink/70 dark:bg-white/[0.06] dark:text-white/70'}`}>
-          {view.inProgress ? <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_10px_#32D6A0]" /> : <Clock size={12} aria-hidden />}
+        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${view.inProgress ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-200' : 'text-ink/65 dark:text-white/65'}`}>
+          {view.inProgress ? <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" /> : <Clock size={12} aria-hidden />}
           {view.status}
         </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-black/[0.07] px-3 py-1 text-xs text-ink/60 dark:border-white/10 dark:text-white/60">
+        <span className="inline-flex items-center gap-1.5 rounded-full px-1 py-1 text-xs text-ink/55 dark:text-white/55">
           {view.video ? <Video size={12} aria-hidden /> : <MapPin size={12} aria-hidden />}
           {view.typeLabel}
         </span>
@@ -128,34 +136,36 @@ export function NextPatientCard({
           </div>
         </div>
         <div className="shrink-0 sm:text-right">
-          <p className="font-display text-3xl font-bold tracking-tight tabular-nums text-ink dark:text-white sm:text-4xl">{view.time}</p>
+          <p className="font-display text-3xl font-semibold tracking-tight tabular-nums text-ink dark:bg-gradient-to-b dark:from-white dark:to-white/60 dark:bg-clip-text dark:text-transparent sm:text-[40px]">{view.time}</p>
           <p className="text-xs text-ink/55 dark:text-white/50">{view.dayLabel} · {view.duration}</p>
         </div>
       </div>
 
       <div className="relative mt-5 grid grid-cols-2 gap-2 sm:max-w-md">
-        <div className="rounded-2xl bg-ink/[0.035] px-3.5 py-2.5 dark:bg-white/[0.04]">
+        <div className="rounded-2xl border border-black/[0.04] bg-black/[0.02] px-3.5 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.03]">
           <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink/45 dark:text-white/40">{labels.lastSession}</p>
           <p className="mt-0.5 text-sm font-semibold text-ink dark:text-white">{view.lastSession}</p>
         </div>
-        <div className="rounded-2xl bg-ink/[0.035] px-3.5 py-2.5 dark:bg-white/[0.04]">
+        <div className="rounded-2xl border border-black/[0.04] bg-black/[0.02] px-3.5 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.03]">
           <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink/45 dark:text-white/40">My Phygo</p>
-          <p className={`mt-0.5 text-sm font-semibold ${view.linked ? 'text-emerald-700 dark:text-emerald-300' : 'text-ink/60 dark:text-white/55'}`}>{view.linkedLabel}</p>
+          <p className={`mt-0.5 inline-flex items-center gap-1.5 text-sm font-semibold ${view.linked ? 'text-ink dark:text-white' : 'text-ink/55 dark:text-white/50'}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${view.linked ? 'bg-emerald-400' : 'border border-current'}`} />
+            {view.linkedLabel}
+          </p>
         </div>
       </div>
 
       <div className="relative mt-6 flex flex-col gap-2 sm:flex-row">
         <Link
           href={`/dashboard/patients/${view.patientId}/session`}
-          className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-2xl px-6 text-sm font-semibold text-white shadow-[0_14px_36px_-12px_rgba(79,124,255,0.75)] transition-transform hover:scale-[1.02]"
-          style={{ background: BRAND_GRADIENT }}
+          className={`inline-flex min-h-[46px] items-center justify-center gap-2 rounded-2xl px-6 text-sm font-semibold transition-all ${PRIMARY_BTN}`}
         >
           <Play size={15} aria-hidden />
           {labels.startSession}
         </Link>
         <Link
           href={`/dashboard/patients/${view.patientId}`}
-          className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-2xl border border-black/[0.08] bg-white/70 px-6 text-sm font-semibold text-ink transition-colors hover:border-[#4F7CFF]/40 dark:border-white/10 dark:bg-white/[0.04] dark:text-white"
+          className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-2xl border border-black/[0.08] bg-white px-6 text-sm font-semibold text-ink transition-colors hover:border-black/20 dark:border-white/[0.1] dark:bg-white/[0.04] dark:text-white dark:hover:border-white/25"
         >
           <UserRound size={15} aria-hidden />
           {labels.openRecord}
@@ -168,13 +178,13 @@ export function NextPatientCard({
           <Link
             key={l.id}
             href={`/dashboard/patients/${l.patientId}`}
-            className="inline-flex min-h-[34px] items-center gap-2 rounded-full border border-black/[0.07] px-3 text-xs text-ink/75 transition-colors hover:border-[#4F7CFF]/40 dark:border-white/10 dark:text-white/75"
+            className="inline-flex min-h-[34px] items-center gap-2 rounded-full border border-black/[0.07] px-3 text-xs text-ink/70 transition-colors hover:border-black/20 dark:border-white/[0.08] dark:text-white/70 dark:hover:border-white/25"
           >
             <span className="font-mono font-semibold text-ink dark:text-white">{l.time}</span>
             {l.name}
           </Link>
         ))}
-        <Link href="/dashboard/agenda" className="ml-auto inline-flex min-h-[34px] items-center gap-1 text-xs font-semibold text-[#3A5FE0] hover:underline dark:text-[#9db4ff]">
+        <Link href="/dashboard/agenda" className="ml-auto inline-flex min-h-[34px] items-center gap-1 text-xs font-semibold text-ink/70 hover:text-ink dark:text-white/70 dark:hover:text-white">
           {labels.openAgenda}
           <ArrowRight size={13} aria-hidden />
         </Link>
@@ -186,15 +196,14 @@ export function NextPatientCard({
 export function NoUpcomingCard({ title, body, cta }: { title: string; body: string; cta: string }) {
   return (
     <Card glow className="flex flex-col items-start justify-center p-6 sm:p-8" data-testid="next-patient-empty">
-      <span className="mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-[#4F7CFF]/10 text-[#4F7CFF]">
+      <span className="mb-4 grid h-12 w-12 place-items-center rounded-2xl border border-black/[0.06] bg-black/[0.03] text-ink/70 dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-white/80">
         <CalendarClock size={20} aria-hidden />
       </span>
       <p className="font-display text-2xl font-bold tracking-tight text-ink dark:text-white">{title}</p>
       <p className="mt-2 max-w-md text-sm text-ink/60 dark:text-white/55">{body}</p>
       <Link
         href="/dashboard/agenda"
-        className="mt-6 inline-flex min-h-[44px] items-center gap-2 rounded-2xl px-5 text-sm font-semibold text-white"
-        style={{ background: BRAND_GRADIENT }}
+        className={`mt-6 inline-flex min-h-[44px] items-center gap-2 rounded-2xl px-5 text-sm font-semibold transition-all ${PRIMARY_BTN}`}
       >
         {cta}
         <ArrowRight size={14} aria-hidden />
@@ -246,9 +255,10 @@ export function TodoCard({
             <li key={it.id} className="flex items-center gap-3 py-3">
               <span
                 aria-hidden
-                className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl text-xs font-bold ${it.kind === 'request' ? 'bg-amber-400/15 text-amber-600 dark:text-amber-300' : 'bg-[#4F7CFF]/10 text-[#3A5FE0] dark:text-[#9db4ff]'}`}
+                className="relative grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-black/[0.06] bg-black/[0.03] text-[11px] font-semibold text-ink/75 dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-white/80"
               >
                 {initials(it.name)}
+                <span className={`absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full ring-2 ring-white dark:ring-[#0b0c10] ${it.kind === 'request' ? 'bg-amber-400' : 'bg-[#8B95FF]'}`} />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-ink dark:text-white">{it.name}</p>
@@ -262,7 +272,7 @@ export function TodoCard({
                     onClick={() => onAnswer(it.id, 'confirmed')}
                     aria-label={`${labels.accept}: ${it.name}`}
                     title={labels.accept}
-                    className="grid h-10 w-10 place-items-center rounded-xl border border-emerald-500/35 bg-emerald-500/10 text-emerald-700 transition-transform hover:scale-105 disabled:opacity-50 dark:text-emerald-300"
+                    className={`grid h-10 w-10 place-items-center rounded-xl transition-all disabled:opacity-50 ${PRIMARY_BTN}`}
                   >
                     <Check size={15} aria-hidden />
                   </button>
@@ -272,7 +282,7 @@ export function TodoCard({
                     onClick={() => onAnswer(it.id, 'cancelled')}
                     aria-label={`${labels.decline}: ${it.name}`}
                     title={labels.decline}
-                    className="grid h-10 w-10 place-items-center rounded-xl border border-black/[0.08] text-ink/60 transition-transform hover:scale-105 disabled:opacity-50 dark:border-white/10 dark:text-white/60"
+                    className="grid h-10 w-10 place-items-center rounded-xl border border-black/[0.08] text-ink/55 transition-colors hover:border-black/20 hover:text-ink disabled:opacity-50 dark:border-white/[0.1] dark:text-white/55 dark:hover:border-white/25 dark:hover:text-white"
                   >
                     <X size={15} aria-hidden />
                   </button>
@@ -281,7 +291,7 @@ export function TodoCard({
                 <Link
                   href={`/dashboard/patients/${it.patientId}`}
                   aria-label={it.name}
-                  className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-black/[0.08] text-ink/60 hover:border-[#4F7CFF]/40 dark:border-white/10 dark:text-white/60"
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-black/[0.08] text-ink/55 transition-colors hover:border-black/20 hover:text-ink dark:border-white/[0.1] dark:text-white/55 dark:hover:border-white/25 dark:hover:text-white"
                 >
                   <ArrowRight size={15} aria-hidden />
                 </Link>
@@ -319,7 +329,7 @@ export function StatTile({
     <>
       <p className="text-xs text-ink/60 dark:text-white/55">{label}</p>
       <div className="mt-2 flex items-baseline gap-2">
-        <p className="font-display text-3xl font-bold tracking-tight tabular-nums text-ink dark:text-white" data-stat={index}>
+        <p className="font-display text-3xl font-semibold tracking-tight tabular-nums text-ink dark:text-white" data-stat={index}>
           {value === undefined ? (
             <span className="block h-8 w-12 animate-pulse rounded-md bg-ink/10 dark:bg-white/10" aria-label={loading} />
           ) : value === null ? (
@@ -328,7 +338,7 @@ export function StatTile({
             value
           )}
         </p>
-        {extra && value !== undefined && value !== null && <span className="font-mono text-[11px] text-emerald-600 dark:text-emerald-300">{extra}</span>}
+        {extra && value !== undefined && value !== null && <span className="font-mono text-[11px] text-ink/45 dark:text-white/45">{extra}</span>}
       </div>
       {chart && value !== undefined && value !== null && <div className="pointer-events-none absolute bottom-4 right-4 hidden sm:block" aria-hidden>{chart}</div>}
     </>
@@ -337,7 +347,7 @@ export function StatTile({
   return (
     <Card className="h-full">
       {href ? (
-        <Link href={href} className={`${cls} rounded-[24px] transition-colors hover:bg-[#4F7CFF]/[0.04]`}>
+        <Link href={href} className={`${cls} rounded-[24px] transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03]`}>
           {inner}
         </Link>
       ) : (
@@ -347,7 +357,7 @@ export function StatTile({
   )
 }
 
-export function Sparkline({ values, color = '#4F7CFF', id }: { values: number[]; color?: string; id: string }) {
+export function Sparkline({ values, color = ACCENT_SOLID, id }: { values: number[]; color?: string; id: string }) {
   const w = 110
   const h = 40
   const max = Math.max(1, ...values)
@@ -358,12 +368,12 @@ export function Sparkline({ values, color = '#4F7CFF', id }: { values: number[];
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
       <defs>
         <linearGradient id={id} x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stopColor={color} stopOpacity="0.35" />
+          <stop offset="0" stopColor={color} stopOpacity="0.28" />
           <stop offset="1" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
       <path d={`${line} L${w} ${h} L0 ${h}Z`} fill={`url(#${id})`} />
-      <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={line} fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -374,7 +384,7 @@ export function Bars({ values, highlight }: { values: number[]; highlight: numbe
     <svg width={7 * 15} height={40} viewBox={`0 0 ${7 * 15} 40`}>
       {values.map((v, i) => {
         const bh = Math.max(4, (v / max) * 36)
-        return <rect key={i} x={i * 15 + 1} y={40 - bh} width={11} height={bh} rx={3} fill={i === highlight ? '#32D6A0' : '#4F7CFF'} opacity={i === highlight ? 1 : 0.35 + 0.5 * (v / max)} />
+        return <rect key={i} x={i * 15 + 1} y={40 - bh} width={11} height={bh} rx={3} fill={i === highlight ? ACCENT_SOLID : 'currentColor'} opacity={i === highlight ? 1 : 0.12 + 0.18 * (v / max)} />
       })}
     </svg>
   )
@@ -388,8 +398,8 @@ export function Ring({ part, total }: { part: number; total: number }) {
     <svg width={42} height={42} viewBox="0 0 42 42">
       <defs>
         <linearGradient id="ring-g">
-          <stop offset="0" stopColor="#4F7CFF" />
-          <stop offset="1" stopColor="#32D6A0" />
+          <stop offset="0" stopColor="#A5B4FF" />
+          <stop offset="1" stopColor="#A78BFA" />
         </linearGradient>
       </defs>
       <circle cx="21" cy="21" r={r} fill="none" stroke="currentColor" strokeOpacity="0.1" strokeWidth="5" />
@@ -424,7 +434,7 @@ export function PatientCard({
   return (
     <Link
       href={`/dashboard/patients/${id}`}
-      className="group block rounded-[20px] border border-black/[0.07] bg-white/80 p-4 transition-all hover:-translate-y-0.5 hover:border-[#4F7CFF]/35 hover:shadow-[0_16px_40px_-20px_rgba(79,124,255,0.55)] dark:border-white/[0.08] dark:bg-white/[0.025]"
+      className="group block rounded-[20px] border border-black/[0.06] bg-white/90 p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-0.5 hover:border-black/15 hover:shadow-[0_18px_40px_-24px_rgba(15,23,42,0.35)] dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.045] dark:to-white/[0.015] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] dark:hover:border-white/20"
     >
       <div className="flex items-center gap-3">
         <Avatar name={name} linked={linked} />
@@ -432,20 +442,20 @@ export function PatientCard({
           <p className="truncate text-[15px] font-semibold text-ink dark:text-white">{name}</p>
           {detail && <p className="truncate text-xs text-ink/55 dark:text-white/50">{detail}</p>}
         </div>
-        <ArrowRight size={15} aria-hidden className="shrink-0 text-ink/25 transition-all group-hover:translate-x-0.5 group-hover:text-[#4F7CFF] dark:text-white/25" />
+        <ArrowRight size={15} aria-hidden className="shrink-0 text-ink/25 transition-all group-hover:translate-x-0.5 group-hover:text-ink dark:text-white/25 dark:group-hover:text-white" />
       </div>
       <div className="mt-3.5 grid grid-cols-2 gap-2">
-        <div className="rounded-xl bg-ink/[0.035] px-3 py-2 dark:bg-white/[0.035]">
+        <div className="rounded-xl bg-black/[0.025] px-3 py-2 dark:bg-white/[0.03]">
           <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink/45 dark:text-white/40">{lastLabel}</p>
           <p className="mt-0.5 truncate text-[13px] font-semibold text-ink dark:text-white">{last}</p>
         </div>
-        <div className="rounded-xl bg-ink/[0.035] px-3 py-2 dark:bg-white/[0.035]">
+        <div className="rounded-xl bg-black/[0.025] px-3 py-2 dark:bg-white/[0.03]">
           <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink/45 dark:text-white/40">{nextLabel}</p>
           <p className="mt-0.5 truncate text-[13px] font-semibold text-ink dark:text-white">{next}</p>
         </div>
       </div>
-      <p className={`mt-3 inline-flex items-center gap-1.5 text-[11.5px] ${linked ? 'text-emerald-700 dark:text-emerald-300' : 'text-ink/45 dark:text-white/40'}`}>
-        <span className={`h-1.5 w-1.5 rounded-full ${linked ? 'bg-emerald-500' : 'border border-current'}`} />
+      <p className={`mt-3 inline-flex items-center gap-1.5 text-[11.5px] ${linked ? 'text-ink/70 dark:text-white/70' : 'text-ink/40 dark:text-white/35'}`}>
+        <span className={`h-1.5 w-1.5 rounded-full ${linked ? 'bg-emerald-400' : 'border border-current'}`} />
         {linkedLabel}
       </p>
     </Link>

@@ -8,7 +8,7 @@ import Navbar from '@/components/Navbar'
 import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
 import ErrorState from '@/components/workspace/ErrorState'
 import {
-  Card, BRAND_GRADIENT, NextPatientCard, NoUpcomingCard, TodoCard, StatTile, Sparkline, Bars, Ring, PatientCard, Skeleton, InlineError,
+  Card, ACCENT, PRIMARY_BTN, NextPatientCard, NoUpcomingCard, TodoCard, StatTile, Sparkline, Bars, Ring, PatientCard, Skeleton, InlineError,
   type NextView, type TodoItem,
 } from '@/components/dashboard/HomeCards'
 import { useClinicalLocked } from '@/lib/useClinicalAccess'
@@ -52,7 +52,7 @@ type Loaded<T> = T | null | undefined
 const ROW_CAP = 1000
 
 const INPUT_CLASS =
-  'w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.03] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white aria-[invalid=true]:border-red-500/60'
+  'w-full mt-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.03] px-4 py-3 outline-none transition focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15 text-ink dark:text-white aria-[invalid=true]:border-red-500/60'
 
 const EMPTY_FORM = { first: '', last: '', birth: '', gender: '', condition: '', phone: '', email: '' }
 type NewForm = typeof EMPTY_FORM
@@ -342,8 +342,7 @@ export default function DashboardPage() {
       disabled={locked}
       aria-expanded={showForm}
       aria-controls="new-patient-form"
-      className={`flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-5 min-h-[46px] text-sm font-semibold text-white shadow-[0_14px_36px_-12px_rgba(79,124,255,0.75)] transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 ${extra}`}
-      style={{ background: BRAND_GRADIENT }}
+      className={`flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-5 min-h-[46px] text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 ${PRIMARY_BTN} ${extra}`}
     >
       {showForm ? <X size={16} aria-hidden /> : <Plus size={16} aria-hidden />}
       {showForm ? ui.patients.cancel : ui.patients.newPatient}
@@ -354,7 +353,7 @@ export default function DashboardPage() {
     <div>
       <label htmlFor={`np-${k}`} className="text-sm font-medium text-ink/70 dark:text-white/60">
         {label}
-        {opts.required && <span aria-hidden className="text-[#4F7CFF]"> *</span>}
+        {opts.required && <span aria-hidden className="text-[#7C83FF]"> *</span>}
       </label>
       <input
         id={`np-${k}`}
@@ -378,13 +377,13 @@ export default function DashboardPage() {
   )
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#f5f6f8] transition-colors dark:bg-[#06070a]">
+    <div className="relative min-h-screen overflow-hidden bg-[#f7f7f8] transition-colors dark:bg-[#050608]">
       <Navbar />
 
       {/* aurora and a faint grid, the same palette as the landing */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-40 -top-56 h-[620px] w-[820px] rounded-full opacity-25 blur-[120px] dark:opacity-30" style={{ background: 'radial-gradient(circle, #4F7CFF, transparent 65%)' }} />
-        <div className="absolute -right-48 -top-40 h-[560px] w-[720px] rounded-full opacity-20 blur-[120px] dark:opacity-20" style={{ background: 'radial-gradient(circle, #32D6A0, transparent 65%)' }} />
+        <div className="absolute -left-48 -top-64 h-[640px] w-[860px] rounded-full opacity-[0.14] blur-[130px] dark:opacity-[0.22]" style={{ background: 'radial-gradient(circle, #6366F1, transparent 65%)' }} />
+        <div className="absolute -right-56 -top-48 h-[560px] w-[720px] rounded-full opacity-[0.08] blur-[130px] dark:opacity-[0.14]" style={{ background: 'radial-gradient(circle, #A78BFA, transparent 65%)' }} />
         <div
           className="absolute inset-0 hidden opacity-40 dark:block"
           style={{
@@ -399,15 +398,15 @@ export default function DashboardPage() {
       <main id="main-content" className="relative mx-auto max-w-6xl px-4 pb-28 pt-28 sm:px-6 sm:pb-20 sm:pt-36">
         <motion.header initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-7 flex flex-col gap-5 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
-            <p className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(50,214,160,0.15),0_0_12px_#32D6A0]" />
+            <p className="flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ink/50 dark:text-white/45">
+              <span className="h-1.5 w-1.5 rounded-full shadow-[0_0_10px_rgba(139,149,255,0.8)]" style={{ background: ACCENT }} />
               {dateLine || ui.patients.eyebrow}
             </p>
             <h1 className="mt-3 break-words font-display text-3xl font-bold leading-tight tracking-tight text-ink dark:text-white sm:text-4xl lg:text-5xl">
-              <span className="bg-gradient-to-r from-ink via-ink to-[#3A5FE0] bg-clip-text text-transparent dark:from-white dark:via-[#c9d6ff] dark:to-[#6ee7c4]">
+              <span className="bg-gradient-to-b from-ink to-ink/70 bg-clip-text text-transparent dark:from-white dark:to-white/55">
                 {greetingTime ? (displayName ? `${greetingTime}, ${displayName}` : greetingTime) : ui.patients.greetingDefault}
               </span>
-              <span className="bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] bg-clip-text text-transparent">.</span>
+              <span className="bg-gradient-to-r from-[#A5B4FF] to-[#A78BFA] bg-clip-text text-transparent">.</span>
             </h1>
             <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[15px] text-ink/60 dark:text-white/55" data-testid="brief">
               {todayCount === null ? (
@@ -415,7 +414,12 @@ export default function DashboardPage() {
               ) : (
                 <>
                   <span>{todayCount ? <b className="font-semibold text-ink dark:text-white">{h.briefAppointments(todayCount)}</b> : h.briefNoAppointments}</span>
-                  {requests.length > 0 && <span className="text-amber-700 dark:text-amber-300">{h.briefRequests(requests.length)}</span>}
+                  {requests.length > 0 && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                      {h.briefRequests(requests.length)}
+                    </span>
+                  )}
                 </>
               )}
             </p>
@@ -460,9 +464,8 @@ export default function DashboardPage() {
                           onClick={() => setField('gender', opt.value)}
                           aria-pressed={form.gender === opt.value}
                           className={`min-h-[44px] rounded-xl border px-4 text-sm font-medium transition-colors ${
-                            form.gender === opt.value ? 'border-transparent text-white' : 'border-black/10 text-ink/70 dark:border-white/10 dark:text-white/60'
+                            form.gender === opt.value ? `border-transparent ${PRIMARY_BTN}` : 'border-black/10 text-ink/70 dark:border-white/10 dark:text-white/60'
                           }`}
-                          style={form.gender === opt.value ? { background: BRAND_GRADIENT } : undefined}
                         >
                           {opt.label}
                         </button>
@@ -483,8 +486,7 @@ export default function DashboardPage() {
                 <button
                   type="submit"
                   disabled={saving || locked}
-                  className="min-h-[46px] rounded-2xl px-7 text-sm font-semibold text-white shadow-[0_14px_36px_-12px_rgba(79,124,255,0.75)] transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100"
-                  style={{ background: BRAND_GRADIENT }}
+                  className={`min-h-[46px] rounded-2xl px-7 text-sm font-semibold transition-all disabled:opacity-60 ${PRIMARY_BTN}`}
                 >
                   {saving ? ui.patients.savingButton : ui.patients.savePatientButton}
                 </button>
@@ -539,7 +541,7 @@ export default function DashboardPage() {
             index={1}
             label={h.statNotesThisMonth}
             value={notesMonth}
-            chart={notes && now ? <Sparkline id="notes-spark" values={notesPerWeek(notes, now)} color="#32D6A0" /> : undefined}
+            chart={notes && now ? <Sparkline id="notes-spark" values={notesPerWeek(notes, now)} /> : undefined}
             unavailable={t.common.unavailable}
             loading={ui.common.loading}
           />
@@ -579,7 +581,7 @@ export default function DashboardPage() {
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder={ui.patients.searchPlaceholder}
                   aria-label={ui.patients.searchPlaceholder}
-                  className="min-h-[44px] w-full rounded-2xl border border-black/[0.08] bg-white/80 pl-11 pr-4 text-sm text-ink outline-none backdrop-blur-xl transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 dark:border-white/10 dark:bg-white/[0.035] dark:text-white"
+                  className="min-h-[44px] w-full rounded-2xl border border-black/[0.08] bg-white/80 pl-11 pr-4 text-sm text-ink outline-none backdrop-blur-xl transition focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15 dark:border-white/10 dark:bg-white/[0.035] dark:text-white"
                 />
               </div>
             )}
@@ -599,12 +601,12 @@ export default function DashboardPage() {
             <ErrorState title={t.home.loadErrorTitle} message={t.home.loadErrorBody} onRetry={loadPatients} />
           ) : patients.length === 0 ? (
             <Card className="px-6 py-14 text-center">
-              <span className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-[#4F7CFF]/10 text-[#4F7CFF]">
+              <span className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-2xl border border-black/[0.06] bg-black/[0.03] text-ink/70 dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-white/80">
                 <Users size={20} aria-hidden />
               </span>
               <p className="text-ink/70 dark:text-white/60">{ui.patients.noPatientsYet}</p>
               {!locked && !showForm && (
-                <button type="button" onClick={toggleForm} className="mt-5 hidden min-h-[44px] items-center gap-2 rounded-2xl px-5 text-sm font-semibold text-white sm:inline-flex" style={{ background: BRAND_GRADIENT }}>
+                <button type="button" onClick={toggleForm} className={`mt-5 hidden min-h-[44px] items-center gap-2 rounded-2xl px-5 text-sm font-semibold transition-all sm:inline-flex ${PRIMARY_BTN}`}>
                   <Sparkles size={15} aria-hidden />
                   {t.home.addFirstPatient}
                 </button>
