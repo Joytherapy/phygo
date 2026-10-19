@@ -69,10 +69,6 @@ export default function MyPhygoLifeMetabolicPage() {
     })
   }, [router])
 
-  if (checking) {
-    return <div className="relative pt-40 text-center text-ink/55 dark:text-white/40">…</div>
-  }
-
   const latest = history[0] ?? null
   const showTodaysTarget = latest && !showCalculator
   // La history arriva piu'-recente-prima (per la lista); il grafico vuole
@@ -89,6 +85,12 @@ export default function MyPhygoLifeMetabolicPage() {
       dailyRateKg: adaptiveInsight.insight.dailyRateKg,
     })
   }, [goalWeightInput, latest, adaptiveInsight])
+
+  // After every hook: returning before them changed the hook count between
+  // renders and crashed the page (React error #310) once the session check ended.
+  if (checking) {
+    return <div className="relative pt-40 text-center text-ink/55 dark:text-white/40">…</div>
+  }
 
   return (
     <div className="relative max-w-2xl mx-auto pt-40 pb-24 px-6">
