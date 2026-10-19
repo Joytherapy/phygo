@@ -53,7 +53,7 @@ export default function FolderCard({
     setRenaming(false)
   }
 
-  const iconColor = folder.color || '#4F7CFF'
+  const iconColor = folder.color || '#7C83FF'
 
   return (
     <div
@@ -121,7 +121,7 @@ export default function FolderCard({
                 if (e.key === 'Enter') commitRename()
                 if (e.key === 'Escape') setRenaming(false)
               }}
-              className="w-full rounded-lg border border-[#4F7CFF]/40 bg-white dark:bg-[#12131a] px-1.5 py-0.5 text-xs text-ink dark:text-white outline-none"
+              className="w-full rounded-lg border border-[#7C83FF]/40 bg-white dark:bg-[#12131a] px-1.5 py-0.5 text-xs text-ink dark:text-white outline-none"
             />
             <button onClick={commitRename} className="text-[#32D6A0] shrink-0">
               <Check size={13} />

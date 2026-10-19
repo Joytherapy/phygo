@@ -182,7 +182,7 @@ export default function EventsPage() {
   const hasMore = events.length < total
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -237,7 +237,7 @@ export default function EventsPage() {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="mb-8 rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 grid sm:grid-cols-2 lg:grid-cols-4 gap-4"
+            className="mb-8 rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 grid sm:grid-cols-2 lg:grid-cols-4 gap-4"
           >
             <FilterSelect
               label={ui.events.categoryLabel}
@@ -400,7 +400,7 @@ export default function EventsPage() {
               {providers.map((provider) => (
                 <div
                   key={provider.id}
-                  className="group rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#A855F7]/30 hover:shadow-[0_16px_40px_-18px_rgba(168,85,247,0.3)]"
+                  className="group rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#A855F7]/30 hover:shadow-[0_16px_40px_-18px_rgba(168,85,247,0.3)]"
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <h3 className="text-sm font-semibold text-ink dark:text-white">{provider.name}</h3>

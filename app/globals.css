@@ -16,6 +16,14 @@
   --brand-to: #32d6a0;
 }
 
+/* Professional accounts inside the app (data-role is only set by the
+   dashboard's RoleThemeProvider, so the public site keeps :root above) use
+   the premium periwinkle -> violet accent from components/ui/premium.tsx. */
+html[data-role='professional'] {
+  --brand-from: #7c83ff;
+  --brand-to: #a78bfa;
+}
+
 html[data-role='student'] {
   --brand-from: #22d3ee;
   --brand-to: #a855f7;

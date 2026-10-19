@@ -71,7 +71,7 @@ export default function NewFolderDialog({
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#4F7CFF]/10 text-[#4F7CFF]">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#7C83FF]/10 text-[#7C83FF]">
                   <FolderPlus size={15} />
                 </span>
                 <h2 className="text-sm font-semibold text-ink dark:text-white">{ui.dialog.newFolderTitle}</h2>
@@ -91,7 +91,7 @@ export default function NewFolderDialog({
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
               placeholder={ui.dialog.newFolderPlaceholder}
-              className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+              className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 text-sm outline-none transition focus:border-[#7C83FF] focus:ring-4 focus:ring-[#7C83FF]/10 text-ink dark:text-white"
             />
 
             <div className="mt-3 flex items-center gap-1.5">
@@ -125,7 +125,7 @@ export default function NewFolderDialog({
                 onClick={handleCreate}
                 disabled={saving}
                 className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold text-white shadow-soft disabled:opacity-60"
-                style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                style={{ background: 'linear-gradient(90deg, #7C83FF 0%, #A78BFA 100%)' }}
               >
                 {saving && <Loader2 size={13} className="animate-spin" />}
                 {ui.dialog.create}

@@ -16,6 +16,7 @@ import Navbar from '@/components/Navbar'
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext'
 import { useQuizUi, formatQuizString } from '@/lib/i18n/quizStrings'
 import { QUIZ_SUBJECTS, QUIZ_DIFFICULTIES, type QuizSubject, type QuizDifficulty } from '@/lib/quiz/subjects'
+import { PageBackdrop } from '@/components/ui/premium'
 
 type QuizQuestion = { id: string; question: string; options: string[] }
 type SubmitResult = {
@@ -170,21 +171,16 @@ export default function QuizPage() {
   const hasAnsweredCurrent = currentQuestion ? answers[currentQuestion.id] !== undefined : false
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
-        style={{
-          background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(244,114,182,0.35) 50%, rgba(50,214,160,0.5) 100%)',
-        }}
-      />
+      <PageBackdrop />
 
       <div className="relative max-w-3xl mx-auto pt-40 pb-20 px-6">
         {view === 'subjects' && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <div className="mb-10">
-              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-[#4F7CFF] mb-3">{quizUi.navLabel}</p>
+              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-[#7C83FF] mb-3">{quizUi.navLabel}</p>
               <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-ink dark:text-white">
                 {quizUi.pageTitle}
               </h1>
@@ -198,7 +194,7 @@ export default function QuizPage() {
                   <button
                     key={s}
                     onClick={() => pickSubject(s)}
-                    className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-soft hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                    className="text-left rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 shadow-soft hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                   >
                     <p className="font-display text-base font-bold text-ink dark:text-white">{subjectLabel(s, ui, quizUi)}</p>
                     {p ? (
@@ -235,7 +231,7 @@ export default function QuizPage() {
                 <button
                   key={d}
                   onClick={() => pickDifficulty(d)}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl px-5 py-6 text-center shadow-soft hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                  className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] px-5 py-6 text-center shadow-soft hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                 >
                   <p className="font-display text-lg font-bold text-ink dark:text-white">{quizUi.difficulty[d]}</p>
                   <p className="text-xs text-ink/55 dark:text-white/40 mt-1.5">
@@ -259,7 +255,7 @@ export default function QuizPage() {
 
             {loadingQuestions && (
               <div className="flex flex-col items-center justify-center py-24 text-center">
-                <Loader2 size={28} className="animate-spin text-[#4F7CFF] mb-4" />
+                <Loader2 size={28} className="animate-spin text-[#7C83FF] mb-4" />
                 <p className="text-sm text-ink/60 dark:text-white/50">{quizUi.loadingQuestions}</p>
                 <p className="text-xs text-ink/30 dark:text-white/30 mt-2">{quizUi.generatingNote}</p>
               </div>
@@ -288,7 +284,7 @@ export default function QuizPage() {
                       className="h-full rounded-full transition-all duration-300"
                       style={{
                         width: `${((currentIndex + 1) / questions.length) * 100}%`,
-                        background: 'linear-gradient(90deg, #4F7CFF, #32D6A0)',
+                        background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)',
                       }}
                     />
                   </div>
@@ -315,7 +311,7 @@ export default function QuizPage() {
                             onClick={() => selectOption(currentQuestion.id, i)}
                             className={`w-full text-left rounded-xl border px-4 py-3.5 text-sm font-medium transition-all duration-200 ${
                               selected
-                                ? 'border-[#4F7CFF] bg-[#4F7CFF]/10 text-ink dark:text-white'
+                                ? 'border-[#7C83FF] bg-[#7C83FF]/10 text-ink dark:text-white'
                                 : 'border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] text-ink/70 dark:text-white/70 hover:border-black/20 dark:hover:border-white/20'
                             }`}
                           >
@@ -331,8 +327,7 @@ export default function QuizPage() {
                   <button
                     onClick={goNext}
                     disabled={!hasAnsweredCurrent || submitting}
-                    className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105 disabled:opacity-40 disabled:hover:scale-100"
-                    style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                    className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 transition-transform disabled:opacity-40 disabled:hover:scale-100"
                   >
                     {submitting ? (
                       <Loader2 size={16} className="animate-spin" />
@@ -356,7 +351,7 @@ export default function QuizPage() {
             <div className="text-center mb-10">
               <div
                 className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-soft"
-                style={{ background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' }}
               >
                 <Trophy size={22} />
               </div>
@@ -376,7 +371,7 @@ export default function QuizPage() {
               {results.results.map((r) => (
                 <div
                   key={r.questionId}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                  className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5"
                 >
                   <div className="flex items-start gap-2.5 mb-3">
                     {r.isCorrect ? (
@@ -402,8 +397,7 @@ export default function QuizPage() {
             <div className="flex justify-center gap-3">
               <button
                 onClick={() => difficulty && pickDifficulty(difficulty)}
-                className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-105"
-                style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 transition-transform"
               >
                 <RotateCcw size={16} />
                 {quizUi.retryButton}

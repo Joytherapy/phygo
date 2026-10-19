@@ -40,7 +40,7 @@ export default function MyEventsPage() {
   const shown = tab === 'saved' ? events : tab === 'upcoming' ? upcoming : past
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
       <div

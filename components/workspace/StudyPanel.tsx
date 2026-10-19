@@ -83,7 +83,7 @@ export default function StudyPanel() {
         <div className="flex h-full w-full flex-col rounded-none sm:rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#0c0d12] overflow-hidden shadow-lift">
           <div className="flex items-center justify-between gap-2 border-b border-black/[0.09] dark:border-white/10 px-4 py-3 shrink-0">
             <div className="flex items-center gap-2 text-sm font-semibold text-ink dark:text-white min-w-0">
-              <BookOpen size={15} className="text-[#4F7CFF] shrink-0" />
+              <BookOpen size={15} className="text-[#7C83FF] shrink-0" />
               <span className="truncate">{ui.studyPanel.title}</span>
             </div>
             <button
@@ -116,7 +116,7 @@ export default function StudyPanel() {
               <>
                 <div>
                   {sectionLabel && (
-                    <span className="inline-block mb-1.5 rounded-full bg-[#4F7CFF]/10 px-2.5 py-0.5 text-[11px] font-medium text-[#4F7CFF]">
+                    <span className="inline-block mb-1.5 rounded-full bg-[#7C83FF]/10 px-2.5 py-0.5 text-[11px] font-medium text-[#7C83FF]">
                       {sectionLabel}
                     </span>
                   )}
@@ -126,7 +126,7 @@ export default function StudyPanel() {
                       href={match.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-[#4F7CFF] hover:underline"
+                      className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-[#7C83FF] hover:underline"
                     >
                       {ui.studyPanel.openInPhygo} <ExternalLink size={11} />
                     </a>
@@ -152,7 +152,7 @@ export default function StudyPanel() {
                         <button
                           key={rc.knowledgeId}
                           onClick={() => openWithSelection(rc.title)}
-                          className="flex w-full items-center justify-between gap-2 rounded-xl border border-black/[0.09] dark:border-white/10 bg-black/[0.015] dark:bg-white/[0.03] px-3 py-2 text-left text-sm text-ink/80 dark:text-white/80 hover:border-[#4F7CFF]/30 hover:bg-[#4F7CFF]/5 transition-colors"
+                          className="flex w-full items-center justify-between gap-2 rounded-xl border border-black/[0.09] dark:border-white/10 bg-black/[0.015] dark:bg-white/[0.03] px-3 py-2 text-left text-sm text-ink/80 dark:text-white/80 hover:border-[#7C83FF]/30 hover:bg-[#7C83FF]/5 transition-colors"
                         >
                           <span className="truncate">{rc.title}</span>
                           <ChevronRight size={13} className="shrink-0 text-ink/25 dark:text-white/25" />
@@ -172,7 +172,7 @@ export default function StudyPanel() {
                         <button
                           key={rt.knowledgeId}
                           onClick={() => openWithSelection(rt.title)}
-                          className="flex w-full items-center justify-between gap-2 rounded-xl border border-black/[0.09] dark:border-white/10 bg-black/[0.015] dark:bg-white/[0.03] px-3 py-2 text-left text-sm text-ink/80 dark:text-white/80 hover:border-[#4F7CFF]/30 hover:bg-[#4F7CFF]/5 transition-colors"
+                          className="flex w-full items-center justify-between gap-2 rounded-xl border border-black/[0.09] dark:border-white/10 bg-black/[0.015] dark:bg-white/[0.03] px-3 py-2 text-left text-sm text-ink/80 dark:text-white/80 hover:border-[#7C83FF]/30 hover:bg-[#7C83FF]/5 transition-colors"
                         >
                           <span className="truncate">{rt.title}</span>
                           <ChevronRight size={13} className="shrink-0 text-ink/25 dark:text-white/25" />
@@ -194,7 +194,7 @@ export default function StudyPanel() {
                       onBlur={saveNote}
                       placeholder={ui.studyPanel.myNotePlaceholder}
                       rows={3}
-                      className="w-full resize-none rounded-xl border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/5 px-3 py-2 text-sm text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 focus:outline-none focus:border-[#4F7CFF]/40"
+                      className="w-full resize-none rounded-xl border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/5 px-3 py-2 text-sm text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 focus:outline-none focus:border-[#7C83FF]/40"
                     />
                     {noteStatus === 'saved' && <p className="mt-1 text-[11px] text-ink/30 dark:text-white/30">{ui.studyPanel.noteSaved}</p>}
                   </div>
@@ -210,7 +210,7 @@ export default function StudyPanel() {
                   onClick={addToDocument}
                   disabled={addedToDocument}
                   className="flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-white disabled:opacity-60 transition-opacity"
-                  style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                  style={{ background: 'linear-gradient(90deg, #7C83FF 0%, #A78BFA 100%)' }}
                 >
                   {addedToDocument ? <Check size={14} /> : <Pin size={14} />}
                   {addedToDocument ? ui.studyPanel.addedToDocument : ui.studyPanel.addToDocument}
@@ -224,7 +224,7 @@ export default function StudyPanel() {
                 {saveStatus === 'saving' ? (
                   <Loader2 size={14} className="animate-spin" />
                 ) : isSaved ? (
-                  <BookmarkCheck size={14} className="text-[#4F7CFF]" />
+                  <BookmarkCheck size={14} className="text-[#7C83FF]" />
                 ) : (
                   <Bookmark size={14} />
                 )}

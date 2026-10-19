@@ -29,6 +29,7 @@ import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
 import ErrorState from '@/components/workspace/ErrorState'
 import { cancelAppointment } from '@/lib/appointments'
 import { lazy } from '@/lib/lazy'
+import { PageBackdrop } from '@/components/ui/premium'
 
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -302,13 +303,10 @@ export default function AgendaPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
-        style={{ background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)' }}
-      />
+      <PageBackdrop />
 
       <main id="main-content" className="relative max-w-6xl mx-auto pt-32 sm:pt-40 pb-24 px-4 sm:px-6">
         <motion.button
@@ -324,7 +322,7 @@ export default function AgendaPage() {
 
         <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
           <div>
-            <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#4F7CFF] mb-2">
+            <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#7C83FF] mb-2">
               {ui.page.eyebrow}
             </p>
             <h1 className="font-display text-4xl font-bold tracking-tight text-ink dark:text-white">
@@ -337,8 +335,7 @@ export default function AgendaPage() {
               type="button"
               onClick={() => openAddModal(weekDays.find(isToday) ?? weekDays[0], DEFAULT_SLOT)}
               disabled={locked}
-              className="flex min-h-[40px] items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(79,124,255,0.35)] transition-transform hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+              className="flex min-h-[40px] items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 shadow-[0_6px_16px_rgba(124,131,255,0.35)] transition-transform hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               <Plus size={14} aria-hidden />
               {ui.page.newAppointment}
@@ -348,7 +345,7 @@ export default function AgendaPage() {
                 type="button"
                 onClick={() => setWeekOffset(weekOffset - 1)}
                 aria-label={t.agenda.previousWeek}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 dark:border-white/10 text-ink/70 dark:text-white/70 hover:border-[#4F7CFF]/40 transition-colors"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 dark:border-white/10 text-ink/70 dark:text-white/70 hover:border-black/15 dark:hover:border-white/20 transition-colors"
               >
                 <ChevronLeft size={16} aria-hidden />
               </button>
@@ -357,7 +354,7 @@ export default function AgendaPage() {
                 onClick={() => setWeekOffset(0)}
                 title={t.agenda.backToThisWeek}
                 aria-live="polite"
-                className="min-h-[40px] flex-1 sm:flex-none whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10 hover:border-[#4F7CFF]/40 transition-colors"
+                className="min-h-[40px] flex-1 sm:flex-none whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10 hover:border-black/15 dark:hover:border-white/20 transition-colors"
               >
                 {mounted ? weekLabel() : '···'}
               </button>
@@ -365,7 +362,7 @@ export default function AgendaPage() {
                 type="button"
                 onClick={() => setWeekOffset(weekOffset + 1)}
                 aria-label={t.agenda.nextWeek}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 dark:border-white/10 text-ink/70 dark:text-white/70 hover:border-[#4F7CFF]/40 transition-colors"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 dark:border-white/10 text-ink/70 dark:text-white/70 hover:border-black/15 dark:hover:border-white/20 transition-colors"
               >
                 <ChevronRight size={16} aria-hidden />
               </button>
@@ -449,14 +446,14 @@ export default function AgendaPage() {
                   <li
                     key={d.toISOString()}
                     className={`rounded-2xl border bg-white/95 dark:bg-white/[0.03] p-3 ${
-                      isToday(d) ? 'border-[#4F7CFF]/40' : 'border-black/[0.09] dark:border-white/10'
+                      isToday(d) ? 'border-[#7C83FF]/40' : 'border-black/[0.09] dark:border-white/10'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2 pl-1">
-                      <p className={`text-sm font-semibold capitalize ${isToday(d) ? 'text-[#4F7CFF]' : 'text-ink dark:text-white'}`}>
+                      <p className={`text-sm font-semibold capitalize ${isToday(d) ? 'text-[#7C83FF]' : 'text-ink dark:text-white'}`}>
                         {dayLabel}
                         {isToday(d) && (
-                          <span className="ml-2 rounded-full bg-[#4F7CFF]/15 px-2 py-0.5 text-[11px] font-semibold normal-case">{ui.common.today}</span>
+                          <span className="ml-2 rounded-full bg-[#7C83FF]/15 px-2 py-0.5 text-[11px] font-semibold normal-case">{ui.common.today}</span>
                         )}
                       </p>
                       {!locked && (
@@ -479,11 +476,11 @@ export default function AgendaPage() {
                             <button
                               type="button"
                               onClick={() => openDetails(a)}
-                              className="flex w-full min-h-[48px] items-center gap-3 rounded-xl border border-black/[0.06] dark:border-white/[0.08] px-3 py-2 text-left hover:border-[#4F7CFF]/40 transition-colors"
+                              className="flex w-full min-h-[48px] items-center gap-3 rounded-xl border border-black/[0.06] dark:border-white/[0.08] px-3 py-2 text-left hover:border-black/15 dark:hover:border-white/20 transition-colors"
                             >
                               <span
                                 className="h-8 w-1 shrink-0 rounded-full"
-                                style={{ background: a.session_type === 'video' ? '#4F7CFF' : '#22B888' }}
+                                style={{ background: a.session_type === 'video' ? '#7C83FF' : '#94A3B8' }}
                                 aria-hidden
                               />
                               <span className="w-12 shrink-0 text-sm font-bold tabular-nums text-ink dark:text-white">
@@ -520,7 +517,7 @@ export default function AgendaPage() {
                       <div
                         key={d.toISOString()}
                         className={`flex-1 text-center py-3 border-l border-black/[0.09] dark:border-white/10 ${
-                          isToday(d) ? 'bg-[#4F7CFF]/5' : ''
+                          isToday(d) ? 'bg-[#7C83FF]/5' : ''
                         }`}
                       >
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50">
@@ -528,7 +525,7 @@ export default function AgendaPage() {
                         </p>
                         <p
                           className={`text-lg font-bold ${
-                            isToday(d) ? 'text-[#4F7CFF]' : 'text-ink dark:text-white'
+                            isToday(d) ? 'text-[#7C83FF]' : 'text-ink dark:text-white'
                           }`}
                         >
                           {d.getDate()}
@@ -559,13 +556,13 @@ export default function AgendaPage() {
                           key={d.toISOString()}
                           onClick={(e) => handleColumnClick(d, e)}
                           className={`flex-1 relative border-l border-black/[0.09] dark:border-white/10 cursor-pointer group/col ${
-                            isToday(d) ? 'bg-[#4F7CFF]/[0.03]' : ''
+                            isToday(d) ? 'bg-[#7C83FF]/[0.03]' : ''
                           }`}
                         >
                           {SLOTS.map((_, i) => (
                             <div
                               key={i}
-                              className="absolute left-0 right-0 border-t border-black/[0.05] dark:border-white/[0.05] group-hover/col:bg-[#4F7CFF]/[0.02]"
+                              className="absolute left-0 right-0 border-t border-black/[0.05] dark:border-white/[0.05] group-hover/col:bg-[#7C83FF]/[0.02]"
                               style={{ top: i * ROW_HEIGHT, height: ROW_HEIGHT }}
                             />
                           ))}
@@ -591,8 +588,8 @@ export default function AgendaPage() {
                                   height,
                                   background:
                                     a.session_type === 'video'
-                                      ? 'linear-gradient(135deg, #4F7CFF 0%, #6E8FFF 100%)'
-                                      : 'linear-gradient(135deg, #32D6A0 0%, #22B888 100%)',
+                                      ? 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)'
+                                      : 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
                                 }}
                               >
                                 <p className="text-[11px] font-bold leading-tight truncate">
@@ -616,14 +613,14 @@ export default function AgendaPage() {
               <div className="flex items-center gap-1.5">
                 <span
                   className="h-2.5 w-2.5 rounded-full"
-                  style={{ background: 'linear-gradient(135deg, #4F7CFF 0%, #6E8FFF 100%)' }}
+                  style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' }}
                 />
                 <span className="text-xs text-ink/60 dark:text-white/50">{ui.common.videoCall}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span
                   className="h-2.5 w-2.5 rounded-full"
-                  style={{ background: 'linear-gradient(135deg, #32D6A0 0%, #22B888 100%)' }}
+                  style={{ background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)' }}
                 />
                 <span className="text-xs text-ink/60 dark:text-white/50">{ui.common.inPerson}</span>
               </div>
@@ -652,7 +649,7 @@ export default function AgendaPage() {
               aria-labelledby="new-appointment-title"
               className="w-full max-w-sm max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#12131a] shadow-2xl p-6"
             >
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#4F7CFF] mb-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#7C83FF] mb-1">
                 {ui.modal.newAppointmentEyebrow}
               </p>
               <p id="new-appointment-title" className="text-sm font-bold text-ink dark:text-white mb-4">
@@ -667,7 +664,7 @@ export default function AgendaPage() {
                   id="appt-time"
                   value={addSlotIndex}
                   onChange={(e) => setAddSlotIndex(Number(e.target.value))}
-                  className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.03] px-3 py-2.5 text-sm outline-none focus:border-[#4F7CFF] text-ink dark:text-white"
+                  className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.03] px-3 py-2.5 text-sm outline-none focus:border-[#7C83FF] text-ink dark:text-white"
                 >
                   {SLOTS.map((slot, i) => (
                     <option key={i} value={i}>
@@ -682,8 +679,8 @@ export default function AgendaPage() {
                   {ui.modal.patientLabel}
                 </label>
                 {selectedPatient ? (
-                  <div className="flex items-center gap-2 rounded-xl border border-[#4F7CFF]/30 bg-[#4F7CFF]/5 px-3 py-2.5">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/15 text-[#4F7CFF]">
+                  <div className="flex items-center gap-2 rounded-xl border border-[#7C83FF]/30 bg-[#7C83FF]/5 px-3 py-2.5">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#7C83FF]/15 text-[#7C83FF]">
                       <User size={12} />
                     </span>
                     <span className="text-sm font-medium text-ink dark:text-white flex-1 truncate">
@@ -708,7 +705,7 @@ export default function AgendaPage() {
                       value={patientQuery}
                       onChange={(e) => searchPatients(e.target.value)}
                       placeholder={ui.modal.searchPlaceholder}
-                      className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.03] pl-9 pr-3 py-2.5 text-sm outline-none focus:border-[#4F7CFF] text-ink dark:text-white"
+                      className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.03] pl-9 pr-3 py-2.5 text-sm outline-none focus:border-[#7C83FF] text-ink dark:text-white"
                     />
                     {searchingPatients && (
                       <p className="text-[11px] text-ink/55 dark:text-white/40 mt-1.5">{ui.modal.searching}</p>
@@ -729,9 +726,9 @@ export default function AgendaPage() {
                               setSelectedPatient(p)
                               setPatientResults([])
                             }}
-                            className="w-full flex min-h-[40px] items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-[#4F7CFF]/10 transition-colors"
+                            className="w-full flex min-h-[40px] items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-[#7C83FF]/10 transition-colors"
                           >
-                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/15 text-[#4F7CFF]">
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#7C83FF]/15 text-[#7C83FF]">
                               <User size={12} />
                             </span>
                             <span className="text-sm font-medium text-ink dark:text-white truncate">{p.name}</span>
@@ -750,7 +747,7 @@ export default function AgendaPage() {
                   onClick={() => setAddSessionType('video')}
                   className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold border transition-colors ${
                     addSessionType === 'video'
-                      ? 'border-[#4F7CFF] text-[#4F7CFF] bg-[#4F7CFF]/10'
+                      ? 'border-[#7C83FF] text-[#7C83FF] bg-[#7C83FF]/10'
                       : 'border-black/10 dark:border-white/10 text-ink/60 dark:text-white/50'
                   }`}
                 >
@@ -763,7 +760,7 @@ export default function AgendaPage() {
                   onClick={() => setAddSessionType('in_person')}
                   className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold border transition-colors ${
                     addSessionType === 'in_person'
-                      ? 'border-[#4F7CFF] text-[#4F7CFF] bg-[#4F7CFF]/10'
+                      ? 'border-[#7C83FF] text-[#7C83FF] bg-[#7C83FF]/10'
                       : 'border-black/10 dark:border-white/10 text-ink/60 dark:text-white/50'
                   }`}
                 >
@@ -782,7 +779,7 @@ export default function AgendaPage() {
                   onChange={(e) => setAddNote(e.target.value)}
                   rows={2}
                   placeholder={ui.modal.notePlaceholder}
-                  className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.03] px-3 py-2.5 text-sm outline-none focus:border-[#4F7CFF] text-ink dark:text-white resize-none"
+                  className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.03] px-3 py-2.5 text-sm outline-none focus:border-[#7C83FF] text-ink dark:text-white resize-none"
                 />
               </div>
 
@@ -797,8 +794,7 @@ export default function AgendaPage() {
                 <button
                   onClick={handleConfirmAdd}
                   disabled={!selectedPatient || addSaving}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-full py-2.5 text-sm font-semibold text-white disabled:opacity-50 transition-transform hover:scale-[1.02]"
-                  style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-full py-2.5 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 disabled:opacity-50 transition-transform"
                 >
                   {addSaving && <Loader2 size={14} className="animate-spin" />}
                   {ui.common.confirm}
@@ -828,7 +824,7 @@ export default function AgendaPage() {
               aria-labelledby="appointment-details-title"
               className="w-full max-w-sm rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#12131a] shadow-2xl p-6"
             >
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#4F7CFF] mb-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#7C83FF] mb-1">
                 {ui.cancelFlow.detailsEyebrow}
               </p>
               <p id="appointment-details-title" className="text-sm font-bold text-ink dark:text-white">
@@ -876,8 +872,7 @@ export default function AgendaPage() {
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={() => router.push(`/dashboard/patients/${selected.patient_id}`)}
-                    className="w-full flex items-center justify-center gap-2 rounded-full py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02]"
-                    style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                    className="w-full flex items-center justify-center gap-2 rounded-full py-2.5 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 transition-transform"
                   >
                     <User size={14} />
                     {ui.cancelFlow.openPatient}

@@ -3,7 +3,8 @@
 //     later today, pending patient requests, last session per patient,
 //     follow-ups, weekly counters;
 //   - in a real browser (Playwright) against the fake Supabase, synthetic data
-//     only: the next patient card with its actions, a patient's request
+//     only: the next patient card with its actions (a video appointment opens
+//     the video call page), a patient's request
 //     confirmed from the to-do list, a follow-up suggestion, and the new
 //     patient form with first name, surname and date of birth.
 // Browser tests are skipped when Playwright/Chromium are not installed.
@@ -149,7 +150,8 @@ test('next patient: name, time, video, last session, and the actions open the se
     if (sameDay) assert.match(text, /Tra \d+ min/);
     assert.match(text, /Videochiamata/);
     assert.match(text, /3 giorni fa/, 'last session from the notes');
-    assert.equal(await card.getByRole('link', { name: 'Inizia seduta' }).getAttribute('href'), `/dashboard/patients/${P1}/session`);
+    // A video appointment: the main action opens the video call page.
+    assert.equal(await card.getByRole('link', { name: 'Avvia videochiamata' }).getAttribute('href'), `/dashboard/patients/${P1}/call`);
     assert.equal(await card.getByRole('link', { name: 'Apri scheda' }).getAttribute('href'), `/dashboard/patients/${P1}`);
     if (sameDay) assert.match(await page.getByTestId('brief').innerText(), /1 appuntamento oggi/);
     assert.match(await page.getByTestId('brief').innerText(), /1 richiesta da confermare/);

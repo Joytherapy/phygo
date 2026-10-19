@@ -9,13 +9,8 @@ import { ReactNode, useEffect, useRef, useState } from 'react'
 import { ArrowRight, Check, Clock, MapPin, Play, UserRound, Video, X, AlertCircle, RotateCcw, CalendarClock } from 'lucide-react'
 
 
-// Premium palette: monochrome surfaces and one accent (periwinkle to violet,
-// the colours of the PHYGO mark), used sparingly for focus details.
-export const ACCENT = 'linear-gradient(135deg, #A5B4FF 0%, #7C83FF 50%, #A78BFA 100%)'
-export const ACCENT_SOLID = '#8B95FF'
-// The main action: ink on light, white on dark, as on the landing page.
-export const PRIMARY_BTN =
-  'bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90'
+export { ACCENT, ACCENT_SOLID, PRIMARY_BTN } from '@/components/ui/premium'
+import { ACCENT, ACCENT_SOLID, PRIMARY_BTN } from '@/components/ui/premium'
 
 const EDGE_MASK = {
   padding: 1,
@@ -122,7 +117,7 @@ export function NextPatientCard({
   title: string
   view: NextView
   later: { id: string; time: string; name: string; patientId: string }[]
-  labels: { startSession: string; openRecord: string; lastSession: string; laterToday: string; openAgenda: string }
+  labels: { startSession: string; startVideoCall: string; openRecord: string; lastSession: string; laterToday: string; openAgenda: string }
 }) {
   return (
     <Card glow className="p-5 sm:p-7" data-testid="next-patient">
@@ -172,11 +167,11 @@ export function NextPatientCard({
 
       <div className="relative mt-6 flex flex-col gap-2 sm:flex-row">
         <Link
-          href={`/dashboard/patients/${view.patientId}/session`}
+          href={`/dashboard/patients/${view.patientId}/${view.video ? 'call' : 'session'}`}
           className={`inline-flex min-h-[46px] items-center justify-center gap-2 rounded-2xl px-6 text-sm font-semibold transition-all ${PRIMARY_BTN}`}
         >
-          <Play size={15} aria-hidden />
-          {labels.startSession}
+          {view.video ? <Video size={15} aria-hidden /> : <Play size={15} aria-hidden />}
+          {view.video ? labels.startVideoCall : labels.startSession}
         </Link>
         <Link
           href={`/dashboard/patients/${view.patientId}`}

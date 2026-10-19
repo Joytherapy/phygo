@@ -37,8 +37,8 @@ type Props = {
   onSaved: (patient: ProfilePatient) => void
 }
 
-const card = 'rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/90 dark:bg-white/[0.02] backdrop-blur-xl p-6 sm:p-7'
-const inputCls = 'w-full rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.04] px-3.5 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/25 focus:outline-none focus:border-[#4F7CFF]/60 focus:ring-2 focus:ring-[#4F7CFF]/15 disabled:opacity-50'
+const card = 'rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.055] dark:to-white/[0.018] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-6 sm:p-7'
+const inputCls = 'w-full rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.04] px-3.5 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/25 focus:outline-none focus:border-[#7C83FF]/60 focus:ring-2 focus:ring-[#7C83FF]/15 disabled:opacity-50'
 
 // Declared outside the component so that typing in a field never remounts it.
 function Field({ label, value, empty }: { label: string; value: string | null | undefined; empty: string }) {
@@ -56,7 +56,7 @@ function Section({ icon: Icon, title, children, hint }: { icon: typeof ContactRo
   return (
     <section className="rounded-2xl border border-black/[0.07] dark:border-white/[0.08] bg-white/70 dark:bg-white/[0.02] p-4 sm:p-5">
       <h3 className="flex items-center gap-2 text-sm font-bold text-ink dark:text-white">
-        <Icon size={15} className="text-[#4F7CFF]" />
+        <Icon size={15} className="text-[#7C83FF]" />
         {title}
       </h3>
       {hint && <p className="mt-1 text-xs text-ink/50 dark:text-white/40">{hint}</p>}
@@ -240,7 +240,7 @@ export default function PatientProfileCard({ patient, locked, onSaved }: Props) 
   const detailsError = detailsStatus === 'error' && (
     <div role="alert" data-testid="details-error" className="rounded-xl border border-red-500/25 bg-red-500/[0.04] p-3 text-xs text-ink/70 dark:text-white/70 flex flex-wrap items-center gap-3">
       <span className="flex-1 min-w-[12rem]">{editing ? t.detailsLocked : t.loadError}</span>
-      <button type="button" onClick={() => loadDetails()} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-semibold text-white bg-[#4F7CFF] hover:bg-[#3D68E8]">
+      <button type="button" onClick={() => loadDetails()} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90">
         <RotateCcw size={12} />
         {t.retry}
       </button>
@@ -251,7 +251,7 @@ export default function PatientProfileCard({ patient, locked, onSaved }: Props) 
     <div className={`mb-8 ${card}`} data-testid="patient-profile">
       <div className="flex items-start justify-between gap-3 mb-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4F7CFF]/15 to-[#4F7CFF]/5 text-[#4F7CFF]">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-black/[0.06] bg-black/[0.03] text-ink/70 dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-white/80">
             <ContactRound size={18} />
           </div>
           <div>
@@ -264,7 +264,7 @@ export default function PatientProfileCard({ patient, locked, onSaved }: Props) 
             type="button"
             onClick={startEditing}
             disabled={locked || detailsStatus === 'loading'}
-            className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold border border-black/10 dark:border-white/10 text-ink/70 dark:text-white/70 hover:border-[#4F7CFF]/40 hover:text-[#4F7CFF] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold border border-black/10 dark:border-white/10 text-ink/70 dark:text-white/70 hover:border-black/15 dark:hover:border-white/20 hover:text-ink dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Pencil size={13} />
             {t.edit}
@@ -384,8 +384,7 @@ export default function PatientProfileCard({ patient, locked, onSaved }: Props) 
             <button
               type="submit"
               disabled={saving || locked}
-              className="rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] disabled:opacity-60"
-              style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+              className="rounded-full px-6 py-2.5 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 disabled:opacity-60"
             >
               {saving ? t.saving : t.save}
             </button>

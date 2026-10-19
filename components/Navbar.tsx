@@ -217,7 +217,7 @@ export default function Navbar() {
       >
         <a
           href={isDashboard ? (isStudent ? "/dashboard/workspace" : "/dashboard") : "/"}
-          className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+          className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C83FF]"
         >
           <BrandMark />
         </a>
@@ -378,8 +378,8 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2">
           {currentPatient && (
-            <div className="hidden sm:flex items-center gap-1.5 rounded-full pl-1 pr-2 py-1 bg-[#4F7CFF]/10 text-[#4F7CFF]">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#4F7CFF] text-white">
+            <div className="hidden sm:flex items-center gap-1.5 rounded-full pl-1 pr-2 py-1 bg-[#7C83FF]/10 text-[#7C83FF]">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#7C83FF] text-white">
                 <User size={12} />
               </span>
               <span className="text-xs font-semibold max-w-[100px] truncate">
@@ -389,7 +389,7 @@ export default function Navbar() {
                 type="button"
                 aria-label={t.nav.clearPatient}
                 onClick={() => setCurrentPatient(null)}
-                className="-my-1 flex h-7 w-7 items-center justify-center rounded-full hover:bg-[#4F7CFF]/20 transition-colors"
+                className="-my-1 flex h-7 w-7 items-center justify-center rounded-full hover:bg-[#7C83FF]/20 transition-colors"
               >
                 <X size={11} />
               </button>
@@ -543,14 +543,14 @@ export default function Navbar() {
       </nav>
 
       {currentPatient && (
-        <div className="sm:hidden absolute top-16 left-4 right-4 flex items-center justify-center gap-1.5 rounded-full pl-3 pr-1 py-1.5 bg-[#4F7CFF]/10 text-[#4F7CFF]">
+        <div className="sm:hidden absolute top-16 left-4 right-4 flex items-center justify-center gap-1.5 rounded-full pl-3 pr-1 py-1.5 bg-[#7C83FF]/10 text-[#7C83FF]">
           <User size={12} />
           <span className="min-w-0 truncate text-xs font-semibold">{ui.nav.currentPatient}: {currentPatient.name}</span>
           <button
             type="button"
             aria-label={t.nav.clearPatient}
             onClick={() => setCurrentPatient(null)}
-            className="-my-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-[#4F7CFF]/20 transition-colors"
+            className="-my-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-[#7C83FF]/20 transition-colors"
           >
             <X size={11} />
           </button>

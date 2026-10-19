@@ -33,7 +33,7 @@ const STUDY_TYPE_STYLE: Record<string, { text: string; bg: string; border: strin
   'case-control': { text: '#F59E0B', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)' },
   'cross-sectional': { text: '#FB7185', bg: 'rgba(251,113,133,0.12)', border: 'rgba(251,113,133,0.3)' },
 };
-const DEFAULT_STUDY_STYLE = { text: '#4F7CFF', bg: 'rgba(79,124,255,0.12)', border: 'rgba(79,124,255,0.3)' };
+const DEFAULT_STUDY_STYLE = { text: '#7C83FF', bg: 'rgba(124,131,255,0.12)', border: 'rgba(124,131,255,0.3)' };
 
 function getStudyStyle(studyType: string | null) {
   if (!studyType) return DEFAULT_STUDY_STYLE;

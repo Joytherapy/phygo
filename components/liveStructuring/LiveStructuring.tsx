@@ -1001,7 +1001,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
     <div className={className}>
 <div className="relative overflow-hidden rounded-[28px] glass-strong shadow-lift p-7 sm:p-9">
 
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-electric/60 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#7C83FF]/60 to-transparent" />
 
         {/* Status */}
         <div className="mb-6 flex items-center justify-between">
@@ -1052,7 +1052,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                 <div className="mt-2 h-1.5 w-48 overflow-hidden rounded-full bg-black/8 dark:bg-white/8">
 
                   <motion.div
-                    className="h-full rounded-full bg-gradient-to-r from-electric via-[#6E8FFF] to-emerald"
+                    className="h-full rounded-full bg-gradient-to-r from-[#7C83FF] via-[#6E8FFF] to-[#A78BFA]"
                     animate={{ width: `${progress}%` }}
                     transition={{
                       duration: .35,
@@ -1102,7 +1102,7 @@ className="text-[11px] rounded-lg border border-black/15 dark:border-white/10 bg
                     duration: 2,
                     repeat: Infinity,
                   }}
-                  className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-electric to-emerald text-white shadow-glow"
+                  className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#7C83FF] to-[#A78BFA] text-white shadow-glow"
                 >
                   <Mic size={24} />
                 </motion.span>
@@ -1130,7 +1130,7 @@ className="text-[11px] rounded-lg border border-black/15 dark:border-white/10 bg
                   {Array.from({ length: 20 }).map((_, i) => (
                     <motion.span
                       key={i}
-                      className="w-[3px] rounded-full bg-gradient-to-t from-electric to-emerald"
+                      className="w-[3px] rounded-full bg-gradient-to-t from-[#7C83FF] to-[#A78BFA]"
                       animate={{
                         height: [5, 10 + ((i * 4) % 24), 5],
                       }}
@@ -1236,7 +1236,7 @@ className="text-[11px] rounded-lg border border-black/15 dark:border-white/10 bg
                         disabled={noteSaveStatus === "saving"}
                         data-cursor-hover
                         className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold text-white transition-transform hover:scale-[1.03] disabled:opacity-60 disabled:hover:scale-100 ${
-                          noteSaveStatus === "error" ? "bg-red-500" : "bg-gradient-to-r from-electric to-emerald"
+                          noteSaveStatus === "error" ? "bg-red-500" : "bg-gradient-to-r from-[#7C83FF] to-[#A78BFA]"
                         }`}
                       >
                         <CheckCircle2 size={13} />
@@ -1301,7 +1301,7 @@ className="text-[11px] rounded-lg border border-black/15 dark:border-white/10 bg
         <div className="mb-3 flex items-center justify-between">
 
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-electric/10 text-electric">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#7C83FF]/10 text-[#7C83FF]">
               <Icon size={14} />
             </span>
             <span className="eyebrow text-ink/55 dark:text-white/40">
@@ -1370,7 +1370,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
     className="mt-4 rounded-[24px] border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-soft"
   >
     <div className="flex items-center gap-2 mb-4">
-      <Target size={15} className="text-electric" />
+      <Target size={15} className="text-[#7C83FF]" />
       <span className="eyebrow text-ink/55 dark:text-white/40">
         Clinical Reasoning
       </span>
@@ -1382,7 +1382,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
         <ul className="space-y-1">
           {finalNote.clinicalReasoning.hypotheses.map((h: string, i: number) => (
             <li key={i} className="text-sm text-ink/70 dark:text-white/70 leading-relaxed flex gap-2">
-              <span className="shrink-0 text-electric font-semibold">{i === 0 ? "①" : i === 1 ? "②" : "③"}</span>
+              <span className="shrink-0 text-[#7C83FF] font-semibold">{i === 0 ? "①" : i === 1 ? "②" : "③"}</span>
               {h}
             </li>
           ))}
@@ -1471,14 +1471,14 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
 
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
       <div className="flex gap-3">
-        <Target size={16} className="mt-0.5 shrink-0 text-electric" />
+        <Target size={16} className="mt-0.5 shrink-0 text-[#7C83FF]" />
         <div>
           <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Goals</p>
           <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.goals}</p>
         </div>
       </div>
       <div className="flex gap-3">
-        <Stethoscope size={16} className="mt-0.5 shrink-0 text-electric" />
+        <Stethoscope size={16} className="mt-0.5 shrink-0 text-[#7C83FF]" />
         <div>
           <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Clinical Tests</p>
           <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.clinical_tests}</p>
@@ -1492,7 +1492,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
         </div>
       </div>
       <div className="flex gap-3">
-        <Dumbbell size={16} className="mt-0.5 shrink-0 text-electric" />
+        <Dumbbell size={16} className="mt-0.5 shrink-0 text-[#7C83FF]" />
         <div>
           <p className="text-xs font-semibold text-ink/60 dark:text-white/50 mb-1">Typical Exercises</p>
           <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed">{clinicalInsight.typical_exercises}</p>
@@ -1507,7 +1507,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
       {matchedKeyword && (
         <button
           onClick={() => setShowWhy(!showWhy)}
-          className="text-xs font-medium text-electric hover:underline"
+          className="text-xs font-medium text-[#7C83FF] hover:underline"
         >
           Why this suggestion?
         </button>
@@ -1527,7 +1527,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
     <div className="mt-4">
       <button
         onClick={() => setShowAskPhygo((prev) => !prev)}
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-electric hover:underline"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#7C83FF] hover:underline"
       >
         <Sparkles size={12} />
         Ask Phygo AI for more insight
@@ -1538,7 +1538,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
             value={askQuestion}
             onChange={(e) => setAskQuestion(e.target.value)}
             placeholder="e.g. What else should I consider for this case?"
-            className="w-full rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 p-2.5 text-xs text-ink/80 dark:text-white/80 focus:outline-none focus:ring-2 focus:ring-electric/30"
+            className="w-full rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 p-2.5 text-xs text-ink/80 dark:text-white/80 focus:outline-none focus:ring-2 focus:ring-[#7C83FF]/30"
             rows={2}
           />
           <button
@@ -1573,7 +1573,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
     className="mt-4 rounded-[24px] border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-soft"
   >
     <div className="flex items-center gap-2 mb-4">
-      <BookOpen size={15} className="text-electric" />
+      <BookOpen size={15} className="text-[#7C83FF]" />
       <span className="eyebrow text-ink/55 dark:text-white/40">
         Relevant Scientific Evidence
       </span>
@@ -1601,7 +1601,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                 {paper.title}
               </p>
               {paper.study_type && (
-                <span className="shrink-0 rounded-full bg-electric/10 px-2.5 py-0.5 text-[10px] font-semibold text-electric">
+                <span className="shrink-0 rounded-full bg-[#7C83FF]/10 px-2.5 py-0.5 text-[10px] font-semibold text-[#7C83FF]">
                   {paper.study_type}
                 </span>
               )}
@@ -1627,7 +1627,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                 href={paper.original_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-electric hover:underline"
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#7C83FF] hover:underline"
               >
                 View source
                 <ExternalLink size={10} />
@@ -1658,7 +1658,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
       <button
         onClick={() => setShowAddExercise((prev) => !prev)}
         className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold"
-        style={{ background: "rgba(79,124,255,0.12)", color: "#4F7CFF" }}
+        style={{ background: "rgba(124,131,255,0.12)", color: "#7C83FF" }}
       >
         {showAddExercise ? <X size={12} /> : <Plus size={12} />}
         {showAddExercise ? "Cancel" : "Add exercise"}
@@ -1675,7 +1675,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
             onChange={(e) => searchExerciseDb(e.target.value)}
             placeholder="Search exercises (e.g. plank, bridge, squat)..."
             autoFocus
-            className="w-full text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 pl-9 pr-3 py-2 outline-none focus:border-electric"
+            className="w-full text-sm rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 pl-9 pr-3 py-2 outline-none focus:border-[#7C83FF]"
           />
         </div>
         {exerciseSearching && (
@@ -1690,7 +1690,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
               <div
                 key={result.internal_id}
                 onClick={() => addExerciseToList(result)}
-                className="flex items-center gap-3 rounded-xl bg-white dark:bg-white/10 p-2.5 cursor-pointer hover:bg-electric/5 dark:hover:bg-electric/10 transition-colors"
+                className="flex items-center gap-3 rounded-xl bg-white dark:bg-white/10 p-2.5 cursor-pointer hover:bg-[#7C83FF]/5 dark:hover:bg-[#7C83FF]/10 transition-colors"
               >
                 {result.media?.image_url ? (
                   <img
@@ -1711,7 +1711,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                     </p>
                   )}
                 </div>
-                <Plus size={14} className="text-electric shrink-0" />
+                <Plus size={14} className="text-[#7C83FF] shrink-0" />
               </div>
             ))}
           </div>
@@ -1770,7 +1770,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                       </span>
                     )}
                     {!isEditing && hasDetails && (
-                      <span className="text-[10px] font-medium text-electric">
+                      <span className="text-[10px] font-medium text-[#7C83FF]">
                         {isOpen ? "Hide details ▲" : "How to do it ▼"}
                       </span>
                     )}
@@ -1780,7 +1780,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
               <div className="flex items-start gap-1 shrink-0">
                 <button
                   onClick={() => setEditingExercise(isEditing ? null : key)}
-                  className="p-1.5 rounded-lg text-ink/55 dark:text-white/40 hover:bg-black/5 dark:hover:bg-white/10 hover:text-electric transition-colors"
+                  className="p-1.5 rounded-lg text-ink/55 dark:text-white/40 hover:bg-black/5 dark:hover:bg-white/10 hover:text-[#7C83FF] transition-colors"
                 >
                   <Pencil size={13} />
                 </button>
@@ -1842,7 +1842,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                 </div>
                 <button
                   onClick={() => setEditingExercise(null)}
-                  className="col-span-2 mt-1 rounded-full px-4 py-1.5 text-[11px] font-semibold text-white self-start bg-gradient-to-r from-electric to-emerald"
+                  className="col-span-2 mt-1 rounded-full px-4 py-1.5 text-[11px] font-semibold text-white self-start bg-gradient-to-r from-[#7C83FF] to-[#A78BFA]"
                 >
                   Done
                 </button>
@@ -1892,7 +1892,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
   }`}
 >
           <div className="flex items-center gap-2 mb-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-electric text-[11px] font-bold text-white">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#7C83FF] text-[11px] font-bold text-white">
               {phase.phase_number}
             </span>
             <p className="text-sm font-semibold text-ink dark:text-white">
@@ -1963,7 +1963,7 @@ className={`text-[13px] leading-relaxed text-ink/70 dark:text-white/70 ${phraseF
                     : startVoice
                 }
                 data-cursor-hover
-className="ml-auto inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-electric to-emerald px-5 py-2.5 text-[12px] font-bold text-white shadow-[0_8px_24px_rgba(79,124,255,0.4)] transition-transform hover:scale-[1.05]"
+className="ml-auto inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#7C83FF] to-[#A78BFA] px-5 py-2.5 text-[12px] font-bold text-white shadow-[0_8px_24px_rgba(124,131,255,0.4)] transition-transform hover:scale-[1.05]"
               >
                 {phase === "listening" ? (
                   <Square
@@ -1998,9 +1998,9 @@ className="ml-auto inline-flex items-center gap-2 rounded-full bg-gradient-to-r 
   data-cursor-hover
 className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[12px] font-bold transition-all hover:scale-[1.05] ${voiceSupported ? "" : "ml-auto"}`}
 style={{
-  background: "rgba(79,124,255,0.16)",
-  color: "#4F7CFF",
-  border: "1.5px solid rgba(79,124,255,0.35)",
+  background: "rgba(124,131,255,0.16)",
+  color: "#7C83FF",
+  border: "1.5px solid rgba(124,131,255,0.35)",
 }}
 
             >
@@ -2095,14 +2095,14 @@ Write instead
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
               placeholder="Scrivi qui le tue osservazioni sulla seduta..."
-              className="w-full rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 p-2.5 text-xs text-ink/80 dark:text-white/80 focus:outline-none focus:ring-2 focus:ring-electric/30"
+              className="w-full rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/10 p-2.5 text-xs text-ink/80 dark:text-white/80 focus:outline-none focus:ring-2 focus:ring-[#7C83FF]/30"
               rows={4}
             />
             <button
               onClick={submitTextInput}
               disabled={!textInput.trim()}
               data-cursor-hover
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-electric to-emerald px-4 py-2 text-[11px] font-semibold text-white shadow-glow transition-transform hover:scale-[1.03] disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#7C83FF] to-[#A78BFA] px-4 py-2 text-[11px] font-semibold text-white shadow-glow transition-transform hover:scale-[1.03] disabled:opacity-50"
             >
               Genera nota
             </button>

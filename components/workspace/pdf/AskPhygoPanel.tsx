@@ -79,7 +79,7 @@ export default function AskPhygoPanel({ contextLabel, onClose }: { contextLabel?
     <div className="flex h-full w-full flex-col rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#0c0d12] overflow-hidden">
       <div className="flex items-center justify-between gap-2 border-b border-black/[0.09] dark:border-white/10 px-4 py-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-ink dark:text-white">
-          <Sparkles size={15} className="text-[#4F7CFF]" />
+          <Sparkles size={15} className="text-[#7C83FF]" />
           {ui.ask.title}
         </div>
         <button onClick={onClose} aria-label={ui.ask.close} className="flex h-7 w-7 items-center justify-center rounded-lg text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors">
@@ -115,14 +115,14 @@ export default function AskPhygoPanel({ contextLabel, onClose }: { contextLabel?
               }
             }}
             placeholder={ui.ask.placeholder}
-            className="flex-1 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/5 px-4 py-2 text-sm text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 focus:outline-none focus:border-[#4F7CFF]/40"
+            className="flex-1 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/5 px-4 py-2 text-sm text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 focus:outline-none focus:border-[#7C83FF]/40"
           />
           <button
             onClick={ask}
             disabled={!question.trim() || loading}
             aria-label={ui.ask.send}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white disabled:opacity-30 transition-opacity"
-            style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+            style={{ background: 'linear-gradient(90deg, #7C83FF 0%, #A78BFA 100%)' }}
           >
             <Send size={14} />
           </button>

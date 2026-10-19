@@ -71,7 +71,7 @@ export default function NerveDetailPage() {
   }, [slug, lang]);
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
       <div
@@ -133,7 +133,7 @@ export default function NerveDetailPage() {
 
             <div className="grid sm:grid-cols-2 gap-4 mb-8">
               {nerve.motor_function && (
-                <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5">
+                <div className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5">
                   <p className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-2">
                     {ui.brainMap.nerve.motorFunction}
                   </p>
@@ -143,7 +143,7 @@ export default function NerveDetailPage() {
                 </div>
               )}
               {nerve.sensory_function && (
-                <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5">
+                <div className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5">
                   <p className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-2">
                     {ui.brainMap.nerve.sensoryFunction}
                   </p>
@@ -166,7 +166,7 @@ export default function NerveDetailPage() {
             )}
 
             {nerve.clinical_sign && (
-              <div className="mb-10 rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5">
+              <div className="mb-10 rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5">
                 <p className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-2">
                   {ui.brainMap.nerve.clinicalSign}
                 </p>
@@ -191,7 +191,7 @@ export default function NerveDetailPage() {
                     <button
                       key={c.id}
                       onClick={() => setSelectedCondition(c)}
-                      className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 hover:border-[#F5A524]/40 transition-colors"
+                      className="text-left rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 hover:border-[#F5A524]/40 transition-colors"
                     >
                       <p className="text-sm font-semibold text-ink dark:text-white">
                         {c.condition_name}

@@ -153,7 +153,7 @@ export default function BulkPatientLinkBar({
             onClick={handleLinkClick}
             disabled={status === 'saving' || items.length === 0}
             className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white shadow-soft disabled:opacity-50 whitespace-nowrap"
-            style={{ background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' }}
+            style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #A78BFA 100%)' }}
           >
             {status === 'saving' && <Loader2 size={13} className="animate-spin" />}
             {status === 'saved' && <Check size={13} />}
@@ -180,7 +180,7 @@ export default function BulkPatientLinkBar({
                   value={query}
                   onChange={(e) => searchPatients(e.target.value)}
                   placeholder={ui.clinicalActionBar.searchPlaceholder}
-                  className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 pl-8 pr-2 py-2 outline-none focus:border-[#4F7CFF]"
+                  className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 pl-8 pr-2 py-2 outline-none focus:border-[#7C83FF]"
                 />
               </div>
 
@@ -198,9 +198,9 @@ export default function BulkPatientLinkBar({
                     <button
                       key={p.id}
                       onClick={() => handlePickPatient(p)}
-                      className="w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-[#4F7CFF]/10 transition-colors"
+                      className="w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-[#7C83FF]/10 transition-colors"
                     >
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/15 text-[#4F7CFF]">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#7C83FF]/15 text-[#7C83FF]">
                         <User size={12} />
                       </span>
                       <span className="text-xs font-medium text-ink dark:text-white truncate">{p.name}</span>

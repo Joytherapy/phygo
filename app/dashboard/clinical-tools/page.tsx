@@ -14,6 +14,7 @@ import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 import type { OrthoTestContent } from '@/lib/orthopedicTestsContent';
 import type { SF36Domain, SF36ItemContent, SF36SectionContent, PFDIItemContent, ICIQCircumstanceContent, QOption } from '@/lib/pelvicFloorQuestionnaires';
 import type { ScaleKey, ScaleOption } from '@/lib/functionalScalesContent';
+import { PageBackdrop } from '@/components/ui/premium'
 
 // Functional Scales content (item labels, option labels, interpretation
 // text for all 27 scales below) now lives in lib/functionalScalesContent.ts
@@ -366,7 +367,7 @@ function KatzScale({ content }: { content: FunctionalScalesData['katz'] }) {
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.key} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div key={item.key} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={content.options} value={scores[item.key]} onChange={(v) => setScores((s) => ({ ...s, [item.key]: v }))} />
         </div>
@@ -382,7 +383,7 @@ function BarthelScale({ content }: { content: FunctionalScalesData['barthel'] })
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.key} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div key={item.key} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={item.options} value={scores[item.key]} onChange={(v) => setScores((s) => ({ ...s, [item.key]: v }))} />
         </div>
@@ -399,7 +400,7 @@ function TinettiScale({ content }: { content: FunctionalScalesData['tinetti'] })
   const total = balanceTotal + gaitTotal;
   const renderItems = (items: FunctionalScalesData['tinetti']['balance']) =>
     items.map((item) => (
-      <div key={item.key} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div key={item.key} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{item.label}</p>
         <ButtonGroup options={Array.from({ length: item.max + 1 }, (_, v) => ({ v, l: String(v) }))} value={scores[item.key]} onChange={(v) => setScores((s) => ({ ...s, [item.key]: v }))} />
       </div>
@@ -425,7 +426,7 @@ function ConleyScale({ content, ui }: { content: FunctionalScalesData['conley'];
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.key} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div key={item.key} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup
             options={[{ v: 0, l: ui.clinicalToolkit.functional.noLabel }, { v: item.max, l: `${ui.clinicalToolkit.functional.yesLabel} (${item.max})` }]}
@@ -445,7 +446,7 @@ function BergBalanceScale({ content }: { content: FunctionalScalesData['berg'] }
   return (
     <div className="space-y-4">
       {content.items.map((label, i) => (
-        <div key={i} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div key={i} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{i + 1}. {label}</p>
           <ButtonGroup options={[0, 1, 2, 3, 4].map((v) => ({ v, l: String(v) }))} value={scores[i]} onChange={(v) => setScores((s) => ({ ...s, [i]: v }))} />
         </div>
@@ -461,7 +462,7 @@ function MorseFallScale({ content }: { content: FunctionalScalesData['morse'] })
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.key} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div key={item.key} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={item.options} value={scores[item.key]} onChange={(v) => setScores((s) => ({ ...s, [item.key]: v }))} />
         </div>
@@ -476,7 +477,7 @@ function AshworthScale({ content }: { content: FunctionalScalesData['ashworth'] 
   const selected = content.levels.find((l) => l.v === value);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.label}</p>
         <div className="space-y-2">
           {content.levels.map((l) => (
@@ -496,7 +497,7 @@ function NRSPainScale({ content }: { content: FunctionalScalesData['nrs'] }) {
   const [value, setValue] = useState<number | null>(null);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.label}</p>
         <div className="flex flex-wrap gap-2">
           {Array.from({ length: 11 }, (_, v) => (
@@ -519,15 +520,15 @@ function SPPBScale({ content }: { content: FunctionalScalesData['sppb'] }) {
   const answered = balance !== null && gait !== null && chair !== null;
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.balanceLabel}</p>
         <ButtonGroup options={content.balanceOptions} value={balance ?? undefined} onChange={setBalance} />
       </div>
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.gaitLabel}</p>
         <ButtonGroup options={content.gaitOptions} value={gait ?? undefined} onChange={setGait} />
       </div>
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.chairLabel}</p>
         <ButtonGroup options={content.chairOptions} value={chair ?? undefined} onChange={setChair} />
       </div>
@@ -540,7 +541,7 @@ function MMSEScale({ content }: { content: FunctionalScalesData['mmse'] }) {
   const [value, setValue] = useState<number | null>(null);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.label}</p>
         <div className="flex flex-wrap gap-2">
           {Array.from({ length: 31 }, (_, v) => (
@@ -563,15 +564,15 @@ function GCSScale({ content }: { content: FunctionalScalesData['gcs'] }) {
   const answered = eye !== null && verbal !== null && motor !== null;
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.eyeLabel}</p>
         <ButtonGroup options={content.eyeOptions} value={eye ?? undefined} onChange={setEye} />
       </div>
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.verbalLabel}</p>
         <ButtonGroup options={content.verbalOptions} value={verbal ?? undefined} onChange={setVerbal} />
       </div>
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.motorLabel}</p>
         <ButtonGroup options={content.motorOptions} value={motor ?? undefined} onChange={setMotor} />
       </div>
@@ -584,7 +585,7 @@ function TUGScale({ content, ui }: { content: FunctionalScalesData['tug']; ui: F
   const [seconds, setSeconds] = useState<number | null>(null);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.label}</p>
         <div className="flex items-center gap-3">
           <input type="number" step="0.1" value={seconds ?? ''} onChange={(e) => setSeconds(e.target.value ? parseFloat(e.target.value) : null)} placeholder="0.0" className="w-28 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm outline-none focus:border-[#6366F1]" />
@@ -600,7 +601,7 @@ function SixMWTScale({ content, ui }: { content: FunctionalScalesData['sixmwt'];
   const [meters, setMeters] = useState<number | null>(null);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.label}</p>
         <div className="flex items-center gap-3">
           <input type="number" value={meters ?? ''} onChange={(e) => setMeters(e.target.value ? parseFloat(e.target.value) : null)} placeholder="0" className="w-28 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm outline-none focus:border-[#6366F1]" />
@@ -624,7 +625,7 @@ function NIHSSScale({ content }: { content: FunctionalScalesData['nihss'] }) {
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div key={item.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={item.options} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
         </div>
@@ -641,7 +642,7 @@ function UPDRSPartIIIScale({ content }: { content: FunctionalScalesData['updrs3'
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div key={item.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={content.options} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
         </div>
@@ -660,7 +661,7 @@ function WOMACScale({ content }: { content: FunctionalScalesData['womac'] }) {
   const answeredCount = Object.keys(scores).length;
   const renderGroup = (items: FunctionalScalesData['womac']['pain']) =>
     items.map((item) => (
-      <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div key={item.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{item.label}</p>
         <ButtonGroup options={content.options} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
       </div>
@@ -708,7 +709,7 @@ function DASHScale({ content }: { content: FunctionalScalesData['dash'] }) {
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div key={item.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={content.options} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
         </div>
@@ -735,7 +736,7 @@ function WMFTScale({ content, ui }: { content: FunctionalScalesData['wmft']; ui:
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div key={item.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <div className="flex items-center gap-3 mb-3">
             <input
@@ -782,7 +783,7 @@ function BoxBlockScale({ content }: { content: FunctionalScalesData['boxblock'] 
   const [nonDominant, setNonDominant] = useState<number | null>(null);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.dominantLabel}</p>
         <input
           type="number"
@@ -792,7 +793,7 @@ function BoxBlockScale({ content }: { content: FunctionalScalesData['boxblock'] 
           className="w-28 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm outline-none focus:border-[#6366F1]"
         />
       </div>
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.nonDominantLabel}</p>
         <input
           type="number"
@@ -819,7 +820,7 @@ function JebsenScale({ content, ui }: { content: FunctionalScalesData['jebsen'];
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div key={item.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-3">{item.label}</p>
           <div className="flex items-center gap-3">
             <input
@@ -847,7 +848,7 @@ function TrunkControlScale({ content }: { content: FunctionalScalesData['tct'] }
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div key={item.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={content.options} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
         </div>
@@ -866,7 +867,7 @@ function EDSSScale({ content }: { content: FunctionalScalesData['edss'] }) {
         <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.fsHeading}</h3>
         <div className="space-y-3">
           {content.fsSystems.map((item) => (
-            <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+            <div key={item.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
               <p className="text-sm font-semibold mb-2">{item.label}</p>
               <ButtonGroup options={content.options} value={fsScores[item.id]} onChange={(v) => setFsScores((s) => ({ ...s, [item.id]: v }))} />
             </div>
@@ -875,7 +876,7 @@ function EDSSScale({ content }: { content: FunctionalScalesData['edss'] }) {
       </div>
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.stepHeading}</h3>
-        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <div className="space-y-2">
             {content.steps.map((step) => (
               <button
@@ -901,7 +902,7 @@ function HoehnYahrScale({ content }: { content: FunctionalScalesData['hy'] }) {
   const selected = content.stages.find((s) => s.v === stage);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{content.text.label}</p>
         <div className="space-y-2">
           {content.stages.map((s) => (
@@ -928,7 +929,7 @@ function FSSScale({ content }: { content: FunctionalScalesData['fss'] }) {
   return (
     <div className="space-y-4">
       {content.items.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div key={item.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{item.label}</p>
           <ButtonGroup options={content.options} value={scores[item.id]} onChange={(v) => setScores((s) => ({ ...s, [item.id]: v }))} />
         </div>
@@ -961,38 +962,38 @@ function HarrisHipScale({ content }: { content: FunctionalScalesData['hhs'] }) {
     <div className="space-y-6">
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.painHeading}</h3>
-        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <ButtonGroup options={content.options.pain} value={pain} onChange={setPain} />
         </div>
       </div>
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.functionHeading}</h3>
         <div className="space-y-3">
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.limpLabel}</p>
             <ButtonGroup options={content.options.limp} value={limp} onChange={setLimp} />
           </div>
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.supportLabel}</p>
             <ButtonGroup options={content.options.support} value={support} onChange={setSupport} />
           </div>
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.distanceLabel}</p>
             <ButtonGroup options={content.options.distance} value={distance} onChange={setDistance} />
           </div>
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.sittingLabel}</p>
             <ButtonGroup options={content.options.sitting} value={sitting} onChange={setSitting} />
           </div>
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.transportLabel}</p>
             <ButtonGroup options={content.options.transport} value={transport} onChange={setTransport} />
           </div>
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.stairsLabel}</p>
             <ButtonGroup options={content.options.stairs} value={stairs} onChange={setStairs} />
           </div>
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.shoesLabel}</p>
             <ButtonGroup options={content.options.shoes} value={shoes} onChange={setShoes} />
           </div>
@@ -1000,13 +1001,13 @@ function HarrisHipScale({ content }: { content: FunctionalScalesData['hhs'] }) {
       </div>
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.deformityHeading}</h3>
-        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <ButtonGroup options={content.options.deformity} value={deformity} onChange={setDeformity} />
         </div>
       </div>
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.romHeading}</h3>
-        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <ButtonGroup options={content.options.rom} value={rom} onChange={setRom} />
         </div>
       </div>
@@ -1025,23 +1026,23 @@ function UCLAShoulderScale({ content }: { content: FunctionalScalesData['ucla'] 
   const total = (pain ?? 0) + (func ?? 0) + (flexion ?? 0) + (strength ?? 0) + (satisfaction ?? 0);
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.painLabel}</p>
         <ButtonGroup options={content.options.pain} value={pain} onChange={setPain} />
       </div>
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.functionLabel}</p>
         <ButtonGroup options={content.options.function} value={func} onChange={setFunc} />
       </div>
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.flexionLabel}</p>
         <ButtonGroup options={content.options.flexion} value={flexion} onChange={setFlexion} />
       </div>
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.strengthLabel}</p>
         <ButtonGroup options={content.options.strength} value={strength} onChange={setStrength} />
       </div>
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{content.text.satisfactionLabel}</p>
         <ButtonGroup options={content.options.satisfaction} value={satisfaction} onChange={setSatisfaction} />
       </div>
@@ -1071,15 +1072,15 @@ function DRSScale({ content }: { content: FunctionalScalesData['drs'] }) {
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.vigilanceHeading}</h3>
         <div className="space-y-3">
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.eyeLabel}</p>
             <ButtonGroup options={content.options.eye} value={eye} onChange={setEye} />
           </div>
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.commLabel}</p>
             <ButtonGroup options={content.options.comm} value={comm} onChange={setComm} />
           </div>
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.motorLabel}</p>
             <ButtonGroup options={content.options.motor} value={motor} onChange={setMotor} />
           </div>
@@ -1088,15 +1089,15 @@ function DRSScale({ content }: { content: FunctionalScalesData['drs'] }) {
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.selfcareHeading}</h3>
         <div className="space-y-3">
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.feedingLabel}</p>
             <ButtonGroup options={content.options.selfcare} value={feeding} onChange={setFeeding} />
           </div>
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.toiletingLabel}</p>
             <ButtonGroup options={content.options.selfcare} value={toileting} onChange={setToileting} />
           </div>
-          <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
             <p className="text-sm font-semibold mb-2">{content.text.groomingLabel}</p>
             <ButtonGroup options={content.options.selfcare} value={grooming} onChange={setGrooming} />
           </div>
@@ -1104,14 +1105,14 @@ function DRSScale({ content }: { content: FunctionalScalesData['drs'] }) {
       </div>
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.dependenceHeading}</h3>
-        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{content.text.levelLabel}</p>
           <ButtonGroup options={content.options.level} value={level} onChange={setLevel} />
         </div>
       </div>
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{content.text.psychosocialHeading}</h3>
-        <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+        <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
           <p className="text-sm font-semibold mb-2">{content.text.employLabel}</p>
           <ButtonGroup options={content.options.employ} value={employ} onChange={setEmploy} />
         </div>
@@ -1233,7 +1234,7 @@ function SF36Scale({ data, ui }: { data: PFQuestionnaireData; ui: ReturnType<typ
               const item = data.sf36Items.find((it) => it.id === id)!;
               const options = data.optionSets[item.optionSet] ?? [];
               return (
-                <div key={id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+                <div key={id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
                   <p className="text-sm font-semibold mb-2">{id}. {item.text}</p>
                   <ButtonGroup options={options} value={answers[id]} onChange={(v) => setAnswers((s) => ({ ...s, [id]: v }))} />
                 </div>
@@ -1297,7 +1298,7 @@ function PFDI20Scale({ data, ui }: { data: PFQuestionnaireData; ui: ReturnType<t
           <h4 className="text-xs font-semibold uppercase tracking-wide text-ink/60 dark:text-white/50 mb-3">{s.label}</h4>
           <div className="space-y-3">
             {s.items.map((item) => (
-              <div key={item.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+              <div key={item.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
                 <p className="text-sm font-semibold mb-2">{item.text}</p>
                 <ButtonGroup options={options} value={answers[item.id]} onChange={(v) => setAnswers((a) => ({ ...a, [item.id]: v }))} />
               </div>
@@ -1342,15 +1343,15 @@ function ICIQScale({ data, ui }: { data: PFQuestionnaireData; ui: ReturnType<typ
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{data.iciqQuestions.frequency.text}</p>
         <ButtonGroup options={freqOptions} value={freq} onChange={setFreq} />
       </div>
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{data.iciqQuestions.amount.text}</p>
         <ButtonGroup options={amountOptions} value={amount} onChange={setAmount} />
       </div>
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-3">{data.iciqQuestions.impact.text}</p>
         <div className="flex flex-wrap gap-2">
           {Array.from({ length: 11 }, (_, v) => (
@@ -1360,7 +1361,7 @@ function ICIQScale({ data, ui }: { data: PFQuestionnaireData; ui: ReturnType<typ
           ))}
         </div>
       </div>
-      <div className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-4">
+      <div className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-4">
         <p className="text-sm font-semibold mb-2">{data.iciqQuestions.circumstancesLabel.text}</p>
         <div className="flex flex-wrap gap-2">
           {data.iciqCircumstances.map((c) => (
@@ -1599,9 +1600,9 @@ function ClinicalToolsPageInner() {
     (t.procedure ?? '').toLowerCase().includes(normalizedMtSearch);
     const mtFilteredByRegion = (mtTechniques ?? []).filter((t) => t.joint_region === activeMTRegion && (activeMTType === 'all' || t.technique_type === activeMTType) && matchesTechnique(t));
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
-      <div className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]" style={{ background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)' }} />
+      <PageBackdrop />
       <div className="relative max-w-3xl mx-auto px-6 pt-40 pb-24">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#6366F1]/20 dark:border-[#6366F1]/25 bg-gradient-to-r from-[#6366F1]/[0.07] to-[#8B5CF6]/[0.07] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-5 shadow-soft shadow-[#6366F1]/10">
@@ -1613,7 +1614,7 @@ function ClinicalToolsPageInner() {
             <span className="bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] bg-clip-text text-transparent">{ui.clinicalToolkit.badge}</span>
           </div>
           <h1 className="font-display text-6xl md:text-7xl font-bold tracking-tight">
-            <span className="relative inline-block bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] bg-clip-text text-transparent drop-shadow-[0_2px_24px_rgba(79,124,255,0.25)]">
+            <span className="relative inline-block bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] bg-clip-text text-transparent drop-shadow-[0_2px_24px_rgba(124,131,255,0.25)]">
               {ui.clinicalToolkit.headingAccent}{' '}{ui.clinicalToolkit.headingRest}
             </span>
           </h1>
@@ -1738,7 +1739,7 @@ function ClinicalToolsPageInner() {
             {!orthoLoading && !orthoError && (
               <div className="space-y-4">
                 {(orthoTests?.[activeRegion] ?? []).map((t) => (
-                  <div key={t.slug} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-5">
+                  <div key={t.slug} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-5">
                     <p className="text-base font-semibold text-ink dark:text-white">{t.name}</p>
                     <p className="text-xs font-medium text-[#6366F1] mt-0.5 mb-3">{t.targets}</p>
                     <div className="space-y-2 text-sm text-ink/70 dark:text-white/70 leading-relaxed">
@@ -1794,7 +1795,7 @@ function ClinicalToolsPageInner() {
                   return (
                     <div key={cat}>
                       <div className="flex items-center gap-2 mb-4">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#6366F1]/10 text-[#6366F1] dark:text-[#A5B4FC]">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75 dark:text-[#A5B4FC]">
                           <CatIcon size={14} />
                         </span>
                         <h3 className="text-xs font-bold uppercase tracking-wide text-ink/60 dark:text-white/60">
@@ -1896,7 +1897,7 @@ function ClinicalToolsPageInner() {
                     </h3>
                                         <div className="space-y-4">
                       {tests.map((t) => (
-                        <div key={t.slug} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-5">
+                        <div key={t.slug} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-5">
                           <p className="text-base font-semibold text-ink dark:text-white">{t.name}</p>
                           <div className="space-y-2 text-sm text-ink/70 dark:text-white/70 leading-relaxed mt-3">
                             <p><span className="font-semibold text-ink/60 dark:text-white/50">{ui.clinicalToolkit.neuro.procedureLabel}: </span>{t.procedure}</p>
@@ -1985,10 +1986,10 @@ function ClinicalToolsPageInner() {
             {!mtLoading && !mtError && (
               <div className="space-y-4">
                 {mtFilteredByRegion.map((t) => (
-                  <div key={t.id} className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] p-5">
+                  <div key={t.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] p-5">
                     <p className="text-base font-semibold text-ink dark:text-white">{t.name}</p>
                     <div className="flex flex-wrap gap-2 mt-1 mb-3">
-                      <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#6366F1]/10 text-[#6366F1]">{t.technique_type}</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75">{t.technique_type}</span>
                       {t.grade && <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-ink/60 dark:text-white/60">{t.grade}</span>}
                     </div>
                     <div className="mb-3">

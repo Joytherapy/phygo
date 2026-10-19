@@ -189,16 +189,16 @@ export default function AppointmentScheduler({
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           className="relative mb-4 overflow-hidden rounded-[24px] p-[1.5px]"
-          style={{ background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' }}
+          style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' }}
         >
           <div className="relative rounded-[22px] bg-white dark:bg-[#0e0f12] p-5 overflow-hidden">
             <div
               className="pointer-events-none absolute -top-16 -right-16 w-40 h-40 rounded-full opacity-[0.12] blur-2xl"
-              style={{ background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' }}
             />
             <div className="flex items-center gap-2 mb-2">
-              <Sparkles size={13} className="text-[#4F7CFF]" />
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#4F7CFF]">{ui.scheduler.nextAppointment}</p>
+              <Sparkles size={13} className="text-[#7C83FF]" />
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#7C83FF]">{ui.scheduler.nextAppointment}</p>
             </div>
             <p className="text-xl font-bold text-ink dark:text-white">
               {new Date(nextAppointment.scheduled_at).toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -308,7 +308,7 @@ export default function AppointmentScheduler({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowPicker(true)}
-              className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-ink/55 dark:text-white/40 hover:text-[#4F7CFF] transition-colors"
+              className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-ink/55 dark:text-white/40 hover:text-ink dark:hover:text-white transition-colors"
             >
               <Plus size={13} />
               {mode === 'physio' ? ui.scheduler.scheduleAnother : ui.scheduler.requestAnother}
@@ -320,8 +320,7 @@ export default function AppointmentScheduler({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowPicker(true)}
-              className="w-full flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-[1.015]"
-              style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+              className="w-full flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 shadow-[0_10px_30px_rgba(124,131,255,0.35)] transition-transform hover:scale-[1.015]"
             >
               <Plus size={16} />
               {mode === 'physio' ? ui.scheduler.scheduleAppointment : ui.scheduler.requestAppointment}
@@ -348,7 +347,7 @@ export default function AppointmentScheduler({
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 15 }}
                     className="flex h-14 w-14 items-center justify-center rounded-full text-white"
-                    style={{ background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                    style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' }}
                   >
                     <Check size={26} strokeWidth={3} />
                   </motion.div>
@@ -372,10 +371,10 @@ export default function AppointmentScheduler({
                     onClick={() => setSelectedDay(d)}
                     className={`shrink-0 flex flex-col items-center justify-center w-14 h-16 rounded-2xl transition-all ${
                       isSelected
-                        ? 'text-white shadow-[0_6px_16px_rgba(79,124,255,0.4)] scale-105'
+                        ? 'text-white shadow-[0_6px_16px_rgba(124,131,255,0.4)] scale-105'
                         : 'text-ink/60 dark:text-white/60 bg-black/[0.04] dark:bg-white/5 hover:bg-black/[0.07] dark:hover:bg-white/10'
                     }`}
-                    style={isSelected ? { background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
+                    style={isSelected ? { background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' } : undefined}
                   >
                     <span className="text-[9px] font-bold tracking-wide opacity-80">{label.top}</span>
                     <span className="text-lg font-bold">{label.bottom}</span>
@@ -395,9 +394,9 @@ export default function AppointmentScheduler({
                   className={`rounded-xl py-2.5 text-xs font-semibold border transition-all ${
                     selectedSlot === slot
                       ? 'border-transparent text-white shadow-md scale-[1.03]'
-                      : 'border-black/10 dark:border-white/10 text-ink/60 dark:text-white/60 hover:border-[#4F7CFF]/40'
+                      : 'border-black/10 dark:border-white/10 text-ink/60 dark:text-white/60 hover:border-black/15 dark:hover:border-white/20'
                   }`}
-                  style={selectedSlot === slot ? { background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
+                  style={selectedSlot === slot ? { background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' } : undefined}
                 >
                   {slot}
                 </button>
@@ -415,9 +414,9 @@ export default function AppointmentScheduler({
                   className={`rounded-xl py-2.5 text-xs font-semibold border transition-all ${
                     selectedSlot === slot
                       ? 'border-transparent text-white shadow-md scale-[1.03]'
-                      : 'border-black/10 dark:border-white/10 text-ink/60 dark:text-white/60 hover:border-[#4F7CFF]/40'
+                      : 'border-black/10 dark:border-white/10 text-ink/60 dark:text-white/60 hover:border-black/15 dark:hover:border-white/20'
                   }`}
-                  style={selectedSlot === slot ? { background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
+                  style={selectedSlot === slot ? { background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' } : undefined}
                 >
                   {slot}
                 </button>
@@ -429,12 +428,12 @@ export default function AppointmentScheduler({
                 onClick={() => setSessionType('video')}
                 className={`flex flex-col items-center gap-1.5 rounded-2xl py-4 border transition-all ${
                   sessionType === 'video'
-                    ? 'border-[#4F7CFF] bg-[#4F7CFF]/10 shadow-soft'
+                    ? 'border-[#7C83FF] bg-[#7C83FF]/10 shadow-soft'
                     : 'border-black/10 dark:border-white/10'
                 }`}
               >
-                <Video size={20} className={sessionType === 'video' ? 'text-[#4F7CFF]' : 'text-ink/55 dark:text-white/40'} />
-                <span className={`text-sm font-semibold ${sessionType === 'video' ? 'text-[#4F7CFF]' : 'text-ink/60 dark:text-white/60'}`}>
+                <Video size={20} className={sessionType === 'video' ? 'text-[#7C83FF]' : 'text-ink/55 dark:text-white/40'} />
+                <span className={`text-sm font-semibold ${sessionType === 'video' ? 'text-[#7C83FF]' : 'text-ink/60 dark:text-white/60'}`}>
                   {ui.common.video}
                 </span>
                 <span className="text-[10px] text-ink/55 dark:text-white/40">{ui.scheduler.fromAnywhere}</span>
@@ -443,12 +442,12 @@ export default function AppointmentScheduler({
                 onClick={() => setSessionType('in_person')}
                 className={`flex flex-col items-center gap-1.5 rounded-2xl py-4 border transition-all ${
                   sessionType === 'in_person'
-                    ? 'border-[#4F7CFF] bg-[#4F7CFF]/10 shadow-soft'
+                    ? 'border-[#7C83FF] bg-[#7C83FF]/10 shadow-soft'
                     : 'border-black/10 dark:border-white/10'
                 }`}
               >
-                <MapPin size={20} className={sessionType === 'in_person' ? 'text-[#4F7CFF]' : 'text-ink/55 dark:text-white/40'} />
-                <span className={`text-sm font-semibold ${sessionType === 'in_person' ? 'text-[#4F7CFF]' : 'text-ink/60 dark:text-white/60'}`}>
+                <MapPin size={20} className={sessionType === 'in_person' ? 'text-[#7C83FF]' : 'text-ink/55 dark:text-white/40'} />
+                <span className={`text-sm font-semibold ${sessionType === 'in_person' ? 'text-[#7C83FF]' : 'text-ink/60 dark:text-white/60'}`}>
                   {ui.common.inPersonShort}
                 </span>
                 <span className="text-[10px] text-ink/55 dark:text-white/40">{ui.scheduler.atTheClinic}</span>
@@ -475,8 +474,7 @@ export default function AppointmentScheduler({
               <button
                 onClick={handleConfirmSlot}
                 disabled={!selectedSlot || saving}
-                className="flex-1 flex items-center justify-center gap-2 rounded-full py-2.5 text-sm font-semibold text-white disabled:opacity-50 transition-transform hover:scale-[1.02] shadow-[0_6px_20px_rgba(79,124,255,0.3)]"
-                style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                className="flex-1 flex items-center justify-center gap-2 rounded-full py-2.5 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 disabled:opacity-50 transition-transform shadow-[0_6px_20px_rgba(124,131,255,0.3)]"
               >
                 {saving && <Loader2 size={14} className="animate-spin" />}
                 {mode === 'physio' ? ui.common.confirm : ui.scheduler.sendRequest}
@@ -495,7 +493,7 @@ export default function AppointmentScheduler({
                 <span className="text-ink/60 dark:text-white/60 flex items-center gap-2">
                   <span
                     className={`h-1.5 w-1.5 rounded-full ${
-                      a.status === 'completed' ? 'bg-emerald-500' : a.status === 'confirmed' ? 'bg-[#4F7CFF]' : 'bg-ink/20 dark:bg-white/20'
+                      a.status === 'completed' ? 'bg-emerald-500' : a.status === 'confirmed' ? 'bg-[#7C83FF]' : 'bg-ink/20 dark:bg-white/20'
                     }`}
                   />
                   {new Date(a.scheduled_at).toLocaleDateString(locale, { day: 'numeric', month: 'short' })} · {a.session_type === 'video' ? ui.common.video : ui.common.inPersonShort}

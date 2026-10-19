@@ -28,7 +28,7 @@ const STATUS_STYLE: Record<VerificationStatusKey, string> = {
 }
 
 const inputClass =
-  'w-full mt-1.5 rounded-xl border bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white'
+  'w-full mt-1.5 rounded-xl border bg-white/85 dark:bg-white/[0.02] px-4 py-3 outline-none transition focus:border-[#7C83FF] focus:ring-4 focus:ring-[#7C83FF]/10 text-ink dark:text-white'
 
 export type VerificationSummary = { status: VerificationStatusKey; practiceStage: 'student' | 'professional' }
 
@@ -110,10 +110,10 @@ export default function ProfessionalVerificationCard({
   if (hidden) return null
 
   return (
-    <section id="professional-verification" aria-labelledby="verification-title" className="rounded-2xl border border-[#4F7CFF]/20 bg-[#4F7CFF]/[0.04] p-5">
+    <section id="professional-verification" aria-labelledby="verification-title" className="rounded-2xl border border-[#7C83FF]/20 bg-[#7C83FF]/[0.04] p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 id="verification-title" className="text-sm font-semibold text-ink dark:text-white flex items-center gap-1.5">
-          <ShieldCheck size={15} className="text-[#4F7CFF]" />
+          <ShieldCheck size={15} className="text-[#7C83FF]" />
           {t.title}
         </h2>
         {state !== 'loading' && state !== 'unavailable' && (
@@ -191,7 +191,7 @@ export default function ProfessionalVerificationCard({
               onClick={submit}
               disabled={state === 'saving'}
               className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-              style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+              style={{ background: 'linear-gradient(90deg, #7C83FF 0%, #A78BFA 100%)' }}
             >
               {state === 'saving' && <Loader2 size={14} className="animate-spin" aria-hidden />}
               {state === 'saving' ? t.saving : status === 'not_applicable' ? t.submit : t.resubmit}

@@ -55,12 +55,32 @@ function DailyFrame({ session, onLeft }: { session: Session; onLeft: () => void 
   return <div ref={container} className="w-full aspect-video" />
 }
 
+// On the clinician's call page the states before and between calls sit on a
+// full-size stage, so the page keeps the call's shape before it starts.
+function Stage({ on, children }: { on: boolean; children: React.ReactNode }) {
+  if (!on) return <>{children}</>
+  return (
+    <div className="relative grid aspect-video min-h-[280px] place-items-center overflow-hidden rounded-[18px] bg-black/[0.03] dark:bg-black/40">
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60" style={{ background: 'radial-gradient(60% 60% at 50% 40%, rgba(124,131,255,0.18), transparent 70%)' }} />
+      <div className="relative flex w-full max-w-sm flex-col items-center gap-5 px-6 text-center">
+        <span aria-hidden className="grid h-16 w-16 place-items-center rounded-full border border-black/[0.06] bg-white/70 text-ink/70 dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-white/80">
+          <Video size={24} />
+        </span>
+        <div className="w-full">{children}</div>
+      </div>
+    </div>
+  )
+}
+
 export default function VideoCallPanel({
   patientId,
   canStart,
+  stage = false,
 }: {
   patientId: string
   canStart: boolean
+  /** Show the idle states on a full-size stage (the clinician's call page). */
+  stage?: boolean
 }) {
   const [call, setCall] = useState<ActiveCall | null>(null)
   const [loading, setLoading] = useState(true)
@@ -167,9 +187,11 @@ export default function VideoCallPanel({
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-10 text-center">
-        <Loader2 size={18} className="mx-auto animate-spin text-ink/30 dark:text-white/30" />
-      </div>
+      <Stage on={stage}>
+        <div className={stage ? 'py-2 text-center' : 'rounded-2xl border border-dashed border-black/10 dark:border-white/15 py-10 text-center'}>
+          <Loader2 size={18} className="mx-auto animate-spin text-ink/30 dark:text-white/30" />
+        </div>
+      </Stage>
     )
   }
 
@@ -192,16 +214,18 @@ export default function VideoCallPanel({
 
   if (call && !session) {
     return (
+      <Stage on={stage}>
       <div>
       <button
         onClick={() => join(call)}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl border border-[#4F7CFF]/30 bg-[#4F7CFF]/10 py-4 text-sm font-semibold text-[#4F7CFF] hover:bg-[#4F7CFF]/15 transition-colors animate-pulse"
+        className="w-full flex items-center justify-center gap-2 rounded-2xl border border-[#7C83FF]/30 bg-[#7C83FF]/10 py-4 text-sm font-semibold text-[#7C83FF] hover:bg-[#7C83FF]/15 transition-colors animate-pulse"
       >
         <Video size={16} />
         {v.joinCall}
       </button>
       {error && <p role="alert" className="text-xs text-red-500 mt-2 text-center">{error}</p>}
       </div>
+      </Stage>
     )
   }
 
@@ -214,12 +238,12 @@ export default function VideoCallPanel({
   }
 
   return (
+    <Stage on={stage}>
     <div>
       <button
         onClick={startCall}
         disabled={starting}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl px-6 py-4 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.35)] transition-transform hover:scale-[1.02] disabled:opacity-60"
-        style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+        className="w-full flex items-center justify-center gap-2 rounded-2xl px-6 py-4 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 transition-transform disabled:opacity-60"
       >
         {starting ? <Loader2 size={16} className="animate-spin" /> : <Video size={16} />}
         {starting ? v.starting : v.startCall}
@@ -235,5 +259,6 @@ export default function VideoCallPanel({
         </button>
       )}
     </div>
+    </Stage>
   )
 }

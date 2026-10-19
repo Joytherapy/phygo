@@ -25,6 +25,7 @@ import {
   nextByPatient, notesPerWeek, pendingRequests, weekBounds, type HomeAppointment, type HomeNote,
 } from '@/lib/dashboard/home'
 import { lazy } from '@/lib/lazy'
+import { PageBackdrop, PAGE_BG } from '@/components/ui/premium'
 
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -377,31 +378,10 @@ export default function DashboardPage() {
   )
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#f7f7f8] transition-colors dark:bg-[#050608]">
+    <div className={`relative min-h-screen overflow-hidden transition-colors ${PAGE_BG}`}>
       <Navbar />
 
-      {/* aurora and a faint grid, the same palette as the landing */}
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-48 -top-64 h-[640px] w-[860px] rounded-full opacity-[0.14] blur-[130px] dark:opacity-[0.22]" style={{ background: 'radial-gradient(circle, #6366F1, transparent 65%)' }} />
-        <div className="absolute -right-56 -top-48 h-[560px] w-[720px] rounded-full opacity-[0.08] blur-[130px] dark:opacity-[0.14]" style={{ background: 'radial-gradient(circle, #A78BFA, transparent 65%)' }} />
-        {/* film grain for depth */}
-        <div
-          className="absolute inset-0 opacity-[0.025] mix-blend-overlay dark:opacity-[0.05]"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          }}
-        />
-        <div
-          className="absolute inset-0 hidden opacity-40 dark:block"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px)',
-            backgroundSize: '56px 56px',
-            maskImage: 'radial-gradient(ellipse at 50% 0%, #000 25%, transparent 70%)',
-            WebkitMaskImage: 'radial-gradient(ellipse at 50% 0%, #000 25%, transparent 70%)',
-          }}
-        />
-      </div>
+      <PageBackdrop />
 
       <main id="main-content" className="relative mx-auto max-w-6xl px-4 pb-28 pt-28 sm:px-6 sm:pb-20 sm:pt-36">
         <motion.header initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-7 flex flex-col gap-5 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
@@ -523,7 +503,7 @@ export default function DashboardPage() {
                 title={next && isToday(next.appointment, now) ? h.nextPatient : h.nextAppointment}
                 view={nextView}
                 later={later}
-                labels={{ startSession: h.startSession, openRecord: h.openRecord, lastSession: h.lastSession, laterToday: h.laterToday, openAgenda: h.openAgenda }}
+                labels={{ startSession: h.startSession, startVideoCall: h.startVideoCall, openRecord: h.openRecord, lastSession: h.lastSession, laterToday: h.laterToday, openAgenda: h.openAgenda }}
               />
             ) : (
               <NoUpcomingCard title={h.noUpcomingTitle} body={h.noUpcomingBody} cta={h.openAgenda} />
