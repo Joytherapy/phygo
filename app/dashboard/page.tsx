@@ -384,6 +384,14 @@ export default function DashboardPage() {
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute -left-48 -top-64 h-[640px] w-[860px] rounded-full opacity-[0.14] blur-[130px] dark:opacity-[0.22]" style={{ background: 'radial-gradient(circle, #6366F1, transparent 65%)' }} />
         <div className="absolute -right-56 -top-48 h-[560px] w-[720px] rounded-full opacity-[0.08] blur-[130px] dark:opacity-[0.14]" style={{ background: 'radial-gradient(circle, #A78BFA, transparent 65%)' }} />
+        {/* film grain for depth */}
+        <div
+          className="absolute inset-0 opacity-[0.025] mix-blend-overlay dark:opacity-[0.05]"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          }}
+        />
         <div
           className="absolute inset-0 hidden opacity-40 dark:block"
           style={{
@@ -402,7 +410,7 @@ export default function DashboardPage() {
               <span className="h-1.5 w-1.5 rounded-full shadow-[0_0_10px_rgba(139,149,255,0.8)]" style={{ background: ACCENT }} />
               {dateLine || ui.patients.eyebrow}
             </p>
-            <h1 className="mt-3 break-words font-display text-3xl font-bold leading-tight tracking-tight text-ink dark:text-white sm:text-4xl lg:text-5xl">
+            <h1 className="mt-3 break-words font-display text-[34px] font-semibold leading-[1.05] tracking-[-0.035em] text-ink dark:text-white sm:text-5xl lg:text-[60px]">
               <span className="bg-gradient-to-b from-ink to-ink/70 bg-clip-text text-transparent dark:from-white dark:to-white/55">
                 {greetingTime ? (displayName ? `${greetingTime}, ${displayName}` : greetingTime) : ui.patients.greetingDefault}
               </span>

@@ -5,7 +5,7 @@
 // patient cards. Data comes from app/dashboard/page.tsx; nothing here queries.
 
 import Link from 'next/link'
-import { ReactNode } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import { ArrowRight, Check, Clock, MapPin, Play, UserRound, Video, X, AlertCircle, RotateCcw, CalendarClock } from 'lucide-react'
 
 
@@ -17,26 +17,41 @@ export const ACCENT_SOLID = '#8B95FF'
 export const PRIMARY_BTN =
   'bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90'
 
+const EDGE_MASK = {
+  padding: 1,
+  WebkitMask: 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
+  WebkitMaskComposite: 'xor',
+  maskComposite: 'exclude',
+} as const
+
 export function Card({ children, className = '', glow = false, ...rest }: { children: ReactNode; className?: string; glow?: boolean } & React.HTMLAttributes<HTMLElement>) {
+  // Pointer position for the spotlight (CSS variables, no re-render).
+  const onPointerMove = (e: React.PointerEvent<HTMLElement>) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    e.currentTarget.style.setProperty('--spot-x', `${e.clientX - r.left}px`)
+    e.currentTarget.style.setProperty('--spot-y', `${e.clientY - r.top}px`)
+  }
   return (
     <section
       {...rest}
-      className={`relative min-w-0 overflow-hidden rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.055] dark:to-white/[0.018] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ${className}`}
+      onPointerMove={onPointerMove}
+      className={`group/card relative min-w-0 overflow-hidden rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.055] dark:to-white/[0.018] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ${className}`}
     >
+      {/* soft light following the pointer (dark theme) */}
+      <span aria-hidden className="phygo-spotlight pointer-events-none absolute inset-0 hidden opacity-0 transition-opacity duration-500 group-hover/card:opacity-100 dark:block" />
       {/* thin light edge, brighter at the top-left corner */}
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0 rounded-[24px] opacity-0 dark:opacity-100"
         style={{
-          padding: 1,
+          ...EDGE_MASK,
           background: glow
-            ? 'linear-gradient(140deg, rgba(165,180,255,0.5), transparent 38%, transparent 68%, rgba(167,139,250,0.3))'
+            ? 'linear-gradient(140deg, rgba(165,180,255,0.35), transparent 38%, transparent 68%, rgba(167,139,250,0.2))'
             : 'linear-gradient(140deg, rgba(255,255,255,0.14), transparent 35%, transparent 75%, rgba(255,255,255,0.05))',
-          WebkitMask: 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
-          WebkitMaskComposite: 'xor',
-          maskComposite: 'exclude',
         }}
       />
+      {/* the focus card: a slow light running around its edge */}
+      {glow && <span aria-hidden className="phygo-edge-light pointer-events-none absolute inset-0 rounded-[24px] opacity-50 dark:opacity-90" style={EDGE_MASK} />}
       {children}
     </section>
   )
@@ -306,6 +321,33 @@ export function TodoCard({
 
 /* ---------- counters ---------- */
 
+// Counts up to the figure once it arrives; shows it at once for people who
+// prefer reduced motion.
+function CountUp({ value }: { value: number }) {
+  const reduced = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const [shown, setShown] = useState(() => (reduced() ? value : 0))
+  const from = useRef(shown)
+  useEffect(() => {
+    if (reduced()) {
+      setShown(value)
+      from.current = value
+      return
+    }
+    const start = performance.now()
+    const a = from.current
+    let raf = 0
+    const step = (t: number) => {
+      const k = Math.min(1, (t - start) / 700)
+      setShown(Math.round(a + (value - a) * (1 - Math.pow(1 - k, 3))))
+      if (k < 1) raf = requestAnimationFrame(step)
+      else from.current = value
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [value])
+  return <>{shown}</>
+}
+
 export function StatTile({
   index,
   label,
@@ -327,15 +369,15 @@ export function StatTile({
 }) {
   const inner = (
     <>
-      <p className="text-xs text-ink/60 dark:text-white/55">{label}</p>
-      <div className="mt-2 flex items-baseline gap-2">
-        <p className="font-display text-3xl font-semibold tracking-tight tabular-nums text-ink dark:text-white" data-stat={index}>
+      <p className="text-xs text-ink/55 dark:text-white/50">{label}</p>
+      <div className="mt-3 flex items-baseline gap-2">
+        <p className="font-display text-[34px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-ink dark:text-white" data-stat={index}>
           {value === undefined ? (
             <span className="block h-8 w-12 animate-pulse rounded-md bg-ink/10 dark:bg-white/10" aria-label={loading} />
           ) : value === null ? (
             <span title={unavailable} aria-label={unavailable}>—</span>
           ) : (
-            value
+            <CountUp value={value} />
           )}
         </p>
         {extra && value !== undefined && value !== null && <span className="font-mono text-[11px] text-ink/45 dark:text-white/45">{extra}</span>}
