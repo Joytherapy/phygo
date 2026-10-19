@@ -59,6 +59,23 @@ test('Ask PHYGO from the dashboard does not talk about "this document"', { skip 
     await input.waitFor();
     const panelText = await page.locator('body').innerText();
     assert.ok(!panelText.includes('questo documento'), 'no mention of "this document" without a document open');
+
+    // The hint inside the field is never cut off, also the longer one shown
+    // inside a document: the text, wrapped to the field width, fits its height.
+    const field = await input.elementHandle();
+    for (const hint of [null, 'Chiedi qualcosa sul documento…', 'Fai una domanda su questo documento…']) {
+      const fits = await field.evaluate((el, text) => {
+        if (text) el.setAttribute('placeholder', text);
+        const cs = getComputedStyle(el);
+        const ctx = document.createElement('canvas').getContext('2d');
+        ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+        const avail = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        const lines = Math.ceil(ctx.measureText(el.getAttribute('placeholder')).width / avail);
+        const lineHeight = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.2;
+        return { lines, room: el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom), need: lines * lineHeight };
+      }, hint);
+      assert.ok(fits.need <= fits.room + 1, `placeholder ${hint ?? '(general)'} fits: ${fits.lines} line(s), needs ${fits.need}px, has ${fits.room}px`);
+    }
   } finally {
     await ctx.close();
   }
