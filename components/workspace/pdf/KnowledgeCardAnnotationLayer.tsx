@@ -115,7 +115,7 @@ export default function KnowledgeCardAnnotationLayer({
         return (
           <div
             key={a.id}
-            className="group absolute rounded-xl border border-[#4F7CFF]/20 bg-white/95 dark:bg-[#171821]/95 backdrop-blur-sm shadow-soft"
+            className="group absolute rounded-xl border border-[#7C83FF]/20 bg-white/95 dark:bg-[#171821]/95 backdrop-blur-sm shadow-soft"
             style={{
               left: `${pos.x * 100}%`,
               top: `${pos.y * 100}%`,
@@ -150,8 +150,8 @@ export default function KnowledgeCardAnnotationLayer({
               style={{ pointerEvents: boxesInteractive ? 'auto' : 'none' }}
             >
               <div className="flex items-center gap-1.5 mb-1">
-                <BookOpen size={11} className="text-[#4F7CFF] shrink-0" />
-                {sectionLabel && <span className="text-[10px] font-medium uppercase tracking-wide text-[#4F7CFF]">{sectionLabel}</span>}
+                <BookOpen size={11} className="text-[#7C83FF] shrink-0" />
+                {sectionLabel && <span className="text-[10px] font-medium uppercase tracking-wide text-[#7C83FF]">{sectionLabel}</span>}
               </div>
               <p className="text-xs font-semibold text-ink dark:text-white leading-snug">{data.title}</p>
               {data.href && (
@@ -165,7 +165,7 @@ export default function KnowledgeCardAnnotationLayer({
               <div
                 onPointerDown={(e) => handleResizeStart(e, a)}
                 aria-label="Resize"
-                className="absolute -bottom-1.5 -right-1.5 h-3.5 w-3.5 cursor-nwse-resize rounded-full border-2 border-white dark:border-[#0c0d12] bg-[#4F7CFF] opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute -bottom-1.5 -right-1.5 h-3.5 w-3.5 cursor-nwse-resize rounded-full border-2 border-white dark:border-[#0c0d12] bg-[#7C83FF] opacity-0 group-hover:opacity-100 transition-opacity"
                 style={{ touchAction: 'none' }}
               />
             )}

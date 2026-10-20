@@ -30,7 +30,7 @@ export default function GlobalAskLauncher() {
         className={`fixed bottom-6 right-4 sm:right-6 z-[80] flex h-13 w-13 items-center justify-center rounded-full text-white shadow-lift transition-transform hover:scale-105 ${
           open ? 'hidden sm:flex' : 'flex'
         }`}
-        style={{ background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)', height: 52, width: 52 }}
+        style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #A78BFA 100%)', height: 52, width: 52 }}
       >
         <Sparkles size={20} />
       </button>

@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useState, useRef, useEffect, type MouseEvent as ReactMouseEvent } from 'react';
+import { PageBackdrop } from '@/components/ui/premium'
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -67,8 +68,8 @@ const IMAGE_BASE =
 
 const VIEW_COLORS: Record<View, { gradient: string; solid: string }> = {
   brain: {
-    gradient: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)',
-    solid: '#4F7CFF',
+    gradient: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)',
+    solid: '#7C83FF',
   },
   nerves: {
     gradient: 'linear-gradient(90deg, #F5A524 0%, #F97316 100%)',
@@ -451,15 +452,10 @@ function BrainMapPageInner() {
     lp.content.toLowerCase().includes(normalizedLocalizationSearch);
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
-        style={{
-          background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)',
-        }}
-      />
+      <PageBackdrop />
       {/* Secondo alone più piccolo e sfalsato, per dare profondità allo sfondo invece
           di un unico bagliore piatto — un dettaglio tipico delle landing page premium. */}
       <div
@@ -475,12 +471,12 @@ function BrainMapPageInner() {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-5 shadow-soft shadow-black/[0.03] dark:shadow-black/20">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#32D6A0] opacity-60" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#7C83FF] to-[#A78BFA]" />
             </span>
             {ui.brainMap.atlasBadge}
           </div>
           <h1 className="font-display text-6xl sm:text-7xl font-bold tracking-tight mb-4">
-            <span className="bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0] bg-clip-text text-transparent">
+            <span>
               {ui.brainMap.heading}
             </span>
           </h1>
@@ -492,10 +488,10 @@ function BrainMapPageInner() {
         <div className="flex justify-center mb-8">
           <Link
             href="/dashboard/physiology?system=neurological"
-            className="group inline-flex items-center gap-2 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl px-4 py-2 text-xs font-medium text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white hover:border-[#4F7CFF]/40 transition-colors"
+            className="group inline-flex items-center gap-2 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl px-4 py-2 text-xs font-medium text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white hover:border-black/15 dark:hover:border-white/20 transition-colors"
           >
             {ui.physiologyCrossLink.question}
-            <span className="font-semibold" style={{ color: '#4F7CFF' }}>
+            <span className="font-semibold" style={{ color: '#7C83FF' }}>
               {ui.physiologyCrossLink.cta} →
             </span>
           </Link>
@@ -573,7 +569,7 @@ function BrainMapPageInner() {
                     <button
                       key={z.slug}
                       onClick={() => router.push(`/dashboard/brain-map/${z.slug}`)}
-                      className="px-3.5 py-1.5 rounded-full text-sm border border-black/[0.08] dark:border-white/10 text-ink/70 dark:text-white/70 transition-all duration-200 hover:border-[#4F7CFF]/50 hover:text-[#4F7CFF] hover:-translate-y-0.5 hover:shadow-md hover:shadow-[#4F7CFF]/10 active:translate-y-0"
+                      className="px-3.5 py-1.5 rounded-full text-sm border border-black/[0.08] dark:border-white/10 text-ink/70 dark:text-white/70 transition-all duration-200 hover:border-[#7C83FF]/50 hover:text-ink dark:hover:text-white hover:-translate-y-0.5 hover:shadow-md hover:shadow-[#7C83FF]/10 active:translate-y-0"
                     >
                       {ui.brainMap.zoneNames[z.slug as keyof typeof ui.brainMap.zoneNames] ?? z.name}
                     </button>
@@ -586,21 +582,21 @@ function BrainMapPageInner() {
                   {ui.brainMap.referenceViewsHint}
                 </p>
                 <div className="flex flex-col gap-4">
-                  <div className="group rounded-2xl overflow-hidden border border-black/[0.09] dark:border-white/10 transition-all duration-300 hover:border-[#4F7CFF]/30 hover:shadow-xl hover:shadow-[#4F7CFF]/10">
+                  <div className="group rounded-2xl overflow-hidden border border-black/[0.09] dark:border-white/10 transition-all duration-300 hover:border-black/15 dark:hover:border-white/20 hover:shadow-xl hover:shadow-[#7C83FF]/10">
                     <img
                       src={`${IMAGE_BASE}/brain-lateral-view.png`}
                       alt="Brain — Lateral View"
                       className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                   </div>
-                  <div className="group rounded-2xl overflow-hidden border border-black/[0.09] dark:border-white/10 transition-all duration-300 hover:border-[#4F7CFF]/30 hover:shadow-xl hover:shadow-[#4F7CFF]/10">
+                  <div className="group rounded-2xl overflow-hidden border border-black/[0.09] dark:border-white/10 transition-all duration-300 hover:border-black/15 dark:hover:border-white/20 hover:shadow-xl hover:shadow-[#7C83FF]/10">
                     <img
                       src={`${IMAGE_BASE}/brain-sagittal-view.png`}
                       alt="Brain — Sagittal View"
                       className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                   </div>
-                  <div className="group rounded-2xl overflow-hidden border border-black/[0.09] dark:border-white/10 transition-all duration-300 hover:border-[#4F7CFF]/30 hover:shadow-xl hover:shadow-[#4F7CFF]/10">
+                  <div className="group rounded-2xl overflow-hidden border border-black/[0.09] dark:border-white/10 transition-all duration-300 hover:border-black/15 dark:hover:border-white/20 hover:shadow-xl hover:shadow-[#7C83FF]/10">
                     <img
                       src={`${IMAGE_BASE}/brain-coronal-view.png`}
                       alt="Brain — Coronal View"
@@ -694,7 +690,7 @@ function BrainMapPageInner() {
               value={brainConditionsSearch}
               onChange={(e) => setBrainConditionsSearch(e.target.value)}
               placeholder={ui.brainMap.searchConditionsPlaceholder}
-              className="w-full mb-6 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] px-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#4F7CFF]/40"
+              className="w-full mb-6 rounded-xl border border-black/[0.08] dark:border-white/10 bg-white dark:bg-white/[0.03] px-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 outline-none transition-colors focus:border-[#7C83FF]/40"
             />
 
             {brainConditionsLoading && (
@@ -712,7 +708,7 @@ function BrainMapPageInner() {
                     <button
                       key={c.id}
                       onClick={() => setSelectedCondition(c)}
-                      className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:border-[#4F7CFF]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#4F7CFF]/10"
+                      className="text-left rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 transition-all duration-300 hover:border-black/15 dark:hover:border-white/20 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#7C83FF]/10"
                     >
                       <p className="text-sm font-semibold text-ink dark:text-white">
                         {c.condition_name}
@@ -721,7 +717,7 @@ function BrainMapPageInner() {
                         {c.zones.map((z) => (
                           <span
                             key={z.slug}
-                            className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#4F7CFF]/10 text-[#4F7CFF] dark:bg-[#4F7CFF]/15"
+                            className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/[0.04] text-ink/70 dark:bg-white/[0.06] dark:text-white/75 dark:bg-[#7C83FF]/15"
                           >
                             {z.name}
                           </span>
@@ -829,7 +825,7 @@ function BrainMapPageInner() {
                                   <button
                                     key={n.id}
                                     onClick={() => router.push(`/dashboard/brain-map/nerve/${n.slug}`)}
-                                    className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:border-[#F5A524]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#F5A524]/10"
+                                    className="text-left rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 transition-all duration-300 hover:border-[#F5A524]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#F5A524]/10"
                                   >
                                     <p className="text-sm font-semibold text-ink dark:text-white mb-1">{n.name}</p>
                                     {n.compression_site && (
@@ -935,7 +931,7 @@ function BrainMapPageInner() {
                   {nerveInjuryTypes.filter(matchesNerveInjuryType).map((t) => (
                     <div
                       key={t.slug}
-                      className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
+                      className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
                     >
                       <span
                         className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full text-white mb-2"
@@ -1000,7 +996,7 @@ function BrainMapPageInner() {
                   {conductionFiberTypes.filter(matchesConductionFiberType).map((f) => (
                     <div
                       key={f.slug}
-                      className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
+                      className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
                     >
                       <span
                         className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full text-white mb-2"
@@ -1064,7 +1060,7 @@ function BrainMapPageInner() {
                       <button
                         key={c.id}
                         onClick={() => setSelectedCondition(c)}
-                        className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:border-[#F5A524]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#F5A524]/10"
+                        className="text-left rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 transition-all duration-300 hover:border-[#F5A524]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#F5A524]/10"
                       >
                         <p className="text-sm font-semibold text-ink dark:text-white">
                           {c.condition_name}
@@ -1119,7 +1115,7 @@ function BrainMapPageInner() {
                       <button
                         key={c.id}
                         onClick={() => setSelectedCondition(c)}
-                        className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:border-[#F5A524]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#F5A524]/10"
+                        className="text-left rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 transition-all duration-300 hover:border-[#F5A524]/40 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#F5A524]/10"
                       >
                         <p className="text-sm font-semibold text-ink dark:text-white">
                           {c.condition_name}
@@ -1203,7 +1199,7 @@ function BrainMapPageInner() {
                   {filteredPathways.filter(matchesPathway).map((p) => (
                     <div
                       key={p.slug}
-                      className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl overflow-hidden transition-all duration-300 hover:border-[#A855F7]/30 hover:shadow-xl hover:shadow-[#A855F7]/10"
+                      className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] overflow-hidden transition-all duration-300 hover:border-[#A855F7]/30 hover:shadow-xl hover:shadow-[#A855F7]/10"
                     >
                       <button
                         onClick={() => setExpandedPathway(p)}
@@ -1262,7 +1258,7 @@ function BrainMapPageInner() {
                   {gaitTypes.filter(matchesGaitType).map((g) => (
                     <div
                       key={g.slug}
-                      className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
+                      className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/40"
                     >
                       <p className="text-sm font-semibold text-ink dark:text-white">{g.name}</p>
                       <p
@@ -1302,7 +1298,7 @@ function BrainMapPageInner() {
                   {localizationPrinciples.filter(matchesLocalizationPrinciple).map((lp, i) => (
                     <div
                       key={lp.slug}
-                      className="group relative rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-6 overflow-hidden transition-all duration-300 hover:border-[#A855F7]/30 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#A855F7]/10"
+                      className="group relative rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-6 overflow-hidden transition-all duration-300 hover:border-[#A855F7]/30 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#A855F7]/10"
                     >
                       <div
                         className="pointer-events-none absolute -right-10 -top-10 w-32 h-32 rounded-full opacity-[0.07] blur-3xl transition-opacity duration-300 group-hover:opacity-[0.16]"

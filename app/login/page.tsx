@@ -3,9 +3,13 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
-import { useEntryLang } from "@/lib/i18n/useEntryLang";
+import { useChosenEntryLang, useEntryLang, useSetEntryLang } from "@/lib/i18n/useEntryLang";
+import { rememberLanguage } from "@/lib/i18n/rememberLanguage";
 import { ENTRY_STRINGS, localizeAuthError } from "@/lib/i18n/entryStrings";
 import { publicPath, myPhygoLoginHref } from "@/lib/i18n/landingStrings";
+import { BrandSymbol } from "@/components/BrandMark";
+import LanguageMenu from "@/components/LanguageMenu";
+import { PageBackdrop } from '@/components/ui/premium'
 
 export default function LoginPage() {
   return (
@@ -20,6 +24,8 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const supabase = createClient();
   const lang = useEntryLang();
+  const chosenLang = useChosenEntryLang();
+  const setEntryLang = useSetEntryLang();
   const t = ENTRY_STRINGS[lang].login;
 
   const [mode, setMode] = useState<"login" | "signup">(() =>
@@ -37,49 +43,54 @@ function LoginForm() {
     setMessage(null);
     setLoading(true);
 
-    if (mode === "login") {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    // If the sign-in service cannot be reached (or is not configured, as in
+    // Vercel Previews), say so instead of leaving the button on "Please wait".
+    try {
+      if (mode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-      if (error) {
-        setError(localizeAuthError(error.message, t));
+        if (error) {
+          setError(error.name === "AuthRetryableFetchError" ? t.serviceUnavailable : localizeAuthError(error.message, t));
+        } else {
+          // The language chosen on the site or on this page becomes the
+          // account's, so the dashboard opens in it (it defaults to 'it').
+          if (chosenLang) await rememberLanguage(supabase, chosenLang);
+          router.push("/dashboard");
+          router.refresh();
+          return; // stays on "Please wait" while the dashboard opens
+        }
       } else {
-        router.push("/dashboard");
-        router.refresh();
-      }
-    } else {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
 
-      if (error) {
-        setError(localizeAuthError(error.message, t));
-      } else {
-        router.push("/onboarding");
-        router.refresh();
+        if (error) {
+          setError(error.name === "AuthRetryableFetchError" ? t.serviceUnavailable : localizeAuthError(error.message, t));
+        } else {
+          router.push("/onboarding");
+          router.refresh();
+          return;
+        }
       }
+    } catch (err) {
+      console.error("Sign-in unavailable:", err instanceof Error ? err.message : err);
+      setError(t.serviceUnavailable);
     }
-
     setLoading(false);
   };
 
   return (
-    <main id="main-content" className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white dark:bg-[#08090b] px-4">
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
-        style={{
-          background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)',
-        }}
-      />
+    <main id="main-content" className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f7f7f8] dark:bg-[#050608] px-4">
+      <PageBackdrop />
 
-      <div className="relative w-full max-w-sm rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.04] backdrop-blur-2xl shadow-2xl p-8">
+      <div className="relative w-full max-w-sm rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.055] dark:to-white/[0.018] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-8">
+        <LanguageMenu value={lang} onChange={setEntryLang} className="absolute right-4 top-4" />
         <div className="flex justify-center mb-6">
-          <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7CFF] to-[#32D6A0] text-white text-lg font-bold shadow-[0_8px_24px_rgba(79,124,255,0.35)]">
-            P
-          </span>
+          <BrandSymbol />
         </div>
 
         <h1 className="mb-1 text-center text-2xl font-semibold text-ink dark:text-white">
@@ -101,7 +112,7 @@ function LoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+              className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 text-sm outline-none transition focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15 text-ink dark:text-white"
               placeholder="you@example.com"
             />
           </div>
@@ -118,7 +129,7 @@ function LoginForm() {
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+              className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 text-sm outline-none transition focus:border-[#8B95FF] focus:ring-4 focus:ring-[#8B95FF]/15 text-ink dark:text-white"
               placeholder="••••••••"
             />
           </div>
@@ -133,8 +144,8 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(79,124,255,0.35)] transition-transform hover:scale-[1.02] disabled:opacity-50"
-            style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+            className="w-full rounded-xl py-3 text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 transition-transform disabled:opacity-50"
+            
           >
             {loading ? t.wait : mode === "login" ? t.loginCta : t.signupCta}
           </button>
@@ -147,7 +158,7 @@ function LoginForm() {
               <button
                 type="button"
                 onClick={() => setMode("signup")}
-                className="font-semibold text-[#3A5FE0] dark:text-[#7B9DFF] hover:underline"
+                className="font-semibold text-[#5B63E6] dark:text-[#A5B4FF] hover:underline"
               >
                 {t.signUp}
               </button>
@@ -158,7 +169,7 @@ function LoginForm() {
               <button
                 type="button"
                 onClick={() => setMode("login")}
-                className="font-semibold text-[#3A5FE0] dark:text-[#7B9DFF] hover:underline"
+                className="font-semibold text-[#5B63E6] dark:text-[#A5B4FF] hover:underline"
               >
                 {t.logIn}
               </button>
@@ -168,7 +179,7 @@ function LoginForm() {
 
         <p className="mt-4 text-center text-xs text-ink/60 dark:text-white/55">
           {t.patientHint}{" "}
-          <a href={myPhygoLoginHref(lang)} className="font-semibold text-[#3A5FE0] dark:text-[#7B9DFF] hover:underline">
+          <a href={myPhygoLoginHref(lang)} className="font-semibold text-[#5B63E6] dark:text-[#A5B4FF] hover:underline">
             {t.patientLink}
           </a>
         </p>

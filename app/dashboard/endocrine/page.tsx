@@ -8,6 +8,7 @@ import ClinicalActionBar from '@/components/ClinicalActionBar';
 import { X, Search } from 'lucide-react';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 import EvidenceBadge, { SourceCitation } from '@/components/EvidenceBadge';
+import { PageBackdrop } from '@/components/ui/premium';
 
 type SubView = 'anatomy' | 'conditions' | 'assessment' | 'rehab';
 interface StructureItem {
@@ -231,11 +232,12 @@ export default function EndocrinePage() {
       : rehab.some(matchesRehab);
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
+      <PageBackdrop />
       <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-[0.10] dark:opacity-[0.16] blur-[140px]"
         style={{
           background: 'radial-gradient(circle, rgba(16,185,129,0.6) 0%, rgba(14,165,233,0.5) 100%)',
         }}
@@ -247,11 +249,8 @@ export default function EndocrinePage() {
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT.gradient }} />
             {ui.endocrine.atlasBadge}
           </div>
-          <h1 className="font-display text-6xl font-bold tracking-tight">
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: ACCENT.gradient }}
-            >
+          <h1 className="font-display text-5xl sm:text-6xl font-semibold tracking-[-0.035em] text-ink dark:text-white">
+            <span>
               {ui.endocrine.heading}
             </span>
           </h1>
@@ -265,10 +264,9 @@ export default function EndocrinePage() {
                 onClick={() => setSubView(t.key)}
                 className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   subView === t.key
-                    ? 'text-white'
+                    ? 'bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] dark:bg-white dark:text-ink'
                     : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                 }`}
-                style={subView === t.key ? { background: ACCENT.solid } : undefined}
               >
                 {t.label}
               </button>
@@ -406,7 +404,7 @@ export default function EndocrinePage() {
                   <button
                     key={c.id}
                     onClick={() => setSelectedCondition(c)}
-                    className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-colors hover:border-[#10B981]/40"
+                    className="text-left rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 transition-colors hover:border-[#10B981]/40"
                   >
                     <p className="text-sm font-semibold text-ink dark:text-white mb-2">{c.condition_name}</p>
                     <EvidenceBadge level={c.evidence_level} />
@@ -452,7 +450,7 @@ export default function EndocrinePage() {
                         {items.map((t) => (
                           <div
                             key={t.id}
-                            className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                            className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{t.name}</p>
                             {t.procedure && (
@@ -511,7 +509,7 @@ export default function EndocrinePage() {
                         {items.map((r) => (
                           <div
                             key={r.id}
-                            className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5"
+                            className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5"
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white mb-2">{r.name}</p>
                             {r.description && (

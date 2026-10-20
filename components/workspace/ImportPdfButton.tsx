@@ -200,7 +200,7 @@ export default function ImportPdfButton({
             ? 'inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition-transform hover:scale-[1.02] disabled:opacity-60'
             : 'inline-flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 dark:text-white/70 border border-black/10 dark:border-white/10 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors disabled:opacity-60'
         }
-        style={variant === 'button' ? { background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
+        style={variant === 'button' ? { background: 'linear-gradient(90deg, #7C83FF 0%, #A78BFA 100%)' } : undefined}
       >
         {busy ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
         {busy

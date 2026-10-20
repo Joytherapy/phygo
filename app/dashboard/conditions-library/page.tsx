@@ -5,6 +5,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Search, X, ChevronDown, Stethoscope, ChevronRight, BookOpen } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings';
+import ErrorState from '@/components/workspace/ErrorState';
+import { PageBackdrop } from '@/components/ui/premium'
 
 // Sezione "Patologie" del dashboard (menu Libreria) — elenco di tutte le
 // condizioni cliniche di `knowledge_base` con ricerca + filtro per sistema,
@@ -200,6 +203,7 @@ export default function ConditionsLibraryPage() {
   const lang: Lang = rawLang === 'en' || rawLang === 'es' || rawLang === 'fr' ? rawLang : 'it';
   const ui = UI[lang];
   const systemLabels = SYSTEM_LABELS[lang];
+  const t = useDashboardUi();
 
   const [conditions, setConditions] = useState<ConditionSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -208,14 +212,25 @@ export default function ConditionsLibraryPage() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [detailCache, setDetailCache] = useState<Map<number, ConditionDetail>>(new Map());
   const [loadingDetailId, setLoadingDetailId] = useState<number | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const [detailErrorId, setDetailErrorId] = useState<number | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
+  // A failed request shows an error with Retry; before, it rendered as
+  // "no conditions found", which reads as missing content.
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setLoadError(false);
     fetch(`/api/conditions-library/list?lang=${lang}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (!cancelled) setConditions(data.conditions || []);
+      .then(async (r) => {
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok || !Array.isArray(data.conditions)) throw new Error(`conditions list: ${r.status}`);
+        if (!cancelled) setConditions(data.conditions);
+      })
+      .catch((err) => {
+        console.error('Conditions could not be loaded:', err);
+        if (!cancelled) setLoadError(true);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -223,7 +238,7 @@ export default function ConditionsLibraryPage() {
     return () => {
       cancelled = true;
     };
-  }, [lang]);
+  }, [lang, reloadKey]);
 
   const systemCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -248,34 +263,37 @@ export default function ConditionsLibraryPage() {
       return;
     }
     setExpandedId(id);
-    if (!detailCache.has(id)) {
-      setLoadingDetailId(id);
-      fetch(`/api/conditions-library/${id}?lang=${lang}`)
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.condition) {
-            setDetailCache((prev) => new Map(prev).set(id, data.condition));
-          }
-        })
-        .finally(() => setLoadingDetailId((cur) => (cur === id ? null : cur)));
-    }
+    if (!detailCache.has(id)) loadDetail(id);
+  };
+
+  const loadDetail = (id: number) => {
+    setLoadingDetailId(id);
+    setDetailErrorId((cur) => (cur === id ? null : cur));
+    fetch(`/api/conditions-library/${id}?lang=${lang}`)
+      .then(async (r) => {
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok || !data.condition) throw new Error(`condition ${id}: ${r.status}`);
+        setDetailCache((prev) => new Map(prev).set(id, data.condition));
+      })
+      .catch((err) => {
+        console.error('Condition detail could not be loaded:', err);
+        setDetailErrorId(id);
+      })
+      .finally(() => setLoadingDetailId((cur) => (cur === id ? null : cur)));
   };
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] rounded-full opacity-20 dark:opacity-25 blur-[160px]"
-        style={{ background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)' }}
-      />
+      <PageBackdrop />
 
       <div className="relative max-w-6xl mx-auto pt-40 pb-24 px-6">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#4F7CFF]/20 bg-[#4F7CFF]/10 px-3.5 py-1.5 mb-5">
-          <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }} />
-          <p className="eyebrow text-[#4F7CFF]">{loading ? ui.loading : ui.eyebrow(conditions.length)}</p>
+        <div className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-black/[0.02] px-4 py-1.5 mb-5 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.03]">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'linear-gradient(135deg, #A5B4FF 0%, #7C83FF 50%, #A78BFA 100%)' }} />
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-ink/70 dark:text-white/70">{loading ? ui.loading : ui.eyebrow(conditions.length)}</p>
         </div>
-        <h1 className="font-display text-6xl font-bold tracking-tight mb-3 text-[#32D6A0]">
+        <h1 className="font-display text-5xl sm:text-6xl font-semibold tracking-[-0.035em] mb-3 text-ink dark:text-white">
           {ui.heading1} {ui.heading2}
         </h1>
         <p className="text-base text-ink/60 dark:text-white/50 mb-6 max-w-xl">{ui.description}</p>
@@ -288,7 +306,7 @@ export default function ConditionsLibraryPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={ui.searchPlaceholder}
-              className="w-full rounded-full border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl pl-10 pr-9 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/35 dark:placeholder:text-white/35 outline-none focus:border-[#4F7CFF]/40 transition-colors shadow-soft"
+              className="w-full rounded-full border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl pl-10 pr-9 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/35 dark:placeholder:text-white/35 outline-none focus:border-[#7C83FF]/40 transition-colors shadow-soft"
             />
             {search && (
               <button
@@ -307,9 +325,9 @@ export default function ConditionsLibraryPage() {
               <select
                 value={systemFilter}
                 onChange={(e) => setSystemFilter(e.target.value)}
-                className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-soft cursor-pointer transition-colors ${
+                className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#7C83FF]/40 shadow-soft cursor-pointer transition-colors ${
                   systemFilter
-                    ? 'border-[#4F7CFF]/40 bg-[#4F7CFF]/10 text-ink dark:text-white'
+                    ? 'border-[#7C83FF]/40 bg-[#7C83FF]/10 text-ink dark:text-white'
                     : 'border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
                 }`}
               >
@@ -331,8 +349,10 @@ export default function ConditionsLibraryPage() {
               <div key={i} className="h-14 rounded-2xl bg-ink/5 dark:bg-white/5 animate-pulse" />
             ))}
           </div>
+        ) : loadError ? (
+          <ErrorState message={t.library.loadError} onRetry={() => setReloadKey((k) => k + 1)} />
         ) : filtered.length === 0 ? (
-          <p className="text-sm text-ink/55 dark:text-white/40">{ui.noResults}</p>
+          <p className="text-sm text-ink/60 dark:text-white/50">{ui.noResults}</p>
         ) : (
           <div className="space-y-2">
             {filtered.map((c) => {
@@ -341,15 +361,16 @@ export default function ConditionsLibraryPage() {
               return (
                 <div
                   key={c.id}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] overflow-hidden transition-colors"
+                  className="rounded-2xl border border-black/[0.05] bg-black/[0.02] dark:border-white/[0.06] dark:bg-white/[0.03] overflow-hidden transition-colors"
                 >
                   <button
                     type="button"
                     onClick={() => toggleExpand(c.id)}
-                    className="w-full flex items-center justify-between gap-3 px-5 py-3.5 text-left hover:bg-ink/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+                    aria-expanded={isOpen}
+                    className="w-full min-h-[48px] flex items-center justify-between gap-3 px-5 py-3.5 text-left hover:bg-ink/[0.02] dark:hover:bg-white/[0.02] transition-colors"
                   >
                     <span className="flex items-center gap-2.5 min-w-0">
-                      <BookOpen size={15} className="shrink-0 text-[#4F7CFF]" />
+                      <BookOpen size={15} className="shrink-0 text-[#7C83FF]" />
                       <span className="text-sm font-semibold text-ink dark:text-white truncate">{c.name}</span>
                     </span>
                     <ChevronRight size={16} className={`shrink-0 text-ink/30 dark:text-white/30 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
@@ -386,6 +407,17 @@ export default function ConditionsLibraryPage() {
                                 </div>
                               )}
                             </>
+                          ) : detailErrorId === c.id ? (
+                            <div role="alert" className="flex flex-wrap items-center gap-3 py-3">
+                              <p className="text-sm text-red-600 dark:text-red-400">{t.library.loadError}</p>
+                              <button
+                                type="button"
+                                onClick={() => loadDetail(c.id)}
+                                className="min-h-[40px] rounded-full border border-black/15 dark:border-white/15 px-4 text-sm font-semibold text-ink/80 dark:text-white/80 hover:bg-ink/5 dark:hover:bg-white/10"
+                              >
+                                {t.common.retry}
+                              </button>
+                            </div>
                           ) : null}
                         </div>
                       </motion.div>

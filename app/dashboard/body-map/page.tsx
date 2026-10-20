@@ -8,6 +8,7 @@ import { MousePointerClick, ScanLine, Search, ArrowRight, Move3d } from 'lucide-
 import Navbar from '@/components/Navbar';
 import BodyMap3D from '@/components/BodyMap3D';
 import { useUiStrings } from '@/contexts/LanguageContext';
+import { PageBackdrop } from '@/components/ui/premium'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -28,23 +29,18 @@ function BodyMapContent() {
   const HOW_IT_WORKS = [
     { icon: MousePointerClick, color: '#32D6A0', label: bm.howItWorks.clickZone.label, text: bm.howItWorks.clickZone.text },
     { icon: ScanLine, color: '#bcd7ff', label: bm.howItWorks.xray.label, text: bm.howItWorks.xray.text },
-    { icon: Search, color: '#4F7CFF', label: bm.howItWorks.search.label, text: bm.howItWorks.search.text },
+    { icon: Search, color: '#7C83FF', label: bm.howItWorks.search.label, text: bm.howItWorks.search.text },
   ] as const;
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px] animate-drift"
-        style={{
-          background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)',
-        }}
-      />
+      <PageBackdrop />
       <div
         className="pointer-events-none absolute top-1/3 right-[-200px] w-[600px] h-[600px] rounded-full opacity-[0.12] dark:opacity-[0.18] blur-[130px] animate-floatSlow"
         style={{
-          background: 'radial-gradient(circle, rgba(50,214,160,0.6) 0%, rgba(79,124,255,0.4) 100%)',
+          background: 'radial-gradient(circle, rgba(167,139,250,0.6) 0%, rgba(124,131,255,0.4) 100%)',
         }}
       />
 
@@ -68,9 +64,7 @@ function BodyMapContent() {
             variants={fadeUp}
             className="font-display font-semibold tracking-tight text-5xl sm:text-6xl"
           >
-            <span className="bg-gradient-to-r from-electric via-[#6D8FFF] to-emerald bg-clip-text text-transparent">
-              Anatomical Navigator
-            </span>
+            <span>{ui.bodyMap.heading}</span>
           </motion.h1>
 
           <motion.p
@@ -179,7 +173,7 @@ function BodyMapContent() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => router.push('/dashboard/body-map/whole-body')}
-              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-electric to-emerald px-7 py-3.5 text-sm font-semibold text-white shadow-glow transition-shadow hover:shadow-lift shimmer-sweep"
+              className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[#7C83FF] to-[#A78BFA] px-7 py-3.5 text-sm font-semibold text-white shadow-glow transition-shadow hover:shadow-lift shimmer-sweep"
             >
               {bm.ctaWholeBody}
               <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />

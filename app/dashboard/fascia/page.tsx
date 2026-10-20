@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import { X, Search, Sparkles, Loader2 } from 'lucide-react';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 import EvidenceBadge from '@/components/EvidenceBadge';
+import { PageBackdrop } from '@/components/ui/premium';
 
 type SubView = 'structures' | 'function' | 'treatments' | 'rehab';
 
@@ -300,11 +301,12 @@ export default function FasciaPage() {
       : rehab.some(matchesRehab);
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
+      <PageBackdrop />
       <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-[0.10] dark:opacity-[0.16] blur-[140px]"
         style={{
           background: 'radial-gradient(circle, rgba(217,119,6,0.55) 0%, rgba(180,83,9,0.45) 100%)',
         }}
@@ -316,8 +318,8 @@ export default function FasciaPage() {
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT.gradient }} />
             {ui.fascia.atlasBadge}
           </div>
-          <h1 className="font-display text-6xl font-bold tracking-tight">
-            <span className="bg-clip-text text-transparent" style={{ backgroundImage: ACCENT.gradient }}>
+          <h1 className="font-display text-5xl sm:text-6xl font-semibold tracking-[-0.035em] text-ink dark:text-white">
+            <span>
               {ui.fascia.heading}
             </span>
           </h1>
@@ -331,10 +333,9 @@ export default function FasciaPage() {
                 onClick={() => setSubView(t.key)}
                 className={`px-5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   subView === t.key
-                    ? 'text-white'
+                    ? 'bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] dark:bg-white dark:text-ink'
                     : 'text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white'
                 }`}
-                style={subView === t.key ? { background: ACCENT.solid } : undefined}
               >
                 {t.label}
               </button>

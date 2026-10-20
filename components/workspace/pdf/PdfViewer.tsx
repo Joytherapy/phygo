@@ -233,7 +233,7 @@ export default function PdfViewer({
               onClick={() => setShowThumbnails((v) => !v)}
               aria-label={ui.reader.thumbnails}
               className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                showThumbnails ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+                showThumbnails ? 'bg-[#7C83FF]/10 text-[#7C83FF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
               }`}
             >
               <PanelLeft size={15} />
@@ -243,7 +243,7 @@ export default function PdfViewer({
               aria-label={ui.reader.bookmarkPage}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
             >
-              {bookmarkedPages.has(pageNumber) ? <BookmarkCheck size={15} className="text-[#4F7CFF]" /> : <Bookmark size={15} />}
+              {bookmarkedPages.has(pageNumber) ? <BookmarkCheck size={15} className="text-[#7C83FF]" /> : <Bookmark size={15} />}
             </button>
           </div>
 
@@ -294,7 +294,7 @@ export default function PdfViewer({
               onClick={() => setFitWidth(true)}
               aria-label={ui.reader.fitWidth}
               className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                fitWidth ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+                fitWidth ? 'bg-[#7C83FF]/10 text-[#7C83FF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
               }`}
             >
               <StretchHorizontal size={15} />
@@ -310,7 +310,7 @@ export default function PdfViewer({
               onClick={toggleAsk}
               aria-label={ui.ask.button}
               className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                askOpen ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+                askOpen ? 'bg-[#7C83FF]/10 text-[#7C83FF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
               }`}
             >
               <Sparkles size={15} />
@@ -389,7 +389,7 @@ export default function PdfViewer({
                   window.location.reload()
                 }}
                 className="rounded-full px-4 py-2 text-xs font-semibold text-white shadow-soft transition-transform hover:scale-[1.02]"
-                style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                style={{ background: 'linear-gradient(90deg, #7C83FF 0%, #A78BFA 100%)' }}
               >
                 {ui.reader.retry}
               </button>
@@ -411,7 +411,7 @@ export default function PdfViewer({
                       key={p}
                       onClick={() => goToPage(p)}
                       className={`block w-full rounded-lg overflow-hidden border transition-colors ${
-                        p === pageNumber ? 'border-[#4F7CFF]' : 'border-black/10 dark:border-white/10'
+                        p === pageNumber ? 'border-[#7C83FF]' : 'border-black/10 dark:border-white/10'
                       }`}
                     >
                       <Page pageNumber={p} width={100} renderTextLayer={false} renderAnnotationLayer={false} loading={null} />
@@ -521,6 +521,7 @@ export default function PdfViewer({
                   color={textColor}
                   backgroundColor={textBackground}
                   fontSize={textFontSize}
+            onSelectNote={(size) => size !== null && setTextFontSize(size)}
                   onCreate={(data) => onCreateAnnotation(pageNumber, { type: 'text', data })}
                   onUpdate={onUpdateAnnotation}
                   onDelete={onDeleteAnnotation}

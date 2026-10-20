@@ -18,6 +18,12 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     users, // access token -> user object
     requests: [],
     failTables: new Set(), // tables that answer 500 (to test error handling)
+    // Daily stand-in: what PHYGO asked Daily for (room bodies, token properties, deleted rooms).
+    // deleteFailures: statuses the next room deletions answer with (e.g. [500, 500]), to test refusals.
+    daily: { rooms: [], tokens: [], deleted: [], deleteAttempts: [], deleteFailures: [] },
+    // Storage objects ("bucket/path" -> { size, contentType }); missingBuckets answer
+    // like Supabase does for a bucket that was never created.
+    storage: { objects: new Map(), missingBuckets: new Set() },
   };
 
   const server = http.createServer(async (req, res) => {
@@ -33,7 +39,7 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
       'access-control-allow-origin': req.headers.origin ?? '*',
       'access-control-allow-credentials': 'true',
       'access-control-allow-headers': req.headers['access-control-request-headers'] ?? '*',
-      'access-control-allow-methods': 'GET,HEAD,POST,PATCH,DELETE,OPTIONS',
+      'access-control-allow-methods': 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS',
     };
     const send = (status, payload, headers = {}) => {
       res.writeHead(status, { 'content-type': 'application/json', ...cors, ...headers });
@@ -70,13 +76,60 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
       );
     }
 
+    // Storage: single-object signed URL, upload, delete, and serving a signed object.
+    const bucketMissing = (bucket) => {
+      if (!state.storage.missingBuckets.has(bucket)) return false;
+      send(400, { statusCode: '404', error: 'Bucket not found', message: 'Bucket not found' });
+      return true;
+    };
+    const signOne = url.pathname.match(/^\/storage\/v1\/object\/sign\/([^/]+)\/(.+)$/);
+    if (signOne && req.method === 'POST') {
+      if (bucketMissing(signOne[1])) return;
+      const key = `${signOne[1]}/${decodeURIComponent(signOne[2])}`;
+      if (!state.storage.objects.has(key)) return send(400, { statusCode: '404', error: 'not_found', message: 'Object not found' });
+      return send(200, { signedURL: `/object/sign/${key}?token=test` });
+    }
+    if (signOne && (req.method === 'GET' || req.method === 'HEAD')) {
+      // A 1x1 PNG stands in for any stored image.
+      res.writeHead(200, { ...cors, 'content-type': 'image/png' });
+      return res.end(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64'));
+    }
+    const objectPath = url.pathname.match(/^\/storage\/v1\/object\/([^/]+)\/(.+)$/);
+    if (objectPath && (req.method === 'POST' || req.method === 'PUT') && objectPath[1] !== 'sign') {
+      if (bucketMissing(objectPath[1])) return;
+      const key = `${objectPath[1]}/${decodeURIComponent(objectPath[2])}`;
+      state.storage.objects.set(key, { size: body.length, contentType: req.headers['content-type'] ?? null });
+      return send(200, { Key: key, Id: key });
+    }
+    const bucketOnly = url.pathname.match(/^\/storage\/v1\/object\/([^/]+)$/);
+    if (bucketOnly && req.method === 'DELETE') {
+      if (bucketMissing(bucketOnly[1])) return;
+      const { prefixes = [] } = JSON.parse(body || '{}');
+      const removed = prefixes.filter((p) => state.storage.objects.delete(`${bucketOnly[1]}/${p}`)).map((name) => ({ name }));
+      return send(200, removed);
+    }
+
     // OpenAI stand-in: any call is recorded and refused, so tests can assert none happened.
     if (url.pathname.startsWith('/openai/')) return send(500, { error: { message: 'OpenAI is not available in tests' } });
 
     // Daily stand-in: room creation answers with a synthetic room, so tests can count calls.
     if (url.pathname === '/daily/v1/rooms' && req.method === 'POST') {
-      const { name } = JSON.parse(body || '{}');
-      return send(200, { name, url: `https://test.invalid/${name}` });
+      const room = JSON.parse(body || '{}');
+      state.daily.rooms.push(room);
+      return send(200, { name: room.name, url: `https://test.invalid/${room.name}` });
+    }
+    if (url.pathname === '/daily/v1/meeting-tokens' && req.method === 'POST') {
+      const { properties } = JSON.parse(body || '{}');
+      state.daily.tokens.push(properties);
+      return send(200, { token: `synthetic-token-${state.daily.tokens.length}` });
+    }
+    const dailyRoom = url.pathname.match(/^\/daily\/v1\/rooms\/([^/]+)$/);
+    if (dailyRoom && req.method === 'DELETE') {
+      state.daily.deleteAttempts.push(decodeURIComponent(dailyRoom[1]));
+      const failure = state.daily.deleteFailures.shift();
+      if (failure) return send(failure, { error: failure === 404 ? 'not-found' : 'synthetic-failure' });
+      state.daily.deleted.push(decodeURIComponent(dailyRoom[1]));
+      return send(200, { deleted: true, name: decodeURIComponent(dailyRoom[1]) });
     }
 
     const rest = url.pathname.match(/^\/rest\/v1\/([a-z_]+)$/);
@@ -122,13 +175,24 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
       if (pk && !url.searchParams.get('on_conflict') && items.some((item) => rows.some((r) => r[pk] === item[pk]))) {
         return send(409, { code: '23505', message: `duplicate key value violates unique constraint "${table}_pkey"` });
       }
+      const written = [];
       for (const item of items) {
         const conflict = url.searchParams.get('on_conflict');
         const existing = conflict ? rows.find((r) => conflict.split(',').every((c) => r[c] === item[c])) : null;
-        if (existing) Object.assign(existing, item);
-        else rows.push({ id: item.id ?? `row-${rows.length + 1}`, ...item });
+        if (existing) written.push(Object.assign(existing, item));
+        else {
+          // Database defaults: a generated uuid and the creation time.
+          const row = { id: item.id ?? crypto.randomUUID(), created_at: item.created_at ?? new Date().toISOString(), ...item };
+          rows.push(row);
+          written.push(row);
+        }
       }
-      return send(201, items);
+      // .insert(...).select().single() asks for one object, as PostgREST answers it.
+      if ((req.headers.accept ?? '').includes('vnd.pgrst.object')) {
+        if (written.length !== 1) return send(406, { code: 'PGRST116', message: 'JSON object requested, multiple (or no) rows returned' });
+        return send(201, written[0]);
+      }
+      return send(201, written);
     }
     if (req.method === 'PATCH') {
       const patch = JSON.parse(body || '{}');

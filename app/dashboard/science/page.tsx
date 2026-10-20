@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Search, BookOpen, Calendar, MessageCircleQuestion, Lightbulb, ArrowUpRight, FlaskConical, Microscope } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useUiStrings } from '@/contexts/LanguageContext';
+import { PageBackdrop } from '@/components/ui/premium'
 
 interface Paper {
   id: string;
@@ -33,7 +34,7 @@ const STUDY_TYPE_STYLE: Record<string, { text: string; bg: string; border: strin
   'case-control': { text: '#F59E0B', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)' },
   'cross-sectional': { text: '#FB7185', bg: 'rgba(251,113,133,0.12)', border: 'rgba(251,113,133,0.3)' },
 };
-const DEFAULT_STUDY_STYLE = { text: '#4F7CFF', bg: 'rgba(79,124,255,0.12)', border: 'rgba(79,124,255,0.3)' };
+const DEFAULT_STUDY_STYLE = { text: '#7C83FF', bg: 'rgba(124,131,255,0.12)', border: 'rgba(124,131,255,0.3)' };
 
 function getStudyStyle(studyType: string | null) {
   if (!studyType) return DEFAULT_STUDY_STYLE;
@@ -73,7 +74,7 @@ export default function SciencePage() {
   );
 
   return (
-    <div className="relative min-h-screen bg-[#F6F7FB] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
       {/* Texture a puntini — sostituisce il bianco piatto con una superficie che ha profondità */}
@@ -86,8 +87,9 @@ export default function SciencePage() {
         style={{ backgroundImage: DOT_GRID_DARK }}
       />
 
+      <PageBackdrop />
       <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] rounded-full opacity-20 dark:opacity-25 blur-[150px]"
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] rounded-full opacity-[0.10] dark:opacity-[0.16] blur-[150px]"
         style={{
           background: 'radial-gradient(circle, rgba(245,185,66,0.5) 0%, rgba(184,134,11,0.4) 100%)',
         }}
@@ -102,11 +104,8 @@ export default function SciencePage() {
           <Microscope size={13} strokeWidth={2.5} style={{ color: GOLD }} />
           <p className="text-xs font-semibold tracking-[0.15em] uppercase" style={{ color: '#B8860B' }}>{ui.science.badge}</p>
         </div>
-        <h1 className="font-display text-6xl font-bold tracking-tight mb-3">
-          <span
-            className="drop-shadow-[0_2px_28px_rgba(184,134,11,0.3)]"
-            style={{ background: GOLD_GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-          >
+        <h1 className="font-display text-5xl sm:text-6xl font-semibold tracking-[-0.035em] text-ink dark:text-white mb-3">
+          <span>
             {ui.science.headingLead} {ui.science.headingAccent}
           </span>
         </h1>

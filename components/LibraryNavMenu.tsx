@@ -99,7 +99,7 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={navUi.searchPlaceholder}
-          className="w-full rounded-lg border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/5 pl-8 pr-3 py-1.5 text-xs text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 outline-none focus:border-[#4F7CFF]/40 transition-colors"
+          className="w-full rounded-lg border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/5 pl-8 pr-3 py-1.5 text-xs text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 outline-none focus:border-[#7C83FF]/40 transition-colors"
         />
       </div>
 
@@ -114,7 +114,8 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
               <button
                 type="button"
                 onClick={() => toggleCategory(cat.id)}
-                className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 hover:text-ink/70 dark:hover:text-white/70 transition-colors"
+                aria-expanded={isOpen}
+                className={`flex w-full items-center justify-between rounded-lg px-3 ${variant === 'mobile' ? 'min-h-[40px] py-2' : 'py-1.5'} text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 hover:text-ink/70 dark:hover:text-white/70 transition-colors`}
               >
                 {navUi.categories[cat.id]}
                 <ChevronDown size={11} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -137,7 +138,7 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
                           className={
                             variant === 'desktop'
                               ? 'block rounded-xl px-3 py-2.5 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors'
-                              : 'block py-1.5 pl-3'
+                              : 'flex min-h-[44px] items-center pl-3'
                           }
                         >
                           <p
