@@ -2,13 +2,14 @@
 
 // "Home programme" on the patient page: the programme the patient finds every
 // day in My Phygo (Daily Quest). Only the clinician writes it; it starts from
-// the latest note's exercises, copied as prescribed, and the clinician decides
+// the latest note's exercises, copied as prescribed, or from exercises picked in
+// the Exercises section (LibraryExercisePicker), and the clinician decides
 // rest days, sessions per day and an optional short variant. Row-level
 // security and triggers enforce the same rules (sql/2026-10-20_care_program_PROPOSED.sql);
 // until that SQL is applied the tables do not exist and this card stays hidden.
 import { useCallback, useEffect, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import { CalendarCheck, Pause, Play, Flag, Plus, Trash2, Pencil, Leaf } from 'lucide-react'
+import { CalendarCheck, Pause, Play, Flag, Plus, Trash2, Pencil, Leaf, Library } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { lazy } from '@/lib/lazy'
 import { CARE_STRINGS } from '@/lib/i18n/careStrings'
@@ -20,9 +21,11 @@ import {
   adherence,
   blankDraft,
   doseLabel,
+  draftFromLibraryExercise,
   draftFromNoteExercises,
   isMissingTable,
   itemRow,
+  LIBRARY_SOURCE,
   localDate,
   type ActivityLog,
   type CareItem,
@@ -32,6 +35,7 @@ import {
 } from '@/lib/care/program'
 import { PRIMARY_BTN, SECONDARY_BTN } from '@/components/ui/premium'
 import { RULE_COLUMNS, type AttentionRules } from '@/lib/care/attention'
+import LibraryExercisePicker, { type LibraryExercise } from '@/components/patients/LibraryExercisePicker'
 
 const supabase = lazy(() => createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!))
 
@@ -51,12 +55,14 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
   const { lang } = useLanguage()
   const t = (CARE_STRINGS[lang] ?? CARE_STRINGS.it).clinician
   const ta = (CARE_STRINGS[lang] ?? CARE_STRINGS.it).attention
+  const tl = (CARE_STRINGS[lang] ?? CARE_STRINGS.it).library
   const [state, setState] = useState<'loading' | 'missing' | 'error' | 'ready'>('loading')
   const [program, setProgram] = useState<CareProgram | null>(null)
   const [items, setItems] = useState<CareItem[]>([])
   const [logs, setLogs] = useState<ActivityLog[]>([])
   const [lastCheckin, setLastCheckin] = useState<{ checkin_date: string; pain_nrs: number | null; fatigue_nrs: number | null } | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
+  const [picking, setPicking] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
@@ -113,6 +119,7 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
 
   const startFromNote = async () => {
     setMessage(null)
+    setPicking(false)
     const { data } = await supabase.from('notes').select('id, exercises, created_at').eq('patient_id', patientId).order('created_at', { ascending: false }).limit(1)
     const note = ((data ?? []) as any[])[0] ?? null
     const fromNote = draftFromNoteExercises(note?.exercises, note?.id ?? null)
@@ -123,13 +130,30 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
   const startBlank = () => {
     setMessage(null)
     setNotice(null)
+    setPicking(false)
     setDraft({ title: t.defaultTitle, starts_on: localDate(new Date()), rest_weekdays: [], items: [blankDraft()], checkin: true, source_note_id: null })
+  }
+
+  const startFromLibrary = () => {
+    setMessage(null)
+    setNotice(null)
+    setDraft({ title: t.defaultTitle, starts_on: localDate(new Date()), rest_weekdays: [], items: [], checkin: true, source_note_id: null })
+    setPicking(true)
+  }
+
+  // Picked exercises replace the empty rows still waiting for a name.
+  const addFromLibrary = (picked: LibraryExercise[]) => {
+    setNotice(null)
+    setMessage(null)
+    setDraft((d) => (d ? { ...d, items: [...d.items.filter((i) => i.id || i.title.trim()), ...picked.map(draftFromLibraryExercise)] } : d))
+    setPicking(false)
   }
 
   const startEdit = () => {
     if (!program) return
     setMessage(null)
     setNotice(null)
+    setPicking(false)
     const exercises = items.filter((i) => i.active && i.kind === 'exercise')
     setDraft({
       title: program.title,
@@ -162,6 +186,7 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
   const save = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!draft || locked) return
+    if (draft.items.length === 0) return setMessage({ kind: 'error', text: tl.needOne })
     if (draft.items.some((i) => !i.title.trim())) return setMessage({ kind: 'error', text: t.needName })
     setSaving(true)
     setMessage(null)
@@ -212,6 +237,7 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
     }
     setSaving(false)
     setDraft(null)
+    setPicking(false)
     setMessage({ kind: 'ok', text: t.saved })
     load()
   }
@@ -296,6 +322,9 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
             <button type="button" disabled={locked} onClick={startBlank} className={`inline-flex min-h-[40px] items-center gap-2 rounded-full px-4 text-sm font-semibold disabled:opacity-50 ${SECONDARY_BTN}`}>
               {t.createBlank}
             </button>
+            <button type="button" disabled={locked} onClick={startFromLibrary} className={`inline-flex min-h-[40px] items-center gap-2 rounded-full px-4 text-sm font-semibold disabled:opacity-50 ${SECONDARY_BTN}`}>
+              <Library size={15} aria-hidden /> {tl.createFromLibrary}
+            </button>
           </div>
         </div>
       )}
@@ -309,6 +338,7 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
                 <span className="font-medium text-ink dark:text-white">{i.title}</span>
                 <span className="text-ink/55 dark:text-white/45"> · {doseLabel(i) ?? t.noDose} · {t.sessionsPerDay(i.times_per_day)}</span>
                 {i.short_variant && <span className="ml-2 inline-flex items-center gap-1 text-xs text-emerald-700 dark:text-emerald-400"><Leaf size={12} aria-hidden />{t.shortAvailable}</span>}
+                {i.exercise_source === LIBRARY_SOURCE && <span className="ml-2 inline-flex items-center gap-1 text-xs text-[#5B63E6] dark:text-[#A5B4FF]"><Library size={12} aria-hidden />{tl.fromLibrary}</span>}
               </li>
             ))}
           </ul>
@@ -394,7 +424,12 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
             {draft.items.map((it, index) => (
               <fieldset key={index} className="rounded-2xl border border-black/[0.07] p-4 dark:border-white/[0.08]" data-testid="care-program-draft-item">
                 <div className="flex items-center justify-between gap-2">
-                  <legend className="text-sm font-bold text-ink dark:text-white">{t.exerciseN(index + 1)}</legend>
+                  <legend className="flex flex-wrap items-center gap-2 text-sm font-bold text-ink dark:text-white">
+                    {t.exerciseN(index + 1)}
+                    {it.exercise_source === LIBRARY_SOURCE && (
+                      <span data-testid="care-program-library-badge" className="inline-flex items-center gap-1 rounded-full bg-[#7C83FF]/10 px-2 py-0.5 text-[11px] font-semibold text-[#5B63E6] dark:text-[#A5B4FF]"><Library size={11} aria-hidden />{tl.fromLibrary}</span>
+                    )}
+                  </legend>
                   {draft.items.length > 1 && (
                     <button type="button" onClick={() => setDraft({ ...draft, items: draft.items.filter((_, i) => i !== index) })} className="inline-flex items-center gap-1 text-xs font-semibold text-red-600 dark:text-red-400">
                       <Trash2 size={13} aria-hidden />{t.remove}
@@ -421,6 +456,9 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
                       </select>
                     </label>
                   </div>
+                  {it.exercise_source === LIBRARY_SOURCE && it.sets == null && it.reps == null && it.duration_seconds == null && (
+                    <p className="-mt-1 text-xs text-amber-700 dark:text-amber-300">{tl.doseFromYou}</p>
+                  )}
                   <label>
                     <span className={labelCls}>{t.doseNotes}</span>
                     <input className={inputCls} maxLength={500} value={it.dose_notes} onChange={(e) => setItem(index, { dose_notes: e.target.value })} />
@@ -437,9 +475,23 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
                 </div>
               </fieldset>
             ))}
-            <button type="button" onClick={() => setDraft({ ...draft, items: [...draft.items, blankDraft()] })} className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold ${SECONDARY_BTN}`}>
-              <Plus size={14} aria-hidden />{t.addExercise}
-            </button>
+            {picking ? (
+              <LibraryExercisePicker
+                patientId={patientId}
+                excludeIds={draft.items.filter((i) => i.exercise_source === LIBRARY_SOURCE && i.exercise_ref).map((i) => i.exercise_ref as string)}
+                onAdd={addFromLibrary}
+                onClose={() => setPicking(false)}
+              />
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => setPicking(true)} className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold ${SECONDARY_BTN}`}>
+                  <Library size={14} aria-hidden />{tl.addFromLibrary}
+                </button>
+                <button type="button" onClick={() => setDraft({ ...draft, items: [...draft.items, blankDraft()] })} className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold ${SECONDARY_BTN}`}>
+                  <Plus size={14} aria-hidden />{t.addExercise}
+                </button>
+              </div>
+            )}
           </div>
 
           <label className="flex items-start gap-2.5 text-sm text-ink/80 dark:text-white/75">
@@ -449,7 +501,7 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
 
           <div className="flex flex-wrap items-center gap-2">
             <button type="submit" disabled={saving || locked} className={`inline-flex min-h-[42px] items-center rounded-full px-5 text-sm font-semibold disabled:opacity-50 ${PRIMARY_BTN}`}>{saving ? t.saving : t.save}</button>
-            <button type="button" onClick={() => { setDraft(null); setMessage(null) }} className={`inline-flex min-h-[42px] items-center rounded-full px-5 text-sm font-semibold ${SECONDARY_BTN}`}>{t.cancel}</button>
+            <button type="button" onClick={() => { setDraft(null); setPicking(false); setMessage(null) }} className={`inline-flex min-h-[42px] items-center rounded-full px-5 text-sm font-semibold ${SECONDARY_BTN}`}>{t.cancel}</button>
           </div>
         </form>
       )}

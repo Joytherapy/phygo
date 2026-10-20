@@ -115,6 +115,27 @@ export type CareDict = {
     saveRules: string
     rulesSaved: string
   }
+  library: {
+    addFromLibrary: string
+    createFromLibrary: string
+    title: string
+    hint: string
+    search: string
+    linked: string
+    all: string
+    loading: string
+    loadError: string
+    noResults: string
+    more: (n: number) => string
+    selected: (n: number) => string
+    add: (n: number) => string
+    needOne: string
+    close: string
+    fromLibrary: string
+    doseFromYou: string
+    showHow: string
+    hideHow: string
+  }
 }
 
 const it: CareDict = {
@@ -233,6 +254,27 @@ const it: CareDict = {
     off: 'Nessuna soglia',
     saveRules: 'Salva soglie',
     rulesSaved: 'Soglie salvate.',
+  },
+  library: {
+    addFromLibrary: 'Aggiungi dalla sezione Esercizi',
+    createFromLibrary: 'Crea dalla sezione Esercizi',
+    title: 'Esercizi dalla sezione Esercizi',
+    hint: 'Il paziente vedrà il video e le istruzioni dell’esercizio. Il dosaggio lo decidi tu.',
+    search: 'Cerca per nome, muscolo, zona o attrezzo',
+    linked: 'Già collegati a questo paziente',
+    all: 'Tutti gli esercizi',
+    loading: 'Caricamento degli esercizi…',
+    loadError: 'Non è stato possibile caricare gli esercizi. Riprova.',
+    noResults: 'Nessun esercizio trovato.',
+    more: (n) => `Altri ${n} risultati: affina la ricerca.`,
+    selected: (n) => (n === 1 ? '1 selezionato' : `${n} selezionati`),
+    add: (n) => (n === 0 ? 'Aggiungi' : n === 1 ? 'Aggiungi 1 esercizio' : `Aggiungi ${n} esercizi`),
+    needOne: 'Aggiungi almeno un esercizio.',
+    close: 'Chiudi',
+    fromLibrary: 'Dalla sezione Esercizi',
+    doseFromYou: 'Indica tu serie, ripetizioni o durata.',
+    showHow: 'Guarda come si fa',
+    hideHow: 'Nascondi il video',
   },
 }
 
@@ -353,6 +395,27 @@ const en: CareDict = {
     saveRules: 'Save thresholds',
     rulesSaved: 'Thresholds saved.',
   },
+  library: {
+    addFromLibrary: 'Add from the Exercises section',
+    createFromLibrary: 'Create from the Exercises section',
+    title: 'Exercises from the Exercises section',
+    hint: 'The patient will see the exercise video and instructions. You set the dose.',
+    search: 'Search by name, muscle, area or equipment',
+    linked: 'Already linked to this patient',
+    all: 'All exercises',
+    loading: 'Loading exercises…',
+    loadError: 'The exercises could not be loaded. Try again.',
+    noResults: 'No exercises found.',
+    more: (n) => `${n} more results: refine the search.`,
+    selected: (n) => `${n} selected`,
+    add: (n) => (n === 0 ? 'Add' : n === 1 ? 'Add 1 exercise' : `Add ${n} exercises`),
+    needOne: 'Add at least one exercise.',
+    close: 'Close',
+    fromLibrary: 'From the Exercises section',
+    doseFromYou: 'Set the sets, reps or duration yourself.',
+    showHow: 'See how it’s done',
+    hideHow: 'Hide the video',
+  },
 }
 
 const es: CareDict = {
@@ -472,6 +535,27 @@ const es: CareDict = {
     saveRules: 'Guardar umbrales',
     rulesSaved: 'Umbrales guardados.',
   },
+  library: {
+    addFromLibrary: 'Añadir desde la sección Ejercicios',
+    createFromLibrary: 'Crear desde la sección Ejercicios',
+    title: 'Ejercicios de la sección Ejercicios',
+    hint: 'El paciente verá el vídeo y las instrucciones del ejercicio. La dosis la decides tú.',
+    search: 'Buscar por nombre, músculo, zona o material',
+    linked: 'Ya vinculados a este paciente',
+    all: 'Todos los ejercicios',
+    loading: 'Cargando ejercicios…',
+    loadError: 'No se han podido cargar los ejercicios. Inténtalo de nuevo.',
+    noResults: 'No se ha encontrado ningún ejercicio.',
+    more: (n) => `${n} resultados más: afina la búsqueda.`,
+    selected: (n) => (n === 1 ? '1 seleccionado' : `${n} seleccionados`),
+    add: (n) => (n === 0 ? 'Añadir' : n === 1 ? 'Añadir 1 ejercicio' : `Añadir ${n} ejercicios`),
+    needOne: 'Añade al menos un ejercicio.',
+    close: 'Cerrar',
+    fromLibrary: 'De la sección Ejercicios',
+    doseFromYou: 'Indica tú las series, repeticiones o duración.',
+    showHow: 'Ver cómo se hace',
+    hideHow: 'Ocultar el vídeo',
+  },
 }
 
 const fr: CareDict = {
@@ -590,6 +674,27 @@ const fr: CareDict = {
     off: 'Aucun seuil',
     saveRules: 'Enregistrer les seuils',
     rulesSaved: 'Seuils enregistrés.',
+  },
+  library: {
+    addFromLibrary: 'Ajouter depuis la section Exercices',
+    createFromLibrary: 'Créer depuis la section Exercices',
+    title: 'Exercices de la section Exercices',
+    hint: 'Le patient verra la vidéo et les consignes de l’exercice. C’est vous qui fixez le dosage.',
+    search: 'Rechercher par nom, muscle, zone ou matériel',
+    linked: 'Déjà liés à ce patient',
+    all: 'Tous les exercices',
+    loading: 'Chargement des exercices…',
+    loadError: 'Impossible de charger les exercices. Réessayez.',
+    noResults: 'Aucun exercice trouvé.',
+    more: (n) => `${n} autres résultats : affinez la recherche.`,
+    selected: (n) => (n === 1 ? '1 sélectionné' : `${n} sélectionnés`),
+    add: (n) => (n === 0 ? 'Ajouter' : n === 1 ? 'Ajouter 1 exercice' : `Ajouter ${n} exercices`),
+    needOne: 'Ajoutez au moins un exercice.',
+    close: 'Fermer',
+    fromLibrary: 'De la section Exercices',
+    doseFromYou: 'Indiquez vous-même les séries, répétitions ou la durée.',
+    showHow: 'Voir comment faire',
+    hideHow: 'Masquer la vidéo',
   },
 }
 
