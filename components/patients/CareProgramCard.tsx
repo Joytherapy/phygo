@@ -63,6 +63,9 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
   const [lastCheckin, setLastCheckin] = useState<{ checkin_date: string; pain_nrs: number | null; fatigue_nrs: number | null } | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [picking, setPicking] = useState(false)
+  const [preselect, setPreselect] = useState<string[]>([])
+  // Exercises linked to this patient from the Exercises section (patient_clinical_references).
+  const [linkedIds, setLinkedIds] = useState<string[]>([])
   const [notice, setNotice] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
@@ -86,6 +89,8 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
     }
     const current = ((data ?? []) as unknown as CareProgram[])[0] ?? null
     setProgram(current)
+    const { data: refs } = await supabase.from('patient_clinical_references').select('content_id').eq('patient_id', patientId).eq('content_type', 'exercise')
+    setLinkedIds(Array.from(new Set(((refs ?? []) as { content_id: string }[]).map((r) => String(r.content_id)))))
     if (current) {
       const since = addDays(localDate(new Date()), -6)
       const [itemsRes, logsRes, checkinRes, rulesRes] = await Promise.all([
@@ -115,6 +120,11 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
     load()
   }, [load])
 
+  // Opened from the Exercises section ("Open the home programme"): bring the card into view once it is shown.
+  useEffect(() => {
+    if (state === 'ready' && window.location.hash === '#care-program') document.getElementById('care-program')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [state])
+
   if (state === 'missing') return null
 
   const startFromNote = async () => {
@@ -134,10 +144,19 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
     setDraft({ title: t.defaultTitle, starts_on: localDate(new Date()), rest_weekdays: [], items: [blankDraft()], checkin: true, source_note_id: null })
   }
 
-  const startFromLibrary = () => {
+  const startFromLibrary = (ids: string[] = []) => {
     setMessage(null)
     setNotice(null)
+    setPreselect(ids)
     setDraft({ title: t.defaultTitle, starts_on: localDate(new Date()), rest_weekdays: [], items: [], checkin: true, source_note_id: null })
+    setPicking(true)
+  }
+
+  // One step from "linked in the Exercises section" to "in the programme": the editor opens with them ticked.
+  const addLinkedToProgram = (ids: string[]) => {
+    if (!program) return startFromLibrary(ids)
+    startEdit()
+    setPreselect(ids)
     setPicking(true)
   }
 
@@ -147,6 +166,7 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
     setMessage(null)
     setDraft((d) => (d ? { ...d, items: [...d.items.filter((i) => i.id || i.title.trim()), ...picked.map(draftFromLibraryExercise)] } : d))
     setPicking(false)
+    setPreselect([])
   }
 
   const startEdit = () => {
@@ -284,9 +304,11 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
   const week = adherence(program, items, logs, addDays(today, -6), today)
   const exercises = items.filter((i) => i.active && i.kind === 'exercise')
   const checkinOn = items.some((i) => i.active && i.kind === 'checkin')
+  const inProgram = new Set(items.filter((i) => i.active && i.exercise_source === LIBRARY_SOURCE).map((i) => i.exercise_ref))
+  const pendingLinked = linkedIds.filter((id) => !inProgram.has(id))
 
   return (
-    <section className={`mb-8 ${card}`} data-testid="care-program-card" aria-labelledby="care-program-heading">
+    <section id="care-program" className={`mb-8 scroll-mt-24 ${card}`} data-testid="care-program-card" aria-labelledby="care-program-heading">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7C83FF] to-[#A78BFA] text-white">
@@ -312,6 +334,13 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
         </p>
       )}
 
+      {state === 'ready' && !draft && !locked && pendingLinked.length > 0 && (
+        <div data-testid="care-program-linked" className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#7C83FF]/[0.07] px-4 py-3">
+          <p className="flex items-start gap-2 text-sm text-ink/80 dark:text-white/75"><Library size={15} className="mt-0.5 shrink-0 text-[#7C83FF]" aria-hidden />{tl.linkedPending(pendingLinked.length)}</p>
+          <button type="button" onClick={() => addLinkedToProgram(pendingLinked)} className={`inline-flex min-h-[38px] items-center rounded-full px-4 text-sm font-semibold ${PRIMARY_BTN}`}>{tl.addLinked}</button>
+        </div>
+      )}
+
       {state === 'ready' && !program && !draft && (
         <div className="mt-5">
           <p className="text-sm text-ink/60 dark:text-white/55">{t.empty}</p>
@@ -322,7 +351,7 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
             <button type="button" disabled={locked} onClick={startBlank} className={`inline-flex min-h-[40px] items-center gap-2 rounded-full px-4 text-sm font-semibold disabled:opacity-50 ${SECONDARY_BTN}`}>
               {t.createBlank}
             </button>
-            <button type="button" disabled={locked} onClick={startFromLibrary} className={`inline-flex min-h-[40px] items-center gap-2 rounded-full px-4 text-sm font-semibold disabled:opacity-50 ${SECONDARY_BTN}`}>
+            <button type="button" disabled={locked} onClick={() => startFromLibrary()} className={`inline-flex min-h-[40px] items-center gap-2 rounded-full px-4 text-sm font-semibold disabled:opacity-50 ${SECONDARY_BTN}`}>
               <Library size={15} aria-hidden /> {tl.createFromLibrary}
             </button>
           </div>
@@ -479,12 +508,16 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
               <LibraryExercisePicker
                 patientId={patientId}
                 excludeIds={draft.items.filter((i) => i.exercise_source === LIBRARY_SOURCE && i.exercise_ref).map((i) => i.exercise_ref as string)}
+                preselectIds={preselect}
                 onAdd={addFromLibrary}
-                onClose={() => setPicking(false)}
+                onClose={() => {
+                  setPicking(false)
+                  setPreselect([])
+                }}
               />
             ) : (
               <div className="flex flex-wrap gap-2">
-                <button type="button" onClick={() => setPicking(true)} className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold ${SECONDARY_BTN}`}>
+                <button type="button" onClick={() => { setPreselect([]); setPicking(true) }} className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold ${SECONDARY_BTN}`}>
                   <Library size={14} aria-hidden />{tl.addFromLibrary}
                 </button>
                 <button type="button" onClick={() => setDraft({ ...draft, items: [...draft.items, blankDraft()] })} className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold ${SECONDARY_BTN}`}>

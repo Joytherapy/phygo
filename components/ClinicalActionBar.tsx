@@ -2,10 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Plus, Check, Loader2, Search, User } from 'lucide-react'
+import Link from 'next/link'
+import { Plus, Check, Loader2, Search, User, CalendarCheck } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 import { usePatientContext } from '@/contexts/PatientContext'
-import { useUiStrings } from '@/contexts/LanguageContext'
+import { useLanguage, useUiStrings } from '@/contexts/LanguageContext'
+import { CARE_STRINGS } from '@/lib/i18n/careStrings'
 import { useClinicalLocked } from '@/lib/useClinicalAccess'
 import { lazy } from '@/lib/lazy'
 
@@ -35,6 +37,7 @@ export default function ClinicalActionBar({
 }) {
   const { currentPatient, setCurrentPatient } = usePatientContext()
   const ui = useUiStrings()
+  const { lang } = useLanguage()
   const ACTION_LABELS: Record<ContentType, string> = {
     exercise: ui.clinicalActionBar.addToTreatmentPlan,
     clinical_test: ui.clinicalActionBar.useWithPatient,
@@ -44,6 +47,8 @@ export default function ClinicalActionBar({
     product: ui.clinicalActionBar.recommendToPatient,
   }
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  // After an exercise is linked: a way to the patient's home programme, where it can be added in one step.
+  const [linkedTo, setLinkedTo] = useState<string | null>(null)
   const [showPicker, setShowPicker] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<PatientOption[]>([])
@@ -115,6 +120,7 @@ export default function ClinicalActionBar({
     })
     if (!error) {
       setStatus('saved')
+      if (contentType === 'exercise') setLinkedTo(patientId)
       setTimeout(() => setStatus('idle'), 2000)
     } else {
       console.error('Errore salvataggio riferimento clinico:', error)
@@ -161,6 +167,13 @@ export default function ClinicalActionBar({
           ? ACTION_LABELS[contentType]
           : ui.clinicalActionBar.selectPatient}
       </button>
+
+      {linkedTo && (
+        <Link href={`/dashboard/patients/${linkedTo}#care-program`} data-testid="open-home-programme" className="ml-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold text-[#5B63E6] underline-offset-2 hover:underline dark:text-[#A5B4FF]">
+          <CalendarCheck size={12} aria-hidden />
+          {(CARE_STRINGS[lang] ?? CARE_STRINGS.it).library.openProgram}
+        </Link>
+      )}
 
       {mounted && showPicker &&
         createPortal(
