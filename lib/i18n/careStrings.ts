@@ -115,6 +115,31 @@ export type CareDict = {
     saveRules: string
     rulesSaved: string
   }
+  plan: {
+    days: string
+    everyDay: string
+    daysHint: string
+    fromNote: string
+    sendToProgram: string
+    sending: string
+    created: (n: number) => string
+    updated: (added: number, changed: number) => string
+    unavailable: string
+    sendError: string
+    noExercises: string
+    withVideo: string
+    pdfButton: string
+    pdfTitle: string
+    pdfFor: (name: string) => string
+    pdfStart: (date: string) => string
+    pdfRest: (days: string) => string
+    pdfTimesPerDay: (n: number) => string
+    pdfShort: string
+    pdfApp: string
+    pdfSafety: string
+    pdfFooter: string
+    pdfError: string
+  }
   library: {
     addFromLibrary: string
     createFromLibrary: string
@@ -257,6 +282,31 @@ const it: CareDict = {
     off: 'Nessuna soglia',
     saveRules: 'Salva soglie',
     rulesSaved: 'Soglie salvate.',
+  },
+  plan: {
+    days: 'Giorni',
+    everyDay: 'Tutti i giorni',
+    daysHint: 'Nessun giorno scelto: tutti i giorni tranne quelli di riposo.',
+    fromNote: 'Dalla nota di oggi',
+    sendToProgram: 'Metti nel programma a casa',
+    sending: 'Invio al programma…',
+    created: (n) => (n === 1 ? 'Programma a casa creato con 1 esercizio.' : `Programma a casa creato con ${n} esercizi.`),
+    updated: (added, changed) => `Programma a casa aggiornato: ${added} ${added === 1 ? 'esercizio aggiunto' : 'esercizi aggiunti'}, ${changed} ${changed === 1 ? 'dose aggiornata' : 'dosi aggiornate'}.`,
+    unavailable: 'Il programma a casa non è ancora attivo su questo account.',
+    sendError: 'Non è stato possibile aggiornare il programma a casa. Riprova.',
+    noExercises: 'Questa nota non contiene esercizi da mettere nel programma.',
+    withVideo: 'Con video',
+    pdfButton: 'PDF per il paziente',
+    pdfTitle: 'Il tuo programma a casa',
+    pdfFor: (name) => `Per ${name}`,
+    pdfStart: (date) => `Dal ${date}`,
+    pdfRest: (days) => `Giorni di riposo: ${days}`,
+    pdfTimesPerDay: (n) => (n === 1 ? '1 volta al giorno' : `${n} volte al giorno`),
+    pdfShort: 'Se oggi hai poca voglia:',
+    pdfApp: 'Ogni giorno segna in My Phygo cosa hai fatto e guarda i video degli esercizi:',
+    pdfSafety: 'Se il dolore aumenta molto o compaiono sintomi nuovi, interrompi e contatta il tuo fisioterapista.',
+    pdfFooter: 'Preparato dal tuo fisioterapista con PHYGO',
+    pdfError: 'Non è stato possibile creare il PDF. Riprova.',
   },
   library: {
     addFromLibrary: 'Aggiungi dalla sezione Esercizi',
@@ -401,6 +451,31 @@ const en: CareDict = {
     saveRules: 'Save thresholds',
     rulesSaved: 'Thresholds saved.',
   },
+  plan: {
+    days: 'Days',
+    everyDay: 'Every day',
+    daysHint: 'No day chosen: every day except rest days.',
+    fromNote: 'From today’s note',
+    sendToProgram: 'Put in the home programme',
+    sending: 'Sending to the programme…',
+    created: (n) => (n === 1 ? 'Home programme created with 1 exercise.' : `Home programme created with ${n} exercises.`),
+    updated: (added, changed) => `Home programme updated: ${added} ${added === 1 ? 'exercise added' : 'exercises added'}, ${changed} ${changed === 1 ? 'dose updated' : 'doses updated'}.`,
+    unavailable: 'The home programme is not active on this account yet.',
+    sendError: 'The home programme could not be updated. Try again.',
+    noExercises: 'This note has no exercises to put in the programme.',
+    withVideo: 'With video',
+    pdfButton: 'PDF for the patient',
+    pdfTitle: 'Your home programme',
+    pdfFor: (name) => `For ${name}`,
+    pdfStart: (date) => `From ${date}`,
+    pdfRest: (days) => `Rest days: ${days}`,
+    pdfTimesPerDay: (n) => (n === 1 ? 'Once a day' : `${n} times a day`),
+    pdfShort: 'On a low-energy day:',
+    pdfApp: 'Every day, record what you did in My Phygo and watch the exercise videos:',
+    pdfSafety: 'If the pain gets much worse or new symptoms appear, stop and contact your physiotherapist.',
+    pdfFooter: 'Prepared by your physiotherapist with PHYGO',
+    pdfError: 'The PDF could not be created. Try again.',
+  },
   library: {
     addFromLibrary: 'Add from the Exercises section',
     createFromLibrary: 'Create from the Exercises section',
@@ -544,6 +619,31 @@ const es: CareDict = {
     saveRules: 'Guardar umbrales',
     rulesSaved: 'Umbrales guardados.',
   },
+  plan: {
+    days: 'Días',
+    everyDay: 'Todos los días',
+    daysHint: 'Ningún día elegido: todos los días salvo los de descanso.',
+    fromNote: 'De la nota de hoy',
+    sendToProgram: 'Poner en el programa en casa',
+    sending: 'Enviando al programa…',
+    created: (n) => (n === 1 ? 'Programa en casa creado con 1 ejercicio.' : `Programa en casa creado con ${n} ejercicios.`),
+    updated: (added, changed) => `Programa en casa actualizado: ${added} ${added === 1 ? 'ejercicio añadido' : 'ejercicios añadidos'}, ${changed} ${changed === 1 ? 'dosis actualizada' : 'dosis actualizadas'}.`,
+    unavailable: 'El programa en casa aún no está activo en esta cuenta.',
+    sendError: 'No se ha podido actualizar el programa en casa. Inténtalo de nuevo.',
+    noExercises: 'Esta nota no tiene ejercicios para el programa.',
+    withVideo: 'Con vídeo',
+    pdfButton: 'PDF para el paciente',
+    pdfTitle: 'Tu programa en casa',
+    pdfFor: (name) => `Para ${name}`,
+    pdfStart: (date) => `Desde el ${date}`,
+    pdfRest: (days) => `Días de descanso: ${days}`,
+    pdfTimesPerDay: (n) => (n === 1 ? '1 vez al día' : `${n} veces al día`),
+    pdfShort: 'Si hoy tienes pocas ganas:',
+    pdfApp: 'Cada día, anota en My Phygo lo que has hecho y mira los vídeos de los ejercicios:',
+    pdfSafety: 'Si el dolor aumenta mucho o aparecen síntomas nuevos, para y contacta con tu fisioterapeuta.',
+    pdfFooter: 'Preparado por tu fisioterapeuta con PHYGO',
+    pdfError: 'No se ha podido crear el PDF. Inténtalo de nuevo.',
+  },
   library: {
     addFromLibrary: 'Añadir desde la sección Ejercicios',
     createFromLibrary: 'Crear desde la sección Ejercicios',
@@ -686,6 +786,31 @@ const fr: CareDict = {
     off: 'Aucun seuil',
     saveRules: 'Enregistrer les seuils',
     rulesSaved: 'Seuils enregistrés.',
+  },
+  plan: {
+    days: 'Jours',
+    everyDay: 'Tous les jours',
+    daysHint: 'Aucun jour choisi : tous les jours sauf les jours de repos.',
+    fromNote: 'De la note du jour',
+    sendToProgram: 'Mettre dans le programme à domicile',
+    sending: 'Envoi au programme…',
+    created: (n) => (n === 1 ? 'Programme à domicile créé avec 1 exercice.' : `Programme à domicile créé avec ${n} exercices.`),
+    updated: (added, changed) => `Programme à domicile mis à jour : ${added} ${added === 1 ? 'exercice ajouté' : 'exercices ajoutés'}, ${changed} ${changed === 1 ? 'dosage mis à jour' : 'dosages mis à jour'}.`,
+    unavailable: 'Le programme à domicile n’est pas encore actif sur ce compte.',
+    sendError: 'Impossible de mettre à jour le programme à domicile. Réessayez.',
+    noExercises: 'Cette note ne contient pas d’exercices pour le programme.',
+    withVideo: 'Avec vidéo',
+    pdfButton: 'PDF pour le patient',
+    pdfTitle: 'Votre programme à domicile',
+    pdfFor: (name) => `Pour ${name}`,
+    pdfStart: (date) => `À partir du ${date}`,
+    pdfRest: (days) => `Jours de repos : ${days}`,
+    pdfTimesPerDay: (n) => (n === 1 ? '1 fois par jour' : `${n} fois par jour`),
+    pdfShort: 'Si vous manquez d’énergie aujourd’hui :',
+    pdfApp: 'Chaque jour, notez dans My Phygo ce que vous avez fait et regardez les vidéos des exercices :',
+    pdfSafety: 'Si la douleur augmente beaucoup ou si de nouveaux symptômes apparaissent, arrêtez et contactez votre kinésithérapeute.',
+    pdfFooter: 'Préparé par votre kinésithérapeute avec PHYGO',
+    pdfError: 'Impossible de créer le PDF. Réessayez.',
   },
   library: {
     addFromLibrary: 'Ajouter depuis la section Exercices',

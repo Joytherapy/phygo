@@ -9,7 +9,7 @@
 // until that SQL is applied the tables do not exist and this card stays hidden.
 import { useCallback, useEffect, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import { CalendarCheck, Pause, Play, Flag, Plus, Trash2, Pencil, Leaf, Library } from 'lucide-react'
+import { CalendarCheck, Pause, Play, Flag, Plus, Trash2, Pencil, Leaf, Library, FileDown } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { lazy } from '@/lib/lazy'
 import { CARE_STRINGS } from '@/lib/i18n/careStrings'
@@ -36,6 +36,7 @@ import {
 import { PRIMARY_BTN, SECONDARY_BTN } from '@/components/ui/premium'
 import { RULE_COLUMNS, type AttentionRules } from '@/lib/care/attention'
 import LibraryExercisePicker, { type LibraryExercise } from '@/components/patients/LibraryExercisePicker'
+import { buildProgramPdf, imageAsJpeg } from '@/lib/care/programPdf'
 
 const supabase = lazy(() => createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!))
 
@@ -51,11 +52,13 @@ const numOrNull = (v: string, max: number) => {
   return v.trim() === '' || !Number.isInteger(n) || n < 1 ? null : Math.min(n, max)
 }
 
-export default function CareProgramCard({ patientId, locked }: { patientId: string; locked: boolean }) {
+export default function CareProgramCard({ patientId, patientName, locked }: { patientId: string; patientName?: string; locked: boolean }) {
   const { lang } = useLanguage()
   const t = (CARE_STRINGS[lang] ?? CARE_STRINGS.it).clinician
   const ta = (CARE_STRINGS[lang] ?? CARE_STRINGS.it).attention
   const tl = (CARE_STRINGS[lang] ?? CARE_STRINGS.it).library
+  const tp = (CARE_STRINGS[lang] ?? CARE_STRINGS.it).plan
+  const [pdfStatus, setPdfStatus] = useState<'idle' | 'working' | 'error'>('idle')
   const [state, setState] = useState<'loading' | 'missing' | 'error' | 'ready'>('loading')
   const [program, setProgram] = useState<CareProgram | null>(null)
   const [items, setItems] = useState<CareItem[]>([])
@@ -193,6 +196,7 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
         duration_seconds: i.duration_seconds,
         dose_notes: i.dose_notes ?? '',
         times_per_day: i.times_per_day,
+        weekdays: i.weekdays ?? [],
         short_sets: i.short_variant?.sets ?? null,
         short_reps: i.short_variant?.reps ?? null,
         short_instructions: i.short_variant?.instructions ?? '',
@@ -260,6 +264,32 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
     setPicking(false)
     setMessage({ kind: 'ok', text: t.saved })
     load()
+  }
+
+  // The printable programme for the patient, with the exercise images where the
+  // Exercises section has them (lib/care/programPdf.ts).
+  const downloadPdf = async () => {
+    if (!program) return
+    setPdfStatus('working')
+    try {
+      const images = new Map<string, string>()
+      if (items.some((i) => i.active && i.exercise_source === LIBRARY_SOURCE)) {
+        const res = await fetch(`/api/care/exercise-media?patient=${encodeURIComponent(patientId)}`, { cache: 'no-store' })
+        const media = res.ok ? ((await res.json()).media ?? {}) : {}
+        await Promise.all(
+          Object.entries(media as Record<string, { image_url: string | null }>).map(async ([ref, m]) => {
+            const jpeg = m.image_url ? await imageAsJpeg(m.image_url) : null
+            if (jpeg) images.set(ref, jpeg)
+          }),
+        )
+      }
+      const doc = buildProgramPdf({ program, items, patientName: patientName ?? '', appUrl: `${window.location.origin}/my-phygo/home`, t: tp, weekdayNames: t.weekdays, images })
+      doc.save(`phygo-programma-${localDate(new Date())}.pdf`)
+      setPdfStatus('idle')
+    } catch (err) {
+      console.error('care programme: pdf failed:', err instanceof Error ? err.message : 'error')
+      setPdfStatus('error')
+    }
   }
 
   const setStatus = async (status: ProgramStatus) => {
@@ -365,7 +395,7 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
             {exercises.map((i) => (
               <li key={i.id} className="rounded-xl border border-black/[0.06] px-4 py-3 text-sm dark:border-white/[0.08]">
                 <span className="font-medium text-ink dark:text-white">{i.title}</span>
-                <span className="text-ink/55 dark:text-white/45"> · {doseLabel(i) ?? t.noDose} · {t.sessionsPerDay(i.times_per_day)}</span>
+                <span className="text-ink/55 dark:text-white/45"> · {doseLabel(i) ?? t.noDose} · {t.sessionsPerDay(i.times_per_day)}{i.weekdays?.length ? ` · ${i.weekdays.map((d) => t.weekdays[d - 1]).join(', ')}` : ''}</span>
                 {i.short_variant && <span className="ml-2 inline-flex items-center gap-1 text-xs text-emerald-700 dark:text-emerald-400"><Leaf size={12} aria-hidden />{t.shortAvailable}</span>}
                 {i.exercise_source === LIBRARY_SOURCE && <span className="ml-2 inline-flex items-center gap-1 text-xs text-[#5B63E6] dark:text-[#A5B4FF]"><Library size={12} aria-hidden />{tl.fromLibrary}</span>}
               </li>
@@ -401,6 +431,7 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
           </details>
           <div className="flex flex-wrap gap-2">
             <button type="button" disabled={locked} onClick={startEdit} className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold disabled:opacity-50 ${SECONDARY_BTN}`}><Pencil size={14} aria-hidden />{t.edit}</button>
+            <button type="button" disabled={pdfStatus === 'working' || exercises.length === 0} onClick={downloadPdf} className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold disabled:opacity-50 ${PRIMARY_BTN}`}><FileDown size={14} aria-hidden />{tp.pdfButton}</button>
             {program.status === 'paused' ? (
               <button type="button" disabled={locked} onClick={() => setStatus('active')} className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold disabled:opacity-50 ${SECONDARY_BTN}`}><Play size={14} aria-hidden />{t.resume}</button>
             ) : (
@@ -411,6 +442,7 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
             )}
             <button type="button" disabled={locked} onClick={() => setStatus('completed')} className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold disabled:opacity-50 ${SECONDARY_BTN}`}><Flag size={14} aria-hidden />{t.complete}</button>
           </div>
+          {pdfStatus === 'error' && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{tp.pdfError}</p>}
         </div>
       )}
 
@@ -485,6 +517,21 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
                       </select>
                     </label>
                   </div>
+                  <fieldset data-testid="care-program-item-days">
+                    <legend className={labelCls}>{tp.days}</legend>
+                    <div className="flex flex-wrap gap-1.5">
+                      <button type="button" aria-pressed={it.weekdays.length === 0} onClick={() => setItem(index, { weekdays: [] })} className={`min-h-[32px] rounded-full px-3 text-xs font-semibold transition ${it.weekdays.length === 0 ? PRIMARY_BTN : SECONDARY_BTN}`}>{tp.everyDay}</button>
+                      {t.weekdays.map((label, d) => {
+                        const day = d + 1
+                        const on = it.weekdays.includes(day)
+                        return (
+                          <button key={day} type="button" aria-pressed={on} aria-label={`${tp.days} ${label}`} onClick={() => setItem(index, { weekdays: on ? it.weekdays.filter((x) => x !== day) : [...it.weekdays, day].sort() })} className={`min-h-[32px] min-w-[44px] rounded-full px-2.5 text-xs font-semibold transition ${on ? PRIMARY_BTN : SECONDARY_BTN}`}>
+                            {label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </fieldset>
                   {it.exercise_source === LIBRARY_SOURCE && it.sets == null && it.reps == null && it.duration_seconds == null && (
                     <p className="-mt-1 text-xs text-amber-700 dark:text-amber-300">{tl.doseFromYou}</p>
                   )}

@@ -149,6 +149,8 @@ export type DraftItem = {
   duration_seconds: number | null
   dose_notes: string
   times_per_day: number
+  /** ISO weekdays this exercise is done on; empty = every day that is not a rest day. */
+  weekdays: number[]
   short_sets: number | null
   short_reps: number | null
   short_instructions: string
@@ -157,12 +159,25 @@ export type DraftItem = {
 const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
 const int = (v: unknown, min: number, max: number) => (typeof v === 'number' && Number.isInteger(v) && v >= min && v <= max ? v : null)
 
+/**
+ * "N times a week" as days, spread through the week (Mon/Wed/Fri for 3): a
+ * starting point the clinician sees and can change. 7 or more, or no
+ * frequency, is every day.
+ */
+export function weekdaysForFrequency(perWeek: number | null | undefined): number[] {
+  const days: Record<number, number[]> = { 1: [1], 2: [2, 5], 3: [1, 3, 5], 4: [1, 2, 4, 5], 5: [1, 2, 3, 4, 5], 6: [1, 2, 3, 4, 5, 6] }
+  return perWeek != null && days[perWeek] ? [...days[perWeek]] : []
+}
+
+export const cleanWeekdays = (days: unknown): number[] =>
+  Array.isArray(days) ? Array.from(new Set(days.filter((d): d is number => Number.isInteger(d) && d >= 1 && d <= 7))).sort() : []
+
 /** A starting point from the note's exercises, for the clinician to review:
  *  the prescribed dose is copied as written, nothing is added. */
 export function draftFromNoteExercises(exercises: unknown, noteId: string | null): DraftItem[] {
   if (!Array.isArray(exercises)) return []
   return exercises.flatMap((ex, index): DraftItem[] => {
-    const base = { kind: 'exercise' as const, times_per_day: 1, short_sets: null, short_reps: null, short_instructions: '' }
+    const base = { kind: 'exercise' as const, times_per_day: 1, weekdays: [] as number[], short_sets: null, short_reps: null, short_instructions: '' }
     if (typeof ex === 'string') {
       const title = ex.trim()
       return title ? [{ ...base, title: title.slice(0, 200), instructions: '', exercise_source: noteId ? 'note' : null, exercise_ref: noteId ? `${noteId}#${index}` : null, sets: null, reps: null, duration_seconds: null, dose_notes: '' }] : []
@@ -185,6 +200,7 @@ export function draftFromNoteExercises(exercises: unknown, noteId: string | null
       reps: int(dosing.reps, 1, 200),
       duration_seconds: int(dosing.duration_seconds, 1, 14400),
       dose_notes: str(dosing.notes).slice(0, 500),
+      weekdays: weekdaysForFrequency(int(dosing.frequency_per_week, 1, 14)),
     }]
   })
 }
@@ -209,7 +225,7 @@ export function draftFromLibraryExercise(ex: { id: string; name: string; instruc
 }
 
 export function blankDraft(): DraftItem {
-  return { kind: 'exercise', title: '', instructions: '', exercise_source: null, exercise_ref: null, sets: null, reps: null, duration_seconds: null, dose_notes: '', times_per_day: 1, short_sets: null, short_reps: null, short_instructions: '' }
+  return { kind: 'exercise', title: '', instructions: '', exercise_source: null, exercise_ref: null, sets: null, reps: null, duration_seconds: null, dose_notes: '', times_per_day: 1, weekdays: [], short_sets: null, short_reps: null, short_instructions: '' }
 }
 
 /** The row to insert for a draft item; the short variant only if the clinician wrote one. */
@@ -228,7 +244,7 @@ export function itemRow(d: DraftItem, programId: string, sortOrder: number) {
     dose_notes: d.dose_notes.trim() || null,
     times_per_day: d.kind === 'exercise' ? Math.min(6, Math.max(1, d.times_per_day)) : 1,
     short_variant: d.kind === 'exercise' && hasShort ? { sets: d.short_sets, reps: d.short_reps, instructions: d.short_instructions.trim() || null } : null,
-    weekdays: [] as number[],
+    weekdays: d.kind === 'exercise' ? cleanWeekdays(d.weekdays) : [],
     sort_order: sortOrder,
     active: true,
   }
