@@ -135,6 +135,9 @@ export type CareDict = {
     doseFromYou: string
     showHow: string
     hideHow: string
+    linkedPending: (n: number) => string
+    addLinked: string
+    openProgram: string
   }
 }
 
@@ -275,6 +278,9 @@ const it: CareDict = {
     doseFromYou: 'Indica tu serie, ripetizioni o durata.',
     showHow: 'Guarda come si fa',
     hideHow: 'Nascondi il video',
+    linkedPending: (n) => (n === 1 ? 'Hai collegato 1 esercizio a questo paziente dalla sezione Esercizi: non è ancora nel programma a casa.' : `Hai collegato ${n} esercizi a questo paziente dalla sezione Esercizi: non sono ancora nel programma a casa.`),
+    addLinked: 'Mettili nel programma',
+    openProgram: 'Apri il programma a casa',
   },
 }
 
@@ -415,6 +421,9 @@ const en: CareDict = {
     doseFromYou: 'Set the sets, reps or duration yourself.',
     showHow: 'See how it’s done',
     hideHow: 'Hide the video',
+    linkedPending: (n) => (n === 1 ? 'You linked 1 exercise to this patient from the Exercises section: it is not in the home programme yet.' : `You linked ${n} exercises to this patient from the Exercises section: they are not in the home programme yet.`),
+    addLinked: 'Add them to the programme',
+    openProgram: 'Open the home programme',
   },
 }
 
@@ -555,6 +564,9 @@ const es: CareDict = {
     doseFromYou: 'Indica tú las series, repeticiones o duración.',
     showHow: 'Ver cómo se hace',
     hideHow: 'Ocultar el vídeo',
+    linkedPending: (n) => (n === 1 ? 'Has vinculado 1 ejercicio a este paciente desde la sección Ejercicios: aún no está en el programa en casa.' : `Has vinculado ${n} ejercicios a este paciente desde la sección Ejercicios: aún no están en el programa en casa.`),
+    addLinked: 'Añadirlos al programa',
+    openProgram: 'Abrir el programa en casa',
   },
 }
 
@@ -695,6 +707,9 @@ const fr: CareDict = {
     doseFromYou: 'Indiquez vous-même les séries, répétitions ou la durée.',
     showHow: 'Voir comment faire',
     hideHow: 'Masquer la vidéo',
+    linkedPending: (n) => (n === 1 ? 'Vous avez lié 1 exercice à ce patient depuis la section Exercices : il n’est pas encore dans le programme à domicile.' : `Vous avez lié ${n} exercices à ce patient depuis la section Exercices : ils ne sont pas encore dans le programme à domicile.`),
+    addLinked: 'Les ajouter au programme',
+    openProgram: 'Ouvrir le programme à domicile',
   },
 }
 

@@ -36,7 +36,7 @@ const CACHE_MS = 20 * 60 * 1000
 const fold = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 const haystack = (e: LibraryExercise) => fold([e.name, e.primary_muscle, e.body_region, e.category, ...(e.equipment ?? []), ...(e.tags ?? [])].filter(Boolean).join(' '))
 
-export default function LibraryExercisePicker({ patientId, excludeIds, onAdd, onClose }: { patientId: string; excludeIds: string[]; onAdd: (exercises: LibraryExercise[]) => void; onClose: () => void }) {
+export default function LibraryExercisePicker({ patientId, excludeIds, preselectIds = [], onAdd, onClose }: { patientId: string; excludeIds: string[]; preselectIds?: string[]; onAdd: (exercises: LibraryExercise[]) => void; onClose: () => void }) {
   const { lang } = useLanguage()
   const dict = CARE_STRINGS[lang] ?? CARE_STRINGS.it
   const t = dict.library
@@ -44,7 +44,7 @@ export default function LibraryExercisePicker({ patientId, excludeIds, onAdd, on
   const [exercises, setExercises] = useState<LibraryExercise[]>([])
   const [linkedIds, setLinkedIds] = useState<string[]>([])
   const [query, setQuery] = useState('')
-  const [picked, setPicked] = useState<string[]>([])
+  const [picked, setPicked] = useState<string[]>(preselectIds)
   const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
@@ -71,6 +71,8 @@ export default function LibraryExercisePicker({ patientId, excludeIds, onAdd, on
         if (cancelled) return
         if (linked.error) console.error('library picker: linked exercises failed:', linked.error.code)
         setExercises(list)
+        // A preselected exercise no longer in the library is dropped, not counted.
+        setPicked((p) => p.filter((id) => list.some((e) => e.id === id)))
         setLinkedIds(Array.from(new Set(((linked.data ?? []) as { content_id: string }[]).map((r) => String(r.content_id)))))
         setState('ready')
       } catch (err) {

@@ -7,10 +7,12 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Check, Loader2, Search, User, Link2 } from 'lucide-react'
+import Link from 'next/link'
+import { Check, Loader2, Search, User, Link2, CalendarCheck } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 import { usePatientContext } from '@/contexts/PatientContext'
-import { useUiStrings } from '@/contexts/LanguageContext'
+import { useLanguage, useUiStrings } from '@/contexts/LanguageContext'
+import { CARE_STRINGS } from '@/lib/i18n/careStrings'
 import { useClinicalLocked } from '@/lib/useClinicalAccess'
 import { lazy } from '@/lib/lazy'
 
@@ -42,7 +44,9 @@ export default function BulkPatientLinkBar({
 }) {
   const { currentPatient, setCurrentPatient } = usePatientContext()
   const ui = useUiStrings()
+  const { lang } = useLanguage()
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const [linkedTo, setLinkedTo] = useState<string | null>(null)
   const [showPicker, setShowPicker] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<PatientOption[]>([])
@@ -101,10 +105,12 @@ export default function BulkPatientLinkBar({
     const { error } = await supabase.from('patient_clinical_references').insert(rows)
     if (!error) {
       setStatus('saved')
+      // Exercises: the bar stays a moment longer, with a way to the patient's home programme.
+      if (contentType === 'exercise') setLinkedTo(patientId)
       setTimeout(() => {
         setStatus('idle')
         onDone()
-      }, 1400)
+      }, contentType === 'exercise' ? 6000 : 1400)
     } else {
       console.error('Errore salvataggio collegamenti multipli al paziente:', error)
       setStatus('idle')
@@ -211,6 +217,13 @@ export default function BulkPatientLinkBar({
             </div>
           )}
         </div>
+
+        {status === 'saved' && linkedTo && (
+          <Link href={`/dashboard/patients/${linkedTo}#care-program`} data-testid="open-home-programme" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold text-[#5B63E6] hover:bg-[#7C83FF]/10 dark:text-[#A5B4FF] whitespace-nowrap">
+            <CalendarCheck size={13} aria-hidden />
+            {(CARE_STRINGS[lang] ?? CARE_STRINGS.it).library.openProgram}
+          </Link>
+        )}
       </div>
     </div>,
     document.body

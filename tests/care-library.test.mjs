@@ -238,3 +238,30 @@ test('the patient sees the exercise video; a removed exercise is not served', { 
   plank.active = false;
   assert.deepEqual(Object.keys((await media('pat')).body.media), [EX(1)]);
 });
+
+test('exercises linked from the Exercises section go into the programme in one step', { skip }, async () => {
+  // The lunge is linked now; the plank was switched off in the programme above.
+  fake.state.tables.patient_clinical_references.push({ id: 'ref-2', user_id: CLIN.id, patient_id: PID, content_type: 'exercise', content_id: EX(3), payload: { label: 'Synthetic lunge', section: 'Exercise Library' }, created_at: '2026-10-19T09:00:00Z' });
+  const { ctx, page, errors } = await pageAs('clin');
+  try {
+    await page.goto(`${app.url}/dashboard/patients/${PID}#care-program`);
+    const card = page.getByTestId('care-program-card');
+    const strip = card.getByTestId('care-program-linked');
+    await strip.waitFor({ timeout: 20000 });
+    assert.match(await strip.innerText(), /Hai collegato 2 esercizi a questo paziente/);
+    await strip.getByRole('button', { name: 'Mettili nel programma' }).click();
+    const picker = card.getByTestId('care-library-picker');
+    await picker.getByRole('button', { name: 'Aggiungi 2 esercizi' }).click({ timeout: 20000 });
+    const titles = await card.getByTestId('care-program-draft-item').evaluateAll((els) => els.map((el) => el.querySelector('input').value));
+    assert.deepEqual(titles, ['Synthetic squat', 'Synthetic plank', 'Synthetic lunge'], 'kept the programme, added the two linked ones');
+    await card.getByRole('button', { name: 'Salva programma' }).click();
+    await card.getByRole('status').filter({ hasText: 'Programma salvato.' }).waitFor({ timeout: 10000 });
+    const program = fake.state.tables.care_programs.find((p) => p.patient_id === PID);
+    const active = fake.state.tables.care_program_items.filter((i) => i.program_id === program.id && i.kind === 'exercise' && i.active).map((i) => i.exercise_ref);
+    assert.deepEqual(active.sort(), [EX(1), EX(2), EX(3)].sort());
+    assert.equal(await card.getByTestId('care-program-linked').count(), 0, 'nothing left to add');
+    assert.deepEqual(errors, []);
+  } finally {
+    await ctx.close();
+  }
+});
