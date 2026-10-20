@@ -15,6 +15,7 @@ type EntryDict = {
     email: string;
     password: string;
     wait: string;
+    serviceUnavailable: string;
     loginCta: string;
     signupCta: string;
     noAccount: string;
@@ -53,6 +54,10 @@ type EntryDict = {
     haveAccount: string;
     noAccountHint: string;
     professionalLink: string;
+    signedInAs: (email: string) => string;
+    signedInHint: string;
+    signOutContinue: string;
+    needsNewAccount: string;
   };
 };
 
@@ -65,6 +70,7 @@ const en: EntryDict = {
     email: 'Email',
     password: 'Password',
     wait: 'Please wait…',
+    serviceUnavailable: "The service isn't available right now. Please try again in a moment.",
     loginCta: 'Log in',
     signupCta: 'Create account',
     noAccount: "Don't have an account?",
@@ -105,6 +111,10 @@ const en: EntryDict = {
     haveAccount: 'Already have an account?',
     noAccountHint: 'New to My Phygo? Your physiotherapist sends you a personal invitation link to create your account.',
     professionalLink: 'Physiotherapist or student? Log in here',
+    signedInAs: (email) => `You are signed in as ${email}.`,
+    signedInHint: 'This invitation creates the patient’s own My Phygo account. Sign out first, then create the account with the patient’s email.',
+    signOutContinue: 'Sign out and continue',
+    needsNewAccount: 'This email already has an account or still needs to be confirmed, so the invitation was not used. Use the patient’s own new email, or ask the physiotherapist for a new invitation.',
   },
 };
 
@@ -117,6 +127,7 @@ const it: EntryDict = {
     email: 'Email',
     password: 'Password',
     wait: 'Attendi…',
+    serviceUnavailable: 'Il servizio non è disponibile in questo momento. Riprova tra poco.',
     loginCta: 'Accedi',
     signupCta: 'Crea account',
     noAccount: 'Non hai un account?',
@@ -157,6 +168,10 @@ const it: EntryDict = {
     haveAccount: 'Hai già un account?',
     noAccountHint: 'Prima volta su My Phygo? Il tuo fisioterapista ti invia un link di invito personale per creare l’account.',
     professionalLink: 'Sei un fisioterapista o uno studente? Accedi qui',
+    signedInAs: (email) => `Sei connesso come ${email}.`,
+    signedInHint: 'Questo invito crea l’account My Phygo del paziente. Prima esci, poi crea l’account con l’email del paziente.',
+    signOutContinue: 'Esci e continua',
+    needsNewAccount: 'Questa email ha già un account o deve ancora essere confermata, quindi l’invito non è stato usato. Usa una nuova email del paziente, oppure chiedi al fisioterapista un nuovo invito.',
   },
 };
 
@@ -169,6 +184,7 @@ const es: EntryDict = {
     email: 'Correo electrónico',
     password: 'Contraseña',
     wait: 'Un momento…',
+    serviceUnavailable: 'El servicio no está disponible en este momento. Inténtalo de nuevo en unos instantes.',
     loginCta: 'Iniciar sesión',
     signupCta: 'Crear cuenta',
     noAccount: '¿No tienes cuenta?',
@@ -209,6 +225,10 @@ const es: EntryDict = {
     haveAccount: '¿Ya tienes cuenta?',
     noAccountHint: '¿Es tu primera vez en My Phygo? Tu fisioterapeuta te envía un enlace de invitación personal para crear tu cuenta.',
     professionalLink: '¿Eres fisioterapeuta o estudiante? Inicia sesión aquí',
+    signedInAs: (email) => `Has iniciado sesión como ${email}.`,
+    signedInHint: 'Esta invitación crea la cuenta My Phygo del paciente. Primero cierra sesión y luego crea la cuenta con el email del paciente.',
+    signOutContinue: 'Cerrar sesión y continuar',
+    needsNewAccount: 'Este email ya tiene una cuenta o aún debe confirmarse, así que la invitación no se ha usado. Usa un email nuevo del paciente o pide al fisioterapeuta una nueva invitación.',
   },
 };
 
@@ -221,6 +241,7 @@ const fr: EntryDict = {
     email: 'E-mail',
     password: 'Mot de passe',
     wait: 'Patientez…',
+    serviceUnavailable: "Le service n'est pas disponible pour le moment. Réessayez dans un instant.",
     loginCta: 'Se connecter',
     signupCta: 'Créer un compte',
     noAccount: 'Pas encore de compte ?',
@@ -261,6 +282,10 @@ const fr: EntryDict = {
     haveAccount: 'Vous avez déjà un compte ?',
     noAccountHint: 'Première visite sur My Phygo ? Votre kinésithérapeute vous envoie un lien d’invitation personnel pour créer votre compte.',
     professionalLink: 'Kinésithérapeute ou étudiant ? Connectez-vous ici',
+    signedInAs: (email) => `Vous êtes connecté en tant que ${email}.`,
+    signedInHint: 'Cette invitation crée le compte My Phygo du patient. Déconnectez-vous d’abord, puis créez le compte avec l’e-mail du patient.',
+    signOutContinue: 'Se déconnecter et continuer',
+    needsNewAccount: 'Cet e-mail a déjà un compte ou doit encore être confirmé : l’invitation n’a donc pas été utilisée. Utilisez un nouvel e-mail du patient, ou demandez au kinésithérapeute une nouvelle invitation.',
   },
 };
 

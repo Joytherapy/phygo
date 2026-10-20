@@ -877,6 +877,7 @@ interface UiDict {
     resetPortalConfirm: string;
     inviteReadyHeading: string;
     inviteShareText: string;
+    inviteLanguageLabel: string;
     copied: string;
     copyButton: string;
     inviteError: string;
@@ -886,6 +887,8 @@ interface UiDict {
     statLinkedItems: string;
     noteHistoryHeading: string;
     noNotesYet: string;
+    notesLoadError: string;
+    notesRetry: string;
     generateFirstNote: string;
     noAssessmentRecorded: string;
     treatmentPlanHeading: string;
@@ -1166,7 +1169,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     nav: {
       patients: 'Pazienti',
       library: 'Libreria',
-      world: 'Phygo World',
+      world: 'PHYGO World',
       schedule: 'Agenda',
       profile: 'Profilo',
       signOut: 'Esci',
@@ -1206,7 +1209,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       shop: { label: 'Negozio', description: 'Attrezzature consigliate' },
     },
     events: {
-      badge: 'Phygo World',
+      badge: 'PHYGO World',
       heading: 'Eventi',
       subtitle: 'Scopri congressi, corsi ed esperienze che stanno plasmando la fisioterapia, la sanità e la performance umana.',
       searchPlaceholder: 'Cerca per nome, argomento, città o paese...',
@@ -2245,6 +2248,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       resetPortalConfirm: "Questo disconnetterà l'account portale attuale di {name}. Dovrà usare un nuovo link di invito per accedere di nuovo. Continuare?",
       inviteReadyHeading: 'Link di invito pronto — valido 7 giorni',
       inviteShareText: 'Condividi questo link con {name} per accedere al portale My Phygo.',
+      inviteLanguageLabel: 'Lingua del paziente:',
       copied: 'Copiato',
       copyButton: 'Copia',
       inviteError: "Impossibile creare l'invito. Riprova.",
@@ -2254,6 +2258,8 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       statLinkedItems: 'Elementi collegati',
       noteHistoryHeading: 'Storico note',
       noNotesYet: 'Ancora nessuna nota per questo paziente.',
+      notesLoadError: 'Non è stato possibile caricare lo storico delle note. Le note non sono state modificate.',
+      notesRetry: 'Riprova',
       generateFirstNote: 'Genera la prima nota di sessione per iniziare lo storico.',
       noAssessmentRecorded: 'Nessuna valutazione registrata.',
       treatmentPlanHeading: 'Piano di trattamento e riferimenti clinici',
@@ -2360,7 +2366,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     bodyMap: {
       badge: 'Mappa 3D Interattiva del Corpo',
       calibrationBadge: 'Modalità Calibrazione — clicca sul modello',
-      heading: 'Anatomical Navigator',
+      heading: 'Navigatore anatomico',
       subtitle: 'Ruota, ingrandisci ed esplora il modello anatomico 3D — clicca su una zona per aprire condizioni, test e protocolli specifici.',
       legendMuscleZones: 'Zone muscolari',
       legendBoneZones: 'Zone ossee (raggi-X)',
@@ -2568,7 +2574,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     nav: {
       patients: 'Patients',
       library: 'Library',
-      world: 'Phygo World',
+      world: 'PHYGO World',
       schedule: 'Schedule',
       profile: 'Profile',
       signOut: 'Sign out',
@@ -2608,7 +2614,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       shop: { label: 'Shop', description: 'Recommended equipment' },
     },
     events: {
-      badge: 'Phygo World',
+      badge: 'PHYGO World',
       heading: 'Events',
       subtitle: 'Discover courses, conferences, congresses and experiences shaping physiotherapy, healthcare and human performance.',
       searchPlaceholder: 'Search by name, topic, city or country...',
@@ -3647,6 +3653,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       resetPortalConfirm: "This will disconnect {name}'s current portal account. They will need a new invite link to log in again. Continue?",
       inviteReadyHeading: 'Invite link ready — valid for 7 days',
       inviteShareText: 'Share this with {name} so they can access their My Phygo portal.',
+      inviteLanguageLabel: "Patient's language:",
       copied: 'Copied',
       copyButton: 'Copy',
       inviteError: 'Could not create invite. Please try again.',
@@ -3656,6 +3663,8 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       statLinkedItems: 'Linked items',
       noteHistoryHeading: 'Note history',
       noNotesYet: 'No notes yet for this patient.',
+      notesLoadError: "The note history couldn't be loaded. Your notes have not been changed.",
+      notesRetry: 'Try again',
       generateFirstNote: 'Generate the first session note to start their history.',
       noAssessmentRecorded: 'No assessment recorded.',
       treatmentPlanHeading: 'Treatment plan & clinical references',
@@ -3970,7 +3979,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     nav: {
       patients: 'Pacientes',
       library: 'Biblioteca',
-      world: 'Phygo World',
+      world: 'PHYGO World',
       schedule: 'Agenda',
       profile: 'Perfil',
       signOut: 'Cerrar sesión',
@@ -4010,7 +4019,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       shop: { label: 'Tienda', description: 'Equipamiento recomendado' },
     },
     events: {
-      badge: 'Phygo World',
+      badge: 'PHYGO World',
       heading: 'Eventos',
       subtitle: 'Descubre congresos, cursos y experiencias que están dando forma a la fisioterapia, la salud y el rendimiento humano.',
       searchPlaceholder: 'Busca por nombre, tema, ciudad o país...',
@@ -5049,6 +5058,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       resetPortalConfirm: 'Esto desconectará la cuenta actual del portal de {name}. Necesitará un nuevo enlace de invitación para volver a iniciar sesión. ¿Continuar?',
       inviteReadyHeading: 'Enlace de invitación listo — válido 7 días',
       inviteShareText: 'Comparte esto con {name} para que pueda acceder a su portal My Phygo.',
+      inviteLanguageLabel: 'Idioma del paciente:',
       copied: 'Copiado',
       copyButton: 'Copiar',
       inviteError: 'No se pudo crear la invitación. Inténtalo de nuevo.',
@@ -5058,6 +5068,8 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       statLinkedItems: 'Elementos vinculados',
       noteHistoryHeading: 'Historial de notas',
       noNotesYet: 'Aún no hay notas para este paciente.',
+      notesLoadError: 'No se pudo cargar el historial de notas. Las notas no se han modificado.',
+      notesRetry: 'Reintentar',
       generateFirstNote: 'Genera la primera nota de sesión para iniciar su historial.',
       noAssessmentRecorded: 'No se registró ninguna evaluación.',
       treatmentPlanHeading: 'Plan de tratamiento y referencias clínicas',
@@ -5164,7 +5176,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     bodyMap: {
       badge: 'Mapa Corporal 3D Interactivo',
       calibrationBadge: 'Modo Calibración — toca el modelo',
-      heading: 'Anatomical Navigator',
+      heading: 'Navegador anatómico',
       subtitle: 'Gira, amplía y explora el modelo anatómico 3D — toca una zona para abrir sus condiciones, pruebas y protocolos.',
       legendMuscleZones: 'Zonas musculares',
       legendBoneZones: 'Zonas óseas (rayos X)',
@@ -5372,7 +5384,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     nav: {
       patients: 'Patients',
       library: 'Bibliothèque',
-      world: 'Phygo World',
+      world: 'PHYGO World',
       schedule: 'Agenda',
       profile: 'Profil',
       signOut: 'Déconnexion',
@@ -5412,7 +5424,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       shop: { label: 'Boutique', description: 'Équipements recommandés' },
     },
     events: {
-      badge: 'Phygo World',
+      badge: 'PHYGO World',
       heading: 'Événements',
       subtitle: 'Découvrez congrès, cours et expériences qui façonnent la physiothérapie, la santé et la performance humaine.',
       searchPlaceholder: 'Rechercher par nom, sujet, ville ou pays...',
@@ -6451,6 +6463,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       resetPortalConfirm: "Cela déconnectera le compte portail actuel de {name}. Il/elle aura besoin d'un nouveau lien d'invitation pour se reconnecter. Continuer ?",
       inviteReadyHeading: "Lien d'invitation prêt — valable 7 jours",
       inviteShareText: "Partagez ceci avec {name} pour qu'il/elle puisse accéder à son portail My Phygo.",
+      inviteLanguageLabel: 'Langue du patient :',
       copied: 'Copié',
       copyButton: 'Copier',
       inviteError: "Impossible de créer l'invitation. Veuillez réessayer.",
@@ -6460,6 +6473,8 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
       statLinkedItems: 'Éléments liés',
       noteHistoryHeading: 'Historique des notes',
       noNotesYet: 'Aucune note pour ce patient pour le moment.',
+      notesLoadError: "L'historique des notes n'a pas pu être chargé. Les notes n'ont pas été modifiées.",
+      notesRetry: 'Réessayer',
       generateFirstNote: 'Générez la première note de séance pour démarrer son historique.',
       noAssessmentRecorded: 'Aucune évaluation enregistrée.',
       treatmentPlanHeading: 'Plan de traitement et références cliniques',
@@ -6566,7 +6581,7 @@ export const UI_STRINGS: Record<AppLang, UiDict> = {
     bodyMap: {
       badge: 'Carte du Corps 3D Interactive',
       calibrationBadge: 'Mode Calibration — touchez le modèle',
-      heading: 'Anatomical Navigator',
+      heading: 'Navigateur anatomique',
       subtitle: 'Faites pivoter, zoomez et explorez le modèle anatomique 3D — touchez une zone pour ouvrir ses pathologies, tests et protocoles.',
       legendMuscleZones: 'Zones musculaires',
       legendBoneZones: 'Zones osseuses (rayons X)',

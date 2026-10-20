@@ -7,6 +7,9 @@ import { Search, Sparkles, Wifi, MapPin, SlidersHorizontal, X, Building2, ArrowU
 import Navbar from '@/components/Navbar'
 import EventCard, { type EventRecord } from '@/components/EventCard'
 import { useUiStrings } from '@/contexts/LanguageContext'
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
+import ErrorState from '@/components/workspace/ErrorState'
+import { PageBackdrop } from '@/components/ui/premium'
 
 const PAGE_SIZE = 15
 
@@ -51,6 +54,7 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
 
 export default function EventsPage() {
   const ui = useUiStrings()
+  const t = useDashboardUi()
   const router = useRouter()
 
   const [query, setQuery] = useState('')
@@ -61,6 +65,8 @@ export default function EventsPage() {
   const [total, setTotal] = useState(0)
   const [offset, setOffset] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [loadingMore, setLoadingMore] = useState(false)
 
   const [featured, setFeatured] = useState<EventRecord[]>([])
@@ -91,19 +97,26 @@ export default function EventsPage() {
   useEffect(() => {
     const handle = setTimeout(() => {
       setLoading(true)
+      setLoadError(false)
       fetch(`/api/events/list?${buildParams({}, 0)}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setEvents(data.events || [])
+        .then(async (res) => {
+          const data = await res.json().catch(() => ({}))
+          // A failed request used to render as "no events found".
+          if (!res.ok || !Array.isArray(data.events)) throw new Error(`events list: ${res.status}`)
+          setEvents(data.events)
           setTotal(data.total || 0)
           setOffset(0)
           setLoading(false)
         })
-        .catch(() => setLoading(false))
+        .catch((err) => {
+          console.error('Events could not be loaded:', err)
+          setLoadError(true)
+          setLoading(false)
+        })
     }, 250)
     return () => clearTimeout(handle)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, filters])
+  }, [query, filters, reloadKey])
 
   // Featured / Online rails — independent of the active filters, hidden
   // once the user starts filtering/searching so the page doesn't feel
@@ -170,24 +183,25 @@ export default function EventsPage() {
   const hasMore = events.length < total
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
+      <PageBackdrop />
       <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[1100px] h-[1100px] rounded-full opacity-20 dark:opacity-30 blur-[160px]"
-        style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.55) 0%, rgba(168,85,247,0.5) 100%)' }}
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[1100px] h-[1100px] rounded-full opacity-[0.10] dark:opacity-[0.16] blur-[160px]"
+        style={{ background: 'radial-gradient(circle, rgba(139,149,255,0.55) 0%, rgba(167,139,250,0.5) 100%)' }}
       />
 
       <div className="relative max-w-6xl mx-auto pt-40 pb-24 px-6">
         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#22D3EE]/25 bg-[#22D3EE]/10 px-3.5 py-1.5 mb-5">
-            <Sparkles size={12} className="text-[#22D3EE]" />
-            <p className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ background: 'linear-gradient(90deg, #22D3EE 0%, #A855F7 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#8B95FF]/25 bg-[#8B95FF]/10 px-3.5 py-1.5 mb-5">
+            <Sparkles size={12} className="text-[#8B95FF]" />
+            <p className="text-xs font-semibold tracking-[0.2em] uppercase text-ink/70 dark:text-white/70">
               {ui.events.badge}
             </p>
           </div>
-          <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tight mb-3">
-            <span style={{ background: 'linear-gradient(90deg, #22D3EE 0%, #A855F7 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <h1 className="font-display text-5xl sm:text-6xl font-semibold tracking-[-0.035em] mb-3 text-ink dark:text-white">
+            <span>
               {ui.events.heading}
             </span>
           </h1>
@@ -196,15 +210,15 @@ export default function EventsPage() {
 
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none flex items-center justify-center h-6 w-6 rounded-full bg-[#22D3EE]/15">
-              <Search size={13} strokeWidth={2.5} className="text-[#22D3EE]" />
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none flex items-center justify-center h-6 w-6 rounded-full bg-[#8B95FF]/15">
+              <Search size={13} strokeWidth={2.5} className="text-[#8B95FF]" />
             </div>
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={ui.events.searchPlaceholder}
-              className="relative w-full text-sm rounded-full border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] pl-14 pr-4 py-3.5 outline-none focus:border-[#22D3EE] text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 transition-colors"
+              className="relative w-full text-sm rounded-full border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] pl-14 pr-4 py-3.5 outline-none focus:border-[#8B95FF] text-ink dark:text-white placeholder:text-ink/55 dark:placeholder:text-white/40 transition-colors"
             />
           </div>
           <button
@@ -214,7 +228,7 @@ export default function EventsPage() {
                 ? 'text-white'
                 : 'text-ink/70 dark:text-white/70 bg-black/[0.04] dark:bg-white/5 hover:bg-black/[0.07] dark:hover:bg-white/10'
             }`}
-            style={showFilters ? { background: 'linear-gradient(90deg, #22D3EE 0%, #A855F7 100%)' } : undefined}
+            style={showFilters ? { background: 'linear-gradient(90deg, #8B95FF 0%, #A78BFA 100%)' } : undefined}
           >
             <SlidersHorizontal size={15} />
             {ui.events.filtersLabel}
@@ -225,7 +239,7 @@ export default function EventsPage() {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            className="mb-8 rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 grid sm:grid-cols-2 lg:grid-cols-4 gap-4"
+            className="mb-8 rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 grid sm:grid-cols-2 lg:grid-cols-4 gap-4"
           >
             <FilterSelect
               label={ui.events.categoryLabel}
@@ -265,7 +279,7 @@ export default function EventsPage() {
                     onClick={() => setFilters((f) => ({ ...f, locationType: v }))}
                     className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
                       filters.locationType === v
-                        ? 'text-white bg-gradient-to-r from-[#22D3EE] to-[#A855F7]'
+                        ? 'text-white bg-gradient-to-r from-[#8B95FF] to-[#A78BFA]'
                         : 'text-ink/60 dark:text-white/60 bg-black/[0.04] dark:bg-white/5 hover:bg-black/[0.07] dark:hover:bg-white/10'
                     }`}
                   >
@@ -284,7 +298,7 @@ export default function EventsPage() {
                     onClick={() => setFilters((f) => ({ ...f, datePreset: v }))}
                     className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
                       filters.datePreset === v
-                        ? 'text-white bg-gradient-to-r from-[#22D3EE] to-[#A855F7]'
+                        ? 'text-white bg-gradient-to-r from-[#8B95FF] to-[#A78BFA]'
                         : 'text-ink/60 dark:text-white/60 bg-black/[0.04] dark:bg-white/5 hover:bg-black/[0.07] dark:hover:bg-white/10'
                     }`}
                   >
@@ -303,7 +317,7 @@ export default function EventsPage() {
                     onClick={() => setFilters((f) => ({ ...f, free: v }))}
                     className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
                       filters.free === v
-                        ? 'text-white bg-gradient-to-r from-[#22D3EE] to-[#A855F7]'
+                        ? 'text-white bg-gradient-to-r from-[#8B95FF] to-[#A78BFA]'
                         : 'text-ink/60 dark:text-white/60 bg-black/[0.04] dark:bg-white/5 hover:bg-black/[0.07] dark:hover:bg-white/10'
                     }`}
                   >
@@ -332,10 +346,10 @@ export default function EventsPage() {
           <Rail title={ui.events.featuredHeading} events={featured} router={router} />
         )}
         {!isFiltering && online.length > 0 && (
-          <Rail title={ui.events.onlineHeading} events={online} router={router} icon={<Wifi size={15} className="text-[#22D3EE]" />} />
+          <Rail title={ui.events.onlineHeading} events={online} router={router} icon={<Wifi size={15} className="text-[#8B95FF]" />} />
         )}
         {!isFiltering && nearYou.length > 0 && (
-          <Rail title={ui.events.nearYouHeading} events={nearYou} router={router} icon={<MapPin size={15} className="text-[#A855F7]" />} />
+          <Rail title={ui.events.nearYouHeading} events={nearYou} router={router} icon={<MapPin size={15} className="text-[#A78BFA]" />} />
         )}
 
         <p className="text-xs font-semibold tracking-[0.2em] uppercase text-ink/55 dark:text-white/40 mb-4 mt-2">
@@ -346,6 +360,8 @@ export default function EventsPage() {
           <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
             <p className="text-sm text-ink/60 dark:text-white/50">{ui.events.loadingEvents}</p>
           </div>
+        ) : loadError ? (
+          <ErrorState message={t.library.loadError} onRetry={() => setReloadKey((k) => k + 1)} />
         ) : events.length === 0 ? (
           <div className="rounded-[28px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center">
             <p className="text-sm text-ink/60 dark:text-white/50">{ui.events.noEventsFound}</p>
@@ -363,7 +379,7 @@ export default function EventsPage() {
                   onClick={loadMore}
                   disabled={loadingMore}
                   className="rounded-full px-6 py-3 text-sm font-semibold text-white disabled:opacity-50 transition-transform hover:scale-[1.02]"
-                  style={{ background: 'linear-gradient(90deg, #22D3EE 0%, #A855F7 100%)' }}
+                  style={{ background: 'linear-gradient(90deg, #8B95FF 0%, #A78BFA 100%)' }}
                 >
                   {loadingMore ? ui.events.loadingEvents : `${ui.events.upcomingHeading} +${total - events.length}`}
                 </button>
@@ -375,7 +391,7 @@ export default function EventsPage() {
         {providers.length > 0 && (
           <div className="mt-16 pt-10 border-t border-black/[0.09] dark:border-white/10">
             <div className="flex items-center gap-2 mb-1.5">
-              <Building2 size={15} className="text-[#A855F7]" />
+              <Building2 size={15} className="text-[#A78BFA]" />
               <p className="text-xs font-semibold tracking-[0.2em] uppercase text-ink/55 dark:text-white/40">
                 {ui.events.providersHeading}
               </p>
@@ -386,7 +402,7 @@ export default function EventsPage() {
               {providers.map((provider) => (
                 <div
                   key={provider.id}
-                  className="group rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#A855F7]/30 hover:shadow-[0_16px_40px_-18px_rgba(168,85,247,0.3)]"
+                  className="group rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#A78BFA]/30 hover:shadow-[0_16px_40px_-18px_rgba(167,139,250,0.3)]"
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <h3 className="text-sm font-semibold text-ink dark:text-white">{provider.name}</h3>
@@ -406,7 +422,7 @@ export default function EventsPage() {
                     href={provider.base_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A855F7] hover:gap-2 transition-all"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A78BFA] hover:gap-2 transition-all"
                   >
                     {ui.events.visitProviderCta}
                     <ArrowUpRight size={13} strokeWidth={2.5} />
@@ -440,7 +456,7 @@ function FilterSelect({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#22D3EE] text-ink dark:text-white"
+        className="w-full rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.06] px-3 py-2.5 text-sm outline-none focus:border-[#8B95FF] text-ink dark:text-white"
       >
         <option value="">{allLabel}</option>
         {options.map(([key, l]) => (

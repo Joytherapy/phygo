@@ -48,6 +48,7 @@ export default async function LandingPage({ lang }: { lang: AppLang }) {
         <LandingHeader lang={lang} nav={t.nav} libraryHref={libraryHref} />
         <main id="main-content">
           <Hero
+            lang={lang}
             hero={t.hero}
             story={t.story}
             conditionsText={conditionsText}
@@ -91,7 +92,7 @@ export default async function LandingPage({ lang }: { lang: AppLang }) {
           <TrustSection lang={lang} trust={t.trust} />
           <PricingSection lang={lang} pricing={t.pricing} />
           <FaqSection faq={t.faq} />
-          <FinalCta final={t.final} libraryHref={libraryHref} />
+          <FinalCta lang={lang} final={t.final} libraryHref={libraryHref} />
         </main>
         <LandingFooter lang={lang} footer={t.footer} libraryHref={libraryHref} />
       </div>

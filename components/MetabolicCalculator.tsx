@@ -6,6 +6,7 @@ import { Flame, Activity, Ruler, Check, Loader2, Search, User, Pencil, X, Printe
 import { usePatientContext } from '@/contexts/PatientContext';
 import { useUiStrings, useLanguage } from '@/contexts/LanguageContext';
 import { getFoodExamplesByMacro } from '@/lib/foodExamples';
+import { localeForLang } from '@/lib/i18n/agendaStrings';
 import type {
   ActivityLevel,
   Goal,
@@ -150,7 +151,7 @@ export default function MetabolicCalculator({
 
   const invalid = result && result.warnings.length > 0;
   const patientNameForPrint = mode === 'professional' ? currentPatient?.name ?? null : null;
-  const printedOn = new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+  const printedOn = new Date().toLocaleDateString(localeForLang(lang), { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <div className="max-w-3xl">
@@ -249,13 +250,10 @@ export default function MetabolicCalculator({
         <div className="mt-6 print:mt-0">
           {/* Intestazione visibile SOLO in stampa — trasforma i risultati in un referto stampabile/PDF */}
           <div className="hidden print:flex items-center justify-between mb-8 pb-4 border-b border-black/10">
-            <div className="flex items-center gap-2 font-display font-bold text-lg text-ink">
-              <img
-                src="/logo-mark.png"
-                alt="Phygo"
-                className="h-8 w-8 rounded-lg object-cover"
-              />
-              Phygo — {ui.resultsHeading}
+            <div className="flex items-center gap-2.5 font-display text-[17px] font-bold tracking-tight text-ink">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo-mark.png" alt="" width={28} height={28} className="h-7 w-7 rounded-md object-cover" />
+              PHYGO — {ui.resultsHeading}
             </div>
             <div className="text-right text-xs text-ink/60">
               {patientNameForPrint && <p className="font-semibold">{ui.printedForLabel} {patientNameForPrint}</p>}

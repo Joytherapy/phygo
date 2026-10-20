@@ -1,7 +1,10 @@
 'use client'
 
+import { AlertCircle, X } from 'lucide-react'
 import Navbar from '@/components/Navbar'
-import WorkspaceSidebar from './WorkspaceSidebar'
+import WorkspaceSidebar, { WorkspaceMobileNav } from './WorkspaceSidebar'
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
+import { PageBackdrop } from '@/components/ui/premium'
 
 // The calmer, "study environment" shell for every /dashboard/workspace/*
 // page — same PHYGO chrome (Navbar, color tokens) as the rest of the
@@ -35,29 +38,40 @@ import WorkspaceSidebar from './WorkspaceSidebar'
 // the dashboard are completely unaffected. No portals are used anywhere in
 // the Workspace component tree (menus/dialogs all render inline, verified
 // via grep), so every dropdown, color picker and dialog inherits this too.
+// actionError: a failed rename/star/delete/restore (see
+// lib/workspace/useWorkspaceMutation.ts), shown above the page content.
 export default function WorkspaceShell({
   children,
   fullscreen = false,
+  actionError = null,
+  onDismissActionError,
 }: {
   children: React.ReactNode
   fullscreen?: boolean
+  actionError?: string | null
+  onDismissActionError?: () => void
 }) {
+  const t = useDashboardUi()
   if (fullscreen) {
     return (
-      <div className="dark fixed inset-0 z-40 flex flex-col bg-white dark:bg-[#08090b] transition-colors">{children}</div>
+      // The full-screen reader stays dark (a reading surface), with a dark background to match.
+      <div className="dark fixed inset-0 z-40 flex flex-col bg-[#050608] transition-colors">{children}</div>
     )
   }
 
   return (
-    <div className="dark relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    // Follows the app theme like every other page (a fixed "dark" class here
+    // painted white text on the light background in the light theme).
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
+      <PageBackdrop />
 
       {/* Role-aware ambient glow: reads var(--brand-from)/var(--brand-to) from
           app/globals.css, which RoleThemeProvider switches from the default
           PHYGO blue→green to a Student cyan→violet via html[data-role] — the
           main visible "stacco" between Student and Professional, since this
           shell is the Student home surface. color-mix reproduces the exact
-          original rgba(79,124,255,0.5)/rgba(50,214,160,0.4) look for
+          original rgba(124,131,255,0.5)/rgba(167,139,250,0.4) look for
           Professional (unchanged), just parameterized by the CSS vars.
           A second, smaller and more saturated orb layers underneath for a
           richer, less flat "premium" depth than a single soft blur. */}
@@ -83,7 +97,29 @@ export default function WorkspaceShell({
       <div className="relative max-w-[1600px] mx-auto pt-32 md:pt-36 pb-24 px-4 sm:px-6 lg:px-10">
         <div className="flex gap-8">
           <WorkspaceSidebar />
-          <main className="flex-1 min-w-0">{children}</main>
+          <main id="main-content" className="flex-1 min-w-0">
+            <WorkspaceMobileNav />
+            {actionError && (
+              <div
+                role="alert"
+                className="mb-6 flex items-start gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300"
+              >
+                <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden />
+                <p className="flex-1">{actionError}</p>
+                {onDismissActionError && (
+                  <button
+                    type="button"
+                    onClick={onDismissActionError}
+                    aria-label={t.common.close}
+                    className="-my-2 -mr-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full hover:bg-red-500/10"
+                  >
+                    <X size={14} aria-hidden />
+                  </button>
+                )}
+              </div>
+            )}
+            {children}
+          </main>
         </div>
       </div>
     </div>

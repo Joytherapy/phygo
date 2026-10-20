@@ -5,6 +5,7 @@ import { RoleThemeProvider } from '@/contexts/RoleThemeContext'
 import { StudyPanelProvider } from '@/contexts/StudyPanelContext'
 import GlobalAskLauncher from '@/components/workspace/GlobalAskLauncher'
 import StudyPanel from '@/components/workspace/StudyPanel'
+import DashboardMotion from '@/components/dashboard/DashboardMotion'
 
 // AskProvider + GlobalAskLauncher make "Ask PHYGO" a site-wide feature
 // (floating button + slide-over panel, on every dashboard page) instead of
@@ -21,6 +22,9 @@ import StudyPanel from '@/components/workspace/StudyPanel'
 // from any page (in practice: from PdfViewer's TextSelectionPopup) without
 // the document page needing to render or manage the panel itself. See
 // contexts/StudyPanelContext.tsx.
+//
+// DashboardMotion makes framer-motion honour prefers-reduced-motion on every
+// dashboard page (see components/dashboard/DashboardMotion.tsx).
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <LanguageProvider>
@@ -28,9 +32,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <PatientProvider>
           <AskProvider>
             <StudyPanelProvider>
-              {children}
-              <GlobalAskLauncher />
-              <StudyPanel />
+              <DashboardMotion>
+                {children}
+                <GlobalAskLauncher />
+                <StudyPanel />
+              </DashboardMotion>
             </StudyPanelProvider>
           </AskProvider>
         </PatientProvider>

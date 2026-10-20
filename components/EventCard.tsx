@@ -52,9 +52,9 @@ export default function EventCard({ event, onClick }: { event: EventRecord; onCl
 
   const verificationColor =
     event.verification_status === 'phygo_verified'
-      ? '#22D3EE'
+      ? '#8B95FF'
       : event.verification_status === 'organizer_verified'
-      ? '#A855F7'
+      ? '#A78BFA'
       : event.verification_status === 'source_verified'
       ? '#818CF8'
       : '#8A93A6'
@@ -66,7 +66,7 @@ export default function EventCard({ event, onClick }: { event: EventRecord; onCl
     >
       <div
         className="relative h-28 flex items-center justify-center overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, rgba(34,211,238,0.18) 0%, rgba(168,85,247,0.18) 100%)' }}
+        style={{ background: 'linear-gradient(135deg, rgba(139,149,255,0.18) 0%, rgba(167,139,250,0.18) 100%)' }}
       >
         {event.image ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -74,7 +74,7 @@ export default function EventCard({ event, onClick }: { event: EventRecord; onCl
         ) : (
           <div
             className="pointer-events-none absolute -top-8 -right-8 w-28 h-28 rounded-full opacity-40 blur-2xl transition-transform duration-500 group-hover:scale-125"
-            style={{ background: 'linear-gradient(135deg, #22D3EE 0%, #A855F7 100%)' }}
+            style={{ background: 'linear-gradient(135deg, #8B95FF 0%, #A78BFA 100%)' }}
           />
         )}
         <span className="absolute top-2.5 left-2.5 rounded-full bg-white/90 dark:bg-black/60 backdrop-blur-sm px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-ink dark:text-white shadow-soft">
@@ -106,7 +106,7 @@ export default function EventCard({ event, onClick }: { event: EventRecord; onCl
           </span>
           <span
             className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-semibold text-white transition-transform group-hover:scale-105"
-            style={{ background: 'linear-gradient(90deg, #22D3EE 0%, #A855F7 100%)' }}
+            style={{ background: 'linear-gradient(90deg, #8B95FF 0%, #A78BFA 100%)' }}
           >
             <BadgeCheck size={12} />
             {ui.events.viewEventCta}

@@ -31,7 +31,7 @@ export default function PhygoWorld() {
         <div className="rounded-xl3 bg-grad-mesh dark:bg-white/[0.03] p-8 sm:p-10">
           <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
             <div>
-              <p className="eyebrow text-electric mb-2">Phygo World</p>
+              <p className="eyebrow text-electric mb-2">PHYGO World</p>
               <p className="text-sm text-ink/55 dark:text-white/55 max-w-md">
                 Beyond the clinic — the wider ecosystem around Phygo.
               </p>

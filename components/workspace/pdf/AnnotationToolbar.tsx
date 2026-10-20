@@ -12,6 +12,7 @@ import { MousePointer2, Pencil, Highlighter, Eraser, Type, Minus, Square, Circle
 import { HIGHLIGHT_COLORS, PEN_COLORS, TEXT_COLORS, TEXT_BACKGROUND_COLORS, type AnnotationTool, type ImageAnnotationData } from '@/lib/workspace/types'
 import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
 import InsertImageButton from './InsertImageButton'
+import { FONT_SIZES, MAX_FONT_SIZE, MIN_FONT_SIZE, stepFontSize } from './TextAnnotationLayer'
 
 const WIDTHS = [2, 3.5, 5.5]
 // Deliberately thicker than the pen widths above — a highlighter is a broad
@@ -27,7 +28,6 @@ const ERASER_SIZES = [14, 26, 44]
 // need to fit in a tight margin. 14 (the pre-existing hardcoded default)
 // stays one of the presets so nothing changes for anyone who never touches
 // this control.
-const TEXT_SIZES = [9, 14, 20, 28]
 const MORE_TOOLS: AnnotationTool[] = ['line', 'rect', 'ellipse']
 
 export default function AnnotationToolbar({
@@ -70,7 +70,8 @@ export default function AnnotationToolbar({
   onTextBackgroundChange: (c: string | null) => void
   markerColor: string
   onMarkerColorChange: (c: string) => void
-  /** Font size (px) new text notes are created with — see TEXT_SIZES. */
+  /** Font size (px) for new text notes, and for the selected note while one
+   *  is selected (TextAnnotationLayer) — Word-style menu plus A-/A+ steps. */
   textFontSize: number
   onTextFontSizeChange: (s: number) => void
   width: number
@@ -110,7 +111,7 @@ export default function AnnotationToolbar({
 
   const btn = (active: boolean) =>
     `flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-      active ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
+      active ? 'bg-[#7C83FF]/10 text-[#7C83FF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
     }`
 
   const isInkTool = tool === 'pen' || tool === 'line' || tool === 'rect' || tool === 'ellipse'
@@ -222,12 +223,12 @@ export default function AnnotationToolbar({
                 aria-label={`${ui.annotate.thickness} ${w}`}
                 title={`${ui.annotate.thickness} ${w}`}
                 className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                  width === w ? 'bg-[#4F7CFF]/10' : 'hover:bg-ink/5 dark:hover:bg-white/10'
+                  width === w ? 'bg-[#7C83FF]/10' : 'hover:bg-ink/5 dark:hover:bg-white/10'
                 }`}
               >
                 <span
                   className="rounded-full"
-                  style={{ width: Math.max(4, w * 2), height: Math.max(4, w * 2), backgroundColor: width === w ? '#4F7CFF' : 'currentColor', opacity: width === w ? 1 : 0.4 }}
+                  style={{ width: Math.max(4, w * 2), height: Math.max(4, w * 2), backgroundColor: width === w ? '#7C83FF' : 'currentColor', opacity: width === w ? 1 : 0.4 }}
                 />
               </button>
             ))}
@@ -258,12 +259,12 @@ export default function AnnotationToolbar({
                 aria-label={`${ui.annotate.thickness} ${w}`}
                 title={`${ui.annotate.thickness} ${w}`}
                 className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                  markerWidth === w ? 'bg-[#4F7CFF]/10' : 'hover:bg-ink/5 dark:hover:bg-white/10'
+                  markerWidth === w ? 'bg-[#7C83FF]/10' : 'hover:bg-ink/5 dark:hover:bg-white/10'
                 }`}
               >
                 <span
                   className="rounded-sm"
-                  style={{ width: Math.max(6, w * 0.7), height: Math.max(6, w * 0.5), backgroundColor: markerWidth === w ? '#4F7CFF' : 'currentColor', opacity: markerWidth === w ? 1 : 0.4 }}
+                  style={{ width: Math.max(6, w * 0.7), height: Math.max(6, w * 0.5), backgroundColor: markerWidth === w ? '#7C83FF' : 'currentColor', opacity: markerWidth === w ? 1 : 0.4 }}
                 />
               </button>
             ))}
@@ -282,7 +283,7 @@ export default function AnnotationToolbar({
                 aria-label={`${ui.annotate.eraserSize} ${s}`}
                 title={`${ui.annotate.eraserSize} ${s}`}
                 className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                  eraserSize === s ? 'bg-[#4F7CFF]/10' : 'hover:bg-ink/5 dark:hover:bg-white/10'
+                  eraserSize === s ? 'bg-[#7C83FF]/10' : 'hover:bg-ink/5 dark:hover:bg-white/10'
                 }`}
               >
                 <span
@@ -290,7 +291,7 @@ export default function AnnotationToolbar({
                   style={{
                     width: Math.min(22, Math.max(6, s * 0.55)),
                     height: Math.min(22, Math.max(6, s * 0.55)),
-                    borderColor: eraserSize === s ? '#4F7CFF' : 'currentColor',
+                    borderColor: eraserSize === s ? '#7C83FF' : 'currentColor',
                     opacity: eraserSize === s ? 1 : 0.4,
                   }}
                 />
@@ -338,25 +339,43 @@ export default function AnnotationToolbar({
               />
             ))}
           </div>
-          {/* Font size for a NEW note — literal "Aa" at each size so the
-              effect is obvious at a glance, same idea as the width dots
-              above rather than a plain numeric picker. */}
+          {/* Font size, Word-style: A- / size menu / A+. Applies to new notes
+              and to the selected note (TextAnnotationLayer). */}
           <div className="mx-1 h-5 w-px bg-black/[0.08] dark:bg-white/10" />
-          <div className="flex items-center gap-1">
-            {TEXT_SIZES.map((s) => (
-              <button
-                key={s}
-                onClick={() => onTextFontSizeChange(s)}
-                aria-label={`${ui.annotate.textSize} ${s}`}
-                title={`${ui.annotate.textSize} ${s}`}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg font-medium transition-colors ${
-                  textFontSize === s ? 'bg-[#4F7CFF]/10 text-[#4F7CFF]' : 'text-ink/60 dark:text-white/50 hover:bg-ink/5 dark:hover:bg-white/10'
-                }`}
-                style={{ fontSize: Math.min(18, Math.max(9, s * 0.7)) }}
-              >
-                Aa
-              </button>
-            ))}
+          <div className="flex items-center gap-1" data-testid="text-size-controls">
+            <button
+              type="button"
+              onClick={() => onTextFontSizeChange(stepFontSize(textFontSize, -1))}
+              disabled={textFontSize <= MIN_FONT_SIZE}
+              aria-label={ui.annotate.textSmaller}
+              title={ui.annotate.textSmaller}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold text-ink/60 transition-colors hover:bg-ink/5 disabled:opacity-30 dark:text-white/55 dark:hover:bg-white/10"
+            >
+              A−
+            </button>
+            <select
+              value={textFontSize}
+              onChange={(e) => onTextFontSizeChange(Number(e.target.value))}
+              aria-label={ui.annotate.textSize}
+              title={ui.annotate.textSize}
+              className="h-8 rounded-lg border border-black/[0.08] bg-white px-2 text-xs font-semibold tabular-nums text-ink outline-none focus:border-[#8B95FF] dark:border-white/10 dark:bg-white/[0.06] dark:text-white"
+            >
+              {(FONT_SIZES.includes(textFontSize) ? FONT_SIZES : [...FONT_SIZES, textFontSize].sort((a, b) => a - b)).map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => onTextFontSizeChange(stepFontSize(textFontSize, 1))}
+              disabled={textFontSize >= MAX_FONT_SIZE}
+              aria-label={ui.annotate.textBigger}
+              title={ui.annotate.textBigger}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-semibold text-ink/60 transition-colors hover:bg-ink/5 disabled:opacity-30 dark:text-white/55 dark:hover:bg-white/10"
+            >
+              A+
+            </button>
           </div>
         </>
       )}

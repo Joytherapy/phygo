@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar';
 import ClinicalActionBar from '@/components/ClinicalActionBar';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 import { ZONE_ANATOMY } from '@/lib/bodyMapAnatomy';
+import { PageBackdrop } from '@/components/ui/premium'
 
 // Adiacenze anatomiche/cliniche tra zone muscolari e ossee — è il cuore del
 // cross-linking muscolo <-> osso che nessun altro atlante 3D generico offre:
@@ -89,7 +90,7 @@ interface HubData {
 
 const levelColor: Record<string, string> = {
   Gentle: '#32D6A0',
-  Active: '#4F7CFF',
+  Active: '#7C83FF',
   Challenge: '#A855F7',
 };
 
@@ -187,7 +188,7 @@ export default function ZoneHubPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f7f7f8] dark:bg-[#050608] flex items-center justify-center">
         <Navbar />
         <p className="text-ink/55 dark:text-white/40">{ui.common.loading}</p>
       </div>
@@ -196,13 +197,13 @@ export default function ZoneHubPage() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f7f7f8] dark:bg-[#050608] flex items-center justify-center">
         <Navbar />
         <div className="text-center">
           <p className="text-ink/60 dark:text-white/60 mb-4">{ui.bodyMap.zoneNotFound}</p>
           <button
             onClick={() => router.push('/dashboard/body-map')}
-            className="text-sm font-semibold text-[#4F7CFF]"
+            className="text-sm font-semibold text-[#7C83FF]"
           >
             {"\u2190"} {ui.bodyMap.backToBodyMap}
           </button>
@@ -219,15 +220,10 @@ export default function ZoneHubPage() {
   const isBoneZone = zone.slug.startsWith('bone-');
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
-        style={{
-          background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)',
-        }}
-      />
+      <PageBackdrop />
 
       <div className="relative max-w-4xl mx-auto px-6 pt-40 pb-24">
         <button
@@ -240,7 +236,7 @@ export default function ZoneHubPage() {
 
         <div className="mb-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] backdrop-blur-xl text-xs font-semibold tracking-[0.15em] uppercase mb-4">
-            <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#4F7CFF] to-[#32D6A0]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#7C83FF] to-[#A78BFA]" />
             {isBoneZone ? ui.bodyMap.zoneTypeSkeletal : ui.bodyMap.zoneTypeAnatomical}
           </div>
           <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tight">
@@ -262,7 +258,7 @@ export default function ZoneHubPage() {
                   onClick={() => router.push(`/dashboard/body-map/${relSlug}`)}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/[0.08] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:border-black/[0.14] dark:hover:border-white/20 transition-all text-xs font-medium"
                 >
-                  {relSlug.startsWith('bone-') && <Bone size={11} className="text-[#4F7CFF]" />}
+                  {relSlug.startsWith('bone-') && <Bone size={11} className="text-[#7C83FF]" />}
                   {zoneDisplayName(relSlug)}
                 </button>
               ))}
@@ -274,7 +270,7 @@ export default function ZoneHubPage() {
           <div className="mt-10 grid sm:grid-cols-2 gap-4">
             {(
               [
-                { key: 'anatomy', label: ui.anatomy.anatomy, icon: Bone, color: '#4F7CFF' },
+                { key: 'anatomy', label: ui.anatomy.anatomy, icon: Bone, color: '#7C83FF' },
                 { key: 'innervation', label: ui.anatomy.innervation, icon: Zap, color: '#A855F7' },
                 { key: 'biomechanics', label: ui.anatomy.biomechanics, icon: Activity, color: '#32D6A0' },
                 { key: 'clinicalRelevance', label: ui.anatomy.clinicalRelevance, icon: BookOpen, color: '#F59E0B' },
@@ -282,7 +278,7 @@ export default function ZoneHubPage() {
             ).map(({ key, label, icon: Icon, color }) => (
               <div
                 key={key}
-                className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 shadow-soft"
+                className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 shadow-soft"
               >
                 <div className="flex items-center gap-2 mb-3">
                   <span
@@ -310,8 +306,7 @@ export default function ZoneHubPage() {
                 setAskOpen(true);
                 setAskQuestion(zoneStarterQuestions[zone.slug] || '');
               }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white shadow-[0_8px_30px_rgba(79,124,255,0.3)] hover:scale-105 transition-transform"
-              style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 shadow-[0_8px_30px_rgba(124,131,255,0.3)] transition-transform"
             >
               <Sparkles size={16} />
               {ui.bodyMap.askPhygoButton}
@@ -319,7 +314,7 @@ export default function ZoneHubPage() {
           ) : (
             <div className="rounded-[24px] border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 max-w-2xl">
               <div className="flex items-center gap-2 mb-3">
-                <Sparkles size={16} className="text-[#4F7CFF]" />
+                <Sparkles size={16} className="text-[#7C83FF]" />
                 <p className="text-sm font-semibold">{ui.bodyMap.askPhygoHeadingPrefix.replace('{zone}', zoneDisplayName(zone.slug))}</p>
               </div>
               <div className="flex gap-2">
@@ -327,14 +322,13 @@ export default function ZoneHubPage() {
                   value={askQuestion}
                   onChange={(e) => setAskQuestion(e.target.value)}
                   rows={2}
-                  className="flex-1 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-3 py-2 text-sm outline-none focus:border-[#4F7CFF] resize-none"
+                  className="flex-1 rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-3 py-2 text-sm outline-none focus:border-[#7C83FF] resize-none"
                   placeholder={ui.bodyMap.askPlaceholder}
                 />
                 <button
                   onClick={handleAskPhygo}
                   disabled={askLoading || !askQuestion.trim()}
-                  className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl text-white disabled:opacity-50 self-end"
-                  style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                  className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-ink text-white shadow-[0_10px_30px_-12px_rgba(15,23,42,0.55)] hover:bg-ink/90 dark:bg-white dark:text-ink dark:shadow-[0_10px_30px_-10px_rgba(255,255,255,0.25)] dark:hover:bg-white/90 disabled:opacity-50 self-end"
                 >
                   {askLoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
                 </button>
@@ -353,7 +347,7 @@ export default function ZoneHubPage() {
 
         <div className="mt-10 pt-10 border-t border-black/[0.09] dark:border-white/10">
           <div className="flex items-center gap-2 mb-4">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/[0.12] text-[#4F7CFF]">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#7C83FF]/[0.12] text-[#7C83FF]">
               <Activity size={14} />
             </span>
             <h2 className="text-sm font-semibold tracking-wide uppercase text-ink/60 dark:text-white/60">
@@ -370,7 +364,7 @@ export default function ZoneHubPage() {
               {exercises.map((ex) => (
                 <div
                   key={ex.id}
-                  className="rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl shadow-soft hover:shadow-md transition-all"
+                  className="rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] shadow-soft hover:shadow-md transition-all"
                 >
                   {ex.image_url && (
                     <div className="aspect-video bg-white flex items-center justify-center rounded-t-2xl overflow-hidden">
@@ -384,7 +378,7 @@ export default function ZoneHubPage() {
                   <div className="p-4">
                     <span
                       className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full text-white mb-2"
-                      style={{ backgroundColor: levelColor[ex.level] || '#4F7CFF' }}
+                      style={{ backgroundColor: levelColor[ex.level] || '#7C83FF' }}
                     >
                       {ex.level}
                     </span>
@@ -405,7 +399,7 @@ export default function ZoneHubPage() {
           {totalExercises > exercises.length && (
             <button
               onClick={() => router.push('/dashboard/library')}
-              className="mt-4 text-sm font-semibold text-[#4F7CFF] hover:underline"
+              className="mt-4 text-sm font-semibold text-[#7C83FF] hover:underline"
             >
               {ui.bodyMap.seeAllExercises.replace('{count}', String(totalExercises))}
             </button>
@@ -448,7 +442,7 @@ export default function ZoneHubPage() {
                           c.evidence_level.toLowerCase() === 'high'
                             ? '#32D6A0'
                             : c.evidence_level.toLowerCase() === 'moderate'
-                            ? '#4F7CFF'
+                            ? '#7C83FF'
                             : '#94A3B8',
                       }}
                     >
@@ -499,7 +493,7 @@ export default function ZoneHubPage() {
                       selectedCondition.evidence_level.toLowerCase() === 'high'
                         ? '#32D6A0'
                         : selectedCondition.evidence_level.toLowerCase() === 'moderate'
-                        ? '#4F7CFF'
+                        ? '#7C83FF'
                         : '#94A3B8',
                   }}
                 >

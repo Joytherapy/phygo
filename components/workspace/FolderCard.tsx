@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Folder, Star, Pencil, Trash2, Check, X, Palette } from 'lucide-react'
 import ItemMenu from './ItemMenu'
 import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
-import { FOLDER_COLORS, type WorkspaceFolder } from '@/lib/workspace/types'
+import { FOLDER_COLORS, folderColor, type WorkspaceFolder } from '@/lib/workspace/types'
 
 // THIRD PASS on the GoodNotes-style redesign. First pass: big square covers
 // with a full gradient background — user liked the organization but called
@@ -33,6 +33,7 @@ export default function FolderCard({
   onColorChange: (color: string | null) => void
 }) {
   const ui = useWorkspaceUi()
+  const [menuOpen, setMenuOpen] = useState(false)
   const [renaming, setRenaming] = useState(false)
   const [draftName, setDraftName] = useState(folder.name)
   const [colorPickerOpen, setColorPickerOpen] = useState(false)
@@ -53,12 +54,13 @@ export default function FolderCard({
     setRenaming(false)
   }
 
-  const iconColor = folder.color || '#4F7CFF'
+  const shown = folderColor(folder.color)
+  const iconColor = shown || '#8B95FF'
 
   return (
     <div
       onClick={() => !renaming && onOpen()}
-      className="group relative flex aspect-[3/4] flex-col overflow-hidden rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lift hover:border-black/[0.1] dark:hover:border-white/20"
+      className={`group relative flex aspect-[3/4] flex-col rounded-2xl border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur-xl cursor-pointer transition-all hover:-translate-y-0.5 hover:border-black/15 hover:shadow-[0_20px_44px_-28px_rgba(15,23,42,0.45)] dark:border-white/[0.07] dark:bg-white/[0.035] dark:hover:border-white/20 ${menuOpen || colorPickerOpen ? 'z-30' : ''}`}
     >
       <div className="flex flex-1 items-center justify-center">
         <span className="flex h-14 w-14 items-center justify-center rounded-2xl" style={{ backgroundColor: `${iconColor}17` }}>
@@ -74,6 +76,7 @@ export default function FolderCard({
 
       <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
         <ItemMenu
+          onOpenChange={setMenuOpen}
           actions={[
             { key: 'rename', label: ui.item.rename, icon: <Pencil size={13} />, onSelect: () => setRenaming(true) },
             { key: 'color', label: ui.item.color, icon: <Palette size={13} />, onSelect: () => setColorPickerOpen(true) },
@@ -84,7 +87,7 @@ export default function FolderCard({
         {colorPickerOpen && (
           <div
             ref={colorPickerRef}
-            className="absolute right-0 top-full mt-1.5 z-30 flex items-center gap-1.5 rounded-xl border border-black/[0.09] dark:border-white/10 bg-white dark:bg-[#171821] shadow-lift p-2"
+            className="absolute right-0 top-full mt-1.5 z-30 flex items-center gap-1.5 rounded-2xl border border-black/[0.06] bg-white/95 p-2 shadow-[0_24px_60px_-20px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-[#121319]/95"
           >
             <button
               onClick={() => {
@@ -92,7 +95,7 @@ export default function FolderCard({
                 setColorPickerOpen(false)
               }}
               aria-label="None"
-              className={`h-5 w-5 rounded-full border-2 border-dashed ${!folder.color ? 'border-ink dark:border-white' : 'border-black/20 dark:border-white/20'}`}
+              className={`h-5 w-5 rounded-full border-2 border-dashed ${!shown ? 'border-ink dark:border-white' : 'border-black/20 dark:border-white/20'}`}
             />
             {FOLDER_COLORS.map((c) => (
               <button
@@ -102,7 +105,7 @@ export default function FolderCard({
                   setColorPickerOpen(false)
                 }}
                 aria-label={c}
-                className={`h-5 w-5 rounded-full border transition-transform ${folder.color === c ? 'scale-110 border-ink dark:border-white' : 'border-black/10 dark:border-white/20'}`}
+                className={`h-5 w-5 rounded-full border transition-transform ${shown === c ? 'scale-110 border-ink dark:border-white' : 'border-black/10 dark:border-white/20'}`}
                 style={{ backgroundColor: c }}
               />
             ))}
@@ -121,9 +124,9 @@ export default function FolderCard({
                 if (e.key === 'Enter') commitRename()
                 if (e.key === 'Escape') setRenaming(false)
               }}
-              className="w-full rounded-lg border border-[#4F7CFF]/40 bg-white dark:bg-[#12131a] px-1.5 py-0.5 text-xs text-ink dark:text-white outline-none"
+              className="w-full rounded-lg border border-[#7C83FF]/40 bg-white dark:bg-[#12131a] px-1.5 py-0.5 text-xs text-ink dark:text-white outline-none"
             />
-            <button onClick={commitRename} className="text-[#32D6A0] shrink-0">
+            <button onClick={commitRename} className="text-[#7C83FF] shrink-0">
               <Check size={13} />
             </button>
             <button onClick={() => setRenaming(false)} className="text-ink/55 dark:text-white/40 shrink-0">

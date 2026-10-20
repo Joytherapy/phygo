@@ -119,6 +119,9 @@ interface WorkspaceDict {
     clearPage: string
     noBackground: string
     textSize: string
+    textSmaller: string
+    textBigger: string
+    resizeBox: string
   }
   ask: {
     button: string
@@ -130,6 +133,9 @@ interface WorkspaceDict {
     close: string
     disclaimer: string
     empty: string
+    /** Used when no document is open (dashboard, patient pages, library…). */
+    placeholderGeneral: string
+    emptyGeneral: string
     genericError: string
     networkError: string
   }
@@ -280,7 +286,7 @@ const it: WorkspaceDict = {
   annotate: {
     select: 'Seleziona', pen: 'Penna', line: 'Linea', rectangle: 'Rettangolo', ellipse: 'Cerchio',
     highlighter: 'Evidenziatore', eraser: 'Gomma', eraserSize: 'Dimensione gomma', text: 'Testo', textPlaceholder: 'Scrivi una nota…', shape: 'Forma',
-    color: 'Colore', thickness: 'Spessore', undo: 'Annulla', redo: 'Ripeti', clearPage: 'Cancella annotazioni pagina', noBackground: 'Nessuno sfondo', textSize: 'Dimensione testo',
+    color: 'Colore', thickness: 'Spessore', undo: 'Annulla', redo: 'Ripeti', clearPage: 'Cancella annotazioni pagina', noBackground: 'Nessuno sfondo', textSize: 'Dimensione testo', textSmaller: 'Riduci testo', textBigger: 'Ingrandisci testo', resizeBox: 'Ridimensiona riquadro',
     insertImage: 'Inserisci immagine', uploadPhoto: 'Carica foto', takePhoto: 'Scatta foto', imageOnly: 'Seleziona un file immagine',
     fileTooLarge: 'File troppo grande (max {max}MB).', sessionExpired: 'Sessione scaduta — accedi di nuovo.',
   },
@@ -349,9 +355,10 @@ const it: WorkspaceDict = {
     copy: 'Copia', copied: 'Copiato', highlight: 'Evidenzia', addToNotes: 'Aggiungi alle note', addedToNotes: 'Aggiunto alle note',
   },
   ask: {
-    button: 'Chiedi a PHYGO', title: 'Chiedi a PHYGO', placeholder: 'Fai una domanda su questo documento…', send: 'Invia',
+    button: 'Chiedi a PHYGO', title: 'Chiedi a PHYGO', placeholder: 'Chiedi qualcosa sul documento…', send: 'Invia',
     thinking: 'PHYGO sta pensando…', limitReached: 'Hai raggiunto il limite di domande per il tuo piano. Riprova più tardi o passa a un piano superiore.',
     close: 'Chiudi', disclaimer: 'Le risposte sono un supporto didattico, non un parere clinico definitivo.', empty: 'Fai la tua prima domanda su questo documento.',
+    placeholderGeneral: 'Chiedi qualcosa a PHYGO…', emptyGeneral: 'Chiedi a PHYGO un dubbio clinico, un concetto da ripassare o un esercizio da proporre.',
     genericError: 'Qualcosa è andato storto.', networkError: 'Errore di rete — riprova.',
   },
 }
@@ -395,7 +402,7 @@ const en: WorkspaceDict = {
   annotate: {
     select: 'Select', pen: 'Pen', line: 'Line', rectangle: 'Rectangle', ellipse: 'Circle',
     highlighter: 'Highlighter', eraser: 'Eraser', eraserSize: 'Eraser size', text: 'Text', textPlaceholder: 'Write a note…', shape: 'Shape',
-    color: 'Color', thickness: 'Thickness', undo: 'Undo', redo: 'Redo', clearPage: 'Clear page annotations', noBackground: 'No background', textSize: 'Text size',
+    color: 'Color', thickness: 'Thickness', undo: 'Undo', redo: 'Redo', clearPage: 'Clear page annotations', noBackground: 'No background', textSize: 'Text size', textSmaller: 'Smaller text', textBigger: 'Bigger text', resizeBox: 'Resize box',
     insertImage: 'Insert image', uploadPhoto: 'Upload photo', takePhoto: 'Take photo', imageOnly: 'Please select an image file',
     fileTooLarge: 'File too large (max {max}MB).', sessionExpired: 'Session expired — please sign in again.',
   },
@@ -464,9 +471,10 @@ const en: WorkspaceDict = {
     copy: 'Copy', copied: 'Copied', highlight: 'Highlight', addToNotes: 'Add to notes', addedToNotes: 'Added to notes',
   },
   ask: {
-    button: 'Ask PHYGO', title: 'Ask PHYGO', placeholder: 'Ask a question about this document…', send: 'Send',
+    button: 'Ask PHYGO', title: 'Ask PHYGO', placeholder: 'Ask about this document…', send: 'Send',
     thinking: 'PHYGO is thinking…', limitReached: "You've reached your plan's question limit. Try again later or upgrade your plan.",
     close: 'Close', disclaimer: 'Answers are study support, not definitive clinical advice.', empty: 'Ask your first question about this document.',
+    placeholderGeneral: 'Ask PHYGO anything…', emptyGeneral: 'Ask PHYGO about a clinical doubt, a concept to review or an exercise to suggest.',
     genericError: 'Something went wrong.', networkError: 'Network error — please try again.',
   },
 }
@@ -510,7 +518,7 @@ const es: WorkspaceDict = {
   annotate: {
     select: 'Seleccionar', pen: 'Bolígrafo', line: 'Línea', rectangle: 'Rectángulo', ellipse: 'Círculo',
     highlighter: 'Resaltador', eraser: 'Borrador', eraserSize: 'Tamaño del borrador', text: 'Texto', textPlaceholder: 'Escribe una nota…', shape: 'Forma',
-    color: 'Color', thickness: 'Grosor', undo: 'Deshacer', redo: 'Rehacer', clearPage: 'Borrar anotaciones de la página', noBackground: 'Sin fondo', textSize: 'Tamaño del texto',
+    color: 'Color', thickness: 'Grosor', undo: 'Deshacer', redo: 'Rehacer', clearPage: 'Borrar anotaciones de la página', noBackground: 'Sin fondo', textSize: 'Tamaño del texto', textSmaller: 'Reducir texto', textBigger: 'Ampliar texto', resizeBox: 'Redimensionar cuadro',
     insertImage: 'Insertar imagen', uploadPhoto: 'Subir foto', takePhoto: 'Tomar foto', imageOnly: 'Selecciona un archivo de imagen',
     fileTooLarge: 'Archivo demasiado grande (máx. {max}MB).', sessionExpired: 'Sesión caducada — inicia sesión de nuevo.',
   },
@@ -579,9 +587,10 @@ const es: WorkspaceDict = {
     copy: 'Copiar', copied: 'Copiado', highlight: 'Resaltar', addToNotes: 'Añadir a notas', addedToNotes: 'Añadido a notas',
   },
   ask: {
-    button: 'Preguntar a PHYGO', title: 'Preguntar a PHYGO', placeholder: 'Haz una pregunta sobre este documento…', send: 'Enviar',
+    button: 'Preguntar a PHYGO', title: 'Preguntar a PHYGO', placeholder: 'Pregunta sobre el documento…', send: 'Enviar',
     thinking: 'PHYGO está pensando…', limitReached: 'Has alcanzado el límite de preguntas de tu plan. Inténtalo más tarde o mejora tu plan.',
     close: 'Cerrar', disclaimer: 'Las respuestas son apoyo de estudio, no un consejo clínico definitivo.', empty: 'Haz tu primera pregunta sobre este documento.',
+    placeholderGeneral: 'Pregunta lo que quieras a PHYGO…', emptyGeneral: 'Pregunta a PHYGO una duda clínica, un concepto para repasar o un ejercicio para proponer.',
     genericError: 'Algo salió mal.', networkError: 'Error de red — inténtalo de nuevo.',
   },
 }
@@ -625,7 +634,7 @@ const fr: WorkspaceDict = {
   annotate: {
     select: 'Sélectionner', pen: 'Stylo', line: 'Ligne', rectangle: 'Rectangle', ellipse: 'Cercle',
     highlighter: 'Surligneur', eraser: 'Gomme', eraserSize: 'Taille de la gomme', text: 'Texte', textPlaceholder: 'Écrivez une note…', shape: 'Forme',
-    color: 'Couleur', thickness: 'Épaisseur', undo: 'Annuler', redo: 'Rétablir', clearPage: 'Effacer les annotations de la page', noBackground: 'Aucun fond', textSize: 'Taille du texte',
+    color: 'Couleur', thickness: 'Épaisseur', undo: 'Annuler', redo: 'Rétablir', clearPage: 'Effacer les annotations de la page', noBackground: 'Aucun fond', textSize: 'Taille du texte', textSmaller: 'Réduire le texte', textBigger: 'Agrandir le texte', resizeBox: 'Redimensionner le cadre',
     insertImage: 'Insérer une image', uploadPhoto: 'Importer une photo', takePhoto: 'Prendre une photo', imageOnly: 'Sélectionnez un fichier image',
     fileTooLarge: 'Fichier trop volumineux (max {max}Mo).', sessionExpired: 'Session expirée — veuillez vous reconnecter.',
   },
@@ -694,9 +703,10 @@ const fr: WorkspaceDict = {
     copy: 'Copier', copied: 'Copié', highlight: 'Surligner', addToNotes: 'Ajouter aux notes', addedToNotes: 'Ajouté aux notes',
   },
   ask: {
-    button: 'Demander à PHYGO', title: 'Demander à PHYGO', placeholder: 'Posez une question sur ce document…', send: 'Envoyer',
+    button: 'Demander à PHYGO', title: 'Demander à PHYGO', placeholder: 'Une question sur ce document…', send: 'Envoyer',
     thinking: 'PHYGO réfléchit…', limitReached: 'Vous avez atteint la limite de questions de votre forfait. Réessayez plus tard ou passez à un forfait supérieur.',
     close: 'Fermer', disclaimer: "Les réponses sont un support d'étude, pas un avis clinique définitif.", empty: 'Posez votre première question sur ce document.',
+    placeholderGeneral: 'Demandez ce que vous voulez à PHYGO…', emptyGeneral: 'Demandez à PHYGO un doute clinique, une notion à revoir ou un exercice à proposer.',
     genericError: "Une erreur s'est produite.", networkError: 'Erreur réseau — veuillez réessayer.',
   },
 }

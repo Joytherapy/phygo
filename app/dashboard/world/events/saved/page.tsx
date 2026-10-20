@@ -6,6 +6,7 @@ import { Bookmark } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import EventCard, { type EventRecord } from '@/components/EventCard'
 import { useUiStrings } from '@/contexts/LanguageContext'
+import { PageBackdrop } from '@/components/ui/premium'
 
 type Tab = 'saved' | 'upcoming' | 'past'
 
@@ -40,18 +41,19 @@ export default function MyEventsPage() {
   const shown = tab === 'saved' ? events : tab === 'upcoming' ? upcoming : past
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
+      <PageBackdrop />
       <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[150px]"
-        style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.5) 0%, rgba(168,85,247,0.5) 100%)' }}
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-[0.10] dark:opacity-[0.16] blur-[150px]"
+        style={{ background: 'radial-gradient(circle, rgba(139,149,255,0.5) 0%, rgba(167,139,250,0.5) 100%)' }}
       />
 
       <div className="relative max-w-5xl mx-auto pt-40 pb-24 px-6">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#22D3EE]/25 bg-[#22D3EE]/10 px-3.5 py-1.5 mb-5">
-          <Bookmark size={12} className="text-[#22D3EE]" />
-          <p className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ background: 'linear-gradient(90deg, #22D3EE 0%, #A855F7 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+        <div className="inline-flex items-center gap-2 rounded-full border border-[#8B95FF]/25 bg-[#8B95FF]/10 px-3.5 py-1.5 mb-5">
+          <Bookmark size={12} className="text-[#8B95FF]" />
+          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-ink/70 dark:text-white/70">
             {ui.events.badge}
           </p>
         </div>
@@ -75,7 +77,7 @@ export default function MyEventsPage() {
                       ? 'text-white scale-[1.03]'
                       : 'text-ink/60 dark:text-white/60 bg-black/[0.04] dark:bg-white/5 hover:bg-black/[0.07] dark:hover:bg-white/10'
                   }`}
-                  style={tab === t ? { background: 'linear-gradient(90deg, #22D3EE 0%, #A855F7 100%)' } : undefined}
+                  style={tab === t ? { background: 'linear-gradient(90deg, #8B95FF 0%, #A78BFA 100%)' } : undefined}
                 >
                   {t === 'saved' ? ui.events.savedTab : t === 'upcoming' ? ui.events.upcomingTab : ui.events.pastTab}
                   {' · '}

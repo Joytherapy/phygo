@@ -4,16 +4,20 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Video } from 'lucide-react'
+import { ArrowLeft, Video, NotebookPen } from 'lucide-react'
 import Navbar from '@/components/Navbar'
 import LiveStructuring from '@/components/liveStructuring/LiveStructuring'
 import { usePatientContext } from '@/contexts/PatientContext'
-import VideoCallPanel from '@/components/VideoCallPanel'
 import ClinicalAccessNotice from '@/components/ClinicalAccessNotice'
 import { useClinicalLocked } from '@/lib/useClinicalAccess'
 import AppointmentScheduler from '@/components/AppointmentScheduler'
 import { useUiStrings } from '@/contexts/LanguageContext'
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
+import ErrorState from '@/components/workspace/ErrorState'
 import { lazy } from '@/lib/lazy'
+import { PageBackdrop, PageEyebrow, PAGE_BG, SECONDARY_BTN } from '@/components/ui/premium'
+import { useHomeUi } from '@/lib/i18n/homeStrings'
+import { Card, Avatar } from '@/components/dashboard/HomeCards'
 
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,10 +27,13 @@ const supabase = lazy(() => createBrowserClient(
 type Patient = {
   id: string
   name: string
+  patient_user_id: string | null
 }
 
 export default function PatientSessionPage() {
   const ui = useUiStrings()
+  const t = useDashboardUi()
+  const h = useHomeUi()
   const params = useParams()
   const router = useRouter()
   const locked = useClinicalLocked()
@@ -35,29 +42,36 @@ export default function PatientSessionPage() {
   const { setCurrentPatient } = usePatientContext()
   const [patient, setPatient] = useState<Patient | null>(null)
   const [loading, setLoading] = useState(true)
-  const [tab, setTab] = useState<'session' | 'video'>('session')
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [savedMessage, setSavedMessage] = useState(false)
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
+      setLoadFailed(false)
+      const { data, error } = await supabase
         .from('patients')
-        .select('id, name')
+        .select('id, name, patient_user_id')
         .eq('id', patientId)
         .single()
 
       if (data) {
         setPatient(data)
         setCurrentPatient({ id: data.id, name: data.name })
+      } else if (error && error.code !== 'PGRST116') {
+        // PGRST116 = no such patient (or not yours). Anything else is a failed
+        // request and gets Retry instead of a misleading "patient not found".
+        console.error('Patient could not be loaded:', error)
+        setLoadFailed(true)
       }
       setLoading(false)
     }
     load()
-  }, [patientId, setCurrentPatient])
+  }, [patientId, setCurrentPatient, reloadKey])
 
   if (loading) {
     return (
-      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b]">
+      <div className={`relative min-h-screen ${PAGE_BG}`}>
         <Navbar />
         <div className="pt-40 text-center text-ink/55 dark:text-white/40">{ui.common.loading}</div>
       </div>
@@ -66,87 +80,86 @@ export default function PatientSessionPage() {
 
   if (!patient) {
     return (
-      <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b]">
+      <div className={`relative min-h-screen ${PAGE_BG}`}>
         <Navbar />
-        <div className="pt-40 text-center text-ink/55 dark:text-white/40">{ui.patients.patientNotFound}</div>
+        <main id="main-content" className="max-w-xl mx-auto px-4 pt-40">
+          {loadFailed ? (
+            <ErrorState
+              message={t.home.loadErrorBody}
+              onRetry={() => {
+                setLoading(true)
+                setReloadKey((k) => k + 1)
+              }}
+            />
+          ) : (
+            <p className="text-center text-ink/60 dark:text-white/50">{ui.patients.patientNotFound}</p>
+          )}
+        </main>
       </div>
     )
   }
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className={`relative min-h-screen overflow-hidden transition-colors ${PAGE_BG}`}>
       <Navbar />
+      <PageBackdrop />
 
-      <div className="relative max-w-4xl mx-auto pt-40 pb-20 px-6">
+      <main id="main-content" className="relative max-w-4xl mx-auto pt-28 sm:pt-36 pb-20 px-4 sm:px-6">
         <motion.button
+          type="button"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onClick={() => router.push(`/dashboard/patients/${patientId}`)}
-          className="flex items-center gap-1.5 text-sm text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white mb-6 transition-colors"
+          className="-ml-2 inline-flex min-h-[40px] max-w-full items-center gap-1.5 rounded-full px-2 text-sm text-ink/60 dark:text-white/50 hover:text-ink dark:hover:text-white mb-4 transition-colors"
         >
-          <ArrowLeft size={15} />
+          <ArrowLeft size={15} className="shrink-0" aria-hidden />
           {ui.patients.backToPatientName.replace('{name}', patient.name)}
         </motion.button>
 
-        <div className="flex items-center gap-2 mb-8">
-          <button
-            onClick={() => setTab('session')}
-            className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
-              tab === 'session'
-                ? 'text-white'
-                : 'text-ink/60 dark:text-white/50 border border-black/10 dark:border-white/10'
-            }`}
-            style={tab === 'session' ? { background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
-          >
-            {ui.patients.sessionNoteTab}
-          </button>
-          <button
-            onClick={() => setTab('video')}
-            className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
-              tab === 'video'
-                ? 'text-white'
-                : 'text-ink/60 dark:text-white/50 border border-black/10 dark:border-white/10'
-            }`}
-            style={tab === 'video' ? { background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
-          >
-            <Video size={14} />
-            {ui.patients.videoCallTab}
-          </button>
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-5">
+          <div className="flex min-w-0 items-center gap-4">
+            <Avatar name={patient.name} linked={!!patient.patient_user_id} size={56} />
+            <div className="min-w-0">
+              <PageEyebrow icon={NotebookPen}>{h.sessionNote}</PageEyebrow>
+              <h1 className="mt-1.5 break-words font-display text-3xl font-semibold tracking-[-0.035em] text-ink dark:text-white sm:text-[40px] sm:leading-[1.1]">{patient.name}</h1>
+            </div>
+          </div>
+          {patient.patient_user_id && (
+            <button
+              type="button"
+              onClick={() => router.push(`/dashboard/patients/${patientId}/call`)}
+              disabled={locked}
+              className={`inline-flex min-h-[44px] items-center gap-2 rounded-2xl px-4 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${SECONDARY_BTN}`}
+            >
+              <Video size={16} aria-hidden />
+              {h.startVideoCall}
+            </button>
+          )}
         </div>
 
         <ClinicalAccessNotice />
 
         {savedMessage && (
-          <div className="mb-6 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400">
+          <div role="status" className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
             {ui.patients.noteSavedMessage.replace('{name}', patient.name)}
           </div>
         )}
 
-        {tab === 'session' && (
-          <>
-            {!locked && <AppointmentScheduler patientId={patientId} mode="physio" />}
-
-            <div className="flex items-center gap-3 my-8">
-              <div className="h-px flex-1 bg-black/[0.06] dark:bg-white/10" />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink/30 dark:text-white/30">
-                {ui.patients.sessionNoteTab}
-              </p>
-              <div className="h-px flex-1 bg-black/[0.06] dark:bg-white/10" />
-            </div>
-
-            <LiveStructuring
-              instanceId={`session-${patientId}`}
-              variant="full"
-              patientId={patientId}
-              onSaved={() => setSavedMessage(true)}
-            />
-          </>
+        {!locked && (
+          <Card className="mb-6 p-4 sm:p-6">
+            <AppointmentScheduler patientId={patientId} mode="physio" />
+          </Card>
         )}
 
-        {tab === 'video' && (
-          <VideoCallPanel patientId={patientId} canStart={!locked} />
-        )}
-      </div>
+        <Card className="p-5 sm:p-7">
+          <LiveStructuring
+            instanceId={`session-${patientId}`}
+            variant="full"
+            patientId={patientId}
+            onSaved={() => setSavedMessage(true)}
+          />
+        </Card>
+      </main>
     </div>
   )
 }

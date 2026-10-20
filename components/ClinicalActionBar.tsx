@@ -148,7 +148,7 @@ export default function ClinicalActionBar({
         onClick={handleClick}
         disabled={status === 'saving'}
         className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold transition-colors disabled:opacity-70"
-        style={{ background: 'rgba(79,124,255,0.12)', color: '#4F7CFF' }}
+        style={{ background: 'rgba(124,131,255,0.12)', color: '#7C83FF' }}
       >
         {status === 'saving' && <Loader2 size={12} className="animate-spin" />}
         {status === 'saved' && <Check size={12} />}
@@ -177,7 +177,7 @@ export default function ClinicalActionBar({
                 value={query}
                 onChange={(e) => searchPatients(e.target.value)}
                 placeholder={ui.clinicalActionBar.searchPlaceholder}
-                className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 pl-8 pr-2 py-2 outline-none focus:border-[#4F7CFF]"
+                className="w-full text-xs rounded-lg border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 pl-8 pr-2 py-2 outline-none focus:border-[#7C83FF]"
               />
             </div>
 
@@ -195,9 +195,9 @@ export default function ClinicalActionBar({
                   <button
                     key={p.id}
                     onClick={() => handlePickPatient(p)}
-                    className="w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-[#4F7CFF]/10 transition-colors"
+                    className="w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-[#7C83FF]/10 transition-colors"
                   >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#4F7CFF]/15 text-[#4F7CFF]">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#7C83FF]/15 text-[#7C83FF]">
                       <User size={12} />
                     </span>
                     <span className="text-xs font-medium text-ink dark:text-white truncate">{p.name}</span>

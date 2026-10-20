@@ -101,7 +101,7 @@ export default function NewNotebookDialog({
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#4F7CFF]/10 text-[#4F7CFF]">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#7C83FF]/10 text-[#7C83FF]">
                   <BookOpen size={15} />
                 </span>
                 <h2 className="text-sm font-semibold text-ink dark:text-white">{ui.dialog.newNotebookTitle}</h2>
@@ -121,7 +121,7 @@ export default function NewNotebookDialog({
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
               placeholder={ui.dialog.newNotebookPlaceholder}
-              className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 text-sm outline-none transition focus:border-[#4F7CFF] focus:ring-4 focus:ring-[#4F7CFF]/10 text-ink dark:text-white"
+              className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white/85 dark:bg-white/[0.02] px-4 py-3 text-sm outline-none transition focus:border-[#7C83FF] focus:ring-4 focus:ring-[#7C83FF]/10 text-ink dark:text-white"
             />
 
             <div className="mt-4">
@@ -133,7 +133,7 @@ export default function NewNotebookDialog({
                     onClick={() => setFormat(f)}
                     className={`flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors ${
                       format === f
-                        ? 'border-[#4F7CFF] bg-[#4F7CFF]/10 text-[#4F7CFF]'
+                        ? 'border-[#7C83FF] bg-[#7C83FF]/10 text-[#7C83FF]'
                         : 'border-black/10 dark:border-white/10 text-ink/60 dark:text-white/60 hover:bg-ink/5 dark:hover:bg-white/10'
                     }`}
                   >
@@ -152,7 +152,7 @@ export default function NewNotebookDialog({
                     onClick={() => setPaperColor(c)}
                     aria-label={c}
                     className={`h-7 w-7 rounded-full border transition-transform ${
-                      paperColor === c ? 'scale-110 border-[#4F7CFF]' : 'border-black/10 dark:border-white/20'
+                      paperColor === c ? 'scale-110 border-[#7C83FF]' : 'border-black/10 dark:border-white/20'
                     }`}
                     style={{ backgroundColor: c }}
                   />
@@ -169,7 +169,7 @@ export default function NewNotebookDialog({
                     onClick={() => setTemplate(t)}
                     title={templateLabel(t)}
                     className={`flex h-12 items-center justify-center rounded-lg border overflow-hidden transition-colors ${
-                      template === t ? 'border-[#4F7CFF] ring-2 ring-[#4F7CFF]/20' : 'border-black/10 dark:border-white/10'
+                      template === t ? 'border-[#7C83FF] ring-2 ring-[#7C83FF]/20' : 'border-black/10 dark:border-white/10'
                     }`}
                     style={{ backgroundColor: paperColor }}
                   >
@@ -193,7 +193,7 @@ export default function NewNotebookDialog({
                 onClick={handleCreate}
                 disabled={saving}
                 className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold text-white shadow-soft disabled:opacity-60"
-                style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }}
+                style={{ background: 'linear-gradient(90deg, #7C83FF 0%, #A78BFA 100%)' }}
               >
                 {saving && <Loader2 size={13} className="animate-spin" />}
                 {ui.dialog.create}

@@ -13,10 +13,12 @@ import {
   Smartphone,
   Users,
 } from "lucide-react";
-import type { LandingDict } from "@/lib/i18n/landingStrings";
+import { signupHref, type LandingDict } from "@/lib/i18n/landingStrings";
+import type { AppLang } from "@/lib/i18n/uiStrings";
 import { EASE, MicroLabel, MockCaption, PrimaryButton, Rich, SecondaryButton } from "./ui";
 
 type Props = {
+  lang: AppLang;
   hero: LandingDict["hero"];
   story: LandingDict["story"];
   conditionsText: string;
@@ -61,7 +63,7 @@ function Sub({ text, conditions, exercises }: { text: string; conditions: string
   );
 }
 
-export default function Hero({ hero, story, conditionsText, exercisesText, condition, libraryExercise }: Props) {
+export default function Hero({ lang, hero, story, conditionsText, exercisesText, condition, libraryExercise }: Props) {
   return (
     <section aria-labelledby="hero-title" className="relative overflow-hidden pt-32 pb-16 sm:pt-40 sm:pb-24">
       <div aria-hidden className="pointer-events-none absolute inset-0 lp-dots [mask-image:radial-gradient(70%_60%_at_50%_30%,#000,transparent)]" />
@@ -93,7 +95,7 @@ export default function Hero({ hero, story, conditionsText, exercisesText, condi
           </motion.p>
 
           <motion.div {...enter(3)} className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-            <PrimaryButton href="/login?mode=signup">{hero.ctaPrimary}</PrimaryButton>
+            <PrimaryButton href={signupHref(lang)}>{hero.ctaPrimary}</PrimaryButton>
             <SecondaryButton href="#tour">{hero.ctaSecondary}</SecondaryButton>
           </motion.div>
 

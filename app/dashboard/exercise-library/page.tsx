@@ -21,6 +21,7 @@ import Navbar from '@/components/Navbar';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
 import ClinicalActionBar from '@/components/ClinicalActionBar';
 import BulkPatientLinkBar from '@/components/BulkPatientLinkBar';
+import { PageBackdrop } from '@/components/ui/premium'
 
 interface ExerciseEntry {
   id: string;
@@ -67,12 +68,12 @@ const BODY_ZONES: { slug: string; name: string }[] = [
 const BODY_ZONE_NAME: Record<string, string> = Object.fromEntries(BODY_ZONES.map((z) => [z.slug, z.name]));
 
 const CATEGORY_STYLE: Record<string, { gradient: string; glow: string; icon: typeof Dumbbell }> = {
-  Bodyweight: { gradient: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)', glow: 'rgba(79,124,255,0.28)', icon: PersonStanding },
-  'Free Weights': { gradient: 'linear-gradient(135deg, #A855F7 0%, #4F7CFF 100%)', glow: 'rgba(168,85,247,0.28)', icon: Weight },
+  Bodyweight: { gradient: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)', glow: 'rgba(124,131,255,0.28)', icon: PersonStanding },
+  'Free Weights': { gradient: 'linear-gradient(135deg, #A855F7 0%, #7C83FF 100%)', glow: 'rgba(168,85,247,0.28)', icon: Weight },
   Resistance: { gradient: 'linear-gradient(135deg, #F59E0B 0%, #FB7185 100%)', glow: 'rgba(245,158,11,0.28)', icon: Waves },
   Cardio: { gradient: 'linear-gradient(135deg, #FB7185 0%, #A855F7 100%)', glow: 'rgba(251,113,133,0.28)', icon: HeartPulse },
 };
-const DEFAULT_STYLE = { gradient: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)', glow: 'rgba(79,124,255,0.28)', icon: Dumbbell };
+const DEFAULT_STYLE = { gradient: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)', glow: 'rgba(124,131,255,0.28)', icon: Dumbbell };
 
 // Per formattare i numeri (es. "1.880" vs "1,880") nello stesso stile della lingua corrente,
 // non sempre con la convenzione italiana indipendentemente dalla lingua scelta.
@@ -121,7 +122,7 @@ function StepList({ steps: rawSteps }: { steps: string[] }) {
         <li key={i} className="flex gap-3 text-sm text-ink/70 dark:text-white/70 leading-relaxed">
           <span
             className="flex-none mt-0.5 h-5 w-5 rounded-full text-[11px] font-bold text-white flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' }}
+            style={{ background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' }}
           >
             {i + 1}
           </span>
@@ -289,22 +290,19 @@ export default function ExerciseLibraryPage() {
     f.type === 'region' ? BODY_ZONE_NAME[f.value] || f.value : f.type === 'tag' ? ui.hiitLabel : f.value;
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-[#08090b] overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] overflow-hidden transition-colors">
       <Navbar />
 
-      <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] rounded-full opacity-20 dark:opacity-25 blur-[160px]"
-        style={{ background: 'radial-gradient(circle, rgba(79,124,255,0.6) 0%, rgba(50,214,160,0.5) 100%)' }}
-      />
+      <PageBackdrop />
 
       <div className="relative max-w-6xl mx-auto pt-40 pb-24 px-6">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#4F7CFF]/20 bg-[#4F7CFF]/10 px-3.5 py-1.5 mb-5">
-          <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: 'linear-gradient(90deg, #4F7CFF 0%, #32D6A0 100%)' }} />
-          <p className="eyebrow text-[#4F7CFF]">
+        <div className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-black/[0.02] px-4 py-1.5 mb-5 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.03]">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'linear-gradient(135deg, #A5B4FF 0%, #7C83FF 50%, #A78BFA 100%)' }} />
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-ink/70 dark:text-white/70">
             {exercises.length > 0 ? ui.eyebrowCount.replace('{count}', exercises.length.toLocaleString(numberLocale)) : ui.eyebrowDefault}
           </p>
         </div>
-        <h1 className="font-display text-6xl font-bold tracking-tight mb-3 text-[#32D6A0]">
+        <h1 className="font-display text-5xl sm:text-6xl font-semibold tracking-[-0.035em] mb-3 text-ink dark:text-white">
           {ui.headingPart1} {ui.headingPart2}
         </h1>
         <p className="text-base text-ink/50 dark:text-white/50 mb-6 max-w-xl">
@@ -319,7 +317,7 @@ export default function ExerciseLibraryPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={ui.searchPlaceholder}
-              className="w-full rounded-full border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/35 dark:placeholder:text-white/35 outline-none focus:border-[#4F7CFF]/40 transition-colors shadow-sm"
+              className="w-full rounded-full border border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink/35 dark:placeholder:text-white/35 outline-none focus:border-[#7C83FF]/40 transition-colors shadow-sm"
             />
             {search && (
               <button
@@ -341,7 +339,7 @@ export default function ExerciseLibraryPage() {
                 ? 'border-transparent text-white shadow-sm'
                 : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white'
             }`}
-            style={selectionMode ? { background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
+            style={selectionMode ? { background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' } : undefined}
           >
             {selectionMode ? <X size={16} /> : <ListChecks size={16} />}
           </button>
@@ -358,7 +356,7 @@ export default function ExerciseLibraryPage() {
                 <select
                   value={filter?.type === 'region' ? filter.value : ''}
                   onChange={(e) => setFilter(e.target.value ? { type: 'region', value: e.target.value } : null)}
-                  className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
+                  className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#7C83FF]/40 shadow-sm cursor-pointer transition-colors ${
                     filter?.type === 'region'
                       ? 'border-[#A855F7]/40 bg-[#A855F7]/10 text-ink dark:text-white'
                       : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
@@ -392,9 +390,9 @@ export default function ExerciseLibraryPage() {
                     else if (v === '__hiit__') setFilter({ type: 'tag', value: CARDIO_HIIT_TAG });
                     else setFilter({ type: 'category', value: v });
                   }}
-                  className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
+                  className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#7C83FF]/40 shadow-sm cursor-pointer transition-colors ${
                     filter?.type === 'category' || filter?.type === 'tag'
-                      ? 'border-[#4F7CFF]/40 bg-[#4F7CFF]/10 text-ink dark:text-white'
+                      ? 'border-[#7C83FF]/40 bg-[#7C83FF]/10 text-ink dark:text-white'
                       : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
                   }`}
                 >
@@ -426,9 +424,9 @@ export default function ExerciseLibraryPage() {
                 <select
                   value={filter?.type === 'equipment' ? filter.value : ''}
                   onChange={(e) => setFilter(e.target.value ? { type: 'equipment', value: e.target.value } : null)}
-                  className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#4F7CFF]/40 shadow-sm cursor-pointer transition-colors ${
+                  className={`w-full appearance-none truncate rounded-full border backdrop-blur-xl pl-9 pr-9 py-2.5 text-xs font-semibold outline-none focus:border-[#7C83FF]/40 shadow-sm cursor-pointer transition-colors ${
                     filter?.type === 'equipment'
-                      ? 'border-[#4F7CFF]/40 bg-[#4F7CFF]/10 text-ink dark:text-white'
+                      ? 'border-[#7C83FF]/40 bg-[#7C83FF]/10 text-ink dark:text-white'
                       : 'border-black/[0.06] dark:border-white/10 bg-white/70 dark:bg-white/[0.03] text-ink/70 dark:text-white/70'
                   }`}
                 >
@@ -503,7 +501,7 @@ export default function ExerciseLibraryPage() {
                       }
                     }}
                     className={`group text-left relative rounded-[24px] border backdrop-blur-xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 cursor-pointer bg-white/70 dark:bg-white/[0.03] ${
-                      isSelected ? 'border-[#4F7CFF] ring-2 ring-[#4F7CFF]/50' : 'border-black/[0.06] dark:border-white/10'
+                      isSelected ? 'border-[#7C83FF] ring-2 ring-[#7C83FF]/50' : 'border-black/[0.06] dark:border-white/10'
                     }`}
                   >
                     {selectionMode && (
@@ -511,7 +509,7 @@ export default function ExerciseLibraryPage() {
                         className={`absolute top-3 right-3 z-[3] flex h-7 w-7 items-center justify-center rounded-full shadow-lg transition-colors ${
                           isSelected ? 'text-white' : 'bg-white/90 dark:bg-black/60 text-ink/30 dark:text-white/40'
                         }`}
-                        style={isSelected ? { background: 'linear-gradient(135deg, #4F7CFF 0%, #32D6A0 100%)' } : undefined}
+                        style={isSelected ? { background: 'linear-gradient(135deg, #7C83FF 0%, #8B5CF6 100%)' } : undefined}
                       >
                         {isSelected ? <CheckCircle2 size={15} /> : <span className="h-3.5 w-3.5 rounded-full border-2 border-current" />}
                       </span>
@@ -585,7 +583,7 @@ export default function ExerciseLibraryPage() {
                               applyFilter({ type: 'muscle', value: ex.primary_muscle as string });
                             }
                           }}
-                          className="inline-block text-xs text-ink/50 dark:text-white/50 hover:text-[#4F7CFF] dark:hover:text-[#4F7CFF] hover:underline underline-offset-2"
+                          className="inline-block text-xs text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white dark:hover:text-ink dark:hover:text-white hover:underline underline-offset-2"
                         >
                           {ex.primary_muscle}
                         </span>

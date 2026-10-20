@@ -11,11 +11,14 @@ import EmptyState from '@/components/workspace/EmptyState'
 import ErrorState from '@/components/workspace/ErrorState'
 import { getSupabaseBrowserClient } from '@/lib/supabaseBrowserClient'
 import { useWorkspaceUi } from '@/lib/i18n/workspaceStrings'
+import { useDashboardUi } from '@/lib/i18n/dashboardStrings'
+import { useWorkspaceMutation } from '@/lib/workspace/useWorkspaceMutation'
 import type { WorkspaceDocument, WorkspaceFolder, WorkspaceNotebook } from '@/lib/workspace/types'
 
 export default function WorkspaceStarredPage() {
   const router = useRouter()
   const ui = useWorkspaceUi()
+  const t = useDashboardUi()
   const supabase = getSupabaseBrowserClient()
 
   const [loading, setLoading] = useState(true)
@@ -61,7 +64,8 @@ export default function WorkspaceStarredPage() {
     ])
 
     if (f.error || d.error || n.error) {
-      setError(f.error?.message || d.error?.message || n.error?.message || 'Failed to load')
+      console.error('Starred items could not be loaded:', f.error || d.error || n.error)
+      setError('load_failed')
       setLoading(false)
       return
     }
@@ -76,9 +80,11 @@ export default function WorkspaceStarredPage() {
     load()
   }, [load])
 
+  const { mutate, actionError, dismissActionError } = useWorkspaceMutation(load)
+
   const unstarFolder = async (f: WorkspaceFolder) => {
     setFolders((prev) => prev.filter((x) => x.id !== f.id))
-    await fetch(`/api/workspace/folders/${f.id}`, {
+    await mutate(`/api/workspace/folders/${f.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ starred: false }),
@@ -87,7 +93,7 @@ export default function WorkspaceStarredPage() {
 
   const renameFolder = async (f: WorkspaceFolder, name: string) => {
     setFolders((prev) => prev.map((x) => (x.id === f.id ? { ...x, name } : x)))
-    await fetch(`/api/workspace/folders/${f.id}`, {
+    await mutate(`/api/workspace/folders/${f.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
@@ -96,12 +102,12 @@ export default function WorkspaceStarredPage() {
 
   const deleteFolder = async (f: WorkspaceFolder) => {
     setFolders((prev) => prev.filter((x) => x.id !== f.id))
-    await fetch(`/api/workspace/folders/${f.id}`, { method: 'DELETE' })
+    await mutate(`/api/workspace/folders/${f.id}`, { method: 'DELETE' })
   }
 
   const changeFolderColor = async (f: WorkspaceFolder, color: string | null) => {
     setFolders((prev) => prev.map((x) => (x.id === f.id ? { ...x, color } : x)))
-    await fetch(`/api/workspace/folders/${f.id}`, {
+    await mutate(`/api/workspace/folders/${f.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ color }),
@@ -110,7 +116,7 @@ export default function WorkspaceStarredPage() {
 
   const unstarDocument = async (d: WorkspaceDocument) => {
     setDocuments((prev) => prev.filter((x) => x.id !== d.id))
-    await fetch(`/api/workspace/documents/${d.id}`, {
+    await mutate(`/api/workspace/documents/${d.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ starred: false }),
@@ -119,7 +125,7 @@ export default function WorkspaceStarredPage() {
 
   const renameDocument = async (d: WorkspaceDocument, name: string) => {
     setDocuments((prev) => prev.map((x) => (x.id === d.id ? { ...x, name } : x)))
-    await fetch(`/api/workspace/documents/${d.id}`, {
+    await mutate(`/api/workspace/documents/${d.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
@@ -128,7 +134,7 @@ export default function WorkspaceStarredPage() {
 
   const deleteDocument = async (d: WorkspaceDocument) => {
     setDocuments((prev) => prev.filter((x) => x.id !== d.id))
-    await fetch(`/api/workspace/documents/${d.id}`, { method: 'DELETE' })
+    await mutate(`/api/workspace/documents/${d.id}`, { method: 'DELETE' })
   }
 
   const downloadDocument = async (d: WorkspaceDocument) => {
@@ -139,7 +145,7 @@ export default function WorkspaceStarredPage() {
 
   const unstarNotebook = async (nb: WorkspaceNotebook) => {
     setNotebooks((prev) => prev.filter((x) => x.id !== nb.id))
-    await fetch(`/api/workspace/notebooks/${nb.id}`, {
+    await mutate(`/api/workspace/notebooks/${nb.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ starred: false }),
@@ -148,7 +154,7 @@ export default function WorkspaceStarredPage() {
 
   const renameNotebook = async (nb: WorkspaceNotebook, name: string) => {
     setNotebooks((prev) => prev.map((x) => (x.id === nb.id ? { ...x, name } : x)))
-    await fetch(`/api/workspace/notebooks/${nb.id}`, {
+    await mutate(`/api/workspace/notebooks/${nb.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
@@ -157,12 +163,12 @@ export default function WorkspaceStarredPage() {
 
   const deleteNotebook = async (nb: WorkspaceNotebook) => {
     setNotebooks((prev) => prev.filter((x) => x.id !== nb.id))
-    await fetch(`/api/workspace/notebooks/${nb.id}`, { method: 'DELETE' })
+    await mutate(`/api/workspace/notebooks/${nb.id}`, { method: 'DELETE' })
   }
 
   if (loading) {
     return (
-      <WorkspaceShell>
+      <WorkspaceShell actionError={actionError} onDismissActionError={dismissActionError}>
         <div className="flex items-center justify-center py-24 text-ink/55 dark:text-white/40">
           <Loader2 size={18} className="animate-spin" />
         </div>
@@ -172,14 +178,14 @@ export default function WorkspaceStarredPage() {
 
   if (error) {
     return (
-      <WorkspaceShell>
-        <ErrorState message={error} onRetry={load} />
+      <WorkspaceShell actionError={actionError} onDismissActionError={dismissActionError}>
+        <ErrorState message={t.workspace.loadError} onRetry={load} />
       </WorkspaceShell>
     )
   }
 
   return (
-    <WorkspaceShell>
+    <WorkspaceShell actionError={actionError} onDismissActionError={dismissActionError}>
       <h1 className="font-display text-3xl font-bold tracking-tight text-ink dark:text-white mb-8">{ui.nav.starred}</h1>
 
       {folders.length === 0 && documents.length === 0 && notebooks.length === 0 ? (

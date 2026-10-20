@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { APP_LANGS, type AppLang } from '@/lib/i18n/uiStrings';
 
 // Language for the pages a visitor reaches from the landing before any
@@ -53,4 +53,31 @@ export function useEntryLang(): AppLang {
   }, [fromUrl]);
 
   return lang;
+}
+
+/**
+ * Switches the language of an entry page: it goes in the URL (?lang=, which
+ * useEntryLang reads first) and in the "phygo-lang" preference, so the next
+ * page keeps it too. A language in the URL counts as chosen: the login pages
+ * save it to the account on sign-in.
+ */
+export function useSetEntryLang(): (next: AppLang) => void {
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  return (next) => {
+    const query = new URLSearchParams(params.toString());
+    query.set('lang', next);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      /* storage unavailable */
+    }
+    router.replace(`${pathname}?${query.toString()}`, { scroll: false });
+  };
+}
+
+/** The language in the URL, if any: the one the visitor chose on the site or on this page. */
+export function useChosenEntryLang(): AppLang | null {
+  return parseLang(useSearchParams().get('lang'));
 }

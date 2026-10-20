@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { X } from 'lucide-react';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
+import { PageBackdrop } from '@/components/ui/premium';
 
 interface BLSProcedure {
   id: string;
@@ -55,11 +56,12 @@ export default function BLSPage() {
   }, [lang]);
 
   return (
-    <div className="relative min-h-screen bg-[#f6f7f9] dark:bg-[#08090b] text-ink dark:text-white overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-[#f7f7f8] dark:bg-[#050608] text-ink dark:text-white overflow-hidden transition-colors">
       <Navbar />
 
+      <PageBackdrop />
       <div
-        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-20 dark:opacity-25 blur-[140px]"
+        className="pointer-events-none absolute -top-60 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-[0.10] dark:opacity-[0.16] blur-[140px]"
         style={{
           background: 'radial-gradient(circle, rgba(239,68,68,0.6) 0%, rgba(249,115,22,0.5) 100%)',
         }}
@@ -71,11 +73,8 @@ export default function BLSPage() {
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACCENT.solid }} />
             {ui.bls.badge}
           </div>
-          <h1 className="font-display text-6xl font-bold tracking-tight">
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: ACCENT.gradient }}
-            >
+          <h1 className="font-display text-5xl sm:text-6xl font-semibold tracking-[-0.035em] text-ink dark:text-white">
+            <span>
               {ui.bls.heading}
             </span>
           </h1>
@@ -111,7 +110,7 @@ export default function BLSPage() {
                       <button
                         key={p.id}
                         onClick={() => setSelected(p)}
-                        className="text-left rounded-2xl border border-black/[0.09] dark:border-white/10 bg-white/95 dark:bg-white/[0.03] backdrop-blur-xl p-5 transition-colors hover:border-[#EF4444]/40"
+                        className="text-left rounded-2xl border border-black/[0.06] bg-white/90 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035] p-5 transition-colors hover:border-[#EF4444]/40"
                       >
                         <p className="text-sm font-semibold text-ink dark:text-white">{p.name}</p>
                         {p.age_group && (

@@ -1,7 +1,8 @@
-import type { LandingDict } from "@/lib/i18n/landingStrings";
+import { signupHref, type LandingDict } from "@/lib/i18n/landingStrings";
+import type { AppLang } from "@/lib/i18n/uiStrings";
 import { PrimaryButton, Reveal, Rich, TextLink } from "./ui";
 
-export default function FinalCta({ final, libraryHref }: { final: LandingDict["final"]; libraryHref: string }) {
+export default function FinalCta({ lang, final, libraryHref }: { lang: AppLang; final: LandingDict["final"]; libraryHref: string }) {
   return (
     <section aria-labelledby="final-cta-title" className="relative px-4 py-24 sm:px-6 sm:py-32">
       <div className="lp-ticks relative mx-auto max-w-6xl">
@@ -17,7 +18,7 @@ export default function FinalCta({ final, libraryHref }: { final: LandingDict["f
             </h2>
             <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-ink/60 dark:text-white/55 sm:text-lg">{final.text}</p>
             <div className="mt-10 flex flex-col items-center justify-center gap-5 sm:flex-row">
-              <PrimaryButton href="/login?mode=signup">{final.cta}</PrimaryButton>
+              <PrimaryButton href={signupHref(lang)}>{final.cta}</PrimaryButton>
               <TextLink href={libraryHref}>{final.secondary}</TextLink>
             </div>
             <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.12em] text-ink/60 dark:text-white/55">{final.note}</p>

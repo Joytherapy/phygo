@@ -137,7 +137,7 @@ test('1. an explicitly listed existing account keeps its temporary access', asyn
 
   const room = await call(app.url, 'POST', '/api/video-call/create-room', 'legacy', { patientId: 'p-legacy' });
   assert.equal(room.status, 200);
-  assert.match((await room.json()).url, /^https:\/\/test\.invalid\//);
+  assert.match((await room.json()).call.room_url, /^https:\/\/test\.invalid\//);
   assert.equal(providerCalls().daily, before.daily + 1);
 
   // Patient ownership still applies during the transition.
