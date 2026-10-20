@@ -115,6 +115,28 @@ export type CareDict = {
     saveRules: string
     rulesSaved: string
   }
+  booklet: {
+    button: string
+    panelTitle: string
+    panelHint: string
+    include: string
+    title: string
+    summary: string
+    path: string
+    exercises: string
+    evidence: string
+    contact: string
+    currentPhase: string
+    notSaid: string
+    youAreHere: string
+    goals: string
+    progressWhen: string
+    evidenceIntro: string
+    strength: (s: string) => string
+    guideline: (name: string, source: string) => string
+    making: string
+    error: string
+  }
   plan: {
     days: string
     everyDay: string
@@ -282,6 +304,28 @@ const it: CareDict = {
     off: 'Nessuna soglia',
     saveRules: 'Salva soglie',
     rulesSaved: 'Soglie salvate.',
+  },
+  booklet: {
+    button: 'Scarica l’opuscolo',
+    panelTitle: 'Opuscolo per il paziente',
+    panelHint: 'Un documento chiaro da consegnare o inviare: riepilogo, percorso, esercizi ed evidenze. Nessuna parte della nota clinica.',
+    include: 'Includi',
+    title: 'Il tuo percorso',
+    summary: 'Cosa abbiamo visto oggi',
+    path: 'Il tuo percorso di recupero',
+    exercises: 'I tuoi esercizi',
+    evidence: 'Su cosa si basa il tuo programma',
+    contact: 'Quando contattarmi',
+    currentPhase: 'Fase attuale del paziente',
+    notSaid: 'Non indicare',
+    youAreHere: 'Sei qui',
+    goals: 'Obiettivi',
+    progressWhen: 'Si passa alla fase successiva quando',
+    evidenceIntro: 'Il percorso e gli esercizi seguono le indicazioni della ricerca scientifica. Questi sono alcuni degli studi considerati:',
+    strength: (s) => `Livello di evidenza: ${s}`,
+    guideline: (name, source) => `Protocollo di riferimento per ${name}: ${source}.`,
+    making: 'Preparazione dell’opuscolo…',
+    error: 'Non è stato possibile creare l’opuscolo. Riprova.',
   },
   plan: {
     days: 'Giorni',
@@ -451,6 +495,28 @@ const en: CareDict = {
     saveRules: 'Save thresholds',
     rulesSaved: 'Thresholds saved.',
   },
+  booklet: {
+    button: 'Download the booklet',
+    panelTitle: 'Patient booklet',
+    panelHint: 'A clear document to hand over or send: summary, recovery path, exercises and evidence. No part of the clinical note.',
+    include: 'Include',
+    title: 'Your recovery path',
+    summary: 'What we saw today',
+    path: 'Your recovery path',
+    exercises: 'Your exercises',
+    evidence: 'What your programme is based on',
+    contact: 'When to contact me',
+    currentPhase: 'Patient’s current phase',
+    notSaid: 'Do not show',
+    youAreHere: 'You are here',
+    goals: 'Goals',
+    progressWhen: 'You move to the next phase when',
+    evidenceIntro: 'The path and the exercises follow what research recommends. These are some of the studies considered:',
+    strength: (s) => `Level of evidence: ${s}`,
+    guideline: (name, source) => `Reference protocol for ${name}: ${source}.`,
+    making: 'Preparing the booklet…',
+    error: 'The booklet could not be created. Try again.',
+  },
   plan: {
     days: 'Days',
     everyDay: 'Every day',
@@ -619,6 +685,28 @@ const es: CareDict = {
     saveRules: 'Guardar umbrales',
     rulesSaved: 'Umbrales guardados.',
   },
+  booklet: {
+    button: 'Descargar el folleto',
+    panelTitle: 'Folleto para el paciente',
+    panelHint: 'Un documento claro para entregar o enviar: resumen, recorrido, ejercicios y evidencias. Nada de la nota clínica.',
+    include: 'Incluir',
+    title: 'Tu recorrido',
+    summary: 'Lo que vimos hoy',
+    path: 'Tu recorrido de recuperación',
+    exercises: 'Tus ejercicios',
+    evidence: 'En qué se basa tu programa',
+    contact: 'Cuándo contactarme',
+    currentPhase: 'Fase actual del paciente',
+    notSaid: 'No indicar',
+    youAreHere: 'Estás aquí',
+    goals: 'Objetivos',
+    progressWhen: 'Se pasa a la fase siguiente cuando',
+    evidenceIntro: 'El recorrido y los ejercicios siguen las indicaciones de la investigación científica. Estos son algunos de los estudios considerados:',
+    strength: (s) => `Nivel de evidencia: ${s}`,
+    guideline: (name, source) => `Protocolo de referencia para ${name}: ${source}.`,
+    making: 'Preparando el folleto…',
+    error: 'No se ha podido crear el folleto. Inténtalo de nuevo.',
+  },
   plan: {
     days: 'Días',
     everyDay: 'Todos los días',
@@ -786,6 +874,28 @@ const fr: CareDict = {
     off: 'Aucun seuil',
     saveRules: 'Enregistrer les seuils',
     rulesSaved: 'Seuils enregistrés.',
+  },
+  booklet: {
+    button: 'Télécharger la brochure',
+    panelTitle: 'Brochure pour le patient',
+    panelHint: 'Un document clair à remettre ou envoyer : résumé, parcours, exercices et données probantes. Rien de la note clinique.',
+    include: 'Inclure',
+    title: 'Votre parcours',
+    summary: 'Ce que nous avons vu aujourd’hui',
+    path: 'Votre parcours de récupération',
+    exercises: 'Vos exercices',
+    evidence: 'Sur quoi repose votre programme',
+    contact: 'Quand me contacter',
+    currentPhase: 'Phase actuelle du patient',
+    notSaid: 'Ne pas indiquer',
+    youAreHere: 'Vous êtes ici',
+    goals: 'Objectifs',
+    progressWhen: 'On passe à la phase suivante quand',
+    evidenceIntro: 'Le parcours et les exercices suivent les recommandations de la recherche scientifique. Voici quelques-unes des études prises en compte :',
+    strength: (s) => `Niveau de preuve : ${s}`,
+    guideline: (name, source) => `Protocole de référence pour ${name} : ${source}.`,
+    making: 'Préparation de la brochure…',
+    error: 'Impossible de créer la brochure. Réessayez.',
   },
   plan: {
     days: 'Jours',

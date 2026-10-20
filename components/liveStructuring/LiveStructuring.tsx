@@ -51,6 +51,10 @@ import Link from "next/link";
 import { CalendarCheck, PlayCircle } from "lucide-react";
 import { CARE_STRINGS } from "@/lib/i18n/careStrings";
 import { syncProgrammeFromNote, type SyncResult } from "@/lib/care/fromNote";
+import { bookletExercises, bookletPapers, bookletPhases, buildPatientBooklet, type BookletSections } from "@/lib/care/patientBooklet";
+import { imageAsJpeg } from "@/lib/care/programPdf";
+import { usePatientContext } from "@/contexts/PatientContext";
+import { localDate } from "@/lib/care/program";
 
 // One look for every block of the panel (a quiet tile inside the page card).
 const BLOCK = "mt-4 rounded-[22px] border border-black/[0.06] bg-white/70 p-5 sm:p-6 dark:border-white/[0.07] dark:bg-white/[0.025]";
@@ -148,6 +152,12 @@ const savedNoteIdRef = useRef<string | null>(null);
 // the patient's home programme (lib/care/fromNote.ts), without retyping them.
 const care = CARE_STRINGS[lang as keyof typeof CARE_STRINGS] ?? CARE_STRINGS.it;
 const [programStatus, setProgramStatus] = useState<"idle" | "sending" | SyncResult>("idle");
+// The patient booklet: summary, recovery path, exercises and evidence of this
+// note in one document for the patient (lib/care/patientBooklet.ts).
+const { currentPatient } = usePatientContext();
+const [bookletSections, setBookletSections] = useState<BookletSections>({ summary: true, path: true, exercises: true, evidence: true });
+const [currentPhase, setCurrentPhase] = useState<number | null>(null);
+const [bookletStatus, setBookletStatus] = useState<"idle" | "working" | "error">("idle");
 
 const submitTextInput = () => {
   const raw = textInput.trim();
@@ -856,6 +866,39 @@ const sendToProgramme = async () => {
   });
   if (result.kind === "error") console.error(`home programme from note: ${result.where} failed:`, result.code);
   setProgramStatus(result);
+};
+
+const downloadBooklet = async () => {
+  if (!finalNote) return;
+  setBookletStatus("working");
+  try {
+    const images = new Map<string, string>();
+    await Promise.all(
+      exerciseEntries.map(async (ex: any, i: number) => {
+        const jpeg = ex.media?.image_url ? await imageAsJpeg(ex.media.image_url) : null;
+        if (jpeg) images.set(String(ex.internal_id ?? i), jpeg);
+      })
+    );
+    const doc = buildPatientBooklet({
+      patientName: currentPatient && currentPatient.id === patientId ? currentPatient.name : "",
+      date: localDate(new Date()),
+      summary: finalNote.summaryForPatient || "",
+      phases: bookletPhases(rehabPhases),
+      currentPhase,
+      exercises: bookletExercises(exerciseEntries.length > 0 ? exerciseEntries : finalNote.exercises, care.plan, care.clinician.weekdays, images),
+      papers: bookletPapers(relevantPapers),
+      guideline: clinicalInsight?.condition_name && clinicalInsight?.source ? { name: clinicalInsight.condition_name, source: clinicalInsight.source, date: clinicalInsight.source_date || null } : null,
+      sections: bookletSections,
+      appUrl: `${window.location.origin}/my-phygo/home`,
+      t: care.booklet,
+      plan: care.plan,
+    });
+    doc.save(`phygo-opuscolo-${localDate(new Date())}.pdf`);
+    setBookletStatus("idle");
+  } catch (err) {
+    console.error("patient booklet failed:", err instanceof Error ? err.message : "error");
+    setBookletStatus("error");
+  }
 };
 
 const askPhygoAI = async () => {
@@ -1788,6 +1831,47 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                     </p>
                   </div>
                 ))}
+              </div>
+            </motion.div>
+          )}
+
+          {isLiveVoice && finalNote && (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }} className={BLOCK} data-testid="patient-booklet">
+              <BlockTitle icon={BookOpen}>{care.booklet.panelTitle}</BlockTitle>
+              <p className="mt-2 text-xs leading-relaxed text-ink/55 dark:text-white/45">{care.booklet.panelHint}</p>
+              <fieldset className="mt-4">
+                <legend className={LABEL}>{care.booklet.include}</legend>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {([
+                    ["summary", care.booklet.summary, !!finalNote.summaryForPatient],
+                    ["path", care.booklet.path, rehabPhases.length > 0],
+                    ["exercises", care.booklet.exercises, exerciseEntries.length > 0 || (finalNote.exercises || []).length > 0],
+                    ["evidence", care.booklet.evidence, relevantPapers.length > 0 || !!clinicalInsight?.source],
+                  ] as [keyof BookletSections, string, boolean][]).filter(([, , available]) => available).map(([key, label]) => (
+                    <label key={key} className={`inline-flex min-h-[36px] cursor-pointer items-center gap-2 rounded-full border px-3 text-xs font-semibold transition ${bookletSections[key] ? "border-[#7C83FF]/50 bg-[#7C83FF]/10 text-[#5B63E6] dark:text-[#A5B4FF]" : "border-black/10 text-ink/55 dark:border-white/10 dark:text-white/50"}`}>
+                      <input type="checkbox" className="h-3.5 w-3.5 accent-[#7C83FF]" checked={bookletSections[key]} onChange={(e) => setBookletSections({ ...bookletSections, [key]: e.target.checked })} />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              {rehabPhases.length > 0 && bookletSections.path && (
+                <label className="mt-4 block max-w-sm">
+                  <span className={LABEL}>{care.booklet.currentPhase}</span>
+                  <select value={currentPhase ?? ""} onChange={(e) => setCurrentPhase(e.target.value === "" ? null : Number(e.target.value))} className={`${FIELD} mt-1.5`}>
+                    <option value="">{care.booklet.notSaid}</option>
+                    {bookletPhases(rehabPhases).map((p) => (
+                      <option key={p.number} value={p.number}>{`${p.number}. ${p.name}`}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button type="button" onClick={downloadBooklet} disabled={bookletStatus === "working"} className={`inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 text-sm font-semibold transition disabled:opacity-60 ${PRIMARY_BTN}`}>
+                  <Download size={15} aria-hidden />
+                  {bookletStatus === "working" ? care.booklet.making : care.booklet.button}
+                </button>
+                {bookletStatus === "error" && <p role="alert" className="text-xs text-red-600 dark:text-red-400">{care.booklet.error}</p>}
               </div>
             </motion.div>
           )}

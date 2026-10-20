@@ -6,6 +6,9 @@
 //     use the note's dose updates the same exercise, a new exercise is added,
 //     nothing is removed, a note without a dose leaves the dose as it was;
 //   - lib/care/programPdf.ts: Latin-1 text and the line under each exercise;
+//   - lib/care/patientBooklet.ts: the booklet built from a note holds summary,
+//     recovery path with "you are here", exercises and evidence, and none of
+//     the clinical note or the protocol's red flags;
 //   - /api/exercise-search: Exercises-section results first (with video) for a
 //     signed-in user, none without a session;
 //   - /api/care/exercise-media: only the clinician who owns the patient;
@@ -39,6 +42,7 @@ const skip = !playwright || !fs.existsSync(CHROMIUM) ? 'Playwright/Chromium not 
 let C; // lib/care/program.ts
 let F; // lib/care/fromNote.ts
 let P; // lib/care/programPdf.ts
+let B; // lib/care/patientBooklet.ts
 before(async () => {
   const dir = mkdtempSync(join(tmpdir(), 'phygo-care-rx-'));
   const out = (f, src) => writeFileSync(join(dir, `${f}.mjs`), ts.transpileModule(src, { compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 } }).outputText);
@@ -46,11 +50,14 @@ before(async () => {
   try {
     out('program', read('program'));
     out('fromNote', read('fromNote').replace("from './program'", "from './program.mjs'"));
-    // The PDF module's text helpers are tested without loading jsPDF.
-    out('programPdf', read('programPdf').replace(/^import jsPDF from 'jspdf'$/m, 'const jsPDF = null').replace("from './program'", "from './program.mjs'"));
+    // jsPDF is handed in from here (the transpiled files live outside node_modules' reach).
+    globalThis.__jsPDF = (await import('jspdf')).jsPDF;
+    out('programPdf', read('programPdf').replace(/^import jsPDF from 'jspdf'$/m, 'const jsPDF = globalThis.__jsPDF').replace("from './program'", "from './program.mjs'"));
+    out('patientBooklet', read('patientBooklet').replace("from './programPdf'", "from './programPdf.mjs'").replace("from './program'", "from './program.mjs'"));
     C = await import(join(dir, 'program.mjs'));
     F = await import(join(dir, 'fromNote.mjs'));
     P = await import(join(dir, 'programPdf.mjs'));
+    B = await import(join(dir, 'patientBooklet.mjs'));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -82,6 +89,50 @@ test('PDF text: Latin-1 only, and the line under each exercise', () => {
   assert.equal(P.itemSummary({ sets: 3, reps: 10, duration_seconds: null, times_per_day: 2, weekdays: [1, 3, 5] }, t, names), '3 × 10 · 2 volte al giorno · Lun, Mer, Ven');
   assert.equal(P.itemSummary({ sets: null, reps: null, duration_seconds: 1200, times_per_day: 1, weekdays: [] }, t, names), '20 min · 1 volte al giorno · Tutti i giorni');
 });
+
+test('the patient booklet: summary, path with "you are here", exercises, evidence; nothing clinical', async () => {
+  const { CARE_STRINGS } = await importStrings();
+  const it = CARE_STRINGS.it;
+  const phases = B.bookletPhases([
+    { id: 'b', phase_number: 2, phase_name: 'Synthetic strength phase', typical_duration: '3-6 weeks', phase_goals: 'Build strength', phase_exercises: 'Clinician list', criteria_to_progress: 'Pain under 3/10' },
+    { id: 'a', phase_number: 1, phase_name: 'Synthetic calm phase', typical_duration: '0-2 weeks', phase_goals: 'Calm the pain', criteria_to_progress: 'Walk without pain' },
+    { phase_number: 3 },
+  ]);
+  assert.deepEqual(phases.map((p) => p.number), [1, 2], 'ordered; a phase without a name is left out');
+  const papers = B.bookletPapers([{ title: 'Synthetic trial of exercise', journal: 'Synthetic Journal', publication_date: '2024-05-01', evidence_strength: 'moderate', why_it_matters: 'Exercise helps synthetic knees' }, { title: '' }]);
+  assert.deepEqual(papers.map((p) => [p.title, p.year]), [['Synthetic trial of exercise', '2024']]);
+  const exercises = B.bookletExercises([
+    { internal_id: 'e1', name: 'Synthetic squat', instructions: ['Sit back', 'Stand up'], dosing: { sets: 3, reps: 10, frequency_per_week: 3, notes: 'Slowly' } },
+    'Synthetic walk',
+  ], it.plan, it.clinician.weekdays, new Map());
+  assert.deepEqual(exercises.map((e) => [e.title, e.summary, e.steps]), [['Synthetic squat', '3 × 10 · Lun, Mer, Ven', '1. Sit back\n2. Stand up'], ['Synthetic walk', 'Tutti i giorni', '']]);
+
+  const build = (sections) => B.buildPatientBooklet({
+    patientName: 'Synthetic Patient', date: '2026-10-20', summary: 'Your synthetic knee is irritated; we start gently.',
+    phases, currentPhase: 1, exercises, papers, guideline: { name: 'Synthetic knee pain', source: 'Synthetic guideline', date: '2023' },
+    sections, appUrl: 'https://example.invalid/my-phygo/home', t: it.booklet, plan: it.plan,
+  }).output();
+  const all = build({ summary: true, path: true, exercises: true, evidence: true });
+  assert.equal(all.slice(0, 5), '%PDF-');
+  for (const text of ['Il tuo percorso', 'Cosa abbiamo visto oggi', 'Your synthetic knee is irritated', 'Il tuo percorso di recupero', 'Synthetic calm phase', 'Sei qui', 'Walk without pain', 'I tuoi esercizi', 'Synthetic squat', 'Su cosa si basa il tuo programma', 'Synthetic trial of exercise', 'Synthetic guideline', 'Quando contattarmi', 'contatta il tuo fisioterapista']) {
+    assert.ok(all.includes(text), `the booklet shows: ${text}`);
+  }
+  assert.ok(!all.includes('Clinician list'), 'the protocol\'s clinician exercise list stays out');
+  const some = build({ summary: true, path: false, exercises: true, evidence: false });
+  assert.ok(!some.includes('Synthetic calm phase') && !some.includes('Synthetic trial of exercise'), 'sections the clinician unticks stay out');
+  assert.ok(some.includes('Synthetic squat'));
+});
+
+async function importStrings() {
+  const dir = mkdtempSync(join(tmpdir(), 'phygo-care-strings-'));
+  try {
+    const src = readFileSync(new URL('../lib/i18n/careStrings.ts', import.meta.url), 'utf8');
+    writeFileSync(join(dir, 'careStrings.mjs'), ts.transpileModule(src, { compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 } }).outputText);
+    return await import(join(dir, 'careStrings.mjs'));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
 
 // ---------------------------------------------------------------- against the fake
 
