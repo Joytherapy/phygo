@@ -189,6 +189,25 @@ export function draftFromNoteExercises(exercises: unknown, noteId: string | null
   })
 }
 
+/** Source name for exercises picked from the Exercises section (the `exercises` table). */
+export const LIBRARY_SOURCE = 'exercises'
+
+/**
+ * A draft from an exercise of the Exercises section: its name and steps, and a
+ * reference to it so the patient can be shown its video. The library carries no
+ * dose, so none is filled in: the clinician sets it.
+ */
+export function draftFromLibraryExercise(ex: { id: string; name: string; instructions?: unknown }): DraftItem {
+  const steps = Array.isArray(ex.instructions) ? ex.instructions.map(str).filter(Boolean) : []
+  return {
+    ...blankDraft(),
+    title: str(ex.name).slice(0, 200),
+    instructions: steps.map((s, i) => `${i + 1}. ${s}`).join('\n').slice(0, 4000),
+    exercise_source: LIBRARY_SOURCE,
+    exercise_ref: String(ex.id).slice(0, 200),
+  }
+}
+
 export function blankDraft(): DraftItem {
   return { kind: 'exercise', title: '', instructions: '', exercise_source: null, exercise_ref: null, sets: null, reps: null, duration_seconds: null, dose_notes: '', times_per_day: 1, short_sets: null, short_reps: null, short_instructions: '' }
 }

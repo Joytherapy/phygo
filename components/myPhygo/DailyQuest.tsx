@@ -7,14 +7,17 @@
 // recorded tick is the patient's own report (provenance 'patient_reported').
 // The database refuses anything the programme does not allow
 // (sql/2026-10-20_care_program_PROPOSED.sql). Until that SQL is applied the
-// tables do not exist and this section is not shown.
+// tables do not exist and this section is not shown. Exercises picked from
+// the Exercises section come with their video, served by
+// /api/my-phygo/exercise-media for this patient's own programme only.
 import { useCallback, useEffect, useState } from 'react'
-import { BatteryLow, Check, CheckCircle2, ExternalLink, Moon, Sun } from 'lucide-react'
+import { BatteryLow, Check, CheckCircle2, ExternalLink, Moon, PlayCircle, Sun } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { CARE_STRINGS } from '@/lib/i18n/careStrings'
 import { myPhygoSupabase as supabase } from '@/components/myPhygo/MyProfileContext'
 import {
   ITEM_COLUMNS,
+  LIBRARY_SOURCE,
   LOG_COLUMNS,
   PROGRAM_COLUMNS,
   doseLabel,
@@ -30,11 +33,14 @@ import {
 } from '@/lib/care/program'
 import { PRIMARY_BTN, SECONDARY_BTN } from '@/components/ui/premium'
 
+type Media = { video_url: string | null; video_vertical_url: string | null; image_url: string | null }
+
 const card = 'rounded-2xl border border-black/[0.06] bg-white/90 p-5 backdrop-blur-xl dark:border-white/[0.07] dark:bg-white/[0.035]'
 
 export default function DailyQuest({ patientId }: { patientId: string }) {
   const { lang } = useLanguage()
   const t = (CARE_STRINGS[lang] ?? CARE_STRINGS.it).patient
+  const tl = (CARE_STRINGS[lang] ?? CARE_STRINGS.it).library
   const [state, setState] = useState<'loading' | 'hidden' | 'ready'>('loading')
   const [program, setProgram] = useState<CareProgram | null>(null)
   const [items, setItems] = useState<CareItem[]>([])
@@ -43,6 +49,8 @@ export default function DailyQuest({ patientId }: { patientId: string }) {
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState<string | null>(null)
+  const [media, setMedia] = useState<Record<string, Media>>({})
+  const [watching, setWatching] = useState<string | null>(null)
   const today = localDate(new Date())
 
   const load = useCallback(async () => {
@@ -67,8 +75,16 @@ export default function DailyQuest({ patientId }: { patientId: string }) {
       console.error('daily quest: details failed:', itemsRes.error?.code ?? logsRes.error?.code)
       return setState('hidden')
     }
+    const loadedItems = (itemsRes.data ?? []) as unknown as CareItem[]
     setProgram(current)
-    setItems((itemsRes.data ?? []) as unknown as CareItem[])
+    setItems(loadedItems)
+    if (loadedItems.some((i) => i.active && i.exercise_source === LIBRARY_SOURCE)) {
+      // The videos are a help, not a condition: without them the day works as before.
+      fetch('/api/my-phygo/exercise-media', { cache: 'no-store' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((body) => body?.media && setMedia(body.media))
+        .catch(() => {})
+    }
     setLogs(((logsRes.data ?? []) as unknown as ActivityLog[]).filter((l) => l.activity_date === today))
     setState('ready')
   }, [patientId, today])
@@ -164,9 +180,12 @@ export default function DailyQuest({ patientId }: { patientId: string }) {
           const dose = short ? doseLabel(task.item.short_variant ?? {}) : doseLabel(task.item)
           const instructions = short ? task.item.short_variant?.instructions || task.item.instructions : task.item.instructions
           const recorded = task.log && editing !== key
+          const m = task.item.exercise_source === LIBRARY_SOURCE && task.item.exercise_ref ? media[task.item.exercise_ref] : undefined
+          const video = m ? (typeof window !== 'undefined' && window.matchMedia?.('(max-width: 639px)').matches ? m.video_vertical_url ?? m.video_url : m.video_url ?? m.video_vertical_url) : null
           return (
             <li key={key} data-testid="daily-quest-task" className="rounded-xl border border-black/[0.06] p-4 dark:border-white/[0.08]">
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                {m?.image_url && <img src={m.image_url} alt="" className="h-14 w-14 shrink-0 rounded-xl object-cover" />}
                 <div className="min-w-0">
                   <p className="font-semibold text-ink dark:text-white">{task.item.title}</p>
                   <p className="mt-0.5 text-sm text-ink/60 dark:text-white/55">
@@ -176,8 +195,16 @@ export default function DailyQuest({ patientId }: { patientId: string }) {
                   {instructions && <p className="mt-1.5 whitespace-pre-line text-xs leading-relaxed text-ink/55 dark:text-white/45">{instructions}</p>}
                   {task.item.dose_notes && <p className="mt-1 text-xs text-ink/50 dark:text-white/40">{task.item.dose_notes}</p>}
                   {lowEnergy && !task.item.short_variant && !recorded && <p data-testid="daily-quest-no-short" className="mt-2 text-xs text-amber-700 dark:text-amber-300">{t.noShort}</p>}
+                  {video && (
+                    <button type="button" aria-expanded={watching === key} onClick={() => setWatching(watching === key ? null : key)} className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[#5B63E6] dark:text-[#A5B4FF]">
+                      <PlayCircle size={14} aria-hidden />{watching === key ? tl.hideHow : tl.showHow}
+                    </button>
+                  )}
                 </div>
               </div>
+              {video && watching === key && (
+                <video data-testid="daily-quest-video" src={video} poster={m?.image_url ?? undefined} controls playsInline muted loop preload="metadata" className="mt-3 max-h-[440px] w-full rounded-xl bg-black object-contain" />
+              )}
               {recorded ? (
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <span data-testid="daily-quest-recorded" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400">
