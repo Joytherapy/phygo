@@ -14,6 +14,7 @@ import { localeForLang } from '@/lib/i18n/agendaStrings'
 import { MY_PHYGO_STRINGS } from '@/lib/i18n/myPhygoStrings'
 import { MyAvatar, useMyProfile } from '@/components/myPhygo/MyProfileContext'
 import ClinicianNotice from '@/components/myPhygo/ClinicianNotice'
+import DailyQuest from '@/components/myPhygo/DailyQuest'
 const supabase = lazy(() => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -154,6 +155,8 @@ export default function MyPhygoHomePage() {
           </Link>
         </div>
       )}
+
+      <DailyQuest patientId={patient.id} />
 
       <div className="mb-8">
         <AppointmentScheduler patientId={patient.id} mode="patient" />

@@ -16,6 +16,7 @@ import WeightTrendChart from '@/components/WeightTrendChart'
 import type { AdaptiveInsightResult } from '@/lib/metabolicCalculator'
 import { lazy } from '@/lib/lazy'
 import PatientProfileCard from '@/components/patients/PatientProfileCard'
+import CareProgramCard from '@/components/patients/CareProgramCard'
 import { displayAge, type PatientIdentity } from '@/lib/patients/profile'
 import { PageBackdrop, PageEyebrow, PAGE_BG, PRIMARY_BTN, SECONDARY_BTN, CHIP, HUE, type Hue } from '@/components/ui/premium'
 import { Avatar, Card } from '@/components/dashboard/HomeCards'
@@ -517,6 +518,8 @@ export default function PatientDetailPage() {
           locked={locked}
           onSaved={(updated) => setPatient((p) => (p ? { ...p, ...updated } : p))}
         />
+
+        <CareProgramCard patientId={patient.id} locked={locked} />
 
         <div className="rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.055] dark:to-white/[0.018] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-6 sm:p-7">
           <div className="flex items-start justify-between gap-3 mb-6">
