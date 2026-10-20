@@ -25,6 +25,7 @@ import {
   nextByPatient, notesPerWeek, pendingRequests, weekBounds, type HomeAppointment, type HomeNote,
 } from '@/lib/dashboard/home'
 import { lazy } from '@/lib/lazy'
+import CareAttention from '@/components/dashboard/CareAttention'
 import { PageBackdrop, PAGE_BG, HUE } from '@/components/ui/premium'
 
 const supabase = lazy(() => createBrowserClient(
@@ -562,6 +563,8 @@ export default function DashboardPage() {
             loading={ui.common.loading}
           />
         </motion.div>
+
+        <CareAttention patients={loadState === 'ready' ? patients : null} />
 
         {/* patients */}
         <section id="patients" className="mt-10 scroll-mt-28" aria-labelledby="patients-heading">

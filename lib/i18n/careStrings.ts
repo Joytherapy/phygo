@@ -85,6 +85,36 @@ export type CareDict = {
     education: string
     open: string
   }
+  attention: {
+    heading: string
+    subtitle: string
+    empty: string
+    week: (done: number, planned: number) => string
+    weekNone: string
+    lastCheckin: (pain: string, fatigue: string, date: string) => string
+    noCheckin: string
+    paused: string
+    flags: {
+      pain_high: (value: number, threshold: number) => string
+      pain_rise: (from: number, to: number) => string
+      fatigue_high: (value: number, threshold: number) => string
+      no_update: (days: number) => string
+    }
+    noFlags: string
+    howToRead: string
+    definitions: string[]
+    open: string
+    loadError: string
+    rulesTitle: string
+    rulesHint: string
+    painAtOrAbove: string
+    painRise: string
+    fatigueAtOrAbove: string
+    noUpdate: string
+    off: string
+    saveRules: string
+    rulesSaved: string
+  }
 }
 
 const it: CareDict = {
@@ -168,6 +198,41 @@ const it: CareDict = {
     checkinHint: 'Il tuo fisioterapista vedrà i valori. Se il dolore aumenta molto o compaiono sintomi nuovi, contattalo.',
     education: 'Da leggere',
     open: 'Apri',
+  },
+  attention: {
+    heading: 'Programmi a casa',
+    subtitle: 'Pazienti con un programma attivo: sessioni segnate come fatte e check-in, come li riferiscono i pazienti.',
+    empty: 'Nessun paziente ha ancora un programma a casa attivo. Crealo dalla scheda del paziente.',
+    week: (done, planned) => `${done}/${planned} sessioni in 7 giorni`,
+    weekNone: 'nessuna sessione prevista in 7 giorni',
+    lastCheckin: (pain, fatigue, date) => `check-in ${date}: dolore ${pain}, fatica ${fatigue}`,
+    noCheckin: 'nessun check-in',
+    paused: 'programma in mantenimento',
+    flags: {
+      pain_high: (value, threshold) => `Dolore ${value}/10 (soglia ${threshold})`,
+      pain_rise: (from, to) => `Dolore da ${from} a ${to} dall’inizio`,
+      fatigue_high: (value, threshold) => `Fatica ${value}/10 (soglia ${threshold})`,
+      no_update: (days) => `Nessun aggiornamento da ${days} giorni`,
+    },
+    noFlags: 'nessuna segnalazione',
+    howToRead: 'Come leggere questi dati',
+    definitions: [
+      'Sessioni: quelle previste negli ultimi 7 giorni (oggi compreso) e quante il paziente ha segnato come fatte o fatte in parte. È ciò che il paziente dichiara, non una misura dell’esecuzione.',
+      'Segnalazioni: compaiono solo per le soglie che hai impostato nella scheda del paziente. Senza soglie non compare nulla.',
+      'Dolore e fatica: l’ultimo check-in degli ultimi 7 giorni, su scala 0–10. L’aumento è rispetto al primo check-in dall’inizio del programma.',
+      'Nessun aggiornamento: nei giorni indicati c’erano sessioni previste e il paziente non ha registrato nulla. Non indica un peggioramento clinico.',
+    ],
+    open: 'Apri scheda',
+    loadError: 'I programmi a casa non sono stati caricati.',
+    rulesTitle: 'Quando segnalarmi questo paziente',
+    rulesHint: 'Le soglie le decidi tu e il paziente non le vede. Senza soglie non compare nessuna segnalazione in dashboard.',
+    painAtOrAbove: 'Dolore pari o superiore a',
+    painRise: 'Aumento del dolore rispetto al primo check-in di almeno',
+    fatigueAtOrAbove: 'Fatica pari o superiore a',
+    noUpdate: 'Nessun aggiornamento per almeno (giorni)',
+    off: 'Nessuna soglia',
+    saveRules: 'Salva soglie',
+    rulesSaved: 'Soglie salvate.',
   },
 }
 
@@ -253,6 +318,41 @@ const en: CareDict = {
     education: 'To read',
     open: 'Open',
   },
+  attention: {
+    heading: 'Home programmes',
+    subtitle: 'Patients with an active programme: sessions marked as done and check-ins, as the patients report them.',
+    empty: 'No patient has an active home programme yet. Create one from the patient page.',
+    week: (done, planned) => `${done}/${planned} sessions in 7 days`,
+    weekNone: 'no sessions planned in 7 days',
+    lastCheckin: (pain, fatigue, date) => `check-in ${date}: pain ${pain}, fatigue ${fatigue}`,
+    noCheckin: 'no check-in',
+    paused: 'programme in maintenance',
+    flags: {
+      pain_high: (value, threshold) => `Pain ${value}/10 (threshold ${threshold})`,
+      pain_rise: (from, to) => `Pain from ${from} to ${to} since the start`,
+      fatigue_high: (value, threshold) => `Fatigue ${value}/10 (threshold ${threshold})`,
+      no_update: (days) => `No update for ${days} days`,
+    },
+    noFlags: 'nothing flagged',
+    howToRead: 'How to read this',
+    definitions: [
+      'Sessions: those planned in the last 7 days (today included) and how many the patient marked as done or partly done. This is what the patient reports, not a measure of how they were done.',
+      'Flags: they only appear for the thresholds you set on the patient page. With no threshold nothing appears.',
+      'Pain and fatigue: the latest check-in of the last 7 days, on a 0–10 scale. The rise is compared with the first check-in since the programme started.',
+      'No update: sessions were planned on those days and the patient recorded nothing. It does not mean a clinical worsening.',
+    ],
+    open: 'Open record',
+    loadError: 'The home programmes could not be loaded.',
+    rulesTitle: 'When to flag this patient',
+    rulesHint: 'You set the thresholds and the patient does not see them. With no threshold nothing is flagged on the dashboard.',
+    painAtOrAbove: 'Pain at or above',
+    painRise: 'Pain rise from the first check-in of at least',
+    fatigueAtOrAbove: 'Fatigue at or above',
+    noUpdate: 'No update for at least (days)',
+    off: 'No threshold',
+    saveRules: 'Save thresholds',
+    rulesSaved: 'Thresholds saved.',
+  },
 }
 
 const es: CareDict = {
@@ -337,6 +437,41 @@ const es: CareDict = {
     education: 'Para leer',
     open: 'Abrir',
   },
+  attention: {
+    heading: 'Programas en casa',
+    subtitle: 'Pacientes con un programa activo: sesiones marcadas como hechas y registros, tal como los indican los pacientes.',
+    empty: 'Ningún paciente tiene todavía un programa en casa activo. Créalo desde la ficha del paciente.',
+    week: (done, planned) => `${done}/${planned} sesiones en 7 días`,
+    weekNone: 'ninguna sesión prevista en 7 días',
+    lastCheckin: (pain, fatigue, date) => `registro ${date}: dolor ${pain}, fatiga ${fatigue}`,
+    noCheckin: 'sin registro',
+    paused: 'programa en mantenimiento',
+    flags: {
+      pain_high: (value, threshold) => `Dolor ${value}/10 (umbral ${threshold})`,
+      pain_rise: (from, to) => `Dolor de ${from} a ${to} desde el inicio`,
+      fatigue_high: (value, threshold) => `Fatiga ${value}/10 (umbral ${threshold})`,
+      no_update: (days) => `Sin actualizaciones desde hace ${days} días`,
+    },
+    noFlags: 'sin avisos',
+    howToRead: 'Cómo leer estos datos',
+    definitions: [
+      'Sesiones: las previstas en los últimos 7 días (hoy incluido) y cuántas ha marcado el paciente como hechas o hechas en parte. Es lo que indica el paciente, no una medida de la ejecución.',
+      'Avisos: solo aparecen para los umbrales que has fijado en la ficha del paciente. Sin umbrales no aparece nada.',
+      'Dolor y fatiga: el último registro de los últimos 7 días, en escala 0–10. El aumento se compara con el primer registro desde el inicio del programa.',
+      'Sin actualizaciones: había sesiones previstas en esos días y el paciente no registró nada. No indica un empeoramiento clínico.',
+    ],
+    open: 'Abrir ficha',
+    loadError: 'No se pudieron cargar los programas en casa.',
+    rulesTitle: 'Cuándo avisarme de este paciente',
+    rulesHint: 'Los umbrales los decides tú y el paciente no los ve. Sin umbrales no aparece ningún aviso en el panel.',
+    painAtOrAbove: 'Dolor igual o superior a',
+    painRise: 'Aumento del dolor respecto al primer registro de al menos',
+    fatigueAtOrAbove: 'Fatiga igual o superior a',
+    noUpdate: 'Sin actualizaciones durante al menos (días)',
+    off: 'Sin umbral',
+    saveRules: 'Guardar umbrales',
+    rulesSaved: 'Umbrales guardados.',
+  },
 }
 
 const fr: CareDict = {
@@ -420,6 +555,41 @@ const fr: CareDict = {
     checkinHint: 'Votre kinésithérapeute verra ces valeurs. Si la douleur augmente beaucoup ou si de nouveaux symptômes apparaissent, contactez-le.',
     education: 'À lire',
     open: 'Ouvrir',
+  },
+  attention: {
+    heading: 'Programmes à domicile',
+    subtitle: 'Patients avec un programme actif : séances marquées comme faites et relevés, tels que les patients les déclarent.',
+    empty: 'Aucun patient n’a encore de programme à domicile actif. Créez-le depuis la fiche du patient.',
+    week: (done, planned) => `${done}/${planned} séances sur 7 jours`,
+    weekNone: 'aucune séance prévue sur 7 jours',
+    lastCheckin: (pain, fatigue, date) => `relevé ${date} : douleur ${pain}, fatigue ${fatigue}`,
+    noCheckin: 'aucun relevé',
+    paused: 'programme en entretien',
+    flags: {
+      pain_high: (value, threshold) => `Douleur ${value}/10 (seuil ${threshold})`,
+      pain_rise: (from, to) => `Douleur de ${from} à ${to} depuis le début`,
+      fatigue_high: (value, threshold) => `Fatigue ${value}/10 (seuil ${threshold})`,
+      no_update: (days) => `Aucune mise à jour depuis ${days} jours`,
+    },
+    noFlags: 'aucun signalement',
+    howToRead: 'Comment lire ces données',
+    definitions: [
+      'Séances : celles prévues sur les 7 derniers jours (aujourd’hui compris) et combien le patient a marquées comme faites ou faites en partie. C’est ce que le patient déclare, pas une mesure de l’exécution.',
+      'Signalements : ils n’apparaissent que pour les seuils que vous avez fixés sur la fiche du patient. Sans seuil, rien n’apparaît.',
+      'Douleur et fatigue : le dernier relevé des 7 derniers jours, sur une échelle de 0 à 10. La hausse est comparée au premier relevé depuis le début du programme.',
+      'Aucune mise à jour : des séances étaient prévues ces jours-là et le patient n’a rien enregistré. Cela n’indique pas une aggravation clinique.',
+    ],
+    open: 'Ouvrir la fiche',
+    loadError: 'Les programmes à domicile n’ont pas pu être chargés.',
+    rulesTitle: 'Quand me signaler ce patient',
+    rulesHint: 'Vous fixez les seuils et le patient ne les voit pas. Sans seuil, rien n’est signalé sur le tableau de bord.',
+    painAtOrAbove: 'Douleur égale ou supérieure à',
+    painRise: 'Hausse de la douleur depuis le premier relevé d’au moins',
+    fatigueAtOrAbove: 'Fatigue égale ou supérieure à',
+    noUpdate: 'Aucune mise à jour pendant au moins (jours)',
+    off: 'Aucun seuil',
+    saveRules: 'Enregistrer les seuils',
+    rulesSaved: 'Seuils enregistrés.',
   },
 }
 

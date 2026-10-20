@@ -31,6 +31,7 @@ import {
   type ProgramStatus,
 } from '@/lib/care/program'
 import { PRIMARY_BTN, SECONDARY_BTN } from '@/components/ui/premium'
+import { RULE_COLUMNS, type AttentionRules } from '@/lib/care/attention'
 
 const supabase = lazy(() => createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!))
 
@@ -49,6 +50,7 @@ const numOrNull = (v: string, max: number) => {
 export default function CareProgramCard({ patientId, locked }: { patientId: string; locked: boolean }) {
   const { lang } = useLanguage()
   const t = (CARE_STRINGS[lang] ?? CARE_STRINGS.it).clinician
+  const ta = (CARE_STRINGS[lang] ?? CARE_STRINGS.it).attention
   const [state, setState] = useState<'loading' | 'missing' | 'error' | 'ready'>('loading')
   const [program, setProgram] = useState<CareProgram | null>(null)
   const [items, setItems] = useState<CareItem[]>([])
@@ -58,6 +60,9 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
   const [notice, setNotice] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
+  const EMPTY_RULES: AttentionRules = { pain_at_or_above: null, pain_rise_points: null, fatigue_at_or_above: null, no_update_days: null }
+  const [rules, setRules] = useState<AttentionRules>(EMPTY_RULES)
+  const [rulesStatus, setRulesStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
   const load = useCallback(async () => {
     setState('loading')
@@ -77,10 +82,11 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
     setProgram(current)
     if (current) {
       const since = addDays(localDate(new Date()), -6)
-      const [itemsRes, logsRes, checkinRes] = await Promise.all([
+      const [itemsRes, logsRes, checkinRes, rulesRes] = await Promise.all([
         supabase.from('care_program_items').select(ITEM_COLUMNS).eq('program_id', current.id).order('sort_order'),
         supabase.from('care_activity_logs').select(LOG_COLUMNS).eq('patient_id', patientId).gte('activity_date', since),
         supabase.from('symptom_checkins').select('checkin_date, pain_nrs, fatigue_nrs').eq('patient_id', patientId).order('checkin_date', { ascending: false }).limit(1),
+        supabase.from('care_attention_rules').select(RULE_COLUMNS).eq('patient_id', patientId).limit(1),
       ])
       if (itemsRes.error || logsRes.error) {
         console.error('care programme: details failed:', itemsRes.error?.code ?? logsRes.error?.code)
@@ -89,6 +95,8 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
       setItems((itemsRes.data ?? []) as unknown as CareItem[])
       setLogs(((logsRes.data ?? []) as unknown as ActivityLog[]).filter((l) => l.activity_date >= since))
       setLastCheckin(((checkinRes.data ?? []) as any[])[0] ?? null)
+      const savedRules = ((rulesRes.data ?? []) as any[]).find((r) => r.patient_id === patientId)
+      setRules(savedRules ? { pain_at_or_above: savedRules.pain_at_or_above, pain_rise_points: savedRules.pain_rise_points, fatigue_at_or_above: savedRules.fatigue_at_or_above, no_update_days: savedRules.no_update_days } : EMPTY_RULES)
     } else {
       setItems([])
       setLogs([])
@@ -218,6 +226,34 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
     load()
   }
 
+  const saveRules = async () => {
+    if (locked) return
+    setRulesStatus('saving')
+    const { error } = await supabase.from('care_attention_rules').upsert({ patient_id: patientId, ...rules }, { onConflict: 'patient_id' })
+    if (error) {
+      console.error('care programme: rules failed:', error.code)
+      return setRulesStatus('error')
+    }
+    setRulesStatus('saved')
+  }
+  const ruleSelect = (key: keyof AttentionRules, label: string, values: number[], format: (n: number) => string) => (
+    <label key={key}>
+      <span className={labelCls}>{label}</span>
+      <select
+        className={inputCls}
+        disabled={locked}
+        value={rules[key] ?? ''}
+        onChange={(e) => {
+          setRules({ ...rules, [key]: e.target.value === '' ? null : Number(e.target.value) })
+          setRulesStatus('idle')
+        }}
+      >
+        <option value="">{ta.off}</option>
+        {values.map((n) => <option key={n} value={n}>{format(n)}</option>)}
+      </select>
+    </label>
+  )
+
   const today = localDate(new Date())
   const week = adherence(program, items, logs, addDays(today, -6), today)
   const exercises = items.filter((i) => i.active && i.kind === 'exercise')
@@ -289,6 +325,21 @@ export default function CareProgramCard({ patientId, locked }: { patientId: stri
               </p>
             )}
           </div>
+          <details className="rounded-xl border border-black/[0.06] px-4 py-3 dark:border-white/[0.08]" data-testid="care-attention-rules">
+            <summary className="cursor-pointer text-sm font-semibold text-ink dark:text-white">{ta.rulesTitle}</summary>
+            <p className="mt-1.5 text-xs text-ink/50 dark:text-white/40">{ta.rulesHint}</p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {ruleSelect('pain_at_or_above', ta.painAtOrAbove, [3, 4, 5, 6, 7, 8, 9, 10], (n) => `${n}/10`)}
+              {ruleSelect('pain_rise_points', ta.painRise, [1, 2, 3, 4, 5], (n) => `+${n}`)}
+              {ruleSelect('fatigue_at_or_above', ta.fatigueAtOrAbove, [3, 4, 5, 6, 7, 8, 9, 10], (n) => `${n}/10`)}
+              {ruleSelect('no_update_days', ta.noUpdate, [2, 3, 4, 5, 7, 10, 14], (n) => String(n))}
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <button type="button" disabled={locked || rulesStatus === 'saving'} onClick={saveRules} className={`inline-flex min-h-[38px] items-center rounded-full px-4 text-sm font-semibold disabled:opacity-50 ${SECONDARY_BTN}`}>{ta.saveRules}</button>
+              {rulesStatus === 'saved' && <span role="status" className="text-sm text-emerald-600 dark:text-emerald-400">{ta.rulesSaved}</span>}
+              {rulesStatus === 'error' && <span role="alert" className="text-sm text-red-600 dark:text-red-400">{t.saveError}</span>}
+            </div>
+          </details>
           <div className="flex flex-wrap gap-2">
             <button type="button" disabled={locked} onClick={startEdit} className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold disabled:opacity-50 ${SECONDARY_BTN}`}><Pencil size={14} aria-hidden />{t.edit}</button>
             {program.status === 'paused' ? (
