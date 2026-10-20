@@ -26,10 +26,10 @@ type PatientRecord = {
   main_condition: string | null
 }
 
+// Only what was written for the patient (lib/myPhygo/patientNote.ts): the
+// clinician's findings, assessment, plan and reasoning are not sent here.
 type NoteRecord = {
   id: string
-  assessment: string | null
-  plan: string | null
   exercises: any
   summary_for_patient: string | null
   created_at: string
@@ -75,11 +75,8 @@ export default function MyPhygoHomePage() {
 
       setPatient(patientData)
 
-      const { data: notesData } = await supabase
-        .from('notes')
-        .select('id, assessment, plan, exercises, summary_for_patient, created_at')
-        .eq('patient_id', patientData.id)
-        .order('created_at', { ascending: false })
+      const notesRes = await fetch('/api/my-phygo/notes', { cache: 'no-store' }).catch(() => null)
+      const notesData = notesRes?.ok ? (await notesRes.json().catch(() => ({}))).notes : null
 
       setNotes(notesData || [])
 
@@ -308,7 +305,7 @@ export default function MyPhygoHomePage() {
                       })}
                     </p>
                     <p className="text-sm text-ink/70 dark:text-white/70 truncate">
-                      {note.assessment || t.sessionRecorded}
+                      {note.summary_for_patient || t.sessionRecorded}
                     </p>
                   </div>
                 </div>
