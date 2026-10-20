@@ -18,6 +18,7 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     users, // access token -> user object
     requests: [],
     failTables: new Set(), // tables that answer 500 (to test error handling)
+    missingTables: new Set(), // tables that do not exist yet (SQL not applied): PostgREST's PGRST205
     // Daily stand-in: what PHYGO asked Daily for (room bodies, token properties, deleted rooms).
     // deleteFailures: statuses the next room deletions answer with (e.g. [500, 500]), to test refusals.
     daily: { rooms: [], tokens: [], deleted: [], deleteAttempts: [], deleteFailures: [] },
@@ -136,6 +137,7 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     if (!rest) return send(404, { message: 'not found' });
     const table = rest[1];
     if (state.failTables.has(table)) return send(500, { message: `simulated failure on ${table}`, code: 'XX000' });
+    if (state.missingTables.has(table)) return send(404, { code: 'PGRST205', message: `Could not find the table 'public.${table}' in the schema cache` });
     const rows = (state.tables[table] ??= []);
 
     const filters = [];
