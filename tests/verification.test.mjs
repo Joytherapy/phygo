@@ -101,6 +101,7 @@ const PROTECTED = [
   ['/api/refine-plan', { note: 'synthetic' }],
   ['/api/exercise-intelligence', { note: 'synthetic' }],
   ['/api/science/relevant', { note: 'synthetic' }],
+  ['/api/knowledge-lookup', { assessment: 'synthetic' }],
   ['/api/video-call/create-room', { patientId: 'p-declared' }],
 ];
 

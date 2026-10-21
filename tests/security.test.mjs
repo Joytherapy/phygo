@@ -70,6 +70,7 @@ const AI_ROUTES = [
   ['/api/refine-plan', { transcript: 'x', assessment: 'x', exercisesDraft: [], phases: [], lang: 'en' }],
   ['/api/exercise-intelligence', { primaryCondition: 'x', assessment: 'x', lang: 'en' }],
   ['/api/science/relevant', { primaryCondition: 'x', assessment: 'x' }],
+  ['/api/knowledge-lookup', { primaryCondition: 'x', assessment: 'x' }],
 ];
 
 test('anonymous callers cannot trigger any paid AI or video operation', async () => {

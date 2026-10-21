@@ -55,6 +55,7 @@ import { bookletExercises, bookletPapers, bookletPhases, buildPatientBooklet, ty
 import { imageAsJpeg } from "@/lib/care/programPdf";
 import { usePatientContext } from "@/contexts/PatientContext";
 import { localDate } from "@/lib/care/program";
+import { loadClinicianSignature } from "@/lib/care/clinicianSignature";
 
 // One look for every block of the panel (a quiet tile inside the page card).
 const BLOCK = "mt-4 rounded-[22px] border border-black/[0.06] bg-white/70 p-5 sm:p-6 dark:border-white/[0.07] dark:bg-white/[0.025]";
@@ -118,6 +119,10 @@ export default function LiveStructuring({
   const [evidenceLevel, setEvidenceLevel] = useState<string | null>(null);
 const [relevantPapers, setRelevantPapers] = useState<any[]>([]);
 const [papersLoading, setPapersLoading] = useState(false);
+// After a note: whether the evidence and protocol searches have answered, so an
+// empty result is said instead of the block silently not appearing.
+const [papersChecked, setPapersChecked] = useState(false);
+const [kbChecked, setKbChecked] = useState<string | null>(null);
 const [matchedKeyword, setMatchedKeyword] = useState<string | null>(null);
 const [showWhy, setShowWhy] = useState(false);
 const [showAskPhygo, setShowAskPhygo] = useState(false);
@@ -322,6 +327,9 @@ const [recordingLang, setRecordingLang] = useState(DICTATION_LOCALE[lang]);
 
     setRelevantPapers([]);
     setPapersLoading(false);
+    setPapersChecked(false);
+    setKbChecked(null);
+    setProgramStatus("idle");
   };
 
   const runFlyPhase = useCallback((finalPhrases: Phrase[]) => {
@@ -489,7 +497,10 @@ if (!res.ok) {
               console.error("science/relevant failed:", err);
               setRelevantPapers([]);
             })
-            .finally(() => setPapersLoading(false));
+            .finally(() => {
+              setPapersLoading(false);
+              setPapersChecked(true);
+            });
         }
 
         let rehabPhasesLocal: any[] = [];
@@ -507,6 +518,7 @@ setRehabPhases(kbData.phases || []);
 setEvidenceLevel(kbData.evidenceLevel || null);
 setMatchedKeyword(kbData.matchedKeyword || null);
 rehabPhasesLocal = kbData.phases || [];
+setKbChecked(note.primaryCondition || note.assessment.slice(0, 80));
 
           } catch (kbErr) {
             console.error("Knowledge lookup failed:", kbErr);
@@ -881,6 +893,7 @@ const downloadBooklet = async () => {
     );
     const doc = buildPatientBooklet({
       patientName: currentPatient && currentPatient.id === patientId ? currentPatient.name : "",
+      clinician: await loadClinicianSignature(supabase),
       date: localDate(new Date()),
       summary: finalNote.summaryForPatient || "",
       phases: bookletPhases(rehabPhases),
@@ -1472,6 +1485,12 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
             </motion.div>
           )}
 
+          {!clinicalInsight && kbChecked && isLiveVoice && (
+            <p data-testid="no-protocol" className="mt-4 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3 text-xs leading-relaxed text-amber-800 dark:text-amber-300">
+              {care.plan.noProtocol(kbChecked)}
+            </p>
+          )}
+
           {clinicalInsight && (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className={`relative overflow-hidden ${BLOCK}`}>
               <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#8B95FF]/60 to-transparent" />
@@ -1553,7 +1572,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
           {/* Relevant evidence from the existing Science/PubMed library, only
               published papers matching the primary condition, and only the
               structured summary written for this purpose (why_it_matters). */}
-          {(papersLoading || relevantPapers.length > 0) && (
+          {(papersLoading || relevantPapers.length > 0 || (papersChecked && isLiveVoice)) && (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.025 }} className={BLOCK}>
               <BlockTitle icon={BookOpen}>{t.evidenceTitle}</BlockTitle>
 

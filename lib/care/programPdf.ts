@@ -5,6 +5,7 @@
 import jsPDF from 'jspdf'
 import { doseLabel, type CareItem, type CareProgram } from './program'
 import type { CareDict } from '@/lib/i18n/careStrings'
+import type { ClinicianSignature } from './clinicianSignature'
 
 // The PDF's built-in font covers Latin-1 only.
 export const pdfText = (s: string) =>
@@ -50,10 +51,10 @@ export class PatientPdf {
     }
   }
 
-  header(title: string, subtitle: string) {
+  header(title: string, subtitle: string, by?: string) {
     const d = this.doc
     d.setFillColor(...ACCENT)
-    d.rect(0, 0, W, 34, 'F')
+    d.rect(0, 0, W, by ? 40 : 34, 'F')
     d.setTextColor(255, 255, 255)
     d.setFont('helvetica', 'bold')
     d.setFontSize(20)
@@ -61,8 +62,39 @@ export class PatientPdf {
     d.setFont('helvetica', 'normal')
     d.setFontSize(10.5)
     d.text(pdfText(subtitle), M, 25, { maxWidth: W - 2 * M })
+    if (by) {
+      d.setFont('helvetica', 'bold')
+      d.text(pdfText(by), M, 32, { maxWidth: W - 2 * M })
+      d.setFont('helvetica', 'normal')
+    }
     d.setTextColor(...INK)
-    this.y = 44
+    this.y = by ? 50 : 44
+  }
+
+  /** The clinician who prepared the document, at its end. */
+  signature(label: string, sig: ClinicianSignature) {
+    const d = this.doc
+    this.ensure(22)
+    this.y += 4
+    d.setDrawColor(...ACCENT)
+    d.setLineWidth(0.4)
+    d.line(M, this.y - 4, M + 60, this.y - 4)
+    d.setLineWidth(0.2)
+    d.setFontSize(9)
+    d.setTextColor(...MUTED)
+    d.text(pdfText(label), M, this.y)
+    d.setFont('helvetica', 'bold')
+    d.setFontSize(12)
+    d.setTextColor(...INK)
+    d.text(pdfText(sig.name), M, this.y + 6)
+    d.setFont('helvetica', 'normal')
+    if (sig.credentials) {
+      d.setFontSize(9.5)
+      d.setTextColor(...MUTED)
+      d.text(pdfText(sig.credentials), M, this.y + 11, { maxWidth: W - 2 * M })
+      d.setTextColor(...INK)
+    }
+    this.y += 16
   }
 
   section(n: number, title: string) {
@@ -184,6 +216,7 @@ export function buildProgramPdf(opts: {
   program: Pick<CareProgram, 'title' | 'starts_on' | 'rest_weekdays'>
   items: CareItem[]
   patientName: string
+  clinician: ClinicianSignature | null
   appUrl: string
   t: CareDict['plan']
   weekdayNames: string[]
@@ -192,7 +225,7 @@ export function buildProgramPdf(opts: {
 }): jsPDF {
   const { t } = opts
   const pdf = new PatientPdf()
-  pdf.header(t.pdfTitle, [opts.patientName ? t.pdfFor(opts.patientName) : null, opts.program.title, t.pdfStart(fmtDate(opts.program.starts_on))].filter(Boolean).join('  ·  '))
+  pdf.header(t.pdfTitle, [opts.patientName ? t.pdfFor(opts.patientName) : null, opts.program.title, t.pdfStart(fmtDate(opts.program.starts_on))].filter(Boolean).join('  ·  '), opts.clinician ? t.pdfBy(opts.clinician.name) : undefined)
   if (opts.program.rest_weekdays.length) pdf.paragraph(t.pdfRest(opts.program.rest_weekdays.map((d) => opts.weekdayNames[d - 1]).join(', ')), MUTED, 10)
   pdf.exercises(
     opts.items
@@ -208,7 +241,8 @@ export function buildProgramPdf(opts: {
       })),
   )
   pdf.closing(t, opts.appUrl)
-  pdf.footers(t.pdfFooter)
+  if (opts.clinician) pdf.signature(t.pdfYourPhysio, opts.clinician)
+  pdf.footers(opts.clinician ? t.pdfFooterBy(opts.clinician.name) : t.pdfFooter)
   return pdf.doc
 }
 

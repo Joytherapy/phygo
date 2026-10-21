@@ -160,6 +160,11 @@ export type CareDict = {
     pdfApp: string
     pdfSafety: string
     pdfFooter: string
+    pdfBy: (name: string) => string
+    pdfFooterBy: (name: string) => string
+    pdfYourPhysio: string
+    pdfNoName: string
+    noProtocol: (condition: string) => string
     pdfError: string
   }
   library: {
@@ -350,6 +355,11 @@ const it: CareDict = {
     pdfApp: 'Ogni giorno segna in My Phygo cosa hai fatto e guarda i video degli esercizi:',
     pdfSafety: 'Se il dolore aumenta molto o compaiono sintomi nuovi, interrompi e contatta il tuo fisioterapista.',
     pdfFooter: 'Preparato dal tuo fisioterapista con PHYGO',
+    pdfBy: (name) => `A cura di ${name}`,
+    pdfFooterBy: (name) => `Preparato da ${name} con PHYGO`,
+    pdfYourPhysio: 'Il tuo fisioterapista',
+    pdfNoName: 'Il PDF non riporta il tuo nome: aggiungilo in Profilo.',
+    noProtocol: (c) => `Nessuna scheda clinica con protocollo riabilitativo trovata per «${c}». Esercizi e nota restano disponibili.`,
     pdfError: 'Non è stato possibile creare il PDF. Riprova.',
   },
   library: {
@@ -540,6 +550,11 @@ const en: CareDict = {
     pdfApp: 'Every day, record what you did in My Phygo and watch the exercise videos:',
     pdfSafety: 'If the pain gets much worse or new symptoms appear, stop and contact your physiotherapist.',
     pdfFooter: 'Prepared by your physiotherapist with PHYGO',
+    pdfBy: (name) => `By ${name}`,
+    pdfFooterBy: (name) => `Prepared by ${name} with PHYGO`,
+    pdfYourPhysio: 'Your physiotherapist',
+    pdfNoName: 'The PDF does not show your name: add it in Profile.',
+    noProtocol: (c) => `No clinical sheet with a rehab protocol was found for “${c}”. The note and exercises are still available.`,
     pdfError: 'The PDF could not be created. Try again.',
   },
   library: {
@@ -730,6 +745,11 @@ const es: CareDict = {
     pdfApp: 'Cada día, anota en My Phygo lo que has hecho y mira los vídeos de los ejercicios:',
     pdfSafety: 'Si el dolor aumenta mucho o aparecen síntomas nuevos, para y contacta con tu fisioterapeuta.',
     pdfFooter: 'Preparado por tu fisioterapeuta con PHYGO',
+    pdfBy: (name) => `Por ${name}`,
+    pdfFooterBy: (name) => `Preparado por ${name} con PHYGO`,
+    pdfYourPhysio: 'Tu fisioterapeuta',
+    pdfNoName: 'El PDF no muestra tu nombre: añádelo en Perfil.',
+    noProtocol: (c) => `No se ha encontrado una ficha clínica con protocolo de rehabilitación para «${c}». La nota y los ejercicios siguen disponibles.`,
     pdfError: 'No se ha podido crear el PDF. Inténtalo de nuevo.',
   },
   library: {
@@ -920,6 +940,11 @@ const fr: CareDict = {
     pdfApp: 'Chaque jour, notez dans My Phygo ce que vous avez fait et regardez les vidéos des exercices :',
     pdfSafety: 'Si la douleur augmente beaucoup ou si de nouveaux symptômes apparaissent, arrêtez et contactez votre kinésithérapeute.',
     pdfFooter: 'Préparé par votre kinésithérapeute avec PHYGO',
+    pdfBy: (name) => `Par ${name}`,
+    pdfFooterBy: (name) => `Préparé par ${name} avec PHYGO`,
+    pdfYourPhysio: 'Votre kinésithérapeute',
+    pdfNoName: 'Le PDF n’indique pas votre nom : ajoutez-le dans Profil.',
+    noProtocol: (c) => `Aucune fiche clinique avec protocole de rééducation trouvée pour « ${c} ». La note et les exercices restent disponibles.`,
     pdfError: 'Impossible de créer le PDF. Réessayez.',
   },
   library: {
