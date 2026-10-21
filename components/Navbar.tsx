@@ -281,7 +281,7 @@ export default function Navbar() {
                   // the y animation, which clobbers Tailwind's translate-x entirely and left
                   // this menu offset to the right by half its width. The motion.div below only
                   // animates opacity/y; it is not what centers the panel.
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-72">
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-72 whitespace-normal">
                     <motion.div
                       initial={{ opacity: 0, y: -4 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -342,7 +342,9 @@ export default function Navbar() {
                   // Same centering fix as the Libreria menu above: keep left-1/2
                   // -translate-x-1/2 off the motion.div so framer-motion's own
                   // transform (for the y animation) doesn't override it.
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-64">
+                  // whitespace-normal: the desktop nav row is nowrap, which the
+                  // descriptions inherited and ran out of the panel.
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-72 whitespace-normal">
                     <motion.div
                       initial={{ opacity: 0, y: -4 }}
                       animate={{ opacity: 1, y: 0 }}

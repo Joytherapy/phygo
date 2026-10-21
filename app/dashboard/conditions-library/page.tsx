@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Search, X, ChevronDown, Stethoscope, ChevronRight, BookOpen } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/contexts/LanguageContext';
+import EvidenceBadge from '@/components/EvidenceBadge';
 import { useDashboardUi } from '@/lib/i18n/dashboardStrings';
 import ErrorState from '@/components/workspace/ErrorState';
 import { PageBackdrop } from '@/components/ui/premium'
@@ -401,8 +402,8 @@ export default function ConditionsLibraryPage() {
                                 <div className="pt-2 border-t border-black/[0.09] dark:border-white/10">
                                   <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 mb-1">
                                     {ui.source}
-                                    {detail.evidence_level ? ` · ${ui.evidenceLevel}: ${detail.evidence_level}` : ''}
                                   </p>
+                                  {detail.evidence_level && <EvidenceBadge level={detail.evidence_level} className="mb-1.5" />}
                                   <p className="text-xs text-ink/60 dark:text-white/50 leading-relaxed">{detail.source}</p>
                                 </div>
                               )}

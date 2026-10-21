@@ -54,7 +54,8 @@ before(async () => {
     // jsPDF is handed in from here (the transpiled files live outside node_modules' reach).
     globalThis.__jsPDF = (await import('jspdf')).jsPDF;
     out('programPdf', read('programPdf').replace(/^import jsPDF from 'jspdf'$/m, 'const jsPDF = globalThis.__jsPDF').replace("from './program'", "from './program.mjs'"));
-    out('patientBooklet', read('patientBooklet').replace("from './programPdf'", "from './programPdf.mjs'").replace("from './program'", "from './program.mjs'"));
+    out('evidence', readFileSync(new URL('../lib/evidence.ts', import.meta.url), 'utf8'));
+    out('patientBooklet', read('patientBooklet').replace("from './programPdf'", "from './programPdf.mjs'").replace("from './program'", "from './program.mjs'").replace("from '@/lib/evidence'", "from './evidence.mjs'"));
     C = await import(join(dir, 'program.mjs'));
     F = await import(join(dir, 'fromNote.mjs'));
     P = await import(join(dir, 'programPdf.mjs'));

@@ -7,6 +7,7 @@ import { ArrowLeft, X, Stethoscope, AlertTriangle } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ClinicalActionBar from '@/components/ClinicalActionBar';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
+import EvidenceBadge from '@/components/EvidenceBadge';
 import type { GeriatricPrinciple, ZoneDetail } from '@/lib/brainMapContent';
 import { PageBackdrop } from '@/components/ui/premium'
 
@@ -228,9 +229,7 @@ export default function BrainZoneHubPage() {
               </div>
 
               {selectedCondition.evidence_level && (
-                <span className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#32D6A0] text-white mb-4">
-                  {selectedCondition.evidence_level} {ui.fields.evidence.toLowerCase()}
-                </span>
+                <EvidenceBadge level={selectedCondition.evidence_level} size="md" className="mb-4" />
               )}
 
               <div className="mb-4">

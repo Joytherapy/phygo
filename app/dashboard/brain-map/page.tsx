@@ -10,6 +10,7 @@ import Navbar from '@/components/Navbar';
 import ClinicalActionBar from '@/components/ClinicalActionBar';
 import { X, Maximize2, Sparkles, Loader2, Search } from 'lucide-react';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
+import EvidenceBadge from '@/components/EvidenceBadge';
 import {
   PATHWAYS,
   GAIT_TYPES,
@@ -724,9 +725,7 @@ function BrainMapPageInner() {
                         ))}
                       </div>
                       {c.evidence_level && (
-                        <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/55 dark:text-white/40">
-                          {ui.fields.evidence}: {c.evidence_level}
-                        </span>
+                        <EvidenceBadge level={c.evidence_level} className="mt-2" />
                       )}
                     </button>
                   ))}
@@ -1066,9 +1065,7 @@ function BrainMapPageInner() {
                           {c.condition_name}
                         </p>
                         {c.evidence_level && (
-                          <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/55 dark:text-white/40">
-                            {ui.fields.evidence}: {c.evidence_level}
-                          </span>
+                          <EvidenceBadge level={c.evidence_level} className="mt-2" />
                         )}
                       </button>
                     ))}
@@ -1121,9 +1118,7 @@ function BrainMapPageInner() {
                           {c.condition_name}
                         </p>
                         {c.evidence_level && (
-                          <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/55 dark:text-white/40">
-                            {ui.fields.evidence}: {c.evidence_level}
-                          </span>
+                          <EvidenceBadge level={c.evidence_level} className="mt-2" />
                         )}
                       </button>
                     ))}
@@ -1428,9 +1423,7 @@ function BrainMapPageInner() {
                 )}
                 {selectedCondition.evidence_level && (
                   <div className="pt-2 border-t border-black/[0.09] dark:border-white/10">
-                    <p className="text-xs text-ink/55 dark:text-white/40">
-                      {ui.fields.evidence}: {selectedCondition.evidence_level}
-                    </p>
+                    <EvidenceBadge level={selectedCondition.evidence_level} size="md" />
                   </div>
                 )}
               </div>

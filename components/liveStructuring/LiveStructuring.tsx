@@ -55,6 +55,7 @@ import { bookletExercises, bookletPapers, bookletPhases, buildPatientBooklet, ty
 import { imageAsJpeg } from "@/lib/care/programPdf";
 import { usePatientContext } from "@/contexts/PatientContext";
 import { localDate } from "@/lib/care/program";
+import EvidenceBadge from "@/components/EvidenceBadge";
 import { loadClinicianSignature } from "@/lib/care/clinicianSignature";
 
 // One look for every block of the panel (a quiet tile inside the page card).
@@ -905,6 +906,7 @@ const downloadBooklet = async () => {
       appUrl: `${window.location.origin}/my-phygo/home`,
       t: care.booklet,
       plan: care.plan,
+      lang,
     });
     doc.save(`phygo-opuscolo-${localDate(new Date())}.pdf`);
     setBookletStatus("idle");
@@ -1500,11 +1502,8 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                   <BlockTitle icon={Sparkles}>{t.clinicalInsights}</BlockTitle>
                   <p className="mt-3 text-base font-semibold text-ink dark:text-white">{clinicalInsight.condition_name}</p>
                 </div>
-                {evidenceLevel && (
-                  <span className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold ${CHIP}`}>
-                    {evidenceLevel === "high" ? t.evidenceStrong : t.evidenceModerate}
-                  </span>
-                )}
+                {/* Any level, in its colour (lib/evidence.ts); it used to read every non-"high" level as moderate. */}
+                {evidenceLevel && <EvidenceBadge level={evidenceLevel} size="md" className="shrink-0" />}
               </div>
 
               <div className={`mt-5 grid grid-cols-1 gap-5 ${compact ? "" : "sm:grid-cols-2"}`}>
@@ -1591,6 +1590,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                             <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${CHIP}`}>{paper.study_type}</span>
                           )}
                         </div>
+                        {paper.evidence_strength && <EvidenceBadge level={paper.evidence_strength} className="mb-2" />}
                         <p className="mb-2 text-[11px] text-ink/50 dark:text-white/45">
                           {[
                             paper.authors,
