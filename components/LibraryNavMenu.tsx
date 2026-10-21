@@ -99,7 +99,7 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={navUi.searchPlaceholder}
-          className="w-full rounded-lg border border-black/[0.09] dark:border-white/10 bg-black/[0.02] dark:bg-white/5 pl-8 pr-3 py-1.5 text-xs text-ink dark:text-white placeholder:text-ink/30 dark:placeholder:text-white/30 outline-none focus:border-[#7C83FF]/40 transition-colors"
+          className="w-full rounded-xl border border-black/[0.09] dark:border-white/10 bg-black/[0.03] dark:bg-white/5 pl-8 pr-3 py-2 text-sm text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/35 outline-none focus:border-[#7C83FF]/40 transition-colors"
         />
       </div>
 
@@ -115,10 +115,15 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
                 type="button"
                 onClick={() => toggleCategory(cat.id)}
                 aria-expanded={isOpen}
-                className={`flex w-full items-center justify-between rounded-lg px-3 ${variant === 'mobile' ? 'min-h-[40px] py-2' : 'py-1.5'} text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 hover:text-ink/70 dark:hover:text-white/70 transition-colors`}
+                className={
+                  variant === 'desktop'
+                    ? // Same type as the PHYGO World menu: a group reads like one of its items.
+                      'flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-ink hover:bg-ink/5 dark:text-white dark:hover:bg-white/10 transition-colors'
+                    : 'flex w-full items-center justify-between rounded-lg px-3 min-h-[40px] py-2 text-[11px] font-semibold uppercase tracking-wide text-ink/55 dark:text-white/40 hover:text-ink/70 dark:hover:text-white/70 transition-colors'
+                }
               >
                 {navUi.categories[cat.id]}
-                <ChevronDown size={11} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={variant === 'desktop' ? 14 : 11} className={`shrink-0 text-ink/45 dark:text-white/45 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
               </button>
               <AnimatePresence initial={false}>
                 {isOpen && (
@@ -126,7 +131,7 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden"
+                    className={variant === 'desktop' ? 'ml-3 overflow-hidden border-l border-black/[0.08] pl-1 dark:border-white/10' : 'overflow-hidden'}
                   >
                     {categoryKeys.map((key) => {
                       const l = linksByKey[key]
@@ -144,7 +149,7 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
                           <p
                             className={
                               variant === 'desktop'
-                                ? 'text-sm font-semibold text-ink dark:text-white'
+                                ? 'text-sm font-medium text-ink dark:text-white'
                                 : 'text-sm font-medium text-ink/80 dark:text-white/80'
                             }
                           >
