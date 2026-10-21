@@ -152,6 +152,10 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
         if (raw.startsWith('eq.')) return String(v) === raw.slice(3);
         if (raw.startsWith('neq.')) return String(v) !== raw.slice(4);
         if (raw.startsWith('in.(')) return raw.slice(4, -1).split(',').map((s) => s.replace(/^"|"$/g, '')).includes(String(v));
+        if (raw.startsWith('ilike.')) {
+          const pattern = raw.slice(6).replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/[%*]/g, '.*');
+          return new RegExp(`^${pattern}$`, 'is').test(String(v ?? ''));
+        }
         return true;
       });
 

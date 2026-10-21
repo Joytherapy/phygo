@@ -519,7 +519,7 @@ export default function PatientDetailPage() {
           onSaved={(updated) => setPatient((p) => (p ? { ...p, ...updated } : p))}
         />
 
-        <CareProgramCard patientId={patient.id} locked={locked} />
+        <CareProgramCard patientId={patient.id} patientName={patient.name} locked={locked} />
 
         <div className="rounded-[24px] border border-black/[0.06] bg-white/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-28px_rgba(15,23,42,0.28)] backdrop-blur-xl dark:border-white/[0.07] dark:bg-transparent dark:bg-gradient-to-b dark:from-white/[0.055] dark:to-white/[0.018] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-6 sm:p-7">
           <div className="flex items-start justify-between gap-3 mb-6">

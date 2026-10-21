@@ -47,6 +47,14 @@ import {
 import { lazy } from "@/lib/lazy";
 import { useLiveUi, DICTATION_LOCALE } from "@/lib/i18n/liveStructuringStrings";
 import { ACCENT, CHIP, ICON_TILE, INPUT_FOCUS, PRIMARY_BTN, SECONDARY_BTN } from "@/components/ui/premium";
+import Link from "next/link";
+import { CalendarCheck, PlayCircle } from "lucide-react";
+import { CARE_STRINGS } from "@/lib/i18n/careStrings";
+import { syncProgrammeFromNote, type SyncResult } from "@/lib/care/fromNote";
+import { bookletExercises, bookletPapers, bookletPhases, buildPatientBooklet, type BookletSections } from "@/lib/care/patientBooklet";
+import { imageAsJpeg } from "@/lib/care/programPdf";
+import { usePatientContext } from "@/contexts/PatientContext";
+import { localDate } from "@/lib/care/program";
 
 // One look for every block of the panel (a quiet tile inside the page card).
 const BLOCK = "mt-4 rounded-[22px] border border-black/[0.06] bg-white/70 p-5 sm:p-6 dark:border-white/[0.07] dark:bg-white/[0.025]";
@@ -140,6 +148,16 @@ const [textInput, setTextInput] = useState("");
 // paziente prima che l'output AI sia stato controllato.
 const [noteSaveStatus, setNoteSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 const savedNoteIdRef = useRef<string | null>(null);
+// "Put in the home programme": the reviewed exercises of the saved note become
+// the patient's home programme (lib/care/fromNote.ts), without retyping them.
+const care = CARE_STRINGS[lang as keyof typeof CARE_STRINGS] ?? CARE_STRINGS.it;
+const [programStatus, setProgramStatus] = useState<"idle" | "sending" | SyncResult>("idle");
+// The patient booklet: summary, recovery path, exercises and evidence of this
+// note in one document for the patient (lib/care/patientBooklet.ts).
+const { currentPatient } = usePatientContext();
+const [bookletSections, setBookletSections] = useState<BookletSections>({ summary: true, path: true, exercises: true, evidence: true });
+const [currentPhase, setCurrentPhase] = useState<number | null>(null);
+const [bookletStatus, setBookletStatus] = useState<"idle" | "working" | "error">("idle");
 
 const submitTextInput = () => {
   const raw = textInput.trim();
@@ -745,7 +763,7 @@ recognition.lang = recordingLang;
     }
     setExerciseSearching(true);
     try {
-      const res = await fetch(`/api/exercise-search?q=${encodeURIComponent(query.trim())}`);
+      const res = await fetch(`/api/exercise-search?q=${encodeURIComponent(query.trim())}&lang=${lang}`);
       const data = await res.json();
       setExerciseSearchResults(data.exercises || []);
     } catch (err) {
@@ -791,8 +809,12 @@ recognition.lang = recordingLang;
     setNoteSaveStatus("saving");
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      // Exercises of the Exercises section carry signed media links that expire
+      // in 30 minutes: they are not stored; the reference (provider_id) is.
       const exercisesToSave =
-        exerciseEntries.length > 0 ? exerciseEntries : finalNote.exercises || null;
+        exerciseEntries.length > 0
+          ? exerciseEntries.map((ex: any) => (ex.provider === "exercises" ? { ...ex, media: null } : ex))
+          : finalNote.exercises || null;
 
       const payload = {
         patient_id: patientId,
@@ -824,12 +846,60 @@ recognition.lang = recordingLang;
       }
 
       setNoteSaveStatus("saved");
+      setProgramStatus("idle");
       onSaved?.();
     } catch (saveErr) {
       console.error("Errore salvataggio nota:", saveErr);
       setNoteSaveStatus("error");
     }
   };
+
+const sendToProgramme = async () => {
+  if (!patientId || noteSaveStatus !== "saved") return;
+  setProgramStatus("sending");
+  const result = await syncProgrammeFromNote(supabase, {
+    patientId,
+    noteId: savedNoteIdRef.current,
+    exercises: exerciseEntries.length > 0 ? exerciseEntries : finalNote?.exercises,
+    title: care.clinician.defaultTitle,
+    checkinTitle: care.clinician.checkinsOn,
+  });
+  if (result.kind === "error") console.error(`home programme from note: ${result.where} failed:`, result.code);
+  setProgramStatus(result);
+};
+
+const downloadBooklet = async () => {
+  if (!finalNote) return;
+  setBookletStatus("working");
+  try {
+    const images = new Map<string, string>();
+    await Promise.all(
+      exerciseEntries.map(async (ex: any, i: number) => {
+        const jpeg = ex.media?.image_url ? await imageAsJpeg(ex.media.image_url) : null;
+        if (jpeg) images.set(String(ex.internal_id ?? i), jpeg);
+      })
+    );
+    const doc = buildPatientBooklet({
+      patientName: currentPatient && currentPatient.id === patientId ? currentPatient.name : "",
+      date: localDate(new Date()),
+      summary: finalNote.summaryForPatient || "",
+      phases: bookletPhases(rehabPhases),
+      currentPhase,
+      exercises: bookletExercises(exerciseEntries.length > 0 ? exerciseEntries : finalNote.exercises, care.plan, care.clinician.weekdays, images),
+      papers: bookletPapers(relevantPapers),
+      guideline: clinicalInsight?.condition_name && clinicalInsight?.source ? { name: clinicalInsight.condition_name, source: clinicalInsight.source, date: clinicalInsight.source_date || null } : null,
+      sections: bookletSections,
+      appUrl: `${window.location.origin}/my-phygo/home`,
+      t: care.booklet,
+      plan: care.plan,
+    });
+    doc.save(`phygo-opuscolo-${localDate(new Date())}.pdf`);
+    setBookletStatus("idle");
+  } catch (err) {
+    console.error("patient booklet failed:", err instanceof Error ? err.message : "error");
+    setBookletStatus("error");
+  }
+};
 
 const askPhygoAI = async () => {
   if (!askQuestion.trim()) return;
@@ -1229,6 +1299,41 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                   </div>
                 )}
 
+                {isLiveVoice && finalNote && patientId && noteSaveStatus === "saved" && (exerciseEntries.length > 0 || (finalNote.exercises || []).length > 0) && (
+                  <div className="flex flex-col items-center gap-2" data-testid="note-to-programme">
+                    <button
+                      type="button"
+                      onClick={sendToProgramme}
+                      disabled={programStatus === "sending"}
+                      className={`inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 text-sm font-semibold transition disabled:opacity-60 ${PRIMARY_BTN}`}
+                    >
+                      <CalendarCheck size={15} aria-hidden />
+                      {programStatus === "sending" ? care.plan.sending : care.plan.sendToProgram}
+                    </button>
+                    {typeof programStatus === "object" && (
+                      <p
+                        role={programStatus.kind === "error" || programStatus.kind === "missing" ? "alert" : "status"}
+                        className={`max-w-[320px] text-xs leading-relaxed ${programStatus.kind === "created" || programStatus.kind === "updated" ? "text-emerald-700 dark:text-emerald-300" : "text-red-600 dark:text-red-400"}`}
+                      >
+                        {programStatus.kind === "created"
+                          ? care.plan.created(programStatus.added)
+                          : programStatus.kind === "updated"
+                          ? care.plan.updated(programStatus.added, programStatus.changed)
+                          : programStatus.kind === "empty"
+                          ? care.plan.noExercises
+                          : programStatus.kind === "missing"
+                          ? care.plan.unavailable
+                          : care.plan.sendError}{" "}
+                        {(programStatus.kind === "created" || programStatus.kind === "updated") && (
+                          <Link href={`/dashboard/patients/${patientId}#care-program`} className="font-semibold underline">
+                            {care.library.openProgram}
+                          </Link>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 {patientId && noteSaveStatus === "idle" && (
                   <p className="max-w-[300px] text-xs leading-relaxed text-ink/55 dark:text-white/45">{t.reviewHint}</p>
                 )}
@@ -1563,7 +1668,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                   const key = ex.internal_id || String(i);
                   const isOpen = expandedExercise === key;
                   const isEditing = editingExercise === key;
-                  const hasDetails = ex.description || (Array.isArray(ex.instructions) && ex.instructions.length > 0);
+                  const hasDetails = ex.description || (Array.isArray(ex.instructions) && ex.instructions.length > 0) || ex.media?.video_url;
                   return (
                     <div
                       key={key}
@@ -1598,6 +1703,12 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                             <div className="mt-1.5 flex items-center gap-2">
                               {ex.provider === "custom" && (
                                 <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">{t.customExercise}</span>
+                              )}
+                              {ex.provider === "exercises" && (
+                                <span data-testid="note-exercise-library" className="inline-flex items-center gap-1 rounded-full bg-[#7C83FF]/10 px-2 py-0.5 text-[10px] font-semibold text-[#5B63E6] dark:text-[#A5B4FF]">
+                                  <PlayCircle size={10} aria-hidden />
+                                  {care.plan.withVideo}
+                                </span>
                               )}
                               {!isEditing && hasDetails && (
                                 <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-[#7C83FF]">
@@ -1667,6 +1778,9 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
 
                       {!isEditing && isOpen && hasDetails && (
                         <div className="border-t border-black/[0.06] pt-3 dark:border-white/[0.07]">
+                          {ex.media?.video_url && (
+                            <video src={ex.media.video_url} poster={ex.media.image_url ?? undefined} controls playsInline muted loop preload="metadata" className="mb-3 max-h-[320px] w-full rounded-xl bg-black object-contain" />
+                          )}
                           {ex.description && <p className="text-xs leading-relaxed text-ink/65 dark:text-white/60">{ex.description}</p>}
                           {Array.isArray(ex.instructions) && ex.instructions.length > 0 && (
                             <ol className="mt-2 list-inside list-decimal space-y-1 text-xs leading-relaxed text-ink/65 dark:text-white/60">
@@ -1717,6 +1831,47 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                     </p>
                   </div>
                 ))}
+              </div>
+            </motion.div>
+          )}
+
+          {isLiveVoice && finalNote && (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }} className={BLOCK} data-testid="patient-booklet">
+              <BlockTitle icon={BookOpen}>{care.booklet.panelTitle}</BlockTitle>
+              <p className="mt-2 text-xs leading-relaxed text-ink/55 dark:text-white/45">{care.booklet.panelHint}</p>
+              <fieldset className="mt-4">
+                <legend className={LABEL}>{care.booklet.include}</legend>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {([
+                    ["summary", care.booklet.summary, !!finalNote.summaryForPatient],
+                    ["path", care.booklet.path, rehabPhases.length > 0],
+                    ["exercises", care.booklet.exercises, exerciseEntries.length > 0 || (finalNote.exercises || []).length > 0],
+                    ["evidence", care.booklet.evidence, relevantPapers.length > 0 || !!clinicalInsight?.source],
+                  ] as [keyof BookletSections, string, boolean][]).filter(([, , available]) => available).map(([key, label]) => (
+                    <label key={key} className={`inline-flex min-h-[36px] cursor-pointer items-center gap-2 rounded-full border px-3 text-xs font-semibold transition ${bookletSections[key] ? "border-[#7C83FF]/50 bg-[#7C83FF]/10 text-[#5B63E6] dark:text-[#A5B4FF]" : "border-black/10 text-ink/55 dark:border-white/10 dark:text-white/50"}`}>
+                      <input type="checkbox" className="h-3.5 w-3.5 accent-[#7C83FF]" checked={bookletSections[key]} onChange={(e) => setBookletSections({ ...bookletSections, [key]: e.target.checked })} />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              {rehabPhases.length > 0 && bookletSections.path && (
+                <label className="mt-4 block max-w-sm">
+                  <span className={LABEL}>{care.booklet.currentPhase}</span>
+                  <select value={currentPhase ?? ""} onChange={(e) => setCurrentPhase(e.target.value === "" ? null : Number(e.target.value))} className={`${FIELD} mt-1.5`}>
+                    <option value="">{care.booklet.notSaid}</option>
+                    {bookletPhases(rehabPhases).map((p) => (
+                      <option key={p.number} value={p.number}>{`${p.number}. ${p.name}`}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button type="button" onClick={downloadBooklet} disabled={bookletStatus === "working"} className={`inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 text-sm font-semibold transition disabled:opacity-60 ${PRIMARY_BTN}`}>
+                  <Download size={15} aria-hidden />
+                  {bookletStatus === "working" ? care.booklet.making : care.booklet.button}
+                </button>
+                {bookletStatus === "error" && <p role="alert" className="text-xs text-red-600 dark:text-red-400">{care.booklet.error}</p>}
               </div>
             </motion.div>
           )}

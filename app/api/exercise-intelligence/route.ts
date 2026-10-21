@@ -5,6 +5,8 @@ import OpenAI from "openai";
 import { searchExercisesWithCache } from "@/lib/exercise-providers/cache";
 import type { ExerciseEntry } from "@/lib/exercise-providers/types";
 import { lazy } from "@/lib/lazy";
+import { serviceClient } from "@/lib/verification";
+import { searchLibraryExercises } from "@/lib/exerciseLibrary/search";
 
 const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
 
@@ -67,12 +69,24 @@ export async function POST(request: Request) {
       );
       const keywords: string[] = parsed.keywords || [draftText];
 
+      // The Exercises section first (video, steps, usable in the home
+      // programme); the older wger cache only when it has nothing.
       let match: ExerciseEntry | null = null;
-      try {
-        const candidates = await searchExercisesWithCache(keywords, "en");
-        match = candidates[0] || null;
-      } catch (searchErr) {
-        console.error("Exercise search failed:", searchErr);
+      const db = serviceClient();
+      if (db) {
+        try {
+          match = (await searchLibraryExercises(db, keywords, language, 1))[0] || null;
+        } catch (libErr) {
+          console.error("Exercise library search failed:", libErr);
+        }
+      }
+      if (!match) {
+        try {
+          const candidates = await searchExercisesWithCache(keywords, "en");
+          match = candidates[0] || null;
+        } catch (searchErr) {
+          console.error("Exercise search failed:", searchErr);
+        }
       }
 
       const dosing = {
