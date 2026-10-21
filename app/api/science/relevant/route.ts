@@ -4,6 +4,7 @@ import { consumeHourly, HOURLY_LIMITS, limitResponse } from '@/lib/rateLimit';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { lazy } from '@/lib/lazy';
+import { paperScore, searchTerms } from '@/lib/knowledge/paperRank';
 
 // Collega il motore clinico AI (LiveStructuring) alla libreria Scienza/PubMed
 // che esiste già in Phygo (research_papers + research_summaries, alimentata
@@ -68,8 +69,9 @@ export async function POST(req: Request) {
       // fallback: cerchiamo comunque con il testo grezzo
     }
 
-    const orFilter = keywords
-      .map((k) => k.replace(/[%,]/g, ' ').trim())
+    const terms = searchTerms(keywords);
+    const orFilter = [...terms.phrases, ...terms.words]
+      .map((k) => k.replace(/[%,()*]/g, ' ').trim())
       .filter(Boolean)
       .map((k) => `title.ilike.%${k}%,abstract.ilike.%${k}%`)
       .join(',');
@@ -78,22 +80,31 @@ export async function POST(req: Request) {
       return NextResponse.json({ papers: [] });
     }
 
-    const { data, error } = await supabase
+    const { data: found, error } = await supabase
       .from('research_papers')
       .select(
-        'id, title, authors, journal, publication_date, study_type, pmid, original_url, research_summaries(clinical_question, main_findings, why_it_matters, clinical_interpretation, evidence_strength)'
+        'id, title, abstract, authors, journal, publication_date, study_type, pmid, original_url, status, research_summaries(clinical_question, main_findings, why_it_matters, clinical_interpretation, evidence_strength)'
       )
       .eq('status', 'published')
       .or(orFilter)
       .order('publication_date', { ascending: false })
-      .limit(MAX_RESULTS);
+      .limit(40);
 
     if (error) {
       console.error('science/relevant query error:', error);
       return NextResponse.json({ papers: [] });
     }
 
-    const papers = (data || []).map((p: any) => ({
+    // Most relevant first (lib/knowledge/paperRank.ts), newest first on a tie.
+    const data = (found || [])
+      .filter((p: any) => p.status === 'published')
+      .map((p: any) => ({ p, score: paperScore(p, terms) }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score || String(b.p.publication_date ?? '').localeCompare(String(a.p.publication_date ?? '')))
+      .slice(0, MAX_RESULTS)
+      .map((x) => x.p);
+
+    const papers = data.map((p: any) => ({
       id: p.id,
       title: p.title,
       authors: p.authors,

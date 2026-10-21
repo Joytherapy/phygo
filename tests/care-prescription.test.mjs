@@ -43,6 +43,7 @@ let C; // lib/care/program.ts
 let F; // lib/care/fromNote.ts
 let P; // lib/care/programPdf.ts
 let B; // lib/care/patientBooklet.ts
+let S; // lib/care/clinicianSignature.ts
 before(async () => {
   const dir = mkdtempSync(join(tmpdir(), 'phygo-care-rx-'));
   const out = (f, src) => writeFileSync(join(dir, `${f}.mjs`), ts.transpileModule(src, { compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 } }).outputText);
@@ -58,6 +59,8 @@ before(async () => {
     F = await import(join(dir, 'fromNote.mjs'));
     P = await import(join(dir, 'programPdf.mjs'));
     B = await import(join(dir, 'patientBooklet.mjs'));
+    out('clinicianSignature', read('clinicianSignature'));
+    S = await import(join(dir, 'clinicianSignature.mjs'));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -121,6 +124,19 @@ test('the patient booklet: summary, path with "you are here", exercises, evidenc
   const some = build({ summary: true, path: false, exercises: true, evidence: false });
   assert.ok(!some.includes('Synthetic calm phase') && !some.includes('Synthetic trial of exercise'), 'sections the clinician unticks stay out');
   assert.ok(some.includes('Synthetic squat'));
+
+  // Signed by the clinician: header, signature and footer; never an e-mail address.
+  const signature = S.signatureFrom({ display_name: ' Dott.ssa Synthetic Clinician ', credentials: [{ id: '1', label: 'Fisioterapista OMPT' }, { label: '' }, 'MSc'] });
+  assert.deepEqual(signature, { name: 'Dott.ssa Synthetic Clinician', credentials: 'Fisioterapista OMPT, MSc' });
+  assert.equal(S.signatureFrom({ display_name: '' }, ''), null);
+  assert.deepEqual(S.signatureFrom(null, 'Meta Name'), { name: 'Meta Name', credentials: '' });
+  const signed = B.buildPatientBooklet({
+    patientName: 'Synthetic Patient', clinician: signature, date: '2026-10-20', summary: 'x', phases: [], currentPhase: null, exercises, papers: [], guideline: null,
+    sections: { summary: true, path: true, exercises: true, evidence: true }, appUrl: 'https://example.invalid/my-phygo/home', t: it.booklet, plan: it.plan,
+  }).output();
+  for (const text of ['A cura di Dott.ssa Synthetic Clinician', 'Il tuo fisioterapista', 'Fisioterapista OMPT, MSc', 'Preparato da Dott.ssa Synthetic Clinician con PHYGO']) {
+    assert.ok(signed.includes(text), `signed booklet shows: ${text}`);
+  }
 });
 
 async function importStrings() {

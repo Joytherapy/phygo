@@ -37,6 +37,7 @@ import { PRIMARY_BTN, SECONDARY_BTN } from '@/components/ui/premium'
 import { RULE_COLUMNS, type AttentionRules } from '@/lib/care/attention'
 import LibraryExercisePicker, { type LibraryExercise } from '@/components/patients/LibraryExercisePicker'
 import { buildProgramPdf, imageAsJpeg } from '@/lib/care/programPdf'
+import { loadClinicianSignature, type ClinicianSignature } from '@/lib/care/clinicianSignature'
 
 const supabase = lazy(() => createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!))
 
@@ -59,6 +60,11 @@ export default function CareProgramCard({ patientId, patientName, locked }: { pa
   const tl = (CARE_STRINGS[lang] ?? CARE_STRINGS.it).library
   const tp = (CARE_STRINGS[lang] ?? CARE_STRINGS.it).plan
   const [pdfStatus, setPdfStatus] = useState<'idle' | 'working' | 'error'>('idle')
+  // undefined: not loaded yet; null: the clinician has no name in their profile.
+  const [signature, setSignature] = useState<ClinicianSignature | null | undefined>(undefined)
+  useEffect(() => {
+    loadClinicianSignature(supabase).then(setSignature).catch(() => setSignature(null))
+  }, [])
   const [state, setState] = useState<'loading' | 'missing' | 'error' | 'ready'>('loading')
   const [program, setProgram] = useState<CareProgram | null>(null)
   const [items, setItems] = useState<CareItem[]>([])
@@ -283,7 +289,7 @@ export default function CareProgramCard({ patientId, patientName, locked }: { pa
           }),
         )
       }
-      const doc = buildProgramPdf({ program, items, patientName: patientName ?? '', appUrl: `${window.location.origin}/my-phygo/home`, t: tp, weekdayNames: t.weekdays, images })
+      const doc = buildProgramPdf({ program, items, patientName: patientName ?? '', clinician: signature ?? (await loadClinicianSignature(supabase)), appUrl: `${window.location.origin}/my-phygo/home`, t: tp, weekdayNames: t.weekdays, images })
       doc.save(`phygo-programma-${localDate(new Date())}.pdf`)
       setPdfStatus('idle')
     } catch (err) {
@@ -443,6 +449,7 @@ export default function CareProgramCard({ patientId, patientName, locked }: { pa
             <button type="button" disabled={locked} onClick={() => setStatus('completed')} className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full px-4 text-sm font-semibold disabled:opacity-50 ${SECONDARY_BTN}`}><Flag size={14} aria-hidden />{t.complete}</button>
           </div>
           {pdfStatus === 'error' && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{tp.pdfError}</p>}
+          {signature === null && <p data-testid="pdf-no-name" className="text-xs text-amber-700 dark:text-amber-300">{tp.pdfNoName}</p>}
         </div>
       )}
 

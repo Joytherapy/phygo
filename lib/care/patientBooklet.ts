@@ -9,6 +9,7 @@ import type jsPDF from 'jspdf'
 import { doseLabel, weekdaysForFrequency } from './program'
 import { LAYOUT, PatientPdf, fmtDate, pdfText, type PrintExercise } from './programPdf'
 import type { CareDict } from '@/lib/i18n/careStrings'
+import type { ClinicianSignature } from './clinicianSignature'
 
 export type BookletPhase = { number: number; name: string; duration: string | null; goals: string | null; progressWhen: string | null }
 export type BookletPaper = { title: string; journal: string | null; year: string | null; strength: string | null; why: string | null }
@@ -56,6 +57,7 @@ export function bookletExercises(entries: unknown, t: Pick<CareDict['plan'], 'pd
 
 export function buildPatientBooklet(opts: {
   patientName: string
+  clinician: ClinicianSignature | null
   date: string
   summary: string
   phases: BookletPhase[]
@@ -72,7 +74,7 @@ export function buildPatientBooklet(opts: {
   const { M, W, INK, MUTED, ACCENT, ACCENT_TEXT } = LAYOUT
   const pdf = new PatientPdf()
   const d = pdf.doc
-  pdf.header(t.title, [opts.patientName ? opts.plan.pdfFor(opts.patientName) : null, fmtDate(opts.date)].filter(Boolean).join('  ·  '))
+  pdf.header(t.title, [opts.patientName ? opts.plan.pdfFor(opts.patientName) : null, fmtDate(opts.date)].filter(Boolean).join('  ·  '), opts.clinician ? opts.plan.pdfBy(opts.clinician.name) : undefined)
   let n = 0
 
   if (opts.sections.summary && opts.summary.trim()) {
@@ -149,6 +151,7 @@ export function buildPatientBooklet(opts: {
 
   pdf.section(++n, t.contact)
   pdf.closing(opts.plan, opts.appUrl)
-  pdf.footers(opts.plan.pdfFooter)
+  if (opts.clinician) pdf.signature(opts.plan.pdfYourPhysio, opts.clinician)
+  pdf.footers(opts.clinician ? opts.plan.pdfFooterBy(opts.clinician.name) : opts.plan.pdfFooter)
   return d
 }
