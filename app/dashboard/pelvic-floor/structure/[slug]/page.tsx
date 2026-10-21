@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { ArrowLeft, X } from 'lucide-react';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
+import EvidenceBadge from '@/components/EvidenceBadge';
 import { PageBackdrop } from '@/components/ui/premium';
 
 interface StructureDetail {
@@ -253,9 +254,7 @@ export default function PelvicFloorStructureDetailPage() {
                 )}
                 {selectedCondition.evidence_level && (
                   <div className="pt-2 border-t border-black/[0.09] dark:border-white/10">
-                    <p className="text-xs text-ink/55 dark:text-white/40">
-                      {ui.fields.evidence}: {selectedCondition.evidence_level}
-                    </p>
+                    <EvidenceBadge level={selectedCondition.evidence_level} size="md" />
                   </div>
                 )}
               </div>

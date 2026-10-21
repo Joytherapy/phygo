@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import ClinicalActionBar from '@/components/ClinicalActionBar';
 import { X, Sparkles, Loader2, Maximize2, Search } from 'lucide-react';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
+import EvidenceBadge from '@/components/EvidenceBadge';
 import { PageBackdrop } from '@/components/ui/premium';
 
 type SubView = 'anatomy' | 'conditions' | 'treatments' | 'assessment' | 'rehab';
@@ -572,9 +573,7 @@ export default function OncologyPage() {
                           >
                             <p className="text-sm font-semibold text-ink dark:text-white">{c.condition_name}</p>
                             {c.evidence_level && (
-                              <span className="inline-block text-[10px] font-bold uppercase tracking-wide mt-2 text-ink/55 dark:text-white/40">
-                                {ui.fields.evidence}: {c.evidence_level.split(' - ')[0]}
-                              </span>
+                              <EvidenceBadge level={c.evidence_level.split(' - ')[0]} className="mt-2" />
                             )}
                           </button>
                         ))}
@@ -887,9 +886,7 @@ export default function OncologyPage() {
                 )}
                 {selectedCondition.evidence_level && (
                   <div className="pt-2 border-t border-black/[0.09] dark:border-white/10">
-                    <p className="text-xs text-ink/55 dark:text-white/40">
-                      {ui.fields.evidence}: {selectedCondition.evidence_level}
-                    </p>
+                    <EvidenceBadge level={selectedCondition.evidence_level} size="md" />
                   </div>
                 )}
               </div>

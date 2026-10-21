@@ -1,53 +1,46 @@
 'use client';
 
-import { useUiStrings } from '@/contexts/LanguageContext';
-
-type EvidenceLevel = 'high' | 'strong' | 'moderate' | 'low' | 'limited' | string;
-
-const LEVEL_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
-  high: { bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-500' },
-  strong: { bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-500' },
-  moderate: { bg: 'bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', dot: 'bg-amber-500' },
-  low: { bg: 'bg-orange-500/10', text: 'text-orange-600 dark:text-orange-400', dot: 'bg-orange-500' },
-  limited: { bg: 'bg-orange-500/10', text: 'text-orange-600 dark:text-orange-400', dot: 'bg-orange-500' },
-};
-
-const DEFAULT_STYLE = { bg: 'bg-black/5 dark:bg-white/10', text: 'text-ink/60 dark:text-white/50', dot: 'bg-ink/30 dark:bg-white/30' };
+import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
+import { EVIDENCE_STYLE, evidenceLabel, evidenceTier } from '@/lib/evidence';
 
 /**
- * Uniform "evidence level" badge used across every section of the site
- * (Anatomy / Conditions / Rehab / Function / Treatments tabs) so that
- * clinical content is consistently flagged as High / Moderate / Low /
- * Expert-consensus quality evidence, wherever it appears.
- *
- * `level` is expected to be one of the DB enum values already used in
- * `knowledge_base.evidence_level` and the various `*_structures` /
- * `*_rehab` tables: 'high' | 'strong' | 'moderate' | 'low' | 'limited'.
- * Any other/unrecognized value still renders (in a neutral gray) rather
- * than being silently dropped, so a not-yet-normalized value is visible
- * instead of invisible.
+ * Uniform "evidence level" badge used across every section of the site, so
+ * that clinical content is flagged with the same colour for the same level
+ * wherever it appears (lib/evidence.ts): green high, teal moderate-high,
+ * amber moderate, orange low-moderate, red low, blue expert consensus, grey
+ * when the stored value is not recognised (then shown as written, never
+ * dropped). The words are always there; the colour only makes them stand out.
  */
 export default function EvidenceBadge({
   level,
   className = '',
+  prefix = true,
+  size = 'sm',
 }: {
-  level?: EvidenceLevel | null;
+  level?: string | null;
   className?: string;
+  /** Show "Evidence:" before the level. */
+  prefix?: boolean;
+  size?: 'sm' | 'md';
 }) {
   const ui = useUiStrings();
+  const { lang } = useLanguage();
 
-  if (!level) return null;
+  if (!level || !level.trim()) return null;
 
-  const key = level.toLowerCase().trim();
-  const style = LEVEL_STYLES[key] ?? DEFAULT_STYLE;
-  const label = ui.evidenceLevels[key as keyof typeof ui.evidenceLevels] ?? level;
+  const tier = evidenceTier(level);
+  const style = EVIDENCE_STYLE[tier ?? 'unknown'];
+  const label = evidenceLabel(level, lang);
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${style.bg} ${style.text} ${className}`}
+      data-testid="evidence-badge"
+      data-tier={tier ?? 'unknown'}
+      title={level}
+      className={`inline-flex items-center gap-1.5 rounded-full font-bold uppercase tracking-wide ${size === 'md' ? 'px-3 py-1 text-[11px]' : 'px-2 py-0.5 text-[10px]'} ${style.chip} ${className}`}
     >
-      <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-      {ui.fields.evidence}: {label}
+      <span aria-hidden className={`h-1.5 w-1.5 shrink-0 rounded-full ${style.dot}`} />
+      {prefix ? `${ui.fields.evidence}: ${label}` : label}
     </span>
   );
 }

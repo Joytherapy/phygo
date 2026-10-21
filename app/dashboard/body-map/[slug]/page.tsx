@@ -7,6 +7,7 @@ import { ArrowLeft, X, Activity, Stethoscope, AlertTriangle, Sparkles, Send, Loa
 import Navbar from '@/components/Navbar';
 import ClinicalActionBar from '@/components/ClinicalActionBar';
 import { useLanguage, useUiStrings } from '@/contexts/LanguageContext';
+import EvidenceBadge from '@/components/EvidenceBadge';
 import { ZONE_ANATOMY } from '@/lib/bodyMapAnatomy';
 import { PageBackdrop } from '@/components/ui/premium'
 
@@ -435,19 +436,7 @@ export default function ZoneHubPage() {
                     )}
                   </span>
                   {c.evidence_level && (
-                    <span
-                      className="shrink-0 mt-0.5 text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full text-white"
-                      style={{
-                        backgroundColor:
-                          c.evidence_level.toLowerCase() === 'high'
-                            ? '#32D6A0'
-                            : c.evidence_level.toLowerCase() === 'moderate'
-                            ? '#7C83FF'
-                            : '#94A3B8',
-                      }}
-                    >
-                      {c.evidence_level}
-                    </span>
+                    <EvidenceBadge level={c.evidence_level} prefix={false} className="mt-0.5 shrink-0" />
                   )}
                 </button>
               ))}
@@ -486,19 +475,7 @@ export default function ZoneHubPage() {
               </div>
 
               {selectedCondition.evidence_level && (
-                <span
-                  className="inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full text-white mb-4"
-                  style={{
-                    backgroundColor:
-                      selectedCondition.evidence_level.toLowerCase() === 'high'
-                        ? '#32D6A0'
-                        : selectedCondition.evidence_level.toLowerCase() === 'moderate'
-                        ? '#7C83FF'
-                        : '#94A3B8',
-                  }}
-                >
-                  {ui.fields.evidence}: {selectedCondition.evidence_level}
-                </span>
+                <EvidenceBadge level={selectedCondition.evidence_level} size="md" className="mb-4" />
               )}
 
               <div className="mb-4">

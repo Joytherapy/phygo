@@ -10,6 +10,7 @@ import { doseLabel, weekdaysForFrequency } from './program'
 import { LAYOUT, PatientPdf, fmtDate, pdfText, type PrintExercise } from './programPdf'
 import type { CareDict } from '@/lib/i18n/careStrings'
 import type { ClinicianSignature } from './clinicianSignature'
+import { EVIDENCE_RGB, evidenceLabel, evidenceTier } from '@/lib/evidence'
 
 export type BookletPhase = { number: number; name: string; duration: string | null; goals: string | null; progressWhen: string | null }
 export type BookletPaper = { title: string; journal: string | null; year: string | null; strength: string | null; why: string | null }
@@ -69,6 +70,7 @@ export function buildPatientBooklet(opts: {
   appUrl: string
   t: CareDict['booklet']
   plan: CareDict['plan']
+  lang?: string
 }): jsPDF {
   const { t } = opts
   const { M, W, INK, MUTED, ACCENT, ACCENT_TEXT } = LAYOUT
@@ -84,51 +86,63 @@ export function buildPatientBooklet(opts: {
 
   if (opts.sections.path && opts.phases.length) {
     pdf.section(++n, t.path)
+    // Each phase: number, name ("you are here" on the right when it is the
+    // current one), the typical duration on its own line, then goals and when
+    // to progress. Lines are placed one by one (pdf.ensure), so long texts
+    // wrap and break across pages without ever overlapping; a coloured rule
+    // on the left groups the phase, thicker for the current one.
+    const textX = M + 10
+    const width = W - M - textX
+    const line = (text: string, size: number, color: [number, number, number], bold = false, here = false) => {
+      d.setFont('helvetica', bold ? 'bold' : 'normal')
+      d.setFontSize(size)
+      const lines = d.splitTextToSize(pdfText(text), width) as string[]
+      for (const l of lines) {
+        pdf.ensure(LAYOUT.LINE + 1)
+        d.setDrawColor(...ACCENT)
+        d.setLineWidth(here ? 1.4 : 0.5)
+        d.line(M + 3, pdf.y - 3.6, M + 3, pdf.y + 1.2)
+        d.setLineWidth(0.2)
+        d.setTextColor(...color)
+        d.text(l, textX, pdf.y)
+        pdf.y += size >= 11 ? 5.4 : LAYOUT.LINE + 0.2
+      }
+      d.setFont('helvetica', 'normal')
+    }
     for (const phase of opts.phases) {
       const here = opts.currentPhase === phase.number
-      d.setFontSize(10)
-      const width = W - 2 * M - 14
-      const body = [
-        phase.goals ? `${t.goals}: ${phase.goals}` : null,
-        phase.progressWhen ? `${t.progressWhen}: ${phase.progressWhen}` : null,
-      ].filter(Boolean).flatMap((x) => d.splitTextToSize(pdfText(x as string), width) as string[])
-      const h = 10 + body.length * LAYOUT.LINE + 2
-      pdf.ensure(h + 4)
-      const y = pdf.y
-      d.setDrawColor(here ? ACCENT[0] : 225, here ? ACCENT[1] : 227, here ? ACCENT[2] : 240)
-      d.setFillColor(here ? 240 : 250, here ? 241 : 250, 255)
-      d.setLineWidth(here ? 0.6 : 0.2)
-      d.roundedRect(M - 3, y - 5, W - 2 * M + 6, h, 3, 3, 'FD')
-      d.setLineWidth(0.2)
+      pdf.ensure(16)
       d.setFillColor(...ACCENT)
-      d.circle(M + 3, y - 0.6, 3.6, 'F')
+      d.circle(M + 3, pdf.y - 1.4, 3.6, 'F')
       d.setTextColor(255, 255, 255)
       d.setFont('helvetica', 'bold')
       d.setFontSize(10)
-      d.text(String(phase.number || ''), M + 3, y + 1, { align: 'center' })
-      d.setTextColor(...INK)
-      d.setFontSize(11.5)
-      d.text(pdfText(phase.name), M + 10, y + 0.6, { maxWidth: W - 2 * M - 50 })
-      d.setFont('helvetica', 'normal')
-      d.setFontSize(9.5)
-      d.setTextColor(...MUTED)
+      d.text(String(phase.number || ''), M + 3, pdf.y + 0.2, { align: 'center' })
       if (here) {
-        d.setFont('helvetica', 'bold')
-        d.setTextColor(...ACCENT_TEXT)
-        d.text(pdfText(t.youAreHere), W - M, y + 0.6, { align: 'right' })
-        d.setFont('helvetica', 'normal')
-      } else if (phase.duration) {
-        d.text(pdfText(phase.duration), W - M, y + 0.6, { align: 'right', maxWidth: 45 })
+        const label = pdfText(t.youAreHere)
+        d.setFontSize(9)
+        const w = d.getTextWidth(label) + 6
+        d.setFillColor(...ACCENT)
+        d.roundedRect(W - M - w, pdf.y - 4.4, w, 6, 3, 3, 'F')
+        d.setTextColor(255, 255, 255)
+        d.text(label, W - M - w / 2, pdf.y - 0.3, { align: 'center' })
       }
-      d.setTextColor(60, 60, 75)
-      d.setFontSize(10)
-      let ty = y + 6.5
-      for (const line of body) {
-        d.text(line, M + 10, ty)
-        ty += LAYOUT.LINE
-      }
+      d.setFont('helvetica', 'normal')
+      const nameWidth = here ? width - 28 : width
+      d.setFont('helvetica', 'bold')
+      d.setFontSize(11.5)
       d.setTextColor(...INK)
-      pdf.y = y + h + 3
+      const nameLines = d.splitTextToSize(pdfText(phase.name), nameWidth) as string[]
+      for (const l of nameLines) {
+        d.text(l, textX, pdf.y)
+        pdf.y += 5.4
+      }
+      d.setFont('helvetica', 'normal')
+      if (phase.duration) line(phase.duration, 9, MUTED, false, here)
+      if (phase.goals) line(`${t.goals}: ${phase.goals}`, 10, [60, 60, 75], false, here)
+      if (phase.progressWhen) line(`${t.progressWhen}: ${phase.progressWhen}`, 10, [60, 60, 75], false, here)
+      d.setTextColor(...INK)
+      pdf.y += 5
     }
     pdf.y += 2
   }
@@ -144,7 +158,8 @@ export function buildPatientBooklet(opts: {
     opts.papers.forEach((p, i) => {
       pdf.paragraph(`${i + 1}. ${p.title}${[p.journal, p.year].filter(Boolean).length ? ` (${[p.journal, p.year].filter(Boolean).join(', ')})` : ''}`, INK, 10)
       if (p.why) pdf.paragraph(p.why, MUTED, 9.5)
-      if (p.strength) pdf.paragraph(t.strength(p.strength), ACCENT_TEXT, 9)
+      // The level in the colour it has everywhere in the app (lib/evidence.ts).
+      if (p.strength) pdf.paragraph(t.strength(evidenceLabel(p.strength, opts.lang ?? 'it')), EVIDENCE_RGB[evidenceTier(p.strength) ?? 'unknown'], 9.5)
     })
     if (opts.guideline) pdf.paragraph(t.guideline(opts.guideline.name, [opts.guideline.source, opts.guideline.date].filter(Boolean).join(', ')), MUTED, 9.5)
   }

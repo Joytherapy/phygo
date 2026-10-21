@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useCallback, useContext, useMemo, useState, useEffect, ReactNode } from 'react'
 
 type Patient = { id: string; name: string }
 
@@ -30,17 +30,21 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const setCurrentPatient = (p: Patient | null) => {
+  // Stable across renders: pages that set the patient on load list it in their
+  // effect dependencies, and a new function on every render made them run again
+  // right after the navbar's "x" cleared it, putting the patient straight back.
+  const setCurrentPatient = useCallback((p: Patient | null) => {
     setCurrentPatientState(p)
     if (p) {
       sessionStorage.setItem('phygo_current_patient', JSON.stringify(p))
     } else {
       sessionStorage.removeItem('phygo_current_patient')
     }
-  }
+  }, [])
+  const value = useMemo(() => ({ currentPatient, setCurrentPatient }), [currentPatient, setCurrentPatient])
 
   return (
-    <PatientContext.Provider value={{ currentPatient, setCurrentPatient }}>
+    <PatientContext.Provider value={value}>
       {children}
     </PatientContext.Provider>
   )

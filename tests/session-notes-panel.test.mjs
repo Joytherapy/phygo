@@ -105,3 +105,48 @@ test('the notes panel is in Italian and saves the reviewed note to the patient',
     await ctx.close();
   }
 });
+
+test('the navbar "x" clears the current patient on the session page, and it stays cleared', { skip }, async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'it-IT', reducedMotion: 'reduce' });
+  await ctx.addInitScript(() => window.localStorage.setItem('phygo-lang', 'it'));
+  const [name, value] = sessionCookie('tok-clin', U).split(/=(.*)/s);
+  await ctx.addCookies([{ name, value, url: app.url }]);
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  try {
+    await page.goto(`${app.url}/dashboard/patients/${P}/session`);
+    await page.getByRole('heading', { level: 1, name: 'Paziente Sintetico' }).waitFor({ timeout: 15000 });
+    const clear = page.getByRole('button', { name: 'Deseleziona paziente attuale' }).first();
+    await clear.waitFor({ timeout: 10000 });
+    await clear.click();
+    await page.waitForTimeout(1500);
+    assert.equal(await page.getByRole('button', { name: 'Deseleziona paziente attuale' }).count(), 0, 'the patient is not set again by the page');
+    assert.equal(await page.evaluate(() => window.sessionStorage.getItem('phygo_current_patient')), null);
+    assert.deepEqual(errors, []);
+  } finally {
+    await ctx.close();
+  }
+});
+
+test('the PHYGO World menu keeps its descriptions inside the panel', { skip }, async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: 'it-IT', reducedMotion: 'reduce' });
+  await ctx.addInitScript(() => window.localStorage.setItem('phygo-lang', 'it'));
+  const [name, value] = sessionCookie('tok-clin', U).split(/=(.*)/s);
+  await ctx.addCookies([{ name, value, url: app.url }]);
+  const page = await ctx.newPage();
+  try {
+    await page.goto(`${app.url}/dashboard/patients/${P}/session`);
+    await page.getByRole('heading', { level: 1, name: 'Paziente Sintetico' }).waitFor({ timeout: 15000 });
+    await page.getByRole('button', { name: 'PHYGO World' }).first().click();
+    const link = page.getByRole('link', { name: /Eventi/ }).first();
+    await link.waitFor({ timeout: 5000 });
+    const boxes = await link.evaluate((a) => {
+      const panel = a.parentElement.getBoundingClientRect();
+      return [...a.querySelectorAll('p')].map((p) => ({ right: p.getBoundingClientRect().right, panel: panel.right }));
+    });
+    for (const b of boxes) assert.ok(b.right <= b.panel + 0.5, `text ends at ${b.right}, panel at ${b.panel}`);
+  } finally {
+    await ctx.close();
+  }
+});
