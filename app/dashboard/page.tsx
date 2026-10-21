@@ -230,8 +230,11 @@ export default function DashboardPage() {
 
       if (error) {
         console.error('Patient could not be created:', error)
-        // 42501: refused by the database rules (can_manage_patients()).
-        setCreateError(error.code === '42501' ? t.home.createDenied : t.home.createError)
+        // 42501 with "row-level security": refused by the database rules
+        // (can_manage_patients()). A bare 42501 ("permission denied for table")
+        // is a missing privilege, not the account's status: generic error.
+        const deniedByRules = error.code === '42501' && /row-level security/i.test(error.message ?? '')
+        setCreateError(deniedByRules ? t.home.createDenied : t.home.createError)
         return
       }
 

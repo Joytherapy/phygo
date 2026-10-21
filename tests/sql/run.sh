@@ -130,7 +130,10 @@ q -c "insert into professional_transition_accounts (user_id, until, added_by) va
         ('$L', now() + interval '30 days', 'owner'), ('$R', now() + interval '30 days', 'owner'),
         ('$S', now() + interval '30 days', 'owner'), ('$P', now() + interval '30 days', 'owner');
       insert into professional_transition_accounts (user_id, until, added_at, added_by) values ('$X', now() - interval '1 day', now() - interval '31 days', 'owner');" >/dev/null
-expect "transition entries longer than 90 days are refused" "$(as service_role $U "insert into professional_transition_accounts (user_id, until, added_by) values ('$U', now() + interval '91 days', 'owner')")" denied
+# As the table owner, so only the CHECK constraint can refuse it (as service_role
+# a missing grant refused it too, and the test passed for the wrong reason).
+expect "transition entries longer than 90 days are refused" "$(if q -c "insert into professional_transition_accounts (user_id, until, added_by) values ('$U', now() + interval '91 days', 'owner')" >/dev/null 2>&1; then echo ok; else echo denied; fi)" denied
+expect "an 89-day entry is accepted (the refusal above is the 90-day rule)" "$(if q -c "begin; insert into professional_transition_accounts (user_id, until, added_by) values ('$U', now() + interval '89 days', 'owner'); rollback;" >/dev/null 2>&1; then echo ok; else echo denied; fi)" ok
 expect "users cannot add themselves to the transition list" "$(as authenticated $U "insert into professional_transition_accounts (user_id, until, added_by) values ('$U', now() + interval '10 days', 'me')")" denied
 expect "users cannot extend their own transition entry" "$(as authenticated $L "update professional_transition_accounts set until = now() + interval '80 days' where user_id = '$L'")" denied
 expect "users see only their own transition entry" "$(psql -q -At -d "$DB" -c "set role authenticated; set request.jwt.claim.sub = '$U'; select count(*) from professional_transition_accounts")" 0

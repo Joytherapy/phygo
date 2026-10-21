@@ -7,6 +7,7 @@ import { WgerProvider } from "./wger";
 // "supabaseUrl is required" if NEXT_PUBLIC_SUPABASE_URL isn't set in that
 // build environment.
 let supabaseClient: SupabaseClient | null = null;
+let writerClient: SupabaseClient | null = null;
 
 function getSupabase(): SupabaseClient {
   if (!supabaseClient) {
@@ -16,6 +17,19 @@ function getSupabase(): SupabaseClient {
     );
   }
   return supabaseClient;
+}
+
+// Writes go through the service role, server-side only: the cache feeds the
+// exercises suggested in clinical notes, so it must not be writable with the
+// public anon key (sql/2026-10-22_exercise_cache_no_anon_writes_PROPOSED.sql
+// removes the anon insert/update policies). Reads keep using the anon key.
+function getWriter(): SupabaseClient | null {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error("exercise cache: no service role configured, not writing");
+    return null;
+  }
+  writerClient ??= createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return writerClient;
 }
 
 const wgerProvider = new WgerProvider();
@@ -43,7 +57,9 @@ export async function saveCachedExercise(
   language: string,
   entry: ExerciseEntry
 ): Promise<void> {
-  await getSupabase().from("exercise_cache").upsert(
+  const writer = getWriter();
+  if (!writer) return;
+  const { error } = await writer.from("exercise_cache").upsert(
     {
       provider,
       provider_id: providerId,
@@ -54,6 +70,7 @@ export async function saveCachedExercise(
     },
     { onConflict: "provider,provider_id,language" }
   );
+  if (error) console.error("exercise cache: write failed:", error.code);
 }
 
 export async function searchExercisesWithCache(
