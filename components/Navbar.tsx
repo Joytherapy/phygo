@@ -50,6 +50,11 @@ const getInitials = (name: string) => {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
+
+// One look for every navbar dropdown (Library, PHYGO World, language,
+// profile): an opaque panel, so the page behind never shows through the text.
+const MENU_PANEL =
+  "rounded-2xl border border-black/[0.08] bg-white shadow-[0_24px_60px_-18px_rgba(15,23,42,0.35)] dark:border-white/10 dark:bg-[#15171e] dark:shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)]";
 export default function Navbar() {
   const { scrollY } = useScroll();
   const router = useRouter();
@@ -287,7 +292,7 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -4 }}
                     >
-                      <div className="glass-strong rounded-xl2 shadow-soft p-2">
+                      <div className={`${MENU_PANEL} p-2`}>
                         <LibraryNavMenu variant="desktop" />
                       </div>
                     </motion.div>
@@ -350,7 +355,7 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -4 }}
                     >
-                      <div className="glass-strong rounded-xl2 shadow-soft p-2">
+                      <div className={`${MENU_PANEL} p-2`}>
                         {worldLinkHrefs.map((l) => (
                           <a
                             key={l.href}
@@ -435,7 +440,7 @@ export default function Navbar() {
                     exit={{ opacity: 0, y: -4 }}
                     className="absolute top-full right-0 pt-3 w-40"
                   >
-                    <div className="glass-strong rounded-xl2 shadow-soft p-1.5 flex items-center gap-1">
+                    <div className={`${MENU_PANEL} p-1.5 flex items-center gap-1`}>
                       {APP_LANGS.map((l) => (
                         <button
                           key={l}
@@ -494,7 +499,7 @@ export default function Navbar() {
                     exit={{ opacity: 0, y: -4 }}
                     className="absolute top-full right-0 pt-3 w-44"
                   >
-                    <div className="glass-strong rounded-xl2 shadow-soft p-1.5">
+                    <div className={`${MENU_PANEL} p-1.5`}>
                       <a
                         href="/dashboard/profile"
                         className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-ink/70 dark:text-white/70 hover:bg-ink/5 dark:hover:bg-white/10 transition-colors"
