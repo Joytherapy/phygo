@@ -149,7 +149,7 @@ export default function LibraryNavMenu({ variant, onNavigate }: { variant: 'desk
                           <p
                             className={
                               variant === 'desktop'
-                                ? 'text-sm font-medium text-ink dark:text-white'
+                                ? 'text-sm font-semibold text-ink dark:text-white'
                                 : 'text-sm font-medium text-ink/80 dark:text-white/80'
                             }
                           >
