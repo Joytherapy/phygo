@@ -1,19 +1,24 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 import { getTranslatedExercisesBatch, type ExerciseLang } from '@/lib/exerciseTranslation';
-import { lazy } from '@/lib/lazy';
+import { serviceRoleConfigProblem } from '@/lib/supabase/serverConfig';
+import { normalizeInstructions } from '@/lib/exerciseInstructions';
 
 export const dynamic = 'force-dynamic';
 
 // Legge dalla nuova architettura "Exercise Animatic" (exercises / exercise_translations /
 // exercise_assets), separata dal vecchio provider wger (exercise_cache) e dalla Pro Library
 // editoriale (library_items). Al momento non c'e' alcun gating per piano.
-const adminSupabase = lazy(() => createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-));
+// Created on first use, after the configuration check, instead of at import time.
+let adminClient: SupabaseClient | null = null;
+function getAdminSupabase() {
+  if (!adminClient) {
+    adminClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  }
+  return adminClient;
+}
 
 const SIGNED_URL_TTL_SECONDS = 60 * 30; // 30 minuti, come gli altri signed url del progetto
 
@@ -64,6 +69,15 @@ export async function GET(request: Request) {
     if (!user) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
+
+    // Exercises, media and signed video URLs are all read with the service-role
+    // key; if it is missing or malformed, say so instead of failing per query.
+    const configProblem = serviceRoleConfigProblem();
+    if (configProblem) {
+      console.error('exercise-library list: server configuration problem:', configProblem);
+      return NextResponse.json({ error: 'Server configuration incomplete', code: 'server_config' }, { status: 503 });
+    }
+    const adminSupabase = getAdminSupabase();
 
     // Lettura paginata: continua finche' una pagina torna piena (PAGE_SIZE righe), altrimenti
     // si e' arrivati in fondo. Evita il troncamento silenzioso a 1000 righe di PostgREST.
@@ -227,7 +241,7 @@ export async function GET(request: Request) {
       return {
         id: e.id,
         name: translated?.name || source?.name || e.external_id,
-        instructions: translated?.instructions ?? source?.instructions ?? null,
+        instructions: normalizeInstructions(translated?.instructions ?? source?.instructions ?? null),
         tips: translated?.tips ?? source?.tips ?? null,
         primary_muscle: e.primary_muscle,
         secondary_muscles: e.secondary_muscles,
