@@ -206,11 +206,12 @@ Test nel browser (Playwright, `tests/session-notes-panel.test.mjs`, 5 test). Due
 - "Aggiungi comunque" sposti l'esercizio tra gli esercizi senza toccare gli altri;
 - la nota salvata contenga tutti e quattro gli esercizi scelti.
 
-**Controlli complessivi** sul branch (revisione 2):
-- suite completa dell'app: {{FULL}}, compresi tutti i test preesistenti;
+**Controlli complessivi** sul branch (revisione 2), eseguiti sul commit `2ea766e` con l'albero di lavoro pulito:
+- suite completa dell'app: **237 test, 237 superati, 0 falliti, 0 saltati, 0 annullati**, compresi tutti i test preesistenti. Comprende `clinical-relevance` (34), `knowledge-match` (5) e i 5 test nel browser del pannello;
 - typecheck (`tsc --noEmit`): nessun errore;
 - `next build`: riuscita;
-- test SQL su PostgreSQL locale: 7 file, tutti superati, nessuna operazione su Supabase.
+- test SQL su PostgreSQL locale nel container (socket `/var/run/postgresql`; lo script rifiuta host Supabase): 7 file, tutti superati, nessuna operazione su Supabase.
+- Questo documento è stato aggiornato con un commit successivo che modifica **solo** questo file: il codice è identico a quello verificato.
 
 ## Test simulati e verifica con il modello reale
 
