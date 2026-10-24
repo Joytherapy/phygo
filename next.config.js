@@ -1,3 +1,25 @@
+const fs = require('fs');
+const path = require('path');
+
+// Serve the pdf.js worker from our own domain (see lib/pdfWorker.ts): copy
+// the worker of the installed pdfjs-dist, the build react-pdf uses, to
+// public/pdfjs/<version>/ before Next collects the public folder.
+function copyPdfWorker() {
+  // Resolved from react-pdf, so it is the pdfjs-dist react-pdf actually uses.
+  const fromReactPdf = require('module').createRequire(require.resolve('react-pdf'));
+  const pkg = path.dirname(fromReactPdf.resolve('pdfjs-dist/package.json'));
+  const { version } = fromReactPdf('pdfjs-dist/package.json');
+  const target = path.join(__dirname, 'public', 'pdfjs', version);
+  fs.mkdirSync(target, { recursive: true });
+  fs.copyFileSync(path.join(pkg, 'build', 'pdf.worker.min.mjs'), path.join(target, 'pdf.worker.min.mjs'));
+  // Shown once in the build log, as evidence of which worker was deployed.
+  if (!process.env.PHYGO_PDF_WORKER_LOGGED) {
+    process.env.PHYGO_PDF_WORKER_LOGGED = '1';
+    console.log(`pdf.js worker ${version} copied to public/pdfjs/${version}/pdf.worker.min.mjs`);
+  }
+}
+copyPdfWorker();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,

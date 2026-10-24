@@ -121,8 +121,8 @@ export default function ImportPdfButton({
     let pageCount: number | null = null
     let finalSizeBytes = file.size
     try {
-      const { pdfjs } = await import('react-pdf')
-      pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`
+      const [{ pdfjs }, { pdfWorkerSrc }] = await Promise.all([import('react-pdf'), import('@/lib/pdfWorker')])
+      pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerSrc(pdfjs.version)
       let buffer: ArrayBuffer
       if (isPdf) {
         buffer = await file.arrayBuffer()
