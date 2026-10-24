@@ -36,11 +36,19 @@ Rilievi, Valutazione, Piano, Follow-up, Ragionamento clinico, Spunti clinici
      - stesso meccanismo clinico (ad esempio "tendinopatia") in uno studio su un altro distretto;
    - *pertinenza non verificata*: termini in comune, ma il distretto del caso o dello studio non è riconosciuto. **Non** viene presentata come diretta;
    - *irrilevante*: altro distretto senza meccanismo in comune, oppure solo parole generiche ("pain", "exercise", "musculoskeletal"). Non viene mostrata.
-5. **Pertinenza degli esercizi**: distretto del caso, distretti vicini o lavoro generale senza distretto. I distretti vicini sono, ad esempio:
+5. **Pertinenza degli esercizi**, distinguendo quattro esiti:
+   - *distretto riconosciuto e compatibile*: distretto del caso o distretti vicini;
+   - *attività realmente generale*: attività aerobica come cyclette, camminata o nuoto, riconosciuta dal nome;
+   - *distretto non riconosciuto*: l'esercizio viene mantenuto ma segnalato come "pertinenza non verificata", con il motivo; decide il fisioterapista;
+   - *distretto incompatibile*: l'esercizio viene escluso dalla proposta e messo nell'elenco degli esclusi, con il motivo.
+
+   I distretti vicini sono, ad esempio:
    - scapola e tratto toracico per la spalla;
    - anca, coscia e caviglia per il ginocchio;
    - arto inferiore per la lombare, arto superiore per la cervicale.
-6. **Protocollo**: scheda e fasi del distretto della condizione valutata, presentate come indicative.
+6. **Protocollo**: scheda e fasi del distretto della condizione valutata, presentate come indicative. Una scheda senza distretto riconoscibile, o per un caso senza distretto riconosciuto, è mostrata come "pertinenza non verificata", con il motivo.
+   - **Il caso** è il problema trattato oggi, come lo descrive il fisioterapista. Un distretto citato solo in anamnesi o negato non ne fa parte. Un distretto secondario descritto come attuale sì, come nei casi multidistretto reali.
+   - **Il lato** è associato al distretto con cui viene detto.
 7. **Nessun dato inventato**:
    - misure non dette in Rilievi e Valutazione;
    - giorni, date o orari non detti in Piano e Follow-up;
@@ -104,6 +112,44 @@ Rilievi, Valutazione, Piano, Follow-up, Ragionamento clinico, Spunti clinici
 - **Il riquadro non toglie e non modifica nulla**: gli esercizi scelti o aggiunti dal fisioterapista restano e vengono solo segnalati. L'unica esclusione automatica avviene alla generazione, ed è sempre elencata.
 - **Protocollo**: avviso "indicativo" sulla scheda clinica e nell'opuscolo per il paziente.
 
+### Revisione 2: anamnesi, lato per distretto, quattro esiti
+
+Due limiti della prima versione della PR (commit 160cd46), verificati eseguendo quel codice sui casi nuovi:
+
+- **L'anamnesi contava come caso attuale.**
+  - `caseRegionsOf()` prendeva tutti i distretti della trascrizione. Con "oggi lombalgia; in anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico" il ginocchio era un distretto del caso: l'esercizio per il ginocchio passava e "rinforzo del ginocchio" nel Piano non veniva segnalato.
+  - Lo stesso valeva per "nega dolore lombare".
+  - Il lato era uno solo per tutta la trascrizione: con "spalla destra e ginocchio sinistro" nessun errore di lato veniva rilevato.
+- **"Non riconosciuto" valeva come "pertinente".** `fitsCase()` restituiva vero quando un insieme era vuoto, quindi:
+  - "Plank" (distretto non riconosciuto) e una scheda senza distretto passavano come pertinenti, senza alcun avviso;
+  - un caso senza distretto riconosciuto rendeva "pertinente" qualsiasi elemento.
+
+Correzioni:
+
+- **`caseProfile()`** divide la trascrizione in frasi e proposizioni e classifica ciascuna come:
+  - **attuale**: "oggi", "attualmente", sintomi come dolore o rigidità; oppure "non risolto";
+  - **anamnesi**: "anamnesi", "pregresso", "in passato", "storia di", "asintomatico", "risolto", "guarito"; "anni fa" solo se non ci sono sintomi attuali;
+  - **negata**: "nega", "nessun", "non riferisce", "senza dolore".
+
+  Inoltre:
+  - le autocorrezioni della dettatura ("no scusa", "anzi") annullano quanto detto prima;
+  - "rispetto alla seduta precedente" resta attuale;
+  - il lato è associato al distretto più vicino nella frase ("spalla destra e ginocchio sinistro": spalla destra, ginocchio sinistro).
+- **Il caso** è dato dai distretti attuali (principale e secondari) più quelli della condizione, mai un distretto solo in anamnesi o negato.
+  - Un esercizio per un distretto dell'anamnesi è escluso con il motivo "indicato solo in anamnesi".
+  - Una sezione che tratta come attuale un distretto dell'anamnesi viene segnalata.
+  - Le frasi di anamnesi nelle sezioni generate (es. "pregresso intervento al ginocchio sinistro" nei Rilievi) non sono errori.
+- **`regionFit()`** sostituisce `fitsCase()` e ha quattro esiti: compatibile, attività generale, non riconosciuto, incompatibile.
+  - Sono generali solo le attività aerobiche riconosciute dal nome. "Whole-body" e "core" restano non riconosciuti.
+  - Lo stesso principio vale per:
+    - gli **esercizi**: nel pannello e sulla scheda dell'esercizio, "Pertinenza non verificata" con il motivo, oppure "Attività generale";
+    - le **schede cliniche**: si provano prima quelle verificate; la route restituisce `relevance` e `relevanceReason`, e il pannello mostra il motivo;
+    - gli **studi**: livello "non verificata", già presente.
+  - Gli elementi non riconosciuti **non vengono eliminati**.
+- **Vocabolario**:
+  - aggiunti alcuni esercizi comuni: pendolo/Codman, cat-camel;
+  - corretto un difetto trovato dai nuovi test: "anche" (avverbio) veniva letto come plurale di "anca".
+
 ## Matrice dei casi e risultati (solo test simulati)
 
 Suite `tests/clinical-relevance.test.mjs`. Segue il percorso reale delle route:
@@ -127,26 +173,41 @@ stessa suite eseguita sul codice di `main` (0e55194).
 | Polso sx, tunnel carpale | ✗ calf raise | ✓ escluso |
 | Multidistretto (spalla dx + lombalgia) | ✗ mobilità di caviglia | ✓ esclusa; spalla e lombare mantenuti |
 | Generico/incompleto | ✗ 3 studi casuali per "exercise" | ✓ nessuno studio; avviso "distretto non riconosciuto" |
-| Problemi multipli (lombalgia + ginocchio in anamnesi) | contenuto ✓; ✗ studio senza livello né motivo di pertinenza | ✓ |
+| Problemi multipli (lombalgia + ginocchio in anamnesi; esercizio per il ginocchio nella bozza) | ✗ studio senza livello né motivo; con la prima versione della PR l'esercizio per il ginocchio passava | ✓ escluso come "indicato solo in anamnesi"; la frase di anamnesi nei Rilievi non è un errore |
+| Anamnesi trattata come attuale nel Piano ("rinforzo del ginocchio") | prima versione della PR: non rilevato | ✓ rilevato |
+| Distretto secondario attivo (spalla + "riferisce anche lieve dolore lombare, trattato oggi") | — | ✓ esercizio lombare mantenuto, nessun avviso falso |
+| Distretto secondario negato ("nega dolore lombare") | prima versione della PR: esercizio lombare mantenuto | ✓ escluso |
+| Multidistretto con lati diversi (spalla dx + ginocchio sx; Piano e un esercizio con "ginocchio destro") | prima versione della PR: nessun errore di lato rilevato | ✓ Piano ed esercizio segnalati; nessun falso allarme sugli elementi corretti |
+| Esercizio con distretto non riconosciuto ("Plank") e attività generale ("Cyclette") | prima versione della PR: entrambi trattati come pertinenti | ✓ Plank mantenuto come "non verificato" con il motivo; cyclette "attività generale" |
+| Scheda senza distretto per un caso di spalla ("tendinopatia calcifica") | prima versione della PR: pertinente, senza avviso | ✓ scheda mostrata come "non verificata (la scheda non indica un distretto)" |
+| Caso senza distretto (fibromialgia) | — | ✓ avviso "distretto non riconosciuto"; scheda ed esercizi non verificati, cammino "attività generale" |
 | Colloquiale | ✗ caviglia; studio gamba | ✓ |
 | Trascrizione ambigua ("ginocchio no scusa caviglia") | contenuto ✓; ✗ studio senza livello né motivo di pertinenza | ✓ |
 | Errori nelle sezioni (lato nelle ipotesi, ginocchio nel Piano, 150° non detto, tecar "eseguita" non detta, "alle 18:00" non detto) | (nessun controllo nell'app) | ✓ tutti rilevati; nessun falso allarme su "terapia manuale" e "giovedì", che erano stati detti, né sui differenziali |
 | Sequenza spalla → ginocchio → anca | ✓ nessuna contaminazione | ✓ |
 | Prompt senza sbilanciamento | ✗ | ✓ |
 
-Risultati della suite (24 test: matrice, regressione dello screenshot, sequenza, prompt e funzioni di controllo):
-- **prima**, sul codice di `main`: **6 superati, 18 falliti**. Due casi con contenuto già corretto (problemi multipli, trascrizione ambigua) falliscono su `main` solo perché gli studi non hanno livello né motivo di pertinenza;
-- **dopo**: **24 superati su 24**.
+Risultati della suite:
+- **Prima versione della suite** (24 test):
+  - su `main`: **6 superati, 18 falliti**. Due casi con contenuto già corretto (problemi multipli, trascrizione ambigua) falliscono solo perché gli studi non hanno livello né motivo di pertinenza;
+  - con la prima versione della PR: 24 su 24.
+- **Suite attuale** (34 test: 24 casi più 10 tra regressione dello screenshot, sequenza, prompt e funzioni di controllo). Comprende i nuovi test su anamnesi, problema attivo, distretti secondari, negazioni, casi multidistretto, lato per distretto e i quattro esiti: **34 superati su 34**.
+- **I nuovi casi della revisione 2** non sono confrontabili con `main` riga per riga, perché le funzioni che verificano non esistevano. Il loro "prima" è il comportamento della prima versione della PR, riportato nella tabella, ottenuto eseguendo il codice del commit 160cd46.
 
-Test nel browser (Playwright, `tests/session-notes-panel.test.mjs`, 4 test, tutti superati). Verificano che:
+Test nel browser (Playwright, `tests/session-notes-panel.test.mjs`, 5 test). Due riguardano il pannello di coerenza. Il primo è il caso degli screenshot; il secondo è un caso con due distretti trattati oggi e uno solo in anamnesi. Verificano che:
+- un esercizio per un distretto citato solo in anamnesi venga escluso con il motivo "indicato solo in anamnesi";
+- il Piano che tratta come attuale il distretto dell'anamnesi venga segnalato;
+- il lato venga controllato per distretto: segnalata solo l'ipotesi con il ginocchio dal lato sbagliato, non il Piano corretto (spalla destra, ginocchio sinistro) né la riga di anamnesi nei Rilievi;
+- un esercizio con distretto non riconosciuto resti nel programma con "Pertinenza non verificata" e il motivo, nella scheda dell'esercizio e nel pannello;
+- una scheda clinica senza distretto riconoscibile sia mostrata con il motivo;
 - il riquadro indichi il lato errato nel Piano e l'esercizio escluso con "Distretto dell'esercizio: caviglia e piede. Distretto del caso: spalla.";
 - l'esercizio abbinato al database mostri "Dalla nota: …";
 - un esercizio di un altro distretto aggiunto a mano dal fisioterapista resti nel programma e venga solo segnalato;
 - "Aggiungi comunque" sposti l'esercizio tra gli esercizi senza toccare gli altri;
-- la nota salvata contenga i tre esercizi scelti.
+- la nota salvata contenga tutti e quattro gli esercizi scelti.
 
-**Controlli complessivi** sul branch, prima della PR:
-- suite completa dell'app: **226 test, 226 superati, 0 falliti, 0 saltati**, compresi tutti i test preesistenti;
+**Controlli complessivi** sul branch (revisione 2):
+- suite completa dell'app: {{FULL}}, compresi tutti i test preesistenti;
 - typecheck (`tsc --noEmit`): nessun errore;
 - `next build`: riuscita;
 - test SQL su PostgreSQL locale: 7 file, tutti superati, nessuna operazione su Supabase.
@@ -156,14 +217,20 @@ Test nel browser (Playwright, `tests/session-notes-panel.test.mjs`, 4 test, tutt
 | | Stato |
 |---|---|
 | Test simulati (modello scriptato, dati sintetici) | Eseguiti, risultati sopra |
-| Verifica con il modello AI reale | **Non eseguita.** In questo ambiente non c'è accesso a OpenAI. La qualità delle risposte reali con i nuovi prompt **non è validata**. Procedura per il preview: `docs/clinical/verifica-manuale-preview.md` |
+| Verifica con il modello AI reale | **Non eseguita.** In questo ambiente non è disponibile alcuna chiave OpenAI, e non è stata prelevata quella di produzione da Vercel. La qualità delle risposte reali con i nuovi prompt **non è validata**. Nessun caso reale del modello è stato verificato. |
+
+**Procedura per la verifica con il modello reale** (`docs/clinical/verifica-manuale-modello-reale.md`):
+- si esegue con `scripts/clinical-relevance-live.mjs`, in ambiente isolato: app in locale, Supabase sostituito da un database in memoria con soli dati sintetici, nessun database reale e nessun paziente;
+- lo script è stato provato solo contro un sostituto locale di OpenAI, per verificare il collegamento tra le parti; il report di quella prova dice esplicitamente "SOSTITUTO del modello". Non è una verifica del modello reale.
 
 ## Limiti residui
 
 - **I controlli sono deterministici e coprono solo fatti verificabili**: distretto, lato, misure con unità, giorni/date/orari, trattamenti "eseguiti" di un elenco noto. Non giudicano la correttezza del ragionamento clinico, l'aderenza agli obiettivi del paziente, la popolazione degli studi o la corrispondenza tra titolo, abstract, autori e PMID. Sono tutti punti della verifica manuale.
 - **Il riconoscimento del distretto si basa su un vocabolario**: sinonimi rari, refusi o abbreviazioni non vengono riconosciuti. In quel caso il sistema **lo dichiara** ("distretto non riconosciuto", "pertinenza non verificata") invece di classificare.
-- **Un distretto citato solo come anamnesi conta come distretto del caso**: gli esercizi per quel distretto non vengono esclusi.
-- **Gli esercizi generali senza distretto non vengono filtrati**: cyclette, camminata, core.
+- **La distinzione anamnesi / attuale / negato si basa su parole indicatrici**: un'anamnesi senza indicatori ("operato al ginocchio nel 2019") resta attuale. Una frase senza indicatori eredita lo stato della frase precedente. Gli errori vanno nel senso di considerare un distretto attuale, quindi segnalare meno, non nascondere.
+- **Il lato viene associato alla parola di lato più vicina**, entro tre parole. Costruzioni lunghe o insolite possono lasciare il lato non associato, e in quel caso non viene controllato.
+- **Le attività generali sono solo quelle aerobiche riconosciute dal nome.** Gli esercizi "core" o "whole-body" restano "non verificati": decide il fisioterapista.
+- **Una scheda o uno studio "non verificati" restano visibili.** Vanno valutati dal fisioterapista, che vede il motivo.
 - **Il controllo dei distretti non si applica a tutte le sezioni**: Differenziali, test suggeriti e precauzioni possono citare altri distretti; lì si controlla solo il lato.
 - **"Indiretta per meccanismo" dipende dalle parole del titolo**: può includere uno studio sullo stesso meccanismo in un contesto clinico diverso. Per questo è sempre etichettato e viene dopo le evidenze dirette.
 - **I dati del test sono sintetici**: il database reale (1107 schede, 52 studi pubblicati, 1924 esercizi) può contenere casi non rappresentati.

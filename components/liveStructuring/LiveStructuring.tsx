@@ -58,7 +58,8 @@ import { usePatientContext } from "@/contexts/PatientContext";
 import { localDate } from "@/lib/care/program";
 import EvidenceBadge from "@/components/EvidenceBadge";
 import { loadClinicianSignature } from "@/lib/care/clinicianSignature";
-import { checkOutput, type Issue, type SectionName } from "@/lib/clinical/coherence";
+import { caseOf, checkOutput, type Issue, type SectionName } from "@/lib/clinical/coherence";
+import { exerciseFit } from "@/lib/clinical/region";
 
 // One look for every block of the panel (a quiet tile inside the page card).
 const BLOCK = "mt-4 rounded-[22px] border border-black/[0.06] bg-white/70 p-5 sm:p-6 dark:border-white/[0.07] dark:bg-white/[0.025]";
@@ -150,7 +151,9 @@ const [exerciseSearching, setExerciseSearching] = useState(false);
 // What the clinician said for the last generated note, and the exercises the
 // draft proposed for another body region (left out, can be added back).
 const [noteTranscript, setNoteTranscript] = useState("");
-const [excludedExercises, setExcludedExercises] = useState<{ name: string; regions?: string[]; caseRegions?: string[] }[]>([]);
+const [excludedExercises, setExcludedExercises] = useState<{ name: string; reason?: string; regions?: string[]; caseRegions?: string[] }[]>([]);
+// Whether the condition sheet's region could be verified against the case (/api/knowledge-lookup).
+const [insightRelevance, setInsightRelevance] = useState<{ relevance: string | null; reason: string | null }>({ relevance: null, reason: null });
 
 const [textInput, setTextInput] = useState("");
 
@@ -324,6 +327,7 @@ const [recordingLang, setRecordingLang] = useState(DICTATION_LOCALE[lang]);
 
     setExerciseEntries([]);
     setExcludedExercises([]);
+    setInsightRelevance({ relevance: null, reason: null });
     setNoteTranscript("");
     setExpandedExercise(null);
     setEditingExercise(null);
@@ -524,6 +528,7 @@ body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.prima
             });
             const kbData = await kbRes.json();
 setClinicalInsight(kbData.match || null);
+setInsightRelevance({ relevance: kbData.relevance ?? null, reason: kbData.relevanceReason ?? null });
 setRehabPhases(kbData.phases || []);
 setEvidenceLevel(kbData.evidenceLevel || null);
 setMatchedKeyword(kbData.matchedKeyword || null);
@@ -590,7 +595,7 @@ if (Array.isArray(exercisesArr) && exercisesArr.length > 0) {
     }
     // Exercises for another body region stay out of the note too; they are
     // listed under the coherence checks, with "Add anyway".
-    const excluded: { name: string; regions?: string[]; caseRegions?: string[] }[] = Array.isArray(eiData.excluded) ? eiData.excluded : [];
+    const excluded: { name: string; reason?: string; regions?: string[]; caseRegions?: string[] }[] = Array.isArray(eiData.excluded) ? eiData.excluded : [];
     setExcludedExercises(excluded);
     if (excluded.length && Array.isArray(exercisesArr)) {
       const out = new Set(excluded.map((e) => e.name));
@@ -813,12 +818,15 @@ recognition.lang = recordingLang;
   // Deterministic checks of what was generated against what the clinician
   // said (lib/clinical/coherence.ts): region, side, exercises, papers,
   // protocol, measurements not given. Recomputed as the clinician edits.
+  // Today's case (regions of the current problem, history, sides) for the badges on exercises.
+  const caseView = useMemo(() => (finalNote && noteTranscript ? caseOf(noteTranscript, finalNote) : null), [finalNote, noteTranscript]);
+
   const coherenceIssues = useMemo(() => {
     if (!finalNote || !noteTranscript) return [];
     return checkOutput({
       transcript: noteTranscript,
       note: finalNote,
-      exercises: exerciseEntries.map((e: any) => ({ name: e.name ?? "", body_region: e.body_region, primary_muscle: e.primary_muscle })),
+      exercises: exerciseEntries.map((e: any) => ({ name: e.name ?? "", draft: e.draft ?? null, body_region: e.body_region, primary_muscle: e.primary_muscle })),
       papers: relevantPapers.map((p: any) => ({ title: p.title ?? "", relevance: p.relevance ?? null, relevance_reason: p.relevance_reason ?? null })),
       protocol: clinicalInsight ? { name: clinicalInsight.condition_name ?? "", keywords: clinicalInsight.condition_keywords ?? null } : null,
     });
@@ -835,7 +843,7 @@ recognition.lang = recordingLang;
   const issueText = (issue: Issue) => {
     let item = issue.item;
     if (issue.kind === "side" && issue.section) item = sectionLabel(issue.section);
-    if (issue.kind === "section_region" && issue.section) item = `${sectionLabel(issue.section)} (${regionLabel(issue.regions)})`;
+    if ((issue.kind === "section_region" || issue.kind === "history_as_active") && issue.section) item = `${sectionLabel(issue.section)} (${regionLabel(issue.regions)})`;
     if ((issue.kind === "invented" || issue.kind === "invented_appointment" || issue.kind === "invented_treatment") && issue.section) item = `"${issue.item}" (${sectionLabel(issue.section)})`;
     return t.coherenceIssue[issue.kind](item);
   };
@@ -1584,7 +1592,9 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                       <li key={e.name} data-testid="excluded-exercise" className="flex flex-wrap items-center justify-between gap-2 text-sm text-ink/75 dark:text-white/75">
                         <span className="min-w-0 break-words">
                           {e.name}
-                          {(e.regions?.length || e.caseRegions?.length) ? (
+                          {e.reason === "history_only" ? (
+                            <span className="block text-[11px] text-ink/55 dark:text-white/45">{t.excludedHistory(regionLabel(e.regions))}</span>
+                          ) : (e.regions?.length || e.caseRegions?.length) ? (
                             <span className="block text-[11px] text-ink/55 dark:text-white/45">{t.excludedReason(regionLabel(e.regions) || "—", regionLabel(e.caseRegions) || "—")}</span>
                           ) : null}
                         </span>
@@ -1639,6 +1649,9 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
               <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-black/[0.06] pt-4 dark:border-white/[0.07]">
                 <p className="text-[11px] text-ink/50 dark:text-white/40">
                   {clinicalInsight.source} ({clinicalInsight.source_date}) · {t.insightDisclaimer} {t.protocolIndicative}
+                  {insightRelevance.relevance === "unverified" && insightRelevance.reason && (t.unverifiedReason as Record<string, string>)[insightRelevance.reason] && (
+                    <span data-testid="insight-unverified" className="mt-1 block font-semibold text-amber-700 dark:text-amber-300">{(t.unverifiedReason as Record<string, string>)[insightRelevance.reason]}</span>
+                  )}
                 </p>
                 {matchedKeyword && (
                   <button type="button" onClick={() => setShowWhy(!showWhy)} aria-expanded={showWhy} className="text-xs font-semibold text-[#7C83FF] hover:underline">
@@ -1832,6 +1845,17 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                             <p className="truncate text-sm font-semibold text-ink dark:text-white">{ex.name}</p>
                             {/* Matched to a database exercise with another name: say what the note wrote. */}
                             {ex.draft && ex.draft !== ex.name && <p className="mt-0.5 text-[11px] text-ink/50 dark:text-white/40">{t.fromNote(ex.draft)}</p>}
+                            {/* Region against today's case: a general activity is said as such; one not recognised is not verified, the clinician decides. */}
+                            {caseView && isLiveVoice && (() => {
+                              const fit = exerciseFit(ex, caseView.regions);
+                              if (fit === "general") return <p data-testid="exercise-general" className="mt-0.5 text-[11px] text-ink/55 dark:text-white/45">{t.generalActivity}</p>;
+                              if (fit !== "unknown") return null;
+                              return (
+                                <p data-testid="exercise-unverified" className="mt-0.5 whitespace-normal text-[11px] font-medium text-amber-700 dark:text-amber-300">
+                                  {t.unverifiedReason[caseView.regions.length ? "exercise_region_unknown" : "case_region_unknown"]}
+                                </p>
+                              );
+                            })()}
                             {ex.primary_muscle && <p className="mt-0.5 text-[11px] text-ink/55 dark:text-white/45">{ex.primary_muscle}</p>}
                             {!isEditing && (ex.dosing?.sets || ex.dosing?.reps || ex.dosing?.duration_seconds) && (
                               <p className="mt-1 text-[11px] text-ink/65 dark:text-white/55">

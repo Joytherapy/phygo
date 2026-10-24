@@ -128,11 +128,19 @@ test('the coherence checks say what was left out and why, keep what the clinicia
   let sent = null;
   await page.route('**/api/generate-note', json({ note }));
   await page.route('**/api/science/relevant', json({ papers: [] }));
-  await page.route('**/api/knowledge-lookup', json({ match: null, phases: [] }));
+  // A condition sheet naming no body region: shown, marked as not verified.
+  await page.route('**/api/knowledge-lookup', json({
+    match: { id: 14, condition_name: 'Tendinopatia calcifica', condition_keywords: 'tendinopatia calcifica', goals: 'Obiettivi sintetici', clinical_tests: 'Test sintetici', red_flags: 'Nessuna', typical_exercises: 'Esercizi sintetici', source: 'Linea guida sintetica', source_date: '2024' },
+    phases: [], relevance: 'unverified', relevanceReason: 'sheet_region_unknown',
+  }));
   await page.route('**/api/exercise-intelligence', (route) => {
     sent = JSON.parse(route.request().postData() || '{}');
     return json({
-      exercises: [{ internal_id: 'exercises-1', provider: 'exercises', provider_id: 'e1', name: 'Shoulder external rotation with band', draft: 'Rotazione esterna con elastico 3x12', body_region: 'shoulder', primary_muscle: 'Infraspinatus', media: null, source_type: 'professional', dosing, clinical_check: null }],
+      exercises: [
+        { internal_id: 'exercises-1', provider: 'exercises', provider_id: 'e1', name: 'Shoulder external rotation with band', draft: 'Rotazione esterna con elastico 3x12', body_region: 'shoulder', primary_muscle: 'Infraspinatus', media: null, source_type: 'professional', dosing, clinical_check: null, relevance: 'compatible', relevance_reason: null },
+        // Region not recognised: kept, never shown as pertinent.
+        { internal_id: 'custom-plank', provider: 'custom', provider_id: null, name: 'Plank 3x30s', draft: 'Plank 3x30s', body_region: null, primary_muscle: null, media: null, source_type: 'professional', dosing, clinical_check: null, relevance: 'unverified', relevance_reason: 'exercise_region_unknown' },
+      ],
       excluded: [{ name: 'Mobilità di caviglia 2x15', reason: 'off_region', regions: ['ankle_foot'], caseRegions: ['shoulder'] }],
     })(route);
   });
@@ -166,7 +174,14 @@ test('the coherence checks say what was left out and why, keep what the clinicia
     await checks.getByText('Esercizi non inseriti perché riguardano un altro distretto').waitFor();
     assert.equal(await excluded.count(), 1);
     assert.match(await excluded.innerText(), /Mobilità di caviglia 2x15[\s\S]*Distretto dell'esercizio: caviglia e piede\. Distretto del caso: spalla\./);
-    assert.equal(await cards.count(), 1, 'the excluded exercise is not in the exercises');
+    assert.equal(await cards.count(), 2, 'the excluded exercise is not in the exercises');
+    // Not recognised: kept, marked as not verified with the reason, in the card and in the checks.
+    await cards.nth(1).getByTestId('exercise-unverified').getByText('Pertinenza non verificata: il distretto dell’esercizio non è riconosciuto. Decidi tu se tenerlo.').waitFor();
+    await checks.locator('li[data-kind="exercise_unverified"]').getByText('"Plank 3x30s": pertinenza non verificata', { exact: false }).waitFor();
+    assert.equal(await cards.first().getByTestId('exercise-unverified').count(), 0, 'a recognised, compatible exercise is not marked');
+    // The sheet without a recognisable region: shown, not verified.
+    await page.getByTestId('insight-unverified').getByText('Pertinenza non verificata: la scheda non indica un distretto riconoscibile.').waitFor();
+    await checks.locator('li[data-kind="protocol_unverified"]').waitFor();
     // A note exercise matched to a database exercise says what the note wrote.
     await cards.first().getByText('Dalla nota: Rotazione esterna con elastico 3x12').waitFor();
     await shoot(checks, 'coherence-1-after-generation.png');
@@ -176,15 +191,15 @@ test('the coherence checks say what was left out and why, keep what the clinicia
     await page.getByRole('button', { name: 'Aggiungi esercizio' }).click();
     await page.getByRole('textbox', { name: 'Cerca esercizi (es. plank, ponte, squat)…' }).fill('hamstring');
     await page.getByRole('button', { name: /Hamstring stretch/ }).click();
-    assert.equal(await cards.count(), 2);
+    assert.equal(await cards.count(), 3);
     await checks.locator('li[data-kind="exercise"]').getByText('"Hamstring stretch" riguarda un distretto diverso da quello del caso.').waitFor();
 
     // Added back on purpose: it moves from the excluded list to the exercises,
     // nothing else changes.
     await excluded.getByRole('button', { name: 'Aggiungi comunque' }).click();
     await excluded.first().waitFor({ state: 'detached' });
-    assert.equal(await cards.count(), 3);
-    assert.deepEqual(await cards.evaluateAll((els) => els.map((e) => e.querySelector('p')?.textContent)), ['Shoulder external rotation with band', 'Hamstring stretch', 'Mobilità di caviglia 2x15']);
+    assert.equal(await cards.count(), 4);
+    assert.deepEqual(await cards.evaluateAll((els) => els.map((e) => e.querySelector('p')?.textContent)), ['Shoulder external rotation with band', 'Plank 3x30s', 'Hamstring stretch', 'Mobilità di caviglia 2x15']);
     await checks.locator('li[data-kind="exercise"]').getByText('"Mobilità di caviglia 2x15" riguarda un distretto diverso da quello del caso.').waitFor();
     await shoot(checks, 'coherence-2-after-choices.png');
     await shoot(cards.first().locator('xpath=..'), 'coherence-3-exercises.png');
@@ -192,7 +207,73 @@ test('the coherence checks say what was left out and why, keep what the clinicia
     await page.getByRole('button', { name: 'Salva nella scheda' }).click();
     await page.getByRole('button', { name: 'Salvata nella scheda' }).waitFor({ timeout: 10000 });
     const saved = fake.state.tables.notes.at(-1);
-    assert.deepEqual((saved.exercises ?? []).map((e) => (typeof e === 'string' ? e : e.name)), ['Shoulder external rotation with band', 'Hamstring stretch', 'Mobilità di caviglia 2x15'], 'what the clinician chose is saved, nothing lost');
+    assert.deepEqual((saved.exercises ?? []).map((e) => (typeof e === 'string' ? e : e.name)), ['Shoulder external rotation with band', 'Plank 3x30s', 'Hamstring stretch', 'Mobilità di caviglia 2x15'], 'what the clinician chose is saved, nothing lost');
+  } finally {
+    await ctx.close();
+  }
+});
+
+test('coherence checks with two regions treated today and one only in history: sides per region, history not treated as current', { skip }, async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'it-IT', reducedMotion: 'reduce' });
+  const [name, value] = sessionCookie('tok-clin', U).split(/=(.*)/s);
+  await ctx.addCookies([{ name, value, url: app.url }]);
+  const page = await ctx.newPage();
+  const json = (body) => (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
+  const said = 'Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi. In anamnesi frattura del polso destro, ora asintomatica.';
+  const note = {
+    // The history line in the findings is correct; the plan's sides are correct;
+    // one hypothesis has the knee on the wrong side; the plan treats the wrist (history) as current.
+    subjective: 'Dolore alla spalla destra e al ginocchio sinistro. Pregressa frattura del polso destro, ora asintomatica.',
+    objective: 'Dolore in elevazione della spalla e alle scale.',
+    assessment: 'Possibile dolore di spalla correlato alla cuffia dei rotatori; possibile dolore femororotuleo.',
+    plan: 'Esercizi per la spalla destra e per il ginocchio sinistro. Rinforzo del polso.',
+    summaryForPatient: 'Esercizi ogni giorno.',
+    primaryCondition: 'rotator cuff related shoulder pain',
+    clinicalReasoning: { hypotheses: ['Possibile dolore femororotuleo al ginocchio destro'] },
+    exercises: ['Rotazione esterna con elastico spalla destra 3x12', 'Estensione di ginocchio sinistro 3x12', 'Flessori del polso 3x12'],
+    language: 'it',
+  };
+  const dosing = { sets: 3, reps: 12, duration_seconds: null, frequency_per_week: null, notes: null };
+  await page.route('**/api/generate-note', json({ note }));
+  await page.route('**/api/science/relevant', json({ papers: [] }));
+  await page.route('**/api/knowledge-lookup', json({ match: null, phases: [] }));
+  await page.route('**/api/exercise-intelligence', json({
+    exercises: [
+      { internal_id: 'exercises-1', provider: 'exercises', provider_id: 'e1', name: 'Shoulder external rotation with band', draft: 'Rotazione esterna con elastico spalla destra 3x12', body_region: 'shoulder', primary_muscle: 'Infraspinatus', media: null, source_type: 'professional', dosing, clinical_check: null, relevance: 'compatible', relevance_reason: null },
+      { internal_id: 'exercises-7', provider: 'exercises', provider_id: 'e7', name: 'Knee extension', draft: 'Estensione di ginocchio sinistro 3x12', body_region: 'thighs', primary_muscle: 'Quadriceps', media: null, source_type: 'professional', dosing, clinical_check: null, relevance: 'compatible', relevance_reason: null },
+    ],
+    excluded: [{ name: 'Flessori del polso 3x12', reason: 'history_only', regions: ['wrist_hand'], caseRegions: ['shoulder', 'knee'] }],
+  }));
+  const shots = process.env.COHERENCE_SCREENSHOTS;
+  try {
+    await page.goto(`${app.url}/dashboard/patients/${P}/session`);
+    await page.getByRole('heading', { level: 1, name: 'Paziente Sintetico' }).waitFor({ timeout: 15000 });
+    await page.getByRole('button', { name: 'Scrivi', exact: true }).click();
+    await page.getByRole('textbox', { name: 'Scrivi qui le tue osservazioni sulla seduta…' }).fill(said);
+    await page.getByRole('button', { name: 'Genera nota' }).click();
+    await page.getByText('Nota pronta').waitFor({ timeout: 15000 });
+    const checks = page.getByTestId('coherence-checks');
+    await checks.getByText('Controlli di coerenza').waitFor({ timeout: 10000 });
+
+    // The wrist is history: its exercise is left out saying so, and the plan is flagged for treating it as current.
+    const excluded = checks.getByTestId('excluded-exercise');
+    assert.equal(await excluded.count(), 1);
+    assert.match(await excluded.innerText(), /Flessori del polso 3x12[\s\S]*polso e mano: indicato solo in anamnesi, non come problema attuale\./);
+    await checks.locator('li[data-kind="history_as_active"]').getByText('Piano (polso e mano): tratta come problema attuale un distretto che hai indicato solo in anamnesi.').waitFor();
+    // Sides per region: only the hypothesis with the knee on the wrong side.
+    const sides = await checks.locator('li[data-kind="side"]').allInnerTexts();
+    assert.deepEqual(sides, ['Ipotesi cliniche: il lato non corrisponde a quello che hai indicato.'], 'the plan (right shoulder, left knee) and the history line are not flagged');
+    assert.equal(await checks.locator('li[data-kind="section_region"]').count(), 0, 'the history line in the findings is not an error');
+    // Both regions of today keep their exercises, with no warning on them.
+    const cards = page.getByTestId('note-exercise');
+    assert.equal(await cards.count(), 2);
+    assert.equal(await page.getByTestId('exercise-unverified').count(), 0);
+    assert.equal(await checks.locator('li[data-kind="exercise"], li[data-kind="exercise_unverified"]').count(), 0);
+    if (shots) {
+      await checks.evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 140));
+      const box = await checks.boundingBox();
+      await page.screenshot({ path: `${shots}/coherence-4-history-multisite.png`, clip: { x: box.x - 8, y: box.y - 8, width: box.width + 16, height: box.height + 16 } });
+    }
   } finally {
     await ctx.close();
   }

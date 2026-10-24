@@ -10,7 +10,7 @@
 // its title must be about a body region that fits the condition, and it must
 // share the condition's own terms, not just generic words.
 import { normalizeText } from './conditionMatch'
-import { fitsCase, regionsOf, type Region } from '../clinical/region'
+import { regionFit, regionsOf, type Region } from '../clinical/region'
 
 const STOP = new Set(['with', 'without', 'after', 'before', 'pain', 'chronic', 'acute', 'patients', 'patient', 'therapy', 'treatment', 'syndrome', 'disorder', 'injury', 'physical', 'physiotherapy', 'rehabilitation', 'exercise', 'exercises'])
 // Words that say nothing about which condition a paper is about.
@@ -66,7 +66,7 @@ export function paperRelevance(paper: { title?: string | null; abstract?: string
   const paperRegions = titleRegions.length ? titleRegions : regionsOf(paper.abstract)
   if (!regions.length) return shared ? { level: 'unverified', reason: 'case_region_unknown' } : null
   if (!paperRegions.length) return shared ? { level: 'unverified', reason: 'paper_region_unknown' } : null
-  if (!fitsCase(paperRegions, regions)) return mechanismInTitle && shared ? { level: 'indirect', reason: 'same_mechanism_other_region' } : null
+  if (regionFit(paperRegions, regions) === 'incompatible') return mechanismInTitle && shared ? { level: 'indirect', reason: 'same_mechanism_other_region' } : null
   if (phraseInTitle) return { level: 'direct', reason: 'same_condition' }
   if (phraseInAbstract) return { level: 'direct', reason: 'same_region' }
   return { level: 'indirect', reason: 'same_region' }

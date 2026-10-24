@@ -67,7 +67,10 @@ interface LiveDict {
   coherenceTitle: string
   coherenceIntro: string
   coherenceOk: string
-  coherenceIssue: Record<'region_unknown' | 'district' | 'section_region' | 'side' | 'exercise' | 'evidence' | 'evidence_unverified' | 'protocol' | 'invented' | 'invented_appointment' | 'invented_treatment', (item: string) => string>
+  coherenceIssue: Record<'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side' | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified' | 'invented' | 'invented_appointment' | 'invented_treatment', (item: string) => string>
+  unverifiedReason: Record<'case_region_unknown' | 'exercise_region_unknown' | 'sheet_region_unknown', string>
+  generalActivity: string
+  excludedHistory: (regions: string) => string
   regionNames: Record<'shoulder' | 'elbow' | 'wrist_hand' | 'cervical' | 'thoracic' | 'lumbar' | 'hip' | 'thigh' | 'knee' | 'lower_leg' | 'ankle_foot' | 'upper_limb' | 'lower_limb', string>
   excludedTitle: string
   excludedReason: (regions: string, caseRegions: string) => string
@@ -201,7 +204,17 @@ const it: LiveDict = {
     invented: (i) => `${i}: misura che non compare in ciò che hai detto. Verificala prima di salvare.`,
     invented_appointment: (i) => `${i}: giorno, data o orario che non hai indicato. Verificalo prima di comunicarlo al paziente.`,
     invented_treatment: (i) => `${i}: presentato come già eseguito, ma non compare in ciò che hai detto.`,
+    history_as_active: (i) => `${i}: tratta come problema attuale un distretto che hai indicato solo in anamnesi.`,
+    exercise_unverified: (i) => `"${i}": pertinenza non verificata, il distretto dell'esercizio non è riconosciuto. Decidi tu se tenerlo.`,
+    protocol_unverified: (i) => `La scheda "${i}": pertinenza non verificata, il distretto non è riconosciuto.`,
   },
+  unverifiedReason: {
+    case_region_unknown: 'Pertinenza non verificata: il distretto del caso non è stato riconosciuto.',
+    exercise_region_unknown: 'Pertinenza non verificata: il distretto dell’esercizio non è riconosciuto. Decidi tu se tenerlo.',
+    sheet_region_unknown: 'Pertinenza non verificata: la scheda non indica un distretto riconoscibile.',
+  },
+  generalActivity: 'Attività generale',
+  excludedHistory: (r) => `${r}: indicato solo in anamnesi, non come problema attuale.`,
   regionNames: { shoulder: 'spalla', elbow: 'gomito', wrist_hand: 'polso e mano', cervical: 'rachide cervicale', thoracic: 'rachide dorsale', lumbar: 'rachide lombare', hip: 'anca', thigh: 'coscia', knee: 'ginocchio', lower_leg: 'gamba (polpaccio)', ankle_foot: 'caviglia e piede', upper_limb: 'arto superiore', lower_limb: 'arto inferiore' },
   excludedTitle: 'Esercizi non inseriti perché riguardano un altro distretto',
   excludedReason: (r, c) => `Distretto dell'esercizio: ${r}. Distretto del caso: ${c}.`,
@@ -335,7 +348,17 @@ const en: LiveDict = {
     invented: (i) => `${i}: a measurement that is not in what you said. Check it before saving.`,
     invented_appointment: (i) => `${i}: a day, date or time you did not give. Check it before telling the patient.`,
     invented_treatment: (i) => `${i}: presented as already done, but not in what you said.`,
+    history_as_active: (i) => `${i}: treats as a current problem a body region you gave only as history.`,
+    exercise_unverified: (i) => `"${i}": pertinence not verified, the exercise's body region is not recognised. Your call whether to keep it.`,
+    protocol_unverified: (i) => `The sheet "${i}": pertinence not verified, the body region is not recognised.`,
   },
+  unverifiedReason: {
+    case_region_unknown: 'Pertinence not verified: the body region of the case was not recognised.',
+    exercise_region_unknown: 'Pertinence not verified: the exercise’s body region is not recognised. Your call whether to keep it.',
+    sheet_region_unknown: 'Pertinence not verified: the sheet names no recognisable body region.',
+  },
+  generalActivity: 'General activity',
+  excludedHistory: (r) => `${r}: given only as history, not as a current problem.`,
   regionNames: { shoulder: 'shoulder', elbow: 'elbow', wrist_hand: 'wrist and hand', cervical: 'cervical spine', thoracic: 'thoracic spine', lumbar: 'lumbar spine', hip: 'hip', thigh: 'thigh', knee: 'knee', lower_leg: 'lower leg (calf)', ankle_foot: 'ankle and foot', upper_limb: 'upper limb', lower_limb: 'lower limb' },
   excludedTitle: 'Exercises left out because they are for another body region',
   excludedReason: (r, c) => `Exercise region: ${r}. Case region: ${c}.`,
@@ -469,7 +492,17 @@ const es: LiveDict = {
     invented: (i) => `${i}: una medida que no aparece en lo que has dicho. Verifícala antes de guardar.`,
     invented_appointment: (i) => `${i}: un día, fecha u hora que no has indicado. Verifícalo antes de comunicarlo al paciente.`,
     invented_treatment: (i) => `${i}: se presenta como ya realizado, pero no aparece en lo que has dicho.`,
+    history_as_active: (i) => `${i}: trata como problema actual una región que indicaste solo como antecedente.`,
+    exercise_unverified: (i) => `"${i}": pertinencia no verificada, no se reconoce la región del ejercicio. Decides tú si mantenerlo.`,
+    protocol_unverified: (i) => `La ficha "${i}": pertinencia no verificada, no se reconoce la región.`,
   },
+  unverifiedReason: {
+    case_region_unknown: 'Pertinencia no verificada: no se ha reconocido la región del caso.',
+    exercise_region_unknown: 'Pertinencia no verificada: no se reconoce la región del ejercicio. Decides tú si mantenerlo.',
+    sheet_region_unknown: 'Pertinencia no verificada: la ficha no indica una región reconocible.',
+  },
+  generalActivity: 'Actividad general',
+  excludedHistory: (r) => `${r}: indicado solo como antecedente, no como problema actual.`,
   regionNames: { shoulder: 'hombro', elbow: 'codo', wrist_hand: 'muñeca y mano', cervical: 'columna cervical', thoracic: 'columna dorsal', lumbar: 'columna lumbar', hip: 'cadera', thigh: 'muslo', knee: 'rodilla', lower_leg: 'pierna (pantorrilla)', ankle_foot: 'tobillo y pie', upper_limb: 'miembro superior', lower_limb: 'miembro inferior' },
   excludedTitle: 'Ejercicios no incluidos porque son de otra región',
   excludedReason: (r, c) => `Región del ejercicio: ${r}. Región del caso: ${c}.`,
@@ -603,7 +636,17 @@ const fr: LiveDict = {
     invented: (i) => `${i} : une mesure absente de ce que vous avez dit. Vérifiez-la avant d'enregistrer.`,
     invented_appointment: (i) => `${i} : un jour, une date ou une heure que vous n’avez pas indiqués. Vérifiez avant de le communiquer au patient.`,
     invented_treatment: (i) => `${i} : présenté comme déjà réalisé, mais absent de ce que vous avez dit.`,
+    history_as_active: (i) => `${i} : traite comme problème actuel une région que vous avez indiquée seulement dans les antécédents.`,
+    exercise_unverified: (i) => `« ${i} » : pertinence non vérifiée, la région de l’exercice n’est pas reconnue. À vous de décider de le garder.`,
+    protocol_unverified: (i) => `La fiche « ${i} » : pertinence non vérifiée, la région n’est pas reconnue.`,
   },
+  unverifiedReason: {
+    case_region_unknown: 'Pertinence non vérifiée : la région du cas n’a pas été reconnue.',
+    exercise_region_unknown: 'Pertinence non vérifiée : la région de l’exercice n’est pas reconnue. À vous de décider de le garder.',
+    sheet_region_unknown: 'Pertinence non vérifiée : la fiche n’indique pas de région reconnaissable.',
+  },
+  generalActivity: 'Activité générale',
+  excludedHistory: (r) => `${r} : indiqué seulement dans les antécédents, pas comme problème actuel.`,
   regionNames: { shoulder: 'épaule', elbow: 'coude', wrist_hand: 'poignet et main', cervical: 'rachis cervical', thoracic: 'rachis dorsal', lumbar: 'rachis lombaire', hip: 'hanche', thigh: 'cuisse', knee: 'genou', lower_leg: 'jambe (mollet)', ankle_foot: 'cheville et pied', upper_limb: 'membre supérieur', lower_limb: 'membre inférieur' },
   excludedTitle: 'Exercices non ajoutés car ils concernent une autre région',
   excludedReason: (r, c) => `Région de l’exercice : ${r}. Région du cas : ${c}.`,

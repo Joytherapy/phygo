@@ -5,7 +5,8 @@ import { consumeHourly, HOURLY_LIMITS } from '@/lib/rateLimit';
 import { serviceClient } from '@/lib/verification';
 import { lazy } from '@/lib/lazy';
 import { bestCondition, type KbRow } from '@/lib/knowledge/conditionMatch';
-import { fitsCase, regionsOf } from '@/lib/clinical/region';
+import { regionFit, regionsOf } from '@/lib/clinical/region';
+import { conditionRegionsOf } from '@/lib/clinical/coherence';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,9 +20,11 @@ const PAGE = 1000;
 // (lib/knowledge/conditionMatch.ts). Only when nothing matches, the AI is
 // asked to pick one of the existing sheets by name, or none: it never writes
 // clinical content, and an id it returns that is not in the list is ignored.
-// Either way only sheets of a body region that fits the condition assessed are
-// candidates: a generic keyword ("tendinopatia") must not bring the Achilles
-// sheet to a shoulder note.
+// Either way a sheet of another body region is never a candidate (a generic
+// keyword, "tendinopatia", must not bring the Achilles sheet to a shoulder
+// note); sheets of a compatible region are tried first, and a sheet whose
+// region, or the condition's, is not recognised comes back marked as not
+// verified, with the reason.
 export async function POST(request: Request) {
   const gate = await requireVerifiedProfessional();
   if (!gate.ok) return gate.response;
@@ -45,15 +48,18 @@ export async function POST(request: Request) {
       if (!data || data.length < PAGE) break;
     }
 
-    const conditionRegions = regionsOf(`${primary} ${text}`);
+    const conditionRegions = conditionRegionsOf(primary, text);
     const sheetRegions = (r: KbRow) =>
       regionsOf([r.condition_name, r.condition_keywords, ...Object.values(r.translations ?? {}).flatMap((t) => [t?.condition_name, t?.condition_keywords])].filter(Boolean).join(' '));
-    const candidates = rows.filter((r) => fitsCase(sheetRegions(r), conditionRegions));
+    const fitOf = (r: KbRow) => regionFit(sheetRegions(r), conditionRegions);
+    const verified = rows.filter((r) => fitOf(r) === 'compatible');
+    const unverified = rows.filter((r) => fitOf(r) === 'unknown');
+    const candidates = [...verified, ...unverified];
 
     let match: (KbRow & Record<string, any>) | null = null;
     let matchedKeyword: string | null = null;
     let matchedBy: 'keyword' | 'ai' | null = null;
-    const found = bestCondition(candidates, primary, text);
+    const found = bestCondition(verified, primary, text) ?? bestCondition(unverified, primary, text);
     if (found) {
       match = found.row as KbRow & Record<string, any>;
       matchedKeyword = found.keyword;
@@ -100,8 +106,14 @@ export async function POST(request: Request) {
     const finalMatch = match && lang && lang !== 'it' && match.translations?.[lang] ? { ...match, ...match.translations[lang] } : match;
     const finalPhases = lang && lang !== 'it' ? phases.map((p: any) => (p.translations?.[lang] ? { ...p, ...p.translations[lang] } : p)) : phases;
 
+    // Not verified when the sheet's region, or the condition's, is not recognised.
+    const relevance = match ? (fitOf(match) === 'compatible' ? 'verified' : 'unverified') : null;
+    const relevanceReason = relevance === 'unverified' ? (conditionRegions.length ? 'sheet_region_unknown' : 'case_region_unknown') : null;
+
     return NextResponse.json({
       match: finalMatch || null,
+      relevance,
+      relevanceReason,
       phases: finalPhases,
       evidenceLevel: match?.evidence_level || null,
       matchedKeyword,

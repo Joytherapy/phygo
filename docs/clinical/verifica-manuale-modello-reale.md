@@ -1,30 +1,42 @@
-# Verifica manuale sul preview: pertinenza clinica con il modello AI reale
+# Verifica manuale: pertinenza clinica con il modello AI reale, in ambiente isolato
 
 La suite automatica (`tests/clinical-relevance.test.mjs`) usa risposte del
 modello **simulate**. Verifica che cosa fa PHYGO con quelle risposte: filtri,
 abbinamenti, scheda clinica, studi, controlli di coerenza. **Non** verifica che
 cosa scrive davvero il modello con i nuovi prompt. Questa procedura serve a
-quello, sul deploy di preview della PR, con casi solo sintetici.
+quello.
 
-## Preparazione
+## Ambiente: isolato, senza database reale
 
-1. Aprire il link di preview della PR (Vercel → Deployments → Preview).
-2. Accedere con un account professionista verificato di prova.
-3. Creare un paziente fittizio, ad esempio **"TEST – non reale"**. Non usare pazienti reali e non incollare dati reali nelle note.
-   - Il preview può usare lo stesso database di produzione: alla fine eliminare il paziente fittizio e le sue note.
-4. Ogni nota genera chiamate a OpenAI, a pagamento come in produzione. Il giro completo è di circa 16 note più le ripetizioni.
+**Non usare il preview di Vercel né il database di produzione, e non creare pazienti fittizi nel database di produzione,** neppure con l'intenzione di cancellarli dopo.
 
-## Come eseguire ogni caso
+Si usa invece lo script `scripts/clinical-relevance-live.mjs`:
+- **App:** gira in locale, sul computer di chi esegue la verifica.
+- **Database:** al posto di Supabase c'è un sostituto **in memoria** (`tests/support/fake-supabase.mjs`). Contiene solo i dati sintetici della suite: schede, studi, esercizi e un professionista di prova. Non scrive nulla da nessuna parte e sparisce alla chiusura.
+- **Unica chiamata esterna: OpenAI**, con la chiave passata nella variabile `OPENAI_API_KEY_LIVE`. La chiave non viene stampata.
+- **Costi:** ogni caso genera alcune chiamate a pagamento, come una nota vera. Le ripetizioni predefinite sono 2.
 
-1. Pagina del paziente fittizio → Seduta → **Scrivi**.
-2. Incollare il testo del caso e premere **Genera nota**.
-3. Compilare una riga della scheda di registrazione (in fondo) per **ogni sezione**:
-   - Rilievi, Valutazione, Piano, Follow-up/sintesi per il paziente, Ragionamento clinico;
-   - Spunti clinici (scheda e protocollo), Evidenze, Esercizi, Controlli di coerenza.
-4. Ripetere ogni caso **2 volte**: il modello non dà sempre la stessa risposta.
-5. Eseguire i casi 1 → 4 → 6 di seguito, senza ricaricare la pagina, per controllare che non ci sia contaminazione tra casi.
+```
+npm ci
+node scripts/clinical-relevance-live.mjs --build
+OPENAI_API_KEY_LIVE=<chiave> node scripts/clinical-relevance-live.mjs --out ./clinical-live-report --repeat 2
+```
 
-## Casi (testi sintetici)
+- Si può limitare a una parte dei casi con `--cases shoulderLeft,historyKnee,multiSiteSides`.
+- Il risultato è in `clinical-live-report/report.md`, con una scheda di revisione per ogni esecuzione. Contiene:
+  - tutte le sezioni generate;
+  - la scheda clinica con la sua pertinenza;
+  - gli studi con livello e motivo;
+  - gli esercizi con pertinenza e testo della nota;
+  - gli esercizi esclusi con il motivo;
+  - i controlli di coerenza.
+- L'intestazione del report dice quale endpoint ha risposto. Un report che dice "SOSTITUTO del modello" non è una verifica del modello reale.
+- La build dello script è legata alla porta del sostituto: prima di rieseguire la suite di test, rifare la build dei test.
+- Il controllo visivo del pannello si fa con il test nel browser (`tests/session-notes-panel.test.mjs`), sullo stesso sostituto in memoria. Per salvare le immagini del pannello, impostare `COHERENCE_SCREENSHOTS=<cartella>`.
+
+I casi sono quelli della matrice in `tests/support/clinical-world.mjs`. Vengono eseguiti in sequenza nella stessa sessione, quindi controllano anche la contaminazione tra un caso e l'altro.
+
+## Casi principali (testi sintetici; l'elenco completo è nello script)
 
 | # | Testo da incollare | Distretto / lato atteso |
 |---|---|---|
@@ -45,6 +57,11 @@ quello, sul deploy di preview della PR, con casi solo sintetici.
 | 15 | Oggi lombalgia; in anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico. | lombare (ginocchio solo anamnesi) |
 | 16 | mi fa male la spalla quando alzo il braccio, soprattutto la sera, da un paio di settimane | spalla (colloquiale, lato non detto) |
 | 17 | dolore al ginocchio no scusa alla caviglia sinistra dopo una distorsione | caviglia, sinistra (trascrizione ambigua) |
+| 18 | Oggi lombalgia; in anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico. | lombare (ginocchio **solo anamnesi**: niente esercizi né piano per il ginocchio) |
+| 19 | Dolore alla spalla destra da tre settimane; riferisce anche lieve dolore lombare, trattato oggi. | spalla destra + lombare secondario attivo |
+| 20 | Dolore alla spalla destra da tre settimane, nega dolore lombare. | spalla destra (lombare **negato**) |
+| 21 | Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi. | multidistretto con **lato diverso per distretto** |
+| 22 | Fibromialgia con dolore diffuso e stanchezza. | nessun distretto: tutto "pertinenza non verificata" |
 
 ## Che cosa controllare in ogni sezione
 
@@ -58,7 +75,8 @@ quello, sul deploy di preview della PR, con casi solo sintetici.
 - **Piano**:
   - pertinente al distretto e alla condizione;
   - distingue ciò che è stato fatto oggi da ciò che è proposto;
-  - lato corretto.
+  - lato corretto **per ogni distretto** nei casi multidistretto;
+  - nessun distretto dell'anamnesi trattato come problema attuale.
 - **Follow-up / sintesi per il paziente**:
   - nessun giorno, data o orario non detti;
   - nessun risultato futuro presentato come certo.
@@ -67,14 +85,16 @@ quello, sul deploy di preview della PR, con casi solo sintetici.
   - "informazioni mancanti" specifiche del caso;
   - red flag presenti o esplicitamente assenti.
 - **Spunti clinici (scheda e protocollo)**:
-  - scheda dello stesso distretto e condizione;
+  - scheda dello stesso distretto e condizione, oppure "pertinenza non verificata" con il motivo;
   - avviso "protocollo indicativo" presente.
 - **Evidenze**:
   - "Evidenza indiretta" e "Pertinenza non verificata" mostrano il motivo;
   - nessuno studio di un altro distretto senza motivo;
   - se non c'è nulla di pertinente, il messaggio "nessuno studio" invece di studi casuali.
 - **Esercizi**:
-  - distretto del caso, distretti vicini o lavoro generale;
+  - distretto del caso, distretti vicini o attività generale (aerobica);
+  - un esercizio con distretto non riconosciuto è mostrato come "pertinenza non verificata", con il motivo, e non viene tolto;
+  - nessun esercizio per un distretto citato solo in anamnesi o negato;
   - "Dalla nota: …" quando l'esercizio del database ha un nome diverso;
   - dosaggio presente.
 - **Controlli di coerenza**:
@@ -83,6 +103,8 @@ quello, sul deploy di preview della PR, con casi solo sintetici.
   - gli avvisi sono veri (nessun falso allarme) e non manca un errore evidente (nessun falso negativo).
 
 ## Scheda di registrazione
+
+Il report dello script contiene già una scheda per ogni esecuzione. Formato:
 
 | Caso | Ripetizione | Sezione | Esito (OK / errore) | Gravità (alta / media / bassa) | Che cosa | Serve revisione umana? |
 |---|---|---|---|---|---|---|

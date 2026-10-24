@@ -28,6 +28,9 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     // OpenAI stand-in for content tests: a function (system prompt, user prompt) ->
     // JSON-serialisable answer, or undefined to refuse the call as usual.
     openai: null,
+    // Only for the manual check with the real model (scripts/clinical-relevance-live.mjs):
+    // an async function (request body) -> { status, json } that forwards the call.
+    openaiForward: null,
   };
 
   const server = http.createServer(async (req, res) => {
@@ -115,6 +118,10 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
 
     // OpenAI stand-in: any call is recorded and refused, so tests can assert none happened.
     if (url.pathname.startsWith('/openai/')) {
+      if (state.openaiForward && url.pathname.endsWith('/chat/completions')) {
+        const { status, json } = await state.openaiForward(JSON.parse(body || '{}'));
+        return send(status, json);
+      }
       if (state.openai && url.pathname.endsWith('/chat/completions')) {
         const req = JSON.parse(body || '{}');
         const msgs = req.messages ?? [];

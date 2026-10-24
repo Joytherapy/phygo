@@ -7,8 +7,8 @@ import type { ExerciseEntry } from "@/lib/exercise-providers/types";
 import { lazy } from "@/lib/lazy";
 import { serviceClient } from "@/lib/verification";
 import { searchLibraryExercises, specificKeywords } from "@/lib/exerciseLibrary/search";
-import { exerciseRegions, fitsCase, regionsOf, type Region } from "@/lib/clinical/region";
-import { caseRegionsOf } from "@/lib/clinical/coherence";
+import { exerciseFit, exerciseRegions, isGeneralActivity, regionsOf, type Fit, type Region } from "@/lib/clinical/region";
+import { caseOf } from "@/lib/clinical/coherence";
 
 const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
 
@@ -28,10 +28,16 @@ type ExerciseOutput = ExerciseEntry & {
   _debugKeywords?: string[];
   /** The exercise as the note wrote it, before it was matched to a database exercise. */
   draft: string;
+  /** Its region against the case: compatible, a general activity, or not verified (region not recognised). */
+  relevance: "compatible" | "general" | "unverified";
+  relevance_reason: "case_region_unknown" | "exercise_region_unknown" | null;
 };
 
-/** An exercise of the draft left out because it is for a body region the case is not about. */
-type Excluded = { name: string; reason: "off_region"; regions: Region[]; caseRegions: Region[] };
+/**
+ * An exercise of the draft left out because it is for a body region the case
+ * is not about ("off_region"), or one the clinician gave only as history.
+ */
+type Excluded = { name: string; reason: "off_region" | "history_only"; regions: Region[]; caseRegions: Region[] };
 
 export async function POST(request: Request) {
   // Clinician-only paid AI operation (OpenAI) on real clinical information: verified professional + hourly cap.
@@ -50,26 +56,32 @@ export async function POST(request: Request) {
 
     const language = (lang || "en").slice(0, 2);
 
-    // The body regions of today's case: what the clinician said, plus the
-    // condition assessed (lib/clinical). An exercise for another region is
-    // left out (and listed, so the clinician can add it back), and a draft is
-    // only ever matched to a database exercise of a region that fits.
-    const caseRegions = caseRegionsOf(typeof transcript === "string" ? transcript.slice(0, 8000) : "", {
+    // The body regions of today's case: the clinician's current problem(s)
+    // plus the condition assessed, not regions given only as history
+    // (lib/clinical). An exercise for another region is left out (and
+    // listed, so the clinician can add it back); a draft is matched only to a
+    // database exercise that is not of another region, a verified one first;
+    // an exercise whose region is not recognised is kept but marked as not
+    // verified, never as pertinent.
+    const view = caseOf(typeof transcript === "string" ? transcript.slice(0, 8000) : "", {
       primaryCondition: typeof primaryCondition === "string" ? primaryCondition : "",
       assessment: typeof assessment === "string" ? assessment : "",
     });
-    const fits = (ex: ExerciseEntry) => fitsCase(exerciseRegions(ex), caseRegions);
+    const caseRegions = view.regions;
+    const history = new Set(view.profile.history);
     const excluded: Excluded[] = [];
+    const RANK: Record<Fit, number> = { compatible: 0, general: 1, unknown: 2, incompatible: 3 };
 
     const processOne = async (draft: any): Promise<ExerciseOutput | null> => {
       const draftText: string =
         typeof draft === "string" ? draft : draft.name || String(draft);
       const draftRegions = regionsOf(draftText);
+      const draftFit = exerciseFit({ name: draftText }, caseRegions);
       const exclude = (regions: Region[]) => {
-        excluded.push({ name: draftText, reason: "off_region", regions, caseRegions });
+        excluded.push({ name: draftText, reason: regions.some((r) => history.has(r)) ? "history_only" : "off_region", regions, caseRegions });
         return null;
       };
-      if (!fitsCase(draftRegions, caseRegions)) return exclude(draftRegions);
+      if (draftFit === "incompatible") return exclude(draftRegions);
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o-mini",
@@ -104,8 +116,9 @@ export async function POST(request: Request) {
       let match: ExerciseEntry | null = null;
       const pick = (candidates: ExerciseEntry[]): ExerciseEntry | null | "off_region" => {
         if (candidates.length === 0) return null;
-        if (draftRegions.length === 0 && !fits(candidates[0])) return "off_region";
-        return candidates.find(fits) ?? null;
+        const fit = (c: ExerciseEntry) => exerciseFit(c, caseRegions);
+        if (draftRegions.length === 0 && !isGeneralActivity(draftText) && fit(candidates[0]) === "incompatible") return "off_region";
+        return candidates.filter((c) => fit(c) !== "incompatible").sort((a, b) => RANK[fit(a)] - RANK[fit(b)])[0] ?? null;
       };
       const db = serviceClient();
       if (db && searchWith.length) {
@@ -137,11 +150,18 @@ export async function POST(request: Request) {
         notes: parsed.notes ?? null,
       };
 
+      // Verified when the note's text or the matched exercise is of a compatible region.
+      const fits = [draftFit, ...(match ? [exerciseFit(match, caseRegions)] : [])];
+      const relevance: ExerciseOutput["relevance"] = fits.includes("compatible") ? "compatible" : fits.includes("general") ? "general" : "unverified";
+      const relevance_reason: ExerciseOutput["relevance_reason"] = relevance !== "unverified" ? null : caseRegions.length ? "exercise_region_unknown" : "case_region_unknown";
+
       if (match) {
         return {
           ...match,
           _debugKeywords: keywords,
           draft: draftText,
+          relevance,
+          relevance_reason,
           source_type: "professional",
           dosing,
           clinical_check: null,
@@ -169,6 +189,8 @@ export async function POST(request: Request) {
         license: null,
         language,
         draft: draftText,
+        relevance,
+        relevance_reason,
         source_type: "professional",
         dosing,
         clinical_check: null,
@@ -182,7 +204,7 @@ export async function POST(request: Request) {
     const order = exercisesDraft.map((d: any) => (typeof d === "string" ? d : d?.name || String(d)));
     excluded.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
 
-    return NextResponse.json({ exercises: results, excluded, caseRegions });
+    return NextResponse.json({ exercises: results, excluded, caseRegions, historyRegions: view.profile.history });
   } catch (err) {
     console.error("Exercise intelligence error:", err);
     return NextResponse.json({ exercises: [], excluded: [] }, { status: 500 });

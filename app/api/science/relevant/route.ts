@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { lazy } from '@/lib/lazy';
 import { paperRelevance, paperScore, searchTerms } from '@/lib/knowledge/paperRank';
-import { regionsOf } from '@/lib/clinical/region';
+import { conditionRegionsOf } from '@/lib/clinical/coherence';
 
 // Collega il motore clinico AI (LiveStructuring) alla libreria Scienza/PubMed
 // che esiste già in Phygo (research_papers + research_summaries, alimentata
@@ -100,7 +100,7 @@ export async function POST(req: Request) {
     // Only papers pertinent to the condition (lib/knowledge/paperRank.ts):
     // direct first, then indirect (same region before another region with the
     // same mechanism), then unverified; most relevant, then newest, on a tie.
-    const regions = regionsOf(`${typeof primaryCondition === 'string' ? primaryCondition : ''} ${typeof assessment === 'string' ? assessment : ''}`);
+    const regions = conditionRegionsOf(typeof primaryCondition === 'string' ? primaryCondition : '', typeof assessment === 'string' ? assessment : '');
     const data = (found || [])
       .filter((p: any) => p.status === 'published')
       .map((p: any) => ({ p, score: paperScore(p, terms), relevance: paperRelevance(p, terms, regions) }))

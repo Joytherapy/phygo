@@ -5,12 +5,17 @@
 // appointment or a treatment "done" that is not in the clinician's words, a
 // paper whose pertinence could not be verified. Whether the reasoning is sound
 // stays with the clinician; when the region of the case is not recognised it
-// says so instead of reporting "no inconsistency".
-import { caseSide, contradictsSide, exerciseRegions, fitsCase, normalize, pertinentTo, regionsOf, type Region } from './region'
+// says so instead of reporting "no inconsistency", and an item whose region
+// is not recognised is reported as not verified, never as pertinent.
+//
+// The case is today's problem as the clinician describes it (caseProfile):
+// regions named only in history or as negated are not part of it, and each
+// side is checked against the region it was given for.
+import { caseProfile, exerciseFit, exerciseRegions, normalize, pertinentTo, regionFit, regionsOf, sideContradictions, statementsOf, mentionsOf, type CaseProfile, type Region } from './region'
 
 export type IssueKind =
-  | 'region_unknown' | 'district' | 'section_region' | 'side'
-  | 'exercise' | 'evidence' | 'evidence_unverified' | 'protocol'
+  | 'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side'
+  | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified'
   | 'invented' | 'invented_appointment' | 'invented_treatment'
 export type Issue = { kind: IssueKind; severity: 'high' | 'medium'; item: string; section?: SectionName; regions?: Region[]; caseRegions?: Region[] }
 
@@ -23,7 +28,8 @@ type Reasoning = Partial<Record<'hypotheses' | 'differentials', string[] | strin
 export type GeneratedOutput = {
   transcript: string
   note: { subjective?: string; objective?: string; assessment?: string; plan?: string; summaryForPatient?: string; primaryCondition?: string; clinicalReasoning?: Reasoning | null }
-  exercises: { name: string; body_region?: string | null; primary_muscle?: string | null }[]
+  /** `draft`: the exercise as the note wrote it (with its side), when matched to a database exercise. */
+  exercises: { name: string; draft?: string | null; body_region?: string | null; primary_muscle?: string | null }[]
   papers: { title: string; relevance?: string | null; relevance_reason?: string | null }[]
   protocol: { name: string; keywords?: string | null } | null
 }
@@ -79,10 +85,34 @@ export function treatmentsNotInTranscript(section: string, transcript: string): 
   return Array.from(new Set(out))
 }
 
-/** Regions of today's case: what the clinician said, plus the condition named today. */
-export function caseRegionsOf(transcript: string, note: GeneratedOutput['note']): Region[] {
-  return Array.from(new Set([...regionsOf(transcript), ...regionsOf(`${note.primaryCondition ?? ''} ${note.assessment ?? ''}`)]))
+/**
+ * Regions of the condition assessed today: those of the primary condition,
+ * or, when it names none, of the current statements of the assessment
+ * (not its history: "pregresso intervento al ginocchio").
+ */
+export function conditionRegionsOf(primaryCondition: string | null | undefined, assessment: string | null | undefined): Region[] {
+  const primary = regionsOf(primaryCondition)
+  return primary.length ? primary : caseProfile(assessment).active
 }
+
+export type CaseView = {
+  profile: CaseProfile
+  /** The condition's regions, as the note names them. */
+  condition: Region[]
+  /** Regions of today's case: the clinician's current problem(s) plus the condition, never a region they gave only as history. */
+  regions: Region[]
+}
+
+export function caseOf(transcript: string, note: Pick<GeneratedOutput['note'], 'primaryCondition' | 'assessment'>): CaseView {
+  const profile = caseProfile(transcript)
+  const condition = conditionRegionsOf(note.primaryCondition, note.assessment)
+  const historyOnly = new Set([...profile.history, ...profile.negated])
+  const regions = Array.from(new Set([...profile.active, ...condition.filter((r) => !historyOnly.has(r))]))
+  return { profile, condition, regions }
+}
+
+/** Regions of today's case (see caseOf). */
+export const caseRegionsOf = (transcript: string, note: Pick<GeneratedOutput['note'], 'primaryCondition' | 'assessment'>) => caseOf(transcript, note).regions
 
 const asText = (v: string[] | string | undefined | null) => (Array.isArray(v) ? v.join(' ') : v ?? '')
 
@@ -103,48 +133,61 @@ const REGION_SECTIONS: SectionName[] = ['subjective', 'objective', 'assessment',
 
 export function checkOutput(o: GeneratedOutput): Issue[] {
   const issues: Issue[] = []
-  const said = regionsOf(o.transcript)
-  const condition = regionsOf(`${o.note.primaryCondition ?? ''} ${o.note.assessment ?? ''}`)
-  const caseRegions = caseRegionsOf(o.transcript, o.note)
+  const { profile, condition, regions: caseRegions } = caseOf(o.transcript, o.note)
+  const history = new Set(profile.history)
   const sections = sectionsOf(o.note)
+  const reference = condition.filter((r) => caseRegions.includes(r)).length ? condition.filter((r) => caseRegions.includes(r)) : caseRegions
 
-  // 0. Without a recognised region nothing below can be judged by region: say so.
+  // 0. Without a recognised region nothing below can be verified by region: say so.
   if (caseRegions.length === 0) issues.push({ kind: 'region_unknown', severity: 'medium', item: '' })
 
-  // 1. The condition assessed today is in a region the clinician talked about.
-  if (said.length && condition.length && !fitsCase(condition, said)) {
-    issues.push({ kind: 'district', severity: 'high', item: o.note.primaryCondition || o.note.assessment || '', regions: condition, caseRegions: said })
+  // 1. The condition assessed today is in a region of today's problem, not of the history.
+  if (profile.active.length && condition.length && regionFit(condition, profile.active) === 'incompatible') {
+    const asHistory = condition.some((r) => history.has(r))
+    issues.push({ kind: asHistory ? 'history_as_active' : 'district', severity: 'high', item: o.note.primaryCondition || o.note.assessment || '', regions: condition, caseRegions: profile.active })
   }
-  // 2. Each section: no region the clinician did not talk about (beyond the
-  //    neighbours), no side opposite to the one given.
-  const near = pertinentTo(said)
-  const side = caseSide(o.transcript)
+  // 2. Each section: its current statements stay in today's regions (or their
+  //    neighbours) and keep the side given for each region.
+  const near = pertinentTo(caseRegions)
   for (const [name, text] of sections) {
-    if (said.length && REGION_SECTIONS.includes(name)) {
-      const off = regionsOf(text).filter((r) => !near.has(r))
-      if (off.length) issues.push({ kind: 'section_region', severity: 'medium', item: name, section: name, regions: off, caseRegions: said })
+    if (caseRegions.length && REGION_SECTIONS.includes(name)) {
+      const named = statementsOf(text).filter((s) => s.status === 'active').flatMap((s) => mentionsOf(s.text).map((m) => m.region))
+      const off = Array.from(new Set(named.filter((r) => !near.has(r))))
+      const asHistory = off.filter((r) => history.has(r))
+      const other = off.filter((r) => !history.has(r))
+      if (asHistory.length) issues.push({ kind: 'history_as_active', severity: 'high', item: name, section: name, regions: asHistory, caseRegions })
+      if (other.length) issues.push({ kind: 'section_region', severity: 'medium', item: name, section: name, regions: other, caseRegions })
     }
-    if (contradictsSide(text, side)) issues.push({ kind: 'side', severity: 'high', item: name, section: name })
+    if (sideContradictions(text, profile).length) issues.push({ kind: 'side', severity: 'high', item: name, section: name })
   }
-  // 3. Exercises, 4. papers, 5. protocol: in the case's regions or their neighbours.
+  // 3. Exercises: compatible, general, not verified, or incompatible.
   for (const e of o.exercises) {
+    const fit = exerciseFit(e, caseRegions)
     const r = exerciseRegions(e)
-    if (!fitsCase(r, caseRegions)) issues.push({ kind: 'exercise', severity: 'high', item: e.name, regions: r, caseRegions })
-    else if (contradictsSide(e.name, side)) issues.push({ kind: 'side', severity: 'medium', item: e.name })
+    if (fit === 'incompatible') issues.push({ kind: r.some((x) => history.has(x)) ? 'history_as_active' : 'exercise', severity: 'high', item: e.name, regions: r, caseRegions })
+    else if (fit === 'unknown' && caseRegions.length) issues.push({ kind: 'exercise_unverified', severity: 'medium', item: e.name })
+    else if (sideContradictions(`${e.draft ?? ''} ${e.name}`, profile).length) issues.push({ kind: 'side', severity: 'medium', item: e.draft || e.name })
   }
+  // 4. Papers: as classified by the search (lib/knowledge/paperRank.ts), or by their title.
   for (const p of o.papers) {
     if (p.relevance === 'unverified') {
       issues.push({ kind: 'evidence_unverified', severity: 'medium', item: p.title })
       continue
     }
-    // Shown as indirect because it shares the mechanism: already labelled with its reason.
-    if (p.relevance === 'indirect' && p.relevance_reason === 'same_mechanism_other_region') continue
-    const r = regionsOf(p.title)
-    if (!fitsCase(r, condition.length ? condition : caseRegions)) issues.push({ kind: 'evidence', severity: 'high', item: p.title, regions: r, caseRegions })
+    if (p.relevance === 'direct' || p.relevance === 'indirect') {
+      // Shown with its level and reason; only a paper of another region without one is wrong.
+      if (p.relevance_reason === 'same_mechanism_other_region') continue
+    }
+    const fit = regionFit(regionsOf(p.title), reference)
+    if (fit === 'incompatible') issues.push({ kind: 'evidence', severity: 'high', item: p.title, regions: regionsOf(p.title), caseRegions })
+    else if (fit === 'unknown' && !p.relevance) issues.push({ kind: 'evidence_unverified', severity: 'medium', item: p.title })
   }
+  // 5. Protocol (condition sheet).
   if (o.protocol) {
     const r = regionsOf(`${o.protocol.name} ${o.protocol.keywords ?? ''}`)
-    if (!fitsCase(r, condition.length ? condition : caseRegions)) issues.push({ kind: 'protocol', severity: 'high', item: o.protocol.name, regions: r, caseRegions })
+    const fit = regionFit(r, reference)
+    if (fit === 'incompatible') issues.push({ kind: 'protocol', severity: 'high', item: o.protocol.name, regions: r, caseRegions })
+    else if (fit === 'unknown') issues.push({ kind: 'protocol_unverified', severity: 'medium', item: o.protocol.name })
   }
   // 6. Facts must come from the clinician: measurements in the findings and
   //    assessment, fixed appointments in the plan and follow-up, treatments
