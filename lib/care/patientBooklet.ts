@@ -86,6 +86,7 @@ export function buildPatientBooklet(opts: {
 
   if (opts.sections.path && opts.phases.length) {
     pdf.section(++n, t.path)
+    pdf.paragraph(t.pathIndicative, MUTED, 10)
     // Each phase: number, name ("you are here" on the right when it is the
     // current one), the typical duration on its own line, then goals and when
     // to progress. Lines are placed one by one (pdf.ensure), so long texts

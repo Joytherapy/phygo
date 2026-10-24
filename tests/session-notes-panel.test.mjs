@@ -106,6 +106,98 @@ test('the notes panel is in Italian and saves the reviewed note to the patient',
   }
 });
 
+test('the coherence checks say what was left out and why, keep what the clinician chose, and let an exercise be added back', { skip }, async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'it-IT', reducedMotion: 'reduce' });
+  const [name, value] = sessionCookie('tok-clin', U).split(/=(.*)/s);
+  await ctx.addCookies([{ name, value, url: app.url }]);
+  const page = await ctx.newPage();
+  const json = (body) => (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
+  // The screenshot case, synthetic: left shoulder, the draft with an ankle
+  // exercise, and a plan that names the other side.
+  const note = {
+    subjective: 'Dolore alla spalla sinistra da un mese.',
+    objective: 'Dolore in rotazione esterna resistita.',
+    assessment: 'Possibile tendinopatia della cuffia dei rotatori.',
+    plan: 'Rinforzo progressivo della spalla destra.',
+    summaryForPatient: 'Esercizi ogni giorno.',
+    primaryCondition: 'rotator cuff tendinopathy',
+    exercises: ['Rotazione esterna con elastico 3x12', 'Mobilità di caviglia 2x15'],
+    language: 'it',
+  };
+  const dosing = { sets: 3, reps: 12, duration_seconds: null, frequency_per_week: null, notes: null };
+  let sent = null;
+  await page.route('**/api/generate-note', json({ note }));
+  await page.route('**/api/science/relevant', json({ papers: [] }));
+  await page.route('**/api/knowledge-lookup', json({ match: null, phases: [] }));
+  await page.route('**/api/exercise-intelligence', (route) => {
+    sent = JSON.parse(route.request().postData() || '{}');
+    return json({
+      exercises: [{ internal_id: 'exercises-1', provider: 'exercises', provider_id: 'e1', name: 'Shoulder external rotation with band', draft: 'Rotazione esterna con elastico 3x12', body_region: 'shoulder', primary_muscle: 'Infraspinatus', media: null, source_type: 'professional', dosing, clinical_check: null }],
+      excluded: [{ name: 'Mobilità di caviglia 2x15', reason: 'off_region', regions: ['ankle_foot'], caseRegions: ['shoulder'] }],
+    })(route);
+  });
+  // An exercise the clinician picks by hand from the database, of another region on purpose.
+  await page.route('**/api/exercise-search*', json({ exercises: [{ internal_id: 'exercises-2', provider: 'exercises', provider_id: 'e2', name: 'Hamstring stretch', body_region: 'hamstrings', primary_muscle: 'Hamstrings', media: null }] }));
+  // Optional screenshots of the panel for review (below the sticky navbar).
+  const shots = process.env.COHERENCE_SCREENSHOTS;
+  const shoot = async (locator, file) => {
+    if (!shots) return;
+    await locator.evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 140));
+    const box = await locator.boundingBox();
+    await page.screenshot({ path: `${shots}/${file}`, clip: { x: box.x - 8, y: box.y - 8, width: box.width + 16, height: box.height + 16 } });
+  };
+  try {
+    await page.goto(`${app.url}/dashboard/patients/${P}/session`);
+    await page.getByRole('heading', { level: 1, name: 'Paziente Sintetico' }).waitFor({ timeout: 15000 });
+    await page.getByRole('button', { name: 'Scrivi', exact: true }).click();
+    const said = 'Dolore alla spalla sinistra da un mese, dolore in rotazione esterna resistita.';
+    await page.getByRole('textbox', { name: 'Scrivi qui le tue osservazioni sulla seduta…' }).fill(said);
+    await page.getByRole('button', { name: 'Genera nota' }).click();
+    await page.getByText('Nota pronta').waitFor({ timeout: 15000 });
+
+    const checks = page.getByTestId('coherence-checks');
+    await checks.getByText('Controlli di coerenza').waitFor({ timeout: 10000 });
+    assert.equal(sent.transcript, said, 'the clinician’s words go with the exercises, as the reference for region and side');
+    const cards = page.getByTestId('note-exercise');
+    const excluded = checks.getByTestId('excluded-exercise');
+
+    // What does not match, and why.
+    await checks.locator('li[data-kind="side"]').getByText('Piano: il lato non corrisponde a quello che hai indicato.').waitFor();
+    await checks.getByText('Esercizi non inseriti perché riguardano un altro distretto').waitFor();
+    assert.equal(await excluded.count(), 1);
+    assert.match(await excluded.innerText(), /Mobilità di caviglia 2x15[\s\S]*Distretto dell'esercizio: caviglia e piede\. Distretto del caso: spalla\./);
+    assert.equal(await cards.count(), 1, 'the excluded exercise is not in the exercises');
+    // A note exercise matched to a database exercise says what the note wrote.
+    await cards.first().getByText('Dalla nota: Rotazione esterna con elastico 3x12').waitFor();
+    await shoot(checks, 'coherence-1-after-generation.png');
+
+    // The clinician adds an exercise of another region by hand: it is kept as
+    // chosen and only flagged, never removed.
+    await page.getByRole('button', { name: 'Aggiungi esercizio' }).click();
+    await page.getByRole('textbox', { name: 'Cerca esercizi (es. plank, ponte, squat)…' }).fill('hamstring');
+    await page.getByRole('button', { name: /Hamstring stretch/ }).click();
+    assert.equal(await cards.count(), 2);
+    await checks.locator('li[data-kind="exercise"]').getByText('"Hamstring stretch" riguarda un distretto diverso da quello del caso.').waitFor();
+
+    // Added back on purpose: it moves from the excluded list to the exercises,
+    // nothing else changes.
+    await excluded.getByRole('button', { name: 'Aggiungi comunque' }).click();
+    await excluded.first().waitFor({ state: 'detached' });
+    assert.equal(await cards.count(), 3);
+    assert.deepEqual(await cards.evaluateAll((els) => els.map((e) => e.querySelector('p')?.textContent)), ['Shoulder external rotation with band', 'Hamstring stretch', 'Mobilità di caviglia 2x15']);
+    await checks.locator('li[data-kind="exercise"]').getByText('"Mobilità di caviglia 2x15" riguarda un distretto diverso da quello del caso.').waitFor();
+    await shoot(checks, 'coherence-2-after-choices.png');
+    await shoot(cards.first().locator('xpath=..'), 'coherence-3-exercises.png');
+
+    await page.getByRole('button', { name: 'Salva nella scheda' }).click();
+    await page.getByRole('button', { name: 'Salvata nella scheda' }).waitFor({ timeout: 10000 });
+    const saved = fake.state.tables.notes.at(-1);
+    assert.deepEqual((saved.exercises ?? []).map((e) => (typeof e === 'string' ? e : e.name)), ['Shoulder external rotation with band', 'Hamstring stretch', 'Mobilità di caviglia 2x15'], 'what the clinician chose is saved, nothing lost');
+  } finally {
+    await ctx.close();
+  }
+});
+
 test('the navbar "x" clears the current patient on the session page, and it stays cleared', { skip }, async () => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'it-IT', reducedMotion: 'reduce' });
   await ctx.addInitScript(() => window.localStorage.setItem('phygo-lang', 'it'));

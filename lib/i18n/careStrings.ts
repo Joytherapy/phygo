@@ -131,6 +131,7 @@ export type CareDict = {
     youAreHere: string
     goals: string
     progressWhen: string
+    pathIndicative: string
     evidenceIntro: string
     strength: (s: string) => string
     guideline: (name: string, source: string) => string
@@ -326,6 +327,7 @@ const it: CareDict = {
     youAreHere: 'Sei qui',
     goals: 'Obiettivi',
     progressWhen: 'Si passa alla fase successiva quando',
+    pathIndicative: 'Le fasi e i tempi sono indicativi: il tuo fisioterapista li adatta alla tua valutazione e ai tuoi progressi.',
     evidenceIntro: 'Il percorso e gli esercizi seguono le indicazioni della ricerca scientifica. Questi sono alcuni degli studi considerati:',
     strength: (s) => `Livello di evidenza: ${s}`,
     guideline: (name, source) => `Protocollo di riferimento per ${name}: ${source}.`,
@@ -521,6 +523,7 @@ const en: CareDict = {
     youAreHere: 'You are here',
     goals: 'Goals',
     progressWhen: 'You move to the next phase when',
+    pathIndicative: 'The phases and timings are indicative: your physiotherapist adapts them to your assessment and your progress.',
     evidenceIntro: 'The path and the exercises follow what research recommends. These are some of the studies considered:',
     strength: (s) => `Level of evidence: ${s}`,
     guideline: (name, source) => `Reference protocol for ${name}: ${source}.`,
@@ -716,6 +719,7 @@ const es: CareDict = {
     youAreHere: 'Estás aquí',
     goals: 'Objetivos',
     progressWhen: 'Se pasa a la fase siguiente cuando',
+    pathIndicative: 'Las fases y los tiempos son orientativos: tu fisioterapeuta los adapta a tu valoración y a tu evolución.',
     evidenceIntro: 'El recorrido y los ejercicios siguen las indicaciones de la investigación científica. Estos son algunos de los estudios considerados:',
     strength: (s) => `Nivel de evidencia: ${s}`,
     guideline: (name, source) => `Protocolo de referencia para ${name}: ${source}.`,
@@ -911,6 +915,7 @@ const fr: CareDict = {
     youAreHere: 'Vous êtes ici',
     goals: 'Objectifs',
     progressWhen: 'On passe à la phase suivante quand',
+    pathIndicative: 'Les phases et les durées sont indicatives : votre kinésithérapeute les adapte à votre évaluation et à vos progrès.',
     evidenceIntro: 'Le parcours et les exercices suivent les recommandations de la recherche scientifique. Voici quelques-unes des études prises en compte :',
     strength: (s) => `Niveau de preuve : ${s}`,
     guideline: (name, source) => `Protocole de référence pour ${name} : ${source}.`,

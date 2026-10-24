@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mic,
@@ -25,6 +25,7 @@ import {
   ChevronDown,
   Languages,
   PenLine,
+  ShieldCheck,
 
 } from "lucide-react";
 
@@ -57,6 +58,7 @@ import { usePatientContext } from "@/contexts/PatientContext";
 import { localDate } from "@/lib/care/program";
 import EvidenceBadge from "@/components/EvidenceBadge";
 import { loadClinicianSignature } from "@/lib/care/clinicianSignature";
+import { checkOutput, type Issue, type SectionName } from "@/lib/clinical/coherence";
 
 // One look for every block of the panel (a quiet tile inside the page card).
 const BLOCK = "mt-4 rounded-[22px] border border-black/[0.06] bg-white/70 p-5 sm:p-6 dark:border-white/[0.07] dark:bg-white/[0.025]";
@@ -145,6 +147,10 @@ const [showAddExercise, setShowAddExercise] = useState(false);
 const [exerciseSearchQuery, setExerciseSearchQuery] = useState("");
 const [exerciseSearchResults, setExerciseSearchResults] = useState<any[]>([]);
 const [exerciseSearching, setExerciseSearching] = useState(false);
+// What the clinician said for the last generated note, and the exercises the
+// draft proposed for another body region (left out, can be added back).
+const [noteTranscript, setNoteTranscript] = useState("");
+const [excludedExercises, setExcludedExercises] = useState<{ name: string; regions?: string[]; caseRegions?: string[] }[]>([]);
 
 const [textInput, setTextInput] = useState("");
 
@@ -317,6 +323,8 @@ const [recordingLang, setRecordingLang] = useState(DICTATION_LOCALE[lang]);
     setProgress(0);
 
     setExerciseEntries([]);
+    setExcludedExercises([]);
+    setNoteTranscript("");
     setExpandedExercise(null);
     setEditingExercise(null);
     setShowAddExercise(false);
@@ -478,6 +486,7 @@ if (!res.ok) {
         const data = await res.json();
         const note = data.note ?? {};
         setFinalNote(note);
+        setNoteTranscript(raw);
 
         // Evidenze scientifiche rilevanti dalla libreria Scienza/PubMed già
         // esistente in Phygo — parte in parallelo (non await) così non
@@ -572,11 +581,20 @@ if (Array.isArray(exercisesArr) && exercisesArr.length > 0) {
         assessment: note.assessment,
         primaryCondition: note.primaryCondition,
         lang: note.language || recordingLang,
+        transcript: raw,
       }),
     });
     const eiData = await eiRes.json();
     if (Array.isArray(eiData.exercises)) {
       exerciseEntriesArr = eiData.exercises;
+    }
+    // Exercises for another body region stay out of the note too; they are
+    // listed under the coherence checks, with "Add anyway".
+    const excluded: { name: string; regions?: string[]; caseRegions?: string[] }[] = Array.isArray(eiData.excluded) ? eiData.excluded : [];
+    setExcludedExercises(excluded);
+    if (excluded.length && Array.isArray(exercisesArr)) {
+      const out = new Set(excluded.map((e) => e.name));
+      exercisesArr = exercisesArr.filter((e: any) => !out.has(typeof e === "string" ? e : e?.name));
     }
   } catch (eiErr) {
     console.error("Errore exercise-intelligence:", eiErr);
@@ -766,6 +784,60 @@ recognition.lang = recordingLang;
       prev.filter((ex: any, i: number) => (ex.internal_id || String(i)) !== key)
     );
     setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+  };
+
+  const addBackExcluded = (name: string) => {
+    setExcludedExercises((prev) => prev.filter((e) => e.name !== name));
+    setExerciseEntries((prev) => [
+      ...prev,
+      {
+        internal_id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        provider: "custom",
+        provider_id: null,
+        name,
+        draft: name,
+        description: null,
+        instructions: null,
+        body_region: null,
+        primary_muscle: null,
+        media: null,
+        source_type: "professional",
+        dosing: { sets: null, reps: null, duration_seconds: null, frequency_per_week: null, notes: null },
+        clinical_check: null,
+      },
+    ]);
+    setFinalNote((prev: any) => (prev && Array.isArray(prev.exercises) ? { ...prev, exercises: [...prev.exercises, name] } : prev));
+    setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+  };
+
+  // Deterministic checks of what was generated against what the clinician
+  // said (lib/clinical/coherence.ts): region, side, exercises, papers,
+  // protocol, measurements not given. Recomputed as the clinician edits.
+  const coherenceIssues = useMemo(() => {
+    if (!finalNote || !noteTranscript) return [];
+    return checkOutput({
+      transcript: noteTranscript,
+      note: finalNote,
+      exercises: exerciseEntries.map((e: any) => ({ name: e.name ?? "", body_region: e.body_region, primary_muscle: e.primary_muscle })),
+      papers: relevantPapers.map((p: any) => ({ title: p.title ?? "", relevance: p.relevance ?? null, relevance_reason: p.relevance_reason ?? null })),
+      protocol: clinicalInsight ? { name: clinicalInsight.condition_name ?? "", keywords: clinicalInsight.condition_keywords ?? null } : null,
+    });
+  }, [finalNote, noteTranscript, exerciseEntries, relevantPapers, clinicalInsight]);
+
+  // How each check names what it is about: a section by its heading, regions by name.
+  const sectionLabel = (name: SectionName): string =>
+    ({
+      subjective: t.subjective, objective: t.objective, assessment: t.assessment, plan: t.plan, summaryForPatient: t.patientSummary,
+      hypotheses: t.hypotheses, differentials: t.differentials, supportingFindings: t.supportingFindings, findingsAgainst: t.findingsAgainst,
+      missingInformation: t.missingInfo, suggestedAssessments: t.suggestedAssessments, redFlagsPrecautions: t.redFlagsPrecautions,
+    })[name];
+  const regionLabel = (regions?: string[]) => (regions ?? []).map((r) => (t.regionNames as Record<string, string>)[r] ?? r).join(", ");
+  const issueText = (issue: Issue) => {
+    let item = issue.item;
+    if (issue.kind === "side" && issue.section) item = sectionLabel(issue.section);
+    if (issue.kind === "section_region" && issue.section) item = `${sectionLabel(issue.section)} (${regionLabel(issue.regions)})`;
+    if ((issue.kind === "invented" || issue.kind === "invented_appointment" || issue.kind === "invented_treatment") && issue.section) item = `"${issue.item}" (${sectionLabel(issue.section)})`;
+    return t.coherenceIssue[issue.kind](item);
   };
 
   const searchExerciseDb = async (query: string) => {
@@ -1487,6 +1559,47 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
             </motion.div>
           )}
 
+          {isLiveVoice && finalNote && noteTranscript && phase === "done" && (
+            <motion.div data-testid="coherence-checks" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className={BLOCK}>
+              <BlockTitle icon={ShieldCheck}>{t.coherenceTitle}</BlockTitle>
+              <p className="mt-2 text-[11px] leading-relaxed text-ink/50 dark:text-white/40">{t.coherenceIntro}</p>
+              {coherenceIssues.length === 0 && excludedExercises.length === 0 && (
+                <p className="mt-3 text-sm text-emerald-700 dark:text-emerald-300">{t.coherenceOk}</p>
+              )}
+              {coherenceIssues.length > 0 && (
+                <ul className="mt-3 space-y-1.5">
+                  {coherenceIssues.map((issue, i) => (
+                    <li key={`${issue.kind}-${i}`} data-kind={issue.kind} className="flex gap-2 text-sm leading-relaxed text-amber-900 dark:text-amber-200/90">
+                      <AlertTriangle size={14} aria-hidden className={`mt-1 shrink-0 ${issue.severity === "high" ? "text-red-500" : "text-amber-500"}`} />
+                      <span>{issueText(issue)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {excludedExercises.length > 0 && (
+                <div className="mt-4 border-t border-black/[0.06] pt-3 dark:border-white/[0.07]">
+                  <p className={`${LABEL} mb-2`}>{t.excludedTitle}</p>
+                  <ul className="space-y-2">
+                    {excludedExercises.map((e) => (
+                      <li key={e.name} data-testid="excluded-exercise" className="flex flex-wrap items-center justify-between gap-2 text-sm text-ink/75 dark:text-white/75">
+                        <span className="min-w-0 break-words">
+                          {e.name}
+                          {(e.regions?.length || e.caseRegions?.length) ? (
+                            <span className="block text-[11px] text-ink/55 dark:text-white/45">{t.excludedReason(regionLabel(e.regions) || "—", regionLabel(e.caseRegions) || "—")}</span>
+                          ) : null}
+                        </span>
+                        <button type="button" onClick={() => addBackExcluded(e.name)} className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 text-xs font-semibold ${SECONDARY_BTN}`}>
+                          <Plus size={12} aria-hidden />
+                          {t.addBack}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </motion.div>
+          )}
+
           {!clinicalInsight && kbChecked && isLiveVoice && (
             <p data-testid="no-protocol" className="mt-4 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3 text-xs leading-relaxed text-amber-800 dark:text-amber-300">
               {care.plan.noProtocol(kbChecked)}
@@ -1525,7 +1638,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
 
               <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-black/[0.06] pt-4 dark:border-white/[0.07]">
                 <p className="text-[11px] text-ink/50 dark:text-white/40">
-                  {clinicalInsight.source} ({clinicalInsight.source_date}) · {t.insightDisclaimer}
+                  {clinicalInsight.source} ({clinicalInsight.source_date}) · {t.insightDisclaimer} {t.protocolIndicative}
                 </p>
                 {matchedKeyword && (
                   <button type="button" onClick={() => setShowWhy(!showWhy)} aria-expanded={showWhy} className="text-xs font-semibold text-[#7C83FF] hover:underline">
@@ -1590,7 +1703,16 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                             <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${CHIP}`}>{paper.study_type}</span>
                           )}
                         </div>
-                        {paper.evidence_strength && <EvidenceBadge level={paper.evidence_strength} className="mb-2" />}
+                        <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                          {paper.evidence_strength && <EvidenceBadge level={paper.evidence_strength} />}
+                          {paper.relevance === "indirect" && <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${CHIP}`}>{t.evidenceIndirect}</span>}
+                          {paper.relevance === "unverified" && (
+                            <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300">{t.evidenceUnverified}</span>
+                          )}
+                        </div>
+                        {(paper.relevance === "indirect" || paper.relevance === "unverified") && paper.relevance_reason && (t.evidenceReason as Record<string, string>)[paper.relevance_reason] && (
+                          <p data-testid="paper-relevance-reason" className="mb-2 text-[11px] leading-relaxed text-ink/60 dark:text-white/50">{(t.evidenceReason as Record<string, string>)[paper.relevance_reason]}</p>
+                        )}
                         <p className="mb-2 text-[11px] text-ink/50 dark:text-white/45">
                           {[
                             paper.authors,
@@ -1691,6 +1813,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                   return (
                     <div
                       key={key}
+                      data-testid="note-exercise"
                       className={`flex flex-col gap-3 rounded-2xl border border-black/[0.05] bg-black/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.03] ${isOpen || isEditing ? "sm:col-span-2" : ""}`}
                     >
                       <div className="flex gap-3">
@@ -1707,6 +1830,8 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                           )}
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-ink dark:text-white">{ex.name}</p>
+                            {/* Matched to a database exercise with another name: say what the note wrote. */}
+                            {ex.draft && ex.draft !== ex.name && <p className="mt-0.5 text-[11px] text-ink/50 dark:text-white/40">{t.fromNote(ex.draft)}</p>}
                             {ex.primary_muscle && <p className="mt-0.5 text-[11px] text-ink/55 dark:text-white/45">{ex.primary_muscle}</p>}
                             {!isEditing && (ex.dosing?.sets || ex.dosing?.reps || ex.dosing?.duration_seconds) && (
                               <p className="mt-1 text-[11px] text-ink/65 dark:text-white/55">
