@@ -1,0 +1,3132 @@
+[
+{
+"id": 1,
+"condition_name": "Dolore di spalla correlato alla cuffia dei rotatori (RCRSP)",
+"condition_keywords": "dolore di spalla correlato alla cuffia,sindrome da conflitto subacromiale,conflitto subacromiale,impingement di spalla,rotator cuff related shoulder pain,RCRSP,subacromial pain syndrome,shoulder impin"
+},
+{
+"id": 2,
+"condition_name": "Ricostruzione del legamento crociato anteriore (LCA)",
+"condition_keywords": "ginocchio, legamento crociato anteriore, ricostruzione LCA, lesione LCA, knee, anterior cruciate ligament, ACL reconstruction, ACL injury, rodilla, ligamento cruzado anterior, reconstrucción del LCA, "
+},
+{
+"id": 3,
+"condition_name": "Lombalgia (dolore lombare)",
+"condition_keywords": "lombalgia, dolore lombare, mal di schiena, colonna lombare, low back pain, lumbar pain, back pain, lombalgia aguda, dolor lumbar, lumbalgia, lombalgie, douleur lombaire, mal de dos"
+},
+{
+"id": 4,
+"condition_name": "Artrosi di ginocchio e/o anca",
+"condition_keywords": "artrosi ginocchio, artrosi al ginocchio, artrosi anca, artrosi all'anca, artrosi dell'anca, artrosi dell'anca, coxartrosi dell'anca, artrosi coxo-femorale\n gonartrosi, coxartrosi, knee osteoarthritis,"
+},
+{
+"id": 5,
+"condition_name": "Cervicalgia (dolore cervicale)",
+"condition_keywords": "cervicalgia, dolore cervicale, collo, colonna cervicale, cervicobrachialgia, neck pain, cervical pain, cervical spine, whiplash, dolor cervical, dolor de cuello, cervicalgie, douleur cervicale"
+},
+{
+"id": 6,
+"condition_name": "Tendinopatia achillea",
+"condition_keywords": "tendinopatia achillea, tendine dAchille, tendinite achillea, achillodinia, Achilles tendinopathy, Achilles tendinitis, Achilles pain, tendinopatia de Aquiles, tendon de Aquiles, tendinopathie dAchille"
+},
+{
+"id": 7,
+"condition_name": "Ernia del disco lombare con radicolopatia",
+"condition_keywords": "ernia discale, ernia del disco, ernia lombare, radicolopatia, sciatalgia, sciatica, lumbar disc herniation, disc herniation, radiculopathy, herniated disc, hernia discal, hernia de disco, radiculopati"
+},
+{
+"id": 8,
+"condition_name": "Spondilolisi (frattura da stress della pars interarticularis)",
+"condition_keywords": "spondilolisi, frattura da stress lombare, pars interarticularis, spondilolistesi, mal di schiena nellatleta giovane, spondylolysis, pars interarticularis stress fracture, spondylolisthesis, espondilol"
+},
+{
+"id": 9,
+"condition_name": "Spondilite anchilosante (spondiloartrite assiale)",
+"condition_keywords": "spondilite anchilosante, spondiloartrite assiale, morbo di Bechterew, rigidita mattutina infiammatoria, ankylosing spondylitis, axial spondyloarthritis,  axSpA, espondilitis anquilosante, espondiloart"
+},
+{
+"id": 10,
+"condition_name": "Artrosi della spalla (glenoomerale)",
+"condition_keywords": "artrosi spalla, artrosi della spalla, omartrosi, artrosi glenoomerale, glenohumeral osteoarthritis, shoulder osteoarthritis, GHOA, artrosis de hombro, artrosis glenohumeral, arthrose de lepaule, arthr"
+},
+{
+"id": 11,
+"condition_name": "Artrosi delle mani",
+"condition_keywords": "artrosi mani, artrosi mano, artrosi delle dita, rizoartrosi, artrosi trapezio-metacarpale, hand osteoarthritis, thumb base osteoarthritis, CMC osteoarthritis, artrosis de mano, artrosis de las manos, "
+},
+{
+"id": 12,
+"condition_name": "Artrosi di caviglia",
+"condition_keywords": "artrosi caviglia, artrosi della caviglia, artrosi tibiotarsica, ankle osteoarthritis, ankle OA, artrosis de tobillo, arthrose de la cheville"
+},
+{
+"id": 13,
+"condition_name": "Tendinite/tendinopatia del capo lungo del bicipite",
+"condition_keywords": "tendinite bicipite, tendinopatia bicipite, capo lungo del bicipite, tendinite del capo lungo del bicipite, biceps tendinitis, biceps tendinopathy, LHBT, long head biceps tendinopathy, bicipital tendin"
+},
+{
+"id": 14,
+"condition_name": "Epicondilite laterale (gomito del tennista)",
+"condition_keywords": "epicondilite, epicondilite laterale, gomito del tennista, epicondilalgia, tennis elbow, lateral epicondylitis, lateral epicondylalgia, lateral elbow tendinopathy, epicondilitis lateral, codo de tenist"
+},
+{
+"id": 15,
+"condition_name": "Epicondilite mediale (gomito del golfista)",
+"condition_keywords": "epitrocleite, epicondilite mediale, gomito del golfista, medial epicondylitis, golfers elbow, medial elbow tendinopathy, epicondilitis medial, codo de golfista, epicondylite mediale, coude du golfeur"
+},
+{
+"id": 16,
+"condition_name": "Fascite plantare",
+"condition_keywords": "fascite plantare,tallonite,dolore al tallone,plantar fasciitis,heel pain,fascitis plantar,dolor de talon,fasciite plantaire,douleur au talon"
+},
+{
+"id": 17,
+"condition_name": "Sindrome femoro-rotulea",
+"condition_keywords": "sindrome femoro-rotulea,dolore anteriore ginocchio,dolore rotuleo,patellofemoral pain,anterior knee pain,dolor femororrotuliano,dolor anterior de rodilla,syndrome femoro-patellaire,douleur anterieure "
+},
+{
+"id": 18,
+"condition_name": "Distorsione di caviglia laterale",
+"condition_keywords": "distorsione di caviglia,distorsione caviglia laterale,instabilita di caviglia,lateral ankle sprain,ankle sprain,chronic ankle instability,esguince de tobillo,esguince lateral de tobillo,entorse de che"
+},
+{
+"id": 19,
+"condition_name": "Capsulite adesiva (spalla congelata)",
+"condition_keywords": "capsulite adesiva,spalla congelata,adhesive capsulitis,frozen shoulder,capsulitis adhesiva,hombro congelado,capsulite retractile,epaule gelee"
+},
+{
+"id": 20,
+"condition_name": "Lesione muscolare degli ischiocrurali",
+"condition_keywords": "lesione ischiocrurali,stiramento bicipite femorale,strappo muscolare posteriore coscia,hamstring strain,hamstring injury,lesion de isquiotibiales,distension de isquiotibiales,lesion des ischio-jambier"
+},
+{
+"id": 21,
+"condition_name": "Pubalgia/dolore inguinale da adduttori",
+"condition_keywords": "pubalgia,dolore inguinale,dolore da adduttori,groin pain,adductor related groin pain,dolor inguinal,dolor de aductores,pubalgie,douleur inguinale,douleur des adducteurs"
+},
+{
+"id": 22,
+"condition_name": "Sindrome del tunnel carpale",
+"condition_keywords": "sindrome del tunnel carpale,tunnel carpale,carpal tunnel syndrome,sindrome del tunel carpiano,syndrome du canal carpien,formicolio mano,intorpidimento mano"
+},
+{
+"id": 23,
+"condition_name": "Tendinopatia rotulea (ginocchio del saltatore)",
+"condition_keywords": "tendinopatia rotulea,ginocchio del saltatore,jumper knee,patellar tendinopathy,tendinopatia patelar,rodilla del saltador,tendinopathie rotulienne,genou du sauteur"
+},
+{
+"id": 24,
+"condition_name": "Sindrome da stress tibiale mediale",
+"condition_keywords": "sindrome da stress tibiale,periostite tibiale,shin splints,medial tibial stress syndrome,dolore alla tibia,periostitis tibial,syndrome de stress tibial median,periostite"
+},
+{
+"id": 25,
+"condition_name": "Sindrome della bandelletta ileotibiale",
+"condition_keywords": "sindrome della bandelletta ileotibiale,ginocchio del corridore,iliotibial band syndrome,ITBS,dolore laterale al ginocchio,sindrome de la banda iliotibial,syndrome de la bandelette ileo-tibiale"
+},
+{
+"id": 26,
+"condition_name": "Tenosinovite di De Quervain",
+"condition_keywords": "tenosinovite di de quervain,malattia di de quervain,dolore al polso lato pollice,de quervain tenosynovitis,de quervain disease,tenosinovitis de de quervain,tenosynovite de de quervain"
+},
+{
+"id": 27,
+"condition_name": "Lesione degenerativa del menisco",
+"condition_keywords": "lesione degenerativa del menisco,menisco degenerativo,degenerative meniscus tear,meniscal tear,lesion degenerativa de menisco,lesion de menisco,lesion degenerative du menisque,dolore al ginocchio meni"
+},
+{
+"id": 28,
+"condition_name": "Radicolopatia cervicale",
+"condition_keywords": "radicolopatia cervicale,dolore cervicobrachiale,cervicobrachialgia,cervical radiculopathy,radiculopatia cervical,radiculopathie cervicale,dolore al braccio da collo,formicolio braccio da cervicale"
+},
+{
+"id": 29,
+"condition_name": "Instabilita di spalla (lussazione anteriore traumatica)",
+"condition_keywords": "instabilita di spalla,lussazione di spalla,lussazione anteriore di spalla,shoulder instability,shoulder dislocation,inestabilidad de hombro,luxacion de hombro,instabilite de epaule,luxation de epaule"
+},
+{
+"id": 30,
+"condition_name": "Sindrome del dolore trocanterico (tendinopatia glutea)",
+"condition_keywords": "sindrome del dolore trocanterico,tendinopatia glutea,borsite trocanterica,dolore laterale all'anca,greater trochanteric pain syndrome,gluteal tendinopathy,sindrome del dolor trocantereo,tendinopatia g"
+},
+{
+"id": 31,
+"condition_name": "Instabilita cronica di caviglia",
+"condition_keywords": "instabilita cronica di caviglia,cedimento di caviglia,chronic ankle instability,inestabilidad cronica de tobillo,instabilite chronique de cheville,caviglia che cede"
+},
+{
+"id": 32,
+"condition_name": "Sindrome del piriforme (deep gluteal syndrome)",
+"condition_keywords": "sindrome del piriforme,deep gluteal syndrome,sciatalgia da piriforme,piriformis syndrome,sindrome del piriforme profondo,syndrome du piriforme,sindrome piriforme"
+},
+{
+"id": 33,
+"condition_name": "Protesi totale di ginocchio (post-operatorio)",
+"condition_keywords": "protesi di ginocchio,protesi totale di ginocchio,artroplastica di ginocchio,total knee arthroplasty,protesis de rodilla,artroplastia de rodilla,prothese de genou,arthroplastie du genou"
+},
+{
+"id": 34,
+"condition_name": "Protesi totale anca (post-operatorio)",
+"condition_keywords": "protesi danca,protesi totale danca,artroplastica danca,total hip arthroplasty,protesis de cadera,artroplastia de cadera,prothese de hanche,arthroplastie de la hanche,protesi allanca,protesi anca,prote"
+},
+{
+"id": 35,
+"condition_name": "Protesi di spalla (totale/inversa, post-operatorio)",
+"condition_keywords": "protesi di spalla,protesi totale di spalla,protesi inversa di spalla,shoulder arthroplasty,reverse shoulder arthroplasty,RTSA,protesis de hombro,protesis inversa de hombro,prothese depaule,prothese in"
+},
+{
+"id": 37,
+"condition_name": "Protesi totale di caviglia (post-operatorio)",
+"condition_keywords": "protesi di caviglia,protesi totale di caviglia,artroplastica di caviglia,total ankle arthroplasty,protesis de tobillo,artroplastia de tobillo,prothese de cheville,arthroplastie de cheville"
+},
+{
+"id": 38,
+"condition_name": "Protesi totale di gomito (post-operatorio)",
+"condition_keywords": "protesi di gomito,protesi totale di gomito,artroplastica di gomito,total elbow arthroplasty,protesis de codo,artroplastia de codo,prothese de coude,arthroplastie du coude"
+},
+{
+"id": 39,
+"condition_name": "Asma (gestione dellesercizio)",
+"condition_keywords": "asma,broncocostrizione da sforzo,asma bronchiale,asthma,exercise induced bronchoconstriction,asma bronquial,broncoconstriccion inducida por ejercicio,asthme,bronchoconstriction induite par exercice"
+},
+{
+"id": 40,
+"condition_name": "Riabilitazione post-infarto miocardico",
+"condition_keywords": "infarto miocardico,infarto del miocardio,riabilitazione cardiaca,post infarto,myocardial infarction,cardiac rehabilitation,infarto de miocardio,rehabilitacion cardiaca,infarctus du myocarde,readaptati"
+},
+{
+"id": 42,
+"condition_name": "Riabilitazione post-ictus (recupero motorio)",
+"condition_keywords": "ictus,ictus cerebrale,riabilitazione post ictus,emiplegia,emiparesi,stroke,cerebrovascular accident,ictus cerebral,accidente cerebrovascular,accident vasculaire cerebral,hemiplegia,hemiparesia"
+},
+{
+"id": 43,
+"condition_name": "Miocardite (ritorno allattivita fisica)",
+"condition_keywords": "miocardite,infiammazione del miocardio,myocarditis,miocarditis,myocardite,ritorno allo sport post miocardite"
+},
+{
+"id": 45,
+"condition_name": "Stenosi spinale lombare con claudicatio neurogena",
+"condition_keywords": "stenosi spinale lombare,claudicatio neurogena,claudicazione neurogena,stenosi del canale lombare,lumbar spinal stenosis,neurogenic claudication,estenosis espinal lumbar,claudicacion neurogena,stenose "
+},
+{
+"id": 46,
+"condition_name": "Neuropatia periferica diabetica",
+"condition_keywords": "neuropatia periferica diabetica,neuropatia diabetica,polineuropatia diabetica,diabetic peripheral neuropathy,neuropatia periferica del diabete,neuropatia diabetica periferica,neuropathie diabetique pe"
+},
+{
+"id": 47,
+"condition_name": "Malattia di Osgood-Schlatter",
+"condition_keywords": "malattia di osgood-schlatter,osgood schlatter,apofisite tibiale,dolore anteriore ginocchio adolescente,osgood-schlatter disease,tibial tuberosity apophysitis,enfermedad de osgood-schlatter,maladie dos"
+},
+{
+"id": 48,
+"condition_name": "Frattura da stress tibiale",
+"condition_keywords": "frattura da stress tibiale,frattura da stress,stress fracture,bone stress injury,tibial stress fracture,fractura por estres tibial,fractura por estres,fracture de stress tibiale,fracture de fatigue"
+},
+{
+"id": 49,
+"condition_name": "Ipertensione arteriosa (gestione con esercizio)",
+"condition_keywords": "ipertensione,ipertensione arteriosa,pressione alta,pressione arteriosa alta,hypertension,high blood pressure,hipertension arterial,presion arterial alta,hypertension arterielle,tension arterielle elev"
+},
+{
+"id": 50,
+"condition_name": "Lesione acuta del menisco (traumatica)",
+"condition_keywords": "lesione acuta del menisco,lesione traumatica del menisco,rottura del menisco,menisco rotto,acute meniscus tear,traumatic meniscal tear,meniscal repair,lesion aguda de menisco,rotura traumatica de meni"
+},
+{
+"id": 51,
+"condition_name": "Colpo di frusta (whiplash-associated disorder)",
+"condition_keywords": "colpo di frusta,trauma da colpo di frusta,distorsione cervicale da trauma,whiplash,whiplash associated disorder,WAD,latigazo cervical,trauma cervical por latigazo,coup du lapin,traumatisme cervical"
+},
+{
+"id": 52,
+"condition_name": "Sindrome dello stretto toracico",
+"condition_keywords": "sindrome dello stretto toracico,sindrome dellopercolo toracico,thoracic outlet syndrome,TOS,sindrome del desfiladero toracico,syndrome de la traversee thoraco-brachiale,compressione neurovascolare tor"
+},
+{
+"id": 53,
+"condition_name": "Frattura di radio distale (post-frattura/post-operatoria)",
+"condition_keywords": "frattura di radio distale,frattura di polso,frattura di Colles,distal radius fracture,wrist fracture,Colles fracture,fractura de radio distal,fractura de muneca,fracture du radius distal,fracture du p"
+},
+{
+"id": 54,
+"condition_name": "Lesione del legamento collaterale mediale del ginocchio (LCM)",
+"condition_keywords": "lesione del legamento collaterale mediale,distorsione del LCM,lesione LCM ginocchio,medial collateral ligament injury,MCL sprain,MCL injury,lesion del ligamento colateral medial,esguince LCM,lesion du"
+},
+{
+"id": 55,
+"condition_name": "Sindrome del tunnel cubitale",
+"condition_keywords": "sindrome del tunnel cubitale,neuropatia ulnare al gomito,intrappolamento del nervo ulnare,cubital tunnel syndrome,ulnar nerve entrapment,ulnar neuropathy at the elbow,sindrome del tunel cubital,neurop"
+},
+{
+"id": 56,
+"condition_name": "Neuroma di Morton",
+"condition_keywords": "neuroma di Morton,neuroma interdigitale,metatarsalgia da neuroma,Morton neuroma,interdigital neuroma,plantar digital neuropathy,neuroma de Morton,neuroma interdigital,neurome de Morton,neurome interdi"
+},
+{
+"id": 57,
+"condition_name": "Instabilita/lussazione femoro-rotulea",
+"condition_keywords": "instabilita femoro-rotulea,lussazione di rotula,lussazione rotulea,instabilita rotulea,patellar dislocation,patellar instability,MPFL injury,luxacion de rotula,inestabilidad rotuliana,luxation de la r"
+},
+{
+"id": 58,
+"condition_name": "Sindrome del tunnel tarsale",
+"condition_keywords": "sindrome del tunnel tarsale,intrappolamento del nervo tibiale posteriore,tarsal tunnel syndrome,posterior tibial nerve entrapment,sindrome del tunel tarsiano,neuropatia del nervio tibial posterior,syn"
+},
+{
+"id": 59,
+"condition_name": "Retrazione di Dupuytren (post-chirurgica)",
+"condition_keywords": "retrazione di Dupuytren,morbo di Dupuytren,malattia di Dupuytren,Dupuytren contracture,Dupuytren disease,contractura de Dupuytren,enfermedad de Dupuytren,maladie de Dupuytren,retraction de Dupuytren"
+},
+{
+"id": 60,
+"condition_name": "Frattura d'anca (post-chirurgica, anziano)",
+"condition_keywords": "frattura d'anca,frattura del femore prossimale,frattura sottocapitata,frattura pertrocanterica,hip fracture,femoral neck fracture,fractura de cadera,fractura de femur proximal,fracture de la hanche,fr"
+},
+{
+"id": 62,
+"condition_name": "Piede torto congenito (PTC)",
+"condition_keywords": "piede torto congenito,PTC,piede equino varo supinato,piede talo vago,piede metatarso varo,clubfoot,congenital talipes equinovarus,CTEV,pie zambo congenito,pie equino varo,pied bot congenital,pied varu"
+},
+{
+"id": 63,
+"condition_name": "Frattura di bacino/acetabolo (post-chirurgica)",
+"condition_keywords": "frattura di bacino,frattura acetabolare,frattura del bacino,pelvic fracture,acetabular fracture,fractura de pelvis,fractura acetabular,fracture du bassin,fracture acetabulaire"
+},
+{
+"id": 64,
+"condition_name": "Frattura dello scafoide",
+"condition_keywords": "frattura dello scafoide,frattura scafoide carpale,scaphoid fracture,fractura de escafoides,fracture du scaphoide,dolore tabacchiera anatomica"
+},
+{
+"id": 65,
+"condition_name": "Displasia congenita dellanca (DCA)",
+"condition_keywords": "displasia congenita dell'anca,DCA,displasia dell'anca,lussazione congenita danca,developmental dysplasia of the hip,DDH,displasia congenita de cadera,dysplasie congenitale de la hanche,displasia evolu"
+},
+{
+"id": 66,
+"condition_name": "Cadute nellanziano (prevenzione e gestione)",
+"condition_keywords": "cadute nellanziano,prevenzione delle cadute,rischio di caduta,falls prevention,fall risk elderly,caidas en el anciano,prevencion de caidas,chutes chez la personne agee,prevention des chutes"
+},
+{
+"id": 67,
+"condition_name": "Lesione del midollo spinale (fase riabilitativa)",
+"condition_keywords": "lesione del midollo spinale,lesione midollare,paraplegia,tetraplegia,spinal cord injury,SCI,lesion medular,lesion de la medula espinal,lesion medullaire,paraplegie,tetraplegie"
+},
+{
+"id": 68,
+"condition_name": "Rottura completa del tendine d'Achille",
+"condition_keywords": "rottura del tendine d'achille,rottura achillea,lesione completa achillea,acute Achilles tendon rupture,Achilles tear,rotura del tendon de Aquiles,rupture du tendon d'Achille"
+},
+{
+"id": 69,
+"condition_name": "Alluce valgo",
+"condition_keywords": "alluce valgo,deformita dellalluce,hallux valgus,bunion,juanete,hallux valgus deformity,oignon du pied"
+},
+{
+"id": 70,
+"condition_name": "Sclerosi multipla (gestione con esercizio)",
+"condition_keywords": "sclerosi multipla,SM,multiple sclerosis,MS,esclerosis multiple,sclerose en plaques"
+},
+{
+"id": 71,
+"condition_name": "Sindrome di Guillain-Barre",
+"condition_keywords": "sindrome di Guillain-Barre,polineuropatia infiammatoria acuta,Guillain-Barre syndrome,GBS,sindrome de Guillain-Barre,syndrome de Guillain-Barre"
+},
+{
+"id": 72,
+"condition_name": "Miastenia gravis (gestione con esercizio)",
+"condition_keywords": "miastenia gravis,miastenia,myasthenia gravis,MG,miastenia grave,myasthenie"
+},
+{
+"id": 73,
+"condition_name": "Piaghe da decubito (prevenzione e gestione)",
+"condition_keywords": "piaghe da decubito,lesioni da pressione,ulcere da decubito,pressure ulcer,pressure injury,bedsore,ulcera por presion,escara,escarre,ulcere de pression"
+},
+{
+"id": 74,
+"condition_name": "Sindrome da conflitto femoro-acetabolare (FAI)",
+"condition_keywords": "sindrome da conflitto femoro-acetabolare,conflitto femoro-acetabolare,FAI,femoroacetabular impingement,FAI syndrome,pinzamiento femoroacetabular,conflit femoro-acetabulaire"
+},
+{
+"id": 75,
+"condition_name": "Lesione SLAP (labbro glenoideo superiore)",
+"condition_keywords": "lesione SLAP,lesione del labbro glenoideo,SLAP lesion,superior labrum tear,superior labral tear,lesion SLAP,lesion del labrum glenoideo,lesion du bourrelet glenoidien"
+},
+{
+"id": 76,
+"condition_name": "Dito a scatto (tenosinovite stenosante)",
+"condition_keywords": "dito a scatto,tenosinovite stenosante,pollice a scatto,trigger finger,stenosing tenosynovitis,trigger thumb,dedo en gatillo,tenosinovitis estenosante,doigt a ressort,tenosynovite stenosante"
+},
+{
+"id": 77,
+"condition_name": "Meralgia parestesica",
+"condition_keywords": "meralgia parestesica,sindrome di Bernhardt-Roth,intrappolamento del nervo femorocutaneo laterale,meralgia paresthetica,lateral femoral cutaneous nerve entrapment,meralgia parestesica,meralgie paresthe"
+},
+{
+"id": 78,
+"condition_name": "Cisti di Baker (cisti poplitea)",
+"condition_keywords": "cisti di Baker,cisti poplitea,Baker cyst,popliteal cyst,quiste de Baker,quiste popliteo,kyste de Baker,kyste poplite"
+},
+{
+"id": 80,
+"condition_name": "Poliradicoloneuropatia infiammatoria demielinizzante cronica (CIDP)",
+"condition_keywords": "CIDP,poliradicoloneuropatia infiammatoria cronica,polineuropatia demielinizzante cronica,chronic inflammatory demyelinating polyneuropathy,polirradiculoneuropatia desmielinizante inflamatoria cronica,"
+},
+{
+"id": 81,
+"condition_name": "Epilessia (gestione dellesercizio in sicurezza)",
+"condition_keywords": "epilessia,crisi epilettica,crisi convulsiva,epilepsy,seizure disorder,epilepsia,crisis epileptica,epilepsie,crise epileptique"
+},
+{
+"id": 82,
+"condition_name": "Cefalea cervicogenica",
+"condition_keywords": "cefalea cervicogenica,mal di testa cervicogenico,cervicogenic headache,cervicogenic headaches,cefalea cervicogenica,cephalee cervicogenique,mal de tete cervicogenique"
+},
+{
+"id": 83,
+"condition_name": "Insufficienza cardiaca (gestione con esercizio)",
+"condition_keywords": "insufficienza cardiaca,scompenso cardiaco,heart failure,cardiac insufficiency,insuficiencia cardiaca,insuffisance cardiaque"
+},
+{
+"id": 84,
+"condition_name": "Riabilitazione post-chirurgia toracica (resezione polmonare)",
+"condition_keywords": "chirurgia toracica,resezione polmonare,lobectomia,pneumonectomia,VATS,post-thoracic surgery,lung resection,cirugia toracica,reseccion pulmonar,chirurgie thoracique,resection pulmonaire"
+},
+{
+"id": 85,
+"condition_name": "Ictus ischemico (fase acuta/subacuta)",
+"condition_keywords": "ictus ischemico,stroke ischemico,infarto cerebrale,ictus acuto,fase acuta ictus"
+},
+{
+"id": 86,
+"condition_name": "Ictus emorragico (emorragia cerebrale)",
+"condition_keywords": "ictus emorragico,emorragia cerebrale,emorragia intraparenchimale,stroke emorragico"
+},
+{
+"id": 87,
+"condition_name": "Attacco ischemico transitorio (TIA)",
+"condition_keywords": "TIA,attacco ischemico transitorio,mini ictus,ischemia cerebrale transitoria"
+},
+{
+"id": 88,
+"condition_name": "Malattia di Parkinson",
+"condition_keywords": "parkinson,malattia di parkinson,morbo di parkinson,parkinsonismo idiopatico"
+},
+{
+"id": 89,
+"condition_name": "Malattia di Alzheimer",
+"condition_keywords": "alzheimer,malattia di alzheimer,demenza di alzheimer,decadimento cognitivo alzheimer"
+},
+{
+"id": 90,
+"condition_name": "Demenza vascolare",
+"condition_keywords": "demenza vascolare,demenza multinfartuale,decadimento cognitivo vascolare"
+},
+{
+"id": 91,
+"condition_name": "Demenza frontotemporale",
+"condition_keywords": "demenza frontotemporale,degenerazione lobare frontotemporale,FTD"
+},
+{
+"id": 92,
+"condition_name": "Atassia cerebellare",
+"condition_keywords": "atassia cerebellare,atassia,disturbi cerebellari,sindrome atassica"
+},
+{
+"id": 93,
+"condition_name": "Sindrome del tronco encefalico (es. sindrome di Wallenberg)",
+"condition_keywords": "sindrome del tronco encefalico,sindrome di wallenberg,ictus del tronco encefalico,sindrome bulbare laterale"
+},
+{
+"id": 94,
+"condition_name": "Sclerosi laterale amiotrofica (SLA)",
+"condition_keywords": "sla,sclerosi laterale amiotrofica,malattia del motoneurone,ALS"
+},
+{
+"id": 95,
+"condition_name": "Mielopatia cervicale spondilotica",
+"condition_keywords": "mielopatia cervicale spondilotica,mielopatia cervicale,stenosi cervicale con mielopatia"
+},
+{
+"id": 96,
+"condition_name": "Spasticità (sindrome del motoneurone superiore)",
+"condition_keywords": "spasticità,sindrome del motoneurone superiore,ipertono spastico,SMNS,upper motor neuron syndrome"
+},
+{
+"id": 97,
+"condition_name": "Rischio di caduta nell'anziano",
+"condition_keywords": "caduta,rischio di caduta,cadute anziano,prevenzione cadute,fall risk"
+},
+{
+"id": 98,
+"condition_name": "Sarcopenia",
+"condition_keywords": "sarcopenia,perdita massa muscolare,riduzione forza muscolare anziano"
+},
+{
+"id": 99,
+"condition_name": "Paralisi del nervo faciale (centrale vs periferica)",
+"condition_keywords": "paralisi facciale,paresi facciale,nervo faciale,paralisi di Bell,paresi centrale periferica"
+},
+{
+"id": 100,
+"condition_name": "Sindromi midollari da trauma vertebro-spinale",
+"condition_keywords": "sindrome midollare,trauma spinale,Brown-Sequard,sindrome del cordone anteriore,sindrome del cordone centrale,cauda equina,lesione midollare"
+},
+{
+"id": 101,
+"condition_name": "Incontinenza Urinaria da Sforzo (Stress Urinary Incontinence)",
+"condition_keywords": "incontinenza da sforzo,SUI,perdita urina tosse,perdita urina starnuto,ipermobilità uretrale"
+},
+{
+"id": 102,
+"condition_name": "Incontinenza Urinaria da Urgenza / Vescica Iperattiva (Urge Incontinence / OAB)",
+"condition_keywords": "incontinenza da urgenza,vescica iperattiva,OAB,urgenza minzionale,iperattività detrusoriale"
+},
+{
+"id": 103,
+"condition_name": "Vescica Neurologica Iper-riflessica con Dissinergia Vescico-Sfinterica",
+"condition_keywords": "vescica neurologica,iper-reflessia detrusoriale,dissinergia detrusore sfintere,DSD,mielolesione,lesione sopra sacrale"
+},
+{
+"id": 104,
+"condition_name": "Sindrome della Vescica Dolorosa / Cistite Interstiziale (Bladder Pain Syndrome, BPS)",
+"condition_keywords": "cistite interstiziale,BPS,sindrome vescica dolorosa,dolore vescicale cronico,deficit GAG"
+},
+{
+"id": 105,
+"condition_name": "Ritenzione Urinaria (Acuta e Cronica)",
+"condition_keywords": "ritenzione urinaria,globo vescicale,vescica ipoattiva,areflessia detrusoriale"
+},
+{
+"id": 106,
+"condition_name": "Enuresi Notturna (Primaria e Secondaria)",
+"condition_keywords": "enuresi notturna,pipì a letto,incontinenza notturna infantile,bagnare il letto"
+},
+{
+"id": 107,
+"condition_name": "Poliuria e Nicturia (Diagnosi Differenziale)",
+"condition_keywords": "poliuria,nicturia,eccessiva produzione urina,risveglio notturno per urinare"
+},
+{
+"id": 108,
+"condition_name": "Coccigodinia",
+"condition_keywords": "coccigodinia,dolore coccige,dolore osso sacro"
+},
+{
+"id": 109,
+"condition_name": "Sindrome dell'Elevatore dell'Ano",
+"condition_keywords": "sindrome elevatore ano,dolore anorettale,spasmo elevatore ano"
+},
+{
+"id": 110,
+"condition_name": "Dolore Pelvico Cronico (Classificazione EAU)",
+"condition_keywords": "dolore pelvico cronico,CPP,dolore pelvico persistente"
+},
+{
+"id": 111,
+"condition_name": "Neuropatia del Nervo Pudendo",
+"condition_keywords": "neuropatia pudendo,nevralgia pudendo,intrappolamento nervo pudendo"
+},
+{
+"id": 113,
+"condition_name": "Vulvodinia",
+"condition_keywords": "vulvodinia,dolore vulvare cronico,dolore vestibolare"
+},
+{
+"id": 114,
+"condition_name": "Scompenso Cardiaco Cronico",
+"condition_keywords": "scompenso cardiaco, insufficienza cardiaca, heart failure, FE ridotta, riabilitazione cardiaca"
+},
+{
+"id": 115,
+"condition_name": "Cardiopatia Ischemica e Post-Infarto del Miocardio",
+"condition_keywords": "infarto miocardico, cardiopatia ischemica, coronaropatia, sindrome coronarica acuta, post-IMA"
+},
+{
+"id": 116,
+"condition_name": "Riabilitazione Post-Cardiochirurgia (Sternotomia Mediana)",
+"condition_keywords": "post cardiochirurgia, bypass coronarico, CABG, sternotomia, chirurgia valvolare, post-operatorio cardiaco"
+},
+{
+"id": 117,
+"condition_name": "Broncopneumopatia Cronica Ostruttiva (BPCO)",
+"condition_keywords": "BPCO, COPD, malattia polmonare ostruttiva cronica, enfisema, bronchite cronica,EPOC,enfisema pulmonar,mpoc,malattia polmonare ostruttiva cronica"
+},
+{
+"id": 118,
+"condition_name": "Fibrosi Cistica",
+"condition_keywords": "fibrosi cistica, cystic fibrosis, malattia polmonare genetica, disostruzione bronchiale"
+},
+{
+"id": 119,
+"condition_name": "Iperplasia Prostatica Benigna (IPB) con Sintomi delle Basse Vie Urinarie",
+"condition_keywords": null
+},
+{
+"id": 120,
+"condition_name": "Vescica Neurologica Areflessica (Underactive Bladder)",
+"condition_keywords": null
+},
+{
+"id": 121,
+"condition_name": "Incontinenza da Overflow (Iscuria Paradossa)",
+"condition_keywords": null
+},
+{
+"id": 122,
+"condition_name": "Neuralgia Ileo-Inguinale",
+"condition_keywords": null
+},
+{
+"id": 124,
+"condition_name": "Vescica Iperattiva Neurogena Sopra-pontina (con Sinergia Vescico-Sfinterica Mantenuta)",
+"condition_keywords": null
+},
+{
+"id": 125,
+"condition_name": "Lesione del Legamento Crociato Posteriore (LCP)",
+"condition_keywords": null
+},
+{
+"id": 126,
+"condition_name": "Lesione del Legamento Collaterale Laterale (LCL) e dell'Angolo Postero-Laterale",
+"condition_keywords": null
+},
+{
+"id": 128,
+"condition_name": "Rottura del Tendine Rotuleo (Acuta)",
+"condition_keywords": null
+},
+{
+"id": 129,
+"condition_name": "Malattia di Sinding-Larsen-Johansson",
+"condition_keywords": null
+},
+{
+"id": 130,
+"condition_name": "Tendinopatia del Quadricipite",
+"condition_keywords": null
+},
+{
+"id": 131,
+"condition_name": "Impingement/Irritazione del Corpo Adiposo di Hoffa",
+"condition_keywords": null
+},
+{
+"id": 132,
+"condition_name": "Plica Sinoviale Sintomatica",
+"condition_keywords": null
+},
+{
+"id": 133,
+"condition_name": "Borsite del Ginocchio (Prepatellare e Infrapatellare)",
+"condition_keywords": null
+},
+{
+"id": 134,
+"condition_name": "Tendinopatia del Bicipite Femorale (Inserzione Distale)",
+"condition_keywords": null
+},
+{
+"id": 135,
+"condition_name": "Tendinopatia del Popliteo",
+"condition_keywords": null
+},
+{
+"id": 136,
+"condition_name": "Lesioni Condrali Focali (Danno alla Cartilagine Articolare)",
+"condition_keywords": null
+},
+{
+"id": 137,
+"condition_name": "Instabilita Multidirezionale Atraumatica di Spalla (AMBRI)",
+"condition_keywords": null
+},
+{
+"id": 138,
+"condition_name": "Deficit di Rotazione Interna Gleno-Omerale (GIRD)",
+"condition_keywords": null
+},
+{
+"id": 141,
+"condition_name": "Lesioni dell'Articolazione Acromion-Claveare (Acute e Croniche)",
+"condition_keywords": null
+},
+{
+"id": 143,
+"condition_name": "Neuropatie da Intrappolamento della Spalla (Nervo Soprascapolare, Stretto Toracico, Spazio Quadrilatero)",
+"condition_keywords": null
+},
+{
+"id": 144,
+"condition_name": "Lesione del Labbro Acetabolare",
+"condition_keywords": null
+},
+{
+"id": 145,
+"condition_name": "Instabilita dell'Anca",
+"condition_keywords": null
+},
+{
+"id": 146,
+"condition_name": "Sindrome da Conflitto Ischio-Femorale",
+"condition_keywords": null
+},
+{
+"id": 147,
+"condition_name": "Frattura da Stress del Collo Femorale",
+"condition_keywords": null
+},
+{
+"id": 148,
+"condition_name": "Disfunzione dell'Articolazione Sacroiliaca",
+"condition_keywords": null
+},
+{
+"id": 149,
+"condition_name": "Dolore Inguinale di Origine Adduttoria (Adductor-Related Groin Pain)",
+"condition_keywords": null
+},
+{
+"id": 150,
+"condition_name": "Dolore Inguinale di Origine Ileopsoas (Iliopsoas-Related Groin Pain)",
+"condition_keywords": null
+},
+{
+"id": 151,
+"condition_name": "Dolore Inguinale di Origine Pubica / Osteite Pubica (Pubic-Related Groin Pain)",
+"condition_keywords": null
+},
+{
+"id": 152,
+"condition_name": "Dolore Inguinale di Origine Inguinale/Parete Posteriore (\"Sportsman's Hernia\")",
+"condition_keywords": null
+},
+{
+"id": 153,
+"condition_name": "Lesione della Sindesmosi Tibio-Fibulare (Distorsione Alta di Caviglia)",
+"condition_keywords": null
+},
+{
+"id": 154,
+"condition_name": "Frattura di Maisonneuve",
+"condition_keywords": null
+},
+{
+"id": 155,
+"condition_name": "Lesione Osteocondrale della Cupola Talare",
+"condition_keywords": null
+},
+{
+"id": 156,
+"condition_name": "Sindrome del Seno del Tarso",
+"condition_keywords": null
+},
+{
+"id": 159,
+"condition_name": "Impingement Anteriore/Antero-laterale della Caviglia",
+"condition_keywords": null
+},
+{
+"id": 160,
+"condition_name": "Sindrome Dolorosa Regionale Complessa Tipo 1 (CRPS)",
+"condition_keywords": null
+},
+{
+"id": 161,
+"condition_name": "Tendinopatia del Tibiale Posteriore",
+"condition_keywords": null
+},
+{
+"id": 162,
+"condition_name": "Tendinopatia dei Peronei",
+"condition_keywords": null
+},
+{
+"id": 163,
+"condition_name": "Tendinopatia del Flessore Lungo dell'Alluce (FHL)",
+"condition_keywords": null
+},
+{
+"id": 164,
+"condition_name": "Frattura da Avulsione vs Frattura di Jones (Base del Quinto Metatarso)",
+"condition_keywords": null
+},
+{
+"id": 165,
+"condition_name": "Frattura da Stress Navicolare",
+"condition_keywords": null
+},
+{
+"id": 166,
+"condition_name": "Lesioni dell'Articolazione di Lisfranc (Tarso-Metatarsale)",
+"condition_keywords": null
+},
+{
+"id": 167,
+"condition_name": "Turf Toe (Distorsione della Prima Articolazione Metatarso-Falangea)",
+"condition_keywords": null
+},
+{
+"id": 168,
+"condition_name": "Contusione del Cuscinetto Adiposo Plantare",
+"condition_keywords": null
+},
+{
+"id": 169,
+"condition_name": "Tendinopatia del Tibiale Anteriore",
+"condition_keywords": null
+},
+{
+"id": 170,
+"condition_name": "Impingement Posteriore della Caviglia",
+"condition_keywords": null
+},
+{
+"id": 171,
+"condition_name": "Lesione del Legamento Deltoideo (Mediale) di Caviglia",
+"condition_keywords": null
+},
+{
+"id": 172,
+"condition_name": "Frattura da Stress dell'Astragalo",
+"condition_keywords": null
+},
+{
+"id": 173,
+"condition_name": "Frattura da Stress del Calcagno",
+"condition_keywords": null
+},
+{
+"id": 174,
+"condition_name": "Frattura da Stress Malleolare Mediale",
+"condition_keywords": null
+},
+{
+"id": 175,
+"condition_name": "Hallux Limitus/Rigidus",
+"condition_keywords": null
+},
+{
+"id": 176,
+"condition_name": "Intrappolamento del Primo Ramo del Nervo Plantare Laterale (Nervo di Baxter)",
+"condition_keywords": null
+},
+{
+"id": 177,
+"condition_name": "Intrappolamento del Nervo Calcaneale Mediale",
+"condition_keywords": null
+},
+{
+"id": 178,
+"condition_name": "Sinovite dell'Articolazione Metatarso-Falangea (Metatarsalgia da Sovraccarico)",
+"condition_keywords": null
+},
+{
+"id": 179,
+"condition_name": "Distorsione/Lesione del Legamento Collaterale Mediale del Gomito",
+"condition_keywords": null
+},
+{
+"id": 180,
+"condition_name": "Borsite Olecranica",
+"condition_keywords": null
+},
+{
+"id": 181,
+"condition_name": "Tendinopatia del Tricipite",
+"condition_keywords": null
+},
+{
+"id": 182,
+"condition_name": "Impingement Posteriore del Gomito (Valgus Extension Overload)",
+"condition_keywords": null
+},
+{
+"id": 183,
+"condition_name": "Lussazione Posteriore del Gomito",
+"condition_keywords": null
+},
+{
+"id": 184,
+"condition_name": "Rottura del Tendine del Bicipite Distale",
+"condition_keywords": null
+},
+{
+"id": 187,
+"condition_name": "Sindrome del Tunnel Radiale (Intrappolamento del Nervo Interosseo Posteriore)",
+"condition_keywords": null
+},
+{
+"id": 188,
+"condition_name": "Sindrome del Pronatore Rotondo (Intrappolamento del Nervo Mediano)",
+"condition_keywords": null
+},
+{
+"id": 189,
+"condition_name": "Lesioni da Iperestensione del Gomito",
+"condition_keywords": null
+},
+{
+"id": 190,
+"condition_name": "Sindrome Compartimentale Acuta dell'Avambraccio",
+"condition_keywords": null
+},
+{
+"id": 191,
+"condition_name": "Lesione del Complesso Fibrocartilagineo Triangolare (TFCC)",
+"condition_keywords": null
+},
+{
+"id": 192,
+"condition_name": "Instabilita Radio-Ulnare Distale (DRUJ)",
+"condition_keywords": null
+},
+{
+"id": 195,
+"condition_name": "Dissociazione Scafo-Lunata",
+"condition_keywords": null
+},
+{
+"id": 196,
+"condition_name": "Malattia di Kienbock (Necrosi Avascolare del Semilunare)",
+"condition_keywords": null
+},
+{
+"id": 197,
+"condition_name": "Cisti Gangliari del Polso",
+"condition_keywords": null
+},
+{
+"id": 198,
+"condition_name": "Sindrome da Intersezione",
+"condition_keywords": null
+},
+{
+"id": 199,
+"condition_name": "Compressione del Nervo Radiale Sensitivo (Sindrome di Wartenberg)",
+"condition_keywords": null
+},
+{
+"id": 200,
+"condition_name": "Compressione del Nervo Ulnare al Canale di Guyon",
+"condition_keywords": null
+},
+{
+"id": 201,
+"condition_name": "Lesione del Legamento Collaterale Ulnare del Pollice (\"Skier's Thumb\" / \"Gamekeeper's Thumb\")",
+"condition_keywords": null
+},
+{
+"id": 202,
+"condition_name": "Dito a Martello (Mallet Finger)",
+"condition_keywords": null
+},
+{
+"id": 203,
+"condition_name": "Deformita a Boutonniere e a Collo di Cigno",
+"condition_keywords": null
+},
+{
+"id": 204,
+"condition_name": "Jersey Finger (Avulsione del Tendine Flessore Profondo delle Dita)",
+"condition_keywords": null
+},
+{
+"id": 205,
+"condition_name": "Fratture Metacarpali (Incluso \"Boxer's Fracture\")",
+"condition_keywords": null
+},
+{
+"id": 206,
+"condition_name": "Lussazioni delle Articolazioni Interfalangee (PIP e DIP)",
+"condition_keywords": null
+},
+{
+"id": 209,
+"condition_name": "Contusione del Quadricipite (con Rischio di Miosite Ossificante)",
+"condition_keywords": null
+},
+{
+"id": 210,
+"condition_name": "Stiramento Prossimale del Retto Femorale",
+"condition_keywords": null
+},
+{
+"id": 211,
+"condition_name": "Stiramento del Quadricipite Distale",
+"condition_keywords": null
+},
+{
+"id": 212,
+"condition_name": "Dolore Riferito alla Coscia Posteriore (Diagnosi Differenziale)",
+"condition_keywords": null
+},
+{
+"id": 213,
+"condition_name": "Frattura da Stress della Corteccia Anteriore della Tibia",
+"condition_keywords": null
+},
+{
+"id": 215,
+"condition_name": "Stiramento del Gastrocnemio (\"Tennis Leg\")",
+"condition_keywords": null
+},
+{
+"id": 216,
+"condition_name": "Stiramento del Soleo",
+"condition_keywords": null
+},
+{
+"id": 217,
+"condition_name": "Dolore al Polpaccio di Tipo Claudicante (Diagnosi Differenziale Vascolare)",
+"condition_keywords": null
+},
+{
+"id": 218,
+"condition_name": "Frattura da Stress del Perone",
+"condition_keywords": null
+},
+{
+"id": 229,
+"condition_name": "Torcicollo Acuto (Acute Wry Neck)",
+"condition_keywords": null
+},
+{
+"id": 230,
+"condition_name": "Spondilolistesi",
+"condition_keywords": null
+},
+{
+"id": 231,
+"condition_name": "Edema dell'Endpiatto Vertebrale (Modic Type 1)",
+"condition_keywords": null
+},
+{
+"id": 232,
+"condition_name": "Dolore Miofasciale del Gluteo",
+"condition_keywords": null
+},
+{
+"id": 233,
+"condition_name": "Rottura Completa del Tendine Prossimale degli Ischiocrurali",
+"condition_keywords": null
+},
+{
+"id": 234,
+"condition_name": "Frattura da Avulsione della Tuberosita Ischiatica",
+"condition_keywords": null
+},
+{
+"id": 235,
+"condition_name": "Sindrome Compartimentale della Coscia Posteriore",
+"condition_keywords": null
+},
+{
+"id": 237,
+"condition_name": "Disturbi Meccanici della Colonna Toracica (Articolazioni Intervertebrali e Costovertebrali)",
+"condition_keywords": null
+},
+{
+"id": 238,
+"condition_name": "Sindrome T4",
+"condition_keywords": null
+},
+{
+"id": 239,
+"condition_name": "Prolasso del Disco Intervertebrale Toracico",
+"condition_keywords": null
+},
+{
+"id": 241,
+"condition_name": "Trauma Costale (Contusione e Frattura)",
+"condition_keywords": null
+},
+{
+"id": 242,
+"condition_name": "Frattura da Stress delle Coste",
+"condition_keywords": null
+},
+{
+"id": 243,
+"condition_name": "Side Strain (Lesione dell'Obliquo Interno)",
+"condition_keywords": null
+},
+{
+"id": 244,
+"condition_name": "Problemi dell'Articolazione Sternoclaveare",
+"condition_keywords": null
+},
+{
+"id": 245,
+"condition_name": "Fratture Acute del Gomito (Radio Prossimale, Olecrano, Sovracondiloidea)",
+"condition_keywords": null
+},
+{
+"id": 246,
+"condition_name": "Rottura Acuta Completa del Legamento Collaterale Mediale del Gomito",
+"condition_keywords": null
+},
+{
+"id": 247,
+"condition_name": "Fratture dell'Avambraccio (Acute e da Stress)",
+"condition_keywords": null
+},
+{
+"id": 248,
+"condition_name": "Reazione da Stress dell'Omero Prossimale (Little League Shoulder)",
+"condition_keywords": null
+},
+{
+"id": 249,
+"condition_name": "Dolore Miofasciale del Braccio (Bicipite/Tricipite)",
+"condition_keywords": null
+},
+{
+"id": 250,
+"condition_name": "Rottura del Grande Pettorale",
+"condition_keywords": null
+},
+{
+"id": 251,
+"condition_name": "Scapola a Scatto (Snapping Scapula Syndrome)",
+"condition_keywords": null
+},
+{
+"id": 252,
+"condition_name": "Frattura dell'Omero Prossimale (Acuta)",
+"condition_keywords": null
+},
+{
+"id": 253,
+"condition_name": "Instabilita Acquisita Sport-Specifica di Spalla (AIOS)",
+"condition_keywords": null
+},
+{
+"id": 254,
+"condition_name": "Frattura da Stress del Sacro",
+"condition_keywords": null
+},
+{
+"id": 255,
+"condition_name": "Dolore alla Cresta Iliaca",
+"condition_keywords": null
+},
+{
+"id": 256,
+"condition_name": "Lesione Epifisaria Radiale Distale (\"Gymnast's Wrist\")",
+"condition_keywords": null
+},
+{
+"id": 257,
+"condition_name": "Fratture delle Falangi (Prossimale, Media, Distale)",
+"condition_keywords": null
+},
+{
+"id": 260,
+"condition_name": "Frattura della Rotula",
+"condition_keywords": null
+},
+{
+"id": 261,
+"condition_name": "Frattura del Piatto Tibiale",
+"condition_keywords": null
+},
+{
+"id": 262,
+"condition_name": "Lesione del Legamento Rotondo dell'Anca",
+"condition_keywords": null
+},
+{
+"id": 263,
+"condition_name": "Avulsione Completa degli Adduttori",
+"condition_keywords": null
+},
+{
+"id": 264,
+"condition_name": "Neuropatia Otturatoria da Intrappolamento",
+"condition_keywords": null
+},
+{
+"id": 265,
+"condition_name": "Frattura da Stress del Ramo Ischio-Pubico",
+"condition_keywords": null
+},
+{
+"id": 266,
+"condition_name": "Distorsione dell'Articolazione Mediotarsica",
+"condition_keywords": null
+},
+{
+"id": 267,
+"condition_name": "Lesioni Sesamoidee (Sesamoidite e Frattura)",
+"condition_keywords": null
+},
+{
+"id": 268,
+"condition_name": "Rottura Acuta della Fascia Plantare",
+"condition_keywords": null
+},
+{
+"id": 270,
+"condition_name": "Sindrome Post-Commotiva Persistente (\"Commozione Difficile\")",
+"condition_keywords": null
+},
+{
+"id": 272,
+"condition_name": "Afasia Post-Ictus",
+"condition_keywords": null
+},
+{
+"id": 273,
+"condition_name": "Disfagia Post-Ictus (Disturbi della Deglutizione)",
+"condition_keywords": null
+},
+{
+"id": 274,
+"condition_name": "Disfunzione Intestinale Neurogena (Neurogenic Bowel)",
+"condition_keywords": null
+},
+{
+"id": 275,
+"condition_name": "Disfunzione Sessuale Dopo Danno Neurologico",
+"condition_keywords": null
+},
+{
+"id": 276,
+"condition_name": "Riabilitazione Cognitiva Dopo Danno Cerebrale (Trauma Cranico/Ictus)",
+"condition_keywords": null
+},
+{
+"id": 277,
+"condition_name": "Trauma Cranico Traumatico (TBI Moderato-Severo)",
+"condition_keywords": null
+},
+{
+"id": 278,
+"condition_name": "Pianto e Riso Patologico (Pseudobulbar Affect, PBA)",
+"condition_keywords": null
+},
+{
+"id": 279,
+"condition_name": "Iperattivita Simpatica Parossistica (Paroxysmal Sympathetic Hyperactivity, PSH)",
+"condition_keywords": null
+},
+{
+"id": 281,
+"condition_name": "Disturbo Funzionale Neurologico (FND) - Variante Motoria",
+"condition_keywords": null
+},
+{
+"id": 282,
+"condition_name": "Malattia di Charcot-Marie-Tooth (CMT)",
+"condition_keywords": null
+},
+{
+"id": 284,
+"condition_name": "Neuropatia Periferica da Chemioterapia (CIPN)",
+"condition_keywords": null
+},
+{
+"id": 285,
+"condition_name": "Riabilitazione Neuropalliativa nelle Malattie Neurologiche Progressive",
+"condition_keywords": null
+},
+{
+"id": 286,
+"condition_name": "Vertigine Parossistica Posizionale Benigna (VPPB)",
+"condition_keywords": null
+},
+{
+"id": 287,
+"condition_name": "Ipofunzione Vestibolare (Uni/Bilaterale)",
+"condition_keywords": null
+},
+{
+"id": 288,
+"condition_name": "Nevralgia del Trigemino",
+"condition_keywords": null
+},
+{
+"id": 290,
+"condition_name": "Lesione del Nervo Accessorio Spinale (Paralisi del Trapezio)",
+"condition_keywords": null
+},
+{
+"id": 291,
+"condition_name": "Lesione del Nervo Peroneo Comune (Piede Cadente)",
+"condition_keywords": null
+},
+{
+"id": 292,
+"condition_name": "Lesione del Nervo Toracico Lungo (Scapola Alata Mediale)",
+"condition_keywords": null
+},
+{
+"id": 293,
+"condition_name": "Nevralgia del Nervo Safeno",
+"condition_keywords": null
+},
+{
+"id": 294,
+"condition_name": "Sindrome dello Spazio Gluteo Profondo (Deep Gluteal Syndrome, DGS)",
+"condition_keywords": null
+},
+{
+"id": 295,
+"condition_name": "Sindrome di Parsonage-Turner (Amiotrofia Nevralgica)",
+"condition_keywords": null
+},
+{
+"id": 296,
+"condition_name": "Neuropatia del Nervo Femorale",
+"condition_keywords": null
+},
+{
+"id": 297,
+"condition_name": "Lesione/Intrappolamento del Nervo Muscolocutaneo",
+"condition_keywords": null
+},
+{
+"id": 298,
+"condition_name": "Amiotrofia Diabetica (Sindrome di Bruns-Garland, Plessopatia Lombosacrale Diabetica)",
+"condition_keywords": null
+},
+{
+"id": 299,
+"condition_name": "Sindrome del Nervo Interosseo Anteriore (Kiloh-Nevin)",
+"condition_keywords": null
+},
+{
+"id": 300,
+"condition_name": "Plessopatia da Radiazioni (Brachiale e Lombosacrale)",
+"condition_keywords": null
+},
+{
+"id": 301,
+"condition_name": "Lesione del Nervo Grande Auricolare",
+"condition_keywords": null
+},
+{
+"id": 302,
+"condition_name": "Plessopatia Lombosacrale Ostetrica (Post-Partum)",
+"condition_keywords": null
+},
+{
+"id": 303,
+"condition_name": "Preparazione del Pavimento Pelvico alla Gravidanza e al Parto",
+"condition_keywords": null
+},
+{
+"id": 304,
+"condition_name": "Riabilitazione del Pavimento Pelvico nel Post-Partum (Puerperio)",
+"condition_keywords": null
+},
+{
+"id": 305,
+"condition_name": "Diastasi dei Muscoli Retti dell'Addome (DRA)",
+"condition_keywords": null
+},
+{
+"id": 306,
+"condition_name": "Prolasso degli Organi Pelvici (POP)",
+"condition_keywords": "prolasso genitale,cistocele,prolasso uterino,rettocele,prolasso pavimento pelvico"
+},
+{
+"id": 307,
+"condition_name": "Dispareunia e Vaginismo (Genito-Pelvic Pain/Penetration Disorder)",
+"condition_keywords": null
+},
+{
+"id": 308,
+"condition_name": "Bronchiectasie (Non-CF)",
+"condition_keywords": null
+},
+{
+"id": 309,
+"condition_name": "Malattia Polmonare Interstiziale (ILD) e Fibrosi Polmonare Idiopatica (IPF)",
+"condition_keywords": null
+},
+{
+"id": 310,
+"condition_name": "Ipertensione Arteriosa Polmonare (PAH)",
+"condition_keywords": null
+},
+{
+"id": 312,
+"condition_name": "Respirazione Disfunzionale / Sindrome da Iperventilazione (DB/HVS)",
+"condition_keywords": null
+},
+{
+"id": 313,
+"condition_name": "Valvulopatie Cardiache (Stenosi e Insufficienza Valvolare)",
+"condition_keywords": null
+},
+{
+"id": 314,
+"condition_name": "Cardiomiopatie (Dilatativa, Restrittiva, Ipertrofica, Aritmogena del Ventricolo Destro)",
+"condition_keywords": null
+},
+{
+"id": 315,
+"condition_name": "Malattie Pericardiche (Pericardite, Versamento Pericardico, Tamponamento)",
+"condition_keywords": null
+},
+{
+"id": 316,
+"condition_name": "Aritmie Cardiache (incluso Fibrillazione Atriale)",
+"condition_keywords": null
+},
+{
+"id": 317,
+"condition_name": "Cardiopatie Congenite dell'Adulto (ACHD, ex-GUCH)",
+"condition_keywords": null
+},
+{
+"id": 318,
+"condition_name": "Malattia Aortica (Aneurisma e Dissezione)",
+"condition_keywords": null
+},
+{
+"id": 319,
+"condition_name": "Arteriopatia Periferica (PAD) e Claudicatio Intermittente",
+"condition_keywords": null
+},
+{
+"id": 321,
+"condition_name": "Lesione della membrana interossea (lesione di Essex-Lopresti)",
+"condition_keywords": "lesione di Essex-Lopresti,instabilita radio-ulnare longitudinale,Essex-Lopresti lesion,longitudinal radioulnar dissociation"
+},
+{
+"id": 322,
+"condition_name": "Disfunzione articolare costo-vertebrale/costo-trasversaria",
+"condition_keywords": "disfunzione costo-vertebrale,blocco costale,rib dysfunction,costovertebral joint dysfunction"
+},
+{
+"id": 323,
+"condition_name": "Costocondrite (sindrome di Tietze)",
+"condition_keywords": "costocondrite,sindrome di Tietze,costochondritis,Tietze syndrome"
+},
+{
+"id": 324,
+"condition_name": "Frattura del collo chirurgico dell'omero",
+"condition_keywords": "frattura del collo chirurgico dell'omero,frattura omero prossimale,proximal humerus fracture,surgical neck fracture"
+},
+{
+"id": 325,
+"condition_name": "Morbo di Scheuermann (cifosi giovanile)",
+"condition_keywords": "morbo di Scheuermann,cifosi di Scheuermann,Scheuermann's disease,Scheuermann's kyphosis"
+},
+{
+"id": 326,
+"condition_name": "Frattura diafisaria femorale (post-chiodo endomidollare)",
+"condition_keywords": "frattura diafisaria femorale,femoral shaft fracture"
+},
+{
+"id": 327,
+"condition_name": "Frattura del dente dell'epistrofeo (C2)",
+"condition_keywords": "frattura del dente dell'epistrofeo,frattura odontoidea,odontoid fracture,dens fracture"
+},
+{
+"id": 328,
+"condition_name": "Frattura sacrale da insufficienza",
+"condition_keywords": "frattura sacrale da insufficienza,sacral insufficiency fracture,sacral stress fracture"
+},
+{
+"id": 329,
+"condition_name": "Sindrome compartimentale cronica da sforzo",
+"condition_keywords": "sindrome compartimentale cronica da sforzo,chronic exertional compartment syndrome,CECS"
+},
+{
+"id": 330,
+"condition_name": "Frattura da stress metatarsale",
+"condition_keywords": "frattura da stress metatarsale,metatarsal stress fracture"
+},
+{
+"id": 331,
+"condition_name": "Frattura diafisaria omerale con neuroaprassia del nervo radiale",
+"condition_keywords": "frattura diafisaria omerale,paralisi del nervo radiale,humeral shaft fracture,radial nerve palsy"
+},
+{
+"id": 332,
+"condition_name": "Frattura costale",
+"condition_keywords": "frattura costale,frattura delle coste,rib fracture"
+},
+{
+"id": 333,
+"condition_name": "Scoliosi idiopatica dell'adolescente (curva dorsale)",
+"condition_keywords": "scoliosi idiopatica dell'adolescente,adolescent idiopathic scoliosis,AIS"
+},
+{
+"id": 334,
+"condition_name": "Spondilolistesi istmica L5-S1",
+"condition_keywords": "spondilolistesi istmica,scivolamento vertebrale,isthmic spondylolisthesis,spondylolisthesis"
+},
+{
+"id": 335,
+"condition_name": "Frattura di clavicola",
+"condition_keywords": "frattura di clavicola,frattura claveare,clavicle fracture,collarbone fracture"
+},
+{
+"id": 336,
+"condition_name": "Frattura vertebrale da compressione osteoporotica (dorso-lombare)",
+"condition_keywords": "frattura vertebrale da compressione,frattura da compressione osteoporotica,vertebral compression fracture,osteoporotic compression fracture"
+},
+{
+"id": 337,
+"condition_name": "Discinesia scapolare",
+"condition_keywords": "discinesia scapolare,scapular dyskinesis,scapular dyskinesia"
+},
+{
+"id": 338,
+"condition_name": "Rizoartrosi (artrosi trapezio-metacarpale)",
+"condition_keywords": "rizoartrosi,artrosi trapezio-metacarpale,artrosi base del pollice,thumb CMC osteoarthritis,basal joint arthritis"
+},
+{
+"id": 339,
+"condition_name": "Frattura tibiale acuta (gestione post-chirurgica)",
+"condition_keywords": "frattura tibiale,frattura di tibia,tibial shaft fracture"
+},
+{
+"id": 341,
+"condition_name": "Frattura di Monteggia/Galeazzi",
+"condition_keywords": "frattura di Monteggia,frattura di Galeazzi,Monteggia fracture,Galeazzi fracture"
+},
+{
+"id": 342,
+"condition_name": "Trauma cranico lieve (commozione cerebrale) -- ritorno graduale all'attivita",
+"condition_keywords": "commozione cerebrale,trauma cranico lieve,concussione,concussion,mild traumatic brain injury,mTBI"
+},
+{
+"id": 343,
+"condition_name": "Disfunzione sacro-iliaca",
+"condition_keywords": "disfunzione sacro-iliaca,dolore sacro-iliaco,sacroiliac joint dysfunction,SI joint pain"
+},
+{
+"id": 344,
+"condition_name": "Frattura malleolare (Weber)",
+"condition_keywords": "frattura malleolare,classificazione di Weber,malleolar fracture,Weber classification,ankle fracture"
+},
+{
+"id": 345,
+"condition_name": "Frattura pelvica da fragilita (branche ilio-ischio-pubiche)",
+"condition_keywords": "frattura pelvica da fragilita,frattura da insufficienza del bacino,pelvic fragility fracture,pelvic insufficiency fracture"
+},
+{
+"id": 346,
+"condition_name": "Vertigine posizionale post-trauma cranico lieve",
+"condition_keywords": "vertigine posizionale,BPPV post-traumatico,benign paroxysmal positional vertigo,post-traumatic BPPV"
+},
+{
+"id": 347,
+"condition_name": "Frattura del collo dell'astragalo",
+"condition_keywords": "frattura del collo dell'astragalo,talar neck fracture"
+},
+{
+"id": 348,
+"condition_name": "Diabete Mellito di Tipo 2",
+"condition_keywords": "diabete mellito tipo 2,diabete tipo 2,diabete non insulino dipendente,insulino-resistenza,type 2 diabetes,diabetes mellitus tipo 2,diabète de type 2"
+},
+{
+"id": 349,
+"condition_name": "Osteoporosi",
+"condition_keywords": "osteoporosi,osteoporosi post-menopausale,osteoporosi senile,osteopenia,fragilità ossea,osteoporosis,ostéoporose"
+},
+{
+"id": 350,
+"condition_name": "Ipotiroidismo",
+"condition_keywords": "ipotiroidismo,tiroidite di hashimoto,ipofunzione tiroidea,hypothyroidism,hipotiroidismo,hypothyroïdie"
+},
+{
+"id": 351,
+"condition_name": "Diabete Mellito di Tipo 1",
+"condition_keywords": "diabete mellito tipo 1,diabete tipo 1,diabete insulino dipendente,diabete giovanile,type 1 diabetes,diabetes mellitus tipo 1,diabète de type 1"
+},
+{
+"id": 352,
+"condition_name": "Ipertiroidismo (Morbo di Basedow-Graves)",
+"condition_keywords": "ipertiroidismo,morbo di basedow,malattia di graves,tireotossicosi,hyperthyroidism,graves disease,hipertiroidismo,hyperthyroïdie,maladie de basedow"
+},
+{
+"id": 353,
+"condition_name": "Sindrome di Cushing (Ipercortisolismo)",
+"condition_keywords": "sindrome di cushing,ipercortisolismo,cushing da glucocorticoidi,miopatia steroidea,cushing syndrome,sindrome de cushing,syndrome de cushing"
+},
+{
+"id": 354,
+"condition_name": "Malattia di Addison (Insufficienza Surrenalica Primaria)",
+"condition_keywords": "malattia di addison,insufficienza surrenalica,ipocortisolismo,addison disease,adrenal insufficiency,enfermedad de addison,insuficiencia suprarrenal,maladie d addison,insuffisance surrenalienne"
+},
+{
+"id": 355,
+"condition_name": "Ipogonadismo Maschile (Deficit di Testosterone)",
+"condition_keywords": "ipogonadismo maschile,deficit di testosterone,bassi livelli di testosterone,andropausa,male hypogonadism,testosterone deficiency,hipogonadismo masculino,hypogonadisme masculin"
+},
+{
+"id": 356,
+"condition_name": "Deficit di GH nell'Adulto",
+"condition_keywords": "deficit di gh,deficit dell'ormone della crescita,ipopituitarismo,adult growth hormone deficiency,agh deficiency,deficit de gh,déficit en hormone de croissance"
+},
+{
+"id": 357,
+"condition_name": "Acromegalia (Eccesso di GH)",
+"condition_keywords": "acromegalia,eccesso di gh,adenoma gh-secernente,gigantismo,acromegaly,gh excess,acromegalia hormona de crecimiento,acromégalie"
+},
+{
+"id": 358,
+"condition_name": "Malattia Renale Cronica (IRC) ed Esercizio Fisico",
+"condition_keywords": "malattia renale cronica,insufficienza renale cronica,IRC,CKD,chronic kidney disease,nefropatia cronica,insuficiencia renal cronica,maladie renale chronique,nefropatia diabetica,nefropatia ipertensiva,"
+},
+{
+"id": 359,
+"condition_name": "Insufficienza Renale Acuta (IRA) e Ricondizionamento Post-Acuto",
+"condition_keywords": "insufficienza renale acuta,IRA,AKI,acute kidney injury,danno renale acuto,insuficiencia renal aguda,lesion renal aguda,insuffisance renale aigue,rabdomiolisi,necrosi tubulare acuta,debolezza acquisita"
+},
+{
+"id": 360,
+"condition_name": "Esercizio Intradialitico (durante Emodialisi)",
+"condition_keywords": "esercizio intradialitico,emodialisi,dialisi,hemodialysis,intradialytic exercise,ejercicio intradialitico,hemodialisis,exercice intradialytique,hemodialyse,fistola arterovenosa,accesso vascolare dialit"
+},
+{
+"id": 361,
+"condition_name": "Trapianto Renale — Riabilitazione Pre- e Post-Trapianto",
+"condition_keywords": "trapianto renale,trapianto di rene,kidney transplant,renal transplant,trasplante renal,transplantation renale,immunosoppressione,rigetto trapianto,riceventi di trapianto renale"
+},
+{
+"id": 362,
+"condition_name": "Nefrolitiasi (Calcoli Renali) e Gestione Post-Litotrissia",
+"condition_keywords": "nefrolitiasi,calcoli renali,calcolosi renale,litiasi urinaria,kidney stones,nephrolithiasis,urolithiasis,litiasis renal,calculos renales,lithiase renale,calculs renaux,litotrissia,colica renale"
+},
+{
+"id": 363,
+"condition_name": "Iponatriemia Associata all'Esercizio (Exercise-Associated Hyponatremia, EAH)",
+"condition_keywords": "iponatriemia da esercizio,EAH,exercise associated hyponatremia,exercise induced hyponatremia,hiponatremia asociada al ejercicio,hyponatremie associee a l exercice,intossicazione da acqua,overhydration"
+},
+{
+"id": 364,
+"condition_name": "Squilibri del Potassio Rilevanti per l'Esercizio (Iperkaliemia/Ipokaliemia)",
+"condition_keywords": "iperkaliemia,ipokaliemia,squilibrio potassio,hyperkalemia,hypokalemia,potassium imbalance,hiperpotasemia,hipopotasemia,hyperkaliemie,hypokaliemie,ACE-inibitori,diuretici risparmiatori di potassio,arit"
+},
+{
+"id": 365,
+"condition_name": "Sindrome Nefrosica e Proteinuria Significativa",
+"condition_keywords": "sindrome nefrosica,proteinuria,nephrotic syndrome,proteinuria significativa,sindrome nefrotica,syndrome nephrotique,ipoalbuminemia,edema nefrosico,rischio trombotico renale,trombosi venosa nefrosica"
+},
+{
+"id": 366,
+"condition_name": "Malattia da Reflusso Gastroesofageo (MRGE) ed Esercizio Fisico",
+"condition_keywords": "reflusso gastroesofageo, MRGE, malattia da reflusso gastroesofageo, pirosi, bruciore retrosternale, rigurgito acido, esofagite da reflusso, GERD, gastroesophageal reflux disease, acid reflux, reflujo "
+},
+{
+"id": 367,
+"condition_name": "Malattie Infiammatorie Croniche Intestinali (IBD: Morbo di Crohn, Colite Ulcerosa) ed Esercizio",
+"condition_keywords": "malattia infiammatoria cronica intestinale, IBD, morbo di Crohn, colite ulcerosa, rettocolite ulcerosa, malattia di Crohn, inflammatory bowel disease, Crohn's disease, ulcerative colitis, enfermedad i"
+},
+{
+"id": 368,
+"condition_name": "Sindrome dell'Intestino Irritabile (IBS) ed Esercizio",
+"condition_keywords": "sindrome dell'intestino irritabile, IBS, colon irritabile, sindrome del colon irritabile, dieta FODMAP, irritable bowel syndrome, low FODMAP diet, síndrome del intestino irritable, colon irritable, di"
+},
+{
+"id": 369,
+"condition_name": "Chirurgia Bariatrica — Riabilitazione Pre- e Post-Operatoria",
+"condition_keywords": "chirurgia bariatrica, chirurgia dell'obesità, sleeve gastrectomy, bypass gastrico, gastrectomia verticale, riabilitazione bariatrica, sarcopenia post-bariatrica, bariatric surgery, gastric bypass, sle"
+},
+{
+"id": 370,
+"condition_name": "Malattia Epatica Cronica/Cirrosi ed Esercizio Fisico",
+"condition_keywords": "malattia epatica cronica, cirrosi epatica, epatopatia cronica, sarcopenia epatica, fragilità epatica, MASLD, steatosi epatica, chronic liver disease, liver cirrhosis, hepatic sarcopenia, frailty, enfe"
+},
+{
+"id": 371,
+"condition_name": "Disturbi Gastrointestinali da Esercizio di Endurance (\"Exercise-Induced GI Syndrome\")",
+"condition_keywords": "disturbi gastrointestinali da sport, exercise-induced gastrointestinal syndrome, EIGS, gut ischemia da sport, runner's trots, diarrea del corridore, nausea da corsa, gastrointestinal distress in athle"
+},
+{
+"id": 372,
+"condition_name": "Malattia Celiaca — Considerazioni per l'Attività Fisica e lo Sportivo",
+"condition_keywords": "malattia celiaca, celiachia, enteropatia glutine-sensibile, dieta senza glutine, dieta priva di glutine, atleta celiaco, celiac disease, gluten-free diet, gluten-sensitive enteropathy, athlete with ce"
+},
+{
+"id": 373,
+"condition_name": "Stomia Intestinale (Ileostomia/Colostomia) — Riabilitazione e Ripresa dell'Attività Fisica",
+"condition_keywords": "stomia intestinale, ileostomia, colostomia, stoma, ernia parastomale, riabilitazione post-stomia, intestinal stoma, ileostomy, colostomy, parastomal hernia, ostomy exercise, estoma intestinal, ileosto"
+},
+{
+"id": 374,
+"condition_name": "Artrite Reumatoide ed Esercizio Terapeutico",
+"condition_keywords": "artrite reumatoide,AR,poliartrite cronica,rheumatoid arthritis,polyarthritis,artritis reumatoide,polyarthrite rhumatoide,artrite reumatoide esercizio,DMARD,farmaci biologici"
+},
+{
+"id": 375,
+"condition_name": "Lupus Eritematoso Sistemico (LES) ed Esercizio Fisico",
+"condition_keywords": "lupus eritematoso sistemico,LES,lupus,systemic lupus erythematosus,SLE,lupus erythemateux dissemine,connettivite,fotosensibilità"
+},
+{
+"id": 377,
+"condition_name": "Sindrome da Fatica Post-Virale / Long COVID: Riabilitazione con Pacing",
+"condition_keywords": "long covid,sindrome post covid-19,fatica post-virale,post-exertional malaise,PEM,malessere post sforzo,ME/CFS,post-COVID condition,post-viral fatigue syndrome,sindrome post-COVID,fatiga post-viral,syn"
+},
+{
+"id": 378,
+"condition_name": "Immunosoppressione Farmacologica ed Esercizio Fisico (Post-Trapianto, Terapie Biologiche/DMARD)",
+"condition_keywords": "immunosoppressione,terapia immunosoppressiva,post trapianto d'organo,trapianto renale,trapianto cardiaco,trapianto di fegato,farmaci biologici,DMARD,corticosteroidi,immunosuppression,solid organ trans"
+},
+{
+"id": 379,
+"condition_name": "Linfedema Secondario: Valutazione e Trattamento",
+"condition_keywords": "linfedema,linfedema secondario,linfedema post-mastectomia,linfedema post-chirurgico,lymphedema,secondary lymphedema,linfedema secundario,lymphoedeme secondaire,edema arto superiore,edema arto inferior"
+},
+{
+"id": 380,
+"condition_name": "Immunologia dell'Esercizio: Finestra Aperta e Rischio di Infezioni delle Vie Respiratorie Superiori nell'Atleta",
+"condition_keywords": "finestra aperta,open window,immunodepressione da esercizio,infezioni vie respiratorie superiori,URTI,overtraining,curva a J,J-curve,exercise-induced immunosuppression,upper respiratory tract infection"
+},
+{
+"id": 381,
+"condition_name": "HIV e Attività Fisica in Terapia Antiretrovirale",
+"condition_keywords": "HIV,infezione da HIV,virus dell'immunodeficienza umana,terapia antiretrovirale,ART,CD4,HIV exercise,antiretroviral therapy,physical activity HIV,VIH,terapia antirretroviral,VIH ejercicio,VIH therapie "
+},
+{
+"id": 382,
+"condition_name": "Anemia e Capacità allo Sforzo",
+"condition_keywords": "anemia, anemia sideropenica, anemia da carenza di ferro, anemia da malattia cronica, anemia e capacità allo sforzo, VO2max ridotto, anemia e fatica, iron deficiency anemia, anemia por deficiencia de h"
+},
+{
+"id": 383,
+"condition_name": "Trombosi Venosa Profonda (TVP) e Tromboembolismo Venoso",
+"condition_keywords": "trombosi venosa profonda, TVP, tromboembolismo venoso, TEV, embolia polmonare, deep vein thrombosis, DVT, venous thromboembolism, VTE, pulmonary embolism, trombosis venosa profunda, tromboembolismo ve"
+},
+{
+"id": 384,
+"condition_name": "Anemia Falciforme (Sickle Cell Disease) ed Esercizio Fisico",
+"condition_keywords": "anemia falciforme, drepanocitosi, malattia falciforme, sickle cell disease, sickle cell anemia, crisi vaso-occlusiva, tratto falciforme, sickle cell trait, anemia de células falciformes, drépanocytose"
+},
+{
+"id": 385,
+"condition_name": "Policitemia ed Emoconcentrazione",
+"condition_keywords": "policitemia, policitemia vera, eritrocitosi, emoconcentrazione, doping ematico, doping EPO, eritropoietina esogena, polycythemia vera, erythrocytosis, blood doping, policitemia vera, eritrocitosis, po"
+},
+{
+"id": 386,
+"condition_name": "Coagulopatie e Terapia Anticoagulante",
+"condition_keywords": "coagulopatia, terapia anticoagulante, warfarin, NAO, DOAC, antiaggregante piastrinico, emofilia, esercizio e anticoagulanti, anticoagulant therapy exercise, bleeding risk exercise, terapia anticoagula"
+},
+{
+"id": 387,
+"condition_name": "Talassemia ed Esercizio Fisico",
+"condition_keywords": "talassemia, talassemia major, talassemia intermedia, beta talassemia, morbo di Cooley, thalassemia exercise, thalassemia major, transfusion-dependent thalassemia, talasemia, thalassémie, thalassémie m"
+},
+{
+"id": 388,
+"condition_name": "Insufficienza Respiratoria Acuta (Ipossiemica/Ipercapnica)",
+"condition_keywords": "insufficienza respiratoria acuta, ARF, acute respiratory failure, insufficienza respiratoria ipossiemica, insufficienza respiratoria ipercapnica, tipo 1, tipo 2, riacutizzazione BPCO"
+},
+{
+"id": 389,
+"condition_name": "Carcinoma della Vescica",
+"condition_keywords": null
+},
+{
+"id": 390,
+"condition_name": "Tumori Testa-Collo",
+"condition_keywords": null
+},
+{
+"id": 391,
+"condition_name": "Sarcomi Ossei e dei Tessuti Molli",
+"condition_keywords": null
+},
+{
+"id": 392,
+"condition_name": "Neoplasie Ematologiche (Leucemie, Linfomi, Mieloma)",
+"condition_keywords": null
+},
+{
+"id": 393,
+"condition_name": "Carcinoma Mammario",
+"condition_keywords": null
+},
+{
+"id": 394,
+"condition_name": "Linfedema Secondario dellArto Superiore",
+"condition_keywords": null
+},
+{
+"id": 395,
+"condition_name": "Axillary Web Syndrome (Cording)",
+"condition_keywords": null
+},
+{
+"id": 396,
+"condition_name": "Sindrome Dolorosa Post-Mastectomia (PMPS)",
+"condition_keywords": null
+},
+{
+"id": 397,
+"condition_name": "Carcinoma della Cervice Uterina",
+"condition_keywords": null
+},
+{
+"id": 398,
+"condition_name": "Linfedema Secondario dellArto Inferiore (Ginecologico)",
+"condition_keywords": null
+},
+{
+"id": 399,
+"condition_name": "Stenosi Vaginale Post-Radioterapia Pelvica",
+"condition_keywords": null
+},
+{
+"id": 400,
+"condition_name": "Carcinoma Prostatico e Incontinenza Post-Prostatectomia",
+"condition_keywords": null
+},
+{
+"id": 401,
+"condition_name": "Tumori Cerebrali",
+"condition_keywords": null
+},
+{
+"id": 402,
+"condition_name": "Carcinoma del Colon-Retto",
+"condition_keywords": null
+},
+{
+"id": 403,
+"condition_name": "Carcinoma del Polmone",
+"condition_keywords": null
+},
+{
+"id": 404,
+"condition_name": "Neuropatia Periferica Chemio-Indotta (CIPN)",
+"condition_keywords": null
+},
+{
+"id": 405,
+"condition_name": "Fatica Correlata al Cancro (Cancer-Related Fatigue)",
+"condition_keywords": null
+},
+{
+"id": 406,
+"condition_name": "Metastasi Ossee",
+"condition_keywords": null
+},
+{
+"id": 407,
+"condition_name": "Fibromialgia (gestione con esercizio terapeutico)",
+"condition_keywords": "fibromialgia,dolore diffuso cronico,sindrome fibromialgica,fibromyalgia,exercise therapy fibromyalgia,fibromialgia y ejercicio,fibromyalgie"
+},
+{
+"id": 408,
+"condition_name": "Artropatia emofilica (gestione riabilitativa dell'emofilia)",
+"condition_keywords": "emofilia,artropatia emofilica,emartro,hemophilia,hemophilic arthropathy,hemarthrosis,hemofilia,artropatia hemofilica,hémophilie,arthropathie hémophilique"
+},
+{
+"id": 409,
+"condition_name": "Dissinergia del pavimento pelvico (dischezia funzionale)",
+"condition_keywords": "dissinergia del pavimento pelvico,dischezia funzionale,defecazione dissinergica,anismo,pelvic floor dyssynergia,dyssynergic defecation,disinergia del suelo pelvico,dyssynergie du plancher pelvien"
+},
+{
+"id": 410,
+"condition_name": "Obesità (gestione con esercizio terapeutico)",
+"condition_keywords": "obesita,gestione dell'obesita con esercizio,sovrappeso,obesity,exercise prescription obesity,obesidad,ejercicio terapeutico obesidad,obésité,prescription d'exercice"
+},
+{
+"id": 411,
+"condition_name": "Sclerosi sistemica (sclerodermia — gestione con esercizio e riabilitazione della mano)",
+"condition_keywords": "sclerosi sistemica,sclerodermia,systemic sclerosis,scleroderma,esclerosis sistemica,esclerodermia,sclérodermie"
+},
+{
+"id": 412,
+"condition_name": "Polimialgia reumatica e arterite a cellule giganti (gestione dell'esercizio)",
+"condition_keywords": "polimialgia reumatica,arterite a cellule giganti,arterite temporale,polymyalgia rheumatica,giant cell arteritis,temporal arteritis,polimialgia reumatica,arteritis de celulas gigantes,pseudo-polyarthri"
+},
+{
+"id": 413,
+"condition_name": "Endometriosi (dolore pelvico associato — fisioterapia del pavimento pelvico)",
+"condition_keywords": "endometriosi,dolore pelvico cronico da endometriosi,endometriosis,endometriosis-associated pelvic pain,endometriosis pelvic floor therapy,endometriosis,endométriose,douleur pelvienne chronique"
+},
+{
+"id": 414,
+"condition_name": "Deficit energetico relativo nello sport (RED-S)",
+"condition_keywords": "deficit energetico relativo nello sport,RED-S,relative energy deficiency in sport,triade dell'atleta,female athlete triad,deficit energetico atleta,déficit énergétique relatif dans le sport,déficit en"
+},
+{
+"id": 415,
+"condition_name": "Sindrome dell'ovaio policistico (PCOS) — gestione con esercizio",
+"condition_keywords": "sindrome dellovaio policistico,PCOS,ovaio policistico,polycystic ovary syndrome,sindrome de ovario poliquistico,syndrome des ovaires polykystiques"
+},
+{
+"id": 416,
+"condition_name": "Artrite psoriasica (gestione dell'esercizio terapeutico)",
+"condition_keywords": "artrite psoriasica,psoriatic arthritis,artritis psoriasica,rhumatisme psoriasique,dattilite,entesite psoriasica,psoriatic dactylitis,enthesitis"
+},
+{
+"id": 417,
+"condition_name": "Gotta (artrite gottosa — gestione dell'esercizio e delle fasi intercritiche)",
+"condition_keywords": "gotta,artrite gottosa,attacco di gotta,gout,gouty arthritis,podagra,gota,artritis gotosa,goutte,arthrite goutteuse"
+},
+{
+"id": 418,
+"condition_name": "Incontinenza fecale (gestione con fisioterapia del pavimento pelvico)",
+"condition_keywords": "incontinenza fecale,incontinenza anale,fecal incontinence,anal incontinence,incontinencia fecal,incontinence anale,incontinence fecale"
+},
+{
+"id": 419,
+"condition_name": "Sindrome metabolica (gestione con esercizio terapeutico)",
+"condition_keywords": "sindrome metabolica,metabolic syndrome,síndrome metabólico,syndrome métabolique"
+},
+{
+"id": 420,
+"condition_name": "Trombofilia (gestione dell'attività fisica e prevenzione del tromboembolismo venoso)",
+"condition_keywords": "trombofilia,tromboembolismo venoso,TVP,trombosi venosa profonda,thrombophilia,venous thromboembolism,deep vein thrombosis,trombofilia hereditaria,thrombose veineuse"
+},
+{
+"id": 421,
+"condition_name": "Fenomeno di Raynaud (gestione non farmacologica)",
+"condition_keywords": "fenomeno di raynaud,sindrome di raynaud,raynaud phenomenon,raynaud syndrome,fenómeno de raynaud,phénomène de raynaud,vasospasmo digitale"
+},
+{
+"id": 422,
+"condition_name": "Sindrome delle apnee ostruttive del sonno (OSAS) — gestione con esercizio",
+"condition_keywords": "apnea ostruttiva del sonno,apnee notturne,OSAS,OSA,sindrome delle apnee ostruttive,obstructive sleep apnea,apnea obstructiva del sueño,apnée obstructive du sommeil"
+},
+{
+"id": 423,
+"condition_name": "Sindrome di Sjögren (gestione con esercizio terapeutico)",
+"condition_keywords": "sindrome di sjogren,sindrome di sjögren,malattia di sjogren,sjogren syndrome,sjögren syndrome,síndrome de sjögren,syndrome de sjögren,cheratocongiuntivite secca,xerostomia"
+},
+{
+"id": 424,
+"condition_name": "Sarcoidosi (riabilitazione polmonare)",
+"condition_keywords": "sarcoidosi,sarcoidosis,sarcoïdose,sarcoidosis pulmonar,malattia granulomatosa"
+},
+{
+"id": 425,
+"condition_name": "Sindrome da anticorpi antifosfolipidi (APS) — attività fisica in sicurezza",
+"condition_keywords": "sindrome da anticorpi antifosfolipidi,sindrome antifosfolipidica,APS,antiphospholipid syndrome,síndrome antifosfolípido,syndrome des antiphospholipides"
+},
+{
+"id": 426,
+"condition_name": "Sindrome delle gambe senza riposo (RLS) — gestione con esercizio e fisioterapia",
+"condition_keywords": "sindrome delle gambe senza riposo,restless legs syndrome,RLS,malattia di willis-ekbom,síndrome de piernas inquietas,syndrome des jambes sans repos"
+},
+{
+"id": 427,
+"condition_name": "Encefalomielite mialgica/Sindrome da fatica cronica (ME/CFS) — gestione dell'energia, NON esercizio graduato classico",
+"condition_keywords": "encefalomielite mialgica,sindrome da fatica cronica,ME/CFS,CFS,myalgic encephalomyelitis,chronic fatigue syndrome,síndrome de fatiga crónica,encéphalomyélite myalgique,malessere post-sforzo,post-exert"
+},
+{
+"id": 428,
+"condition_name": "Vasculite ANCA-associata (gestione generale dell'attività fisica)",
+"condition_keywords": "vasculite ANCA-associata,granulomatosi con poliangioite,poliangioite microscopica,granulomatosi eosinofila con poliangioite,ANCA-associated vasculitis,AAV,vasculitis asociada a ANCA,vascularite associ"
+},
+{
+"id": 429,
+"condition_name": "Malattia di Behçet (gestione generale dell'attività fisica)",
+"condition_keywords": "malattia di behçet,sindrome di behçet,behcet disease,behçet syndrome,enfermedad de behçet,maladie de behçet,aftosi orale ricorrente,uveite"
+},
+{
+"id": 430,
+"condition_name": "Porpora trombocitopenica immune (ITP) — attività fisica in sicurezza in base alla conta piastrinica",
+"condition_keywords": "porpora trombocitopenica immune,porpora trombocitopenica idiopatica,ITP,immune thrombocytopenic purpura,piastrinopenia,púrpura trombocitopénica inmune,purpura thrombopénique immunologique,trombocitope"
+},
+{
+"id": 431,
+"condition_name": "Disturbo dello spettro da ipermobilità (HSD) / Sindrome di Ehlers-Danlos ipermobile (hEDS) — gestione con esercizio",
+"condition_keywords": "ipermobilità articolare,disturbo dello spettro da ipermobilità,HSD,sindrome di ehlers-danlos,ehlers-danlos syndrome,hypermobility spectrum disorder,hEDS,síndrome de ehlers-danlos,syndrome d'ehlers-dan"
+},
+{
+"id": 432,
+"condition_name": "Sindrome del dolore pelvico cronico maschile / Prostatite cronica (CP/CPPS) — fisioterapia del pavimento pelvico",
+"condition_keywords": "sindrome del dolore pelvico cronico maschile,prostatite cronica,CP/CPPS,chronic prostatitis,chronic pelvic pain syndrome,mialgia del pavimento pelvico maschile,síndrome de dolor pélvico crónico mascul"
+},
+{
+"id": 433,
+"condition_name": "Policondrite recidivante (gestione generale dell'attività fisica)",
+"condition_keywords": "policondrite recidivante,policondrite cronica atrofizzante,relapsing polychondritis,policondritis recidivante,polychondrite chronique atrophiante,condrite auricolare,condrite tracheale"
+},
+{
+"id": 434,
+"condition_name": "Paralisi cerebrale infantile — attività fisica ed esercizio nell'adulto",
+"condition_keywords": "paralisi cerebrale infantile,paralisi cerebrale,cerebral palsy,parálisis cerebral,paralysie cérébrale,disturbo del movimento e della postura"
+},
+{
+"id": 435,
+"condition_name": "Malattia di Paget dell'osso (gestione generale dell'attività fisica)",
+"condition_keywords": "malattia di paget,morbo di paget dell'osso,paget's disease of bone,enfermedad de paget osea,maladie osseuse de paget,osteite deformante"
+},
+{
+"id": 436,
+"condition_name": "Osteogenesi imperfetta (gestione con esercizio in sicurezza)",
+"condition_keywords": "osteogenesi imperfetta,malattia delle ossa di vetro,osteogenesis imperfecta,OI,osteogénesis imperfecta,ostéogenèse imparfaite,fragilità ossea congenita"
+},
+{
+"id": 437,
+"condition_name": "Sindrome di Marfan (gestione dell'esercizio in relazione al rischio aortico)",
+"condition_keywords": "sindrome di marfan,marfan syndrome,síndrome de marfan,syndrome de marfan,dilatazione aortica,aneurisma aortico genetico"
+},
+{
+"id": 439,
+"condition_name": "Distrofia muscolare di Duchenne (DMD) — gestione con esercizio e fisioterapia",
+"condition_keywords": "distrofia muscolare di duchenne,DMD,duchenne muscular dystrophy,distrofia muscular de duchenne,dystrophie musculaire de duchenne"
+},
+{
+"id": 440,
+"condition_name": "Atrofia muscolare spinale (SMA) — fisioterapia e gestione dell'esercizio",
+"condition_keywords": "atrofia muscolare spinale,SMA,spinal muscular atrophy,atrofia muscular espinal,amyotrophie spinale"
+},
+{
+"id": 441,
+"condition_name": "Artrite idiopatica giovanile (AIG) — attività fisica strutturata",
+"condition_keywords": "artrite idiopatica giovanile,AIG,juvenile idiopathic arthritis,JIA,artritis idiopática juvenil,arthrite juvénile idiopathique"
+},
+{
+"id": 442,
+"condition_name": "Torcicollo miogeno congenito (TMC) — fisioterapia pediatrica",
+"condition_keywords": "torcicollo miogeno congenito,torcicollo congenito,TMC,congenital muscular torticollis,CMT,tortícolis muscular congénita,torticolis musculaire congénital"
+},
+{
+"id": 443,
+"condition_name": "Spina bifida / Mielomeningocele — attività fisica ed esercizio",
+"condition_keywords": "spina bifida,mielomeningocele,meningomielocele,myelomeningocele,espina bífida,spina bifida,disrafismo spinale"
+},
+{
+"id": 444,
+"condition_name": "Paralisi ostetrica del plesso brachiale (Erb's Palsy) — fisioterapia conservativa precoce",
+"condition_keywords": "paralisi ostetrica del plesso brachiale,paralisi di erb,erb's palsy,brachial plexus birth injury,obstetric brachial plexus injury,parálisis obstétrica del plexo braquial,paralysie obstétricale du plex"
+},
+{
+"id": 445,
+"condition_name": "Malattia di Sever (apofisite calcaneare) — gestione conservativa",
+"condition_keywords": "malattia di sever,apofisite calcaneare,sever's disease,calcaneal apophysitis,enfermedad de sever,apofisitis calcánea,maladie de sever"
+},
+{
+"id": 446,
+"condition_name": "Sindrome di Down — fisioterapia e gestione dell'ipotonia",
+"condition_keywords": "sindrome di down,trisomia 21,down syndrome,trisomy 21,síndrome de down,syndrome de down,ipotonia congenita"
+},
+{
+"id": 447,
+"condition_name": "Malattia di Legg-Calvé-Perthes — fisioterapia e attività fisica",
+"condition_keywords": "malattia di legg-calve-perthes,perthes,legg-calve-perthes disease,necrosi avascolare dellanca infantile,enfermedad de perthes,maladie de perthes,osteocondrite dellanca"
+},
+{
+"id": 448,
+"condition_name": "Epifisiolisi femorale prossimale (SCFE) — riabilitazione post-chirurgica",
+"condition_keywords": "epifisiolisi femorale prossimale,scivolamento epifisario femorale,SCFE,slipped capital femoral epiphysis,epifisiólisis femoral proximal,épiphysiolyse fémorale"
+},
+{
+"id": 449,
+"condition_name": "Disfunzione temporomandibolare (DTM) — fisioterapia e terapia manuale",
+"condition_keywords": "disfunzione temporomandibolare,DTM,disturbo dellarticolazione temporomandibolare,temporomandibular disorder,TMD,disfunción temporomandibular,trouble temporomandibulaire,dolore mascellare,click mandibo"
+},
+{
+"id": 450,
+"condition_name": "Emicrania — esercizio terapeutico come intervento preventivo",
+"condition_keywords": "emicrania,cefalea emicranica,migraine,migraña,migraine (cefalea),emicrania cronica,emicrania episodica"
+},
+{
+"id": 451,
+"condition_name": "Paralisi di Bell — riabilitazione della paralisi del nervo facciale",
+"condition_keywords": "paralisi di bell,paralisi facciale idiopatica,bell's palsy,facial nerve palsy,parálisis de bell,paralysie faciale idiopathique,paralisi del VII nervo cranico"
+},
+{
+"id": 452,
+"condition_name": "Malformazione di Chiari tipo I — esercizio terapeutico e riabilitazione",
+"condition_keywords": "malformazione di chiari,chiari malformation,malformación de chiari,malformation de chiari,ernia tonsillare cerebellare,sindrome di arnold-chiari"
+},
+{
+"id": 453,
+"condition_name": "Miopatie infiammatorie idiopatiche (polimiosite e dermatomiosite) — esercizio terapeutico",
+"condition_keywords": "miopatie infiammatorie idiopatiche,polimiosite,dermatomiosite,idiopathic inflammatory myopathies,polymyositis,dermatomyositis,miopatías inflamatorias idiopáticas,myopathies inflammatoires idiopathique"
+},
+{
+"id": 454,
+"condition_name": "Malattia di Freiberg (osteocondrosi della testa metatarsale)",
+"condition_keywords": "malattia di freiberg,osteocondrosi della testa del metatarso,freiberg disease,freiberg infraction,enfermedad de freiberg,maladie de freiberg,necrosi avascolare testa metatarsale"
+},
+{
+"id": 455,
+"condition_name": "Sindrome della cauda equina — riconoscimento ed emergenza in fisioterapia",
+"condition_keywords": "sindrome della cauda equina,cauda equina syndrome,síndrome de cauda equina,syndrome de la queue de cheval,compressione cauda equina,emergenza spinale"
+},
+{
+"id": 456,
+"condition_name": "Distonia cervicale (torcicollo spasmodico) — gestione fisioterapica",
+"condition_keywords": "distonia cervicale,torcicollo spasmodico,cervical dystonia,spasmodic torticollis,distonía cervical,dystonie cervicale"
+},
+{
+"id": 457,
+"condition_name": "Malattia di Huntington — fisioterapia e attività fisica",
+"condition_keywords": "malattia di huntington,corea di huntington,huntington disease,huntington's chorea,enfermedad de huntington,maladie de huntington"
+},
+{
+"id": 458,
+"condition_name": "Atassia di Friedreich — riabilitazione multidisciplinare intensiva",
+"condition_keywords": "atassia di friedreich,friedreich ataxia,ataxia de friedreich,ataxie de friedreich,atassia ereditaria"
+},
+{
+"id": 459,
+"condition_name": "Neuroartropatia di Charcot (piede di Charcot) — gestione riabilitativa",
+"condition_keywords": "neuroartropatia di charcot,piede di charcot,charcot foot,charcot neuroarthropathy,neuroartropatía de charcot,neuro-arthropathie de charcot,artropatia neuropatica diabetica"
+},
+{
+"id": 460,
+"condition_name": "Malattia di von Willebrand — attività fisica e sport in sicurezza",
+"condition_keywords": "malattia di von willebrand,von willebrand disease,enfermedad de von willebrand,maladie de von willebrand,coagulopatia congenita,disturbo emorragico congenito"
+},
+{
+"id": 461,
+"condition_name": "Fibromatosi plantare (malattia di Ledderhose) — gestione conservativa e riabilitativa",
+"condition_keywords": "fibromatosi plantare,malattia di ledderhose,ledderhose disease,plantar fibromatosis,fibromatosis plantar,fibromatose plantaire,noduli fascia plantare"
+},
+{
+"id": 462,
+"condition_name": "Cardiomiopatia ipertrofica — esercizio fisico e attività sportiva",
+"condition_keywords": "cardiomiopatia ipertrofica,hypertrophic cardiomyopathy,HCM,miocardiopatia ipertrofica,cardiomiopatia hipertrofica,cardiomyopathie hypertrophique"
+},
+{
+"id": 463,
+"condition_name": "Siringomielia — riabilitazione e gestione fisioterapica",
+"condition_keywords": "siringomielia,siringoidromielia,syringomyelia,siringomielía,syringomyélie,cavità midollare,cisti siringomielica"
+},
+{
+"id": 464,
+"condition_name": "Sindrome post-polio — gestione dell'esercizio e prevenzione della debolezza da sovraccarico",
+"condition_keywords": "sindrome post-polio,post-polio syndrome,PPS,sindrome pospoliomielitica,síndrome pospolio,syndrome post-poliomyélite,esiti tardivi della poliomielite"
+},
+{
+"id": 465,
+"condition_name": "Osteocondrite dissecante del ginocchio — riabilitazione e ritorno allo sport",
+"condition_keywords": "osteocondrite dissecante del ginocchio,osteochondritis dissecans knee,OCD ginocchio,osteocondritis disecante de rodilla,ostéochondrite disséquante du genou,lesione osteocondrale del condilo femorale"
+},
+{
+"id": 466,
+"condition_name": "Endocardite infettiva — riabilitazione cardiaca post-chirurgica",
+"condition_keywords": "endocardite infettiva,infective endocarditis,endocarditis infecciosa,endocardite infectieuse,riabilitazione post-chirurgia valvolare cardiaca"
+},
+{
+"id": 467,
+"condition_name": "Amputazione dell'arto inferiore — riabilitazione protesica",
+"condition_keywords": "amputazione arto inferiore,riabilitazione protesica,lower limb amputation,amputación de miembro inferior,amputation du membre inférieur,protesi transfemorale,protesi transtibiale,osteointegrazione"
+},
+{
+"id": 468,
+"condition_name": "Sindrome dell'arto fantasma (dolore da arto fantasma)",
+"condition_keywords": "sindrome dell'arto fantasma,dolore da arto fantasma,phantom limb pain,dolor del miembro fantasma,douleur du membre fantôme,terapia dello specchio,mirror therapy"
+},
+{
+"id": 469,
+"condition_name": "Ustioni — riabilitazione fisioterapica",
+"condition_keywords": "ustioni,riabilitazione da ustione,burn rehabilitation,quemaduras,brûlures,contratture da ustione,cicatrici ipertrofiche"
+},
+{
+"id": 470,
+"condition_name": "Cachessia neoplastica — esercizio terapeutico",
+"condition_keywords": "cachessia neoplastica,cachessia da cancro,cancer cachexia,caquexia neoplásica,cachexie néoplasique,sarcopenia da cancro,deperimento neoplastico"
+},
+{
+"id": 471,
+"condition_name": "Malattia di Meniere — riabilitazione vestibolare",
+"condition_keywords": "malattia di meniere,vertigine di meniere,meniere disease,enfermedad de meniere,maladie de meniere,idrope endolinfatica,riabilitazione vestibolare"
+},
+{
+"id": 472,
+"condition_name": "Neurite vestibolare (vestibulopatia unilaterale acuta) — riabilitazione vestibolare precoce",
+"condition_keywords": "neurite vestibolare,vestibulopatia unilaterale acuta,vestibular neuritis,neuritis vestibular,neurite vestibulaire,vertigine acuta,test di HINTS"
+},
+{
+"id": 473,
+"condition_name": "Sindrome di Sjogren — esercizio fisico",
+"condition_keywords": "sindrome di sjogren,malattia di sjogren,sjogren syndrome,sindrome de sjogren,syndrome de sjogren,esercizio fisico,attivita aerobica,fatica in malattia autoimmune"
+},
+{
+"id": 474,
+"condition_name": "Distrofia muscolare facio-scapolo-omerale (FSHD) — esercizio fisico",
+"condition_keywords": "distrofia muscolare facio-scapolo-omerale,FSHD,facioscapulohumeral muscular dystrophy,distrofia facioscapulohumeral,dystrophie facio-scapulo-humerale,allenamento aerobico,overwork weakness"
+},
+{
+"id": 475,
+"condition_name": "Sindrome da tachicardia posturale ortostatica (POTS) — esercizio terapeutico",
+"condition_keywords": "sindrome da tachicardia posturale ortostatica,POTS,postural orthostatic tachycardia syndrome,sindrome de taquicardia postural ortostatica,syndrome de tachycardie posturale orthostatique,disautonomia,p"
+},
+{
+"id": 476,
+"condition_name": "Trapianto di cellule staminali ematopoietiche — esercizio e riabilitazione",
+"condition_keywords": "trapianto di cellule staminali ematopoietiche,trapianto di midollo osseo,hematopoietic stem cell transplantation,trasplante de celulas madre hematopoyeticas,greffe de cellules souches hematopoietiques"
+},
+{
+"id": 477,
+"condition_name": "Gomito del lanciatore (apofisite dell'epicondilo mediale) — gestione conservativa",
+"condition_keywords": "gomito del lanciatore,apofisite dell'epicondilo mediale,little league elbow,medial epicondyle apophysitis,codo de little league,coude du lanceur,epitrocleite giovanile"
+},
+{
+"id": 478,
+"condition_name": "Necrosi avascolare della testa del femore (adulto) — riabilitazione post-decompressione midollare",
+"condition_keywords": "necrosi avascolare della testa del femore,osteonecrosi della testa del femore,avascular necrosis femoral head,necrosis avascular de la cabeza femoral,necrose avasculaire de la tete femorale,decompress"
+},
+{
+"id": 479,
+"condition_name": "Dolore pelvico gravidico (disfunzione della sinfisi pubica / pelvic girdle pain)",
+"condition_keywords": "dolore pelvico gravidico,disfunzione della sinfisi pubica,pelvic girdle pain,symphysis pubis dysfunction,dolor pelvico del embarazo,douleur pelvienne de grossesse,lombopelvico gravidanza"
+},
+{
+"id": 480,
+"condition_name": "Sindrome da conflitto posteriore di caviglia (os trigonum)",
+"condition_keywords": "sindrome da conflitto posteriore di caviglia,os trigonum,posterior ankle impingement,pinzamiento posterior de tobillo,conflit posterieur de cheville,dolore posteriore di caviglia in flessione plantare"
+},
+{
+"id": 481,
+"condition_name": "Sindrome da fragilita (frailty) nell'anziano — esercizio terapeutico",
+"condition_keywords": "sindrome da fragilita,frailty syndrome,fragilita dell'anziano,sindrome de fragilidad,syndrome de fragilite,fenotipo di Fried,Vivifrail,Otago"
+},
+{
+"id": 483,
+"condition_name": "Malattia di Wilson — fisioterapia dei disturbi del movimento",
+"condition_keywords": "malattia di wilson,degenerazione epatolenticolare,wilson disease,enfermedad de wilson,maladie de wilson,disturbi del movimento da accumulo di rame"
+},
+{
+"id": 484,
+"condition_name": "Piede piatto flessibile pediatrico — gestione conservativa",
+"condition_keywords": "piede piatto flessibile pediatrico,piede piatto infantile,pediatric flexible flatfoot,pie plano flexible infantil,pied plat flexible infantile,arco plantare bambino"
+},
+{
+"id": 485,
+"condition_name": "Genu valgo/varo idiopatico pediatrico — gestione conservativa",
+"condition_keywords": "genu valgo idiopatico,genu varo idiopatico,ginocchia a x,ginocchia a parentesi,idiopathic genu valgum,idiopathic genu varum,genu valgo infantil,genu varum infantile"
+},
+{
+"id": 486,
+"condition_name": "Distonia generalizzata — neuroriabilitazione",
+"condition_keywords": "distonia generalizzata,generalized dystonia,distonia generalizada,dystonie generalisee,disturbo del movimento distonico,tossina botulinica e riabilitazione"
+},
+{
+"id": 487,
+"condition_name": "Ipertensione polmonare — esercizio terapeutico supervisionato",
+"condition_keywords": "ipertensione polmonare,ipertensione arteriosa polmonare,pulmonary hypertension,pulmonary arterial hypertension,hipertension pulmonar,hypertension pulmonaire,PAH,cuore polmonare"
+},
+{
+"id": 488,
+"condition_name": "Labirintite — riabilitazione vestibolare",
+"condition_keywords": "labirintite,labyrinthitis,laberintitis,labyrinthite,neurite cocleovestibolare,vertigine con ipoacusia,perdita uditiva improvvisa e vertigine"
+},
+{
+"id": 489,
+"condition_name": "Sindrome di Ramsay Hunt — riabilitazione della paralisi facciale e della componente vestibolo-cocleare",
+"condition_keywords": "sindrome di ramsay hunt,herpes zoster oticus,ramsay hunt syndrome,sindrome de ramsay hunt,syndrome de ramsay hunt,paralisi facciale da fuoco di sant'antonio,zoster otico"
+},
+{
+"id": 490,
+"condition_name": "Neurinoma dell'acustico (schwannoma vestibolare) — riabilitazione vestibolare pre e post-chirurgica",
+"condition_keywords": "neurinoma dell'acustico,schwannoma vestibolare,acoustic neuroma,vestibular schwannoma,neurinoma del acustico,neurinome de l'acoustique,tumore dell'VIII nervo cranico"
+},
+{
+"id": 491,
+"condition_name": "Tromboangioite obliterante (malattia di Buerger) — esercizio terapeutico supervisionato",
+"condition_keywords": "tromboangioite obliterante,malattia di buerger,buerger disease,thromboangiitis obliterans,enfermedad de buerger,maladie de buerger,claudicatio da vasculite,vasculite dei piccoli vasi da fumo"
+},
+{
+"id": 492,
+"condition_name": "Debolezza acquisita in terapia intensiva (ICU-acquired weakness) — mobilizzazione precoce",
+"condition_keywords": "debolezza acquisita in terapia intensiva,ICU-acquired weakness,polineuropatia del paziente critico,miopatia del paziente critico,debilidad adquirida en la UCI,faiblesse acquise en reanimation,decondiz"
+},
+{
+"id": 493,
+"condition_name": "Plagiocefalia posizionale del lattante — riposizionamento e fisioterapia",
+"condition_keywords": "plagiocefalia posizionale,plagiocefalia deformativa,positional plagiocephaly,deformational plagiocephaly,plagiocefalia posicional,plagiocephalie positionnelle,testa piatta del neonato,asimmetria crani"
+},
+{
+"id": 494,
+"condition_name": "Sarcoma dei tessuti molli degli arti inferiori — riabilitazione funzionale post-chirurgica",
+"condition_keywords": "sarcoma dei tessuti molli,soft tissue sarcoma,sarcoma de tejidos blandos,sarcome des tissus mous,chirurgia di salvataggio d'arto,limb salvage surgery,riabilitazione oncologica ortopedica"
+},
+{
+"id": 495,
+"condition_name": "Lesione midollare traumatica — riabilitazione multidisciplinare",
+"condition_keywords": "lesione midollare traumatica,tetraplegia,paraplegia,traumatic spinal cord injury,lesion medular traumatica,lesion de la moelle epiniere,mielolesione,disreflessia autonomica"
+},
+{
+"id": 496,
+"condition_name": "Malattia di Kohler (osteocondrosi dello scafoide tarsale) — gestione conservativa",
+"condition_keywords": "malattia di kohler,osteocondrosi dello scafoide tarsale,kohler disease,tarsal navicular osteochondrosis,enfermedad de kohler,maladie de kohler,necrosi avascolare dello scafoide tarsale infantile"
+},
+{
+"id": 497,
+"condition_name": "Malattia di Panner (osteocondrosi del capitello omerale) — gestione conservativa",
+"condition_keywords": "malattia di panner,osteocondrosi del capitello omerale,panner disease,capitellar osteochondrosis,enfermedad de panner,maladie de panner,osteocondrosi del gomito infantile"
+},
+{
+"id": 498,
+"condition_name": "Sindrome della costola scivolata (slipping rib syndrome) — terapia manuale e mobilizzazione costale",
+"condition_keywords": "sindrome della costola scivolata,slipping rib syndrome,costilla deslizante,syndrome de la cote glissante,ipermobilita costale,dolore costale inferiore,manovra dell'uncino"
+},
+{
+"id": 499,
+"condition_name": "Malattia di Pompe (glicogenosi di tipo II) — esercizio terapeutico",
+"condition_keywords": "malattia di pompe,glicogenosi di tipo ii,deficit di alfa-glucosidasi acida,pompe disease,glycogen storage disease type ii,enfermedad de pompe,maladie de pompe,LOPD,forma tardiva di pompe"
+},
+{
+"id": 500,
+"condition_name": "Fibrodisplasia ossificante progressiva (FOP) — gestione riabilitativa con estrema cautela",
+"condition_keywords": "fibrodisplasia ossificante progressiva,FOP,myositis ossificans progressiva,fibrodysplasia ossificans progressiva,fibrodisplasia osificante progresiva,fibrodysplasie ossifiante progressive,ossificazion"
+},
+{
+"id": 501,
+"condition_name": "Sindrome di Paget-Schroetter (trombosi venosa da sforzo dell'arto superiore)",
+"condition_keywords": "sindrome di paget-schroetter,trombosi venosa da sforzo,effort thrombosis,paget-schroetter syndrome,primary effort thrombosis,trombosis venosa por esfuerzo,thrombose veineuse d'effort,trombosi della ve"
+},
+{
+"id": 502,
+"condition_name": "Distrofia muscolare di Becker (BMD) — esercizio terapeutico",
+"condition_keywords": "distrofia muscolare di becker,becker muscular dystrophy,BMD,distrofia muscular de becker,dystrophie musculaire de becker,dystrofinopatia a esordio tardivo"
+},
+{
+"id": 503,
+"condition_name": "Deformita di Haglund con tendinopatia achillea inserzionale — riabilitazione post-chirurgica progressiva",
+"condition_keywords": "deformita di haglund,haglund deformity,tendinopatia achillea inserzionale,insertional achilles tendinopathy,exostosi calcaneare posteriore,bursite retrocalcaneare,pump bump"
+},
+{
+"id": 504,
+"condition_name": "Sindrome di Klippel-Feil — riabilitazione e gestione del dolore",
+"condition_keywords": "sindrome di klippel-feil,klippel-feil syndrome,fusione congenita delle vertebre cervicali,klippel feil,instabilita cervicale congenita"
+},
+{
+"id": 505,
+"condition_name": "Artrogriposi multipla congenita — fisioterapia pediatrica precoce",
+"condition_keywords": "artrogriposi multipla congenita,arthrogryposis multiplex congenita,AMC,contratture articolari multiple congenite,discinesia articolare congenita multipla"
+},
+{
+"id": 506,
+"condition_name": "Paralisi diaframmatica — riabilitazione respiratoria",
+"condition_keywords": "paralisi diaframmatica,diaphragmatic paralysis,paralisi del nervo frenico,phrenic nerve palsy,disfunzione del diaframma,paralisi frenica"
+},
+{
+"id": 507,
+"condition_name": "Malattia di Blount (tibia vara patologica) — gestione conservativa e riabilitazione post-chirurgica",
+"condition_keywords": "malattia di blount,tibia vara patologica,blount disease,osteocondrosi tibiale prossimale,genu varo patologico infantile"
+},
+{
+"id": 508,
+"condition_name": "Sindrome da vibrazione mano-braccio (HAVS) — gestione e riduzione dell'esposizione",
+"condition_keywords": "sindrome da vibrazione mano-braccio,hand-arm vibration syndrome,HAVS,vasospasmo digitale da vibrazione,dito bianco da vibrazione,scala di stoccolma"
+},
+{
+"id": 509,
+"condition_name": "Acondroplasia — attività fisica ed esercizio terapeutico nell'adulto",
+"condition_keywords": "acondroplasia,achondroplasia,displasia scheletrica,nanismo acondroplasico,mutazione FGFR3,stenosi spinale da acondroplasia"
+},
+{
+"id": 510,
+"condition_name": "Osteopetrosi (malattia delle ossa di marmo) — gestione riabilitativa delle fratture",
+"condition_keywords": "osteopetrosi,osteopetrosis,malattia delle ossa di marmo,malattia di albers-schonberg,osteosclerosi generalizzata,fragilita ossea da osteopetrosi"
+},
+{
+"id": 511,
+"condition_name": "Distrofia miotonica di tipo 1 (Steinert) — esercizio terapeutico",
+"condition_keywords": "distrofia miotonica di tipo 1,malattia di steinert,myotonic dystrophy type 1,DM1,miotonia distrofica"
+},
+{
+"id": 512,
+"condition_name": "Atrofia multisistemica (MSA) — riabilitazione fisioterapica",
+"condition_keywords": "atrofia multisistemica,multiple system atrophy,MSA,MSA-P,MSA-C,ipotensione ortostatica neurodegenerativa,atassia cerebellare progressiva"
+},
+{
+"id": 513,
+"condition_name": "Paralisi sopranucleare progressiva (PSP) — riabilitazione e prevenzione delle cadute",
+"condition_keywords": "paralisi sopranucleare progressiva,progressive supranuclear palsy,PSP,sindrome di Richardson,parkinsonismo atipico con cadute precoci"
+},
+{
+"id": 514,
+"condition_name": "Neurofibromatosi di tipo 1 (NF1) — gestione fisioterapica",
+"condition_keywords": "neurofibromatosi di tipo 1,neurofibromatosis type 1,NF1,malattia di von recklinghausen,neurofibromi plessiformi,displasia tibiale da NF1"
+},
+{
+"id": 515,
+"condition_name": "Sindrome di Angelman — fisioterapia dello sviluppo motorio",
+"condition_keywords": "sindrome di angelman,angelman syndrome,sindrome della bambola felice,happy puppet syndrome,delezione 15q11-13,atassia da sindrome di angelman"
+},
+{
+"id": 516,
+"condition_name": "Epidermolisi bollosa — fisioterapia e prevenzione delle contratture",
+"condition_keywords": "epidermolisi bollosa,epidermolysis bullosa,EB,fragilita cutanea genetica,pseudosindattilia da EB,contratture da epidermolisi bollosa"
+},
+{
+"id": 517,
+"condition_name": "Sindrome di Turner — fisioterapia e gestione ortopedica",
+"condition_keywords": "sindrome di turner,turner syndrome,monosomia X,45X0,linfedema congenito da sindrome di turner,deformita di madelung"
+},
+{
+"id": 518,
+"condition_name": "Malattia di Fabry — attività fisica ed esercizio terapeutico",
+"condition_keywords": "malattia di fabry,fabry disease,deficit di alfa-galattosidasi A,malattia da accumulo lisosomiale,acroparestesia da fabry,intolleranza all'esercizio da fabry"
+},
+{
+"id": 519,
+"condition_name": "Sindrome da sovrallenamento (Overtraining Syndrome) — gestione e recupero graduale",
+"condition_keywords": "sindrome da sovrallenamento,overtraining syndrome,OTS,sindrome da surmenage sportivo,affaticamento cronico da allenamento,riposo relativo"
+},
+{
+"id": 520,
+"condition_name": "Cardiopatia congenita dell'adulto (ACHD) — prescrizione dell'esercizio di forza e resistenza",
+"condition_keywords": "cardiopatia congenita dell'adulto,adult congenital heart disease,ACHD,esercizio di forza in cardiopatia congenita,training di resistenza in ACHD"
+},
+{
+"id": 521,
+"condition_name": "Adenomiosi — fisioterapia del pavimento pelvico",
+"condition_keywords": "adenomiosi,adenomyosis,endometriosi interna,dolore pelvico da adenomiosi,dismenorrea da adenomiosi"
+},
+{
+"id": 522,
+"condition_name": "Proctalgia fugace — fisioterapia del pavimento pelvico",
+"condition_keywords": "proctalgia fugace,proctalgia fugax,spasmo del pavimento pelvico anorettale,dolore anorettale episodico,sindrome dell'elevatore dell'ano correlata"
+},
+{
+"id": 523,
+"condition_name": "Emocromatosi ereditaria — gestione riabilitativa dell'artropatia",
+"condition_keywords": "emocromatosi ereditaria,hereditary hemochromatosis,artropatia da emocromatosi,iron overload arthropathy,segno del pugno di ferro,artrite da sovraccarico di ferro"
+},
+{
+"id": 524,
+"condition_name": "Anemia aplastica — attività fisica e riabilitazione post-trapianto",
+"condition_keywords": "anemia aplastica,aplastic anemia,trapianto allogenico di cellule staminali ematopoietiche,HSCT,esercizio dopo trapianto di midollo,deficit midollare,pancitopenia"
+},
+{
+"id": 525,
+"condition_name": "Deficit di G6PD — gestione dell'attività fisica e sport",
+"condition_keywords": "deficit di G6PD,glucosio-6-fosfato deidrogenasi,favismo,emolisi da esercizio,G6PD deficiency,anemia emolitica da G6PD"
+},
+{
+"id": 526,
+"condition_name": "Amiloidosi cardiaca — riabilitazione ed esercizio fisico",
+"condition_keywords": "amiloidosi cardiaca,cardiac amyloidosis,ATTR-CM,amiloidosi da transtiretina,amiloidosi AL,cardiomiopatia amiloidotica,riabilitazione cardiologica in amiloidosi"
+},
+{
+"id": 527,
+"condition_name": "Ileo post-operatorio — mobilizzazione precoce dopo chirurgia addominale",
+"condition_keywords": "ileo post-operatorio, ileo paralitico, mobilizzazione precoce, chirurgia addominale, recupero funzione intestinale, post-op mobilization, postoperative ileus"
+},
+{
+"id": 528,
+"condition_name": "Ragade anale cronica — fisioterapia del pavimento pelvico",
+"condition_keywords": "ragade anale, fissura anale, ipertono dello sfintere anale, dolore anale cronico, biofeedback anale, chronic anal fissure, PAF trial"
+},
+{
+"id": 529,
+"condition_name": "Mielofibrosi — attività fisica nelle neoplasie mieloproliferative",
+"condition_keywords": "mielofibrosi, neoplasie mieloproliferative, MPN, splenomegalia, fatigue oncologica, myelofibrosis"
+},
+{
+"id": 530,
+"condition_name": "Pancreatite cronica — attività fisica e gestione del dimagrimento muscolare",
+"condition_keywords": "pancreatite cronica, insufficienza pancreatica esocrina, sarcopenia pancreatica, chronic pancreatitis"
+},
+{
+"id": 531,
+"condition_name": "Osteomalacia — esercizio terapeutico e gestione della debolezza muscolare",
+"condition_keywords": "osteomalacia, deficit di vitamina D, debolezza muscolare prossimale, mineralizzazione ossea, osteomalacia"
+},
+{
+"id": 532,
+"condition_name": "Malattia diverticolare e diverticolite — attività fisica e prevenzione",
+"condition_keywords": "diverticolite, malattia diverticolare, diverticolosi, diverticoli del colon, prevenzione diverticolite, diverticolite acuta"
+},
+{
+"id": 533,
+"condition_name": "Rene policistico autosomico dominante (ADPKD) — attività fisica e gestione dell'esercizio",
+"condition_keywords": "rene policistico, ADPKD, malattia renale policistica autosomica dominante, policistosi renale, cisti renali multiple"
+},
+{
+"id": 534,
+"condition_name": "Linfoma (Hodgkin e non-Hodgkin) — esercizio aerobico durante la chemioterapia",
+"condition_keywords": "linfoma, linfoma di Hodgkin, linfoma non-Hodgkin, esercizio durante chemioterapia, HELP trial, fatica oncologica linfoma"
+},
+{
+"id": 535,
+"condition_name": "Ernia inguinale — riparazione chirurgica e ripresa dell'attività fisica",
+"condition_keywords": "ernia inguinale, erniorrafia, ernioplastica, riparazione ernia, ernia inguinale laparoscopica, Lichtenstein, ripresa sport post-ernia"
+},
+{
+"id": 536,
+"condition_name": "Citopenia da neoplasia ematologica in trattamento attivo — soglie di sicurezza per l'esercizio",
+"condition_keywords": "citopenia, trombocitopenia da chemioterapia, neutropenia da chemioterapia, esercizio fisico in sicurezza, leucemia, sindrome mielodisplastica, soglie piastriniche esercizio"
+},
+{
+"id": 537,
+"condition_name": "Infezioni urinarie ricorrenti e disfunzione del pavimento pelvico — riabilitazione con biofeedback",
+"condition_keywords": "cistite ricorrente, infezioni urinarie ricorrenti, IVU ricorrenti, pavimento pelvico iperattivo, svuotamento vescicale incompleto, residuo post-minzionale, biofeedback pavimento pelvico"
+},
+{
+"id": 538,
+"condition_name": "Diabete gestazionale — prescrizione dell'esercizio fisico",
+"condition_keywords": "diabete gestazionale, GDM, glicemia in gravidanza, esercizio in gravidanza, cammino postprandiale"
+},
+{
+"id": 539,
+"condition_name": "Carcinoma dell'endometrio — esercizio fisico e gestione del rischio di linfedema",
+"condition_keywords": "carcinoma endometriale, cancro dell'endometrio, cancro uterino, linfedema arto inferiore ginecologico, EPEC, DEUS"
+},
+{
+"id": 540,
+"condition_name": "Riabilitazione dopo gastrectomia (tumore gastrico) — fisioterapia perioperatoria",
+"condition_keywords": "gastrectomia, tumore gastrico, cancro dello stomaco, ERAS gastrectomia, mobilizzazione precoce post-gastrectomia, allenamento muscoli respiratori"
+},
+{
+"id": 541,
+"condition_name": "Sferocitosi ereditaria — attività fisica e gestione della splenomegalia",
+"condition_keywords": "sferocitosi ereditaria, anemia emolitica congenita, splenomegalia, splenectomia, rischio di rottura splenica"
+},
+{
+"id": 542,
+"condition_name": "Ulcera peptica (gastrica e duodenale) — attività fisica e fattori di rischio",
+"condition_keywords": "ulcera peptica, ulcera gastrica, ulcera duodenale, Helicobacter pylori, FANS e ulcera, attività fisica e ulcera"
+},
+{
+"id": 543,
+"condition_name": "Sindrome dell'intestino corto e nutrizione parenterale domiciliare — esercizio fisico",
+"condition_keywords": "sindrome intestino corto, short bowel syndrome, nutrizione parenterale domiciliare, HPN, catetere venoso centrale, insufficienza intestinale cronica"
+},
+{
+"id": 544,
+"condition_name": "Colite ischemica da esercizio intenso (\"colite del corridore\") — prevenzione e ripresa dell'attività",
+"condition_keywords": "colite ischemica, colite del corridore, runner's colitis, ischemia intestinale da sforzo, dolore addominale durante la corsa"
+},
+{
+"id": 545,
+"condition_name": "Carcinoma renale e nefrectomia — ripresa dell'attività fisica e sport con rene singolo",
+"condition_keywords": "carcinoma renale, cancro del rene, nefrectomia, rene singolo, ripresa sport post-nefrectomia"
+},
+{
+"id": 546,
+"condition_name": "Anemia da carenza di ferro — capacità di esercizio e gestione",
+"condition_keywords": "anemia sideropenica, carenza di ferro, ferritina bassa, atleta donna, capacità aerobica, VO2max"
+},
+{
+"id": 547,
+"condition_name": "Cancro del testicolo — esercizio durante chemioterapia e sopravvivenza",
+"condition_keywords": "cancro del testicolo, carcinoma testicolare, orchiectomia, chemioterapia BEP, bleomicina, RPLND, dissezione linfonodale retroperitoneale"
+},
+{
+"id": 548,
+"condition_name": "Vescica neurogena da lesione del motoneurone inferiore (sacrale) — gestione riabilitativa",
+"condition_keywords": "vescica neurogena, lesione motoneurone inferiore, lesione sacrale, cauda equina, vescica acontrattile, Credé, Valsalva minzionale, cateterismo intermittente"
+},
+{
+"id": 549,
+"condition_name": "Porpora di Henoch-Schönlein / vasculite da IgA",
+"condition_keywords": "{henoch-schonlein,porpora,\"vasculite igA\",\"iga vasculitis\",hsp}"
+},
+{
+"id": 550,
+"condition_name": "Leucemia mieloide cronica (LMC) in trattamento con inibitori tirosin-chinasici (TKI)",
+"condition_keywords": "{lmc,cml,\"leucemia mieloide cronica\",imatinib,nilotinib,dasatinib,ponatinib,tki}"
+},
+{
+"id": 551,
+"condition_name": "Tiroidite post-partum",
+"condition_keywords": "{\"tiroidite postpartum\",\"tiroidite post-partum\",\"postpartum thyroiditis\"}"
+},
+{
+"id": 552,
+"condition_name": "Tiroidite di Hashimoto / ipotiroidismo autoimmune",
+"condition_keywords": "{hashimoto,\"tiroidite autoimmune\",ipotiroidismo,hypothyroidism}"
+},
+{
+"id": 553,
+"condition_name": "Steatosi epatica metabolica (MASLD/MASH, ex steatosi epatica non alcolica)",
+"condition_keywords": "{masld,mash,nafld,\"steatosi epatica\",\"fegato grasso\",steatoepatite}"
+},
+{
+"id": 554,
+"condition_name": "Epatite virale cronica C — esercizio fisico ed enzimi epatici",
+"condition_keywords": "{\"epatite c\",hcv,\"epatite virale cronica\",\"hepatitis c\"}"
+},
+{
+"id": 555,
+"condition_name": "Iponatremia da esercizio (EAH) in sport di endurance",
+"condition_keywords": "{eah,\"iponatremia da esercizio\",\"exercise-associated hyponatremia\",\"iponatremia sportiva\"}"
+},
+{
+"id": 556,
+"condition_name": "Neutropenia febbrile in pazienti oncologici/ematologici",
+"condition_keywords": "{\"neutropenia febbrile\",\"febrile neutropenia\",neutropenia,\"conta neutrofili\"}"
+},
+{
+"id": 557,
+"condition_name": "Porfiria acuta — riabilitazione dopo attacco acuto (neuropatia/tetraparesi)",
+"condition_keywords": "{porfiria,\"porfiria acuta intermittente\",\"acute intermittent porphyria\",\"neuropatia porfirica\"}"
+},
+{
+"id": 558,
+"condition_name": "Leucemia linfatica cronica (LLC) — attività fisica in watch-and-wait e in trattamento con inibitori BTK",
+"condition_keywords": "{llc,cll,\"leucemia linfatica cronica\",\"chronic lymphocytic leukemia\",ibrutinib,\"inibitori btk\"}"
+},
+{
+"id": 559,
+"condition_name": "Emorroidi — gestione di stitichezza, sforzo defecatorio e tempo da seduti",
+"condition_keywords": "{emorroidi,hemorrhoids,stitichezza,\"sforzo defecatorio\"}"
+},
+{
+"id": 560,
+"condition_name": "Varicocele — dolore scrotale correlato all attività fisica",
+"condition_keywords": "{varicocele,\"dolore scrotale\",varicocelectomia}"
+},
+{
+"id": 561,
+"condition_name": "Fibromi/miomi uterini — attività fisica e gestione dei sintomi",
+"condition_keywords": "{\"fibroma uterino\",\"mioma uterino\",leiomioma,\"uterine fibroids\"}"
+},
+{
+"id": 562,
+"condition_name": "Malattia di Peyronie — terapia di trazione/stiramento peniena",
+"condition_keywords": "{peyronie,\"malattia di peyronie\",\"curvatura penina\",\"trazione peniena\"}"
+},
+{
+"id": 563,
+"condition_name": "Disfunzione erettile — allenamento del pavimento pelvico ed esercizio aerobico",
+"condition_keywords": "{\"disfunzione erettile\",\"erectile dysfunction\",ed,impotenza}"
+},
+{
+"id": 564,
+"condition_name": "Ascite da cirrosi — adattamento dell attività fisica",
+"condition_keywords": "{ascite,cirrosi,\"ascite epatica\"}"
+},
+{
+"id": 565,
+"condition_name": "Encefalopatia epatica — ruolo dell esercizio e rischio di cadute",
+"condition_keywords": "{\"encefalopatia epatica\",\"hepatic encephalopathy\",\"sarcopenia epatica\"}"
+},
+{
+"id": 566,
+"condition_name": "Insufficienza ovarica precoce (POI) — attività fisica per salute ossea e cardiovascolare",
+"condition_keywords": "{\"insufficienza ovarica precoce\",poi,\"menopausa precoce\",\"premature ovarian insufficiency\"}"
+},
+{
+"id": 567,
+"condition_name": "Ipoglicemia da esercizio nel diabete (tipo 1 e tipo 2 insulino-trattato)",
+"condition_keywords": "{\"ipoglicemia da esercizio\",\"exercise-induced hypoglycemia\",\"diabete tipo 1\",\"gestione glicemica sport\"}"
+},
+{
+"id": 568,
+"condition_name": "Insulinoma — rischio di ipoglicemia indotta dall esercizio",
+"condition_keywords": "{insulinoma,\"ipoglicemia da insulinoma\",\"tumore insulino-secernente\"}"
+},
+{
+"id": 569,
+"condition_name": "Emofilia — classificazione degli sport per rischio emorragico",
+"condition_keywords": "{emofilia,hemophilia,\"sport e emofilia\",\"classificazione rischio emorragico\"}"
+},
+{
+"id": 570,
+"condition_name": "Mastocitosi — esercizio come possibile trigger di degranulazione mastocitaria",
+"condition_keywords": "{mastocitosi,mastocitosis,\"degranulazione mastocitaria\",\"esercizio e mastociti\"}"
+},
+{
+"id": 571,
+"condition_name": "Leucemia mieloide acuta (LMA) — esercizio durante chemioterapia intensiva/trapianto",
+"condition_keywords": "{lma,aml,\"leucemia mieloide acuta\",\"trapianto di cellule staminali\",hsct}"
+},
+{
+"id": 572,
+"condition_name": "Sindrome da dumping (post-gastrectomia/chirurgia bariatrica)",
+"condition_keywords": "{dumping,\"sindrome da dumping\",\"dumping syndrome\",\"ipoglicemia post-prandiale\"}"
+},
+{
+"id": 573,
+"condition_name": "Iperinsulinismo da esercizio (EIHI) — ipoglicemia indotta da sforzo anaerobico",
+"condition_keywords": "{eihi,\"iperinsulinismo da esercizio\",\"exercise-induced hyperinsulinism\",slc16a1,mct1}"
+},
+{
+"id": 574,
+"condition_name": "Pectus excavatum/carinatum — riabilitazione pre/post-chirurgica (procedura Nuss) ed esercizio",
+"condition_keywords": "pectus excavatum, pectus carinatum, torace imbutiforme, torace carenato, deformità della parete toracica, procedura Nuss, tecnica Ravitch, barra toracica retrosternale"
+},
+{
+"id": 575,
+"condition_name": "Deficit di alfa-1 antitripsina (AATD) con enfisema — riabilitazione polmonare ed esercizio",
+"condition_keywords": "alfa-1 antitripsina, AATD, enfisema genetico, BPCO genetica, deficit AAT, terapia aumentativa, riabilitazione polmonare"
+},
+{
+"id": 576,
+"condition_name": "Circolazione di Fontan (palliazione per cuore univentricolare) — esercizio fisico e riabilitazione",
+"condition_keywords": "Fontan, cuore univentricolare, palliazione cardiochirurgica, cardiopatia congenita complessa, CPET pazienti Fontan"
+},
+{
+"id": 577,
+"condition_name": "Sindrome di Prader-Willi — attività fisica e gestione multidisciplinare",
+"condition_keywords": "Prader-Willi, PWS, ipotonia congenita, iperfagia, obesità genetica, terapia con ormone della crescita (GH), scoliosi associata"
+},
+{
+"id": 578,
+"condition_name": "Malattia di Kawasaki — esiti cardiaci a lungo termine e stratificazione del rischio per l'attività fisica",
+"condition_keywords": "Kawasaki, aneurisma coronarico, vasculite pediatrica, Risk Level AHA, ectasia coronarica, ischemia silente pediatrica"
+},
+{
+"id": 579,
+"condition_name": "Malattia granulomatosa cronica (CGD) — precauzioni ambientali per l'attività fisica",
+"condition_keywords": "CGD, malattia granulomatosa cronica, immunodeficienza primitiva, rischio infettivo ambientale, Aspergillus, mulch pneumonitis"
+},
+{
+"id": 580,
+"condition_name": "Sindrome del QT lungo (LQTS) — stratificazione del rischio sportivo e gestione dell'esercizio",
+"condition_keywords": "QT lungo, LQTS, canalopatia cardiaca, LQT1, LQT2, LQT3, morte cardiaca improvvisa, nuoto e QT lungo"
+},
+{
+"id": 581,
+"condition_name": "Sindrome di Brugada — gestione dell'attività fisica e rischio da ipertermia",
+"condition_keywords": "Brugada, canalopatia cardiaca, pattern ECG tipo 1, morte cardiaca improvvisa, ipertermia e aritmia"
+},
+{
+"id": 582,
+"condition_name": "Tachicardia ventricolare polimorfa catecolaminergica (CPVT) — controindicazione allo sport competitivo",
+"condition_keywords": "CPVT, canalopatia cardiaca, RyR2, tachicardia ventricolare bidirezionale, morte cardiaca improvvisa da esercizio"
+},
+{
+"id": 583,
+"condition_name": "Cardiomiopatia aritmogena del ventricolo destro (ARVC/ACM) — esercizio come fattore di progressione di malattia",
+"condition_keywords": "ARVC, ACM, cardiomiopatia aritmogena, desmosoma, morte cardiaca improvvisa nell'atleta, stress di parete ventricolo destro"
+},
+{
+"id": 584,
+"condition_name": "Telangiectasia emorragica ereditaria (HHT, malattia di Rendu-Osler-Weber) — precauzioni per l'attività fisica",
+"condition_keywords": "HHT, Rendu-Osler-Weber, malformazione arterovenosa polmonare, PAVM, epistassi, telangiectasia"
+},
+{
+"id": 585,
+"condition_name": "Sarcoma di Ewing — survivorship e attività fisica dopo trattamento",
+"condition_keywords": "sarcoma di Ewing, oncologia pediatrica, chemioterapia VDC-IE, vincristina, neuropatia periferica, cardiotossicità da antracicline, salvataggio d'arto"
+},
+{
+"id": 586,
+"condition_name": "Osteosarcoma — survivorship e attività fisica dopo trattamento",
+"condition_keywords": "osteosarcoma, oncologia pediatrica, chemioterapia MAP, cisplatino, doxorubicina, cardiotossicità, endoprotesi oncologica, salvataggio d'arto"
+},
+{
+"id": 587,
+"condition_name": "Idrocefalo normoteso (iNPH) — tap test, outcome dopo derivazione ed esercizio fisico",
+"condition_keywords": "idrocefalo normoteso, iNPH, tap test, derivazione ventricolo-peritoneale, disturbo dell'andatura nell'anziano"
+},
+{
+"id": 588,
+"condition_name": "Mielite trasversa — riabilitazione motoria ed esercizio fisico (estrapolato da linee guida SCI non traumatiche)",
+"condition_keywords": "mielite trasversa, lesione midollare non traumatica, SCI, recupero neurologico, ASIA Impairment Scale"
+},
+{
+"id": 589,
+"condition_name": "Paralisi supranucleare progressiva (PSP) — riabilitazione motoria e gestione del rischio di caduta",
+"condition_keywords": "PSP, parkinsonismo atipico, paralisi supranucleare progressiva, rischio di caduta, LSVT BIG"
+},
+{
+"id": 590,
+"condition_name": "Atresia biliare dopo intervento di Kasai — precauzioni sportive in ipertensione portale",
+"condition_keywords": "atresia biliare, intervento di Kasai, portoenterostomia, ipertensione portale pediatrica, splenomegalia, varici esofagee"
+},
+{
+"id": 591,
+"condition_name": "Nevralgia del pudendo — fisioterapia del pavimento pelvico e precauzioni posturali",
+"condition_keywords": "nevralgia del pudendo, criteri di Nantes, intrappolamento del nervo pudendo, dolore pelvico cronico, ciclismo e nevralgia del pudendo"
+},
+{
+"id": 592,
+"condition_name": "Mesotelioma Pleurico Maligno — Riabilitazione Respiratoria e Oncologica",
+"condition_keywords": "{mesotelioma,\"mesotelioma pleurico\",\"tumore pleura\",amianto,asbesto,pleurectomia,\"versamento pleurico\",\"riabilitazione polmonare oncologica\"}"
+},
+{
+"id": 593,
+"condition_name": "Colangiocarcinoma — Attività Fisica in Trattamento e Perioperatorio",
+"condition_keywords": "{colangiocarcinoma,\"tumore vie biliari\",\"colangiocarcinoma intraepatico\",\"colangiocarcinoma perihilare\",\"resezione epatica\",\"chemioterapia vie biliari\",\"fatica oncologica\"}"
+},
+{
+"id": 594,
+"condition_name": "Carcinoma Esofageo — Riabilitazione Post-Esofagectomia",
+"condition_keywords": "{\"carcinoma esofageo\",\"cancro esofago\",esofagectomia,\"ERAS esofagectomia\",\"prehabilitation esofago\",\"riabilitazione post-chirurgica toracica\"}"
+},
+{
+"id": 595,
+"condition_name": "Linfangioleiomiomatosi (LAM) — Riabilitazione Respiratoria",
+"condition_keywords": "{LAM,linfangioleiomiomatosi,\"pneumotorace spontaneo\",\"malattia polmonare cistica\",\"riabilitazione polmonare donne\",\"mTOR inibitori\"}"
+},
+{
+"id": 596,
+"condition_name": "Sindrome di Dressler — Pericardite Post-Infarto/Post-Cardiotomia",
+"condition_keywords": "{Dressler,\"pericardite post-infarto\",\"post-cardiac injury syndrome\",\"pericardite post-cardiotomia\",\"ritorno allo sport dopo pericardite\"}"
+},
+{
+"id": 597,
+"condition_name": "Sindrome di Rett — Scoliosi e Mantenimento della Deambulazione",
+"condition_keywords": "{\"sindrome di Rett\",Rett,\"scoliosi neuromuscolare\",\"stereotipie delle mani\",aprassia,\"deambulazione bambine\"}"
+},
+{
+"id": 598,
+"condition_name": "Sindrome di Loeys-Dietz — Gestione dell'Attività Fisica e Rischio Vascolare",
+"condition_keywords": "{Loeys-Dietz,\"aneurisma aortico\",\"dissezione aortica\",\"tessuto connettivo\",\"instabilità cervicale\",\"aneurismi arterie piccolo calibro\"}"
+},
+{
+"id": 599,
+"condition_name": "Sindrome di Noonan — Fisioterapia per Ipotonia e Ritardo Motorio",
+"condition_keywords": "{\"sindrome di Noonan\",ipotonia,\"ritardo motorio\",\"ipermobilità articolare\",rasopatia}"
+},
+{
+"id": 600,
+"condition_name": "Sindrome di Williams — Gestione della Laxity Articolare con l'Esercizio",
+"condition_keywords": "{\"sindrome di Williams\",Williams-Beuren,\"ipermobilità articolare\",ipotonia,\"stenosi aortica supravalvolare\"}"
+},
+{
+"id": 601,
+"condition_name": "Malattia di Niemann-Pick (Tipo A, B, C) — Mobilità, Spasticità e Precauzioni per Splenomegalia",
+"condition_keywords": "{Niemann-Pick,NPC,\"sfingomielinasi acida\",ASMD,\"atassia progressiva\",splenomegalia,\"malattia da accumulo lisosomiale\"}"
+},
+{
+"id": 602,
+"condition_name": "Displasia Congenita/Evolutiva dell'Anca — Riabilitazione Post-Osteotomia Periacetabolare (PAO)",
+"condition_keywords": "{\"displasia congenita anca\",DDH,\"osteotomia periacetabolare\",PAO,\"displasia dell'anca adolescenti\",\"tutore di Pavlik\"}"
+},
+{
+"id": 603,
+"condition_name": "Mucopolisaccaridosi Tipo I (Hurler/Hurler-Scheie/Scheie) — Precauzioni e Mobilità",
+"condition_keywords": "{\"mucopolisaccaridosi tipo I\",\"MPS I\",\"sindrome di Hurler\",Hurler-Scheie,Scheie,\"instabilità cervicale\",\"contratture articolari\"}"
+},
+{
+"id": 604,
+"condition_name": "Mucopolisaccaridosi Tipo IV A (Sindrome di Morquio A) — Screening Cervicale e Precauzioni per l'Attività Fisica",
+"condition_keywords": "{\"mucopolisaccaridosi tipo IV\",\"MPS IVA\",\"Morquio A\",\"instabilità atlanto-assiale\",\"displasia ossea\",\"compressione midollare\"}"
+},
+{
+"id": 605,
+"condition_name": "Mucopolisaccaridosi Tipo III (Sindrome di Sanfilippo) — Mantenimento della Funzione Motoria",
+"condition_keywords": "{\"mucopolisaccaridosi tipo III\",\"MPS III\",\"sindrome di Sanfilippo\",\"regressione neurocognitiva\",\"malattia neurodegenerativa pediatrica\"}"
+},
+{
+"id": 606,
+"condition_name": "Leucodistrofia Metacromatica (MLD) — Monitoraggio Motorio e Referral Fisioterapico",
+"condition_keywords": "{\"leucodistrofia metacromatica\",MLD,\"arilsulfatasi A\",demielinizzazione,Lenmeldy,\"atidarsagene autotemcel\"}"
+},
+{
+"id": 607,
+"condition_name": "Sclerosi Laterale Primaria (PLS) — Fisioterapia e Gestione della Spasticità",
+"condition_keywords": "{\"sclerosi laterale primaria\",PLS,\"malattia del motoneurone\",\"primo motoneurone\",\"spasticità progressiva\"}"
+},
+{
+"id": 608,
+"condition_name": "Sindrome di Ondine (Ipoventilazione Centrale Congenita, CCHS) — Sicurezza nell'Attività Fisica",
+"condition_keywords": "{\"sindrome di Ondine\",CCHS,\"ipoventilazione centrale congenita\",\"controllo respiratorio automatico\",\"rischio annegamento\"}"
+},
+{
+"id": 609,
+"condition_name": "Malattia di Alexander (GFAP) — Valutazione Fisioterapica e Gestione della Spasticità",
+"condition_keywords": "{\"malattia di Alexander\",GFAP,leucodistrofia,\"spasticità pediatrica\",ipotonia}"
+},
+{
+"id": 610,
+"condition_name": "Sindrome di Leigh — Precauzioni per l'Esercizio nella Malattia Mitocondriale Pediatrica",
+"condition_keywords": "{\"sindrome di Leigh\",\"encefalomiopatia necrotizzante subacuta\",\"malattia mitocondriale pediatrica\",\"regressione motoria\"}"
+},
+{
+"id": 611,
+"condition_name": "Arterite di Takayasu",
+"condition_keywords": "arterite di Takayasu, vasculite dei grossi vasi, Takayasu arteritis, vasculite aortica, malattia senza polso"
+},
+{
+"id": 612,
+"condition_name": "Granulomatosi con Poliangioite (GPA)",
+"condition_keywords": "granulomatosi con poliangioite, GPA, Wegener, vasculite ANCA-associata"
+},
+{
+"id": 613,
+"condition_name": "Miopatia Nemalinica",
+"condition_keywords": "miopatia nemalinica, nemaline myopathy, miopatia congenita a bastoncelli"
+},
+{
+"id": 614,
+"condition_name": "Sindrome di Ehlers-Danlos di Tipo Vascolare (vEDS)",
+"condition_keywords": "sindrome di Ehlers-Danlos vascolare, vEDS, EDS tipo IV, COL3A1"
+},
+{
+"id": 615,
+"condition_name": "Sindrome di Miller Fisher",
+"condition_keywords": "sindrome di Miller Fisher, Miller Fisher Syndrome, variante Guillain-Barre, atassia areflessia oftalmoplegia"
+},
+{
+"id": 616,
+"condition_name": "Poliarterite Nodosa",
+"condition_keywords": "poliarterite nodosa, PAN, vasculite dei vasi di medio calibro, mononeurite multipla"
+},
+{
+"id": 617,
+"condition_name": "Granulomatosi Eosinofila con Poliangioite (EGPA)",
+"condition_keywords": "granulomatosi eosinofila con poliangioite, EGPA, Churg-Strauss, vasculite ANCA eosinofila, asma vasculitico"
+},
+{
+"id": 618,
+"condition_name": "Miopatia Centronucleare",
+"condition_keywords": "miopatia centronucleare, centronuclear myopathy, miopatia miotubulare X-linked, XLMTM"
+},
+{
+"id": 619,
+"condition_name": "Distrofia Muscolare dei Cingoli (LGMD)",
+"condition_keywords": "distrofia muscolare dei cingoli, LGMD, limb-girdle muscular dystrophy"
+},
+{
+"id": 620,
+"condition_name": "Sindrome di Barth",
+"condition_keywords": "sindrome di Barth, Barth syndrome, cardiomiopatia cardioskeletale X-linked, deficit di tafazzina"
+},
+{
+"id": 621,
+"condition_name": "Acidemia Propionica",
+"condition_keywords": "acidemia propionica, propionic acidemia, acidemia organica"
+},
+{
+"id": 622,
+"condition_name": "Acidemia Metilmalonica",
+"condition_keywords": "acidemia metilmalonica, methylmalonic acidemia, aciduria metilmalonica"
+},
+{
+"id": 623,
+"condition_name": "Deficit di Carnitina Palmitoiltransferasi II (CPT II)",
+"condition_keywords": "deficit di carnitina palmitoiltransferasi II, CPT II deficiency, disturbo dell'ossidazione degli acidi grassi, rabdomiolisi da sforzo"
+},
+{
+"id": 624,
+"condition_name": "Malattia di McArdle (Glicogenosi Tipo V)",
+"condition_keywords": "malattia di McArdle, McArdle disease, glicogenosi tipo V, deficit di miofosforilasi, second wind"
+},
+{
+"id": 625,
+"condition_name": "Sindrome di Andersen-Tawil",
+"condition_keywords": "sindrome di Andersen-Tawil, Andersen-Tawil syndrome, canalopatia KCNJ2, paralisi periodica con aritmia"
+},
+{
+"id": 626,
+"condition_name": "Paralisi Periodica Ipokaliemica",
+"condition_keywords": "paralisi periodica ipokaliemica, hypokalemic periodic paralysis, canalopatia muscolare, debolezza episodica"
+},
+{
+"id": 627,
+"condition_name": "Malattia di Castleman",
+"condition_keywords": "{\"Castleman disease\",\"linfoadenopatia angiofollicolare\",iMCD,UCD,\"malattia linfoproliferativa\",\"sindrome IL-6\"}"
+},
+{
+"id": 628,
+"condition_name": "Micosi Fungoide e Sindrome di Sézary",
+"condition_keywords": "{\"mycosis fungoides\",\"Sezary syndrome\",\"linfoma cutaneo a cellule T\",CTCL,eritrodermia,\"linfoma cutaneo\"}"
+},
+{
+"id": 629,
+"condition_name": "Nefropatia da IgA (Malattia di Berger)",
+"condition_keywords": "{\"IgA nephropathy\",\"Berger disease\",\"glomerulonefrite da IgA\",IgAN,\"glomerulopatia primaria\"}"
+},
+{
+"id": 630,
+"condition_name": "Sindrome Nefrotica",
+"condition_keywords": "{\"nephrotic syndrome\",\"proteinuria massiva\",ipoalbuminemia,\"edema nefrotico\",\"sindrome nefrosica\"}"
+},
+{
+"id": 631,
+"condition_name": "Celiachia",
+"condition_keywords": "{\"celiac disease\",\"malattia celiaca\",\"enteropatia glutine-sensibile\",\"intolleranza al glutine\",celiac}"
+},
+{
+"id": 632,
+"condition_name": "Gastroparesi",
+"condition_keywords": "{gastroparesis,\"ritardato svuotamento gastrico\",\"disturbo motilità gastrica\",\"gastroparesi diabetica\"}"
+},
+{
+"id": 633,
+"condition_name": "Connettivite Mista (MCTD, Sindrome di Sharp)",
+"condition_keywords": "{\"mixed connective tissue disease\",MCTD,\"Sharp syndrome\",\"sindrome di Sharp\",\"overlap syndrome\",anti-U1-RNP}"
+},
+{
+"id": 634,
+"condition_name": "Sindrome di Sheehan",
+"condition_keywords": "{\"Sheehan syndrome\",\"necrosi ipofisaria post-partum\",\"panipopituitarismo post-partum\",ipopituitarismo}"
+},
+{
+"id": 635,
+"condition_name": "Iperparatiroidismo Primario",
+"condition_keywords": "{\"primary hyperparathyroidism\",PHPT,ipercalcemia,\"adenoma paratiroideo\",\"osteite fibrosa cistica\"}"
+},
+{
+"id": 636,
+"condition_name": "Feocromocitoma",
+"condition_keywords": "{pheochromocytoma,\"tumore midollare surrene\",catecolamine,\"crisi ipertensiva\",paraganglioma}"
+},
+{
+"id": 637,
+"condition_name": "Colangite Biliare Primitiva",
+"condition_keywords": "{\"primary biliary cholangitis\",PBC,\"cirrosi biliare primitiva\",\"colangite autoimmune\",\"colestasi cronica\"}"
+},
+{
+"id": 638,
+"condition_name": "Sindrome di Klinefelter",
+"condition_keywords": "{\"Klinefelter syndrome\",\"47,XXY\",\"ipogonadismo ipergonadotropo\",\"aneuploidia cromosomica\"}"
+},
+{
+"id": 639,
+"condition_name": "Diabete Insipido",
+"condition_keywords": "{\"diabetes insipidus\",poliuria,\"deficit di vasopressina\",ADH,\"diabete insipido centrale\",\"diabete insipido nefrogenico\"}"
+},
+{
+"id": 640,
+"condition_name": "Prolattinoma e Iperprolattinemia",
+"condition_keywords": "{prolactinoma,hyperprolactinemia,\"adenoma ipofisario secernente prolattina\",iperprolattinemia}"
+},
+{
+"id": 641,
+"condition_name": "Sclerosi Tuberosa",
+"condition_keywords": "{\"tuberous sclerosis complex\",TSC,\"amartomi multipli\",\"angiomiolipoma renale\",linfangioleiomiomatosi,LAM}"
+},
+{
+"id": 642,
+"condition_name": "Malattia di von Hippel-Lindau",
+"condition_keywords": "{\"von Hippel-Lindau disease\",VHL,emangioblastoma,\"sindrome tumorale genetica\",facomatosi}"
+},
+{
+"id": 643,
+"condition_name": "Sindrome Miastenica di Lambert-Eaton",
+"condition_keywords": "{\"Lambert-Eaton myasthenic syndrome\",LEMS,\"anticorpi anti-canali del calcio\",\"sindrome paraneoplastica\",\"giunzione neuromuscolare presinaptica\"}"
+},
+{
+"id": 644,
+"condition_name": "Narcolessia",
+"condition_keywords": "{narcolepsy,cataplessia,\"deficit di orexina\",ipocretina,\"eccessiva sonnolenza diurna\"}"
+},
+{
+"id": 645,
+"condition_name": "Angioedema Ereditario",
+"condition_keywords": "{\"hereditary angioedema\",HAE,\"deficit di C1-inibitore\",SERPING1,\"edema sottocutaneo ricorrente\"}"
+},
+{
+"id": 646,
+"condition_name": "Neuropatia Diabetica Periferica",
+"condition_keywords": "{\"diabetic peripheral neuropathy\",\"polineuropatia diabetica\",DSPN,\"neuropatia sensitivo-motoria distale\",\"piede diabetico\"}"
+},
+{
+"id": 647,
+"condition_name": "Sindrome di Cogan",
+"condition_keywords": "{\"Cogan syndrome\",\"cheratite interstiziale\",\"disfunzione audiovestibolare\",\"vasculite autoimmune rara\"}"
+},
+{
+"id": 648,
+"condition_name": "Malattia di Still dell'Adulto",
+"condition_keywords": "{\"adult onset Still disease\",AOSD,\"malattia autoinflammatoria sistemica\",iperferritinemia,\"sindrome da attivazione macrofagica\"}"
+},
+{
+"id": 649,
+"condition_name": "Artrite Reattiva",
+"condition_keywords": "{\"reactive arthritis\",\"sindrome di Reiter\",\"artrite post-infettiva\",\"spondiloartrite HLA-B27\"}"
+},
+{
+"id": 650,
+"condition_name": "Cardiomiopatia Dilatativa",
+"condition_keywords": "{\"dilated cardiomyopathy\",DCM,\"disfunzione sistolica ventricolare sinistra\",\"mutazioni LMNA FLNC TMEM43 PLN\"}"
+},
+{
+"id": 651,
+"condition_name": "Sindrome di Takotsubo",
+"condition_keywords": "{\"Takotsubo syndrome\",\"cardiomiopatia da stress\",\"sindrome del cuore spezzato\",\"apical ballooning\"}"
+},
+{
+"id": 652,
+"condition_name": "Sindrome di Wolff-Parkinson-White",
+"condition_keywords": "{\"Wolff-Parkinson-White syndrome\",WPW,\"preeccitazione ventricolare\",\"via accessoria atrioventricolare\"}"
+},
+{
+"id": 653,
+"condition_name": "Prolasso della Valvola Mitrale",
+"condition_keywords": "{\"mitral valve prolapse\",MVP,\"prolasso mitralico aritmico\",AMVP,\"degenerazione mixomatosa\"}"
+},
+{
+"id": 654,
+"condition_name": "Stenosi Mitralica",
+"condition_keywords": "{\"mitral stenosis\",\"stenosi mitralica reumatica\",\"ostruzione atrioventricolare sinistra\"}"
+},
+{
+"id": 655,
+"condition_name": "Insufficienza Mitralica",
+"condition_keywords": "{\"mitral regurgitation\",\"rigurgito mitralico\",\"insufficienza mitralica primaria\",\"insufficienza mitralica funzionale\"}"
+},
+{
+"id": 656,
+"condition_name": "Stenosi Aortica",
+"condition_keywords": "{\"aortic stenosis\",AS,\"valvulopatia aortica calcifica\",\"stenosi valvolare aortica\"}"
+},
+{
+"id": 657,
+"condition_name": "Coartazione Aortica",
+"condition_keywords": "{\"aortic coarctation\",\"coartazione istmica\",\"restringimento congenito aorta\",\"cardiopatia congenita\"}"
+},
+{
+"id": 658,
+"condition_name": "Valvola Aortica Bicuspide",
+"condition_keywords": "{\"bicuspid aortic valve\",BAV,\"malformazione cardiaca congenita\",\"aortopatia associata\"}"
+},
+{
+"id": 659,
+"condition_name": "Tetralogia di Fallot Riparata",
+"condition_keywords": "{\"repaired tetralogy of Fallot\",rToF,\"cardiopatia congenita cianotica\",\"insufficienza polmonare residua\"}"
+},
+{
+"id": 660,
+"condition_name": "Trasposizione dei Grossi Vasi",
+"condition_keywords": "{\"transposition of the great arteries\",TGA,\"switch arteriale\",\"switch atriale\",\"Mustard Senning Jatene\"}"
+},
+{
+"id": 661,
+"condition_name": "Pneumotorace Spontaneo",
+"condition_keywords": "{\"pneumotorace spontaneo primario\",\"pneumotorace spontaneo secondario\",\"pneumotorace recidivante\",\"spontaneous pneumothorax\",\"tension pneumothorax\"}"
+},
+{
+"id": 662,
+"condition_name": "Versamento Pleurico Non Maligno",
+"condition_keywords": "{\"pleural effusion\",\"versamento pleurico benigno\",\"versamento parapneumonico\",empiema,toracentesi}"
+},
+{
+"id": 663,
+"condition_name": "Discinesia Ciliare Primaria",
+"condition_keywords": "{\"primary ciliary dyskinesia\",PCD,\"sindrome di Kartagener\",\"situs inversus\",\"clearance mucociliare\"}"
+},
+{
+"id": 664,
+"condition_name": "Ipertensione Polmonare Tromboembolica Cronica",
+"condition_keywords": "{CTEPH,\"chronic thromboembolic pulmonary hypertension\",\"endarterectomia polmonare\",\"angioplastica polmonare con balloon\",\"embolia polmonare cronica\"}"
+},
+{
+"id": 665,
+"condition_name": "Sindrome da Distress Respiratorio Acuto — Riabilitazione Post-Acuta",
+"condition_keywords": "{ARDS,\"post-intensive care syndrome\",PICS,\"ICU-acquired weakness\",\"deconditioning post-ventilazione meccanica\"}"
+},
+{
+"id": 666,
+"condition_name": "Bronchiolite Obliterante dell'Adulto",
+"condition_keywords": "{\"bronchiolitis obliterans syndrome\",BOS,\"chronic lung allograft dysfunction\",CLAD,\"GVHD polmonare\",\"trapianto di polmone\"}"
+},
+{
+"id": 667,
+"condition_name": "Polmonite da Ipersensibilità",
+"condition_keywords": "{\"hypersensitivity pneumonitis\",\"alveolite allergica estrinseca\",\"polmone del contadino\",\"polmone dell'allevatore di uccelli\",\"HP fibrotica\"}"
+},
+{
+"id": 668,
+"condition_name": "Disfunzione delle Corde Vocali da Esercizio",
+"condition_keywords": "{\"vocal cord dysfunction\",VCD,\"paradoxical vocal fold motion\",PVFM,\"exercise-induced laryngeal obstruction\",EILO}"
+},
+{
+"id": 669,
+"condition_name": "Sindrome da Ipoventilazione da Obesità",
+"condition_keywords": "{\"obesity hypoventilation syndrome\",OHS,\"sindrome di Pickwick\",\"ipercapnia cronica\",\"ventilazione non invasiva\"}"
+},
+{
+"id": 670,
+"condition_name": "Cifoscoliosi con Malattia Polmonare Restrittiva",
+"condition_keywords": "{kyphoscoliosis,\"scoliosi severa\",\"deformità parete toracica\",\"malattia polmonare restrittiva\",\"Cobb angle\"}"
+},
+{
+"id": 671,
+"condition_name": "Proteinosi Alveolare Polmonare",
+"condition_keywords": "{\"pulmonary alveolar proteinosis\",PAP,\"accumulo di surfattante\",\"lavaggio polmonare totale\",anti-GM-CSF}"
+}
+]
