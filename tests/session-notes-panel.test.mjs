@@ -171,7 +171,7 @@ test('the coherence checks say what was left out and why, keep what the clinicia
 
     // What does not match, and why.
     await checks.locator('li[data-kind="side"]').getByText('Piano: il lato non corrisponde a quello che hai indicato.').waitFor();
-    await checks.getByText('Esercizi non inseriti perché riguardano un altro distretto').waitFor();
+    await checks.getByText('Esercizi non inseriti nel programma, con il motivo').waitFor();
     assert.equal(await excluded.count(), 1);
     assert.match(await excluded.innerText(), /Mobilità di caviglia 2x15[\s\S]*Distretto dell'esercizio: caviglia e piede\. Distretto del caso: spalla\./);
     assert.equal(await cards.count(), 2, 'the excluded exercise is not in the exercises');
