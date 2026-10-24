@@ -6,7 +6,9 @@ import { searchExercisesWithCache } from "@/lib/exercise-providers/cache";
 import type { ExerciseEntry } from "@/lib/exercise-providers/types";
 import { lazy } from "@/lib/lazy";
 import { serviceClient } from "@/lib/verification";
-import { searchLibraryExercises } from "@/lib/exerciseLibrary/search";
+import { searchLibraryExercises, specificKeywords } from "@/lib/exerciseLibrary/search";
+import { exerciseRegions, fitsCase, regionsOf, type Region } from "@/lib/clinical/region";
+import { caseRegionsOf } from "@/lib/clinical/coherence";
 
 const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
 
@@ -24,7 +26,12 @@ type ExerciseOutput = ExerciseEntry & {
     reason: string | null;
   } | null;
   _debugKeywords?: string[];
+  /** The exercise as the note wrote it, before it was matched to a database exercise. */
+  draft: string;
 };
+
+/** An exercise of the draft left out because it is for a body region the case is not about. */
+type Excluded = { name: string; reason: "off_region"; regions: Region[]; caseRegions: Region[] };
 
 export async function POST(request: Request) {
   // Clinician-only paid AI operation (OpenAI) on real clinical information: verified professional + hourly cap.
@@ -34,18 +41,35 @@ export async function POST(request: Request) {
   if (limited) return limited;
 
   try {
-    const { exercisesDraft, assessment, primaryCondition, lang } =
+    const { exercisesDraft, assessment, primaryCondition, lang, transcript } =
       await request.json();
 
     if (!Array.isArray(exercisesDraft) || exercisesDraft.length === 0) {
-      return NextResponse.json({ exercises: [] });
+      return NextResponse.json({ exercises: [], excluded: [] });
     }
 
     const language = (lang || "en").slice(0, 2);
 
-    const processOne = async (draft: any): Promise<ExerciseOutput> => {
+    // The body regions of today's case: what the clinician said, plus the
+    // condition assessed (lib/clinical). An exercise for another region is
+    // left out (and listed, so the clinician can add it back), and a draft is
+    // only ever matched to a database exercise of a region that fits.
+    const caseRegions = caseRegionsOf(typeof transcript === "string" ? transcript.slice(0, 8000) : "", {
+      primaryCondition: typeof primaryCondition === "string" ? primaryCondition : "",
+      assessment: typeof assessment === "string" ? assessment : "",
+    });
+    const fits = (ex: ExerciseEntry) => fitsCase(exerciseRegions(ex), caseRegions);
+    const excluded: Excluded[] = [];
+
+    const processOne = async (draft: any): Promise<ExerciseOutput | null> => {
       const draftText: string =
         typeof draft === "string" ? draft : draft.name || String(draft);
+      const draftRegions = regionsOf(draftText);
+      const exclude = (regions: Region[]) => {
+        excluded.push({ name: draftText, reason: "off_region", regions, caseRegions });
+        return null;
+      };
+      if (!fitsCase(draftRegions, caseRegions)) return exclude(draftRegions);
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o-mini",
@@ -67,23 +91,39 @@ export async function POST(request: Request) {
       const parsed = JSON.parse(
         completion.choices[0].message.content || "{}"
       );
-      const keywords: string[] = parsed.keywords || [draftText];
+      const keywords: string[] = Array.isArray(parsed.keywords) && parsed.keywords.length ? parsed.keywords : [draftText];
+      // Only keywords that name an exercise: "stretch" alone would match a
+      // stretch of any region.
+      const searchWith = specificKeywords(keywords);
 
       // The Exercises section first (video, steps, usable in the home
-      // programme); the older wger cache only when it has nothing.
+      // programme); the older wger cache only when it has nothing. The best
+      // candidate whose region fits the case; a draft that names no region
+      // takes the region of the exercise it names ("Chin tuck" is a neck
+      // exercise), so it is left out when that region is not the case's.
       let match: ExerciseEntry | null = null;
+      const pick = (candidates: ExerciseEntry[]): ExerciseEntry | null | "off_region" => {
+        if (candidates.length === 0) return null;
+        if (draftRegions.length === 0 && !fits(candidates[0])) return "off_region";
+        return candidates.find(fits) ?? null;
+      };
       const db = serviceClient();
-      if (db) {
+      if (db && searchWith.length) {
         try {
-          match = (await searchLibraryExercises(db, keywords, language, 1))[0] || null;
+          const candidates = await searchLibraryExercises(db, searchWith, language, 5);
+          const found = pick(candidates);
+          if (found === "off_region") return exclude(exerciseRegions(candidates[0]));
+          match = found;
         } catch (libErr) {
           console.error("Exercise library search failed:", libErr);
         }
       }
-      if (!match) {
+      if (!match && searchWith.length) {
         try {
-          const candidates = await searchExercisesWithCache(keywords, "en");
-          match = candidates[0] || null;
+          const candidates = await searchExercisesWithCache(searchWith, "en");
+          const found = pick(candidates);
+          if (found === "off_region") return exclude(exerciseRegions(candidates[0]));
+          match = found;
         } catch (searchErr) {
           console.error("Exercise search failed:", searchErr);
         }
@@ -101,6 +141,7 @@ export async function POST(request: Request) {
         return {
           ...match,
           _debugKeywords: keywords,
+          draft: draftText,
           source_type: "professional",
           dosing,
           clinical_check: null,
@@ -127,19 +168,23 @@ export async function POST(request: Request) {
         media: null,
         license: null,
         language,
+        draft: draftText,
         source_type: "professional",
         dosing,
         clinical_check: null,
       };
     };
 
-    const results: ExerciseOutput[] = await Promise.all(
+    const results = (await Promise.all(
       exercisesDraft.map((draft: any) => processOne(draft))
-    );
+    )).filter((r): r is ExerciseOutput => r !== null);
+    // In the draft's order, whichever finished first.
+    const order = exercisesDraft.map((d: any) => (typeof d === "string" ? d : d?.name || String(d)));
+    excluded.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
 
-    return NextResponse.json({ exercises: results });
+    return NextResponse.json({ exercises: results, excluded, caseRegions });
   } catch (err) {
     console.error("Exercise intelligence error:", err);
-    return NextResponse.json({ exercises: [] }, { status: 500 });
+    return NextResponse.json({ exercises: [], excluded: [] }, { status: 500 });
   }
 }

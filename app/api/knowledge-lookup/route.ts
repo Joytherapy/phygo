@@ -5,6 +5,7 @@ import { consumeHourly, HOURLY_LIMITS } from '@/lib/rateLimit';
 import { serviceClient } from '@/lib/verification';
 import { lazy } from '@/lib/lazy';
 import { bestCondition, type KbRow } from '@/lib/knowledge/conditionMatch';
+import { fitsCase, regionsOf } from '@/lib/clinical/region';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,9 @@ const PAGE = 1000;
 // (lib/knowledge/conditionMatch.ts). Only when nothing matches, the AI is
 // asked to pick one of the existing sheets by name, or none: it never writes
 // clinical content, and an id it returns that is not in the list is ignored.
+// Either way only sheets of a body region that fits the condition assessed are
+// candidates: a generic keyword ("tendinopatia") must not bring the Achilles
+// sheet to a shoulder note.
 export async function POST(request: Request) {
   const gate = await requireVerifiedProfessional();
   if (!gate.ok) return gate.response;
@@ -41,17 +45,22 @@ export async function POST(request: Request) {
       if (!data || data.length < PAGE) break;
     }
 
+    const conditionRegions = regionsOf(`${primary} ${text}`);
+    const sheetRegions = (r: KbRow) =>
+      regionsOf([r.condition_name, r.condition_keywords, ...Object.values(r.translations ?? {}).flatMap((t) => [t?.condition_name, t?.condition_keywords])].filter(Boolean).join(' '));
+    const candidates = rows.filter((r) => fitsCase(sheetRegions(r), conditionRegions));
+
     let match: (KbRow & Record<string, any>) | null = null;
     let matchedKeyword: string | null = null;
     let matchedBy: 'keyword' | 'ai' | null = null;
-    const found = bestCondition(rows, primary, text);
+    const found = bestCondition(candidates, primary, text);
     if (found) {
       match = found.row as KbRow & Record<string, any>;
       matchedKeyword = found.keyword;
       matchedBy = 'keyword';
-    } else if (rows.length > 0 && (await consumeHourly(`ai:knowledge-lookup:${gate.user.id}`, HOURLY_LIMITS.noteEnrichment)) === 'allowed') {
+    } else if (candidates.length > 0 && (await consumeHourly(`ai:knowledge-lookup:${gate.user.id}`, HOURLY_LIMITS.noteEnrichment)) === 'allowed') {
       try {
-        const list = rows.map((r) => `${r.id}\t${r.condition_name ?? ''}`).join('\n');
+        const list = candidates.map((r) => `${r.id}\t${r.condition_name ?? ''}`).join('\n');
         const completion = await openai.chat.completions.create({
           model: 'gpt-4o-mini',
           temperature: 0,
@@ -66,7 +75,7 @@ export async function POST(request: Request) {
           ],
         });
         const id = JSON.parse(completion.choices[0]?.message?.content || '{}')?.id;
-        const picked = id == null ? null : rows.find((r) => String(r.id) === String(id)) ?? null;
+        const picked = id == null ? null : candidates.find((r) => String(r.id) === String(id)) ?? null;
         if (picked) {
           match = picked;
           matchedKeyword = picked.condition_name ?? null;

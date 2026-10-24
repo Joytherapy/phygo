@@ -4,7 +4,8 @@ import { consumeHourly, HOURLY_LIMITS, limitResponse } from '@/lib/rateLimit';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { lazy } from '@/lib/lazy';
-import { paperScore, searchTerms } from '@/lib/knowledge/paperRank';
+import { paperRelevance, paperScore, searchTerms } from '@/lib/knowledge/paperRank';
+import { regionsOf } from '@/lib/clinical/region';
 
 // Collega il motore clinico AI (LiveStructuring) alla libreria Scienza/PubMed
 // che esiste già in Phygo (research_papers + research_summaries, alimentata
@@ -23,6 +24,7 @@ const supabase = lazy(() => createClient(
 const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
 
 const MAX_RESULTS = 3;
+const RANK = { direct: 0, indirect: 1, unverified: 2 } as const;
 
 export async function POST(req: Request) {
   // Clinician-only paid AI operation (OpenAI) on real clinical information: verified professional + hourly cap.
@@ -95,17 +97,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ papers: [] });
     }
 
-    // Most relevant first (lib/knowledge/paperRank.ts), newest first on a tie.
+    // Only papers pertinent to the condition (lib/knowledge/paperRank.ts):
+    // direct first, then indirect (same region before another region with the
+    // same mechanism), then unverified; most relevant, then newest, on a tie.
+    const regions = regionsOf(`${typeof primaryCondition === 'string' ? primaryCondition : ''} ${typeof assessment === 'string' ? assessment : ''}`);
     const data = (found || [])
       .filter((p: any) => p.status === 'published')
-      .map((p: any) => ({ p, score: paperScore(p, terms) }))
-      .filter((x) => x.score > 0)
-      .sort((a, b) => b.score - a.score || String(b.p.publication_date ?? '').localeCompare(String(a.p.publication_date ?? '')))
-      .slice(0, MAX_RESULTS)
-      .map((x) => x.p);
+      .map((p: any) => ({ p, score: paperScore(p, terms), relevance: paperRelevance(p, terms, regions) }))
+      .filter((x) => x.score > 0 && x.relevance !== null)
+      .sort((a, b) => RANK[a.relevance!.level] - RANK[b.relevance!.level] || Number(a.relevance!.reason === 'same_mechanism_other_region') - Number(b.relevance!.reason === 'same_mechanism_other_region') || b.score - a.score || String(b.p.publication_date ?? '').localeCompare(String(a.p.publication_date ?? '')))
+      .slice(0, MAX_RESULTS);
 
-    const papers = data.map((p: any) => ({
+    const papers = data.map(({ p, relevance }: any) => ({
       id: p.id,
+      relevance: relevance.level,
+      relevance_reason: relevance.reason,
       title: p.title,
       authors: p.authors,
       journal: p.journal,

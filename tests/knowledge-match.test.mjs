@@ -30,7 +30,8 @@ before(async () => {
   const out = (f, src) => writeFileSync(join(dir, `${f}.mjs`), ts.transpileModule(src, { compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 } }).outputText);
   try {
     out('conditionMatch', readFileSync(new URL('../lib/knowledge/conditionMatch.ts', import.meta.url), 'utf8'));
-    out('paperRank', readFileSync(new URL('../lib/knowledge/paperRank.ts', import.meta.url), 'utf8').replace("from './conditionMatch'", "from './conditionMatch.mjs'"));
+    out('region', readFileSync(new URL('../lib/clinical/region.ts', import.meta.url), 'utf8'));
+    out('paperRank', readFileSync(new URL('../lib/knowledge/paperRank.ts', import.meta.url), 'utf8').replace("from './conditionMatch'", "from './conditionMatch.mjs'").replace("from '../clinical/region'", "from './region.mjs'"));
     K = await import(join(dir, 'conditionMatch.mjs'));
     R = await import(join(dir, 'paperRank.mjs'));
   } finally {
@@ -60,6 +61,24 @@ test('papers: whole phrase and title first', () => {
   const wordsInAbstract = R.paperScore({ title: 'Shoulder pain trial', abstract: 'rotator muscles and tendinopathy' }, terms);
   assert.ok(phraseInTitle > wordsInAbstract && wordsInAbstract > 0);
   assert.equal(R.paperScore({ title: 'Knee osteoarthritis', abstract: 'quadriceps' }, terms), 0);
+});
+
+test('papers: direct, indirect with its reason, unverified, or not shown', () => {
+  const terms = R.searchTerms(['rotator cuff tendinopathy', 'shoulder pain', 'musculoskeletal pain']);
+  assert.ok(!terms.phrases.includes('musculoskeletal pain'), 'a phrase of generic words only is not a search term');
+  const shoulder = ['shoulder'];
+  const rel = (title, abstract = '', regions = shoulder) => R.paperRelevance({ title, abstract }, terms, regions);
+  assert.deepEqual(rel('Exercise for rotator cuff tendinopathy'), { level: 'direct', reason: 'same_condition' });
+  assert.deepEqual(rel('Subacromial pain: a randomised trial', 'Patients with rotator cuff tendinopathy'), { level: 'direct', reason: 'same_region' });
+  assert.deepEqual(rel('Shoulder tendinopathy and sleep', 'tendinopathy'), { level: 'indirect', reason: 'same_region' });
+  // A relevant mechanism in a paper about another region: kept, with the reason said.
+  assert.deepEqual(rel('Loading programmes in Achilles tendinopathy', 'tendinopathy'), { level: 'indirect', reason: 'same_mechanism_other_region' });
+  // Another region, sharing only a mention of shoulder pain in the abstract: not shown.
+  assert.equal(rel('Traumatic leg pain in adolescents', 'including shoulder pain and knee complaints'), null);
+  assert.equal(rel('Exercise therapy for chronic musculoskeletal pain', 'Exercise and education'), null, 'generic words only');
+  // Region not recognised: shown as unverified, never as direct.
+  assert.deepEqual(rel('Tendinopathy: principles of load', 'tendinopathy and rotator mechanics'), { level: 'unverified', reason: 'paper_region_unknown' });
+  assert.deepEqual(rel('Exercise for rotator cuff tendinopathy', '', []), { level: 'unverified', reason: 'case_region_unknown' });
 });
 
 // ---------------------------------------------------------------- routes
