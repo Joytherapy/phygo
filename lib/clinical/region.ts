@@ -82,10 +82,22 @@ const ZONE: Record<string, Region> = {
   chest: 'shoulder', biceps: 'upper_limb', triceps: 'upper_limb', forearm: 'upper_limb',
 }
 
+// In an exercise, a body part can describe the position, not the region
+// worked ("rotazione esterna con elastico, gomito a 90° al fianco" is a
+// shoulder exercise; "ponte con ginocchia flesse" a hip one).
+const POSITION = /\b(con (il |i |le )?|col |coi )?(gomit[oi]|elbows?|codos?|coudes?|ginocchi[oa]|knees?|rodillas?|genoux|braccia|braccio|arms?|piedi|feet|pies)\s+(a \d+|at \d+|al fianco|ai fianchi|at (your )?sides?|by (your )?sides?|lungo (il|i) fianc\w*|flesso|flessi|flessa|flesse|piegat\w*|bent|flexed|extended|estes[oiae]|appoggiat\w*|a terra|on the floor|in appoggio|apart|divaricat\w*)\b/g
+export const withoutPositions = (text: string | null | undefined) => normalize(text ?? '').replace(POSITION, ' ')
+
+/** The regions an exercise as written works on (positions are not regions). */
+export const exerciseTextRegions = (text: string | null | undefined) => regionsOf(withoutPositions(text))
+
+/** Every single word that names a region in some language (to tell a region-only keyword). */
+export const REGION_WORDS = new Set(Object.values(TERMS).flat().flatMap((t) => normalize(t).trim().split(' ')))
+
 /** The regions of a database exercise: its name, body region and primary muscle. */
 export function exerciseRegions(ex: { name?: string | null; body_region?: string | null; primary_muscle?: string | null }): Region[] {
   const zone = ZONE[normalize(ex.body_region ?? '').trim()]
-  return Array.from(new Set([...regionsOf(`${ex.name ?? ''} ${ex.body_region ?? ''} ${ex.primary_muscle ?? ''}`), ...(zone ? [zone] : [])]))
+  return Array.from(new Set([...regionsOf(`${withoutPositions(ex.name)} ${ex.body_region ?? ''} ${ex.primary_muscle ?? ''}`), ...(zone ? [zone] : [])]))
 }
 
 /** Every region pertinent to a set of regions (each one plus its neighbours). */
@@ -129,80 +141,145 @@ const RIGHT = new Set(['destra', 'destro', 'destre', 'destri', 'dx', 'right', 'd
 const BOTH = [' bilaterale ', ' bilaterali ', ' entrambi ', ' entrambe ', ' bilateral ', ' both ', ' ambos ', ' ambas ', ' les deux ', ' bilateraux ']
 
 // ---------------------------------------------------------------- statements
+//
+// Whether each region named in a text is part of today's problem, of the
+// history, or negated is decided per mention, not per sentence: the nearest
+// marker wins ("Paziente con pregresso intervento al ginocchio sinistro
+// (asintomatico) e lombalgia attuale": knee history, low back current). Commas
+// and brackets are soft boundaries (a marker beyond one counts as farther);
+// sentences are hard ones. A negation before the mention in the same clause
+// negates it. A history or resolution word next to a symptom or "now" word
+// makes that word historical ("pregresso dolore", "attualmente asintomatico").
 
 export type Status = 'active' | 'history' | 'negated'
-const has = (t: string, words: string[]) => words.some((w) => t.includes(w))
-// Explicitly about now: wins over history words ("operato anni fa, oggi dolore").
-const NOW = [' oggi ', ' attualmente ', ' attuale ', ' adesso ', ' today ', ' currently ', ' now ', ' hoy ', ' actualmente ', ' aujourd hui ', ' actuellement ']
-const NEGATED = [' nessun ', ' nessuna ', ' nessuno ', ' nega ', ' negato ', ' negata ', ' assente ', ' assenza di ', ' non riferisce ', ' non lamenta ', ' non dolente ', ' senza dolore ', ' non fa piu male ', ' no pain ', ' denies ', ' denied ', ' without pain ', ' sin dolor ', ' niega ', ' sans douleur ', ' aucun ', ' aucune ']
-// Not "precedente"/"previous" alone: "rispetto alla seduta precedente" is about today.
-const HISTORY = [' anamnesi ', ' anamnestic', ' anamnesis ', ' in passato ', ' pregress', ' storia di ', ' history of ', ' past medical ', ' asintomatic', ' risolt', ' guarit', ' resolved ', ' asymptomatic ', ' no longer ', ' antecedent', ' asymptomatique ']
-const UNRESOLVED = [' non risolt', ' non guarit', ' not resolved ', ' unresolved ', ' no resuelt', ' non resolu']
-const SYMPTOM = [' dolore ', ' dolori ', ' dolente ', ' fa male ', ' male ', ' rigidit', ' gonfior', ' edema ', ' formicol', ' trattat', ' trattament', ' lamenta ', ' riferisce ', ' pain ', ' painful ', ' stiff', ' swelling ', ' treated ', ' dolor ', ' douleur ', ' sospett', ' suspected ']
-const LONG_AGO = [' anni fa ', ' years ago ', ' anos atras ', ' il y a ans ']
+type Kind = 'now' | 'symptom' | 'history' | 'resolved' | 'long_ago' | 'negation'
+const MARKERS: Record<Kind, string[]> = {
+  negation: ['nessun', 'nessuna', 'nessuno', 'nega', 'negato', 'negata', 'assente', 'assenti', 'assenza di', 'non riferisce', 'non lamenta', 'non dolente', 'senza dolore', 'non si rileva', 'non si rilevano', 'non si evidenzia', 'non si evidenziano', 'no pain', 'denies', 'denied', 'without pain', 'no evidence of', 'sin dolor', 'niega', 'sans douleur', 'aucun', 'aucune'],
+  // "now" alone is not enough when next to a resolution word (see above).
+  now: ['oggi', 'attualmente', 'attuale', 'adesso', 'today', 'currently', 'current', 'now', 'hoy', 'actualmente', 'aujourd hui', 'actuellement', 'trattat*', 'treated'],
+  symptom: ['dolore', 'dolori', 'dolente', 'fa male', 'male', 'rigidit*', 'gonfior*', 'edema', 'formicol*', 'lamenta', 'riferisce', 'fastidio', 'pain', 'painful', 'stiff*', 'swelling', 'dolor', 'douleur', 'sospett*', 'suspected', 'non risolt*', 'non guarit*', 'not resolved', 'unresolved'],
+  // Not "precedente"/"previous" alone: "rispetto alla seduta precedente" is about today.
+  history: ['anamnesi', 'anamnestic*', 'anamnesis', 'in passato', 'pregress*', 'storia di', 'history of', 'past medical', 'antecedent*', 'operato in passato'],
+  resolved: ['asintomatic*', 'asymptomatic', 'asymptomatique', 'risolt*', 'guarit*', 'resolved', 'healed', 'no longer', 'non piu dolente', 'non correlat*', 'unrelated', 'not related'],
+  long_ago: ['anni fa', 'years ago', 'anos atras'],
+}
+const KIND_STATUS: Record<Exclude<Kind, 'negation'>, Status> = { now: 'active', symptom: 'active', history: 'history', resolved: 'history', long_ago: 'history' }
 // A dictated self-correction: what was named before it is withdrawn.
-const CORRECTION = [' no scusa ', ' scusa no ', ' anzi ', ' cioe no ', ' i mean ', ' sorry ', ' perdon ', ' pardon ']
+const CORRECTION = ['no scusa', 'scusa no', 'anzi', 'cioe no', 'i mean', 'sorry', 'perdon', 'pardon']
+const BOUNDARY = '|'
 
-/** A text in statements (sentences and clauses), each current, about history, or negated. */
-export function statementsOf(text: string | null | undefined): { text: string; status: Status }[] {
-  const out: { text: string; status: Status }[] = []
-  let carried: Status = 'active'
-  for (const part of (text ?? '').split(/[.;:!?\n]+|,|\s+(?:ma|but|pero|mais)\s+/i)) {
-    if (!part.trim()) continue
-    const t = normalize(part)
-    let status: Status
-    if (has(t, NEGATED)) status = 'negated'
-    else if (has(t, NOW)) status = 'active'
-    else if (has(t, HISTORY) && !has(t, UNRESOLVED)) status = 'history'
-    else if (has(t, SYMPTOM)) status = 'active'
-    else if (has(t, LONG_AGO)) status = 'history'
-    else status = carried
-    if (status !== 'negated') carried = status
-    out.push({ text: part, status })
+/** Words of a sentence, with commas, brackets and "ma/but" as boundary marks. */
+function sentenceWords(sentence: string): string[] {
+  return sentence
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[’']/g, ' ')
+    .replace(/[,()[\]]/g, ` ${BOUNDARY} `)
+    .replace(/[^a-z0-9|]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => (['ma', 'but', 'pero', 'mais'].includes(w) ? BOUNDARY : w))
+}
+
+/** Where a phrase occurs in words ("word*" matches any ending of the last word). */
+function findPhrase(words: string[], phrase: string): { start: number; end: number }[] {
+  const pw = phrase.split(' ')
+  const out: { start: number; end: number }[] = []
+  for (let i = 0; i + pw.length <= words.length; i++) {
+    if (pw.every((p, k) => (p.endsWith('*') ? words[i + k].startsWith(p.slice(0, -1)) : words[i + k] === p))) out.push({ start: i, end: i + pw.length - 1 })
   }
   return out
 }
 
-export type Mention = { region: Region; side: Side | 'both' | null }
+const COMPILED_WORDS = COMPILED.map(({ region, terms }) => ({ region, terms: terms.map((t) => t.trim()) }))
 
-/**
- * The regions a statement names, each with the side said next to it
- * ("spalla destra e ginocchio sinistro": shoulder right, knee left).
- */
-export function mentionsOf(statement: string): Mention[] {
-  let words = tokens(statement)
-  const joined = ` ${words.join(' ')} `
-  const cut = Math.max(-1, ...CORRECTION.map((c) => (joined.lastIndexOf(c) >= 0 ? joined.lastIndexOf(c) + c.length - 1 : -1)))
-  if (cut >= 0) words = joined.slice(cut).trim().split(' ').filter(Boolean)
-  const both = has(` ${words.join(' ')} `, BOTH)
-  const found: { region: Region; start: number; end: number }[] = []
-  for (const { region, terms } of COMPILED) {
-    for (const term of terms) {
-      const tw = term.trim().split(' ')
-      for (let i = 0; i + tw.length <= words.length; i++) {
-        if (tw.every((w, k) => words[i + k] === w)) found.push({ region, start: i, end: i + tw.length - 1 })
-      }
+export type Mention = { region: Region; side: Side | 'both' | null; status: Status }
+
+/** Every region named in a text, with its side and whether it is current, history or negated. */
+export function analyzeMentions(text: string | null | undefined): Mention[] {
+  const out: Mention[] = []
+  let carried: Status = 'active'
+  for (const sentence of (text ?? '').split(/[.;:!?\n]+/)) {
+    let words = sentenceWords(sentence)
+    if (!words.length) continue
+    for (const c of CORRECTION) {
+      const hits = findPhrase(words, c)
+      if (hits.length) words = words.slice(hits[hits.length - 1].end + 1)
     }
+    const boundariesBetween = (a: number, b: number) => words.slice(Math.min(a, b) + 1, Math.max(a, b)).filter((w) => w === BOUNDARY).length
+    // Markers, with words that are a condition in themselves ("lombalgia") as symptoms.
+    const markers: { kind: Kind; start: number; end: number }[] = []
+    for (const kind of Object.keys(MARKERS) as Kind[]) for (const m of MARKERS[kind]) for (const h of findPhrase(words, m)) markers.push({ kind, ...h })
+    words.forEach((w, i) => { if (/(algia|algie|algy|dynia)$/.test(w)) markers.push({ kind: 'symptom', start: i, end: i }) })
+    // "non risolto" is a symptom, not a resolution; drop the resolution found inside it.
+    const unresolved = markers.filter((m) => m.kind === 'symptom' && words[m.start] === 'non' && /^(risolt|guarit)/.test(words[m.end] ?? ''))
+    const marks = markers.filter((m) => !(m.kind === 'resolved' && unresolved.some((u) => u.end === m.end)))
+    // A symptom or "now" next to a history or resolution word takes its meaning.
+    for (const m of marks) {
+      if (m.kind !== 'symptom' && m.kind !== 'now') continue
+      const near = marks.find((x) => (x.kind === 'history' || x.kind === 'resolved') && x !== m && boundariesBetween(x.start, m.start) === 0 && (Math.abs(x.end - m.start) <= 2 || Math.abs(m.end - x.start) <= 2))
+      if (near && !unresolved.includes(m)) m.kind = near.kind
+    }
+    const found: { region: Region; start: number; end: number }[] = []
+    for (const { region, terms } of COMPILED_WORDS) for (const t of terms) for (const h of findPhrase(words, t)) found.push({ region, ...h })
+    // Overlapping terms of one region (cuffia / cuffia dei rotatori): keep one mention per place.
+    const mentions = found.filter((f, i) => !found.some((g, j) => j !== i && g.region === f.region && g.start <= f.start && g.end >= f.end && (g.end - g.start > f.end - f.start || j < i)))
+    // "Both" applies to the region it is said with ("entrambe le ginocchia",
+    // "dolore bilaterale alle ginocchia"), not to every region of the sentence
+    // ("spalla e ginocchio, trattati entrambi oggi").
+    const bothAt = ['bilaterale', 'bilaterali', 'entrambi', 'entrambe', 'bilateral', 'both', 'ambos', 'ambas', 'les deux'].flatMap((w) => findPhrase(words, w))
+    const sideWords = words.map((w, i) => ({ i, side: LEFT.has(w) ? ('left' as const) : RIGHT.has(w) ? ('right' as const) : null })).filter((x) => x.side)
+    const sentenceStatus: Status[] = []
+    for (const f of mentions) {
+      // Negation before it in the same clause.
+      const clauseStart = words.lastIndexOf(BOUNDARY, f.start) + 1
+      const negated = marks.some((m) => m.kind === 'negation' && m.end < f.start && m.start >= clauseStart)
+      let status: Status
+      if (negated) status = 'negated'
+      else {
+        const nearest = marks
+          .filter((m) => m.kind !== 'negation')
+          .map((m) => {
+            const overlap = m.start <= f.end && m.end >= f.start
+            const gap = overlap ? 0 : m.start > f.end ? m.start - f.end - 1 : f.start - m.end - 1
+            return { m, d: gap + 5 * boundariesBetween(m.start, f.start) }
+          })
+          .sort((a, b) => a.d - b.d)[0]
+        status = nearest ? KIND_STATUS[nearest.m.kind as Exclude<Kind, 'negation'>] : carried
+      }
+      // Side: the nearest side word within three words, after the region first ("spalla destra"), then before ("right shoulder").
+      let side: Mention['side'] = null
+      if (bothAt.some((b) => (b.start > f.end ? b.start - f.end : f.start - b.end) <= 3 && boundariesBetween(b.start, f.start) === 0)) side = 'both'
+      else {
+        const near = sideWords
+          .map((x) => ({ ...x, d: x.i > f.end ? x.i - f.end : f.start - x.i, after: x.i > f.end }))
+          .filter((x) => x.d > 0 && x.d <= 3 && boundariesBetween(x.i, f.start) === 0)
+          .sort((a, b) => a.d - b.d || Number(b.after) - Number(a.after))[0]
+        if (near) side = near.side
+        else if (new Set(mentions.map((m) => m.region)).size === 1 && new Set(sideWords.map((x) => x.side)).size === 1) side = sideWords[0].side
+      }
+      sentenceStatus.push(status)
+      out.push({ region: f.region, side, status })
+    }
+    // A sentence without regions passes its meaning on ("Oggi lombalgia. Trattata con…").
+    const own = marks.filter((m) => m.kind !== 'negation').sort((a, b) => b.end - a.end)[0]
+    if (sentenceStatus.length) carried = sentenceStatus.includes('active') ? 'active' : sentenceStatus[sentenceStatus.length - 1] === 'negated' ? carried : 'history'
+    else if (own) carried = KIND_STATUS[own.kind as Exclude<Kind, 'negation'>]
   }
-  const sides = words.map((w, i) => ({ i, side: LEFT.has(w) ? ('left' as const) : RIGHT.has(w) ? ('right' as const) : null })).filter((x) => x.side)
-  const regions = Array.from(new Set(found.map((f) => f.region)))
-  const out = new Map<Region, Set<Side | 'both'>>()
-  for (const f of found) {
-    const set = out.get(f.region) ?? new Set()
-    out.set(f.region, set)
-    if (both) { set.add('both'); continue }
-    // The nearest side word within three words, after the region first ("spalla destra"), then before ("right shoulder").
-    const near = sides
-      .map((x) => ({ ...x, d: x.i > f.end ? x.i - f.end : f.start - x.i, after: x.i > f.end }))
-      .filter((x) => x.d > 0 && x.d <= 3)
-      .sort((a, b) => a.d - b.d || Number(b.after) - Number(a.after))[0]
-    if (near) set.add(near.side!)
-    else if (regions.length === 1 && new Set(sides.map((x) => x.side)).size === 1) set.add(sides[0].side!)
+  return out
+}
+
+/** The regions a text names, each with the side said next to it (whatever their status). */
+export function mentionsOf(text: string): { region: Region; side: Side | 'both' | null }[] {
+  const merged = new Map<Region, Set<Side | 'both'>>()
+  for (const m of analyzeMentions(text)) {
+    const set = merged.get(m.region) ?? new Set()
+    if (m.side) set.add(m.side)
+    merged.set(m.region, set)
   }
-  return Array.from(out.entries()).map(([region, set]) => ({
-    region,
-    side: set.has('both') || (set.has('left') && set.has('right')) ? 'both' : set.has('left') ? 'left' : set.has('right') ? 'right' : null,
-  }))
+  return Array.from(merged.entries()).map(([region, set]) => ({ region, side: set.has('both') || (set.has('left') && set.has('right')) ? 'both' : set.has('left') ? 'left' : set.has('right') ? 'right' : null }))
 }
 
 export type CaseProfile = {
@@ -221,15 +298,13 @@ export function caseProfile(text: string | null | undefined): CaseProfile {
   const active = new Map<Region, Set<Side | 'both'>>()
   const history = new Set<Region>()
   const negated = new Set<Region>()
-  for (const s of statementsOf(text)) {
-    for (const m of mentionsOf(s.text)) {
-      if (s.status === 'history') history.add(m.region)
-      else if (s.status === 'negated') negated.add(m.region)
-      else {
-        const set = active.get(m.region) ?? new Set()
-        if (m.side) set.add(m.side)
-        active.set(m.region, set)
-      }
+  for (const m of analyzeMentions(text)) {
+    if (m.status === 'history') history.add(m.region)
+    else if (m.status === 'negated') negated.add(m.region)
+    else {
+      const set = active.get(m.region) ?? new Set()
+      if (m.side) set.add(m.side)
+      active.set(m.region, set)
     }
   }
   const sides: CaseProfile['sides'] = {}
@@ -237,30 +312,30 @@ export function caseProfile(text: string | null | undefined): CaseProfile {
     if (set.has('both') || (set.has('left') && set.has('right'))) sides[region] = 'both'
     else if (set.size === 1) sides[region] = Array.from(set)[0]
   }
-  const act = Array.from(active.keys())
-  return { active: act, history: Array.from(history).filter((r) => !active.has(r)), negated: Array.from(negated).filter((r) => !active.has(r) && !history.has(r)), sides }
+  return { active: Array.from(active.keys()), history: Array.from(history).filter((r) => !active.has(r)), negated: Array.from(negated).filter((r) => !active.has(r) && !history.has(r)), sides }
 }
 
 /**
- * Sides a generated text gets wrong: a region named with the side opposite to
- * the one the clinician gave for it. A side named without any region is
- * judged against the case only when the case has a single side.
+ * Sides a generated text gets wrong: a current mention of a region with the
+ * side opposite to the one the clinician gave for it. A side named without
+ * any region is judged against the case only when the case has a single side.
  */
 export function sideContradictions(generated: string, profile: CaseProfile): Region[] {
   const out = new Set<Region>()
-  const given = Array.from(new Set(Object.values(profile.sides).filter((s) => s !== 'both')))
-  for (const s of statementsOf(generated)) {
-    if (s.status !== 'active') continue
-    const mentions = mentionsOf(s.text)
-    for (const m of mentions) {
-      const said = profile.sides[m.region]
-      if (said && said !== 'both' && m.side && m.side !== 'both' && m.side !== said) out.add(m.region)
-    }
-    if (mentions.length === 0 && given.length === 1 && Object.values(profile.sides).every((x) => x !== 'both')) {
-      const words = tokens(s.text)
-      const opposite = given[0] === 'left' ? RIGHT : LEFT
-      const same = given[0] === 'left' ? LEFT : RIGHT
-      if (words.some((w) => opposite.has(w)) && !words.some((w) => same.has(w))) out.add(Object.keys(profile.sides)[0] as Region)
+  for (const m of analyzeMentions(generated)) {
+    if (m.status !== 'active') continue
+    const said = profile.sides[m.region]
+    if (said && said !== 'both' && m.side && m.side !== 'both' && m.side !== said) out.add(m.region)
+  }
+  const given = Object.entries(profile.sides)
+  if (given.length === 1 && given[0][1] !== 'both') {
+    const [region, side] = given[0] as [Region, Side]
+    for (const sentence of generated.split(/[.;:!?\n]+/)) {
+      if (analyzeMentions(sentence).length) continue
+      const words = sentenceWords(sentence)
+      const opposite = side === 'left' ? RIGHT : LEFT
+      const same = side === 'left' ? LEFT : RIGHT
+      if (words.some((w) => opposite.has(w)) && !words.some((w) => same.has(w))) out.add(region)
     }
   }
   return Array.from(out)

@@ -150,6 +150,25 @@ Correzioni:
   - aggiunti alcuni esercizi comuni: pendolo/Codman, cat-camel;
   - corretto un difetto trovato dai nuovi test: "anche" (avverbio) veniva letto come plurale di "anca".
 
+### Revisione 3: problemi trovati con il modello reale
+
+L'utente ha eseguito tre verifiche con il modello OpenAI reale, usando lo script in ambiente isolato e casi sintetici. Ognuna è riprodotta come regressione: il caso `real*` in `tests/support/clinical-world.mjs`, con la risposta del modello ricostruita sinteticamente, e un test dedicato in `tests/clinical-relevance.test.mjs`. Sul codice della revisione 2 i tre test fallivano tutti, ciascuno per il motivo osservato.
+
+| Problema osservato | Causa | Correzione |
+|---|---|---|
+| Reperti inventati: ROM lombare limitato, "assenza di radicolopatia", "nessuna instabilità", Neer/Hawkins positivi, gonfiore, flessione del ginocchio limitata oltre 90°. Segnalati solo in parte | Il prompt della nota chiedeva per "Objective" anche le "structures to rule out" e uno stile "non parafrasato". I controlli conoscevano solo le misure con unità | **Prompt**: l'Oggettivo contiene solo reperti, misure e test riferiti; mai reperti negativi, nomi di test o risultati non detti; le considerazioni differenziali vanno nel ragionamento clinico. **`lib/clinical/facts.ts`** riconosce i reperti per concetto (ROM e movimenti ridotti, rigidità, gonfiore, radicolopatia, instabilità, segni neurologici, forza, trofismo, crepitio, palpazione, andatura, ecchimosi) e i test clinici per nome (circa 40, in 4 lingue). Un reperto è sostenuto se il fisioterapista ha parlato di quel concetto, anche con altre parole |
+| `history_as_active` falso positivo ("pregresso intervento al ginocchio sinistro (asintomatico) e lombalgia attuale") | Lo stato (attuale, anamnesi o negato) era deciso per proposizione intera, e "attuale" vinceva su "pregresso" | **Stato per singola menzione**: vince l'indicatore più vicino; virgole e parentesi contano come distanza; una negazione vale nella sua proposizione; "pregresso dolore" e "attualmente asintomatico" sono anamnesi; "non correlato", "asintomatico" e "risolto" sono anamnesi; "entrambi" vale solo per il distretto vicino |
+| Pendolo e sollevamento del braccio prono associati alla rotazione esterna con elastico; rotazione esterna "gomito a 90°" esclusa come esercizio del gomito | La ricerca usava anche parole chiave di solo distretto ("shoulder") e accettava qualsiasi esercizio che contenesse una parola; "gomito a 90°" era letto come distretto | **Posizioni** ("gomito a 90°", "ginocchia flesse", "al fianco") non sono distretti. Le parole chiave di solo distretto non si usano. **`lib/clinical/exerciseMatch.ts`**: un esercizio del database sostituisce quello della nota solo se il movimento coincide (circa 25 movimenti in 4 lingue) o, senza movimento noto, se tutte le parole specifiche della parola chiave sono nel nome. Altrimenti l'esercizio resta come scritto, con "Corrispondenza non verificata"; un suggerimento compare solo se non è in conflitto, e il fisioterapista può usarlo con "Usa «…»" |
+| La sintesi per il paziente inventa follow-up e frequenze di visita | Il prompt chiedeva per il Piano una "sensible frequency/timeline" e non limitava la sintesi | **Prompt**: niente frequenza delle visite, numero di sedute, date di controllo o trattamenti concordati se non detti; distinguere il fatto oggi dal proposto. **Controlli**: visite, follow-up e frequenze (confermati solo se il fisioterapista ne ha parlato e con gli stessi numeri e la stessa unità), accordi ("abbiamo concordato") |
+| Più distretti trattati: protocolli, evidenze ed esercizi devono coprirli tutti | Scheda clinica e studi erano cercati solo per la condizione principale | **`knowledge-lookup`** restituisce `others`: per ogni altro distretto attuale, il suo lato e la sua scheda (o nessuna). **`science/relevant`** cerca per tutti i distretti e prende il migliore studio per ciascuno; ogni studio indica i distretti che copre. **Controlli `coverage_*`**: un distretto trattato oggi senza esercizi, scheda o studi viene segnalato. **Prompt**: piano, esercizi e rifinitura coprono ogni distretto, ciascuno con il suo lato |
+
+**Pulizia della bozza (`sanitizeNote`, nella route della nota).** Le affermazioni non dette vengono tolte dalle parti che riportano fatti, proposizione per proposizione, in modo che resti ciò che è stato detto:
+- reperti, test e misure nei Rilievi soggettivi e nell'Oggettivo;
+- visite, follow-up e accordi nel Piano e nella sintesi per il paziente;
+- trattamenti presentati come eseguiti.
+
+Ogni rimozione è elencata nel pannello ("Tolto dalla bozza perché non risulta da ciò che hai detto"), con sezione, motivo e "Ripristina". La Valutazione è ragionamento clinico: viene solo segnalata (se non è formulata come ipotesi), mai modificata.
+
 ## Matrice dei casi e risultati (solo test simulati)
 
 Suite `tests/clinical-relevance.test.mjs`. Segue il percorso reale delle route:
@@ -206,19 +225,25 @@ Test nel browser (Playwright, `tests/session-notes-panel.test.mjs`, 5 test). Due
 - "Aggiungi comunque" sposti l'esercizio tra gli esercizi senza toccare gli altri;
 - la nota salvata contenga tutti e quattro gli esercizi scelti.
 
-**Controlli complessivi** sul branch (revisione 2), eseguiti sul commit `2ea766e` con l'albero di lavoro pulito:
-- suite completa dell'app: **237 test, 237 superati, 0 falliti, 0 saltati, 0 annullati**, compresi tutti i test preesistenti. Comprende `clinical-relevance` (34), `knowledge-match` (5) e i 5 test nel browser del pannello;
-- typecheck (`tsc --noEmit`): nessun errore;
-- `next build`: riuscita;
-- test SQL su PostgreSQL locale nel container (socket `/var/run/postgresql`; lo script rifiuta host Supabase): 7 file, tutti superati, nessuna operazione su Supabase.
-- Questo documento è stato aggiornato con un commit successivo che modifica **solo** questo file: il codice è identico a quello verificato.
+**Revisione 3, regressioni dal modello reale** (risposte simulate):
+
+| Test | Prima, sul codice della revisione 2 | Dopo |
+|---|---|---|
+| Lombalgia con ginocchio in anamnesi | ✗ reperti inventati non rilevati; `history_as_active` falso positivo nella Valutazione | ✓ tre reperti, visite nel Piano e follow-up nella sintesi rilevati, tolti ed elencati; nessun falso positivo sull'anamnesi |
+| Spalla dx + ginocchio sx | ✗ Neer, Hawkins e gonfiore non rilevati (solo "90 gradi") | ✓ tutti rilevati e tolti (Oggettivo vuoto); scheda del ginocchio sinistro come altro distretto; studi per entrambi; nessun errore di lato |
+| Spalla dx + ginocchio sx, esercizi solo per la spalla | — | ✓ `coverage_exercises` per il ginocchio |
+| Spalla sx, abbinamento esercizi | ✗ rotazione esterna "gomito a 90°" esclusa come esercizio del gomito | ✓ pendolo e sollevamento prono non sostituiti (prono "non verificato"); rotazione esterna abbinata correttamente |
+| Prompt | ✗ "structures to rule out", "sensible frequency/timeline" | ✓ |
+
+**Controlli complessivi:** {{FULL}}
 
 ## Test simulati e verifica con il modello reale
 
 | | Stato |
 |---|---|
 | Test simulati (modello scriptato, dati sintetici) | Eseguiti, risultati sopra |
-| Verifica con il modello AI reale | **Non eseguita.** In questo ambiente non è disponibile alcuna chiave OpenAI, e non è stata prelevata quella di produzione da Vercel. La qualità delle risposte reali con i nuovi prompt **non è validata**. Nessun caso reale del modello è stato verificato. |
+| Verifica con il modello AI reale, prima della revisione 3 | Eseguita dall'utente su tre casi sintetici, in ambiente isolato. Ha trovato i cinque problemi della revisione 3, riprodotti qui come regressioni simulate |
+| Verifica con il modello AI reale, dopo la revisione 3 | **Da ripetere.** In questo ambiente non c'è una chiave OpenAI. Le correzioni sono dimostrate solo con risposte simulate, che riproducono gli output osservati. Quanto il modello reale scriva meno dati inventati con i nuovi prompt **non è dimostrato**; la pulizia e i controlli intervengono comunque su ciò che scrive |
 
 **Procedura per la verifica con il modello reale** (`docs/clinical/verifica-manuale-modello-reale.md`):
 - si esegue con `scripts/clinical-relevance-live.mjs`, in ambiente isolato: app in locale, Supabase sostituito da un database in memoria con soli dati sintetici, nessun database reale e nessun paziente;
@@ -226,6 +251,11 @@ Test nel browser (Playwright, `tests/session-notes-panel.test.mjs`, 5 test). Due
 
 ## Limiti residui
 
+- **Reperti e test sono riconosciuti da un vocabolario** (concetti e nomi in 4 lingue): un reperto descritto con parole fuori elenco non viene rilevato.
+- **Un reperto è "sostenuto" a livello di concetto**: se il fisioterapista ha parlato di gonfiore, un "edema" nel testo è accettato anche se il grado o la sede sono diversi.
+- **La pulizia lavora per proposizioni**: una proposizione che mescola un dato detto e uno inventato viene tolta per intero; resta elencata e si può ripristinare.
+- **La corrispondenza degli esercizi si basa su circa 25 movimenti**: per un esercizio senza movimento noto basta che le parole specifiche della parola chiave siano nel nome.
+- **Per gli altri distretti** la scheda è cercata per parola chiave tra le schede di quel distretto, senza ripiego AI e senza fasi.
 - **I controlli sono deterministici e coprono solo fatti verificabili**: distretto, lato, misure con unità, giorni/date/orari, trattamenti "eseguiti" di un elenco noto. Non giudicano la correttezza del ragionamento clinico, l'aderenza agli obiettivi del paziente, la popolazione degli studi o la corrispondenza tra titolo, abstract, autori e PMID. Sono tutti punti della verifica manuale.
 - **Il riconoscimento del distretto si basa su un vocabolario**: sinonimi rari, refusi o abbreviazioni non vengono riconosciuti. In quel caso il sistema **lo dichiara** ("distretto non riconosciuto", "pertinenza non verificata") invece di classificare.
 - **La distinzione anamnesi / attuale / negato si basa su parole indicatrici**: un'anamnesi senza indicatori ("operato al ginocchio nel 2019") resta attuale. Una frase senza indicatori eredita lo stato della frase precedente. Gli errori vanno nel senso di considerare un distretto attuale, quindi segnalare meno, non nascondere.

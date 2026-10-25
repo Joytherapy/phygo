@@ -8,14 +8,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import ts from 'typescript';
 
-/** lib/clinical/region.ts and coherence.ts, transpiled for Node. */
+/** lib/clinical (region, facts, exerciseMatch, coherence), transpiled for Node. */
 export async function loadClinical() {
   const dir = mkdtempSync(join(tmpdir(), 'phygo-clin-'));
   const out = (f, src) => writeFileSync(join(dir, `${f}.mjs`), ts.transpileModule(src, { compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 } }).outputText);
   try {
-    out('region', readFileSync(new URL('../../lib/clinical/region.ts', import.meta.url), 'utf8'));
-    out('coherence', readFileSync(new URL('../../lib/clinical/coherence.ts', import.meta.url), 'utf8').replace("from './region'", "from './region.mjs'"));
-    return { R: await import(join(dir, 'region.mjs')), K: await import(join(dir, 'coherence.mjs')) };
+    const src = (f) => readFileSync(new URL(`../../lib/clinical/${f}.ts`, import.meta.url), 'utf8').replace("from './region'", "from './region.mjs'").replace("from './facts'", "from './facts.mjs'")
+    for (const f of ['region', 'facts', 'exerciseMatch', 'coherence']) out(f, src(f));
+    return { R: await import(join(dir, 'region.mjs')), K: await import(join(dir, 'coherence.mjs')), F: await import(join(dir, 'facts.mjs')), M: await import(join(dir, 'exerciseMatch.mjs')) };
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -55,6 +55,7 @@ export const PAPERS = [
   // a paper naming no region at all (shown as unverified, never as direct).
   paper('p-achilles', 'Loading programmes in Achilles tendinopathy', 'Progressive tendon loading in tendinopathy.'),
   paper('p-tendo', 'Tendinopathy: principles of load management', 'Tendinopathy and tendon load.'),
+  paper('p-pfp', 'Exercise therapy for patellofemoral pain: a systematic review', 'Hip and knee exercise for patellofemoral pain.'),
 ];
 const lib = (n, name, region, muscle) => ({ id: `8f9a0000-0000-4000-8000-0000000000${String(n).padStart(2, '0')}`, name, region, muscle });
 export const LIB = [
@@ -68,6 +69,7 @@ export const LIB = [
   lib(8, 'Glute bridge', 'hips', 'glutes'),
   lib(9, 'Chin tuck', 'neck', 'deep neck flexors'),
   lib(10, 'Calf raise', 'lower legs', 'gastrocnemius'),
+  lib(11, 'Prone Y raise', 'shoulders', 'lower trapezius'),
 ];
 
 // Each case: what the clinician said, the note the model writes (with the kind of
@@ -210,7 +212,8 @@ export const CASES = {
     note: { subjective: 'Dolore alla spalla destra; lieve lombalgia.', objective: '', assessment: 'Possibile dolore di spalla correlato alla cuffia dei rotatori.', plan: 'Esercizio per spalla e lombare.', primaryCondition: 'rotator cuff related shoulder pain',
       exercises: ['Rotazione esterna con elastico spalla destra 3x12', 'Cat-camel 2x10'] },
     papers: ['rotator cuff'],
-    expect: { sheet: 1, keep: [/shoulder|spalla/i, /cat-camel/i], noIssues: true },
+    // The low back has no sheet or paper in this world: said, not hidden.
+    expect: { sheet: 1, keep: [/shoulder|spalla/i, /cat-camel/i], noIssues: true, issues: ['coverage_protocol:lumbar', 'coverage_evidence:lumbar'] },
   },
   // The same region negated: its exercise is left out.
   secondaryNegated: {
@@ -266,9 +269,80 @@ export const CASES = {
       notIssues: ['invented_treatment:terapia manuale', 'invented_appointment:giovedi', 'section_region:differentials'],
     },
   },
+  // ---- Regressions from the checks with the real model (synthetic re-creations of
+  // what the model wrote; `raw` is the model's note before PHYGO's checks).
+  // 1. Low back pain with a knee operated years ago, asymptomatic: the model
+  //    added lumbar ROM limits, "no radiculopathy", "no instability", visit
+  //    frequencies and a follow-up; the history is stated as history.
+  realLumbarHistory: {
+    transcript: 'Oggi lombalgia da due giorni dopo aver sollevato un peso. In anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico.',
+    note: {
+      subjective: 'Lombalgia da due giorni insorta dopo il sollevamento di un peso. In anamnesi intervento al ginocchio sinistro cinque anni fa, attualmente asintomatico e non correlato al quadro attuale.',
+      objective: 'Limitazione del ROM lombare in flessione. Assenza di segni di radicolopatia. Nessuna instabilità rilevata.',
+      assessment: 'Paziente con pregresso intervento al ginocchio sinistro (asintomatico) e lombalgia attuale, possibile lombalgia meccanica aspecifica.',
+      plan: 'Educazione e esercizio terapeutico graduale per il rachide lombare. Sedute due volte a settimana per quattro settimane.',
+      summaryForPatient: 'Il dolore alla schiena dovrebbe migliorare con il movimento. Ci vediamo due volte a settimana e faremo un controllo tra due settimane.',
+      primaryCondition: 'low back pain',
+      clinicalReasoning: { hypotheses: ['Possibile lombalgia meccanica aspecifica'], missingInformation: 'Mobilità lombare e test neurologici non riportati.' },
+      exercises: ['Cat-camel 2x10', 'Stretching hamstring 3x30s'],
+    },
+    papers: ['low back pain'],
+    expect: { sheet: 7 },
+  },
+  // 2. Right shoulder and left knee treated today: the model added Neer and
+  //    Hawkins positive, knee swelling and knee flexion limited past 90 degrees.
+  realMultisite: {
+    transcript: 'Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi. Dolore alla spalla in elevazione e al ginocchio scendendo le scale.',
+    note: {
+      subjective: 'Dolore alla spalla destra in elevazione e al ginocchio sinistro scendendo le scale.',
+      objective: 'Test di Neer e Hawkins positivi a destra. Gonfiore al ginocchio sinistro. Flessione del ginocchio limitata oltre i 90 gradi.',
+      assessment: 'Possibile dolore di spalla destra correlato alla cuffia dei rotatori; possibile dolore femororotuleo al ginocchio sinistro.',
+      plan: 'Esercizi per la spalla destra e per il ginocchio sinistro.',
+      summaryForPatient: 'Fai gli esercizi per la spalla e per il ginocchio ogni giorno.',
+      primaryCondition: 'rotator cuff related shoulder pain',
+      exercises: ['Rotazione esterna con elastico spalla destra 3x12', 'Estensione di ginocchio sinistro 3x12'],
+    },
+    papers: ['rotator cuff', 'patellofemoral pain'],
+    expect: { sheet: 1 },
+  },
+  // The same case with exercises only for the shoulder: the knee is not covered.
+  realMultisiteNoKnee: {
+    transcript: 'Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi. Dolore alla spalla in elevazione e al ginocchio scendendo le scale.',
+    note: {
+      subjective: 'Dolore alla spalla destra e al ginocchio sinistro.',
+      objective: '',
+      assessment: 'Possibile dolore di spalla destra correlato alla cuffia dei rotatori; possibile dolore femororotuleo al ginocchio sinistro.',
+      plan: 'Esercizi per la spalla destra.',
+      summaryForPatient: '',
+      primaryCondition: 'rotator cuff related shoulder pain',
+      exercises: ['Rotazione esterna con elastico spalla destra 3x12'],
+    },
+    papers: ['rotator cuff'],
+    expect: { sheet: 1 },
+  },
+  // 3. Left shoulder: the pendulum and a prone arm raise were matched to the
+  //    band external rotation; the external rotation "elbow at 90°" was
+  //    excluded as an elbow exercise.
+  realExerciseMatch: {
+    transcript: 'Dolore alla spalla sinistra da un mese, sospetta tendinopatia della cuffia dei rotatori.',
+    note: {
+      subjective: 'Dolore alla spalla sinistra da un mese.',
+      objective: '',
+      assessment: 'Possibile tendinopatia della cuffia dei rotatori della spalla sinistra.',
+      plan: 'Esercizio progressivo per la spalla sinistra.',
+      summaryForPatient: '',
+      primaryCondition: 'rotator cuff tendinopathy',
+      exercises: ['Pendolo di Codman 3x1 minuto', 'Sollevamento del braccio in posizione prona 3x10', 'Rotazione esterna con elastico, gomito a 90° al fianco 3x12'],
+    },
+    papers: ['rotator cuff tendinopathy'],
+    expect: { sheet: 1 },
+  },
 };
 
 export const KEYWORDS = [
+  // As the model extracted them in the real checks: a region word, or another exercise's name.
+  [/pendolo/i, ['pendulum', 'shoulder']],
+  [/prona/i, ['prone arm raise', 'shoulder external rotation']],
   [/rotazione esterna/i, ['shoulder external rotation band', 'external rotation']],
   [/pettoral/i, ['pectoral stretch', 'stretch']],
   [/caviglia/i, ['ankle mobility']],
@@ -303,13 +377,13 @@ export const worldTables = () => ({
 
 /** The note panel's sequence (components/liveStructuring/LiveStructuring.tsx, generateRealNote). */
 export async function runPipeline(post, transcript) {
-  const { note } = await post('/api/generate-note', { transcript, lang: 'it' });
-  const science = await post('/api/science/relevant', { primaryCondition: note.primaryCondition, assessment: note.assessment });
-  const kb = await post('/api/knowledge-lookup', { assessment: note.assessment, primaryCondition: note.primaryCondition, lang: 'it' });
+  const { note, removed } = await post('/api/generate-note', { transcript, lang: 'it' });
+  const science = await post('/api/science/relevant', { primaryCondition: note.primaryCondition, assessment: note.assessment, transcript });
+  const kb = await post('/api/knowledge-lookup', { assessment: note.assessment, primaryCondition: note.primaryCondition, lang: 'it', transcript });
   let exercises = note.exercises;
   if ((kb.phases ?? []).length) exercises = (await post('/api/refine-exercises', { transcript, assessment: note.assessment, exercisesDraft: note.exercises, phases: kb.phases, lang: 'it' })).exercises;
   const ei = await post('/api/exercise-intelligence', { exercisesDraft: exercises, assessment: note.assessment, primaryCondition: note.primaryCondition, lang: 'it', transcript });
-  return { transcript, note, papers: science.papers ?? [], kb, exercises: ei.exercises ?? [], excluded: ei.excluded ?? [] };
+  return { transcript, note, removed: removed ?? [], papers: science.papers ?? [], kb, exercises: ei.exercises ?? [], excluded: ei.excluded ?? [] };
 }
 
 /** checkOutput's input for one pipeline output. */
@@ -317,6 +391,7 @@ export const checkInputOf = (out) => ({
   transcript: out.transcript,
   note: out.note,
   exercises: out.exercises.map((e) => ({ name: e.name, draft: e.draft, body_region: e.body_region, primary_muscle: e.primary_muscle })),
-  papers: out.papers.map((p) => ({ title: p.title, relevance: p.relevance, relevance_reason: p.relevance_reason })),
+  papers: out.papers.map((p) => ({ title: p.title, relevance: p.relevance, relevance_reason: p.relevance_reason, regions: p.regions })),
   protocol: out.kb.match ? { name: out.kb.match.condition_name, keywords: out.kb.match.condition_keywords } : null,
+  otherProtocols: (out.kb.others ?? []).map((o) => ({ region: o.region, name: o.match?.condition_name ?? null })),
 });

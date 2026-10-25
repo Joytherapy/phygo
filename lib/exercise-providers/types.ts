@@ -21,6 +21,8 @@ export type ExerciseEntry = {
   media: ExerciseMedia | null;
   license: string | null;
   language: string;
+  /** The English name it was found by, when `name` is a translation (Exercises section). */
+  source_name?: string | null;
 };
 
 export type ExerciseSearchCriteria = {

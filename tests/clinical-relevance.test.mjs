@@ -28,8 +28,10 @@ const APP_PORT = Number(process.env.CLINICAL_APP_PORT ?? 3809);
 
 let R; // lib/clinical/region.ts
 let K; // lib/clinical/coherence.ts
+let F; // lib/clinical/facts.ts
+let M; // lib/clinical/exerciseMatch.ts
 before(async () => {
-  ({ R, K } = await loadClinical());
+  ({ R, K, F, M } = await loadClinical());
 });
 
 // ---------------------------------------------------------------- unit: regions and sides
@@ -185,8 +187,9 @@ for (const name of Object.keys(CASES)) {
     if (e.sheet !== undefined) assert.equal(out.kb.match?.id ?? null, e.sheet, 'the condition sheet (and its protocol) of this case');
     if (e.papers) assert.deepEqual(out.papers.map((p) => `${p.id}:${p.relevance}`), e.papers, 'only papers pertinent to the case, each with its level');
     for (const p of out.papers) if (p.relevance !== 'direct') assert.ok(p.relevance_reason, `"${p.title}" says why it is ${p.relevance}`);
-    const found = issues.map((i) => `${i.kind}:${i.item}`);
-    if (e.noIssues) assert.deepEqual(found.filter((f) => !f.startsWith('evidence_unverified:')), [], 'a coherent note has no issue in any section');
+    // What PHYGO took out of the note counts as caught, like a check shown in the panel.
+    const found = [...issues.map((i) => `${i.kind}:${i.item}`), ...out.removed.map((r) => `${r.kind}:${r.item}`)];
+    if (e.noIssues) assert.deepEqual(found.filter((f) => !f.startsWith('evidence_unverified:') && !(e.issues ?? []).includes(f)), [], 'a coherent note has no other issue in any section');
     for (const want of e.issues ?? []) assert.ok(found.includes(want), `"${want}" is detected (found: ${found.join(' | ')})`);
     for (const not of e.notIssues ?? []) assert.ok(!found.includes(not), `"${not}" is not reported: the clinician said it`);
     for (const word of e.offRegion ?? []) {
@@ -204,6 +207,102 @@ for (const name of Object.keys(CASES)) {
     }
   });
 }
+
+test('facts the clinician did not give: findings and tests by concept, visits and agreements; no false alarms', () => {
+  const said = 'Lombalgia da due giorni, nessuna irradiazione. Ci rivediamo giovedì.';
+  const kinds = (s, t = said) => F.unsupportedFindings(s, t).map((f) => `${f.kind}:${f.item}`);
+  assert.deepEqual(kinds('Assenza di radicolopatia.'), [], 'the clinician spoke about radiation: a statement about it is supported');
+  assert.deepEqual(kinds('Nessuna instabilità.'), ['invented_finding:instabilita'], 'a negative finding not given is still a finding');
+  assert.deepEqual(kinds('Rotazione cervicale ridotta.'), ['invented_finding:rotazione'], 'a reduced movement is a range-of-motion finding');
+  assert.deepEqual(kinds('Lachman negativo, edema assente.'), ['invented_test:lachman', 'invented_finding:edema']);
+  assert.deepEqual(kinds('Edema perimalleolare.', 'caviglia gonfia dopo la distorsione'), [], 'swelling said in other words');
+  const arr = (s, t = said) => F.unsupportedArrangements(s, t).map((f) => `${f.kind}:${f.item}`);
+  assert.deepEqual(arr('Sedute due volte a settimana per un mese.'), ['invented_appointment:sedute'], 'no visit numbers were given');
+  assert.deepEqual(arr('Ci vediamo giovedì.'), [], 'the clinician said it');
+  assert.deepEqual(arr('Esercizi di controllo motorio 3 volte a settimana.'), [], 'an exercise frequency and "controllo motorio" are not visits');
+  assert.deepEqual(arr('Abbiamo concordato un ciclo di tecar.'), ['invented_agreement:abbiamo concordato']);
+  assert.ok(F.isHedged('Possibile radicolopatia da escludere.') && !F.isHedged('Assenza di radicolopatia.'));
+  // Cleaning: only what was not said goes, clause by clause, and is listed.
+  const { note, removed } = K.sanitizeGeneratedNote({ objective: 'Dolore in flessione, Lachman positivo. ROM conservato.', plan: 'Esercizio progressivo. Rivalutazione tra due settimane.', summaryForPatient: 'Ci vediamo giovedì.' }, 'dolore in flessione del ginocchio, ci rivediamo giovedì');
+  assert.deepEqual([note.objective, note.plan, note.summaryForPatient], ['Dolore in flessione.', 'Esercizio progressivo.', 'Ci vediamo giovedì.']);
+  assert.deepEqual(removed.map((r) => `${r.section}:${r.kind}:${r.text}`), ['objective:invented_test:Lachman positivo', 'objective:invented_finding:ROM conservato', 'plan:invented_appointment:Rivalutazione tra due settimane']);
+});
+
+test('exercises: a position is not a region; a match needs the same movement', () => {
+  assert.deepEqual(R.exerciseTextRegions('Rotazione esterna con elastico, gomito a 90° al fianco'), [], '"gomito a 90°" is the position');
+  assert.deepEqual(R.exerciseTextRegions('Flessione del gomito con manubrio'), ['elbow'], 'an elbow exercise stays one');
+  assert.deepEqual(R.exerciseTextRegions('Ponte con ginocchia flesse'), []);
+  assert.equal(M.isRegionOnlyKeyword('shoulder'), true);
+  assert.equal(M.isRegionOnlyKeyword('shoulder external rotation'), false);
+  assert.equal(M.checkMatch('Rotazione esterna con elastico', ['external rotation'], 'Shoulder external rotation with band'), 'verified');
+  assert.equal(M.checkMatch('Pendolo di Codman', ['pendulum'], 'Shoulder external rotation with band'), 'conflict');
+  assert.equal(M.checkMatch('Sollevamento del braccio in posizione prona', ['shoulder external rotation'], 'Shoulder external rotation with band'), 'conflict');
+  assert.equal(M.checkMatch('Sollevamento del braccio in posizione prona', ['prone y raise'], 'Prone Y raise'), 'verified');
+  assert.equal(M.checkMatch('Chin tuck 3x10', ['chin tuck'], 'Chin tuck'), 'verified');
+  assert.equal(M.checkMatch('Esercizio X', ['band row'], 'Band pull apart'), 'unverified', 'a shared word without a known movement is not a match');
+});
+
+// ---------------------------------------------------------------- regressions from the real model
+// Each reproduces, with synthetic content and a scripted model, what the real
+// model wrote in a check the user ran (see CASES.real*).
+
+/** The checks on the model's note as written (before PHYGO's own clean-up). */
+const rawIssues = (name) => K.checkOutput({ transcript: CASES[name].transcript, note: CASES[name].note, exercises: [], papers: [], protocol: null }).map((i) => `${i.kind}:${i.item}${i.section ? `@${i.section}` : ''}`);
+
+test('real model, low back pain with knee history: invented findings and visits are caught, the history is not a false alarm', async () => {
+  const raw = rawIssues('realLumbarHistory');
+  for (const want of ['invented_finding:limitazione@objective', 'invented_finding:radicolopatia@objective', 'invented_finding:instabilita@objective']) assert.ok(raw.includes(want), `${want} (found: ${raw.join(' | ')})`);
+  assert.ok(raw.some((i) => i.startsWith('invented_appointment:') && i.endsWith('@summaryForPatient')), `the follow-up in the patient summary (found: ${raw.join(' | ')})`);
+  assert.ok(raw.some((i) => i.startsWith('invented_appointment:') && i.endsWith('@plan')), `the visit frequency in the plan (found: ${raw.join(' | ')})`);
+  assert.ok(!raw.some((i) => i.startsWith('history_as_active') || i.startsWith('side:') || i.startsWith('section_region')), `history stated as history is not an error (found: ${raw.join(' | ')})`);
+
+  const out = await runCase('realLumbarHistory');
+  // The note shown keeps only what the clinician said; what was removed is listed, with the reason.
+  assert.doesNotMatch(out.note.objective, /ROM|radicolopat|instabilit/i);
+  assert.doesNotMatch(out.note.summaryForPatient, /vediamo|controllo tra|settiman/i);
+  assert.doesNotMatch(out.note.plan, /sedute|settiman/i);
+  assert.match(out.note.plan, /esercizio terapeutico graduale/i, 'the rest of the plan stays');
+  assert.match(out.note.subjective, /anamnesi intervento al ginocchio sinistro/i, 'the reported history stays');
+  for (const [section, re] of [['objective', /ROM/], ['objective', /radicolopatia/], ['objective', /instabilit/], ['summaryForPatient', /vediamo/], ['plan', /Sedute/]]) {
+    assert.ok(out.removed.some((r) => r.section === section && re.test(r.text) && r.kind && r.item), `${section}: "${re}" removed with a reason`);
+  }
+  const issues = check('realLumbarHistory', out).map((i) => i.kind);
+  assert.ok(!issues.includes('history_as_active') && !issues.includes('invented_finding') && !issues.includes('invented_appointment'), `nothing left to flag (found: ${issues.join(', ')})`);
+});
+
+test('real model, right shoulder + left knee: every invented finding is caught; sheets, papers and exercises cover both regions', async () => {
+  const raw = rawIssues('realMultisite');
+  for (const want of ['invented_test:neer@objective', 'invented_test:hawkins@objective', 'invented_finding:gonfiore@objective', 'invented_finding:limitata@objective', 'invented:90 gradi@objective']) assert.ok(raw.includes(want), `${want} (found: ${raw.join(' | ')})`);
+  const out = await runCase('realMultisite');
+  assert.equal(out.note.objective.trim(), '', 'no objective finding was reported: none is shown');
+  assert.equal(out.removed.filter((r) => r.section === 'objective').length, 3);
+  // Protocol: the shoulder sheet, and the knee sheet for the other region treated today, with its side.
+  assert.equal(out.kb.match?.id, 1);
+  assert.deepEqual((out.kb.others ?? []).map((o) => [o.region, o.side, o.match?.id ?? null]), [['knee', 'left', 4]]);
+  // Evidence for each region.
+  const ids = out.papers.map((p) => p.id);
+  assert.ok(ids.includes('p-shoulder') && ids.includes('p-pfp'), `papers for both regions (got ${ids.join(', ')})`);
+  const kinds = check('realMultisite', out).map((i) => `${i.kind}:${i.item}`);
+  assert.ok(!kinds.some((k) => k.startsWith('coverage') || k.startsWith('side:')), `both regions covered, sides right (found: ${kinds.join(' | ')})`);
+
+  const noKnee = check('realMultisiteNoKnee', await runCase('realMultisiteNoKnee')).map((i) => `${i.kind}:${i.item}`);
+  assert.ok(noKnee.includes('coverage_exercises:knee'), `a region treated today without exercises is flagged (found: ${noKnee.join(' | ')})`);
+});
+
+test('real model, left shoulder: exercises matched by movement, region and side, not by a shared word', async () => {
+  const out = await runCase('realExerciseMatch');
+  const byDraft = (re) => out.exercises.find((x) => re.test(x.draft));
+  const pendulum = byDraft(/pendolo/i);
+  const prone = byDraft(/prona/i);
+  const er = byDraft(/rotazione esterna/i);
+  assert.ok(pendulum && prone && er, `all three stay in the programme (excluded: ${out.excluded.map((x) => x.name).join(', ')})`);
+  assert.notEqual(pendulum.name, 'Shoulder external rotation with band', 'the pendulum is not swapped for the external rotation');
+  assert.notEqual(prone.name, 'Shoulder external rotation with band', 'the prone raise is not swapped for the external rotation');
+  assert.equal(er.name, 'Shoulder external rotation with band', '"elbow at 90°" is a position, not the region: the external rotation is matched');
+  assert.equal(er.relevance, 'compatible');
+  assert.equal(pendulum.relevance, 'compatible', 'the pendulum is a shoulder exercise');
+  assert.equal(prone.match_status, 'unverified', 'the database suggestion for the prone raise moves differently: not trusted');
+});
 
 test('the screenshot case in detail: no hamstring/ankle swap, no leg paper', async () => {
   const out = await runCase('shoulderLeft');
@@ -234,6 +333,9 @@ test('the prompts no longer push other-region exercises', () => {
   assert.doesNotMatch(note, /hamstrings|gastrocnemius|stair gait|side-stepping/i, 'no lower-limb examples as defaults');
   assert.doesNotMatch(refine, /should not be skipped by default|both legs/i, 'no categories forced regardless of the case');
   assert.match(note + refine, /region/i, 'the region of today’s case is stated as the limit');
+  assert.doesNotMatch(note, /structures to rule out|sensible frequency\/timeline/i, 'no invitation to add findings or a visit timeline');
+  assert.match(note, /never add a finding/i, 'objective findings only as reported');
+  assert.match(note, /visit frequency/i, 'no appointments or visit frequency that were not agreed');
 });
 
 after(() => {

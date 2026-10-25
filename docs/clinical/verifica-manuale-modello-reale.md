@@ -62,9 +62,13 @@ I casi sono quelli della matrice in `tests/support/clinical-world.mjs`. Vengono 
 | 20 | Dolore alla spalla destra da tre settimane, nega dolore lombare. | spalla destra (lombare **negato**) |
 | 21 | Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi. | multidistretto con **lato diverso per distretto** |
 | 22 | Fibromialgia con dolore diffuso e stanchezza. | nessun distretto: tutto "pertinenza non verificata" |
+| 23 | Oggi lombalgia da due giorni dopo aver sollevato un peso. In anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico. | regressione 1: niente reperti né visite inventati; nessun falso allarme sull'anamnesi |
+| 24 | Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi. Dolore alla spalla in elevazione e al ginocchio scendendo le scale. | regressione 2: niente test o reperti inventati; scheda, studi ed esercizi per entrambi i distretti, con il lato giusto |
+| 25 | Dolore alla spalla sinistra da un mese, sospetta tendinopatia della cuffia dei rotatori. (Esercizi attesi come pendolo, sollevamento prono, rotazione esterna "gomito a 90°") | regressione 3: nessuna sostituzione con un esercizio di movimento diverso |
 
 ## Che cosa controllare in ogni sezione
 
+- **Tolto dalla bozza** (pannello e report): ogni rimozione era davvero un dato non detto (nessuna rimozione di cose dette), e nessun dato inventato è rimasto nel testo.
 - **Rilievi**:
   - solo ciò che è stato detto;
   - nessuna misura, test o trattamento aggiunti;
@@ -95,7 +99,8 @@ I casi sono quelli della matrice in `tests/support/clinical-world.mjs`. Vengono 
   - distretto del caso, distretti vicini o attività generale (aerobica);
   - un esercizio con distretto non riconosciuto è mostrato come "pertinenza non verificata", con il motivo, e non viene tolto;
   - nessun esercizio per un distretto citato solo in anamnesi o negato;
-  - "Dalla nota: …" quando l'esercizio del database ha un nome diverso;
+  - "Dalla nota: …" quando l'esercizio del database ha un nome diverso, e l'esercizio del database ha lo stesso movimento;
+  - "Corrispondenza non verificata" quando non è certo, senza sostituzione automatica;
   - dosaggio presente.
 - **Controlli di coerenza**:
   - gli esercizi esclusi indicano il distretto dell'esercizio e quello del caso;

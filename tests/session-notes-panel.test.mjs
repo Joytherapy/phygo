@@ -279,6 +279,90 @@ test('coherence checks with two regions treated today and one only in history: s
   }
 });
 
+test('statements the clinician did not give are taken out and listed, and can be restored; unverified library matches are not applied', { skip }, async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'it-IT', reducedMotion: 'reduce' });
+  const [name, value] = sessionCookie('tok-clin', U).split(/=(.*)/s);
+  await ctx.addCookies([{ name, value, url: app.url }]);
+  const page = await ctx.newPage();
+  const json = (body) => (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
+  const said = 'Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi. Dolore alla spalla in elevazione e al ginocchio scendendo le scale.';
+  // As /api/generate-note returns it: already without the invented findings and follow-up, which are listed.
+  const note = {
+    subjective: 'Dolore alla spalla destra in elevazione e al ginocchio sinistro scendendo le scale.',
+    objective: '',
+    assessment: 'Possibile dolore di spalla destra correlato alla cuffia dei rotatori; possibile dolore femororotuleo al ginocchio sinistro.',
+    plan: 'Esercizi per la spalla destra e per il ginocchio sinistro.',
+    summaryForPatient: 'Fai gli esercizi ogni giorno.',
+    primaryCondition: 'rotator cuff related shoulder pain',
+    exercises: ['Pendolo di Codman 3x1 minuto', 'Estensione di ginocchio sinistro 3x12'],
+    language: 'it',
+  };
+  const removed = [
+    { section: 'objective', text: 'Test di Neer e Hawkins positivi a destra', kind: 'invented_test', item: 'neer' },
+    { section: 'objective', text: 'Gonfiore al ginocchio sinistro', kind: 'invented_finding', item: 'gonfiore' },
+    { section: 'summaryForPatient', text: 'Ci vediamo due volte a settimana', kind: 'invented_appointment', item: 'ci vediamo' },
+  ];
+  const dosing = { sets: 3, reps: 12, duration_seconds: null, frequency_per_week: null, notes: null };
+  const suggestion = { internal_id: 'exercises-9', provider: 'exercises', provider_id: 'e9', name: 'Pendulum swing', body_region: 'shoulder', primary_muscle: 'Deltoid', media: null };
+  await page.route('**/api/generate-note', json({ note, removed }));
+  await page.route('**/api/science/relevant', json({ papers: [] }));
+  await page.route('**/api/knowledge-lookup', json({
+    match: { id: 1, condition_name: 'Tendinopatia della cuffia dei rotatori', condition_keywords: 'cuffia dei rotatori', goals: 'g', clinical_tests: 't', red_flags: 'r', typical_exercises: 'e', source: 'Linea guida sintetica', source_date: '2024' },
+    phases: [], relevance: 'verified', relevanceReason: null,
+    others: [{ region: 'knee', side: 'left', match: { id: 4, condition_name: 'Dolore femororotuleo' } }],
+  }));
+  await page.route('**/api/exercise-intelligence', json({
+    exercises: [
+      { internal_id: 'custom-p', provider: 'custom', provider_id: null, name: 'Pendolo di Codman 3x1 minuto', draft: 'Pendolo di Codman 3x1 minuto', body_region: null, primary_muscle: null, media: null, source_type: 'professional', dosing, clinical_check: null, relevance: 'compatible', relevance_reason: null, match_status: 'unverified', suggested_match: suggestion },
+      { internal_id: 'exercises-7', provider: 'exercises', provider_id: 'e7', name: 'Knee extension', draft: 'Estensione di ginocchio sinistro 3x12', body_region: 'thighs', primary_muscle: 'Quadriceps', media: null, source_type: 'professional', dosing, clinical_check: null, relevance: 'compatible', relevance_reason: null, match_status: 'verified', suggested_match: null },
+    ],
+    excluded: [],
+  }));
+  try {
+    await page.goto(`${app.url}/dashboard/patients/${P}/session`);
+    await page.getByRole('heading', { level: 1, name: 'Paziente Sintetico' }).waitFor({ timeout: 15000 });
+    await page.getByRole('button', { name: 'Scrivi', exact: true }).click();
+    await page.getByRole('textbox', { name: 'Scrivi qui le tue osservazioni sulla seduta…' }).fill(said);
+    await page.getByRole('button', { name: 'Genera nota' }).click();
+    await page.getByText('Nota pronta').waitFor({ timeout: 15000 });
+    const checks = page.getByTestId('coherence-checks');
+    await checks.getByText('Controlli di coerenza').waitFor({ timeout: 10000 });
+
+    // What was taken out, where and why.
+    const list = checks.getByTestId('removed-fact');
+    assert.equal(await list.count(), 3);
+    await checks.getByText('Tolto dalla bozza perché non risulta da ciò che hai detto').waitFor();
+    assert.match(await list.nth(0).innerText(), /Test di Neer e Hawkins positivi a destra[\s\S]*Oggettivo · test non nominato/);
+    assert.match(await list.nth(2).innerText(), /Ci vediamo due volte a settimana[\s\S]*Sintesi per il paziente · appuntamento o frequenza delle visite non concordati/);
+    assert.doesNotMatch(await page.getByTestId('note-findings').innerText(), /Neer|Gonfiore/, 'not in the note');
+
+    // The other region treated today, with its side and sheet.
+    await page.getByTestId('other-regions').getByText('ginocchio (lato sinistro): Dolore femororotuleo').waitFor();
+
+    // The library suggestion is not applied by itself; taking it is the clinician's choice.
+    const cards = page.getByTestId('note-exercise');
+    await cards.first().getByTestId('match-unverified').getByText('Corrispondenza in libreria non verificata', { exact: false }).waitFor();
+    assert.equal(await cards.first().locator('p').first().innerText(), 'Pendolo di Codman 3x1 minuto');
+    await cards.first().getByRole('button', { name: 'Usa «Pendulum swing»' }).click();
+    await cards.first().locator('p').first().getByText('Pendulum swing').waitFor();
+    await cards.first().getByText('Dalla nota: Pendolo di Codman 3x1 minuto').waitFor();
+
+    // Restored on purpose: back in its section, off the list; the clinician then saves.
+    await list.nth(1).getByRole('button', { name: 'Ripristina' }).click();
+    assert.equal(await list.count(), 2);
+    await page.getByTestId('note-findings').getByText('Gonfiore al ginocchio sinistro').waitFor();
+    await page.getByRole('button', { name: 'Salva nella scheda' }).click();
+    await page.getByRole('button', { name: 'Salvata nella scheda' }).waitFor({ timeout: 10000 });
+    const saved = fake.state.tables.notes.at(-1);
+    assert.match(saved.objective ?? '', /Gonfiore al ginocchio sinistro/, 'the restored finding is saved');
+    assert.doesNotMatch(saved.objective ?? '', /Neer/, 'what stayed out is not saved');
+    assert.doesNotMatch(saved.summary_for_patient ?? '', /vediamo/);
+    assert.deepEqual((saved.exercises ?? []).map((e) => (typeof e === 'string' ? e : e.name)), ['Pendulum swing', 'Knee extension']);
+  } finally {
+    await ctx.close();
+  }
+});
+
 test('the navbar "x" clears the current patient on the session page, and it stays cleared', { skip }, async () => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'it-IT', reducedMotion: 'reduce' });
   await ctx.addInitScript(() => window.localStorage.setItem('phygo-lang', 'it'));

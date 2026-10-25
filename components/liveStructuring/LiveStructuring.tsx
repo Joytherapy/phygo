@@ -154,6 +154,10 @@ const [noteTranscript, setNoteTranscript] = useState("");
 const [excludedExercises, setExcludedExercises] = useState<{ name: string; reason?: string; regions?: string[]; caseRegions?: string[] }[]>([]);
 // Whether the condition sheet's region could be verified against the case (/api/knowledge-lookup).
 const [insightRelevance, setInsightRelevance] = useState<{ relevance: string | null; reason: string | null }>({ relevance: null, reason: null });
+// Condition sheets for the other regions treated today (/api/knowledge-lookup `others`).
+const [otherSheets, setOtherSheets] = useState<{ region: string; side: string | null; match: { condition_name: string } | null }[]>([]);
+// Statements taken out of the draft because the clinician did not say them (/api/generate-note `removed`).
+const [removedFacts, setRemovedFacts] = useState<{ section: string; text: string; kind: string; item: string }[]>([]);
 
 const [textInput, setTextInput] = useState("");
 
@@ -328,6 +332,8 @@ const [recordingLang, setRecordingLang] = useState(DICTATION_LOCALE[lang]);
     setExerciseEntries([]);
     setExcludedExercises([]);
     setInsightRelevance({ relevance: null, reason: null });
+    setOtherSheets([]);
+    setRemovedFacts([]);
     setNoteTranscript("");
     setExpandedExercise(null);
     setEditingExercise(null);
@@ -491,6 +497,7 @@ if (!res.ok) {
         const note = data.note ?? {};
         setFinalNote(note);
         setNoteTranscript(raw);
+        setRemovedFacts(Array.isArray(data.removed) ? data.removed : []);
 
         // Evidenze scientifiche rilevanti dalla libreria Scienza/PubMed già
         // esistente in Phygo — parte in parallelo (non await) così non
@@ -503,6 +510,7 @@ if (!res.ok) {
             body: JSON.stringify({
               primaryCondition: note.primaryCondition,
               assessment: note.assessment,
+              transcript: raw,
             }),
           })
             .then((r) => r.json())
@@ -524,11 +532,12 @@ if (!res.ok) {
             const kbRes = await fetch("/api/knowledge-lookup", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.primaryCondition, lang: note.language || 'it' }),
+body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.primaryCondition, lang: note.language || 'it', transcript: raw }),
             });
             const kbData = await kbRes.json();
 setClinicalInsight(kbData.match || null);
 setInsightRelevance({ relevance: kbData.relevance ?? null, reason: kbData.relevanceReason ?? null });
+setOtherSheets(Array.isArray(kbData.others) ? kbData.others : []);
 setRehabPhases(kbData.phases || []);
 setEvidenceLevel(kbData.evidenceLevel || null);
 setMatchedKeyword(kbData.matchedKeyword || null);
@@ -791,6 +800,32 @@ recognition.lang = recordingLang;
     setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
   };
 
+  // Puts a statement taken out of the draft back at the end of its section.
+  const restoreRemoved = (r: { section: string; text: string }) => {
+    setRemovedFacts((prev) => prev.filter((x) => x !== r));
+    const id = Object.keys(phraseFields).find((k) => phraseFields[k] === r.section);
+    const current = (finalNote?.[r.section] as string | undefined)?.trim() ?? "";
+    const text = current ? `${current} ${r.text}` : r.text;
+    if (id) return updatePhraseText(id, text);
+    const newId = `${instanceId}-restored-${Date.now()}`;
+    const cat: Category = r.section === "plan" ? "plan" : r.section === "summaryForPatient" ? "followup" : "findings";
+    setAiPhrases((prev) => [...prev, { id: newId, text, cat }]);
+    setPhraseFields((prev) => ({ ...prev, [newId]: r.section }));
+    setFinalNote((prev: any) => (prev ? { ...prev, [r.section]: text } : prev));
+    setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+  };
+
+  // Replaces a note exercise with the library exercise suggested for it (an unverified match), keeping its dose.
+  const useSuggestedMatch = (key: string) => {
+    setExerciseEntries((prev) =>
+      prev.map((ex: any, i: number) => {
+        if ((ex.internal_id || String(i)) !== key || !ex.suggested_match) return ex;
+        return { ...ex.suggested_match, internal_id: `${ex.suggested_match.internal_id}-${Date.now()}`, draft: ex.draft, dosing: ex.dosing, source_type: ex.source_type, clinical_check: null, relevance: ex.relevance, relevance_reason: ex.relevance_reason, match_status: "verified", suggested_match: null };
+      })
+    );
+    setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+  };
+
   const addBackExcluded = (name: string) => {
     setExcludedExercises((prev) => prev.filter((e) => e.name !== name));
     setExerciseEntries((prev) => [
@@ -827,10 +862,11 @@ recognition.lang = recordingLang;
       transcript: noteTranscript,
       note: finalNote,
       exercises: exerciseEntries.map((e: any) => ({ name: e.name ?? "", draft: e.draft ?? null, body_region: e.body_region, primary_muscle: e.primary_muscle })),
-      papers: relevantPapers.map((p: any) => ({ title: p.title ?? "", relevance: p.relevance ?? null, relevance_reason: p.relevance_reason ?? null })),
+      papers: relevantPapers.map((p: any) => ({ title: p.title ?? "", relevance: p.relevance ?? null, relevance_reason: p.relevance_reason ?? null, regions: p.regions ?? null })),
       protocol: clinicalInsight ? { name: clinicalInsight.condition_name ?? "", keywords: clinicalInsight.condition_keywords ?? null } : null,
+      otherProtocols: otherSheets.map((o: any) => ({ region: o.region, name: o.match?.condition_name ?? null })),
     });
-  }, [finalNote, noteTranscript, exerciseEntries, relevantPapers, clinicalInsight]);
+  }, [finalNote, noteTranscript, exerciseEntries, relevantPapers, clinicalInsight, otherSheets]);
 
   // How each check names what it is about: a section by its heading, regions by name.
   const sectionLabel = (name: SectionName): string =>
@@ -844,7 +880,8 @@ recognition.lang = recordingLang;
     let item = issue.item;
     if (issue.kind === "side" && issue.section) item = sectionLabel(issue.section);
     if ((issue.kind === "section_region" || issue.kind === "history_as_active") && issue.section) item = `${sectionLabel(issue.section)} (${regionLabel(issue.regions)})`;
-    if ((issue.kind === "invented" || issue.kind === "invented_appointment" || issue.kind === "invented_treatment") && issue.section) item = `"${issue.item}" (${sectionLabel(issue.section)})`;
+    if (["invented", "invented_finding", "invented_test", "invented_appointment", "invented_agreement", "invented_treatment"].includes(issue.kind) && issue.section) item = `"${issue.item}" (${sectionLabel(issue.section)})`;
+    if (issue.kind.startsWith("coverage_")) item = regionLabel([issue.item]);
     return t.coherenceIssue[issue.kind](item);
   };
 
@@ -1571,7 +1608,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
             <motion.div data-testid="coherence-checks" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className={BLOCK}>
               <BlockTitle icon={ShieldCheck}>{t.coherenceTitle}</BlockTitle>
               <p className="mt-2 text-[11px] leading-relaxed text-ink/50 dark:text-white/40">{t.coherenceIntro}</p>
-              {coherenceIssues.length === 0 && excludedExercises.length === 0 && (
+              {coherenceIssues.length === 0 && excludedExercises.length === 0 && removedFacts.length === 0 && (
                 <p className="mt-3 text-sm text-emerald-700 dark:text-emerald-300">{t.coherenceOk}</p>
               )}
               {coherenceIssues.length > 0 && (
@@ -1583,6 +1620,26 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                     </li>
                   ))}
                 </ul>
+              )}
+              {removedFacts.length > 0 && (
+                <div data-testid="removed-facts" className="mt-4 border-t border-black/[0.06] pt-3 dark:border-white/[0.07]">
+                  <p className={`${LABEL} mb-2`}>{t.removedTitle}</p>
+                  <ul className="space-y-2">
+                    {removedFacts.map((r, i) => (
+                      <li key={`${r.section}-${i}`} data-testid="removed-fact" className="flex flex-wrap items-center justify-between gap-2 text-sm text-ink/75 dark:text-white/75">
+                        <span className="min-w-0 break-words">
+                          «{r.text}»
+                          <span className="block text-[11px] text-ink/55 dark:text-white/45">
+                            {sectionLabel(r.section as SectionName)} · {(t.removedReason as Record<string, string>)[r.kind] ?? r.kind}
+                          </span>
+                        </span>
+                        <button type="button" onClick={() => restoreRemoved(r)} className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 text-xs font-semibold ${SECONDARY_BTN}`}>
+                          {t.restore}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
               {excludedExercises.length > 0 && (
                 <div className="mt-4 border-t border-black/[0.06] pt-3 dark:border-white/[0.07]">
@@ -1651,6 +1708,18 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                   {clinicalInsight.source} ({clinicalInsight.source_date}) · {t.insightDisclaimer} {t.protocolIndicative}
                   {insightRelevance.relevance === "unverified" && insightRelevance.reason && (t.unverifiedReason as Record<string, string>)[insightRelevance.reason] && (
                     <span data-testid="insight-unverified" className="mt-1 block font-semibold text-amber-700 dark:text-amber-300">{(t.unverifiedReason as Record<string, string>)[insightRelevance.reason]}</span>
+                  )}
+                  {otherSheets.length > 0 && (
+                    <span data-testid="other-regions" className="mt-2 block">
+                      <span className="font-semibold">{t.otherRegionsTitle}: </span>
+                      {otherSheets.map((o, i) => (
+                        <span key={o.region}>
+                          {i > 0 ? " · " : ""}
+                          {regionLabel([o.region])}
+                          {o.side && o.side !== "both" ? ` (${o.side === "left" ? t.sideLeft : t.sideRight})` : ""}: {o.match?.condition_name ?? t.otherRegionNoSheet}
+                        </span>
+                      ))}
+                    </span>
                   )}
                 </p>
                 {matchedKeyword && (
@@ -1845,6 +1914,17 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                             <p className="truncate text-sm font-semibold text-ink dark:text-white">{ex.name}</p>
                             {/* Matched to a database exercise with another name: say what the note wrote. */}
                             {ex.draft && ex.draft !== ex.name && <p className="mt-0.5 text-[11px] text-ink/50 dark:text-white/40">{t.fromNote(ex.draft)}</p>}
+                            {/* A library match that could not be confirmed: the note's exercise stays; a suggestion can be taken on purpose. */}
+                            {ex.match_status === "unverified" && (
+                              <div data-testid="match-unverified" className="mt-0.5 whitespace-normal text-[11px] text-amber-700 dark:text-amber-300">
+                                {t.matchUnverified}
+                                {ex.suggested_match?.name && (
+                                  <button type="button" onClick={(e) => { e.stopPropagation(); useSuggestedMatch(key); }} className="ml-1 font-semibold underline">
+                                    {t.useSuggestion(ex.suggested_match.name)}
+                                  </button>
+                                )}
+                              </div>
+                            )}
                             {/* Region against today's case: a general activity is said as such; one not recognised is not verified, the clinician decides. */}
                             {caseView && isLiveVoice && (() => {
                               const fit = exerciseFit(ex, caseView.regions);

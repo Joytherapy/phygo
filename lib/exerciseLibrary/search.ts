@@ -113,6 +113,7 @@ export async function searchLibraryExercises(db: SupabaseClient, keywords: strin
       provider: 'exercises',
       provider_id: id,
       name: text.name || original.name,
+      source_name: original.name,
       description: text.tips ?? null,
       instructions: Array.isArray(text.instructions) ? text.instructions : null,
       body_region: ex.body_region ?? null,

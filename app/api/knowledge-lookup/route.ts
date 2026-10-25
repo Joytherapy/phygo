@@ -6,7 +6,7 @@ import { serviceClient } from '@/lib/verification';
 import { lazy } from '@/lib/lazy';
 import { bestCondition, type KbRow } from '@/lib/knowledge/conditionMatch';
 import { regionFit, regionsOf } from '@/lib/clinical/region';
-import { conditionRegionsOf } from '@/lib/clinical/coherence';
+import { caseOf, conditionRegionsOf, otherRegionsOf } from '@/lib/clinical/coherence';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +32,8 @@ export async function POST(request: Request) {
   if (!db) return NextResponse.json({ match: null, phases: [] }, { status: 503 });
 
   try {
-    const { assessment, primaryCondition, lang } = await request.json();
+    const { assessment, primaryCondition, lang, transcript } = await request.json();
+    const said = typeof transcript === 'string' ? transcript.slice(0, 8000) : '';
     const primary = typeof primaryCondition === 'string' ? primaryCondition.slice(0, 300) : '';
     const text = typeof assessment === 'string' ? assessment.slice(0, 4000) : '';
     if (!primary && !text) return NextResponse.json({ match: null, phases: [] });
@@ -103,7 +104,20 @@ export async function POST(request: Request) {
       phases = (phasesData ?? []).filter((p: any) => String(p.condition_id) === String(match!.id)).sort((a: any, b: any) => (a.phase_number ?? 0) - (b.phase_number ?? 0));
     }
 
-    const finalMatch = match && lang && lang !== 'it' && match.translations?.[lang] ? { ...match, ...match.translations[lang] } : match;
+    const inLang = (row: (KbRow & Record<string, any>) | null) => (row && lang && lang !== 'it' && row.translations?.[lang] ? { ...row, ...row.translations[lang] } : row);
+    const finalMatch = inLang(match);
+
+    // Other regions treated today (e.g. the left knee besides the right
+    // shoulder): the sheet of each, matched by keyword among sheets of that
+    // region only, from what the clinician said and the assessment. No AI
+    // fallback and no phases here: the clinician sees which region has a
+    // sheet and which has none.
+    const others = otherRegionsOf(caseOf(said, { primaryCondition: primary, assessment: text })).map(({ region, side }) => {
+      const pool = rows.filter((r) => regionFit(sheetRegions(r), [region]) === 'compatible' && regionsOf([r.condition_name, r.condition_keywords].filter(Boolean).join(' ')).length > 0)
+      const found = bestCondition(pool, '', `${text} ${said}`)
+      const row = found ? inLang(found.row as KbRow & Record<string, any>) : null
+      return { region, side, match: row ? { id: row.id, condition_name: row.condition_name, source: row.source ?? null, source_date: row.source_date ?? null, evidence_level: row.evidence_level ?? null } : null }
+    });
     const finalPhases = lang && lang !== 'it' ? phases.map((p: any) => (p.translations?.[lang] ? { ...p, ...p.translations[lang] } : p)) : phases;
 
     // Not verified when the sheet's region, or the condition's, is not recognised.
@@ -118,6 +132,7 @@ export async function POST(request: Request) {
       evidenceLevel: match?.evidence_level || null,
       matchedKeyword,
       matchedBy,
+      others,
     });
   } catch (err) {
     console.error('Knowledge lookup error:', err);

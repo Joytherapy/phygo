@@ -11,12 +11,14 @@
 // The case is today's problem as the clinician describes it (caseProfile):
 // regions named only in history or as negated are not part of it, and each
 // side is checked against the region it was given for.
-import { caseProfile, exerciseFit, exerciseRegions, normalize, pertinentTo, regionFit, regionsOf, sideContradictions, statementsOf, mentionsOf, type CaseProfile, type Region } from './region'
+import { analyzeMentions, caseProfile, exerciseFit, exerciseRegions, normalize, pertinentTo, regionFit, regionsOf, sideContradictions, type CaseProfile, type Region } from './region'
+import { isHedged, sanitizeNote, sentencesOf, unsupportedArrangements, unsupportedFindings } from './facts'
 
 export type IssueKind =
   | 'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side'
   | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified'
-  | 'invented' | 'invented_appointment' | 'invented_treatment'
+  | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment'
+  | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence'
 export type Issue = { kind: IssueKind; severity: 'high' | 'medium'; item: string; section?: SectionName; regions?: Region[]; caseRegions?: Region[] }
 
 export type SectionName =
@@ -30,8 +32,11 @@ export type GeneratedOutput = {
   note: { subjective?: string; objective?: string; assessment?: string; plan?: string; summaryForPatient?: string; primaryCondition?: string; clinicalReasoning?: Reasoning | null }
   /** `draft`: the exercise as the note wrote it (with its side), when matched to a database exercise. */
   exercises: { name: string; draft?: string | null; body_region?: string | null; primary_muscle?: string | null }[]
-  papers: { title: string; relevance?: string | null; relevance_reason?: string | null }[]
+  /** `regions`: the regions of the case a paper is evidence for (/api/science/relevant). */
+  papers: { title: string; relevance?: string | null; relevance_reason?: string | null; regions?: Region[] | null }[]
   protocol: { name: string; keywords?: string | null } | null
+  /** Condition sheets for the other regions treated today (/api/knowledge-lookup `others`). */
+  otherProtocols?: { region: Region; name: string | null }[]
 }
 
 const MEASURE = /(\d+(?:[.,]\d+)?)\s*(°|gradi|degrees|grados|degres|cm|mm|kg|\/\s*10|%|secondi|seconds|sec\b|ripetizioni|reps\b)/gi
@@ -111,6 +116,22 @@ export function caseOf(transcript: string, note: Pick<GeneratedOutput['note'], '
   return { profile, condition, regions }
 }
 
+/** Active regions that are not neighbours of each other (shoulder and upper limb count once). */
+export const separateRegions = (regions: Region[]) =>
+  regions.filter((r, i) => !regions.slice(0, i).some((q) => pertinentTo([q]).has(r) && pertinentTo([r]).has(q)))
+
+/**
+ * Other regions treated today, beyond the condition's (e.g. the left knee in
+ * a note about a right shoulder and a left knee), with their side: they need
+ * their own sheet, papers and exercises.
+ */
+export function otherRegionsOf(view: CaseView): { region: Region; side: CaseProfile['sides'][Region] | null }[] {
+  const covered = pertinentTo(view.condition.length ? view.condition : separateRegions(view.profile.active).slice(0, 1))
+  return separateRegions(view.profile.active)
+    .filter((r) => !covered.has(r))
+    .map((region) => ({ region, side: view.profile.sides[region] ?? null }))
+}
+
 /** Regions of today's case (see caseOf). */
 export const caseRegionsOf = (transcript: string, note: Pick<GeneratedOutput['note'], 'primaryCondition' | 'assessment'>) => caseOf(transcript, note).regions
 
@@ -137,6 +158,7 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
   const history = new Set(profile.history)
   const sections = sectionsOf(o.note)
   const reference = condition.filter((r) => caseRegions.includes(r)).length ? condition.filter((r) => caseRegions.includes(r)) : caseRegions
+  const others = otherRegionsOf({ profile, condition, regions: caseRegions })
 
   // 0. Without a recognised region nothing below can be verified by region: say so.
   if (caseRegions.length === 0) issues.push({ kind: 'region_unknown', severity: 'medium', item: '' })
@@ -151,7 +173,7 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
   const near = pertinentTo(caseRegions)
   for (const [name, text] of sections) {
     if (caseRegions.length && REGION_SECTIONS.includes(name)) {
-      const named = statementsOf(text).filter((s) => s.status === 'active').flatMap((s) => mentionsOf(s.text).map((m) => m.region))
+      const named = analyzeMentions(text).filter((m) => m.status === 'active').map((m) => m.region)
       const off = Array.from(new Set(named.filter((r) => !near.has(r))))
       const asHistory = off.filter((r) => history.has(r))
       const other = off.filter((r) => !history.has(r))
@@ -177,8 +199,10 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
     if (p.relevance === 'direct' || p.relevance === 'indirect') {
       // Shown with its level and reason; only a paper of another region without one is wrong.
       if (p.relevance_reason === 'same_mechanism_other_region') continue
+      // Classified by the search against the regions treated today, which it names.
+      if (p.regions?.length) continue
     }
-    const fit = regionFit(regionsOf(p.title), reference)
+    const fit = regionFit(regionsOf(p.title), [...reference, ...others.map((x) => x.region)])
     if (fit === 'incompatible') issues.push({ kind: 'evidence', severity: 'high', item: p.title, regions: regionsOf(p.title), caseRegions })
     else if (fit === 'unknown' && !p.relevance) issues.push({ kind: 'evidence_unverified', severity: 'medium', item: p.title })
   }
@@ -198,8 +222,39 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
     }
     if (name === 'plan' || name === 'summaryForPatient') {
       for (const a of appointmentsNotInTranscript(text, o.transcript)) issues.push({ kind: 'invented_appointment', severity: 'medium', item: a, section: name })
+      for (const sentence of sentencesOf(text)) {
+        for (const f of unsupportedArrangements(sentence, o.transcript)) issues.push({ kind: f.kind, severity: f.kind === 'invented_agreement' ? 'high' : 'medium', item: f.item, section: name })
+      }
+    }
+    // Findings and test results: in the findings always, in the assessment
+    // when stated as fact (a hedged hypothesis is reasoning).
+    if (name === 'subjective' || name === 'objective' || name === 'assessment') {
+      for (const sentence of sentencesOf(text)) {
+        if (name === 'assessment' && isHedged(sentence)) continue
+        for (const f of unsupportedFindings(sentence, o.transcript)) issues.push({ kind: f.kind, severity: 'high', item: f.item, section: name })
+      }
     }
     for (const t of treatmentsNotInTranscript(text, o.transcript)) issues.push({ kind: 'invented_treatment', severity: 'high', item: t, section: name })
   }
+  // 7. More than one region treated today: exercises, condition sheets and
+  //    papers for each (a region next to one already covered counts as covered).
+  const separate = separateRegions(profile.active)
+  if (separate.length >= 2) {
+    const primary = condition.length ? condition : [separate[0]]
+    for (const r of separate) {
+      const near = pertinentTo([r])
+      if (o.exercises.length && !o.exercises.some((e) => exerciseRegions(e).some((x) => near.has(x)))) issues.push({ kind: 'coverage_exercises', severity: 'medium', item: r })
+      if (pertinentTo(primary).has(r)) continue
+      if (o.protocol && !(o.otherProtocols ?? []).some((p) => p.region === r && p.name)) issues.push({ kind: 'coverage_protocol', severity: 'medium', item: r })
+      if (!o.papers.some((p) => (p.regions ?? regionsOf(p.title)).some((x) => near.has(x)))) issues.push({ kind: 'coverage_evidence', severity: 'medium', item: r })
+    }
+  }
   return issues
 }
+
+/**
+ * The note without facts the clinician did not give (lib/clinical/facts.ts),
+ * with the list of what was removed and why.
+ */
+export const sanitizeGeneratedNote = <T extends { subjective?: string; objective?: string; plan?: string; summaryForPatient?: string; [k: string]: unknown }>(note: T, transcript: string) =>
+  sanitizeNote(note, transcript, { measures: measuresNotInTranscript, treatments: treatmentsNotInTranscript, appointments: appointmentsNotInTranscript })

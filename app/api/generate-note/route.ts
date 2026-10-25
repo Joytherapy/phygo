@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import { requireVerifiedProfessional } from "@/lib/auth/sessionServer";
 import { consumeHourly, HOURLY_LIMITS, limitResponse } from "@/lib/rateLimit";
 import { lazy } from "@/lib/lazy";
+import { sanitizeGeneratedNote } from "@/lib/clinical/coherence";
 
 const openai = lazy(() => new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -41,16 +42,17 @@ The user has selected "${lang || 'auto'}" as the expected spoken language for th
 
 
 Writing style:
-- Write like a clinician documenting a case, NOT like someone paraphrasing what was said.
+- Write like a clinician documenting a case, in clinical register, without adding anything that was not said.
 - Use precise, standard physiotherapy terminology where appropriate, while staying clear and readable.
-- Be structured and thorough, not conversational. State findings and reasoning directly, the way a real clinical note reads.
-- "Objective" should read like exam findings, including relevant differential considerations when the picture allows it (e.g. structures likely involved, structures to rule out).
+- Be structured, not conversational. Keep four things apart: what the patient reported ("subjective"), what the therapist observed, measured or tested and said so ("objective"), hypotheses (hedged, in "assessment" and "clinicalReasoning"), and what is missing ("clinicalReasoning.missingInformation").
+- "Objective" contains ONLY the examination findings, measurements and test results the therapist actually reported. Never add a finding: no range-of-motion limits, swelling, strength, neurological signs, instability, palpation findings or gait findings that were not said, no test names or test results (e.g. Neer, Hawkins, Lachman, Lasègue) that were not said, and no negative findings (e.g. "no radiculopathy", "no instability", "ROM preserved") that were not said. If the therapist reported no objective data, "objective" is an empty string. Differential considerations and tests worth doing belong in "clinicalReasoning" (differentials, suggestedAssessments), never in "objective".
 - "Assessment" should read like clinical reasoning: the likely clinical picture, contributing factors, and prognosis considerations where reasonable. The Assessment MUST always explicitly name the specific condition, diagnosis, or procedure being treated (e.g. "total hip replacement", "rotator cuff tendinopathy") — never describe it only in generic terms like "post-operative recovery" without naming what surgery or condition it refers to.
-- "Plan" should be structured in phases where appropriate (e.g. acute/early phase vs progression phase), including approach, rationale, and a sensible frequency/timeline.
+- "Plan" should be structured in phases where appropriate (e.g. acute/early phase vs progression phase), with approach, rationale and criteria to progress. Keep what was done today (only if the therapist said it) apart from what is proposed for the next sessions. Do not state a visit frequency, a number of sessions, follow-up dates, a re-assessment date or any appointment unless the therapist said it; never present a treatment as agreed or already done unless the therapist said so.
 - "Exercises" should include enough prescription detail to be usable: sets, reps, and frequency for each exercise, not just a name.
 
 Content behavior:
-- For "subjective", "objective" and "assessment": use ONLY what the therapist actually said. Do not invent patient facts, symptoms, or findings that were not mentioned.
+- For "subjective", "objective" and "assessment": use ONLY what the therapist actually said. Do not invent patient facts, symptoms, or findings that were not mentioned. Past conditions are written as history ("in anamnesi…") and are never described as current.
+- If the transcript describes more than one body region treated today (e.g. right shoulder and left knee), the plan and the exercises cover each of them, each with its own side.
 - For "plan" and "exercises": you MAY go beyond a literal restatement. Based on the condition described, propose a reasonable, clinically sound and reasonably thorough treatment approach, consistent with common physiotherapy practice for that condition — even if the therapist didn't list it in detail. This is a draft for the practitioner to review, adjust, or discard.
 - Exercises must be scaled to the patient current functional stage as described in the transcript, for any condition being treated, not generic beginner-level exercises regardless of progress made. When the transcript indicates the patient is advanced in recovery (e.g. walks without aids, mild or no pain, good tolerance), propose a broader and more varied set of exercises appropriate to the condition, not just the same 2-3 basic exercises repeated. Gradually introduce more challenging and complementary variants when the clinical picture justifies it (progressions in load, range, speed, complexity or functional demand for the body region involved). Always account for any precautions, contraindications, or specific risks mentioned (e.g. dislocation risk, post-surgical restrictions) when selecting exercises.
 - Exercises must not be limited to a small fixed number of isolated movements. Reason in terms of functional categories relevant to the condition being treated - for example: muscular strengthening, balance/proprioception, gait/ambulation, joint mobility, cardiovascular conditioning (e.g. stationary bike, treadmill if appropriate) - and select one or more genuinely appropriate exercises for each relevant category, based on the patient's functional stage. Not every category applies in every case: use clinical judgement to decide which are relevant for THIS condition and THIS stage (e.g. gait training is not relevant to an isolated shoulder problem).
@@ -73,11 +75,11 @@ Clinical reasoning (separate from "assessment"):
 Respond ALWAYS and ONLY in valid JSON, with this exact structure:
 {
   "subjective": "what the patient reports",
-  "objective": "clinical exam findings, in clinical register, including relevant differential considerations",
+  "objective": "only the exam findings, measurements and test results the therapist reported; empty string if none",
   "assessment": "clinical reasoning, likely picture, contributing factors",
   "plan": "structured, phased treatment plan with brief rationale",
   "exercises": ["exercise 1 with sets/reps/frequency", "exercise 2 with sets/reps/frequency", "exercise 3 with sets/reps/frequency — add more items if clinically appropriate, the array length is NOT fixed at 3"],
-  "summaryForPatient": "short, simple message to send the patient via WhatsApp — plain language, not clinical jargon",
+  "summaryForPatient": "short, simple message to send the patient via WhatsApp — plain language, not clinical jargon; only what was discussed today and the exercises; no appointment, visit frequency, follow-up date or agreed treatment unless the therapist said it",
   "clinicalReasoning": {
     "hypotheses": ["possible hypothesis 1, hedged", "possible hypothesis 2, hedged — omit if only one is reasonable"],
     "differentials": ["differential to consider, hedged", "..."],
@@ -115,8 +117,12 @@ If a field truly cannot be inferred even loosely from the transcript and conditi
       );
     }
 
-    const note = JSON.parse(raw);
-    return NextResponse.json({ note });
+    // The model may still write facts that were not said (findings, test
+    // results, visits, agreements): they are taken out of the parts that
+    // report facts and listed, with the reason, for the clinician to review
+    // (lib/clinical/facts.ts). The assessment is reasoning and is only flagged.
+    const { note, removed } = sanitizeGeneratedNote(JSON.parse(raw), transcript);
+    return NextResponse.json({ note, removed });
   } catch (err) {
     console.error("Errore generate-note:", err);
     return NextResponse.json(
