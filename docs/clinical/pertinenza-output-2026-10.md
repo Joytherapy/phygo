@@ -235,7 +235,12 @@ Test nel browser (Playwright, `tests/session-notes-panel.test.mjs`, 5 test). Due
 | Spalla sx, abbinamento esercizi | ✗ rotazione esterna "gomito a 90°" esclusa come esercizio del gomito | ✓ pendolo e sollevamento prono non sostituiti (prono "non verificato"); rotazione esterna abbinata correttamente |
 | Prompt | ✗ "structures to rule out", "sensible frequency/timeline" | ✓ |
 
-**Controlli complessivi:** {{FULL}}
+**Controlli complessivi** (revisione 3), eseguiti sul commit `f616c4e` con l'albero di lavoro pulito:
+- suite completa dell'app: **247 test, 247 superati, 0 falliti, 0 saltati, 0 annullati**, compresi tutti i test preesistenti. Comprende `clinical-relevance` (43), `knowledge-match` (5) e 6 test nel browser della pagina della seduta, di cui 3 sul pannello di coerenza;
+- typecheck: nessun errore. Build: riuscita;
+- test SQL: 7 file, tutti superati, solo su PostgreSQL locale nel container;
+- script del modello reale: verificato solo contro un sostituto locale di OpenAI (collegamento delle parti), non contro il modello reale;
+- questo documento è aggiornato con un commit successivo che modifica **solo** questo file.
 
 ## Test simulati e verifica con il modello reale
 
