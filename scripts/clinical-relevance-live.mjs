@@ -47,7 +47,7 @@ if (args.includes('--build')) {
   const repeat = Math.max(1, Number(opt('repeat', 2)));
   const names = (opt('cases', '') || Object.keys(CASES).join(',')).split(',').map((s) => s.trim()).filter((n) => CASES[n]);
 
-  const { K } = await loadClinical();
+  const { K, F } = await loadClinical();
   const fake = await startFakeSupabase({ port: FAKE_PORT, users: { 'tok-clin': CLIN }, tables: worldTables() });
   fake.state.openaiForward = async (body) => {
     const res = await fetch(`${base}/chat/completions`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` }, body: JSON.stringify(body) });
@@ -71,7 +71,7 @@ if (args.includes('--build')) {
           name, repeat: r, transcript: out.transcript, note: out.note, removed: out.removed,
           kb: { match: out.kb.match?.condition_name ?? null, relevance: out.kb.relevance ?? null, reason: out.kb.relevanceReason ?? null, others: (out.kb.others ?? []).map((o) => ({ region: o.region, side: o.side, match: o.match?.condition_name ?? null, relevance: o.relevance ?? null, reason: o.relevanceReason ?? null })) },
           papers: out.papers.map((p) => ({ title: p.title, relevance: p.relevance, reason: p.relevance_reason ?? null, regions: p.regions ?? [] })),
-          exercises: out.exercises.map((e) => ({ name: e.name, draft: e.draft, relevance: e.relevance, reason: e.relevance_reason ?? null, match: e.match_status, suggestion: e.suggested_match?.name ?? null })),
+          exercises: out.exercises.map((e) => ({ name: e.name, draft: e.draft, relevance: e.relevance, reason: e.relevance_reason ?? null, match: e.match_status, suggestion: e.suggested_match?.name ?? null, origin: F.exerciseOrigin(e.draft ?? e.name, out.transcript).origin, dosage: F.dosingOrigin(e.dosing, out.transcript) })),
           excluded: out.excluded, issues,
         });
         console.log(`${issues.length} checks`);
@@ -95,11 +95,11 @@ if (args.includes('--build')) {
   for (const run of runs) {
     md.push(`## ${run.name} — ripetizione ${run.repeat}`, '', `**Trascrizione:** ${run.transcript}`, '');
     for (const [k, v] of Object.entries(run.note ?? {})) md.push(`- **${k}:** ${typeof v === 'string' ? v : JSON.stringify(v)}`);
-    md.push('', '**Tolto dalla bozza (non detto dal fisioterapista):**', ...(run.removed.length ? run.removed.map((x) => `- ${x.section} · ${x.kind} · «${x.text}»`) : ['- niente']));
+    md.push('', '**Tolto o etichettato nella bozza (non detto dal fisioterapista):**', ...(run.removed.length ? run.removed.map((x) => `- ${x.section} · ${x.kind} · «${x.text}»${x.replacement ? ` → «${x.replacement}»` : ''}`) : ['- niente']));
     md.push('', `**Scheda clinica:** ${run.kb.match ?? '—'}${run.kb.relevance ? ` (${run.kb.relevance}${run.kb.reason ? `: ${run.kb.reason}` : ''})` : ''}`);
     for (const o of run.kb.others) md.push(`- altro distretto trattato: ${o.region}${o.side ? ` (${o.side})` : ''} → ${o.match ?? 'nessuna scheda'}${o.relevance ? ` (${o.relevance})` : ''}${o.reason ? ` · ${o.reason}` : ''}`);
     md.push('', '**Studi:**', ...(run.papers.length ? run.papers.map((p) => `- ${p.title} — ${p.relevance}${p.reason ? ` (${p.reason})` : ''}${p.regions.length ? ` · distretti: ${p.regions.join(', ')}` : ''}`) : ['- nessuno']));
-    md.push('', '**Esercizi:**', ...(run.exercises.length ? run.exercises.map((e) => `- ${e.name}${e.draft && e.draft !== e.name ? ` (dalla nota: ${e.draft})` : ''} — ${e.relevance}${e.reason ? ` (${e.reason})` : ''} · corrispondenza: ${e.match}${e.suggestion ? ` (suggerito: ${e.suggestion})` : ''}`) : ['- nessuno']));
+    md.push('', '**Esercizi:**', ...(run.exercises.length ? run.exercises.map((e) => `- ${e.name}${e.draft && e.draft !== e.name ? ` (dalla nota: ${e.draft})` : ''} — ${e.relevance}${e.reason ? ` (${e.reason})` : ''} · corrispondenza: ${e.match}${e.suggestion ? ` (suggerito: ${e.suggestion})` : ''} · origine: ${e.origin}${e.dosage ? ` · dosaggio: ${e.dosage}` : ''}`) : ['- nessuno']));
     md.push('', '**Esclusi:**', ...(run.excluded.length ? run.excluded.map((e) => `- ${e.name} — ${e.reason} (${(e.regions ?? []).join(', ')})`) : ['- nessuno']));
     md.push('', '**Controlli di coerenza:**', ...(run.issues.length ? run.issues.map((i) => `- ${i.severity} · ${i.kind} · ${i.item}${i.section ? ` (${i.section})` : ''}`) : ['- nessuno']));
     md.push('', '| Sezione | Esito | Gravità | Che cosa | Revisione umana |', '|---|---|---|---|---|');

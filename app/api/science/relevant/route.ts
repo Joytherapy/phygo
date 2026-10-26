@@ -6,7 +6,7 @@ import OpenAI from 'openai';
 import { lazy } from '@/lib/lazy';
 import { paperRelevance, paperScore, searchTerms, unstatedQualifiers, type PaperRelevance } from '@/lib/knowledge/paperRank';
 import { caseOf, conditionRegionsOf, otherRegionsOf } from '@/lib/clinical/coherence';
-import { pertinentTo, regionsOf, type Region } from '@/lib/clinical/region';
+import { regionsOf, type Region } from '@/lib/clinical/region';
 
 // Collega il motore clinico AI (LiveStructuring) alla libreria Scienza/PubMed
 // che esiste già in Phygo (research_papers + research_summaries, alimentata
@@ -114,14 +114,15 @@ export async function POST(req: Request) {
       .map((p: any) => {
         // About a population or a mechanism the case does not state: not claimed as evidence for it.
         let relevance: PaperRelevance | null = paperRelevance(p, terms, targets);
-        if (relevance && relevance.level !== 'unverified' && unstatedQualifiers(p.title, caseText).length) relevance = { level: 'unverified', reason: 'population_or_mechanism_not_stated' };
+        if (relevance && relevance.reason !== 'case_region_unknown' && unstatedQualifiers(p.title, caseText).length) relevance = { level: 'unverified', reason: 'population_or_mechanism_not_stated' };
         return { p, score: paperScore(p, terms), relevance };
       })
       .filter((x) => x.score > 0 && x.relevance !== null)
       .sort((a, b) => RANK[a.relevance!.level] - RANK[b.relevance!.level] || Number(a.relevance!.reason === 'same_mechanism_other_region') - Number(b.relevance!.reason === 'same_mechanism_other_region') || b.score - a.score || String(b.p.publication_date ?? '').localeCompare(String(a.p.publication_date ?? '')))
       .map((x) => {
         const paperRegions = regionsOf(x.p.title).length ? regionsOf(x.p.title) : regionsOf(x.p.abstract);
-        return { ...x, regions: targets.filter((t) => paperRegions.some((r) => pertinentTo([t]).has(r))) };
+        // The regions treated today that the paper is about: the same region, not a neighbouring one.
+        return { ...x, regions: targets.filter((t) => paperRegions.includes(t)) };
       });
     // The best paper for each region treated today first, then the rest by rank.
     const limit = Math.max(MAX_RESULTS, targets.length);

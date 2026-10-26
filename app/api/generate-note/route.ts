@@ -70,15 +70,17 @@ Clinical reasoning (separate from "assessment"):
 - "findingsAgainst": findings that are missing, or that would argue against the leading hypothesis, if any. An honest empty string is correct when nothing argues against it — do not invent a counterpoint.
 - "missingInformation": clinically relevant information NOT present in the transcript that would help confirm or refine the picture (e.g. a specific ROM measurement, an outcome measure score, a detail of symptom irritability). Be specific to this case, not a generic checklist.
 - "suggestedAssessments": additional tests, special orthopedic tests, or outcome measures that could reasonably be performed next to clarify the picture.
-- "redFlagsPrecautions": any red flags or precautions relevant to this specific presentation. Never leave this empty by omission — if nothing concerning is apparent from what was described, say so explicitly (e.g. "No red flags apparent from the information provided") rather than leaving it blank.
+- "redFlagsPrecautions": the red flags and precautions relevant to this specific presentation. Never declare red flags absent unless the therapist said they screened for them: if they did not discuss them, write that red flags were not assessed in what was reported and list the ones worth screening for this presentation (e.g. "Red flags not assessed in the report: screen for saddle anaesthesia, bladder or bowel changes, fever, unexplained weight loss").
+- Negative results are results. Never write that something is absent, negative or excluded (e.g. "no neurological signs", "no neurological compromise", "no other acute condition", "no red flags") unless the therapist said so; what was not discussed is "not assessed", not absent, and belongs in "missingInformation".
+- Do not turn symptoms into diagnoses. When the therapist described only pain or a symptom in a region, "assessment" says that, and any specific diagnosis (e.g. chondromalacia patellae, rotator cuff tendinopathy) is worded as an unconfirmed hypothesis, never as a fact.
 
 Respond ALWAYS and ONLY in valid JSON, with this exact structure:
 {
   "subjective": "what the patient reports",
   "objective": "only the exam findings, measurements and test results the therapist reported; empty string if none",
-  "assessment": "clinical reasoning, likely picture, contributing factors",
+  "assessment": "clinical reasoning, likely picture, contributing factors; a diagnosis the therapist did not state is worded as an unconfirmed hypothesis",
   "plan": "structured, phased treatment plan with brief rationale",
-  "exercises": ["exercise 1 with sets/reps/frequency", "exercise 2 with sets/reps/frequency", "exercise 3 with sets/reps/frequency — add more items if clinically appropriate, the array length is NOT fixed at 3"],
+  "exercises": ["exercise 1, with the sets/reps/frequency the therapist gave, or a suggested dose", "exercise 2", "exercise 3 — add more items if clinically appropriate, the array length is NOT fixed at 3; doses the therapist did not give are shown to them as AI suggestions"],
   "summaryForPatient": "short, simple message to send the patient via WhatsApp — plain language, not clinical jargon; only what was discussed today and the exercises; no appointment, visit frequency, follow-up date or agreed treatment unless the therapist said it",
   "clinicalReasoning": {
     "hypotheses": ["possible hypothesis 1, hedged", "possible hypothesis 2, hedged — omit if only one is reasonable"],
@@ -87,7 +89,7 @@ Respond ALWAYS and ONLY in valid JSON, with this exact structure:
     "findingsAgainst": "findings missing or against the leading hypothesis, or empty string if none",
     "missingInformation": "specific clinically relevant information not mentioned in the transcript",
     "suggestedAssessments": "additional tests or outcome measures that could clarify the picture",
-    "redFlagsPrecautions": "red flags/precautions for this presentation, or an explicit statement that none are apparent"
+    "redFlagsPrecautions": "red flags/precautions for this presentation; if they were not discussed, that they were not assessed and which ones to screen for"
   }
   If the transcript references standard clinical precautions generically without listing them (e.g. "the usual hip precautions", "the three golden rules"), and the context makes the specific condition clear (e.g. total hip arthroplasty), you may state the standard, widely-recognized precautions explicitly as a reasonable clinical default (e.g. avoid hip flexion beyond 90 degrees, avoid adduction past midline, avoid excessive internal/external rotation) — but always phrase this as a draft for the therapist to confirm against the specific surgical approach, never as a fact the patient stated.
 "language": "the two-letter ISO code of the language you detected and used for this entire response (it, en, es, fr, or others)",

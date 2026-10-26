@@ -12,13 +12,14 @@
 // regions named only in history or as negated are not part of it, and each
 // side is checked against the region it was given for.
 import { analyzeMentions, caseProfile, exerciseFit, exerciseRegions, normalize, pertinentTo, regionFit, regionsOf, sideContradictions, type CaseProfile, type Region } from './region'
-import { isHedged, sanitizeNote, sentencesOf, unsupportedArrangements, unsupportedFindings } from './facts'
+import { isHedged, sanitizeNote, sentencesOf, unstatedDiagnoses, unstatedDosage, unsupportedArrangements, unsupportedFindings, unsupportedNegatives } from './facts'
 
 export type IssueKind =
   | 'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side'
   | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified'
   | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment'
-  | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence' | 'objective_missing'
+  | 'invented_negative' | 'unconfirmed_diagnosis' | 'generated_dosage'
+  | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence' | 'coverage_plan' | 'objective_missing'
 export type Issue = { kind: IssueKind; severity: 'high' | 'medium'; item: string; section?: SectionName; regions?: Region[]; caseRegions?: Region[] }
 
 export type SectionName =
@@ -173,7 +174,8 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
   const near = pertinentTo(caseRegions)
   for (const [name, text] of sections) {
     if (caseRegions.length && REGION_SECTIONS.includes(name)) {
-      const named = analyzeMentions(text).filter((m) => m.status === 'active').map((m) => m.region)
+      // A region named only as a position ("gomito a 90 gradi") is not a region the section is about.
+      const named = analyzeMentions(text, { skipPositions: true }).filter((m) => m.status === 'active').map((m) => m.region)
       const off = Array.from(new Set(named.filter((r) => !near.has(r))))
       const asHistory = off.filter((r) => history.has(r))
       const other = off.filter((r) => !history.has(r))
@@ -227,28 +229,44 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
       }
     }
     // Findings and test results: in the findings always, in the assessment
-    // when stated as fact (a hedged hypothesis is reasoning).
-    if (name === 'subjective' || name === 'objective' || name === 'assessment') {
-      for (const sentence of sentencesOf(text)) {
-        if (name === 'assessment' && isHedged(sentence)) continue
+    // when stated as fact (a hedged hypothesis is reasoning). A negative
+    // result nobody assessed, wherever the note states facts or reasoning
+    // about them.
+    const negativesToo = ['assessment', 'supportingFindings', 'findingsAgainst', 'redFlagsPrecautions'].includes(name)
+    for (const sentence of sentencesOf(text)) {
+      const negatives = negativesToo || ['subjective', 'objective', 'plan', 'summaryForPatient'].includes(name) ? unsupportedNegatives(sentence, o.transcript, negativesToo) : []
+      for (const f of negatives) issues.push({ kind: f.kind, severity: 'high', item: f.item, section: name })
+      if ((name === 'subjective' || name === 'objective' || name === 'assessment') && !(name === 'assessment' && (isHedged(sentence) || negatives.length))) {
         for (const f of unsupportedFindings(sentence, o.transcript)) issues.push({ kind: f.kind, severity: 'high', item: f.item, section: name })
+      }
+      // A diagnosis presented as certain that the clinician did not state.
+      if ((name === 'subjective' || name === 'objective' || name === 'assessment' || name === 'summaryForPatient') && !isHedged(sentence)) {
+        for (const d of unstatedDiagnoses(sentence, o.transcript)) issues.push({ kind: 'unconfirmed_diagnosis', severity: 'high', item: d, section: name })
+      }
+      // A dose the clinician did not give, presented as theirs.
+      if ((name === 'plan' || name === 'summaryForPatient') && !isHedged(sentence)) {
+        for (const d of unstatedDosage(sentence, o.transcript)) issues.push({ kind: 'generated_dosage', severity: 'medium', item: d, section: name })
       }
     }
     for (const t of treatmentsNotInTranscript(text, o.transcript)) issues.push({ kind: 'invented_treatment', severity: 'high', item: t, section: name })
   }
   // No objective findings: said plainly, not left as an empty section.
   if (!(o.note.objective ?? '').trim()) issues.push({ kind: 'objective_missing', severity: 'medium', item: 'objective', section: 'objective' })
-  // 7. More than one region treated today: exercises, condition sheets and
-  //    papers for each (a region next to one already covered counts as covered).
+  // 7. More than one region treated today: the plan, exercises, condition
+  //    sheets and papers for each (for the plan and the exercises a region
+  //    next to one already covered counts as covered; a paper must be about
+  //    the region itself).
   const separate = separateRegions(profile.active)
   if (separate.length >= 2) {
     const primary = condition.length ? condition : [separate[0]]
+    const planRegions = analyzeMentions(o.note.plan ?? '', { skipPositions: true }).filter((m) => m.status === 'active').map((m) => m.region)
     for (const r of separate) {
       const near = pertinentTo([r])
+      if ((o.note.plan ?? '').trim() && !planRegions.some((x) => near.has(x))) issues.push({ kind: 'coverage_plan', severity: 'medium', item: r, section: 'plan' })
       if (o.exercises.length && !o.exercises.some((e) => exerciseRegions(e).some((x) => near.has(x)))) issues.push({ kind: 'coverage_exercises', severity: 'medium', item: r })
       if (pertinentTo(primary).has(r)) continue
       if (o.protocol && !(o.otherProtocols ?? []).some((p) => p.region === r && p.name)) issues.push({ kind: 'coverage_protocol', severity: 'medium', item: r })
-      if (!o.papers.some((p) => p.relevance !== 'unverified' && (p.regions ?? regionsOf(p.title)).some((x) => near.has(x)))) issues.push({ kind: 'coverage_evidence', severity: 'medium', item: r })
+      if (!o.papers.some((p) => p.relevance !== 'unverified' && (p.regions ?? regionsOf(p.title)).includes(r))) issues.push({ kind: 'coverage_evidence', severity: 'medium', item: r })
     }
   }
   return issues

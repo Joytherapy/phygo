@@ -63,13 +63,18 @@ interface LiveDict {
   evidenceDisclaimer: string
   evidenceIndirect: string
   evidenceUnverified: string
-  evidenceReason: Record<'same_region' | 'same_mechanism_other_region' | 'case_region_unknown' | 'paper_region_unknown' | 'population_or_mechanism_not_stated', string>
+  evidenceReason: Record<'same_region' | 'same_mechanism_other_region' | 'case_region_unknown' | 'paper_region_unknown' | 'population_or_mechanism_not_stated' | 'adjacent_region', string>
   coherenceTitle: string
   coherenceIntro: string
   coherenceOk: string
-  coherenceIssue: Record<'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side' | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified' | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment' | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence' | 'objective_missing', (item: string) => string>
+  coherenceIssue: Record<'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side' | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified' | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment' | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence' | 'objective_missing' | 'invented_negative' | 'unconfirmed_diagnosis' | 'generated_dosage' | 'coverage_plan', (item: string) => string>
   removedTitle: string
-  removedReason: Record<'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment', string>
+  removedReason: Record<'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment' | 'invented_negative' | 'unconfirmed_diagnosis' | 'unconfirmed_diagnosis_removed' | 'generated_dosage', string>
+  /** Shown under a statement that was relabelled instead of removed: what the draft now says. */
+  replacedWith: (text: string) => string
+  /** Where an exercise of the programme comes from, and whose its dose is. */
+  exerciseOrigin: Record<'performed' | 'stated' | 'suggested', string>
+  dosageSuggested: string
   restore: string
   matchUnverified: string
   useSuggestion: (name: string) => string
@@ -161,7 +166,7 @@ const it: LiveDict = {
   reviewHint: 'Rivedi nota ed esercizi, modifica ciò che vuoi, poi salva nella scheda del paziente.',
   categories: { findings: 'Rilievi', assessment: 'Valutazione', plan: 'Piano', followup: 'Follow-up' },
   clinicalReasoning: 'Ragionamento clinico',
-  hypotheses: 'Ipotesi cliniche',
+  hypotheses: 'Ipotesi cliniche (non confermate)',
   differentials: 'Diagnosi differenziali da considerare',
   supportingFindings: 'Elementi a favore',
   findingsAgainst: 'Elementi contrari',
@@ -200,6 +205,7 @@ const it: LiveDict = {
     case_region_unknown: 'Il distretto del caso non è stato riconosciuto: la pertinenza non è stata verificata.',
     paper_region_unknown: 'Lo studio non indica un distretto riconoscibile: la pertinenza non è stata verificata.',
     population_or_mechanism_not_stated: 'Lo studio riguarda una popolazione o un meccanismo (es. età, trauma, chirurgia, sport) che non hai indicato per questo caso: pertinenza non verificata.',
+    adjacent_region: 'Studio su un distretto vicino, non sullo stesso: la pertinenza non è stata verificata.',
   },
   coherenceTitle: 'Controlli di coerenza',
   coherenceIntro: 'Confronto automatico tra ciò che hai detto e ciò che è stato generato. Il contenuto clinico resta da verificare da parte tua.',
@@ -211,6 +217,10 @@ const it: LiveDict = {
     coverage_exercises: (i) => `${i}: trattato oggi, ma nessun esercizio lo riguarda.`,
     coverage_protocol: (i) => `${i}: trattato oggi, ma nessuna scheda clinica trovata per questo distretto.`,
     coverage_evidence: (i) => `${i}: trattato oggi, ma nessuno studio pertinente trovato per questo distretto.`,
+    invented_negative: (i) => `${i}: risultato negativo che non hai riferito. Se non è stato valutato, non va dichiarato assente.`,
+    unconfirmed_diagnosis: (i) => `${i}: diagnosi presentata come certa, ma non l’hai indicata. Va trattata come ipotesi da confermare.`,
+    generated_dosage: (i) => `${i}: dosaggio che non hai indicato, presentato come prescrizione. È un suggerimento generato.`,
+    coverage_plan: (i) => `${i}: trattato oggi, ma il piano non ne parla.`,
     objective_missing: () => 'Nessun rilievo obiettivo riferito: la sezione resta vuota. Aggiungilo tu se lo hai raccolto.',
     region_unknown: () => 'Distretto non riconosciuto nella nota: la pertinenza di esercizi, studi e protocollo non è stata verificata automaticamente.',
     district: (i) => `La condizione indicata ("${i}") riguarda un distretto diverso da quello che hai descritto.`,
@@ -227,8 +237,11 @@ const it: LiveDict = {
     exercise_unverified: (i) => `"${i}": pertinenza non verificata, il distretto dell'esercizio non è riconosciuto. Decidi tu se tenerlo.`,
     protocol_unverified: (i) => `La scheda "${i}": pertinenza non verificata, il distretto non è riconosciuto.`,
   },
-  removedTitle: 'Tolto dalla bozza perché non risulta da ciò che hai detto',
-  removedReason: { invented: 'misura non detta', invented_finding: 'reperto non detto', invented_test: 'test non nominato', invented_appointment: 'appuntamento o frequenza delle visite non concordati', invented_agreement: 'accordo non risultante', invented_treatment: 'trattamento non nominato' },
+  removedTitle: 'Tolto o etichettato nella bozza perché non risulta da ciò che hai detto',
+  removedReason: { invented: 'misura non detta', invented_finding: 'reperto non detto', invented_test: 'test non nominato', invented_appointment: 'appuntamento o frequenza delle visite non concordati', invented_agreement: 'accordo non risultante', invented_treatment: 'trattamento non nominato', invented_negative: 'risultato negativo non documentato (non indagato)', unconfirmed_diagnosis: 'diagnosi non indicata da te: etichettata come ipotesi', unconfirmed_diagnosis_removed: 'diagnosi non indicata da te: tolta dal messaggio al paziente', generated_dosage: 'dosaggio non indicato da te: etichettato come proposta generata' },
+  replacedWith: (x) => `Ora nella bozza: «${x}»`,
+  exerciseOrigin: { performed: 'Svolto oggi (dalla trascrizione)', stated: 'Indicato da te', suggested: 'Suggerito dall’AI, da confermare' },
+  dosageSuggested: 'Dosaggio suggerito dall’AI: non indicato da te',
   restore: 'Ripristina',
   matchUnverified: 'Corrispondenza in libreria non verificata: resta l’esercizio come l’hai scritto.',
   useSuggestion: (n) => `Usa «${n}»`,
@@ -325,7 +338,7 @@ const en: LiveDict = {
   reviewHint: 'Review the note and exercises, edit anything you like, then save to the patient’s record.',
   categories: { findings: 'Findings', assessment: 'Assessment', plan: 'Plan', followup: 'Follow-up' },
   clinicalReasoning: 'Clinical reasoning',
-  hypotheses: 'Clinical hypotheses',
+  hypotheses: 'Clinical hypotheses (not confirmed)',
   differentials: 'Differential considerations',
   supportingFindings: 'Supporting findings',
   findingsAgainst: 'Findings against',
@@ -364,6 +377,7 @@ const en: LiveDict = {
     case_region_unknown: 'The body region of the case was not recognised: pertinence not verified.',
     paper_region_unknown: 'The paper names no recognisable body region: pertinence not verified.',
     population_or_mechanism_not_stated: 'The paper is about a population or a mechanism (e.g. age, trauma, surgery, sport) you did not state for this case: pertinence not verified.',
+    adjacent_region: 'Paper about a neighbouring region, not the same one: pertinence not verified.',
   },
   coherenceTitle: 'Coherence checks',
   coherenceIntro: 'An automatic comparison between what you said and what was generated. The clinical content is still yours to verify.',
@@ -375,6 +389,10 @@ const en: LiveDict = {
     coverage_exercises: (i) => `${i}: treated today, but no exercise is for it.`,
     coverage_protocol: (i) => `${i}: treated today, but no condition sheet was found for this region.`,
     coverage_evidence: (i) => `${i}: treated today, but no pertinent paper was found for this region.`,
+    invented_negative: (i) => `${i}: a negative result you did not report. If it was not assessed, it must not be declared absent.`,
+    unconfirmed_diagnosis: (i) => `${i}: a diagnosis presented as certain that you did not give. It is a hypothesis to confirm.`,
+    generated_dosage: (i) => `${i}: a dose you did not give, presented as a prescription. It is a generated suggestion.`,
+    coverage_plan: (i) => `${i}: treated today, but the plan does not mention it.`,
     objective_missing: () => 'No objective findings were stated: the section is left empty. Add them yourself if you collected any.',
     region_unknown: () => 'No body region recognised in the note: the pertinence of exercises, papers and protocol was not checked automatically.',
     district: (i) => `The condition given ("${i}") is about a different body region from the one you described.`,
@@ -391,8 +409,11 @@ const en: LiveDict = {
     exercise_unverified: (i) => `"${i}": pertinence not verified, the exercise's body region is not recognised. Your call whether to keep it.`,
     protocol_unverified: (i) => `The sheet "${i}": pertinence not verified, the body region is not recognised.`,
   },
-  removedTitle: 'Taken out of the draft because it is not in what you said',
-  removedReason: { invented: 'measurement not given', invented_finding: 'finding not given', invented_test: 'test not named', invented_appointment: 'appointment or visit frequency not agreed', invented_agreement: 'agreement not given', invented_treatment: 'treatment not named' },
+  removedTitle: 'Taken out of or labelled in the draft because it is not in what you said',
+  removedReason: { invented: 'measurement not given', invented_finding: 'finding not given', invented_test: 'test not named', invented_appointment: 'appointment or visit frequency not agreed', invented_agreement: 'agreement not given', invented_treatment: 'treatment not named', invented_negative: 'negative result not documented (not assessed)', unconfirmed_diagnosis: 'diagnosis you did not give: labelled as a hypothesis', unconfirmed_diagnosis_removed: 'diagnosis you did not give: taken out of the patient message', generated_dosage: 'dose you did not give: labelled as a generated suggestion' },
+  replacedWith: (x) => `Now in the draft: “${x}”`,
+  exerciseOrigin: { performed: 'Done today (from the transcript)', stated: 'Named by you', suggested: 'Suggested by the AI, to be confirmed' },
+  dosageSuggested: 'Dose suggested by the AI: not given by you',
   restore: 'Restore',
   matchUnverified: 'Library match not verified: the exercise stays as you wrote it.',
   useSuggestion: (n) => `Use “${n}”`,
@@ -489,7 +510,7 @@ const es: LiveDict = {
   reviewHint: 'Revisa la nota y los ejercicios, modifica lo que quieras y guárdala en la ficha del paciente.',
   categories: { findings: 'Hallazgos', assessment: 'Valoración', plan: 'Plan', followup: 'Seguimiento' },
   clinicalReasoning: 'Razonamiento clínico',
-  hypotheses: 'Hipótesis clínicas',
+  hypotheses: 'Hipótesis clínicas (no confirmadas)',
   differentials: 'Diagnósticos diferenciales a considerar',
   supportingFindings: 'Hallazgos a favor',
   findingsAgainst: 'Hallazgos en contra',
@@ -528,6 +549,7 @@ const es: LiveDict = {
     case_region_unknown: 'No se ha reconocido la región del caso: pertinencia no verificada.',
     paper_region_unknown: 'El estudio no indica una región reconocible: pertinencia no verificada.',
     population_or_mechanism_not_stated: 'El estudio trata de una población o un mecanismo (p. ej. edad, traumatismo, cirugía, deporte) que no indicaste para este caso: pertinencia no verificada.',
+    adjacent_region: 'Estudio sobre una región vecina, no la misma: pertinencia no verificada.',
   },
   coherenceTitle: 'Controles de coherencia',
   coherenceIntro: 'Comparación automática entre lo que has dicho y lo generado. El contenido clínico debes verificarlo tú.',
@@ -539,6 +561,10 @@ const es: LiveDict = {
     coverage_exercises: (i) => `${i}: tratado hoy, pero ningún ejercicio lo trabaja.`,
     coverage_protocol: (i) => `${i}: tratado hoy, pero no se encontró ninguna ficha clínica para esta región.`,
     coverage_evidence: (i) => `${i}: tratado hoy, pero no se encontró ningún estudio pertinente para esta región.`,
+    invented_negative: (i) => `${i}: resultado negativo que no indicaste. Si no se evaluó, no debe declararse ausente.`,
+    unconfirmed_diagnosis: (i) => `${i}: diagnóstico presentado como seguro que no indicaste. Es una hipótesis por confirmar.`,
+    generated_dosage: (i) => `${i}: dosis que no indicaste, presentada como prescripción. Es una sugerencia generada.`,
+    coverage_plan: (i) => `${i}: tratado hoy, pero el plan no lo menciona.`,
     objective_missing: () => 'No se indicó ningún hallazgo objetivo: la sección queda vacía. Añádelo tú si lo recogiste.',
     region_unknown: () => 'No se ha reconocido ninguna región en la nota: la pertinencia de ejercicios, estudios y protocolo no se ha verificado automáticamente.',
     district: (i) => `La condición indicada ("${i}") corresponde a una región distinta de la que has descrito.`,
@@ -555,8 +581,11 @@ const es: LiveDict = {
     exercise_unverified: (i) => `"${i}": pertinencia no verificada, no se reconoce la región del ejercicio. Decides tú si mantenerlo.`,
     protocol_unverified: (i) => `La ficha "${i}": pertinencia no verificada, no se reconoce la región.`,
   },
-  removedTitle: 'Retirado del borrador porque no aparece en lo que has dicho',
-  removedReason: { invented: 'medida no dicha', invented_finding: 'hallazgo no dicho', invented_test: 'prueba no nombrada', invented_appointment: 'cita o frecuencia de visitas no acordadas', invented_agreement: 'acuerdo no indicado', invented_treatment: 'tratamiento no nombrado' },
+  removedTitle: 'Retirado o etiquetado en el borrador porque no aparece en lo que has dicho',
+  removedReason: { invented: 'medida no dicha', invented_finding: 'hallazgo no dicho', invented_test: 'prueba no nombrada', invented_appointment: 'cita o frecuencia de visitas no acordadas', invented_agreement: 'acuerdo no indicado', invented_treatment: 'tratamiento no nombrado', invented_negative: 'resultado negativo no documentado (no evaluado)', unconfirmed_diagnosis: 'diagnóstico que no indicaste: etiquetado como hipótesis', unconfirmed_diagnosis_removed: 'diagnóstico que no indicaste: retirado del mensaje al paciente', generated_dosage: 'dosis que no indicaste: etiquetada como sugerencia generada' },
+  replacedWith: (x) => `Ahora en el borrador: «${x}»`,
+  exerciseOrigin: { performed: 'Realizado hoy (de la transcripción)', stated: 'Indicado por ti', suggested: 'Sugerido por la IA, por confirmar' },
+  dosageSuggested: 'Dosis sugerida por la IA: no indicada por ti',
   restore: 'Restaurar',
   matchUnverified: 'Correspondencia en la biblioteca no verificada: el ejercicio queda como lo escribiste.',
   useSuggestion: (n) => `Usar «${n}»`,
@@ -653,7 +682,7 @@ const fr: LiveDict = {
   reviewHint: 'Relisez la note et les exercices, modifiez ce que vous voulez, puis enregistrez dans le dossier du patient.',
   categories: { findings: 'Constats', assessment: 'Évaluation', plan: 'Plan', followup: 'Suivi' },
   clinicalReasoning: 'Raisonnement clinique',
-  hypotheses: 'Hypothèses cliniques',
+  hypotheses: 'Hypothèses cliniques (non confirmées)',
   differentials: 'Diagnostics différentiels à envisager',
   supportingFindings: 'Éléments en faveur',
   findingsAgainst: 'Éléments en défaveur',
@@ -692,6 +721,7 @@ const fr: LiveDict = {
     case_region_unknown: 'La région du cas n’a pas été reconnue : pertinence non vérifiée.',
     paper_region_unknown: 'L’étude n’indique pas de région reconnaissable : pertinence non vérifiée.',
     population_or_mechanism_not_stated: 'L’étude porte sur une population ou un mécanisme (p. ex. âge, traumatisme, chirurgie, sport) que vous n’avez pas indiqué pour ce cas : pertinence non vérifiée.',
+    adjacent_region: 'Étude sur une région voisine, pas la même : pertinence non vérifiée.',
   },
   coherenceTitle: 'Contrôles de cohérence',
   coherenceIntro: 'Comparaison automatique entre ce que vous avez dit et ce qui a été généré. Le contenu clinique reste à vérifier par vous.',
@@ -703,6 +733,10 @@ const fr: LiveDict = {
     coverage_exercises: (i) => `${i} : traité aujourd’hui, mais aucun exercice ne le concerne.`,
     coverage_protocol: (i) => `${i} : traité aujourd’hui, mais aucune fiche clinique trouvée pour cette région.`,
     coverage_evidence: (i) => `${i} : traité aujourd’hui, mais aucune étude pertinente trouvée pour cette région.`,
+    invented_negative: (i) => `${i} : résultat négatif que vous n’avez pas rapporté. S’il n’a pas été évalué, il ne doit pas être déclaré absent.`,
+    unconfirmed_diagnosis: (i) => `${i} : diagnostic présenté comme certain que vous n’avez pas donné. C’est une hypothèse à confirmer.`,
+    generated_dosage: (i) => `${i} : dosage que vous n’avez pas donné, présenté comme une prescription. C’est une suggestion générée.`,
+    coverage_plan: (i) => `${i} : traité aujourd’hui, mais le plan n’en parle pas.`,
     objective_missing: () => 'Aucun constat objectif indiqué : la section reste vide. Ajoutez-le vous-même si vous l’avez recueilli.',
     region_unknown: () => 'Aucune région reconnue dans la note : la pertinence des exercices, des études et du protocole n’a pas été vérifiée automatiquement.',
     district: (i) => `La pathologie indiquée (« ${i} ») concerne une autre région que celle que vous avez décrite.`,
@@ -719,8 +753,11 @@ const fr: LiveDict = {
     exercise_unverified: (i) => `« ${i} » : pertinence non vérifiée, la région de l’exercice n’est pas reconnue. À vous de décider de le garder.`,
     protocol_unverified: (i) => `La fiche « ${i} » : pertinence non vérifiée, la région n’est pas reconnue.`,
   },
-  removedTitle: 'Retiré du brouillon car absent de ce que vous avez dit',
-  removedReason: { invented: 'mesure non donnée', invented_finding: 'constat non donné', invented_test: 'test non nommé', invented_appointment: 'rendez-vous ou fréquence des séances non convenus', invented_agreement: 'accord non indiqué', invented_treatment: 'traitement non nommé' },
+  removedTitle: 'Retiré ou étiqueté dans le brouillon car absent de ce que vous avez dit',
+  removedReason: { invented: 'mesure non donnée', invented_finding: 'constat non donné', invented_test: 'test non nommé', invented_appointment: 'rendez-vous ou fréquence des séances non convenus', invented_agreement: 'accord non indiqué', invented_treatment: 'traitement non nommé', invented_negative: 'résultat négatif non documenté (non évalué)', unconfirmed_diagnosis: 'diagnostic que vous n’avez pas donné : étiqueté comme hypothèse', unconfirmed_diagnosis_removed: 'diagnostic que vous n’avez pas donné : retiré du message au patient', generated_dosage: 'dosage que vous n’avez pas donné : étiqueté comme suggestion générée' },
+  replacedWith: (x) => `Désormais dans le brouillon : « ${x} »`,
+  exerciseOrigin: { performed: 'Réalisé aujourd’hui (d’après la transcription)', stated: 'Indiqué par vous', suggested: 'Suggéré par l’IA, à confirmer' },
+  dosageSuggested: 'Dosage suggéré par l’IA : non indiqué par vous',
   restore: 'Rétablir',
   matchUnverified: 'Correspondance dans la bibliothèque non vérifiée : l’exercice reste tel que vous l’avez écrit.',
   useSuggestion: (n) => `Utiliser « ${n} »`,

@@ -60,6 +60,7 @@ import EvidenceBadge from "@/components/EvidenceBadge";
 import { loadClinicianSignature } from "@/lib/care/clinicianSignature";
 import { caseOf, checkOutput, type Issue, type SectionName } from "@/lib/clinical/coherence";
 import { exerciseFit } from "@/lib/clinical/region";
+import { dosingOrigin, exerciseOrigin } from "@/lib/clinical/facts";
 
 // One look for every block of the panel (a quiet tile inside the page card).
 const BLOCK = "mt-4 rounded-[22px] border border-black/[0.06] bg-white/70 p-5 sm:p-6 dark:border-white/[0.07] dark:bg-white/[0.025]";
@@ -157,7 +158,7 @@ const [insightRelevance, setInsightRelevance] = useState<{ relevance: string | n
 // Condition sheets for the other regions treated today (/api/knowledge-lookup `others`).
 const [otherSheets, setOtherSheets] = useState<{ region: string; side: string | null; match: { condition_name: string } | null; relevance?: "verified" | "unverified" | null; relevanceReason?: string | null }[]>([]);
 // Statements taken out of the draft because the clinician did not say them (/api/generate-note `removed`).
-const [removedFacts, setRemovedFacts] = useState<{ section: string; text: string; kind: string; item: string }[]>([]);
+const [removedFacts, setRemovedFacts] = useState<{ section: string; text: string; kind: string; item: string; replacement?: string }[]>([]);
 
 const [textInput, setTextInput] = useState("");
 
@@ -800,15 +801,23 @@ recognition.lang = recordingLang;
     setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
   };
 
-  // Puts a statement taken out of the draft back at the end of its section.
-  const restoreRemoved = (r: { section: string; text: string }) => {
+  // Undoes a change to the draft: a statement taken out goes back at the end
+  // of its section; a labelled one ("Ipotesi da confermare: …") gets its
+  // original wording back. In the clinical reasoning too.
+  const restoreRemoved = (r: { section: string; text: string; replacement?: string }) => {
     setRemovedFacts((prev) => prev.filter((x) => x !== r));
+    const undo = (current: string) => (r.replacement && current.includes(r.replacement) ? current.replace(r.replacement, r.text) : current ? `${current} ${r.text}` : r.text);
+    if (["supportingFindings", "findingsAgainst", "redFlagsPrecautions"].includes(r.section)) {
+      setFinalNote((prev: any) => (prev ? { ...prev, clinicalReasoning: { ...(prev.clinicalReasoning ?? {}), [r.section]: undo(((prev.clinicalReasoning ?? {})[r.section] ?? "").trim()) } } : prev));
+      setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+      return;
+    }
     const id = Object.keys(phraseFields).find((k) => phraseFields[k] === r.section);
     const current = (finalNote?.[r.section] as string | undefined)?.trim() ?? "";
-    const text = current ? `${current} ${r.text}` : r.text;
+    const text = undo(current);
     if (id) return updatePhraseText(id, text);
     const newId = `${instanceId}-restored-${Date.now()}`;
-    const cat: Category = r.section === "plan" ? "plan" : r.section === "summaryForPatient" ? "followup" : "findings";
+    const cat: Category = r.section === "plan" ? "plan" : r.section === "summaryForPatient" ? "followup" : r.section === "assessment" ? "assessment" : "findings";
     setAiPhrases((prev) => [...prev, { id: newId, text, cat }]);
     setPhraseFields((prev) => ({ ...prev, [newId]: r.section }));
     setFinalNote((prev: any) => (prev ? { ...prev, [r.section]: text } : prev));
@@ -880,7 +889,7 @@ recognition.lang = recordingLang;
     let item = issue.item;
     if (issue.kind === "side" && issue.section) item = sectionLabel(issue.section);
     if ((issue.kind === "section_region" || issue.kind === "history_as_active") && issue.section) item = `${sectionLabel(issue.section)} (${regionLabel(issue.regions)})`;
-    if (["invented", "invented_finding", "invented_test", "invented_appointment", "invented_agreement", "invented_treatment"].includes(issue.kind) && issue.section) item = `"${issue.item}" (${sectionLabel(issue.section)})`;
+    if (["invented", "invented_finding", "invented_test", "invented_appointment", "invented_agreement", "invented_treatment", "invented_negative", "unconfirmed_diagnosis", "generated_dosage"].includes(issue.kind) && issue.section) item = `"${issue.item}" (${sectionLabel(issue.section)})`;
     if (issue.kind.startsWith("coverage_")) item = regionLabel([issue.item]);
     return t.coherenceIssue[issue.kind](item);
   };
@@ -943,7 +952,11 @@ recognition.lang = recordingLang;
       // in 30 minutes: they are not stored; the reference (provider_id) is.
       const exercisesToSave =
         exerciseEntries.length > 0
-          ? exerciseEntries.map((ex: any) => (ex.provider === "exercises" ? { ...ex, media: null } : ex))
+          ? exerciseEntries.map((ex: any) => {
+              // Whose it is: done today, named by the clinician, or the AI's suggestion; and whose its dose is.
+              const origin = noteTranscript ? { origin: exerciseOrigin(ex.draft ?? ex.name ?? "", noteTranscript).origin, dosing_origin: dosingOrigin(ex.dosing, noteTranscript) } : {};
+              return ex.provider === "exercises" ? { ...ex, ...origin, media: null } : { ...ex, ...origin };
+            })
           : finalNote.exercises || null;
 
       const payload = {
@@ -1632,6 +1645,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                           <span className="block text-[11px] text-ink/55 dark:text-white/45">
                             {sectionLabel(r.section as SectionName)} · {(t.removedReason as Record<string, string>)[r.kind] ?? r.kind}
                           </span>
+                          {r.replacement && <span data-testid="removed-fact-replacement" className="block text-[11px] text-ink/55 dark:text-white/45">{t.replacedWith(r.replacement)}</span>}
                         </span>
                         <button type="button" onClick={() => restoreRemoved(r)} className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 text-xs font-semibold ${SECONDARY_BTN}`}>
                           {t.restore}
@@ -1937,6 +1951,17 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                               return (
                                 <p data-testid="exercise-unverified" className="mt-0.5 whitespace-normal text-[11px] font-medium text-amber-700 dark:text-amber-300">
                                   {t.unverifiedReason[caseView.regions.length ? "exercise_region_unknown" : "case_region_unknown"]}
+                                </p>
+                              );
+                            })()}
+                            {/* Whose exercise and dose this is: what the clinician said and did, or the AI's suggestion. */}
+                            {noteTranscript && (() => {
+                              const origin = exerciseOrigin(ex.draft ?? ex.name ?? "", noteTranscript).origin;
+                              const dose = dosingOrigin(ex.dosing, noteTranscript);
+                              return (
+                                <p data-testid="exercise-origin" data-origin={origin} className={`mt-0.5 whitespace-normal text-[11px] ${origin === "suggested" ? "font-medium text-amber-700 dark:text-amber-300" : "text-ink/55 dark:text-white/45"}`}>
+                                  {t.exerciseOrigin[origin]}
+                                  {dose === "suggested" && <span data-testid="dosage-suggested" className="block">{t.dosageSuggested}</span>}
                                 </p>
                               );
                             })()}

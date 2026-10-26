@@ -262,7 +262,7 @@ test('coherence checks with two regions treated today and one only in history: s
     await checks.locator('li[data-kind="history_as_active"]').getByText('Piano (polso e mano): tratta come problema attuale un distretto che hai indicato solo in anamnesi.').waitFor();
     // Sides per region: only the hypothesis with the knee on the wrong side.
     const sides = await checks.locator('li[data-kind="side"]').allInnerTexts();
-    assert.deepEqual(sides, ['Ipotesi cliniche: il lato non corrisponde a quello che hai indicato.'], 'the plan (right shoulder, left knee) and the history line are not flagged');
+    assert.deepEqual(sides, ['Ipotesi cliniche (non confermate): il lato non corrisponde a quello che hai indicato.'], 'the plan (right shoulder, left knee) and the history line are not flagged');
     assert.equal(await checks.locator('li[data-kind="section_region"]').count(), 0, 'the history line in the findings is not an error');
     // Both regions of today keep their exercises, with no warning on them.
     const cards = page.getByTestId('note-exercise');
@@ -290,7 +290,8 @@ test('statements the clinician did not give are taken out and listed, and can be
   const note = {
     subjective: 'Dolore alla spalla destra in elevazione e al ginocchio sinistro scendendo le scale.',
     objective: '',
-    assessment: 'Possibile dolore di spalla destra correlato alla cuffia dei rotatori; possibile dolore femororotuleo al ginocchio sinistro.',
+    // As /api/generate-note returns it after labelling the diagnosis that was not stated.
+    assessment: 'Possibile dolore di spalla destra correlato alla cuffia dei rotatori. Ipotesi da confermare: condromalacia patellare al ginocchio sinistro.',
     plan: 'Esercizi per la spalla destra e per il ginocchio sinistro.',
     summaryForPatient: 'Fai gli esercizi ogni giorno.',
     primaryCondition: 'rotator cuff related shoulder pain',
@@ -301,6 +302,7 @@ test('statements the clinician did not give are taken out and listed, and can be
     { section: 'objective', text: 'Test di Neer e Hawkins positivi a destra', kind: 'invented_test', item: 'neer' },
     { section: 'objective', text: 'Gonfiore al ginocchio sinistro', kind: 'invented_finding', item: 'gonfiore' },
     { section: 'summaryForPatient', text: 'Ci vediamo due volte a settimana', kind: 'invented_appointment', item: 'ci vediamo' },
+    { section: 'assessment', text: 'Condromalacia patellare al ginocchio sinistro.', kind: 'unconfirmed_diagnosis', item: 'condromalacia', replacement: 'Ipotesi da confermare: condromalacia patellare al ginocchio sinistro.' },
   ];
   const dosing = { sets: 3, reps: 12, duration_seconds: null, frequency_per_week: null, notes: null };
   const suggestion = { internal_id: 'exercises-9', provider: 'exercises', provider_id: 'e9', name: 'Pendulum swing', body_region: 'shoulder', primary_muscle: 'Deltoid', media: null };
@@ -332,8 +334,9 @@ test('statements the clinician did not give are taken out and listed, and can be
 
     // What was taken out, where and why.
     const list = checks.getByTestId('removed-fact');
-    assert.equal(await list.count(), 3);
-    await checks.getByText('Tolto dalla bozza perché non risulta da ciò che hai detto').waitFor();
+    assert.equal(await list.count(), 4);
+    await checks.getByText('Tolto o etichettato nella bozza perché non risulta da ciò che hai detto').waitFor();
+    assert.match(await list.nth(3).innerText(), /Condromalacia patellare al ginocchio sinistro[\s\S]*Valutazione · diagnosi non indicata da te: etichettata come ipotesi[\s\S]*Ora nella bozza: «Ipotesi da confermare: condromalacia/);
     assert.match(await list.nth(0).innerText(), /Test di Neer e Hawkins positivi a destra[\s\S]*Oggettivo · test non nominato/);
     assert.match(await list.nth(2).innerText(), /Ci vediamo due volte a settimana[\s\S]*Sintesi per il paziente · appuntamento o frequenza delle visite non concordati/);
     assert.doesNotMatch(await page.getByTestId('note-findings').innerText(), /Neer|Gonfiore/, 'not in the note');
@@ -346,6 +349,12 @@ test('statements the clinician did not give are taken out and listed, and can be
     // No objective finding stated: said so, not left silently empty.
     await checks.locator('li[data-kind="objective_missing"]').getByText('Nessun rilievo obiettivo riferito', { exact: false }).waitFor();
 
+    // Neither exercise nor dose was given by the clinician: both are marked as the AI's suggestions.
+    const origins = page.getByTestId('exercise-origin');
+    assert.deepEqual(await origins.evaluateAll((els) => els.map((e) => e.getAttribute('data-origin'))), ['suggested', 'suggested']);
+    await origins.first().getByText('Suggerito dall’AI, da confermare').waitFor();
+    assert.equal(await page.getByTestId('dosage-suggested').count(), 2, 'the dose is not presented as the clinician’s');
+
     // The library suggestion is not applied by itself; taking it is the clinician's choice.
     const cards = page.getByTestId('note-exercise');
     await cards.first().getByTestId('match-unverified').getByText('Corrispondenza in libreria non verificata', { exact: false }).waitFor();
@@ -355,6 +364,11 @@ test('statements the clinician did not give are taken out and listed, and can be
     await cards.first().getByText('Dalla nota: Pendolo di Codman 3x1 minuto').waitFor();
 
     // Restored on purpose: back in its section, off the list; the clinician then saves.
+    // A labelled diagnosis can be put back as it was written, on purpose.
+    await list.nth(3).getByRole('button', { name: 'Ripristina' }).click();
+    assert.equal(await list.count(), 3);
+    await page.getByText('Condromalacia patellare al ginocchio sinistro.', { exact: false }).first().waitFor();
+    assert.doesNotMatch(await page.getByText('Possibile dolore di spalla destra', { exact: false }).first().innerText(), /Ipotesi da confermare/);
     await list.nth(1).getByRole('button', { name: 'Ripristina' }).click();
     assert.equal(await list.count(), 2);
     await page.getByTestId('note-findings').getByText('Gonfiore al ginocchio sinistro').waitFor();
@@ -366,6 +380,8 @@ test('statements the clinician did not give are taken out and listed, and can be
     assert.doesNotMatch(saved.objective ?? '', /Neer/, 'what stayed out is not saved');
     assert.doesNotMatch(saved.summary_for_patient ?? '', /vediamo/);
     assert.deepEqual((saved.exercises ?? []).map((e) => (typeof e === 'string' ? e : e.name)), ['Pendulum swing', 'Knee extension']);
+    assert.deepEqual((saved.exercises ?? []).map((e) => [e.origin, e.dosing_origin]), [['suggested', 'suggested'], ['suggested', 'suggested']], 'the saved programme keeps whose each exercise and dose is');
+    assert.equal(saved.assessment, 'Possibile dolore di spalla destra correlato alla cuffia dei rotatori. Condromalacia patellare al ginocchio sinistro.', 'the restored wording is what is saved');
   } finally {
     await ctx.close();
   }

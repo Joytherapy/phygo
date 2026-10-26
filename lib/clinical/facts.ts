@@ -7,12 +7,25 @@
 // swelling in any way (gonfiore, edema, versamento…), a clinical test if they
 // named that test, a visit schedule if they spoke about visits.
 //
-// sanitizeNote() removes such statements from the parts of the note that
-// report facts (findings, and the plan and patient summary for visits and
-// agreements) and lists each removal with its reason, so the clinician can
-// put it back. The assessment is reasoning: it is only flagged
+// The same holds for negative results: "no neurological signs", "no red
+// flags", "no other acute condition" are results, and a result the clinician
+// did not give is not a negative one, it is not assessed. Three things are kept
+// apart: a negative the clinician stated ("nessuna irradiazione"), which
+// stays; something not mentioned, which is never turned into a negative; and,
+// where it matters (red flags), an explicit "not assessed".
+//
+// A diagnosis the clinician did not state is a hypothesis: written as a fact
+// ("Condromalacia patellare al ginocchio sinistro") it is labelled as a
+// hypothesis to confirm. A dose (sets, repetitions, frequency) the clinician
+// did not give is a generated suggestion, labelled as such in the plan and
+// told apart on each exercise (exerciseOrigin, dosingOrigin).
+//
+// sanitizeNote() removes or labels such statements in the parts of the note
+// that report facts and lists each change with its reason, so the clinician
+// can undo it. In the assessment only negatives are removed and certain
+// diagnoses labelled; the rest of the reasoning is flagged
 // (lib/clinical/coherence.ts), never edited.
-import { normalize } from './region'
+import { normalize, REGION_WORDS } from './region'
 
 type Group = { key: string; terms: string[] }
 const group = (key: string, terms: string[]): Group => ({ key, terms })
@@ -24,7 +37,7 @@ const FINDINGS: Group[] = [
   group('swelling', ['gonfior*', 'gonfio', 'gonfia', 'edema', 'edematos*', 'versamento', 'tumefazion*', 'swelling', 'swollen', 'effusion', 'hinchazon', 'derrame', 'gonflement', 'epanchement', 'oedeme']),
   group('radiculopathy', ['radicolopati*', 'radicolar*', 'irradiazion*', 'irradiat*', 'sciatalgi*', 'radiculopath*', 'radicular', 'radiating', 'radiculopati*', 'radiculaire']),
   group('instability', ['instabilit*', 'instabile', 'lassita', 'cedimento', 'cedimenti', 'instability', 'unstable', 'laxity', 'giving way', 'inestabilidad', 'instabilite']),
-  group('neuro', ['deficit neurologic*', 'riflessi', 'riflesso', 'sensibilita', 'ipoestesi*', 'parestesi*', 'neurological', 'reflex*', 'numbness', 'tingling', 'hipoestesia', 'reflejos', 'reflexes']),
+  group('neuro', ['neurolog*', 'deficit neurologic*', 'riflessi', 'riflesso', 'sensibilita', 'ipoestesi*', 'parestesi*', 'neurological', 'reflex*', 'numbness', 'tingling', 'hipoestesia', 'reflejos', 'reflexes']),
   group('strength', ['forza', 'ipostenia', 'debolezza', 'deficit di forza', 'strength', 'weakness', 'mrc', 'fuerza', 'debilidad', 'force musculaire', 'faiblesse']),
   group('atrophy', ['ipotrofi*', 'atrofi*', 'trofismo', 'atrophy', 'wasting']),
   group('crepitus', ['crepitio', 'crepitii', 'scroscio', 'crepitus']),
@@ -47,6 +60,44 @@ const TESTS: Group[] = [
   group('adson', ['adson']), group('roos', ['roos']), group('gaenslen', ['gaenslen']), group('kemp', ['kemp']),
 ]
 
+// What a negative statement can be about beyond the findings above.
+const NEGATIVE_CONCEPTS: Group[] = [
+  group('red flags', ['red flag*', 'redflag*', 'bandier* ross*', 'segn* di allarme', 'segnal* di allarme', 'segn* d allarme', 'segnal* d allarme', 'campanell* d allarme', 'warning sign*', 'serious patholog*', 'patologi* grav*', 'banderas rojas', 'signos de alarma', 'drapeaux rouges', 'signes d alerte', 'cauda equina', 'anestesia a sella', 'saddle an*', 'incontinenz*', 'incontinence', 'ritenzione urinaria', 'urinary retention', 'febbre', 'fever', 'calo ponderale', 'perdita di peso', 'weight loss']),
+  group('other conditions', ['altre condizioni', 'altra condizione', 'condizion* acut*', 'altre patologie', 'altra patologia', 'patologi* acut*', 'patologi* sistemic*', 'cause specifiche', 'causa specifica', 'other condition*', 'acute condition*', 'specific cause*', 'systemic', 'otras condiciones', 'otra condicion', 'autres conditions', 'autre condition']),
+]
+// Words that make a statement negative ("senza", "nessun", "negativo"…)…
+const NEGATION = ['nessun', 'nessuna', 'nessuno', 'assenza', 'assente', 'assenti', 'senza', 'non ci sono', 'non c e', 'non si rilev*', 'non si evidenzi*', 'non si osserv*', 'non present*', 'non apparent*', 'non evident*', 'negativ*', 'esclus*', 'none', 'no', 'absence', 'absent', 'without', 'negative', 'not present', 'sin', 'ningun', 'ninguna', 'ausencia', 'ausente', 'aucun', 'aucune', 'sans', 'negatif']
+// …unless it says what is still to check, or that it was not assessed.
+const STILL_OPEN = ['da escludere', 'escluder*', 'rule out', 'da valutare', 'da indagare', 'da verificare', 'to be assessed', 'descartar', 'a exclure', 'non valutat*', 'non indagat*', 'non documentat*', 'non riferit*', 'not assessed', 'not documented', 'not reported', 'no evaluad*', 'non evalue*']
+
+// Diagnoses, by concept: named in the note as a fact, they need the clinician
+// to have stated them (not only suspected). Symptom labels (lombalgia,
+// cervicalgia, gonalgia, dolore) are not diagnoses.
+const DIAGNOSES: Group[] = [
+  group('tendinopathy', ['tendinopati*', 'tendinit*', 'tendinos*', 'tendinite', 'tendinopathy', 'tendinitis', 'tendinosis', 'tendinopathie']),
+  group('chondromalacia', ['condromalaci*', 'chondromalaci*']),
+  group('patellofemoral', ['femororotul*', 'femoro rotul*', 'patellofemoral', 'patello femoral', 'femoropatelar', 'femoro patellaire']),
+  group('impingement', ['impingement', 'conflitto subacromiale', 'sindrome da conflitto', 'subacromial pain syndrome', 'pinzamiento', 'conflit sous acromial']),
+  group('tear', ['lesion*', 'rottur*', 'lacerazion*', 'tear', 'tears', 'rupture', 'rotura', 'desgarro', 'dechirure']),
+  group('capsulitis', ['capsulit*', 'spalla congelata', 'frozen shoulder']),
+  group('bursitis', ['borsit*', 'bursit*']),
+  group('osteoarthritis', ['artrosi', 'osteoartrosi', 'coxartrosi', 'gonartrosi', 'osteoarthritis', 'arthrosis', 'artrosis', 'arthrose', 'coxarthrose', 'gonarthrose']),
+  group('disc', ['ernia', 'ernie', 'discopati*', 'protrusion*', 'disc herniation', 'herniated disc', 'hernia discal', 'hernie discale']),
+  group('radicular', ['radicolopati*', 'sciatalgi*', 'lombosciatalgi*', 'cervicobrachialgi*', 'radiculopath*', 'sciatica', 'radiculopatia', 'ciatica', 'sciatique']),
+  group('sprain', ['distorsion*', 'sprain', 'esguince', 'entorse']),
+  group('fracture', ['frattur*', 'fracture*', 'fractura*']),
+  group('epicondylitis', ['epicondilit*', 'epicondylit*', 'epitrocleit*', 'epicondylalgi*', 'gomito del tennista', 'tennis elbow']),
+  group('fasciitis', ['fascit*', 'fasciit*', 'fascitis']),
+  group('carpal tunnel', ['tunnel carpale', 'carpal tunnel', 'tunel carpiano', 'canal carpien']),
+  group('meniscus', ['meniscopati*', 'meniscopath*']),
+  group('stenosis', ['stenosi', 'stenosis', 'estenosis', 'stenose']),
+  group('spondylolisthesis', ['spondilolis*', 'spondylolis*', 'espondilolis*']),
+  group('dyskinesia', ['discinesi*', 'dyskinesi*', 'discinesia']),
+  group('fibromyalgia', ['fibromialgi*', 'fibromyalgi*']),
+  group('whiplash', ['colpo di frusta', 'whiplash', 'latigazo']),
+  group('de quervain', ['de quervain']),
+]
+
 // Visits, follow-ups, their frequency; and agreements.
 // Not "controllo" or "sessione" alone: "controllo motorio" and "sessione di esercizi" are not visits.
 const VISIT_WORDS = ['sedut*', 'visit*', 'appuntament*', 'appointment*', 'rivalutazion*', 'follow up', 'followup', 'reassessment', 're assessment', 'check up', 'cita', 'citas', 'consulta', 'seance*', 'rendez vous', 'ci vediamo', 'ci rivediamo', 'ci risentiamo', 'see you', 'nos vemos', 'on se revoit', 'controllo tra', 'controllo fra', 'controllo dopo', 'prossimo controllo']
@@ -56,7 +107,7 @@ const AGREEMENT = ['concordat*', 'abbiamo deciso', 'abbiamo stabilito', 'abbiamo
 const AGREEMENT_SAID = ['concord*', 'accordo', 'decis*', 'stabilit*', 'agree*', 'decided', 'acord*', 'convenu*']
 const NUMBER_WORDS = ['una', 'uno', 'due', 'tre', 'quattro', 'cinque', 'sei', 'sette', 'otto', 'dieci', 'one', 'two', 'three', 'four', 'five', 'six', 'dos', 'tres', 'cuatro', 'deux', 'trois', 'quatre']
 // Hypothesis wording: a hedged sentence in the assessment is reasoning, not a finding.
-const HEDGE = ['possibil*', 'probabil*', 'compatibil*', 'consider*', 'da valutare', 'da escludere', 'escluder*', 'sospett*', 'ipotes*', 'potrebbe', 'may', 'might', 'could', 'rule out', 'suggest*', 'posible', 'possible', 'evaluer', 'a valutare']
+const HEDGE = ['possibil*', 'probabil*', 'compatibil*', 'consider*', 'da valutare', 'da escludere', 'escluder*', 'sospett*', 'ipotes*', 'potrebbe', 'may', 'might', 'could', 'rule out', 'suggest*', 'posible', 'possible', 'evaluer', 'a valutare', 'da confermare', 'to be confirmed', 'por confirmar', 'a confirmer', 'non confermat*', 'unconfirmed', 'not confirmed', 'hypothesis', 'hipotesis', 'hypothese', 'proposta generata', 'generated suggestion', 'sugerencia generada', 'suggestion generee']
 
 const words = (s: string) => normalize(s).trim().split(' ').filter(Boolean)
 function hits(ws: string[], phrase: string): boolean {
@@ -75,7 +126,7 @@ function firstHit(ws: string[], terms: string[]): string | null {
 }
 const anyHit = (ws: string[], terms: string[]) => terms.some((t) => hits(ws, t))
 
-export type FactKind = 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement'
+export type FactKind = 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_negative'
 export type UnsupportedFact = { kind: FactKind; item: string }
 
 // A movement said to be reduced ("rotazione cervicale ridotta", "flexion limited") is a range-of-motion finding.
@@ -120,65 +171,267 @@ export function unsupportedArrangements(statement: string, transcript: string): 
   return out
 }
 
+/**
+ * Negative results in a statement ("senza segni di compromissione
+ * neurologica", "nessuna red flag") about something the clinician did not
+ * mention at all: not a documented negative, an unassessed one. `findings`:
+ * also the examination findings (for the sections where unsupportedFindings
+ * does not already look for them).
+ */
+export function unsupportedNegatives(statement: string, transcript: string, findings = true): UnsupportedFact[] {
+  const ws = words(statement)
+  if (!anyHit(ws, NEGATION) || anyHit(ws, STILL_OPEN)) return []
+  const said = words(transcript)
+  const out: UnsupportedFact[] = []
+  for (const g of [...(findings ? FINDINGS : []), ...NEGATIVE_CONCEPTS]) {
+    const hit = firstHit(ws, g.terms)
+    if (hit && !anyHit(said, g.terms)) out.push({ kind: 'invented_negative', item: hit })
+  }
+  return out
+}
+
+/**
+ * Diagnoses a statement names that the clinician did not state as such: not
+ * said at all, or only suspected ("sospetta cuffia" does not state a
+ * tendinopathy, "sospetta tendinopatia" does not state it as certain).
+ */
+export function unstatedDiagnoses(statement: string, transcript: string): string[] {
+  const ws = words(statement)
+  const firm = sentencesOf(transcript).filter((s) => !isHedged(s)).map(words)
+  const out: string[] = []
+  for (const g of DIAGNOSES) {
+    const hit = firstHit(ws, g.terms)
+    if (hit && !firm.some((f) => anyHit(f, g.terms))) out.push(hit)
+  }
+  return out
+}
+
+// Doses: "3x12", "3 serie", "12 ripetizioni", "10 minuti", "3 volte".
+const NUMBER_WORD: Record<string, string> = { uno: '1', una: '1', due: '2', tre: '3', quattro: '4', cinque: '5', sei: '6', sette: '7', otto: '8', nove: '9', dieci: '10', dodici: '12', quindici: '15', venti: '20', trenta: '30', one: '1', two: '2', three: '3', four: '4', five: '5', six: '6', ten: '10', twelve: '12', fifteen: '15', twenty: '20', thirty: '30', dos: '2', tres: '3', cuatro: '4', cinco: '5', diez: '10', doce: '12', deux: '2', trois: '3', quatre: '4', cinq: '5', dix: '10', douze: '12' }
+const UNIT: [RegExp, string][] = [
+  [/^(serie|set|sets|series)$/, 'sets'], [/^(ripetizion\w*|rip|reps?|repetitions?|repeticion\w*)$/, 'reps'],
+  [/^(minut\w*|min)$/, 'min'], [/^(second\w*|sec|s|segund\w*)$/, 'sec'], [/^(volt\w*|times|veces|fois)$/, 'times'],
+]
+/** The doses in a text, each as the forms that state it ("3x12" is "3 sets" and "12 reps"). */
+function dosesOf(text: string): { text: string; forms: string[][] }[] {
+  const ws = words(text).map((w) => NUMBER_WORD[w] ?? w)
+  const out: { text: string; forms: string[][] }[] = []
+  ws.forEach((w, i) => {
+    const nxm = w.match(/^(\d+)x(\d+)$/)
+    if (nxm) out.push({ text: w, forms: [[`${nxm[1]}x${nxm[2]}`], [`${nxm[1]} sets`, `${nxm[2]} reps`]] })
+    else if (/^\d+$/.test(w) && ws[i + 1] === 'x' && /^\d+$/.test(ws[i + 2] ?? '')) out.push({ text: `${w}x${ws[i + 2]}`, forms: [[`${w}x${ws[i + 2]}`], [`${w} sets`, `${ws[i + 2]} reps`]] })
+    else if (/^\d+$/.test(w)) {
+      const unit = UNIT.find(([re]) => re.test(ws[i + 1] ?? ''))?.[1]
+      if (unit) out.push({ text: `${w} ${ws[i + 1]}`, forms: [[`${w} ${unit}`]] })
+    }
+  })
+  return out
+}
+/** Every form of every dose a text gives. */
+function doseForms(text: string): Set<string> {
+  const set = new Set<string>()
+  for (const d of dosesOf(text)) for (const form of d.forms) for (const f of form) set.add(f)
+  // "3x12" also says "3 sets" and "12 reps".
+  for (const f of Array.from(set)) { const m = f.match(/^(\d+)x(\d+)$/); if (m) { set.add(`${m[1]} sets`); set.add(`${m[2]} reps`) } }
+  return set
+}
+const stated = (forms: string[][], said: Set<string>) => forms.some((form) => form.every((f) => said.has(f)))
+
+/** Doses in a statement that the clinician did not give. */
+export function unstatedDosage(statement: string, transcript: string): string[] {
+  const said = doseForms(transcript)
+  return dosesOf(statement).filter((d) => !stated(d.forms, said)).map((d) => d.text)
+}
+
+/** Whether a structured dose (sets, reps, seconds, sessions a week) is the clinician's: null when there is none. */
+export function dosingOrigin(dosing: { sets?: number | null; reps?: number | null; duration_seconds?: number | null; frequency_per_week?: number | null } | null | undefined, transcript: string): 'stated' | 'suggested' | null {
+  if (!dosing) return null
+  const said = doseForms(transcript)
+  const need: string[][][] = []
+  if (dosing.sets) need.push([[`${dosing.sets} sets`]])
+  if (dosing.reps) need.push([[`${dosing.reps} reps`]])
+  if (dosing.duration_seconds) need.push([[`${dosing.duration_seconds} sec`], ...(dosing.duration_seconds % 60 === 0 ? [[`${dosing.duration_seconds / 60} min`]] : [])])
+  if (dosing.frequency_per_week) need.push([[`${dosing.frequency_per_week} times`]])
+  if (!need.length) return null
+  return need.every((forms) => stated(forms, said)) ? 'stated' : 'suggested'
+}
+
+// What an exercise named in the transcript was: done today, or named for later.
+const EXERCISE_CONTEXT = ['eserciz*', 'oggi', 'fatto', 'fatti', 'fatta', 'fatte', 'abbiamo', 'eseguit*', 'svolt*', 'effettuat*', 'lavorat*', 'proseguir*', 'continu*', 'a casa', 'domicilio', 'assegnat*', 'prescritt*', 'consigliat*', 'exercise*', 'today', 'did', 'done', 'performed', 'home', 'ejercicio*', 'hoy', 'exercice*', 'aujourd hui']
+const DONE = ['oggi', 'eseguit*', 'svolt*', 'effettuat*', 'fatto', 'fatti', 'fatta', 'fatte', 'abbiamo lavorato', 'today', 'performed', 'did', 'done', 'hoy', 'realizad*', 'hecho', 'aujourd hui', 'effectue*']
+const LATER = ['a casa', 'domicilio', 'proseguir*', 'continuer*', 'da fare', 'prescri*', 'assegn*', 'consigli*', 'propost*', 'propon*', 'prossim*', 'at home', 'home', 'will', 'should', 'next', 'en casa', 'a la maison', 'maison']
+const NOT_IDENTITY = new Set(['esercizi', 'esercizio', 'exercise', 'exercises', 'ejercicio', 'ejercicios', 'exercice', 'exercices', 'serie', 'series', 'sets', 'ripetizioni', 'reps', 'volte', 'times', 'minuti', 'minutes', 'secondi', 'seconds', 'settimana', 'week', 'giorno', 'day', 'gradi', 'degrees', 'sinistro', 'sinistra', 'destro', 'destra', 'left', 'right', 'izquierdo', 'izquierda', 'derecho', 'derecha', 'gauche', 'droit', 'droite', 'della', 'delle', 'degli', 'dello', 'with', 'avec', 'para', 'pour'])
+
+/**
+ * Where an exercise of the note comes from: done today as the clinician said
+ * ('performed'), named by them for later ('stated'), or proposed by the model
+ * ('suggested'); and whether its dose is the clinician's ('stated'), the
+ * model's ('suggested'), or absent (null). An exercise is the clinician's when
+ * a sentence about exercises names it (its own words, not just its region).
+ */
+export function exerciseOrigin(draft: string, transcript: string): { origin: 'performed' | 'stated' | 'suggested'; dosage: 'stated' | 'suggested' | null } {
+  const doses = dosesOf(draft)
+  const dosage = doses.length ? (unstatedDosage(draft, transcript).length ? 'suggested' : 'stated') : null
+  const stem = (w: string) => w.slice(0, 5)
+  const all = words(draft).filter((w) => w.length >= 4 && !/\d/.test(w) && !NOT_IDENTITY.has(w))
+  const own = all.filter((w) => !REGION_WORDS.has(w))
+  // Its own words; an exercise named only by structures ("pendolo di Codman") by those.
+  const identity = own.length ? own : all
+  let best: { matched: number; sentence: string[] } | null = null
+  for (const sentence of sentencesOf(transcript)) {
+    const sw = words(sentence)
+    if (!anyHit(sw, EXERCISE_CONTEXT)) continue
+    const stems = new Set(sw.map(stem))
+    const matched = identity.filter((w) => stems.has(stem(w))).length
+    if (!best || matched > best.matched) best = { matched, sentence: sw }
+  }
+  const named = !!best && identity.length > 0 && best.matched >= Math.min(2, identity.length) && best.matched / identity.length >= 0.5
+  if (!named) return { origin: 'suggested', dosage: dosage && 'suggested' }
+  return { origin: anyHit(best!.sentence, DONE) && !anyHit(best!.sentence, LATER) ? 'performed' : 'stated', dosage }
+}
+
 /** Whether an assessment statement is worded as a hypothesis (reasoning, not a finding). */
 export const isHedged = (statement: string) => anyHit(words(statement), HEDGE)
 
 /** Sentences of a text, keeping their punctuation. */
 export const sentencesOf = (text: string) => (text.match(/[^.;!?\n]+[.;!?]*/g) ?? []).map((s) => s.trim()).filter(Boolean)
 
-export type Removal = { section: 'subjective' | 'objective' | 'plan' | 'summaryForPatient'; text: string; kind: string; item: string }
+export type RemovalSection = 'subjective' | 'objective' | 'assessment' | 'plan' | 'summaryForPatient' | 'supportingFindings' | 'findingsAgainst' | 'redFlagsPrecautions'
+/**
+ * A change to the draft: `text` was taken out of `section`, or, when
+ * `replacement` is given, replaced by it (a diagnosis or a dose labelled as a
+ * hypothesis or a suggestion; red flags said to be not assessed).
+ */
+export type Removal = { section: RemovalSection; text: string; kind: string; item: string; replacement?: string }
 
-type Note = { subjective?: string; objective?: string; plan?: string; summaryForPatient?: string; [k: string]: unknown }
+type Reasoning = { supportingFindings?: string; findingsAgainst?: string; redFlagsPrecautions?: string; [k: string]: unknown }
+type Note = { subjective?: string; objective?: string; assessment?: string; plan?: string; summaryForPatient?: string; language?: unknown; clinicalReasoning?: Reasoning | null; [k: string]: unknown }
+
+const LABEL = {
+  diagnosis: { it: 'Ipotesi da confermare: ', en: 'Hypothesis to be confirmed: ', es: 'Hipótesis por confirmar: ', fr: 'Hypothèse à confirmer : ' },
+  dosage: { it: 'Proposta generata, da confermare: ', en: 'Generated suggestion, to be confirmed: ', es: 'Sugerencia generada, por confirmar: ', fr: 'Suggestion générée, à confirmer : ' },
+  redFlags: {
+    it: 'Red flag non indagate: non risultano da ciò che è stato riferito, da valutare.',
+    en: 'Red flags not assessed: not in what was reported, to be checked.',
+    es: 'Banderas rojas no evaluadas: no constan en lo referido, por valorar.',
+    fr: 'Drapeaux rouges non évalués : absents de ce qui a été rapporté, à vérifier.',
+  },
+} as const
+type Lang = keyof typeof LABEL.diagnosis
+const langOf = (l: unknown): Lang => (l === 'en' || l === 'es' || l === 'fr' ? l : 'it')
+// "Condromalacia patellare…" → "Ipotesi da confermare: condromalacia patellare…" (an acronym keeps its case).
+const labelled = (label: string, sentence: string) => `${label}${/^[A-ZÀ-Ý]{2}/.test(sentence) ? sentence : sentence.charAt(0).toLowerCase() + sentence.slice(1)}`
 
 /**
  * The note without the statements that report facts the clinician did not
- * give: findings, tests and measurements in the subjective and objective
- * sections, visits, follow-ups and agreements in the plan and the patient
- * summary, treatments presented as done anywhere among these. A sentence is
- * cut clause by clause (by commas), so what was said stays.
+ * give, and with what it presents as certain but was not stated labelled:
+ * - findings, tests and measurements in the subjective and objective sections;
+ * - visits, follow-ups and agreements in the plan and the patient summary;
+ * - treatments presented as done in these;
+ * - negative results nobody assessed, in these, in the assessment and in the
+ *   reasoning (findings for and against, red flags: when red flags were not
+ *   discussed they are said to be not assessed, not absent);
+ * - a diagnosis written as a fact but not stated by the clinician, labelled
+ *   as a hypothesis to confirm (subjective, objective, assessment), or taken
+ *   out of the message to the patient;
+ * - a dose the clinician did not give, in the plan, labelled as a generated
+ *   suggestion.
+ * A sentence is cut clause by clause (by commas), so what was said stays.
  */
 export function sanitizeNote<T extends Note>(note: T, transcript: string, extra: { measures: (s: string, t: string) => string[]; treatments: (s: string, t: string) => string[]; appointments: (s: string, t: string) => string[] }): { note: T; removed: Removal[] } {
   const removed: Removal[] = []
   const out: Note = { ...note }
-  const reasons = (section: Removal['section'], piece: string) => {
+  const lang = langOf(note.language)
+  const reasons = (section: RemovalSection, piece: string) => {
     const found: { kind: string; item: string }[] = []
     if (section === 'subjective' || section === 'objective') {
       found.push(...unsupportedFindings(piece, transcript))
       for (const m of extra.measures(piece, transcript)) found.push({ kind: 'invented', item: m })
-    } else {
+      found.push(...unsupportedNegatives(piece, transcript, false))
+    } else if (section === 'plan' || section === 'summaryForPatient') {
       for (const a of extra.appointments(piece, transcript)) found.push({ kind: 'invented_appointment', item: a })
       found.push(...unsupportedArrangements(piece, transcript))
+      found.push(...unsupportedNegatives(piece, transcript, false))
+    } else {
+      found.push(...unsupportedNegatives(piece, transcript))
     }
-    for (const t of extra.treatments(piece, transcript)) found.push({ kind: 'invented_treatment', item: t })
+    if (section === 'subjective' || section === 'objective' || section === 'plan' || section === 'summaryForPatient') {
+      for (const t of extra.treatments(piece, transcript)) found.push({ kind: 'invented_treatment', item: t })
+    }
     return found
   }
-  for (const section of ['subjective', 'objective', 'plan', 'summaryForPatient'] as const) {
-    const text = note[section]
-    if (typeof text !== 'string' || !text.trim()) continue
+  const clean = (section: RemovalSection, text: string): string => {
     const kept: string[] = []
     for (const sentence of sentencesOf(text)) {
       const whole = reasons(section, sentence)
-      if (!whole.length) {
-        kept.push(sentence)
-        continue
+      let result: string | null = sentence
+      if (whole.length) {
+        // Clause by clause, keeping the clauses that are fine.
+        const end = sentence.match(/[.;!?]+$/)?.[0] ?? ''
+        const clauses = sentence.replace(/[.;!?]+$/, '').split(/,\s*/)
+        const good: string[] = []
+        const cut: Removal[] = []
+        for (const clause of clauses) {
+          const why = reasons(section, clause)
+          if (why.length) cut.push({ section, text: clause.trim(), kind: why[0].kind, item: why[0].item })
+          else good.push(clause.trim())
+        }
+        // A clause alone may not carry the reason (e.g. the number of a schedule): drop the sentence.
+        if (good.length === clauses.length) {
+          removed.push({ section, text: sentence, kind: whole[0].kind, item: whole[0].item })
+          result = null
+        } else {
+          removed.push(...cut)
+          result = good.length ? `${good.join(', ')}${end || '.'}` : null
+        }
       }
-      // Clause by clause, keeping the clauses that are fine.
-      const end = sentence.match(/[.;!?]+$/)?.[0] ?? ''
-      const clauses = sentence.replace(/[.;!?]+$/, '').split(/,\s*/)
-      const good: string[] = []
-      for (const clause of clauses) {
-        const why = reasons(section, clause)
-        if (why.length) removed.push({ section, text: clause.trim(), kind: why[0].kind, item: why[0].item })
-        else good.push(clause.trim())
+      if (result === null) continue
+      // Said as certain, not stated: labelled, with the original kept for undo;
+      // in the message to the patient it is taken out instead.
+      if (section === 'summaryForPatient' && !isHedged(result)) {
+        const dx = unstatedDiagnoses(result, transcript)
+        if (dx.length) {
+          removed.push({ section, text: result, kind: 'unconfirmed_diagnosis_removed', item: dx[0] })
+          continue
+        }
       }
-      // A clause alone may not carry the reason (e.g. the number of a schedule): drop the sentence.
-      if (good.length === clauses.length) {
-        removed.push({ section, text: sentence, kind: whole[0].kind, item: whole[0].item })
-        continue
+      if ((section === 'subjective' || section === 'objective' || section === 'assessment') && !isHedged(result)) {
+        const dx = unstatedDiagnoses(result, transcript)
+        if (dx.length) {
+          const replacement = labelled(LABEL.diagnosis[lang], result)
+          removed.push({ section, text: result, kind: 'unconfirmed_diagnosis', item: dx[0], replacement })
+          result = replacement
+        }
       }
-      if (good.length) kept.push(`${good.join(', ')}${end || '.'}`)
+      if (section === 'plan' && !isHedged(result)) {
+        const dose = unstatedDosage(result, transcript)
+        if (dose.length) {
+          const replacement = labelled(LABEL.dosage[lang], result)
+          removed.push({ section, text: result, kind: 'generated_dosage', item: dose[0], replacement })
+          result = replacement
+        }
+      }
+      kept.push(result)
     }
-    out[section] = kept.join(' ')
+    return kept.join(' ')
+  }
+  for (const section of ['subjective', 'objective', 'assessment', 'plan', 'summaryForPatient'] as const) {
+    const text = note[section]
+    if (typeof text === 'string' && text.trim()) out[section] = clean(section, text)
+  }
+  const reasoning = note.clinicalReasoning
+  if (reasoning && typeof reasoning === 'object') {
+    const r: Reasoning = { ...reasoning }
+    for (const section of ['supportingFindings', 'findingsAgainst', 'redFlagsPrecautions'] as const) {
+      const text = reasoning[section]
+      if (typeof text !== 'string' || !text.trim()) continue
+      const before = removed.length
+      let cleaned = clean(section, text)
+      // Red flags not discussed: said so, never declared absent.
+      if (section === 'redFlagsPrecautions' && removed.length > before) cleaned = [LABEL.redFlags[lang], cleaned].filter(Boolean).join(' ')
+      r[section] = cleaned
+    }
+    out.clinicalReasoning = r
   }
   return { note: out as T, removed }
 }

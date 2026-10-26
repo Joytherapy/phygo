@@ -35,7 +35,7 @@ export function paperScore(paper: { title?: string | null; abstract?: string | n
 export type PaperRelevance =
   | { level: 'direct'; reason: 'same_condition' | 'same_region' }
   | { level: 'indirect'; reason: 'same_region' | 'same_mechanism_other_region' }
-  | { level: 'unverified'; reason: 'case_region_unknown' | 'paper_region_unknown' | 'population_or_mechanism_not_stated' }
+  | { level: 'unverified'; reason: 'case_region_unknown' | 'paper_region_unknown' | 'population_or_mechanism_not_stated' | 'adjacent_region' }
 
 /**
  * Whether, and how, a paper is evidence for this condition. Null: not shown.
@@ -45,7 +45,10 @@ export type PaperRelevance =
  *   words (title or abstract) but not this exact condition, or the same mechanism ("tendinopathy") named in
  *   the title of a paper about another region;
  * - unverified: it shares the condition's terms, but the region of the case
- *   or of the paper is not recognised, so its pertinence is not claimed;
+ *   or of the paper is not recognised, or the paper is about a neighbouring
+ *   region ("adjacent_region": the knee's neighbourhood includes the calf and
+ *   the ankle for exercises, but an Achilles paper is not knee evidence), so
+ *   its pertinence is not claimed;
  * - null: another region without a shared mechanism, or only generic words.
  * `regions` are the regions of the condition.
  */
@@ -67,6 +70,11 @@ export function paperRelevance(paper: { title?: string | null; abstract?: string
   if (!regions.length) return shared ? { level: 'unverified', reason: 'case_region_unknown' } : null
   if (!paperRegions.length) return shared ? { level: 'unverified', reason: 'paper_region_unknown' } : null
   if (regionFit(paperRegions, regions) === 'incompatible') return mechanismInTitle && shared ? { level: 'indirect', reason: 'same_mechanism_other_region' } : null
+  // "Same region" is the same region, not a neighbouring one.
+  if (!paperRegions.some((r) => regions.includes(r))) {
+    if (mechanismInTitle && shared) return { level: 'indirect', reason: 'same_mechanism_other_region' }
+    return shared ? { level: 'unverified', reason: 'adjacent_region' } : null
+  }
   if (phraseInTitle) return { level: 'direct', reason: 'same_condition' }
   if (phraseInAbstract) return { level: 'direct', reason: 'same_region' }
   return { level: 'indirect', reason: 'same_region' }

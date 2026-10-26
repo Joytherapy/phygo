@@ -86,7 +86,9 @@ export const CASES = {
       exercises: ['Rotazione esterna con elastico spalla sinistra 3x12', 'Stretching pettorale alla porta 3x30s', 'Mobilità di caviglia 2x15', 'Stretching hamstring 3x30s', 'Retrazione scapolare 3x10'] },
     refined: ['Rotazione esterna con elastico spalla sinistra 3x12', 'Stretching pettorale alla porta 3x30s', 'Retrazione scapolare 3x10', 'Equilibrio monopodalico 3x30s', 'Cyclette 15 minuti', 'Mobilità di caviglia 2x15', 'Stretching hamstring 3x30s'],
     papers: ['rotator cuff tendinopathy', 'shoulder pain', 'musculoskeletal pain'],
-    expect: { region: 'shoulder', sheet: 1, papers: ['p-shoulder:direct', 'p-achilles:indirect', 'p-tendo:unverified'], offRegion: ['caviglia', 'hamstring', 'monopodalico'], noIssues: true },
+    expect: { region: 'shoulder', sheet: 1, papers: ['p-shoulder:direct', 'p-achilles:indirect', 'p-tendo:unverified'], offRegion: ['caviglia', 'hamstring', 'monopodalico'], noIssues: true,
+      // "Nessuna red flag apparente": red flags were not discussed, so they are said to be not assessed, not absent.
+      issues: ['invented_negative:red flag'] },
   },
   supraspinatusRight: {
     transcript: 'Tendinopatia del sovraspinato alla spalla destra, dolore notturno e in abduzione.',
@@ -409,9 +411,52 @@ export const CASES = {
     papers: ['knee pain'],
     expect: {},
   },
+  // ---- Third check with the real model (after eff1dbe), as the user reported it.
+  // Low back pain: the model declared negative results nobody assessed (no
+  // neurological compromise, no other acute condition, no red flags). The
+  // clinician did say "nessuna irradiazione": that negative is documented.
+  r5LowBack: {
+    transcript: 'Lombalgia acuta da due giorni dopo aver sollevato un peso, nessuna irradiazione alla gamba. Oggi terapia manuale.',
+    note: {
+      subjective: 'Lombalgia acuta da due giorni dopo aver sollevato un peso, nessuna irradiazione alla gamba.',
+      objective: '',
+      assessment: 'Lombalgia acuta di origine meccanica, senza segni di compromissione neurologica né altre condizioni acute.',
+      plan: 'Oggi terapia manuale. Esercizi di mobilità lombare.',
+      summaryForPatient: 'Muoviti con gradualità.',
+      primaryCondition: 'acute low back pain',
+      exercises: ['Cat-camel 2x10'],
+      clinicalReasoning: {
+        hypotheses: ['Possibile lombalgia meccanica aspecifica.'],
+        findingsAgainst: 'Assenza di irradiazione alla gamba.',
+        redFlagsPrecautions: 'Nessuna red flag apparente dalle informazioni fornite.',
+      },
+    },
+    papers: ['low back pain'],
+    expect: {},
+  },
+  // Right shoulder + left knee: pain only, turned into certain diagnoses;
+  // dosages the clinician never gave; a cuff exercise "with the elbow at 90°";
+  // a plan naming both regions; an Achilles paper for the knee.
+  r5MultiSite: {
+    transcript: 'Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi. Dolore alla spalla in elevazione e al ginocchio scendendo le scale.',
+    note: {
+      subjective: 'Dolore alla spalla destra in elevazione e al ginocchio sinistro scendendo le scale.',
+      objective: '',
+      assessment: 'Condromalacia patellare al ginocchio sinistro. Tendinopatia della cuffia dei rotatori alla spalla destra.',
+      plan: 'Rotazione esterna con elastico, gomito a 90 gradi, per la spalla destra: 3 serie da 12 ripetizioni. Step-down per il ginocchio sinistro, 3 volte a settimana.',
+      summaryForPatient: 'Fai gli esercizi per la spalla destra e il ginocchio sinistro.',
+      primaryCondition: 'chondromalacia patellae and rotator cuff tendinopathy',
+      exercises: ['Rotazione esterna con elastico, gomito a 90 gradi 3x12', 'Esercizi isometrici per la cuffia dei rotatori con gomito flesso a 90 gradi 3x10', 'Step-down ginocchio sinistro 3x10'],
+      clinicalReasoning: { hypotheses: ['Possibile tendinopatia della cuffia dei rotatori.', 'Possibile dolore femororotuleo.'] },
+    },
+    papers: ['patellar tendinopathy', 'rotator cuff tendinopathy'],
+    expect: { kbRelevance: ['unverified', 'diagnosis_not_stated'] },
+  },
 };
 
 export const KEYWORDS = [
+  [/isometrici per la cuffia/i, ['isometric', 'rotator cuff']],
+  [/step-down/i, ['step down']],
   [/colonna vertebrale con rotazione/i, ['spinal rotation mobilization', 'rotation']],
   [/plank/i, ['plank']],
   [/bacino/i, ['pelvic tilt', 'pelvic mobility']],

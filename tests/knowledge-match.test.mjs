@@ -148,6 +148,19 @@ test('papers: a population or a mechanism the case does not state is not claimed
   assert.deepEqual(R.unstatedQualifiers('Exercise therapy for patellofemoral pain', 'dolore al ginocchio'), [], 'no population, no mechanism');
 });
 
+test('papers: "same region" means the same region; a neighbouring one is never claimed as it', () => {
+  const terms = R.searchTerms(['patellar tendinopathy', 'knee pain']);
+  const achilles = R.paperRelevance({ title: 'Loading programmes in Achilles tendinopathy', abstract: 'Progressive tendon loading in tendinopathy.' }, terms, ['knee']);
+  assert.ok(achilles && achilles.reason !== 'same_region' && achilles.level !== 'direct', JSON.stringify(achilles));
+  assert.deepEqual(achilles, { level: 'indirect', reason: 'same_mechanism_other_region' }, 'the shared mechanism, said as such');
+  const calf = R.paperRelevance({ title: 'Calf strength and knee pain in runners', abstract: 'Knee pain.' }, terms, ['knee']);
+  assert.ok(calf && calf.reason !== 'adjacent_region', 'a paper that names the knee is about the knee');
+  const hip = R.paperRelevance({ title: 'Hip muscle strength in tendinopathy', abstract: 'Hip strength.' }, terms, ['knee']);
+  assert.notEqual(hip?.reason, 'same_region', `the hip is near the knee, not the knee (${JSON.stringify(hip)})`);
+  const thigh = R.paperRelevance({ title: 'Quadriceps strength after injury', abstract: 'Knee pain and quadriceps.' }, terms, ['knee']);
+  assert.ok(!thigh || thigh.level !== 'direct', JSON.stringify(thigh));
+});
+
 test('knowledge lookup: past the first 1000 sheets, through translations, with its phases', async () => {
   assert.equal((await post('/api/knowledge-lookup', { assessment: 'x' }, null)).status, 401);
   const res = await post('/api/knowledge-lookup', { primaryCondition: 'Rotator cuff tendinopathy', assessment: 'Dolore anteriore di spalla', lang: 'it' });

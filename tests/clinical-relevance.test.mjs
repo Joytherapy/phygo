@@ -360,6 +360,100 @@ test('reported objective data stay in the note; when none was reported, the pane
   assert.ok(none.includes('objective_missing'), `an empty objective is stated (found: ${none.join(', ')})`);
 });
 
+// ---------------------------------------------------------------- third check with the real model (after eff1dbe)
+
+test('real model 3, low back pain: no negative result that was not assessed; the documented one stays', async () => {
+  const raw = rawIssues('r5LowBack');
+  assert.ok(raw.some((x) => x.startsWith('invented_negative:') && x.endsWith('@assessment')), `the negative in the assessment is caught (found: ${raw.join(' | ')})`);
+  assert.ok(raw.some((x) => x.startsWith('invented_negative:') && x.endsWith('@redFlagsPrecautions')), 'the absence of red flags is caught');
+  assert.ok(!raw.some((x) => x.startsWith('invented_negative:') && x.endsWith('@findingsAgainst')), '"assenza di irradiazione" was said: not an invented negative');
+  const out = await runCase('r5LowBack');
+  assert.match(out.note.assessment, /^Lombalgia acuta di origine meccanica/, 'what is supported stays');
+  assert.doesNotMatch(out.note.assessment, /neurolog|condizioni acute/i, 'no "no neurological signs / no other acute condition"');
+  assert.doesNotMatch(out.note.clinicalReasoning.redFlagsPrecautions, /nessuna red flag/i);
+  assert.match(out.note.clinicalReasoning.redFlagsPrecautions, /non indagat/i, 'red flags not assessed: said so, not declared absent');
+  assert.equal(out.note.clinicalReasoning.findingsAgainst, 'Assenza di irradiazione alla gamba.', 'a documented negative is kept');
+  assert.match(out.note.subjective, /nessuna irradiazione/);
+  const removed = out.removed.map((r) => `${r.section}:${r.kind}`);
+  assert.ok(removed.includes('assessment:invented_negative') && removed.includes('redFlagsPrecautions:invented_negative'), removed.join(', '));
+  const kinds = check('r5LowBack', out).map((i) => i.kind);
+  assert.ok(!kinds.includes('invented_negative'), `nothing left to flag (found: ${kinds.join(', ')})`);
+});
+
+test('real model 3, right shoulder + left knee: pain is not turned into certain diagnoses', async () => {
+  const raw = rawIssues('r5MultiSite');
+  assert.ok(raw.some((x) => x.startsWith('unconfirmed_diagnosis:') && x.endsWith('@assessment')), `found: ${raw.join(' | ')}`);
+  const out = await runCase('r5MultiSite');
+  const parts = F.sentencesOf(out.note.assessment);
+  assert.equal(parts.length, 2);
+  for (const p of parts) assert.match(p, /^Ipotesi da confermare: /, `labelled as a hypothesis: ${p}`);
+  assert.ok(out.removed.some((r) => r.section === 'assessment' && r.kind === 'unconfirmed_diagnosis' && r.replacement?.startsWith('Ipotesi da confermare')), 'listed, with what replaced it');
+  const kinds = check('r5MultiSite', out).map((i) => i.kind);
+  assert.ok(!kinds.includes('unconfirmed_diagnosis'), kinds.join(', '));
+  // In the message to the patient an unstated diagnosis is taken out, not labelled.
+  const { note: toPatient, removed } = K.sanitizeGeneratedNote({ language: 'it', summaryForPatient: 'Hai una condromalacia patellare. Fai gli esercizi ogni giorno.' }, CASES.r5MultiSite.transcript);
+  assert.equal(toPatient.summaryForPatient, 'Fai gli esercizi ogni giorno.');
+  assert.deepEqual(removed.map((r) => `${r.section}:${r.kind}:${r.replacement ?? ''}`), ['summaryForPatient:unconfirmed_diagnosis_removed:']);
+  assert.deepEqual(F.unsupportedNegatives('Nessun segno di allarme riferito.', CASES.r5LowBack.transcript).map((f) => f.kind), ['invented_negative']);
+  // Hedged hypotheses stay as they are.
+  assert.deepEqual(out.note.clinicalReasoning.hypotheses, ['Possibile tendinopatia della cuffia dei rotatori.', 'Possibile dolore femororotuleo.']);
+});
+
+test('real model 3: exercises and dosages the clinician did not give are generated suggestions', async () => {
+  const t = CASES.r5MultiSite.transcript;
+  for (const d of CASES.r5MultiSite.note.exercises) assert.deepEqual(F.exerciseOrigin(d, t), { origin: 'suggested', dosage: 'suggested' }, d);
+  const said = 'Dolore alla spalla sinistra da un mese. Oggi abbiamo fatto rotazione esterna con elastico 3x12 e pendolo di Codman. A casa proseguirà con la retrazione scapolare.';
+  assert.deepEqual(F.exerciseOrigin('Rotazione esterna con elastico 3x12', said), { origin: 'performed', dosage: 'stated' });
+  assert.deepEqual(F.exerciseOrigin('Pendolo di Codman', said), { origin: 'performed', dosage: null });
+  assert.deepEqual(F.exerciseOrigin('Retrazione scapolare 3x10', said), { origin: 'stated', dosage: 'suggested' }, 'named for home, the dose is not the clinician\'s');
+  assert.deepEqual(F.exerciseOrigin('Chin tuck 3x10', said), { origin: 'suggested', dosage: 'suggested' });
+  assert.equal(F.dosingOrigin({ sets: 3, reps: 12, duration_seconds: null, frequency_per_week: null }, said), 'stated');
+  assert.equal(F.dosingOrigin({ sets: 3, reps: 12, duration_seconds: null, frequency_per_week: 5 }, said), 'suggested', 'a frequency nobody gave');
+  assert.equal(F.dosingOrigin({ sets: null, reps: null, duration_seconds: null, frequency_per_week: null }, said), null);
+  // The plan: a dose the clinician did not give is labelled, not attributed to them.
+  const raw = rawIssues('r5MultiSite');
+  assert.ok(raw.some((x) => x.startsWith('generated_dosage:') && x.endsWith('@plan')), `found: ${raw.join(' | ')}`);
+  const out = await runCase('r5MultiSite');
+  for (const p of F.sentencesOf(out.note.plan)) assert.match(p, /^Proposta generata, da confermare: /, p);
+  assert.ok(!check('r5MultiSite', out).some((i) => i.kind === 'generated_dosage'));
+  // Said dosage is not relabelled.
+  assert.deepEqual(F.unstatedDosage('Rotazione esterna 3x12 oggi.', said), []);
+});
+
+test('real model 3: a cuff exercise "con gomito flesso a 90 gradi" is a shoulder exercise; the plan naming both regions is not off-region; an Achilles paper is not knee evidence', async () => {
+  assert.deepEqual(R.exerciseTextRegions('Esercizi isometrici per la cuffia dei rotatori con gomito flesso a 90 gradi 3x10'), ['shoulder'], 'the purpose tells the region when nothing else does');
+  assert.deepEqual(R.exerciseTextRegions('Flessione laterale del tronco per la spalla destra'), ['lumbar'], 'a named target still wins over the purpose');
+  const out = await runCase('r5MultiSite');
+  const iso = out.exercises.find((x) => /isometrici/i.test(x.draft));
+  assert.equal(iso?.relevance, 'compatible', `${iso?.relevance} ${iso?.relevance_reason ?? ''}`);
+  assert.ok(!out.excluded.length, out.excluded.map((x) => x.name).join(', '));
+  const kinds = check('r5MultiSite', out).map((i) => `${i.kind}:${i.item}`);
+  assert.ok(!kinds.includes('section_region:plan'), `"gomito a 90 gradi" in the plan is a position (found: ${kinds.join(' | ')})`);
+  const achilles = out.papers.find((p) => p.id === 'p-achilles');
+  assert.ok(achilles, 'the Achilles paper is found by "tendinopathy"');
+  assert.notEqual(achilles.relevance_reason, 'same_region');
+  assert.notEqual(achilles.relevance, 'direct');
+  assert.ok(!(achilles.regions ?? []).includes('knee'), `not counted as knee evidence: ${JSON.stringify(achilles.regions)}`);
+});
+
+test('multi-region notes: the plan check finds real omissions and real off-region statements, not positions', () => {
+  const t = CASES.r5MultiSite.transcript;
+  const run = (plan) => K.checkOutput({ transcript: t, note: { objective: 'x', assessment: 'Dolore alla spalla destra e al ginocchio sinistro.', plan, primaryCondition: 'right shoulder pain' }, exercises: [], papers: [], protocol: null }).map((i) => `${i.kind}:${i.kind === 'section_region' ? i.regions.join('/') : i.item}`).filter((x) => /^(section_region|coverage_plan|side)/.test(x));
+  assert.deepEqual(run('Rotazione esterna con elastico, gomito a 90 gradi, per la spalla destra; step-down per il ginocchio sinistro.'), []);
+  assert.deepEqual(run('Rotazione esterna con elastico per la spalla destra.'), ['coverage_plan:knee'], 'a region treated today that the plan leaves out');
+  assert.deepEqual(run('Esercizi per la spalla destra e il ginocchio sinistro; propriocezione della caviglia e rinforzo del gomito.'), ['section_region:elbow'], 'a region really named as treated stays flagged');
+  assert.deepEqual(run('Esercizi per la spalla destra e il ginocchio destro.'), ['side:plan']);
+});
+
+test('anatomical mapping: no false region from a word that names another structure', () => {
+  assert.deepEqual(R.regionsOf('dolore al collo del piede'), ['ankle_foot']);
+  assert.deepEqual(R.regionsOf('frattura del collo del femore'), ['hip']);
+  assert.deepEqual(R.regionsOf('femoral neck fracture'), ['hip']);
+  assert.deepEqual(R.regionsOf('frattura del piatto tibiale'), ['knee']);
+  assert.deepEqual(R.regionsOf('sindrome della bandelletta ileotibiale'), ['thigh']);
+  assert.deepEqual(R.regionsOf('Loading programmes in Achilles tendinopathy'), ['ankle_foot']);
+});
+
 test('the screenshot case in detail: no hamstring/ankle swap, no leg paper', async () => {
   const out = await runCase('shoulderLeft');
   const pect = out.exercises.find((x) => /pettorale/i.test(x.name));
