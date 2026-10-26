@@ -25,6 +25,7 @@ const APP_PORT = Number(process.env.KNOWLEDGE_APP_PORT ?? 3808);
 
 let K; // conditionMatch
 let R; // paperRank
+let G; // region
 before(async () => {
   const dir = mkdtempSync(join(tmpdir(), 'phygo-kb-'));
   const out = (f, src) => writeFileSync(join(dir, `${f}.mjs`), ts.transpileModule(src, { compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 } }).outputText);
@@ -34,6 +35,7 @@ before(async () => {
     out('paperRank', readFileSync(new URL('../lib/knowledge/paperRank.ts', import.meta.url), 'utf8').replace("from './conditionMatch'", "from './conditionMatch.mjs'").replace("from '../clinical/region'", "from './region.mjs'"));
     K = await import(join(dir, 'conditionMatch.mjs'));
     R = await import(join(dir, 'paperRank.mjs'));
+    G = await import(join(dir, 'region.mjs'));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -122,6 +124,29 @@ const post = async (path, body, who = 'clin') => {
   const res = await fetch(`${app.url}${path}`, { method: 'POST', headers: { 'content-type': 'application/json', ...(who ? { cookie: sessionCookie('tok-clin', CLIN) } : {}) }, body: JSON.stringify(body) });
   return { status: res.status, body: await res.json().catch(() => null) };
 };
+
+test('a diagnosis is stated only by the clinician; a generic regional sheet names only the region\'s pain', () => {
+  const row = (condition_name, condition_keywords = '') => ({ id: 1, condition_name, condition_keywords });
+  const cuff = row('Tendinopatia della cuffia dei rotatori', 'cuffia dei rotatori, rotator cuff');
+  assert.equal(K.conditionStated(cuff, 'dolore alla spalla destra in elevazione', G.REGION_WORDS, true), false, 'pain in the shoulder does not state a cuff tendinopathy');
+  assert.equal(K.conditionStated(cuff, 'sospetta cuffia dei rotatori', G.REGION_WORDS, true), true);
+  assert.equal(K.conditionStated(cuff, 'tendinopatia del sovraspinato', G.REGION_WORDS, true), true, 'the condition word of the sheet, same region');
+  assert.equal(K.conditionStated(cuff, 'tendinopatia achillea', G.REGION_WORDS, false), false, 'the condition word alone, in another region, is not enough');
+  assert.equal(K.conditionStated(row('Dolore femororotuleo', 'femororotuleo, dolore anteriore di ginocchio'), 'dolore al ginocchio scendendo le scale', G.REGION_WORDS, true), false);
+  for (const [name, region, want] of [['Dolore di ginocchio aspecifico', 'knee', true], ['Lombalgia aspecifica', 'lumbar', true], ['Cervicalgia', 'cervical', true], ['Dolore femororotuleo', 'knee', false], ['Coxartrosi', 'hip', false], ['Tendinopatia della cuffia dei rotatori', 'shoulder', false], ['Lombalgia aspecifica', 'knee', false]]) {
+    assert.equal(K.isRegionalSheet(row(name), region), want, `${name} (${region})`);
+  }
+});
+
+test('papers: a population or a mechanism the case does not state is not claimed', () => {
+  const leg = 'Traumatic leg pain in adolescents: a cohort study';
+  assert.deepEqual(R.unstatedQualifiers(leg, 'Dolore al ginocchio sinistro scendendo le scale'), ['adolescents', 'trauma']);
+  assert.deepEqual(R.unstatedQualifiers(leg, 'Ragazzo di 15 anni, dolore al ginocchio dopo una caduta'), [], 'age and fall stated');
+  assert.deepEqual(R.unstatedQualifiers('Rehabilitation after anterior cruciate ligament reconstruction', 'Ricostruzione LCA sei settimane fa'), []);
+  assert.deepEqual(R.unstatedQualifiers('Rehabilitation after anterior cruciate ligament reconstruction', 'Dolore al ginocchio'), ['surgery']);
+  assert.deepEqual(R.unstatedQualifiers('Knee pain in older adults', 'Paziente di 72 anni con gonalgia'), [], 'an age in the range counts');
+  assert.deepEqual(R.unstatedQualifiers('Exercise therapy for patellofemoral pain', 'dolore al ginocchio'), [], 'no population, no mechanism');
+});
 
 test('knowledge lookup: past the first 1000 sheets, through translations, with its phases', async () => {
   assert.equal((await post('/api/knowledge-lookup', { assessment: 'x' }, null)).status, 401);

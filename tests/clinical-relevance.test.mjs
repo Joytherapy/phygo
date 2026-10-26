@@ -69,7 +69,7 @@ test('four outcomes: compatible, general activity, not recognised, incompatible'
   assert.equal(R.regionFit(['knee'], []), 'unknown', 'a case without a recognised region verifies nothing');
   assert.equal(R.exerciseFit({ name: 'Cyclette 15 minuti' }, ['shoulder']), 'general', 'aerobic work is general by nature');
   assert.equal(R.exerciseFit({ name: 'Camminata veloce 20 minuti' }, ['lumbar']), 'general');
-  assert.equal(R.exerciseFit({ name: 'Plank 3x30s' }, ['shoulder']), 'unknown', 'a region not recognised is not "general"');
+  assert.equal(R.exerciseFit({ name: 'Esercizio con la palla 3x10' }, ['shoulder']), 'unknown', 'a region not recognised is not "general"');
   assert.equal(R.exerciseFit({ name: 'Burpee', body_region: 'whole-body' }, ['wrist_hand']), 'unknown', 'whole-body is not general');
   assert.equal(R.exerciseFit({ name: 'Walking lunges' }, ['shoulder']), 'incompatible', 'a region named wins over "walking"');
   assert.equal(R.exerciseFit({ name: 'Hamstring stretch', body_region: 'hamstrings' }, ['shoulder']), 'incompatible');
@@ -189,7 +189,7 @@ for (const name of Object.keys(CASES)) {
     for (const p of out.papers) if (p.relevance !== 'direct') assert.ok(p.relevance_reason, `"${p.title}" says why it is ${p.relevance}`);
     // What PHYGO took out of the note counts as caught, like a check shown in the panel.
     const found = [...issues.map((i) => `${i.kind}:${i.item}`), ...out.removed.map((r) => `${r.kind}:${r.item}`)];
-    if (e.noIssues) assert.deepEqual(found.filter((f) => !f.startsWith('evidence_unverified:') && !(e.issues ?? []).includes(f)), [], 'a coherent note has no other issue in any section');
+    if (e.noIssues) assert.deepEqual(found.filter((f) => !f.startsWith('evidence_unverified:') && f !== 'objective_missing:objective' && !(e.issues ?? []).includes(f)), [], 'a coherent note has no other issue in any section');
     for (const want of e.issues ?? []) assert.ok(found.includes(want), `"${want}" is detected (found: ${found.join(' | ')})`);
     for (const not of e.notIssues ?? []) assert.ok(!found.includes(not), `"${not}" is not reported: the clinician said it`);
     for (const word of e.offRegion ?? []) {
@@ -200,6 +200,7 @@ for (const name of Object.keys(CASES)) {
     for (const [word, reason] of Object.entries(e.excludedReason ?? {})) assert.equal(out.excluded.find((x) => x.name.toLowerCase().includes(word))?.reason, reason, `"${word}" is excluded as ${reason}`);
     for (const [word, level] of Object.entries(e.relevance ?? {})) assert.equal(out.exercises.find((x) => x.draft.toLowerCase().includes(word))?.relevance, level, `"${word}" is ${level}`);
     for (const x of out.exercises) if (x.relevance === 'unverified') assert.ok(x.relevance_reason, `"${x.draft}" says why it is not verified`);
+    if (e.others) assert.deepEqual((out.kb.others ?? []).map((o) => [o.region, o.side, o.match?.id ?? null, o.relevance, o.relevanceReason]), e.others, 'a sheet for each other region treated today, with its side and why');
     if (e.kbRelevance) assert.deepEqual([out.kb.relevance, out.kb.relevanceReason], e.kbRelevance, 'the condition sheet is marked as not verified, with the reason');
     else if (out.kb.match) assert.equal(out.kb.relevance, 'verified', 'a sheet of a recognised, compatible region is verified');
     for (const x of out.exercises) {
@@ -229,9 +230,9 @@ test('facts the clinician did not give: findings and tests by concept, visits an
 });
 
 test('exercises: a position is not a region; a match needs the same movement', () => {
-  assert.deepEqual(R.exerciseTextRegions('Rotazione esterna con elastico, gomito a 90° al fianco'), [], '"gomito a 90°" is the position');
+  assert.deepEqual(R.exerciseTextRegions('Rotazione esterna con elastico, gomito a 90° al fianco'), ['shoulder', 'hip'], '"gomito a 90°" is the position: only the movement says where');
   assert.deepEqual(R.exerciseTextRegions('Flessione del gomito con manubrio'), ['elbow'], 'an elbow exercise stays one');
-  assert.deepEqual(R.exerciseTextRegions('Ponte con ginocchia flesse'), []);
+  assert.deepEqual(R.exerciseTextRegions('Ponte con ginocchia flesse'), ['hip'], '"ginocchia flesse" is the position, the bridge works on the hip');
   assert.equal(M.isRegionOnlyKeyword('shoulder'), true);
   assert.equal(M.isRegionOnlyKeyword('shoulder external rotation'), false);
   assert.equal(M.checkMatch('Rotazione esterna con elastico', ['external rotation'], 'Shoulder external rotation with band'), 'verified');
@@ -276,9 +277,11 @@ test('real model, right shoulder + left knee: every invented finding is caught; 
   const out = await runCase('realMultisite');
   assert.equal(out.note.objective.trim(), '', 'no objective finding was reported: none is shown');
   assert.equal(out.removed.filter((r) => r.section === 'objective').length, 3);
-  // Protocol: the shoulder sheet, and the knee sheet for the other region treated today, with its side.
+  // Protocol: the shoulder sheet, and for the other region treated today the
+  // generic knee sheet, with its side: the clinician described knee pain, the
+  // patellofemoral diagnosis is only the model's.
   assert.equal(out.kb.match?.id, 1);
-  assert.deepEqual((out.kb.others ?? []).map((o) => [o.region, o.side, o.match?.id ?? null]), [['knee', 'left', 4]]);
+  assert.deepEqual((out.kb.others ?? []).map((o) => [o.region, o.side, o.match?.id ?? null, o.relevance]), [['knee', 'left', 15, 'verified']]);
   // Evidence for each region.
   const ids = out.papers.map((p) => p.id);
   assert.ok(ids.includes('p-shoulder') && ids.includes('p-pfp'), `papers for both regions (got ${ids.join(', ')})`);
@@ -302,6 +305,59 @@ test('real model, left shoulder: exercises matched by movement, region and side,
   assert.equal(er.relevance, 'compatible');
   assert.equal(pendulum.relevance, 'compatible', 'the pendulum is a shoulder exercise');
   assert.equal(prone.match_status, 'unverified', 'the database suggestion for the prone raise moves differently: not trusted');
+});
+
+// ---------------------------------------------------------------- second check with the real model (after cf0e971)
+
+test('real model 2, left shoulder: "gomito vicino al corpo" is a position, the external rotation is a shoulder exercise', async () => {
+  const out = await runCase('r4ShoulderLeft');
+  assert.deepEqual(out.excluded.map((x) => `${x.name}:${x.reason}`), [], 'nothing excluded');
+  const er = out.exercises.find((x) => /rotazione esterna/i.test(x.draft));
+  assert.equal(er?.name, 'Shoulder external rotation with band');
+  assert.equal(er?.relevance, 'compatible');
+});
+
+test('real model 2, low back pain: spine, pelvis and core exercises are recognised; none is excluded or left "not verified"', async () => {
+  const out = await runCase('r4HistoryKnee');
+  assert.deepEqual(out.excluded.map((x) => `${x.name}:${x.reason}:${x.regions.join('/')}`), [], 'the spinal rotation is not a shoulder exercise');
+  const byDraft = Object.fromEntries(out.exercises.map((x) => [x.draft, x]));
+  for (const d of ['Mobilizzazione della colonna vertebrale con rotazione 2x10', 'Plank 3x20 secondi', 'Mobilità del bacino 2x10', 'Bird-dog 3x8', 'Flessione laterale della colonna 2x10']) {
+    assert.equal(byDraft[d]?.relevance, 'compatible', `${d}: ${byDraft[d]?.relevance} ${byDraft[d]?.relevance_reason ?? ''}`);
+  }
+  assert.notEqual(byDraft['Mobilizzazione della colonna vertebrale con rotazione 2x10'].name, 'Shoulder internal rotation', 'not swapped for a shoulder exercise sharing "rotation"');
+});
+
+test('real model 2, right shoulder + left knee: a sheet for each region with its side, no diagnosis more specific than stated; papers checked for population and mechanism; a trunk exercise "for the shoulder" is not a shoulder exercise', async () => {
+  const out = await runCase('r4MultiSite');
+  // The knee: only pain is stated, so the generic knee sheet, verified; never a more specific diagnosis.
+  const knee = (out.kb.others ?? []).find((o) => o.region === 'knee');
+  assert.ok(knee, 'the knee is searched as a region treated today');
+  assert.equal(knee.side, 'left');
+  assert.equal(knee.match?.id, 15, `knee sheet: ${JSON.stringify(knee.match)}`);
+  assert.equal(knee.relevance, 'verified');
+  // The shoulder: "cuffia dei rotatori" is the model's hypothesis, not what was said.
+  assert.equal(out.kb.relevance, 'unverified');
+  assert.equal(out.kb.relevanceReason, 'diagnosis_not_stated');
+  // Adolescents and trauma are not in the case: the leg-pain paper is not direct evidence.
+  const leg = out.papers.find((p) => p.id === 'p-leg');
+  assert.ok(!leg || leg.relevance === 'unverified', `p-leg: ${leg?.relevance} ${leg?.relevance_reason ?? ''}`);
+  if (leg) assert.equal(leg.relevance_reason, 'population_or_mechanism_not_stated');
+  // The trunk lateral flexion works the trunk, whatever it is written "for".
+  const trunk = out.excluded.find((x) => /flessione laterale del tronco/i.test(x.name));
+  assert.ok(trunk && !out.exercises.some((x) => /tronco/i.test(x.draft)), 'left out of the programme, with its reason');
+  assert.deepEqual(trunk.regions, ['lumbar']);
+  const kinds = check('r4MultiSite', out).map((i) => `${i.kind}:${i.item}`);
+  assert.ok(!kinds.includes('coverage_protocol:knee'), `the knee has its sheet (found: ${kinds.join(' | ')})`);
+});
+
+test('reported objective data stay in the note; when none was reported, the panel says so', async () => {
+  const out = await runCase('r4ObjectiveReported');
+  assert.equal(out.note.objective, 'Flessione 120 gradi, Lachman negativo, lieve versamento.');
+  assert.deepEqual(out.removed, []);
+  const kinds = check('r4ObjectiveReported', out).map((i) => i.kind);
+  assert.ok(!kinds.some((k) => k.startsWith('invented')), kinds.join(', '));
+  const none = check('r4HistoryKnee', await runCase('r4HistoryKnee')).map((i) => i.kind);
+  assert.ok(none.includes('objective_missing'), `an empty objective is stated (found: ${none.join(', ')})`);
 });
 
 test('the screenshot case in detail: no hamstring/ankle swap, no leg paper', async () => {

@@ -139,7 +139,7 @@ test('the coherence checks say what was left out and why, keep what the clinicia
       exercises: [
         { internal_id: 'exercises-1', provider: 'exercises', provider_id: 'e1', name: 'Shoulder external rotation with band', draft: 'Rotazione esterna con elastico 3x12', body_region: 'shoulder', primary_muscle: 'Infraspinatus', media: null, source_type: 'professional', dosing, clinical_check: null, relevance: 'compatible', relevance_reason: null },
         // Region not recognised: kept, never shown as pertinent.
-        { internal_id: 'custom-plank', provider: 'custom', provider_id: null, name: 'Plank 3x30s', draft: 'Plank 3x30s', body_region: null, primary_muscle: null, media: null, source_type: 'professional', dosing, clinical_check: null, relevance: 'unverified', relevance_reason: 'exercise_region_unknown' },
+        { internal_id: 'custom-ball', provider: 'custom', provider_id: null, name: 'Esercizio con la palla 3x10', draft: 'Esercizio con la palla 3x10', body_region: null, primary_muscle: null, media: null, source_type: 'professional', dosing, clinical_check: null, relevance: 'unverified', relevance_reason: 'exercise_region_unknown' },
       ],
       excluded: [{ name: 'Mobilità di caviglia 2x15', reason: 'off_region', regions: ['ankle_foot'], caseRegions: ['shoulder'] }],
     })(route);
@@ -177,7 +177,7 @@ test('the coherence checks say what was left out and why, keep what the clinicia
     assert.equal(await cards.count(), 2, 'the excluded exercise is not in the exercises');
     // Not recognised: kept, marked as not verified with the reason, in the card and in the checks.
     await cards.nth(1).getByTestId('exercise-unverified').getByText('Pertinenza non verificata: il distretto dell’esercizio non è riconosciuto. Decidi tu se tenerlo.').waitFor();
-    await checks.locator('li[data-kind="exercise_unverified"]').getByText('"Plank 3x30s": pertinenza non verificata', { exact: false }).waitFor();
+    await checks.locator('li[data-kind="exercise_unverified"]').getByText('"Esercizio con la palla 3x10": pertinenza non verificata', { exact: false }).waitFor();
     assert.equal(await cards.first().getByTestId('exercise-unverified').count(), 0, 'a recognised, compatible exercise is not marked');
     // The sheet without a recognisable region: shown, not verified.
     await page.getByTestId('insight-unverified').getByText('Pertinenza non verificata: la scheda non indica un distretto riconoscibile.').waitFor();
@@ -199,7 +199,7 @@ test('the coherence checks say what was left out and why, keep what the clinicia
     await excluded.getByRole('button', { name: 'Aggiungi comunque' }).click();
     await excluded.first().waitFor({ state: 'detached' });
     assert.equal(await cards.count(), 4);
-    assert.deepEqual(await cards.evaluateAll((els) => els.map((e) => e.querySelector('p')?.textContent)), ['Shoulder external rotation with band', 'Plank 3x30s', 'Hamstring stretch', 'Mobilità di caviglia 2x15']);
+    assert.deepEqual(await cards.evaluateAll((els) => els.map((e) => e.querySelector('p')?.textContent)), ['Shoulder external rotation with band', 'Esercizio con la palla 3x10', 'Hamstring stretch', 'Mobilità di caviglia 2x15']);
     await checks.locator('li[data-kind="exercise"]').getByText('"Mobilità di caviglia 2x15" riguarda un distretto diverso da quello del caso.').waitFor();
     await shoot(checks, 'coherence-2-after-choices.png');
     await shoot(cards.first().locator('xpath=..'), 'coherence-3-exercises.png');
@@ -207,7 +207,7 @@ test('the coherence checks say what was left out and why, keep what the clinicia
     await page.getByRole('button', { name: 'Salva nella scheda' }).click();
     await page.getByRole('button', { name: 'Salvata nella scheda' }).waitFor({ timeout: 10000 });
     const saved = fake.state.tables.notes.at(-1);
-    assert.deepEqual((saved.exercises ?? []).map((e) => (typeof e === 'string' ? e : e.name)), ['Shoulder external rotation with band', 'Plank 3x30s', 'Hamstring stretch', 'Mobilità di caviglia 2x15'], 'what the clinician chose is saved, nothing lost');
+    assert.deepEqual((saved.exercises ?? []).map((e) => (typeof e === 'string' ? e : e.name)), ['Shoulder external rotation with band', 'Esercizio con la palla 3x10', 'Hamstring stretch', 'Mobilità di caviglia 2x15'], 'what the clinician chose is saved, nothing lost');
   } finally {
     await ctx.close();
   }
@@ -308,8 +308,10 @@ test('statements the clinician did not give are taken out and listed, and can be
   await page.route('**/api/science/relevant', json({ papers: [] }));
   await page.route('**/api/knowledge-lookup', json({
     match: { id: 1, condition_name: 'Tendinopatia della cuffia dei rotatori', condition_keywords: 'cuffia dei rotatori', goals: 'g', clinical_tests: 't', red_flags: 'r', typical_exercises: 'e', source: 'Linea guida sintetica', source_date: '2024' },
-    phases: [], relevance: 'verified', relevanceReason: null,
-    others: [{ region: 'knee', side: 'left', match: { id: 4, condition_name: 'Dolore femororotuleo' } }],
+    // The clinician said "dolore alla spalla": the cuff sheet comes from the
+    // assessment. For the knee, pain was described: the generic sheet.
+    phases: [], relevance: 'unverified', relevanceReason: 'diagnosis_not_stated',
+    others: [{ region: 'knee', side: 'left', match: { id: 15, condition_name: 'Dolore di ginocchio aspecifico' }, relevance: 'verified', relevanceReason: 'symptom_only' }],
   }));
   await page.route('**/api/exercise-intelligence', json({
     exercises: [
@@ -336,8 +338,13 @@ test('statements the clinician did not give are taken out and listed, and can be
     assert.match(await list.nth(2).innerText(), /Ci vediamo due volte a settimana[\s\S]*Sintesi per il paziente · appuntamento o frequenza delle visite non concordati/);
     assert.doesNotMatch(await page.getByTestId('note-findings').innerText(), /Neer|Gonfiore/, 'not in the note');
 
-    // The other region treated today, with its side and sheet.
-    await page.getByTestId('other-regions').getByText('ginocchio (lato sinistro): Dolore femororotuleo').waitFor();
+    // The main sheet is not claimed as the diagnosis; the other region treated
+    // today has its side, its sheet and why that sheet.
+    await page.getByTestId('insight-unverified').getByText('la diagnosi della scheda non risulta da ciò che hai detto', { exact: false }).waitFor();
+    await page.getByTestId('other-regions').getByText('ginocchio (lato sinistro): Dolore di ginocchio aspecifico', { exact: false }).waitFor();
+    await page.getByTestId('other-region-reason').getByText('scheda generica del distretto (hai descritto il sintomo, non una diagnosi)', { exact: false }).waitFor();
+    // No objective finding stated: said so, not left silently empty.
+    await checks.locator('li[data-kind="objective_missing"]').getByText('Nessun rilievo obiettivo riferito', { exact: false }).waitFor();
 
     // The library suggestion is not applied by itself; taking it is the clinician's choice.
     const cards = page.getByTestId('note-exercise');
@@ -351,6 +358,7 @@ test('statements the clinician did not give are taken out and listed, and can be
     await list.nth(1).getByRole('button', { name: 'Ripristina' }).click();
     assert.equal(await list.count(), 2);
     await page.getByTestId('note-findings').getByText('Gonfiore al ginocchio sinistro').waitFor();
+    await checks.locator('li[data-kind="objective_missing"]').waitFor({ state: 'detached' });
     await page.getByRole('button', { name: 'Salva nella scheda' }).click();
     await page.getByRole('button', { name: 'Salvata nella scheda' }).waitFor({ timeout: 10000 });
     const saved = fake.state.tables.notes.at(-1);

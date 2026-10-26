@@ -4,8 +4,8 @@ import { requireVerifiedProfessional } from '@/lib/auth/sessionServer';
 import { consumeHourly, HOURLY_LIMITS } from '@/lib/rateLimit';
 import { serviceClient } from '@/lib/verification';
 import { lazy } from '@/lib/lazy';
-import { bestCondition, type KbRow } from '@/lib/knowledge/conditionMatch';
-import { regionFit, regionsOf } from '@/lib/clinical/region';
+import { bestCondition, conditionStated, isRegionalSheet, REGION_SYMPTOMS, type KbRow } from '@/lib/knowledge/conditionMatch';
+import { analyzeMentions, REGION_WORDS, regionFit, regionsOf, type Region } from '@/lib/clinical/region';
 import { caseOf, conditionRegionsOf, otherRegionsOf } from '@/lib/clinical/coherence';
 
 export const dynamic = 'force-dynamic';
@@ -108,21 +108,68 @@ export async function POST(request: Request) {
     const finalMatch = inLang(match);
 
     // Other regions treated today (e.g. the left knee besides the right
-    // shoulder): the sheet of each, matched by keyword among sheets of that
-    // region only, from what the clinician said and the assessment. No AI
-    // fallback and no phases here: the clinician sees which region has a
-    // sheet and which has none.
-    const others = otherRegionsOf(caseOf(said, { primaryCondition: primary, assessment: text })).map(({ region, side }) => {
-      const pool = rows.filter((r) => regionFit(sheetRegions(r), [region]) === 'compatible' && regionsOf([r.condition_name, r.condition_keywords].filter(Boolean).join(' ')).length > 0)
-      const found = bestCondition(pool, '', `${text} ${said}`)
-      const row = found ? inLang(found.row as KbRow & Record<string, any>) : null
-      return { region, side, match: row ? { id: row.id, condition_name: row.condition_name, source: row.source ?? null, source_date: row.source_date ?? null, evidence_level: row.evidence_level ?? null } : null }
-    });
+    // shoulder): a sheet for each, among the sheets of that region only, with
+    // its side. In order: a condition the clinician named for it; the regional
+    // sheet for the symptom they described ("dolore al ginocchio"), never a
+    // more specific diagnosis; a condition only the assessment names, or the
+    // AI's choice, both marked as not verified. Otherwise none, with the reason.
+    const view = caseOf(said, { primaryCondition: primary, assessment: text });
+    const sentencesAbout = (source: string, region: Region) =>
+      source.split(/(?<=[.;!?])\s+|\n+/).filter((sentence) => analyzeMentions(sentence).some((m) => m.region === region && m.status === 'active')).join(' ');
+    const ownSheet = (r: KbRow) => regionsOf([r.condition_name, r.condition_keywords].filter(Boolean).join(' '));
+    const others = [];
+    for (const { region, side } of otherRegionsOf(view)) {
+      const pool = rows.filter((r) => ownSheet(r).length > 0 && regionFit(sheetRegions(r), [region]) === 'compatible');
+      const brief = (row: KbRow & Record<string, any>) => {
+        const l = inLang(row)!;
+        return { id: l.id, condition_name: l.condition_name, source: l.source ?? null, source_date: l.source_date ?? null, evidence_level: l.evidence_level ?? null };
+      };
+      const stated = bestCondition(pool, '', sentencesAbout(said, region));
+      const regional = pool.filter((r) => isRegionalSheet(r, region));
+      const symptom = !stated && regional.length && view.profile.active.includes(region) ? { row: regional[0] } : null;
+      const fromAssessment = !stated && !symptom ? bestCondition(pool, '', sentencesAbout(text, region)) : null;
+      let entry: Record<string, any> | null = null;
+      if (stated) entry = { match: brief(stated.row as any), relevance: 'verified', relevanceReason: null, matchedBy: 'keyword' };
+      else if (symptom) entry = { match: brief(symptom.row as any), relevance: 'verified', relevanceReason: 'symptom_only', matchedBy: 'symptom' };
+      else if (fromAssessment) {
+        const ok = !said || conditionStated(fromAssessment.row, said, REGION_WORDS, true);
+        entry = { match: brief(fromAssessment.row as any), relevance: ok ? 'verified' : 'unverified', relevanceReason: ok ? null : 'diagnosis_not_stated', matchedBy: 'keyword' };
+      } else if (pool.length && (await consumeHourly(`ai:knowledge-lookup:${gate.user.id}`, HOURLY_LIMITS.noteEnrichment)) === 'allowed') {
+        try {
+          const completion = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            temperature: 0,
+            response_format: { type: 'json_object' },
+            messages: [
+              {
+                role: 'system',
+                content:
+                  'You map ONE body region of a physiotherapy note to ONE condition sheet from a fixed list (id<TAB>name, names in Italian). Answer ONLY JSON {"id": "<id from the list>"} for the sheet that covers what the therapist said about this region, or {"id": null} if none does. Never pick a diagnosis more specific than what was said; prefer a generic regional sheet when only pain or a symptom was described.',
+              },
+              { role: 'user', content: `Region: ${region}${side ? ` (${side})` : ''}\nWhat the therapist said about it: ${sentencesAbout(said, region) || '(nothing specific)'}\nAssessment about it: ${sentencesAbout(text, region)}\n\nList:\n${pool.map((r) => `${r.id}\t${r.condition_name ?? ''}`).join('\n')}` },
+            ],
+          });
+          const id = JSON.parse(completion.choices[0]?.message?.content || '{}')?.id;
+          const picked = id == null ? null : pool.find((r) => String(r.id) === String(id)) ?? null;
+          if (picked) entry = { match: brief(picked as any), relevance: 'unverified', relevanceReason: 'ai_choice', matchedBy: 'ai' };
+        } catch (aiErr) {
+          console.error('knowledge-lookup: AI fallback (other region) failed:', aiErr instanceof Error ? aiErr.message : aiErr);
+        }
+      }
+      others.push({ region, side, ...(entry ?? { match: null, relevance: null, relevanceReason: pool.length ? 'no_matching_sheet' : 'no_sheet_for_region', matchedBy: null }) });
+    }
     const finalPhases = lang && lang !== 'it' ? phases.map((p: any) => (p.translations?.[lang] ? { ...p, ...p.translations[lang] } : p)) : phases;
 
-    // Not verified when the sheet's region, or the condition's, is not recognised.
-    const relevance = match ? (fitOf(match) === 'compatible' ? 'verified' : 'unverified') : null;
-    const relevanceReason = relevance === 'unverified' ? (conditionRegions.length ? 'sheet_region_unknown' : 'case_region_unknown') : null;
+    // Not verified when the sheet's region, or the condition's, is not
+    // recognised, or when the clinician did not state the sheet's condition
+    // (it comes from the model's assessment, e.g. "cuffia dei rotatori" for
+    // "dolore alla spalla").
+    let relevance: 'verified' | 'unverified' | null = match ? (fitOf(match) === 'compatible' ? 'verified' : 'unverified') : null;
+    let relevanceReason: string | null = relevance === 'unverified' ? (conditionRegions.length ? 'sheet_region_unknown' : 'case_region_unknown') : null;
+    if (match && relevance === 'verified' && said && !conditionStated(match, said, REGION_WORDS, regionFit(sheetRegions(match), view.profile.active) === 'compatible')) {
+      relevance = 'unverified';
+      relevanceReason = 'diagnosis_not_stated';
+    }
 
     return NextResponse.json({
       match: finalMatch || null,

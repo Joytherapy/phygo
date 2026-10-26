@@ -50,3 +50,56 @@ export function bestCondition(rows: KbRow[], primaryCondition: string, assessmen
   }
   return best
 }
+
+// Words that only say where (they come from lib/clinical/region.ts) or that
+// are too common to name a condition.
+const COMMON = new Set(['della', 'dello', 'delle', 'degli', 'dopo', 'with', 'without', 'after', 'related', 'correlato', 'correlata'])
+
+/**
+ * Whether the clinician's own words state the condition of a sheet: one of
+ * its names or keywords, in any language, or a word of its name that names a
+ * condition ("tendinopatia" of "Tendinopatia della cuffia dei rotatori" in
+ * "tendinopatia del sovraspinato"), when the sheet is of a region they spoke
+ * about. A sheet chosen only from the model's assessment ("femororotuleo"
+ * when the clinician said "dolore al ginocchio") is not stated.
+ */
+export function conditionStated(row: KbRow, transcript: string, regionWords: Set<string>, sameRegion: boolean): boolean {
+  const said = ` ${normalizeText(transcript)} `
+  if (candidatesOf(row).some((c) => said.includes(` ${c} `))) return true
+  if (!sameRegion) return false
+  const names = [row.condition_name, ...Object.values(row.translations ?? {}).map((t) => t?.condition_name)]
+  const words = names.flatMap((n) => normalizeText(n ?? '').split(' ')).filter((w) => w.length >= 6 && !regionWords.has(w) && !GENERIC.has(w) && !COMMON.has(w))
+  return words.some((w) => said.includes(` ${w} `))
+}
+
+// What a clinician says when only the symptom and the region are known, to
+// find a regional sheet without a more specific diagnosis.
+export const REGION_SYMPTOMS: Record<string, string[]> = {
+  shoulder: ['dolore alla spalla', 'spalla dolorosa', 'shoulder pain', 'dolor de hombro', 'douleur d epaule'],
+  elbow: ['dolore al gomito', 'elbow pain', 'dolor de codo', 'douleur du coude'],
+  wrist_hand: ['dolore al polso', 'dolore alla mano', 'wrist pain', 'hand pain', 'dolor de muneca', 'douleur du poignet'],
+  cervical: ['cervicalgia', 'dolore al collo', 'dolore cervicale', 'neck pain', 'dolor de cuello', 'cervicalgie'],
+  thoracic: ['dorsalgia', 'dolore dorsale', 'thoracic pain', 'upper back pain', 'dorsalgie'],
+  lumbar: ['lombalgia', 'mal di schiena', 'dolore lombare', 'low back pain', 'lumbalgia', 'lombalgie'],
+  hip: ['dolore all anca', 'dolore d anca', 'hip pain', 'dolor de cadera', 'douleur de hanche'],
+  thigh: ['dolore alla coscia', 'thigh pain'],
+  knee: ['gonalgia', 'dolore al ginocchio', 'dolore di ginocchio', 'knee pain', 'dolor de rodilla', 'gonalgie', 'douleur du genou'],
+  lower_leg: ['dolore al polpaccio', 'dolore alla gamba', 'calf pain', 'leg pain'],
+  ankle_foot: ['dolore alla caviglia', 'dolore al piede', 'ankle pain', 'foot pain', 'dolor de tobillo', 'douleur de cheville'],
+  upper_limb: ['dolore al braccio', 'arm pain'],
+  lower_limb: ['dolore alla gamba', 'leg pain'],
+}
+
+const NONSPECIFIC = new Set(['aspecifico', 'aspecifica', 'nonspecific', 'non', 'specific', 'specifico', 'specifica', 'generico', 'generica', 'generic', 'inespecifico', 'inespecifica', 'specifique', 'regionale', 'regional', 'di', 'del', 'della', 'dello', 'al', 'alla', 'all', 'd', 'de', 'du'])
+
+/**
+ * Whether a sheet only names this region's pain ("Dolore di ginocchio
+ * aspecifico", "Lombalgia aspecifica"), not a diagnosis ("Dolore
+ * femororotuleo", "Coxartrosi"): the sheet to use when the clinician
+ * described pain in the region without naming a condition.
+ */
+export function isRegionalSheet(row: KbRow, region: string): boolean {
+  const allowed = new Set((REGION_SYMPTOMS[region] ?? []).flatMap((p) => p.split(' ')))
+  const words = normalizeText(row.condition_name ?? '').split(' ').filter(Boolean)
+  return allowed.size > 0 && words.length > 0 && words.some((w) => allowed.has(w)) && words.every((w) => allowed.has(w) || GENERIC.has(w) || NONSPECIFIC.has(w))
+}

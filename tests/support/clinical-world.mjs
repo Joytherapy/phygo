@@ -41,12 +41,14 @@ export const KB = [
   // Sheets naming no body region: matched, but never as verified.
   sheet(13, 'Fibromialgia', 'fibromialgia', 'Fibromyalgia'),
   sheet(14, 'Tendinopatia calcifica', 'tendinopatia calcifica, calcific tendinopathy', 'Calcific tendinopathy'),
+  // A generic regional sheet: what fits when only the symptom and the region are stated.
+  sheet(15, 'Dolore di ginocchio aspecifico', 'gonalgia, dolore al ginocchio', 'Non-specific knee pain', { translations: { en: { condition_name: 'Non-specific knee pain', condition_keywords: 'knee pain' } } }),
 ];
 export const PHASES = KB.flatMap((s) => [1, 2].map((n) => ({ id: `ph${s.id}-${n}`, condition_id: s.id, phase_number: n, phase_name: `${s.translations.en.condition_name} phase ${n}`, typical_duration: 'variable', phase_goals: 'goals', phase_exercises: `exercises for ${s.translations.en.condition_name}`, criteria_to_progress: 'criteria' })));
 const paper = (id, title, abstract) => ({ id, status: 'published', title, abstract, publication_date: '2024-01-01', research_summaries: { why_it_matters: `why ${id}`, evidence_strength: 'moderate' } });
 export const PAPERS = [
   paper('p-shoulder', 'Exercise therapy for rotator cuff tendinopathy: a randomized controlled trial', 'Adults with shoulder pain and rotator cuff tendinopathy.'),
-  paper('p-leg', 'Traumatic leg pain in adolescents: a cohort study', 'Musculoskeletal pain in adolescents, including shoulder pain and knee complaints after sport.'),
+  paper('p-leg', 'Traumatic leg pain in adolescents: a cohort study', 'Musculoskeletal pain in adolescents, including shoulder pain and knee pain after sport.'),
   paper('p-acl', 'Rehabilitation after anterior cruciate ligament reconstruction: a systematic review', 'ACL reconstruction rehabilitation of the knee.'),
   paper('p-lbp', 'Clinical practice guideline for low back pain', 'Exercise for non-specific low back pain.'),
   paper('p-generic', 'Exercise therapy for chronic musculoskeletal pain', 'Exercise and education for chronic pain.'),
@@ -70,6 +72,7 @@ export const LIB = [
   lib(9, 'Chin tuck', 'neck', 'deep neck flexors'),
   lib(10, 'Calf raise', 'lower legs', 'gastrocnemius'),
   lib(11, 'Prone Y raise', 'shoulders', 'lower trapezius'),
+  lib(12, 'Shoulder internal rotation', 'shoulders', 'subscapularis'),
 ];
 
 // Each case: what the clinician said, the note the model writes (with the kind of
@@ -189,7 +192,7 @@ export const CASES = {
     note: { subjective: 'Dolore di spalla all’elevazione del braccio.', objective: '', assessment: 'Possibile dolore di spalla correlato alla cuffia dei rotatori.', plan: 'Esercizio graduale.', primaryCondition: 'rotator cuff related shoulder pain',
       exercises: ['Rotazione esterna con elastico 3x12', 'Mobilità di caviglia 2x15'] },
     papers: ['rotator cuff', 'shoulder pain'],
-    expect: { region: 'shoulder', sheet: 1, papers: ['p-shoulder:direct'], offRegion: ['caviglia'] },
+    expect: { kbRelevance: ['unverified', 'diagnosis_not_stated'], region: 'shoulder', sheet: 1, papers: ['p-shoulder:direct'], offRegion: ['caviglia'] },
   },
   voiceAmbiguous: {
     transcript: 'dolore al ginocchio no scusa alla caviglia sinistra dopo una distorsione',
@@ -212,8 +215,9 @@ export const CASES = {
     note: { subjective: 'Dolore alla spalla destra; lieve lombalgia.', objective: '', assessment: 'Possibile dolore di spalla correlato alla cuffia dei rotatori.', plan: 'Esercizio per spalla e lombare.', primaryCondition: 'rotator cuff related shoulder pain',
       exercises: ['Rotazione esterna con elastico spalla destra 3x12', 'Cat-camel 2x10'] },
     papers: ['rotator cuff'],
-    // The low back has no sheet or paper in this world: said, not hidden.
-    expect: { sheet: 1, keep: [/shoulder|spalla/i, /cat-camel/i], noIssues: true, issues: ['coverage_protocol:lumbar', 'coverage_evidence:lumbar'] },
+    // The low back: the generic regional sheet (pain described, no diagnosis
+    // named); no paper in this world, which is said, not hidden.
+    expect: { sheet: 1, kbRelevance: ['unverified', 'diagnosis_not_stated'], others: [['lumbar', null, 7, 'verified', 'symptom_only']], keep: [/shoulder|spalla/i, /cat-camel/i], noIssues: true, issues: ['coverage_evidence:lumbar'], notIssues: ['coverage_protocol:lumbar'] },
   },
   // The same region negated: its exercise is left out.
   secondaryNegated: {
@@ -221,7 +225,7 @@ export const CASES = {
     note: { subjective: 'Dolore alla spalla destra.', objective: '', assessment: 'Possibile dolore di spalla correlato alla cuffia dei rotatori.', plan: 'Esercizio per la spalla.', primaryCondition: 'rotator cuff related shoulder pain',
       exercises: ['Rotazione esterna con elastico spalla destra 3x12', 'Cat-camel 2x10'] },
     papers: ['rotator cuff'],
-    expect: { sheet: 1, offRegion: ['cat-camel'], keep: [/shoulder|spalla/i] },
+    expect: { kbRelevance: ['unverified', 'diagnosis_not_stated'], sheet: 1, offRegion: ['cat-camel'], keep: [/shoulder|spalla/i] },
   },
   // Two regions treated in the same session, each with its own side.
   multiSiteSides: {
@@ -229,15 +233,15 @@ export const CASES = {
     note: { subjective: 'Dolore alla spalla destra e al ginocchio sinistro.', objective: '', assessment: 'Possibile dolore di spalla correlato alla cuffia dei rotatori; dolore femororotuleo al ginocchio sinistro.', plan: 'Esercizi per la spalla destra e per il ginocchio destro.', primaryCondition: 'rotator cuff related shoulder pain',
       exercises: ['Rotazione esterna con elastico spalla destra 3x12', 'Estensione di ginocchio sinistro 3x12', 'Estensione di ginocchio destro 3x12'] },
     papers: ['rotator cuff'],
-    expect: { sheet: 1, keep: [/shoulder|spalla/i, /knee|ginocchio/i], issues: ['side:plan', 'side:Estensione di ginocchio destro 3x12'], notIssues: ['side:Estensione di ginocchio sinistro 3x12', 'side:Rotazione esterna con elastico spalla destra 3x12'] },
+    expect: { kbRelevance: ['unverified', 'diagnosis_not_stated'], sheet: 1, keep: [/shoulder|spalla/i, /knee|ginocchio/i], issues: ['side:plan', 'side:Estensione di ginocchio destro 3x12'], notIssues: ['side:Estensione di ginocchio sinistro 3x12', 'side:Rotazione esterna con elastico spalla destra 3x12'] },
   },
   // Exercises whose region is not recognised: kept, never shown as pertinent; aerobic work is general.
   unknownExercise: {
     transcript: 'Dolore alla spalla sinistra da un mese, sospetta cuffia dei rotatori.',
     note: { subjective: 'Dolore alla spalla sinistra.', objective: '', assessment: 'Possibile tendinopatia della cuffia dei rotatori.', plan: 'Esercizio progressivo.', primaryCondition: 'rotator cuff tendinopathy',
-      exercises: ['Rotazione esterna con elastico 3x12', 'Plank 3x30s', 'Cyclette 10 minuti'] },
+      exercises: ['Rotazione esterna con elastico 3x12', 'Esercizio con la palla 3x10', 'Cyclette 10 minuti'] },
     papers: ['rotator cuff tendinopathy'],
-    expect: { sheet: 1, keep: [/plank/i, /cyclette/i], relevance: { plank: 'unverified', cyclette: 'general', rotazione: 'compatible' }, issues: ['exercise_unverified:Plank 3x30s'], notIssues: ['exercise_unverified:Cyclette 10 minuti'] },
+    expect: { sheet: 1, keep: [/palla/i, /cyclette/i], relevance: { palla: 'unverified', cyclette: 'general', rotazione: 'compatible' }, issues: ['exercise_unverified:Esercizio con la palla 3x10'], notIssues: ['exercise_unverified:Cyclette 10 minuti'] },
   },
   // A condition sheet naming no region, for a case with one: matched, not verified.
   sheetUnverified: {
@@ -251,9 +255,9 @@ export const CASES = {
   caseUnverified: {
     transcript: 'Fibromialgia con dolore diffuso e stanchezza.',
     note: { subjective: 'Dolore diffuso e stanchezza.', objective: '', assessment: 'Quadro compatibile con fibromialgia.', plan: 'Esercizio aerobico graduale.', primaryCondition: 'fibromyalgia',
-      exercises: ['Camminata 20 minuti', 'Plank 3x30s'] },
+      exercises: ['Camminata 20 minuti', 'Esercizio con la palla 3x10'] },
     papers: ['fibromyalgia'],
-    expect: { sheet: 13, kbRelevance: ['unverified', 'case_region_unknown'], relevance: { camminata: 'general', plank: 'unverified' }, issues: ['region_unknown:'] },
+    expect: { sheet: 13, kbRelevance: ['unverified', 'case_region_unknown'], relevance: { camminata: 'general', palla: 'unverified' }, issues: ['region_unknown:'] },
   },
   // Errors in the text sections, one per kind, next to what is correct.
   sectionErrors: {
@@ -264,7 +268,7 @@ export const CASES = {
       exercises: ['Rotazione esterna con elastico 3x12'] },
     papers: ['rotator cuff'],
     expect: {
-      sheet: 1,
+      sheet: 1, kbRelevance: ['unverified', 'diagnosis_not_stated'],
       issues: ['invented:150°', 'invented_treatment:tecar', 'section_region:plan', 'invented_appointment:18:00', 'side:hypotheses'],
       notIssues: ['invented_treatment:terapia manuale', 'invented_appointment:giovedi', 'section_region:differentials'],
     },
@@ -303,7 +307,7 @@ export const CASES = {
       exercises: ['Rotazione esterna con elastico spalla destra 3x12', 'Estensione di ginocchio sinistro 3x12'],
     },
     papers: ['rotator cuff', 'patellofemoral pain'],
-    expect: { sheet: 1 },
+    expect: { kbRelevance: ['unverified', 'diagnosis_not_stated'], sheet: 1 },
   },
   // The same case with exercises only for the shoulder: the knee is not covered.
   realMultisiteNoKnee: {
@@ -318,7 +322,7 @@ export const CASES = {
       exercises: ['Rotazione esterna con elastico spalla destra 3x12'],
     },
     papers: ['rotator cuff'],
-    expect: { sheet: 1 },
+    expect: { kbRelevance: ['unverified', 'diagnosis_not_stated'], sheet: 1 },
   },
   // 3. Left shoulder: the pendulum and a prone arm raise were matched to the
   //    band external rotation; the external rotation "elbow at 90°" was
@@ -337,9 +341,82 @@ export const CASES = {
     papers: ['rotator cuff tendinopathy'],
     expect: { sheet: 1 },
   },
+  // ---- Second check with the real model (after cf0e971), re-created.
+  // 1a. Left shoulder: the band external rotation "gomito vicino al corpo" was
+  //     excluded as an elbow exercise.
+  r4ShoulderLeft: {
+    transcript: 'Paziente di 45 anni con dolore alla spalla sinistra da circa un mese, dolore in elevazione oltre i 90 gradi e alla rotazione esterna contro resistenza. Sospetta problematica della cuffia dei rotatori. Oggi terapia manuale ed esercizi di rotazione esterna con elastico.',
+    note: {
+      subjective: 'Dolore alla spalla sinistra da circa un mese.',
+      objective: 'Dolore in elevazione oltre i 90 gradi e alla rotazione esterna contro resistenza.',
+      assessment: 'Possibile tendinopatia della cuffia dei rotatori della spalla sinistra.',
+      plan: 'Esercizio progressivo per la cuffia dei rotatori.',
+      summaryForPatient: 'Fai gli esercizi per la spalla ogni giorno.',
+      primaryCondition: 'rotator cuff tendinopathy',
+      exercises: ['Rotazione esterna con elastico, gomito vicino al corpo 3x12', 'Retrazione scapolare 3x10'],
+    },
+    papers: ['rotator cuff tendinopathy'],
+    expect: { sheet: 1 },
+  },
+  // 1b + 2. Low back pain with knee history: a spinal rotation mobilisation was
+  //     excluded as a shoulder exercise; plank, pelvic mobility, bird-dog and
+  //     lateral flexion of the spine were "not verified".
+  r4HistoryKnee: {
+    transcript: 'Oggi lombalgia; in anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico.',
+    note: {
+      subjective: 'Lombalgia. In anamnesi intervento al ginocchio sinistro, ora asintomatico.',
+      objective: '',
+      assessment: 'Lombalgia aspecifica.',
+      plan: 'Esercizio terapeutico per il rachide lombare.',
+      summaryForPatient: 'Fai gli esercizi per la schiena ogni giorno.',
+      primaryCondition: 'low back pain',
+      exercises: ['Mobilizzazione della colonna vertebrale con rotazione 2x10', 'Plank 3x20 secondi', 'Mobilità del bacino 2x10', 'Bird-dog 3x8', 'Flessione laterale della colonna 2x10'],
+    },
+    papers: ['low back pain'],
+    expect: { sheet: 7 },
+  },
+  // 3 + 4 + 5. Right shoulder and left knee, the knee without a stated diagnosis:
+  //     the knee had no sheet; the adolescent traumatic leg-pain paper came out
+  //     as direct for the knee; a trunk lateral flexion "for the right shoulder"
+  //     was taken as a shoulder exercise.
+  r4MultiSite: {
+    transcript: 'Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi. Dolore alla spalla in elevazione e al ginocchio scendendo le scale.',
+    note: {
+      subjective: 'Dolore alla spalla destra in elevazione e al ginocchio sinistro scendendo le scale.',
+      objective: '',
+      assessment: 'Dolore alla spalla destra, possibile coinvolgimento della cuffia dei rotatori; ginocchio sinistro doloroso, quadro da approfondire.',
+      plan: 'Esercizi per la spalla destra e per il ginocchio sinistro.',
+      summaryForPatient: 'Fai gli esercizi per la spalla e per il ginocchio ogni giorno.',
+      primaryCondition: 'right shoulder pain',
+      clinicalReasoning: { missingInformation: 'Test clinici e misure di spalla e ginocchio non riportati.' },
+      exercises: ['Rotazione esterna con elastico spalla destra 3x12', 'Estensione di ginocchio sinistro 3x12', 'Flessione laterale del tronco per la spalla destra 2x10'],
+    },
+    papers: ['shoulder pain', 'knee pain'],
+    expect: { kbRelevance: ['unverified', 'diagnosis_not_stated'] },
+  },
+  // Reported objective data must stay; missing data must be said.
+  r4ObjectiveReported: {
+    transcript: 'Dolore al ginocchio destro dopo la corsa. Flessione 120 gradi, Lachman negativo, lieve versamento.',
+    note: {
+      subjective: 'Dolore al ginocchio destro dopo la corsa.',
+      objective: 'Flessione 120 gradi, Lachman negativo, lieve versamento.',
+      assessment: 'Dolore di ginocchio destro dopo la corsa.',
+      plan: 'Carico progressivo.',
+      summaryForPatient: 'Riprendi gradualmente.',
+      primaryCondition: 'right knee pain',
+      exercises: ['Estensione di ginocchio destro 3x12'],
+    },
+    papers: ['knee pain'],
+    expect: {},
+  },
 };
 
 export const KEYWORDS = [
+  [/colonna vertebrale con rotazione/i, ['spinal rotation mobilization', 'rotation']],
+  [/plank/i, ['plank']],
+  [/bacino/i, ['pelvic tilt', 'pelvic mobility']],
+  [/bird/i, ['bird dog']],
+  [/flessione laterale/i, ['lateral flexion', 'side bend']],
   // As the model extracted them in the real checks: a region word, or another exercise's name.
   [/pendolo/i, ['pendulum', 'shoulder']],
   [/prona/i, ['prone arm raise', 'shoulder external rotation']],

@@ -35,7 +35,7 @@ export function paperScore(paper: { title?: string | null; abstract?: string | n
 export type PaperRelevance =
   | { level: 'direct'; reason: 'same_condition' | 'same_region' }
   | { level: 'indirect'; reason: 'same_region' | 'same_mechanism_other_region' }
-  | { level: 'unverified'; reason: 'case_region_unknown' | 'paper_region_unknown' }
+  | { level: 'unverified'; reason: 'case_region_unknown' | 'paper_region_unknown' | 'population_or_mechanism_not_stated' }
 
 /**
  * Whether, and how, a paper is evidence for this condition. Null: not shown.
@@ -70,4 +70,30 @@ export function paperRelevance(paper: { title?: string | null; abstract?: string
   if (phraseInTitle) return { level: 'direct', reason: 'same_condition' }
   if (phraseInAbstract) return { level: 'direct', reason: 'same_region' }
   return { level: 'indirect', reason: 'same_region' }
+}
+
+// A paper about a population or a mechanism ("Traumatic leg pain in
+// adolescents") is evidence for a case only when the case is about it too:
+// the same region is not enough. Each qualifier: the words of a title that
+// state it, and what in the case (the clinician's words, the condition, the
+// assessment) supports it, or the age range it implies.
+const QUALIFIERS: { name: string; title: RegExp; case: RegExp; ages?: [number, number] }[] = [
+  { name: 'children', title: /\b(child|children|childhood|paediatric|pediatric|infants?|kids)\b/, case: /\b(bambin[oaie]|pediatric[oaie]?|child|children|niñ[oa]s?|enfants?)\b/, ages: [0, 12] },
+  { name: 'adolescents', title: /\b(adolescen\w*|youths?|teenage\w*|juvenile)\b/, case: /\b(adolescen\w*|ragazz[oaie]|teenage\w*|youths?)\b/, ages: [10, 19] },
+  { name: 'older adults', title: /\b(older adults?|older people|elderly|aged \d+|geriatric)\b/, case: /\b(anzian[oaie]|elderly|geriatric\w*|older)\b/, ages: [65, 130] },
+  { name: 'trauma', title: /\b(traumatic|trauma|post traumatic|fractures?|whiplash)\b/, case: /\b(traum\w*|cadut[ao]|fall|fell|fratture?|fractures?|incidente|accident\w*|contusion\w*|distorsion\w*|sprain\w*|colpo|urto|whiplash|colpo di frusta|infortun\w*)\b/ },
+  { name: 'surgery', title: /\b(post ?operative|surgery|surgical|arthroplasty|reconstruction|replacement|repair)\b/, case: /\b(operat\w*|intervent\w*|chirurg\w*|surg\w*|protesi|arthroplasty|ricostruzion\w*|reconstruction|sutur\w*|repair)\b/ },
+  { name: 'athletes', title: /\b(athletes?|athletic|elite|players?|runners?)\b/, case: /\b(atlet\w*|athlet\w*|sport\w*|calci\w*|corsa|corre|runners?|players?|gioca\w*|agonist\w*)\b/ },
+  { name: 'pregnancy', title: /\b(pregnan\w*|postpartum|post partum|antenatal|perinatal)\b/, case: /\b(gravidanz\w*|incinta|pregnan\w*|post ?partum|parto|embarazo|grossesse)\b/ },
+]
+
+/**
+ * The populations and mechanisms a paper's title is about that the case does
+ * not state (an age given in the case counts for the age groups).
+ */
+export function unstatedQualifiers(title: string | null | undefined, caseText: string): string[] {
+  const t = normalizeText(title ?? '')
+  const c = normalizeText(caseText)
+  const ages = Array.from(c.matchAll(/\b(\d{1,3}) ?(anni|years?|yo|ans|anos)\b/g)).map((m) => Number(m[1]))
+  return QUALIFIERS.filter((q) => q.title.test(t) && !q.case.test(c) && !(q.ages && ages.some((a) => a >= q.ages![0] && a <= q.ages![1]))).map((q) => q.name)
 }

@@ -69,7 +69,7 @@ if (args.includes('--build')) {
         const issues = K.checkOutput(checkInputOf(out));
         runs.push({
           name, repeat: r, transcript: out.transcript, note: out.note, removed: out.removed,
-          kb: { match: out.kb.match?.condition_name ?? null, relevance: out.kb.relevance ?? null, reason: out.kb.relevanceReason ?? null, others: (out.kb.others ?? []).map((o) => ({ region: o.region, side: o.side, match: o.match?.condition_name ?? null })) },
+          kb: { match: out.kb.match?.condition_name ?? null, relevance: out.kb.relevance ?? null, reason: out.kb.relevanceReason ?? null, others: (out.kb.others ?? []).map((o) => ({ region: o.region, side: o.side, match: o.match?.condition_name ?? null, relevance: o.relevance ?? null, reason: o.relevanceReason ?? null })) },
           papers: out.papers.map((p) => ({ title: p.title, relevance: p.relevance, reason: p.relevance_reason ?? null, regions: p.regions ?? [] })),
           exercises: out.exercises.map((e) => ({ name: e.name, draft: e.draft, relevance: e.relevance, reason: e.relevance_reason ?? null, match: e.match_status, suggestion: e.suggested_match?.name ?? null })),
           excluded: out.excluded, issues,
@@ -97,7 +97,7 @@ if (args.includes('--build')) {
     for (const [k, v] of Object.entries(run.note ?? {})) md.push(`- **${k}:** ${typeof v === 'string' ? v : JSON.stringify(v)}`);
     md.push('', '**Tolto dalla bozza (non detto dal fisioterapista):**', ...(run.removed.length ? run.removed.map((x) => `- ${x.section} · ${x.kind} · «${x.text}»`) : ['- niente']));
     md.push('', `**Scheda clinica:** ${run.kb.match ?? '—'}${run.kb.relevance ? ` (${run.kb.relevance}${run.kb.reason ? `: ${run.kb.reason}` : ''})` : ''}`);
-    for (const o of run.kb.others) md.push(`- altro distretto trattato: ${o.region}${o.side ? ` (${o.side})` : ''} → ${o.match ?? 'nessuna scheda'}`);
+    for (const o of run.kb.others) md.push(`- altro distretto trattato: ${o.region}${o.side ? ` (${o.side})` : ''} → ${o.match ?? 'nessuna scheda'}${o.relevance ? ` (${o.relevance})` : ''}${o.reason ? ` · ${o.reason}` : ''}`);
     md.push('', '**Studi:**', ...(run.papers.length ? run.papers.map((p) => `- ${p.title} — ${p.relevance}${p.reason ? ` (${p.reason})` : ''}${p.regions.length ? ` · distretti: ${p.regions.join(', ')}` : ''}`) : ['- nessuno']));
     md.push('', '**Esercizi:**', ...(run.exercises.length ? run.exercises.map((e) => `- ${e.name}${e.draft && e.draft !== e.name ? ` (dalla nota: ${e.draft})` : ''} — ${e.relevance}${e.reason ? ` (${e.reason})` : ''} · corrispondenza: ${e.match}${e.suggestion ? ` (suggerito: ${e.suggestion})` : ''}`) : ['- nessuno']));
     md.push('', '**Esclusi:**', ...(run.excluded.length ? run.excluded.map((e) => `- ${e.name} — ${e.reason} (${(e.regions ?? []).join(', ')})`) : ['- nessuno']));

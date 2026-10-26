@@ -155,7 +155,7 @@ const [excludedExercises, setExcludedExercises] = useState<{ name: string; reaso
 // Whether the condition sheet's region could be verified against the case (/api/knowledge-lookup).
 const [insightRelevance, setInsightRelevance] = useState<{ relevance: string | null; reason: string | null }>({ relevance: null, reason: null });
 // Condition sheets for the other regions treated today (/api/knowledge-lookup `others`).
-const [otherSheets, setOtherSheets] = useState<{ region: string; side: string | null; match: { condition_name: string } | null }[]>([]);
+const [otherSheets, setOtherSheets] = useState<{ region: string; side: string | null; match: { condition_name: string } | null; relevance?: "verified" | "unverified" | null; relevanceReason?: string | null }[]>([]);
 // Statements taken out of the draft because the clinician did not say them (/api/generate-note `removed`).
 const [removedFacts, setRemovedFacts] = useState<{ section: string; text: string; kind: string; item: string }[]>([]);
 
@@ -1717,6 +1717,10 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                           {i > 0 ? " · " : ""}
                           {regionLabel([o.region])}
                           {o.side && o.side !== "both" ? ` (${o.side === "left" ? t.sideLeft : t.sideRight})` : ""}: {o.match?.condition_name ?? t.otherRegionNoSheet}
+                          {o.relevanceReason && (t.otherSheetReason as Record<string, string>)[o.relevanceReason] && <span data-testid="other-region-reason"> — {(t.otherSheetReason as Record<string, string>)[o.relevanceReason]}</span>}
+                          {o.relevance === "unverified" && o.relevanceReason && (t.unverifiedReason as Record<string, string>)[o.relevanceReason] && (
+                            <span data-testid="other-region-unverified" className="block font-semibold text-amber-700 dark:text-amber-300">{(t.unverifiedReason as Record<string, string>)[o.relevanceReason]}</span>
+                          )}
                         </span>
                       ))}
                     </span>

@@ -39,6 +39,9 @@ const MOVES: Record<string, string[]> = {
   mobility: ['mobilita', 'mobility', 'movilidad', 'mobilite'],
 }
 
+// A movement word alone says how, not which exercise: "rotation" is in
+// "spinal rotation" and "shoulder internal rotation" alike.
+const MOVEMENT_WORDS = new Set(['rotation', 'rotations', 'flexion', 'extension', 'raise', 'raises', 'press', 'stretch', 'stretching', 'mobility', 'mobilization', 'mobilisation', 'abduction', 'adduction', 'lift', 'curl', 'hold', 'circles', 'tilt', 'bend', 'twist'])
 // Words that say how, not what (shared with lib/exerciseLibrary/search.ts's generic words).
 const NOT_SPECIFIC = new Set(['with', 'band', 'the', 'of', 'and', 'for', 'a', 'an', 'on', 'in', 'to', 'exercise', 'exercises', 'light', 'gentle', 'standing', 'seated', 'lying', 'supine', 'prone', 'side', 'resisted', 'resistance', 'assisted', 'active', 'passive', 'dumbbell', 'cable', 'machine', 'bodyweight'])
 
@@ -62,6 +65,7 @@ export const specificWords = (keyword: string) => words(keyword).filter((w) => !
 export const isRegionOnlyKeyword = (keyword: string) => specificWords(keyword).length === 0
 
 export type MatchCheck = 'verified' | 'unverified' | 'conflict'
+export type MatchDetail = { check: MatchCheck; by: 'movement' | 'name' | null }
 
 /**
  * How far a candidate found by `keywords` is the exercise the note wrote as
@@ -70,18 +74,28 @@ export type MatchCheck = 'verified' | 'unverified' | 'conflict'
  * differently), 'unverified' (something in common, nothing confirmed).
  */
 export function checkMatch(draft: string, keywords: string[], candidateName: string): MatchCheck {
+  return matchDetail(draft, keywords, candidateName).check
+}
+
+/**
+ * checkMatch with what confirmed it: the same known movement ('movement'), or
+ * every specific word of a keyword in the name, including at least one that is
+ * not a bare movement word ('name'). Only a match confirmed by movement says
+ * which region the note's exercise works on.
+ */
+export function matchDetail(draft: string, keywords: string[], candidateName: string): MatchDetail {
   const draftMoves = movesOf(draft)
   const candidateMoves = movesOf(candidateName)
   // "Mobility" is too broad to confirm anything on its own.
   const specific = (m: Set<string>) => new Set(Array.from(m).filter((x) => x !== 'mobility'))
   const dm = specific(draftMoves)
   const cm = specific(candidateMoves)
-  if (dm.size && cm.size) return Array.from(dm).some((m) => cm.has(m)) ? 'verified' : 'conflict'
+  if (dm.size && cm.size) return Array.from(dm).some((m) => cm.has(m)) ? { check: 'verified', by: 'movement' } : { check: 'conflict', by: null }
   const name = new Set(words(candidateName))
   const covered = keywords.some((k) => {
     const sw = specificWords(k)
-    return sw.length > 0 && sw.every((w) => name.has(w))
+    return sw.some((w) => !MOVEMENT_WORDS.has(w)) && sw.every((w) => name.has(w))
   })
-  if (dm.size && !cm.size) return covered ? 'unverified' : 'conflict'
-  return covered ? 'verified' : 'unverified'
+  if (dm.size && !cm.size) return covered ? { check: 'unverified', by: null } : { check: 'conflict', by: null }
+  return covered ? { check: 'verified', by: 'name' } : { check: 'unverified', by: null }
 }

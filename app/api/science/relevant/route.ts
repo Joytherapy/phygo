@@ -4,7 +4,7 @@ import { consumeHourly, HOURLY_LIMITS, limitResponse } from '@/lib/rateLimit';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { lazy } from '@/lib/lazy';
-import { paperRelevance, paperScore, searchTerms } from '@/lib/knowledge/paperRank';
+import { paperRelevance, paperScore, searchTerms, unstatedQualifiers, type PaperRelevance } from '@/lib/knowledge/paperRank';
 import { caseOf, conditionRegionsOf, otherRegionsOf } from '@/lib/clinical/coherence';
 import { pertinentTo, regionsOf, type Region } from '@/lib/clinical/region';
 
@@ -41,7 +41,9 @@ export async function POST(req: Request) {
 
     // More than one region treated today (e.g. right shoulder and left knee):
     // the search covers each, so it starts from the assessment as well.
-    const others = otherRegionsOf(caseOf(typeof transcript === 'string' ? transcript.slice(0, 8000) : '', { primaryCondition: primary, assessment: assess }));
+    const said = typeof transcript === 'string' ? transcript.slice(0, 8000) : '';
+    const others = otherRegionsOf(caseOf(said, { primaryCondition: primary, assessment: assess }));
+    const caseText = [said, primary, assess].join(' ');
     const clinicalText: string = others.length
       ? [primary.trim(), assess.trim()].filter(Boolean).join('; ')
       : primary.trim() || assess.trim() || '';
@@ -109,7 +111,12 @@ export async function POST(req: Request) {
     const targets: Region[] = Array.from(new Set([...conditionRegions, ...others.map((o) => o.region)]));
     const ranked = (found || [])
       .filter((p: any) => p.status === 'published')
-      .map((p: any) => ({ p, score: paperScore(p, terms), relevance: paperRelevance(p, terms, targets) }))
+      .map((p: any) => {
+        // About a population or a mechanism the case does not state: not claimed as evidence for it.
+        let relevance: PaperRelevance | null = paperRelevance(p, terms, targets);
+        if (relevance && relevance.level !== 'unverified' && unstatedQualifiers(p.title, caseText).length) relevance = { level: 'unverified', reason: 'population_or_mechanism_not_stated' };
+        return { p, score: paperScore(p, terms), relevance };
+      })
       .filter((x) => x.score > 0 && x.relevance !== null)
       .sort((a, b) => RANK[a.relevance!.level] - RANK[b.relevance!.level] || Number(a.relevance!.reason === 'same_mechanism_other_region') - Number(b.relevance!.reason === 'same_mechanism_other_region') || b.score - a.score || String(b.p.publication_date ?? '').localeCompare(String(a.p.publication_date ?? '')))
       .map((x) => {

@@ -8,7 +8,7 @@ import { lazy } from "@/lib/lazy";
 import { serviceClient } from "@/lib/verification";
 import { searchLibraryExercises, specificKeywords } from "@/lib/exerciseLibrary/search";
 import { exerciseFit, exerciseRegions, exerciseTextRegions, isGeneralActivity, type Fit, type Region } from "@/lib/clinical/region";
-import { checkMatch, isRegionOnlyKeyword } from "@/lib/clinical/exerciseMatch";
+import { isRegionOnlyKeyword, matchDetail } from "@/lib/clinical/exerciseMatch";
 import { caseOf } from "@/lib/clinical/coherence";
 
 const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
@@ -132,9 +132,11 @@ export async function POST(request: Request) {
       // Returns the regions of the exercise the draft names when that exercise is of another region.
       const pick = (candidates: ExerciseEntry[]): Region[] | void => {
         if (candidates.length === 0) return;
-        const checked = candidates.map((c) => ({ c, fit: exerciseFit(c, caseRegions), check: checkMatch(draftText, searchWith, `${c.name} ${c.source_name ?? ""}`) }));
+        const checked = candidates.map((c) => ({ c, fit: exerciseFit(c, caseRegions), ...matchDetail(draftText, searchWith, `${c.name} ${c.source_name ?? ""}`) }));
         const confirmed = checked.filter((x) => x.check === "verified");
-        if (draftRegions.length === 0 && !isGeneralActivity(draftText) && confirmed[0]?.fit === "incompatible") return exerciseRegions(confirmed[0].c);
+        // Only an exercise the draft is confirmed to be, by movement, tells its region ("Chin tuck").
+        const byMovement = confirmed.find((x) => x.by === "movement");
+        if (draftRegions.length === 0 && !isGeneralActivity(draftText) && byMovement?.fit === "incompatible") return exerciseRegions(byMovement.c);
         const best = confirmed.filter((x) => x.fit !== "incompatible").sort((a, b) => RANK[a.fit] - RANK[b.fit])[0];
         if (best) {
           match = best.c;

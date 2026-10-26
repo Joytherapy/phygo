@@ -63,11 +63,11 @@ interface LiveDict {
   evidenceDisclaimer: string
   evidenceIndirect: string
   evidenceUnverified: string
-  evidenceReason: Record<'same_region' | 'same_mechanism_other_region' | 'case_region_unknown' | 'paper_region_unknown', string>
+  evidenceReason: Record<'same_region' | 'same_mechanism_other_region' | 'case_region_unknown' | 'paper_region_unknown' | 'population_or_mechanism_not_stated', string>
   coherenceTitle: string
   coherenceIntro: string
   coherenceOk: string
-  coherenceIssue: Record<'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side' | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified' | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment' | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence', (item: string) => string>
+  coherenceIssue: Record<'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side' | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified' | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment' | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence' | 'objective_missing', (item: string) => string>
   removedTitle: string
   removedReason: Record<'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment', string>
   restore: string
@@ -77,7 +77,9 @@ interface LiveDict {
   otherRegionNoSheet: string
   sideLeft: string
   sideRight: string
-  unverifiedReason: Record<'case_region_unknown' | 'exercise_region_unknown' | 'sheet_region_unknown', string>
+  unverifiedReason: Record<'case_region_unknown' | 'exercise_region_unknown' | 'sheet_region_unknown' | 'diagnosis_not_stated' | 'ai_choice', string>
+  /** Why a region treated today has this sheet, or none (/api/knowledge-lookup `others`). */
+  otherSheetReason: Record<'symptom_only' | 'no_matching_sheet' | 'no_sheet_for_region', string>
   generalActivity: string
   excludedHistory: (regions: string) => string
   regionNames: Record<'shoulder' | 'elbow' | 'wrist_hand' | 'cervical' | 'thoracic' | 'lumbar' | 'hip' | 'thigh' | 'knee' | 'lower_leg' | 'ankle_foot' | 'upper_limb' | 'lower_limb', string>
@@ -197,6 +199,7 @@ const it: LiveDict = {
     same_mechanism_other_region: 'Stesso meccanismo clinico in un altro distretto: utile solo come riferimento, da valutare.',
     case_region_unknown: 'Il distretto del caso non è stato riconosciuto: la pertinenza non è stata verificata.',
     paper_region_unknown: 'Lo studio non indica un distretto riconoscibile: la pertinenza non è stata verificata.',
+    population_or_mechanism_not_stated: 'Lo studio riguarda una popolazione o un meccanismo (es. età, trauma, chirurgia, sport) che non hai indicato per questo caso: pertinenza non verificata.',
   },
   coherenceTitle: 'Controlli di coerenza',
   coherenceIntro: 'Confronto automatico tra ciò che hai detto e ciò che è stato generato. Il contenuto clinico resta da verificare da parte tua.',
@@ -208,6 +211,7 @@ const it: LiveDict = {
     coverage_exercises: (i) => `${i}: trattato oggi, ma nessun esercizio lo riguarda.`,
     coverage_protocol: (i) => `${i}: trattato oggi, ma nessuna scheda clinica trovata per questo distretto.`,
     coverage_evidence: (i) => `${i}: trattato oggi, ma nessuno studio pertinente trovato per questo distretto.`,
+    objective_missing: () => 'Nessun rilievo obiettivo riferito: la sezione resta vuota. Aggiungilo tu se lo hai raccolto.',
     region_unknown: () => 'Distretto non riconosciuto nella nota: la pertinenza di esercizi, studi e protocollo non è stata verificata automaticamente.',
     district: (i) => `La condizione indicata ("${i}") riguarda un distretto diverso da quello che hai descritto.`,
     section_region: (i) => `${i}: nomina un distretto che non hai descritto.`,
@@ -236,7 +240,10 @@ const it: LiveDict = {
     case_region_unknown: 'Pertinenza non verificata: il distretto del caso non è stato riconosciuto.',
     exercise_region_unknown: 'Pertinenza non verificata: il distretto dell’esercizio non è riconosciuto. Decidi tu se tenerlo.',
     sheet_region_unknown: 'Pertinenza non verificata: la scheda non indica un distretto riconoscibile.',
+    diagnosis_not_stated: 'Pertinenza non verificata: la diagnosi della scheda non risulta da ciò che hai detto, viene dalla valutazione generata.',
+    ai_choice: 'Pertinenza non verificata: scheda scelta dal modello, non da parole che hai detto.',
   },
+  otherSheetReason: { symptom_only: 'scheda generica del distretto (hai descritto il sintomo, non una diagnosi)', no_matching_sheet: 'nessuna scheda corrisponde a ciò che hai detto', no_sheet_for_region: 'nessuna scheda per questo distretto' },
   generalActivity: 'Attività generale',
   excludedHistory: (r) => `${r}: indicato solo in anamnesi, non come problema attuale.`,
   regionNames: { shoulder: 'spalla', elbow: 'gomito', wrist_hand: 'polso e mano', cervical: 'rachide cervicale', thoracic: 'rachide dorsale', lumbar: 'rachide lombare', hip: 'anca', thigh: 'coscia', knee: 'ginocchio', lower_leg: 'gamba (polpaccio)', ankle_foot: 'caviglia e piede', upper_limb: 'arto superiore', lower_limb: 'arto inferiore' },
@@ -356,6 +363,7 @@ const en: LiveDict = {
     same_mechanism_other_region: 'Same clinical mechanism in another body region: a reference only, to be weighed.',
     case_region_unknown: 'The body region of the case was not recognised: pertinence not verified.',
     paper_region_unknown: 'The paper names no recognisable body region: pertinence not verified.',
+    population_or_mechanism_not_stated: 'The paper is about a population or a mechanism (e.g. age, trauma, surgery, sport) you did not state for this case: pertinence not verified.',
   },
   coherenceTitle: 'Coherence checks',
   coherenceIntro: 'An automatic comparison between what you said and what was generated. The clinical content is still yours to verify.',
@@ -367,6 +375,7 @@ const en: LiveDict = {
     coverage_exercises: (i) => `${i}: treated today, but no exercise is for it.`,
     coverage_protocol: (i) => `${i}: treated today, but no condition sheet was found for this region.`,
     coverage_evidence: (i) => `${i}: treated today, but no pertinent paper was found for this region.`,
+    objective_missing: () => 'No objective findings were stated: the section is left empty. Add them yourself if you collected any.',
     region_unknown: () => 'No body region recognised in the note: the pertinence of exercises, papers and protocol was not checked automatically.',
     district: (i) => `The condition given ("${i}") is about a different body region from the one you described.`,
     section_region: (i) => `${i}: names a body region you did not describe.`,
@@ -395,7 +404,10 @@ const en: LiveDict = {
     case_region_unknown: 'Pertinence not verified: the body region of the case was not recognised.',
     exercise_region_unknown: 'Pertinence not verified: the exercise’s body region is not recognised. Your call whether to keep it.',
     sheet_region_unknown: 'Pertinence not verified: the sheet names no recognisable body region.',
+    diagnosis_not_stated: 'Pertinence not verified: the sheet\'s diagnosis is not in what you said, it comes from the generated assessment.',
+    ai_choice: 'Pertinence not verified: sheet chosen by the model, not from words you said.',
   },
+  otherSheetReason: { symptom_only: 'generic sheet for the region (you described the symptom, not a diagnosis)', no_matching_sheet: 'no sheet matches what you said', no_sheet_for_region: 'no sheet for this region' },
   generalActivity: 'General activity',
   excludedHistory: (r) => `${r}: given only as history, not as a current problem.`,
   regionNames: { shoulder: 'shoulder', elbow: 'elbow', wrist_hand: 'wrist and hand', cervical: 'cervical spine', thoracic: 'thoracic spine', lumbar: 'lumbar spine', hip: 'hip', thigh: 'thigh', knee: 'knee', lower_leg: 'lower leg (calf)', ankle_foot: 'ankle and foot', upper_limb: 'upper limb', lower_limb: 'lower limb' },
@@ -515,6 +527,7 @@ const es: LiveDict = {
     same_mechanism_other_region: 'Mismo mecanismo clínico en otra región: solo como referencia, a valorar.',
     case_region_unknown: 'No se ha reconocido la región del caso: pertinencia no verificada.',
     paper_region_unknown: 'El estudio no indica una región reconocible: pertinencia no verificada.',
+    population_or_mechanism_not_stated: 'El estudio trata de una población o un mecanismo (p. ej. edad, traumatismo, cirugía, deporte) que no indicaste para este caso: pertinencia no verificada.',
   },
   coherenceTitle: 'Controles de coherencia',
   coherenceIntro: 'Comparación automática entre lo que has dicho y lo generado. El contenido clínico debes verificarlo tú.',
@@ -526,6 +539,7 @@ const es: LiveDict = {
     coverage_exercises: (i) => `${i}: tratado hoy, pero ningún ejercicio lo trabaja.`,
     coverage_protocol: (i) => `${i}: tratado hoy, pero no se encontró ninguna ficha clínica para esta región.`,
     coverage_evidence: (i) => `${i}: tratado hoy, pero no se encontró ningún estudio pertinente para esta región.`,
+    objective_missing: () => 'No se indicó ningún hallazgo objetivo: la sección queda vacía. Añádelo tú si lo recogiste.',
     region_unknown: () => 'No se ha reconocido ninguna región en la nota: la pertinencia de ejercicios, estudios y protocolo no se ha verificado automáticamente.',
     district: (i) => `La condición indicada ("${i}") corresponde a una región distinta de la que has descrito.`,
     section_region: (i) => `${i}: menciona una región que no has descrito.`,
@@ -554,7 +568,10 @@ const es: LiveDict = {
     case_region_unknown: 'Pertinencia no verificada: no se ha reconocido la región del caso.',
     exercise_region_unknown: 'Pertinencia no verificada: no se reconoce la región del ejercicio. Decides tú si mantenerlo.',
     sheet_region_unknown: 'Pertinencia no verificada: la ficha no indica una región reconocible.',
+    diagnosis_not_stated: 'Pertinencia no verificada: el diagnóstico de la ficha no consta en lo que dijiste, viene de la valoración generada.',
+    ai_choice: 'Pertinencia no verificada: ficha elegida por el modelo, no por palabras que dijiste.',
   },
+  otherSheetReason: { symptom_only: 'ficha genérica de la región (describiste el síntoma, no un diagnóstico)', no_matching_sheet: 'ninguna ficha corresponde a lo que dijiste', no_sheet_for_region: 'ninguna ficha para esta región' },
   generalActivity: 'Actividad general',
   excludedHistory: (r) => `${r}: indicado solo como antecedente, no como problema actual.`,
   regionNames: { shoulder: 'hombro', elbow: 'codo', wrist_hand: 'muñeca y mano', cervical: 'columna cervical', thoracic: 'columna dorsal', lumbar: 'columna lumbar', hip: 'cadera', thigh: 'muslo', knee: 'rodilla', lower_leg: 'pierna (pantorrilla)', ankle_foot: 'tobillo y pie', upper_limb: 'miembro superior', lower_limb: 'miembro inferior' },
@@ -674,6 +691,7 @@ const fr: LiveDict = {
     same_mechanism_other_region: 'Même mécanisme clinique dans une autre région : simple référence, à évaluer.',
     case_region_unknown: 'La région du cas n’a pas été reconnue : pertinence non vérifiée.',
     paper_region_unknown: 'L’étude n’indique pas de région reconnaissable : pertinence non vérifiée.',
+    population_or_mechanism_not_stated: 'L’étude porte sur une population ou un mécanisme (p. ex. âge, traumatisme, chirurgie, sport) que vous n’avez pas indiqué pour ce cas : pertinence non vérifiée.',
   },
   coherenceTitle: 'Contrôles de cohérence',
   coherenceIntro: 'Comparaison automatique entre ce que vous avez dit et ce qui a été généré. Le contenu clinique reste à vérifier par vous.',
@@ -685,6 +703,7 @@ const fr: LiveDict = {
     coverage_exercises: (i) => `${i} : traité aujourd’hui, mais aucun exercice ne le concerne.`,
     coverage_protocol: (i) => `${i} : traité aujourd’hui, mais aucune fiche clinique trouvée pour cette région.`,
     coverage_evidence: (i) => `${i} : traité aujourd’hui, mais aucune étude pertinente trouvée pour cette région.`,
+    objective_missing: () => 'Aucun constat objectif indiqué : la section reste vide. Ajoutez-le vous-même si vous l’avez recueilli.',
     region_unknown: () => 'Aucune région reconnue dans la note : la pertinence des exercices, des études et du protocole n’a pas été vérifiée automatiquement.',
     district: (i) => `La pathologie indiquée (« ${i} ») concerne une autre région que celle que vous avez décrite.`,
     section_region: (i) => `${i} : mentionne une région que vous n’avez pas décrite.`,
@@ -713,7 +732,10 @@ const fr: LiveDict = {
     case_region_unknown: 'Pertinence non vérifiée : la région du cas n’a pas été reconnue.',
     exercise_region_unknown: 'Pertinence non vérifiée : la région de l’exercice n’est pas reconnue. À vous de décider de le garder.',
     sheet_region_unknown: 'Pertinence non vérifiée : la fiche n’indique pas de région reconnaissable.',
+    diagnosis_not_stated: 'Pertinence non vérifiée : le diagnostic de la fiche ne ressort pas de ce que vous avez dit, il vient de l’évaluation générée.',
+    ai_choice: 'Pertinence non vérifiée : fiche choisie par le modèle, pas à partir de vos mots.',
   },
+  otherSheetReason: { symptom_only: 'fiche générique de la région (vous avez décrit le symptôme, pas un diagnostic)', no_matching_sheet: 'aucune fiche ne correspond à ce que vous avez dit', no_sheet_for_region: 'aucune fiche pour cette région' },
   generalActivity: 'Activité générale',
   excludedHistory: (r) => `${r} : indiqué seulement dans les antécédents, pas comme problème actuel.`,
   regionNames: { shoulder: 'épaule', elbow: 'coude', wrist_hand: 'poignet et main', cervical: 'rachis cervical', thoracic: 'rachis dorsal', lumbar: 'rachis lombaire', hip: 'hanche', thigh: 'cuisse', knee: 'genou', lower_leg: 'jambe (mollet)', ankle_foot: 'cheville et pied', upper_limb: 'membre supérieur', lower_limb: 'membre inférieur' },

@@ -28,10 +28,11 @@ const TERMS: Record<Region, string[]> = {
   wrist_hand: ['polso', 'polsi', 'mano', 'mani', 'dito', 'dita', 'pollice', 'carpo', 'carpale', 'tunnel carpale', 'de quervain', 'wrist', 'wrists', 'hand', 'hands', 'finger', 'fingers', 'thumb', 'carpal', 'carpal tunnel', 'muneca', 'dedo', 'dedos', 'pulgar', 'poignet', 'poignets', 'doigt', 'doigts', 'pouce', 'canal carpien'],
   cervical: ['cervicale', 'cervicali', 'collo', 'cervicalgia', 'cervicobrachialgia', 'colpo di frusta', 'rachide cervicale', 'neck', 'cervical', 'whiplash', 'cuello', 'cervicalgia', 'cou', 'cervicalgie', 'nuque', 'chin tuck', 'retrazione del mento'],
   // Not the bare word 'dorsale': "flessione dorsale" is the ankle.
-  thoracic: ['toracico', 'toracica', 'rachide dorsale', 'rachide toracico', 'costole', 'costale', 'dorsalgia', 'thoracic', 'thoracic spine', 'rib', 'ribs', 'toracica', 'columna dorsal', 'costillas', 'thoracique', 'cotes', 'colonna dorsale', 'tratto dorsale'],
-  lumbar: ['cat camel', 'gatto cammello', 'gatto e cammello', 'lombare', 'lombari', 'lombalgia', 'lombosciatalgia', 'lombosacrale', 'sciatica', 'sciatalgia', 'mal di schiena', 'rachide lombare', 'sacroiliaca', 'sacroiliache', 'low back', 'low back pain', 'lumbar', 'lumbago', 'lumbosacral', 'sacroiliac', 'lumbalgia', 'lumbar', 'ciatica', 'lombaire', 'lombalgie', 'sciatique', 'lombo'],
+  // The spine named without a level is thoracic and lumbar ("colonna", "spine"); a level, when given, wins ("rachide cervicale").
+  thoracic: ['colonna vertebrale', 'colonna', 'rachide', 'vertebrale', 'vertebrali', 'spine', 'spinal', 'vertebral', 'columna vertebral', 'columna', 'colonne vertebrale', 'colonne', 'rachis', 'toracico', 'toracica', 'rachide dorsale', 'rachide toracico', 'costole', 'costale', 'dorsalgia', 'thoracic', 'thoracic spine', 'rib', 'ribs', 'toracica', 'columna dorsal', 'costillas', 'thoracique', 'cotes', 'colonna dorsale', 'tratto dorsale'],
+  lumbar: ['colonna vertebrale', 'colonna', 'rachide', 'vertebrale', 'vertebrali', 'spine', 'spinal', 'vertebral', 'columna vertebral', 'columna', 'colonne vertebrale', 'colonne', 'rachis', 'tronco', 'trunk', 'tronc', 'core', 'addome', 'addominali', 'addominale', 'abdomen', 'abdominal', 'abdominals', 'abdominales', 'abdominaux', 'bacino', 'pelvi', 'pelvico', 'pelvica', 'pelvis', 'pelvic', 'pelvien', 'pelvienne', 'plank', 'planks', 'plancia', 'bird dog', 'dead bug', 'cat camel', 'gatto cammello', 'gatto e cammello', 'lombare', 'lombari', 'lombalgia', 'lombosciatalgia', 'lombosacrale', 'sciatica', 'sciatalgia', 'mal di schiena', 'rachide lombare', 'sacroiliaca', 'sacroiliache', 'low back', 'low back pain', 'lumbar', 'lumbago', 'lumbosacral', 'sacroiliac', 'lumbalgia', 'lumbar', 'ciatica', 'lombaire', 'lombalgie', 'sciatique', 'lombo'],
   // Not 'anche' (the plural of anca is also the everyday word for "also").
-  hip: ['anca', 'coxartrosi', 'coxofemorale', 'gluteo', 'glutei', 'gluteo medio', 'piriforme', 'trocantere', 'trocanterica', 'trocanterite', 'inguine', 'inguinale', 'femoroacetabolare', 'hip', 'hips', 'gluteal', 'gluteus', 'glute', 'glutes', 'piriformis', 'trochanter', 'trochanteric', 'groin', 'femoroacetabular', 'cadera', 'caderas', 'gluteo', 'ingle', 'hanche', 'hanches', 'fessier', 'aine', 'coxarthrose'],
+  hip: ['bacino', 'pelvi', 'pelvis', 'pelvic', 'anca', 'coxartrosi', 'coxofemorale', 'gluteo', 'glutei', 'gluteo medio', 'piriforme', 'trocantere', 'trocanterica', 'trocanterite', 'inguine', 'inguinale', 'femoroacetabolare', 'hip', 'hips', 'gluteal', 'gluteus', 'glute', 'glutes', 'piriformis', 'trochanter', 'trochanteric', 'groin', 'femoroacetabular', 'cadera', 'caderas', 'gluteo', 'ingle', 'hanche', 'hanches', 'fessier', 'aine', 'coxarthrose'],
   thigh: ['coscia', 'cosce', 'ischiocrurali', 'ischiocrurale', 'bicipite femorale', 'quadricipite', 'quadricipiti', 'adduttori', 'adduttore', 'hamstring', 'hamstrings', 'quadriceps', 'quads', 'thigh', 'adductor', 'adductors', 'isquiotibiales', 'isquiotibial', 'cuadriceps', 'muslo', 'aductores', 'ischio jambiers', 'ischiojambiers', 'cuisse', 'adducteurs'],
   knee: ['ginocchio', 'ginocchia', 'rotula', 'rotuleo', 'rotulea', 'femororotuleo', 'femoro rotuleo', 'menisco', 'meniscale', 'crociato', 'lca', 'gonartrosi', 'knee', 'knees', 'patella', 'patellar', 'patellofemoral', 'meniscus', 'meniscal', 'cruciate', 'acl', 'pcl', 'rodilla', 'rodillas', 'rotuliano', 'menisco', 'genou', 'genoux', 'rotulien', 'menisque', 'ligament croise'],
   lower_leg: ['polpaccio', 'polpacci', 'gastrocnemio', 'gastrocnemi', 'soleo', 'tibia', 'tibiale', 'periostite', 'calf', 'calves', 'gastrocnemius', 'soleus', 'shin', 'shin splints', 'tibial', 'pantorrilla', 'gemelos', 'mollet', 'tibia'],
@@ -68,28 +69,95 @@ const COMPILED = (Object.entries(TERMS) as [Region, string[]][]).map(([region, t
   region,
   terms: Array.from(new Set(terms.map((t) => normalize(t)))),
 }))
+// Terms by their first word, for a fast scan.
+const BY_FIRST = new Map<string, { region: Region; words: string[] }[]>()
+for (const { region, terms } of COMPILED) {
+  for (const t of terms) {
+    const words = t.trim().split(' ')
+    BY_FIRST.set(words[0], [...(BY_FIRST.get(words[0]) ?? []), { region, words }])
+  }
+}
+
+/**
+ * Where region terms occur in words. A longer term wins over a shorter one it
+ * contains, whatever its region ("rachide cervicale" is cervical, not also the
+ * generic spine of "rachide").
+ */
+export function termHits(words: string[]): { region: Region; start: number; end: number }[] {
+  const hits: { region: Region; start: number; end: number }[] = []
+  words.forEach((w, i) => {
+    for (const t of BY_FIRST.get(w) ?? []) if (t.words.every((x, k) => words[i + k] === x)) hits.push({ region: t.region, start: i, end: i + t.words.length - 1 })
+  })
+  return hits.filter((h) => !hits.some((g) => g !== h && g.start <= h.start && g.end >= h.end && g.end - g.start > h.end - h.start))
+}
 
 /** The regions a text names, as whole words (anywhere, whatever the context). */
 export function regionsOf(text: string | null | undefined): Region[] {
-  const t = normalize(text ?? '')
-  return COMPILED.filter((r) => r.terms.some((term) => t.includes(term))).map((r) => r.region)
+  const found = new Set(termHits(normalize(text ?? '').trim().split(' ').filter(Boolean)).map((h) => h.region))
+  return COMPILED.map((r) => r.region).filter((r) => found.has(r))
 }
 
 // The Exercises section's body_region codes (app/dashboard/exercise-library) and
 // wger categories that the words above do not already cover. Whole-body and
 // core are not general: they stay "not recognised".
 const ZONE: Record<string, Region> = {
-  chest: 'shoulder', biceps: 'upper_limb', triceps: 'upper_limb', forearm: 'upper_limb',
+  chest: 'shoulder', biceps: 'upper_limb', triceps: 'upper_limb', forearm: 'upper_limb', 'core abdomen': 'lumbar',
 }
 
-// In an exercise, a body part can describe the position, not the region
-// worked ("rotazione esterna con elastico, gomito a 90° al fianco" is a
-// shoulder exercise; "ponte con ginocchia flesse" a hip one).
-const POSITION = /\b(con (il |i |le )?|col |coi )?(gomit[oi]|elbows?|codos?|coudes?|ginocchi[oa]|knees?|rodillas?|genoux|braccia|braccio|arms?|piedi|feet|pies)\s+(a \d+|at \d+|al fianco|ai fianchi|at (your )?sides?|by (your )?sides?|lungo (il|i) fianc\w*|flesso|flessi|flessa|flesse|piegat\w*|bent|flexed|extended|estes[oiae]|appoggiat\w*|a terra|on the floor|in appoggio|apart|divaricat\w*)\b/g
-export const withoutPositions = (text: string | null | undefined) => normalize(text ?? '').replace(POSITION, ' ')
+// Which region an exercise works on, from how a body part is used in its
+// description, not from the mere presence of a region's name:
+// - the part a movement acts on is the target ("flessione del gomito",
+//   "rotazione esterna spalla destra", "mobilizzazione della colonna");
+// - a part that only gives the position is not ("con le ginocchia flesse",
+//   "gomito vicino al corpo", "gomito a 90° al fianco", "braccia tese");
+// - a part named as the purpose is not ("flessione laterale del tronco per la
+//   spalla destra" works the trunk);
+// - with no target named, the movement can tell it ("rotazione esterna" is a
+//   shoulder or hip movement, "ponte" a hip one); otherwise it is unknown.
+const OF_WORDS = new Set(['di', 'del', 'della', 'dello', 'dei', 'degli', 'delle', 'dell', 'd', 'of', 'du', 'de', 'des'])
+const WITH_WORDS = new Set(['con', 'col', 'coi', 'tenendo', 'mantenendo', 'keeping', 'with', 'avec', 'manteniendo', 'en', 'in'])
+const PURPOSE_WORDS = new Set(['per', 'for', 'para', 'pour'])
+const ARTICLES = new Set(['il', 'lo', 'la', 'l', 'i', 'gli', 'le', 'the', 'your', 'el', 'los', 'las', 'les', 'un', 'una', 'a', 'al', 'alla', 'allo', 'ai', 'alle', 'agli'])
+const POSITION_WORDS = new Set(['vicino', 'vicina', 'vicini', 'vicine', 'aderente', 'aderenti', 'attaccato', 'attaccata', 'attaccati', 'attaccate', 'appoggiato', 'appoggiata', 'appoggiati', 'appoggiate', 'flesso', 'flessa', 'flessi', 'flesse', 'piegato', 'piegata', 'piegati', 'piegate', 'esteso', 'estesa', 'estesi', 'estese', 'teso', 'tesa', 'tesi', 'tese', 'fermo', 'ferma', 'fermi', 'bloccato', 'bloccata', 'fianco', 'fianchi', 'corpo', 'terra', 'divaricate', 'divaricati', 'close', 'near', 'against', 'bent', 'straight', 'tucked', 'pinned', 'side', 'sides', 'apart', 'floor', 'junto', 'pegado', 'pegada', 'apoyado', 'apoyada', 'flexionado', 'flexionada', 'contre', 'pres', 'plie', 'plies', 'tendu', 'tendus'])
+const MOVEMENT_REGIONS: [string[], Region[]][] = [
+  [['rotazione esterna', 'rotazioni esterne', 'extrarotazione', 'external rotation', 'rotacion externa', 'rotation externe', 'rotazione interna', 'rotazioni interne', 'intrarotazione', 'internal rotation', 'rotacion interna', 'rotation interne'], ['shoulder', 'hip']],
+  [['abduzione', 'adduzione', 'abduction', 'adduction', 'abduccion', 'aduccion'], ['shoulder', 'hip']],
+  [['ponte', 'bridge', 'puente', 'pont'], ['hip']],
+]
 
-/** The regions an exercise as written works on (positions are not regions). */
-export const exerciseTextRegions = (text: string | null | undefined) => regionsOf(withoutPositions(text))
+/** The regions an exercise as written works on (positions and purposes are not regions). */
+export function exerciseTextRegions(text: string | null | undefined): Region[] {
+  const words = sentenceWords(text ?? '')
+  const targets = new Set<Region>()
+  for (const h of termHits(words)) {
+    const before = words.slice(Math.max(0, h.start - 3), h.start)
+    const back = (k: number) => before[before.length - k]
+    // "per la spalla": purpose.
+    let k = 1
+    while (back(k) && ARTICLES.has(back(k)!)) k++
+    if (back(k) && PURPOSE_WORDS.has(back(k)!)) continue
+    // "del gomito", "di ginocchio": what the movement acts on.
+    if (back(1) && OF_WORDS.has(back(1)!) || (back(2) && OF_WORDS.has(back(2)!) && ARTICLES.has(back(1)!))) {
+      targets.add(h.region)
+      continue
+    }
+    // "con le ginocchia", "gomito vicino al corpo", "gomito a 90": position.
+    const withBefore = back(k) && WITH_WORDS.has(back(k)!)
+    const after = words.slice(h.end + 1, h.end + 4)
+    const cut = after.indexOf(BOUNDARY)
+    const near = cut >= 0 ? after.slice(0, cut) : after
+    const angle = near.some((w, i) => (w === 'a' || w === 'at') && /^\d+$/.test(near[i + 1] ?? ''))
+    if (withBefore || angle || near.some((w) => POSITION_WORDS.has(w))) continue
+    targets.add(h.region)
+  }
+  if (targets.size) return COMPILED.map((r) => r.region).filter((r) => targets.has(r))
+  const joined = ` ${words.join(' ')} `
+  const moved = new Set(MOVEMENT_REGIONS.filter(([terms]) => terms.some((t) => joined.includes(` ${t} `))).flatMap(([, regions]) => regions))
+  return COMPILED.map((r) => r.region).filter((r) => moved.has(r))
+}
+
+/** The same text without its position phrases (kept for callers that need a string). */
+export const withoutPositions = (text: string | null | undefined) => normalize(text ?? '')
 
 /** Every single word that names a region in some language (to tell a region-only keyword). */
 export const REGION_WORDS = new Set(Object.values(TERMS).flat().flatMap((t) => normalize(t).trim().split(' ')))
@@ -97,7 +165,7 @@ export const REGION_WORDS = new Set(Object.values(TERMS).flat().flatMap((t) => n
 /** The regions of a database exercise: its name, body region and primary muscle. */
 export function exerciseRegions(ex: { name?: string | null; body_region?: string | null; primary_muscle?: string | null }): Region[] {
   const zone = ZONE[normalize(ex.body_region ?? '').trim()]
-  return Array.from(new Set([...regionsOf(`${withoutPositions(ex.name)} ${ex.body_region ?? ''} ${ex.primary_muscle ?? ''}`), ...(zone ? [zone] : [])]))
+  return Array.from(new Set([...exerciseTextRegions(ex.name), ...regionsOf(`${ex.body_region ?? ''} ${ex.primary_muscle ?? ''}`), ...(zone ? [zone] : [])]))
 }
 
 /** Every region pertinent to a set of regions (each one plus its neighbours). */
@@ -222,10 +290,9 @@ export function analyzeMentions(text: string | null | undefined): Mention[] {
       const near = marks.find((x) => (x.kind === 'history' || x.kind === 'resolved') && x !== m && boundariesBetween(x.start, m.start) === 0 && (Math.abs(x.end - m.start) <= 2 || Math.abs(m.end - x.start) <= 2))
       if (near && !unresolved.includes(m)) m.kind = near.kind
     }
-    const found: { region: Region; start: number; end: number }[] = []
-    for (const { region, terms } of COMPILED_WORDS) for (const t of terms) for (const h of findPhrase(words, t)) found.push({ region, ...h })
-    // Overlapping terms of one region (cuffia / cuffia dei rotatori): keep one mention per place.
-    const mentions = found.filter((f, i) => !found.some((g, j) => j !== i && g.region === f.region && g.start <= f.start && g.end >= f.end && (g.end - g.start > f.end - f.start || j < i)))
+    // Overlapping terms (cuffia / cuffia dei rotatori, rachide / rachide cervicale): the longest, one per place.
+    const hits = termHits(words)
+    const mentions = hits.filter((f, i) => !hits.some((g, j) => j < i && g.region === f.region && g.start === f.start && g.end === f.end))
     // "Both" applies to the region it is said with ("entrambe le ginocchia",
     // "dolore bilaterale alle ginocchia"), not to every region of the sentence
     // ("spalla e ginocchio, trattati entrambi oggi").

@@ -18,7 +18,7 @@ export type IssueKind =
   | 'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side'
   | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified'
   | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment'
-  | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence'
+  | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence' | 'objective_missing'
 export type Issue = { kind: IssueKind; severity: 'high' | 'medium'; item: string; section?: SectionName; regions?: Region[]; caseRegions?: Region[] }
 
 export type SectionName =
@@ -236,6 +236,8 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
     }
     for (const t of treatmentsNotInTranscript(text, o.transcript)) issues.push({ kind: 'invented_treatment', severity: 'high', item: t, section: name })
   }
+  // No objective findings: said plainly, not left as an empty section.
+  if (!(o.note.objective ?? '').trim()) issues.push({ kind: 'objective_missing', severity: 'medium', item: 'objective', section: 'objective' })
   // 7. More than one region treated today: exercises, condition sheets and
   //    papers for each (a region next to one already covered counts as covered).
   const separate = separateRegions(profile.active)
@@ -246,7 +248,7 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
       if (o.exercises.length && !o.exercises.some((e) => exerciseRegions(e).some((x) => near.has(x)))) issues.push({ kind: 'coverage_exercises', severity: 'medium', item: r })
       if (pertinentTo(primary).has(r)) continue
       if (o.protocol && !(o.otherProtocols ?? []).some((p) => p.region === r && p.name)) issues.push({ kind: 'coverage_protocol', severity: 'medium', item: r })
-      if (!o.papers.some((p) => (p.regions ?? regionsOf(p.title)).some((x) => near.has(x)))) issues.push({ kind: 'coverage_evidence', severity: 'medium', item: r })
+      if (!o.papers.some((p) => p.relevance !== 'unverified' && (p.regions ?? regionsOf(p.title)).some((x) => near.has(x)))) issues.push({ kind: 'coverage_evidence', severity: 'medium', item: r })
     }
   }
   return issues
