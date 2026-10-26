@@ -169,6 +169,20 @@ L'utente ha eseguito tre verifiche con il modello OpenAI reale, usando lo script
 
 Ogni rimozione è elencata nel pannello ("Tolto dalla bozza perché non risulta da ciò che hai detto"), con sezione, motivo e "Ripristina". La Valutazione è ragionamento clinico: viene solo segnalata (se non è formulata come ipotesi), mai modificata.
 
+### Revisione 4: seconda verifica con il modello reale (dopo `cf0e971`)
+
+L'utente ha ripetuto con il modello OpenAI reale i tre casi sintetici `shoulderLeft`, `historyKnee` e `multiSiteSides`, sul commit `cf0e971` e in ambiente isolato. Il suo report resta sul suo computer e non è nel repository. Ogni problema segnalato è riprodotto come regressione con risposte simulate, in quattro casi: `r4ShoulderLeft`, `r4HistoryKnee`, `r4MultiSite` e `r4ObjectiveReported` in `tests/support/clinical-world.mjs`, con quattro test dedicati in `tests/clinical-relevance.test.mjs`. Sul codice di `cf0e971` i quattro test fallivano tutti, ciascuno per il motivo osservato (47 superati, 4 falliti).
+
+| Problema osservato con il modello reale | Causa | Correzione |
+|---|---|---|
+| "Rotazione esterna con elastico, gomito vicino al corpo" esclusa come esercizio del gomito; "Mobilizzazione della colonna vertebrale con rotazione" esclusa come esercizio della spalla | Due cause. (1) Le posizioni riconosciute erano un elenco fisso ("gomito a 90°", "al fianco"); "gomito vicino al corpo" non c'era, quindi "gomito" diventava il distretto. (2) Un esercizio del database abbinato solo perché il nome condivideva una parola ("rotation" in "Shoulder internal rotation") decideva il distretto dell'esercizio della nota | **Deduzione del distretto dalla struttura della frase** (`exerciseTextRegions` in `lib/clinical/region.ts`), non da un elenco di eccezioni. Il distretto è quello che l'esercizio nomina come **oggetto**: "flessione **del** gomito", "mobilizzazione **della** colonna". Non sono distretti: una **posizione**, cioè un distretto dopo "con", "tenendo" o "in", vicino a parole come vicino, corpo, flesso, fianco, o seguito da un angolo; e uno **scopo** ("per la spalla"). Senza oggetto, un movimento noto indica i distretti possibili: la rotazione esterna o interna e l'abduzione indicano spalla o anca, il ponte indica l'anca. **Abbinamento** (`matchDetail` in `lib/clinical/exerciseMatch.ts`): solo un esercizio confermato dallo **stesso movimento** può indicare il distretto. Una parola di solo movimento ("rotation", "flexion") non basta più a confermare un abbinamento per nome |
+| Plank, mobilità del bacino, bird-dog e flessione laterale della colonna "pertinenza non verificata" in un caso di lombalgia | Colonna, tronco, core, bacino, plank e bird-dog non erano nel vocabolario dei distretti | Aggiunti in 4 lingue: colonna/rachide/spine come dorsale e lombare; tronco, core, addome, plank, bird-dog e dead bug come lombare; bacino/pelvi come lombare e anca. I termini sono cercati **dal più lungo** in tutti i distretti, così "rachide cervicale" resta cervicale. Un esercizio senza alcun distretto riconoscibile ("Esercizio con la palla") resta "non verificato", come richiesto |
+| Spalla dx + ginocchio sx: ginocchio sinistro "nessuna scheda" | Per gli altri distretti si cercava per parola chiave nell'intera valutazione. Il ginocchio era descritto solo come dolore, e nessuna parola chiave di una scheda del ginocchio compariva | **Ricerca separata per ogni distretto** trattato oggi, tra le sole schede di quel distretto, in questo ordine: (1) la condizione nominata dal fisioterapista nelle frasi su quel distretto; (2) se ha descritto solo il sintomo, la **scheda generica del distretto** ("Dolore di ginocchio aspecifico", "Lombalgia aspecifica"), mai una diagnosi più specifica; (3) una condizione che compare solo nella valutazione generata, oppure (4) la scelta del modello limitata alle schede di quel distretto: entrambe **"non verificate"**; (5) altrimenti nessuna, con il motivo. Ogni voce riporta distretto, lato, pertinenza e motivo, anche nel pannello |
+| — (stesso caso) diagnosi più specifica di quella detta | La scheda principale era "verificata" se il distretto coincideva, anche quando la diagnosi ("cuffia dei rotatori") veniva solo dalla valutazione del modello | La scheda principale è **"non verificata: la diagnosi non risulta da ciò che hai detto"** se il fisioterapista non ha nominato la condizione della scheda (un nome o una parola chiave in qualsiasi lingua, oppure, nello stesso distretto, una parola della condizione come "tendinopatia") |
+| "Traumatic leg pain in adolescents: a cohort study" diretto per il ginocchio | La pertinenza degli studi guardava solo distretto e condizione | **Popolazione e meccanismo** (`unstatedQualifiers` in `lib/knowledge/paperRank.ts`): un titolo che riguarda bambini, adolescenti, anziani, trauma, chirurgia, atleti o gravidanza è "non verificato" se il caso non lo indica. Valgono le parole del fisioterapista, la condizione e la valutazione; un'età indicata conta per le fasce d'età. La copertura di un distretto conta solo gli studi diretti o indiretti |
+| "Flessione laterale del tronco per la spalla destra" contata come esercizio compatibile | "spalla" era letto come distretto dell'esercizio | "per la spalla" è uno **scopo**, non un distretto. L'esercizio è del tronco (lombare): nel caso spalla + ginocchio viene escluso con il suo distretto |
+| Dati oggettivi: verificare che quelli riferiti non vengano persi e che l'assenza sia esplicita | — | Regressione `r4ObjectiveReported`: flessione 120 gradi, Lachman negativo e lieve versamento, tutti detti, restano nella nota e non vengono tolti né segnalati. Quando l'Oggettivo è vuoto, il pannello lo dice: "Nessun rilievo obiettivo riferito" (`objective_missing`). L'avviso sparisce se il fisioterapista ripristina un rilievo |
+
 ## Matrice dei casi e risultati (solo test simulati)
 
 Suite `tests/clinical-relevance.test.mjs`. Segue il percorso reale delle route:
@@ -242,13 +256,56 @@ Test nel browser (Playwright, `tests/session-notes-panel.test.mjs`, 5 test). Due
 - script del modello reale: verificato solo contro un sostituto locale di OpenAI (collegamento delle parti), non contro il modello reale;
 - questo documento è aggiornato con un commit successivo che modifica **solo** questo file.
 
+**Revisione 4, regressioni dalla seconda verifica con il modello reale** (risposte simulate):
+
+| Test | Prima, sul codice di `cf0e971` | Dopo |
+|---|---|---|
+| Spalla sx, "Rotazione esterna con elastico, gomito vicino al corpo" | ✗ esclusa (`off_region`) | ✓ non esclusa; abbinata a "Shoulder external rotation with band", compatibile |
+| Lombalgia con ginocchio in anamnesi: mobilizzazione della colonna con rotazione, plank, mobilità del bacino, bird-dog, flessione laterale della colonna | ✗ mobilizzazione esclusa come esercizio della spalla; gli altri quattro "non verificati" | ✓ nessuno escluso; tutti e cinque compatibili; nessuna sostituzione con "Shoulder internal rotation" |
+| Spalla dx + ginocchio sx | ✗ ginocchio senza scheda; scheda della cuffia "verificata" senza che il fisioterapista l'abbia nominata | ✓ ginocchio sinistro: scheda generica del ginocchio, verificata, motivo "sintomo descritto, non una diagnosi"; scheda della cuffia "non verificata: diagnosi non detta"; studio sugli adolescenti con trauma assente o "non verificato" con il motivo; flessione laterale del tronco "per la spalla" esclusa come lombare; nessun avviso di copertura del protocollo per il ginocchio |
+| Oggettivo riferito / Oggettivo assente | ✗ Oggettivo vuoto senza alcun avviso | ✓ dati riferiti conservati e nessuna rimozione; Oggettivo vuoto segnalato |
+
+Altri test aggiornati di conseguenza (comportamento nuovo e voluto, non tolleranze):
+- **Schede**: nei casi in cui il fisioterapista dice solo "dolore alla spalla", la scheda della cuffia è ora "non verificata (diagnosi non detta)". Riguarda 7 casi della matrice; prima risultava "verificata".
+- **Altri distretti**: nel caso `realMultisite` l'altro distretto (ginocchio) riceve la scheda generica del ginocchio invece di "Dolore femororotuleo", che compariva solo nella valutazione del modello. Nel caso `secondaryActive` il distretto lombare riceve "Lombalgia aspecifica" e non è più segnalato come senza scheda.
+- **Esercizi**: "Plank", prima usato come esempio di distretto non riconosciuto, ora è lombare. L'esempio è diventato "Esercizio con la palla 3x10" (casi `unknownExercise`, `caseUnverified` e test nel browser).
+- **Movimenti**: "Rotazione esterna …, gomito a 90° al fianco" ha come distretti possibili spalla e anca, quelli del movimento. "Ponte con ginocchia flesse" ha come distretto l'anca.
+- **Unità**: nuovi test unitari per "diagnosi detta", per "scheda generica del distretto" (es. "Dolore femororotuleo" e "Coxartrosi" non sono generiche) e per popolazione e meccanismo degli studi.
+- **Browser**: il test del pannello multidistretto verifica la scheda "non verificata" con il motivo, la scheda generica del ginocchio con il motivo, l'avviso "Nessun rilievo obiettivo riferito" e la sua scomparsa dopo il ripristino di un rilievo.
+
+**Controlli complessivi** (revisione 4), eseguiti sul commit `19dbc31` con l'albero di lavoro pulito:
+- suite completa dell'app: **257 test, 257 superati, 0 falliti, 0 saltati, 0 annullati**. Comprende `clinical-relevance` (51), `knowledge-match` (7) e i 6 test nel browser della pagina della seduta, di cui 3 sul pannello di coerenza;
+- typecheck: nessun errore. Build: riuscita;
+- test SQL: 7 file, tutti superati, solo su PostgreSQL locale nel container;
+- script del modello reale: eseguito **solo contro un sostituto locale di OpenAI** sui tre casi della verifica e sulle tre regressioni. Il report dice "SOSTITUTO del modello" e riporta, per ogni altro distretto, la scheda con pertinenza e motivo. È una prova del collegamento tra le parti, **non** una verifica del modello reale;
+- questo documento è aggiornato con un commit successivo che modifica **solo** la documentazione.
+
 ## Test simulati e verifica con il modello reale
 
 | | Stato |
 |---|---|
 | Test simulati (modello scriptato, dati sintetici) | Eseguiti, risultati sopra |
 | Verifica con il modello AI reale, prima della revisione 3 | Eseguita dall'utente su tre casi sintetici, in ambiente isolato. Ha trovato i cinque problemi della revisione 3, riprodotti qui come regressioni simulate |
-| Verifica con il modello AI reale, dopo la revisione 3 | **Da ripetere.** In questo ambiente non c'è una chiave OpenAI. Le correzioni sono dimostrate solo con risposte simulate, che riproducono gli output osservati. Quanto il modello reale scriva meno dati inventati con i nuovi prompt **non è dimostrato**; la pulizia e i controlli intervengono comunque su ciò che scrive |
+| Verifica con il modello AI reale, dopo la revisione 3 (`cf0e971`) | Eseguita dall'utente sugli stessi tre casi sintetici. I reperti inventati risultano migliorati; ha trovato i problemi della revisione 4, riprodotti qui come regressioni simulate |
+| Verifica con il modello AI reale, dopo la revisione 4 | **Da eseguire, prima del merge.** In questo ambiente non c'è una chiave OpenAI. Le correzioni sono dimostrate **solo con risposte simulate** che riproducono gli output osservati. Che il modello reale, con la nuova logica, dia i risultati attesi sui tre casi **non è dimostrato** finché non c'è il nuovo report reale da confrontare con quello precedente |
+
+**Ripetizione dei tre casi dopo la revisione 4** (dalla radice del repository, sul commit della PR, con la chiave solo nella variabile d'ambiente):
+
+```
+npm ci
+node scripts/clinical-relevance-live.mjs --build
+OPENAI_API_KEY_LIVE=<chiave> node scripts/clinical-relevance-live.mjs --out ./clinical-live-report-r4 --repeat 1 --cases shoulderLeft,historyKnee,multiSiteSides
+```
+
+Da confrontare con il report precedente (`cf0e971`), punto per punto:
+1. "Rotazione esterna … gomito vicino al corpo" e "Mobilizzazione della colonna vertebrale con rotazione" non sono esclusi;
+2. plank, bacino, bird-dog e flessione laterale della colonna non risultano "non verificati" nel caso lombare;
+3. il ginocchio sinistro ha una scheda con lato, pertinenza e motivo;
+4. "Traumatic leg pain in adolescents" non è "diretto";
+5. un esercizio del tronco "per la spalla" non è compatibile con la spalla;
+6. i dati oggettivi detti restano nella nota e l'Oggettivo vuoto è segnalato.
+
+Il modello reale può scrivere esercizi o valutazioni diversi da quelli delle regressioni. In quel caso conta il comportamento sul testo effettivamente generato, che va riportato con il caso.
 
 **Procedura per la verifica con il modello reale** (`docs/clinical/verifica-manuale-modello-reale.md`):
 - si esegue con `scripts/clinical-relevance-live.mjs`, in ambiente isolato: app in locale, Supabase sostituito da un database in memoria con soli dati sintetici, nessun database reale e nessun paziente;
@@ -259,13 +316,16 @@ Test nel browser (Playwright, `tests/session-notes-panel.test.mjs`, 5 test). Due
 - **Reperti e test sono riconosciuti da un vocabolario** (concetti e nomi in 4 lingue): un reperto descritto con parole fuori elenco non viene rilevato.
 - **Un reperto è "sostenuto" a livello di concetto**: se il fisioterapista ha parlato di gonfiore, un "edema" nel testo è accettato anche se il grado o la sede sono diversi.
 - **La pulizia lavora per proposizioni**: una proposizione che mescola un dato detto e uno inventato viene tolta per intero; resta elencata e si può ripristinare.
-- **La corrispondenza degli esercizi si basa su circa 25 movimenti**: per un esercizio senza movimento noto basta che le parole specifiche della parola chiave siano nel nome.
-- **Per gli altri distretti** la scheda è cercata per parola chiave tra le schede di quel distretto, senza ripiego AI e senza fasi.
-- **I controlli sono deterministici e coprono solo fatti verificabili**: distretto, lato, misure con unità, giorni/date/orari, trattamenti "eseguiti" di un elenco noto. Non giudicano la correttezza del ragionamento clinico, l'aderenza agli obiettivi del paziente, la popolazione degli studi o la corrispondenza tra titolo, abstract, autori e PMID. Sono tutti punti della verifica manuale.
+- **La corrispondenza degli esercizi si basa su circa 25 movimenti**: per un esercizio senza movimento noto devono essere nel nome tutte le parole specifiche della parola chiave, di cui almeno una non di solo movimento.
+- **Il distretto di un esercizio si deduce dalla struttura della frase** (oggetto, posizione, scopo) e da un vocabolario. Una costruzione insolita può essere letta male: un distretto introdotto da "con" è sempre letto come posizione, quindi "Esercizio con la spalla" non ha distretto e resta "non verificato". Senza oggetto, un movimento indica distretti possibili ampi: la rotazione esterna indica spalla o anca. Con i distretti vicini, quindi, risulta compatibile anche in un caso di gomito o di ginocchio. L'errore va nel senso di accettare l'esercizio, che resta visibile al fisioterapista, non di escluderlo.
+- **Per gli altri distretti** la scheda viene mostrata senza fasi. La "scheda generica del distretto" esiste solo se il database ne contiene una il cui nome indica soltanto il dolore di quel distretto, come "Dolore di ginocchio aspecifico" o "Lombalgia aspecifica"; altrimenti si passa alla valutazione o alla scelta del modello, entrambe "non verificate".
+- **"Diagnosi detta" è un confronto di parole**: un sinonimo che non compare tra i nomi e le parole chiave della scheda ("sovraspinato" per una scheda sulla "cuffia dei rotatori") rende la scheda "non verificata" anche se la diagnosi è stata detta. L'errore va nel senso di dichiarare meno.
+- **Popolazione e meccanismo degli studi si leggono dal titolo**, con un elenco di 7 qualificatori in inglese. Una popolazione indicata solo nell'abstract, o con parole fuori elenco, non viene rilevata.
+- **I controlli sono deterministici e coprono solo fatti verificabili**: distretto, lato, misure con unità, giorni/date/orari, trattamenti "eseguiti" di un elenco noto. Non giudicano la correttezza del ragionamento clinico, l'aderenza agli obiettivi del paziente o la corrispondenza tra titolo, abstract, autori e PMID; la popolazione degli studi solo come sopra. Sono tutti punti della verifica manuale.
 - **Il riconoscimento del distretto si basa su un vocabolario**: sinonimi rari, refusi o abbreviazioni non vengono riconosciuti. In quel caso il sistema **lo dichiara** ("distretto non riconosciuto", "pertinenza non verificata") invece di classificare.
 - **La distinzione anamnesi / attuale / negato si basa su parole indicatrici**: un'anamnesi senza indicatori ("operato al ginocchio nel 2019") resta attuale. Una frase senza indicatori eredita lo stato della frase precedente. Gli errori vanno nel senso di considerare un distretto attuale, quindi segnalare meno, non nascondere.
 - **Il lato viene associato alla parola di lato più vicina**, entro tre parole. Costruzioni lunghe o insolite possono lasciare il lato non associato, e in quel caso non viene controllato.
-- **Le attività generali sono solo quelle aerobiche riconosciute dal nome.** Gli esercizi "core" o "whole-body" restano "non verificati": decide il fisioterapista.
+- **Le attività generali sono solo quelle aerobiche riconosciute dal nome.** Gli esercizi di core e tronco (plank, bird-dog, dead bug) sono lombari; gli esercizi "whole-body" o senza distretto restano "non verificati": decide il fisioterapista.
 - **Una scheda o uno studio "non verificati" restano visibili.** Vanno valutati dal fisioterapista, che vede il motivo.
 - **Il controllo dei distretti non si applica a tutte le sezioni**: Differenziali, test suggeriti e precauzioni possono citare altri distretti; lì si controlla solo il lato.
 - **"Indiretta per meccanismo" dipende dalle parole del titolo**: può includere uno studio sullo stesso meccanismo in un contesto clinico diverso. Per questo è sempre etichettato e viene dopo le evidenze dirette.
