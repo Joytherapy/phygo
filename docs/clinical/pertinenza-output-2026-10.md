@@ -183,6 +183,19 @@ L'utente ha ripetuto con il modello OpenAI reale i tre casi sintetici `shoulderL
 | "Flessione laterale del tronco per la spalla destra" contata come esercizio compatibile | "spalla" era letto come distretto dell'esercizio | "per la spalla" è uno **scopo**, non un distretto. L'esercizio è del tronco (lombare): nel caso spalla + ginocchio viene escluso con il suo distretto |
 | Dati oggettivi: verificare che quelli riferiti non vengano persi e che l'assenza sia esplicita | — | Regressione `r4ObjectiveReported`: flessione 120 gradi, Lachman negativo e lieve versamento, tutti detti, restano nella nota e non vengono tolti né segnalati. Quando l'Oggettivo è vuoto, il pannello lo dice: "Nessun rilievo obiettivo riferito" (`objective_missing`). L'avviso sparisce se il fisioterapista ripristina un rilievo |
 
+### Revisione 5: terza verifica con il modello reale (dopo `eff1dbe`)
+
+L'utente ha eseguito di nuovo i tre casi sintetici con il modello OpenAI reale (report `clinical-live-report-r4`). Il report resta sul suo computer: le regressioni riproducono gli output **come descritti dall'utente**, con risposte simulate, nei casi `r5LowBack` e `r5MultiSite` di `tests/support/clinical-world.mjs`. I test sono 7 in `tests/clinical-relevance.test.mjs` più uno in `tests/knowledge-match.test.mjs`. Sul codice di `eff1dbe` gli 8 test fallivano tutti, ciascuno per il motivo osservato; 52 test di `clinical-relevance` e 7 di `knowledge-match` passavano.
+
+| Problema osservato con il modello reale | Funzione responsabile e causa | Correzione |
+|---|---|---|
+| Lombalgia: "nessun segno di compromissione neurologica né altre condizioni acute", e nessuna red flag, senza che fossero stati valutati | **Prompt** (`app/api/generate-note/route.ts`): chiedeva di scrivere esplicitamente "No red flags apparent" se non emergeva nulla. **`lib/clinical/facts.ts`**: "compromissione neurologica", "condizioni acute" e "red flag" non erano concetti noti; la Valutazione e il ragionamento clinico venivano solo segnalati, mai corretti | **Tre stati distinti**: un negativo detto dal fisioterapista resta ("nessuna irradiazione"); un aspetto non nominato non diventa mai un negativo; per le red flag non discusse la nota dice esplicitamente "Red flag non indagate: non risultano da ciò che è stato riferito, da valutare.". `unsupportedNegatives` riconosce le affermazioni negative (nessun, senza, assenza, negativo, escluso… in 4 lingue) su reperti, segni neurologici, red flag e "altre condizioni". Le toglie da Soggettivo, Oggettivo, Valutazione, Piano, sintesi e da reperti a favore e contro e red flag del ragionamento, elencate con "Ripristina" (`invented_negative`). Il prompt ora dice che ciò che non è stato discusso è "non valutato", non assente |
+| Spalla dx + ginocchio sx: "condromalacia patellare", "tendinopatia della cuffia" come diagnosi certe sulla base del solo dolore | Nessun controllo confrontava le diagnosi con la trascrizione | `unstatedDiagnoses`: circa 20 concetti diagnostici in 4 lingue (tendinopatia, condromalacia, femororotuleo, lesione/rottura, artrosi, ernia, distorsione, frattura…); i nomi di sintomo (lombalgia, cervicalgia, gonalgia) non sono diagnosi. Una diagnosi è "detta" solo se il fisioterapista l'ha affermata, non solo sospettata. Se scritta come certa, nei Rilievi e nella Valutazione viene **etichettata "Ipotesi da confermare: …"**, con "Ripristina" che rimette la formulazione originale; nel messaggio al paziente viene **tolta**. Le ipotesi già formulate come tali restano invariate; il titolo della sezione è ora "Ipotesi cliniche (non confermate)". Prompt: i sintomi non vanno trasformati in diagnosi |
+| Esercizi, serie, ripetizioni e frequenze aggiunti dal modello attribuiti al fisioterapista | Il prompt chiedeva "exercise with sets/reps/frequency" per ogni esercizio; nessuna distinzione d'origine | `exerciseOrigin` e `dosingOrigin`: ogni esercizio è **"Svolto oggi (dalla trascrizione)"**, **"Indicato da te"** o **"Suggerito dall'AI, da confermare"**. Il dosaggio è del fisioterapista solo se ha dato gli stessi numeri con la stessa unità ("3x12" vale come 3 serie e 12 ripetizioni); altrimenti "Dosaggio suggerito dall'AI: non indicato da te". Nel Piano una frase con un dosaggio non detto è etichettata "Proposta generata, da confermare: …" (`generated_dosage`). La nota salvata conserva `origin` e `dosing_origin` per ogni esercizio; My Phygo non li mostra al paziente (elenco dei campi consentiti in `lib/myPhygo/patientNote.ts`) |
+| "Loading programmes in Achilles tendinopathy" classificato `same_region` per il ginocchio | **`paperRelevance`** (`lib/knowledge/paperRank.ts`) usava il vicinato clinico (il ginocchio confina con caviglia e piede, utile per gli esercizi) come "stesso distretto"; anche i distretti coperti da uno studio (`science/relevant`) usavano il vicinato | "Stesso distretto" vale solo per lo **stesso** distretto. Uno studio di un distretto vicino è "indiretto per meccanismo" se condivide il meccanismo nel titolo (Achille → ginocchio: tendinopatia), altrimenti "non verificato" (`adjacent_region`), e non conta come copertura di quel distretto. **Altri mapping corretti**: "collo del piede" (non cervicale), "collo del femore"/"femoral neck" (anca), "piatto tibiale" e "zampa d'oca" (ginocchio), "bandelletta ileotibiale" (coscia), ileopsoas e tensore della fascia lata (anca) |
+| Esercizio per la cuffia dei rotatori "con gomito flesso a 90 gradi" con `exercise_region_unknown` | **`exerciseTextRegions`**: "per la cuffia dei rotatori" è uno scopo e veniva sempre ignorato; il gomito è una posizione | Ordine di deduzione: oggetto dell'esercizio, poi movimento, poi **scopo**, solo se non c'è altro. "Flessione laterale del tronco per la spalla" resta del tronco (l'oggetto vince). Nessuna nuova corrispondenza con la libreria: l'abbinamento resta quello confermato dal movimento |
+| Piano multidistretto segnalato `section_region` pur citando entrambi i distretti | **Controllo delle sezioni** (`checkOutput`): "gomito a 90 gradi" nel Piano era letto come una menzione del gomito; il gomito non è tra i vicini della spalla | Nelle sezioni un distretto nominato solo come posizione non conta (`analyzeMentions(…, { skipPositions })`, stessa logica degli esercizi). Le omissioni reali restano visibili: un distretto trattato oggi che il Piano non nomina è segnalato (`coverage_plan`); un altro distretto davvero nominato (es. "rinforzo del gomito") resta `section_region`; il lato sbagliato resta segnalato. Un Piano con "core" o "tronco" in un caso spalla + ginocchio resta segnalato: è un altro distretto |
+
 ## Matrice dei casi e risultati (solo test simulati)
 
 Suite `tests/clinical-relevance.test.mjs`. Segue il percorso reale delle route:
@@ -280,6 +293,38 @@ Altri test aggiornati di conseguenza (comportamento nuovo e voluto, non tolleran
 - script del modello reale: eseguito **solo contro un sostituto locale di OpenAI** sui tre casi della verifica e sulle tre regressioni. Il report dice "SOSTITUTO del modello" e riporta, per ogni altro distretto, la scheda con pertinenza e motivo. È una prova del collegamento tra le parti, **non** una verifica del modello reale;
 - questo documento è aggiornato con un commit successivo che modifica **solo** la documentazione.
 
+**Revisione 5, regressioni dalla terza verifica con il modello reale** (risposte simulate):
+
+| Test | Prima, sul codice di `eff1dbe` | Dopo |
+|---|---|---|
+| Lombalgia: negativi non valutati | ✗ nessun controllo li rilevava (trovato solo `objective_missing`) | ✓ tolti da Valutazione e red flag; red flag "non indagate"; "Assenza di irradiazione" (detta) conservata |
+| Spalla dx + ginocchio sx: diagnosi certe | ✗ nessun controllo | ✓ entrambe le frasi della Valutazione etichettate "Ipotesi da confermare"; nel messaggio al paziente la diagnosi viene tolta; le ipotesi già prudenti invariate |
+| Origine di esercizi e dosaggi | ✗ funzioni assenti | ✓ esercizi e dosaggi non detti "suggeriti"; "svolto oggi" e "indicato da te" riconosciuti; frequenza non detta "suggerita"; frasi del Piano con dosaggio non detto etichettate |
+| Cuffia "con gomito flesso a 90 gradi"; Piano multidistretto; studio sull'Achille | ✗ distretto non riconosciuto; `section_region` sul Piano; Achille `same_region` per il ginocchio | ✓ spalla, compatibile; nessun `section_region`; Achille "indiretto per meccanismo", senza il ginocchio tra i distretti coperti |
+| Controllo del Piano multidistretto | ✗ "gomito a 90 gradi" segnalato | ✓ posizione ignorata; un distretto omesso dal Piano segnalato (`coverage_plan`); un distretto davvero nominato e un lato sbagliato ancora segnalati |
+| Mapping anatomico | ✗ "collo del piede" letto anche come cervicale | ✓ |
+| Studi: stesso distretto (`knowledge-match`) | ✗ `{"level":"indirect","reason":"same_region"}` per l'Achille e il ginocchio | ✓ |
+
+Effetti voluti su test esistenti:
+- **Caso degli screenshot** (`shoulderLeft`): la bozza diceva "Nessuna red flag apparente" senza che se ne fosse parlato. Ora la frase viene tolta e sostituita da "non indagate"; il caso registra questa rimozione.
+- **Studi**: per lo studio "Traumatic leg pain in adolescents" il motivo resta "popolazione o meccanismo non indicati", che prevale sul nuovo "distretto vicino".
+- **Etichette**: nei test nel browser sono cambiati i titoli "Ipotesi cliniche (non confermate)" e "Tolto o etichettato nella bozza…".
+- **Browser**: il test multidistretto verifica anche:
+  - la diagnosi etichettata, con "Ripristina" che rimette la formulazione originale, ed è quella salvata;
+  - "Suggerito dall'AI" e "Dosaggio suggerito" sui due esercizi;
+  - `origin` e `dosing_origin` nella nota salvata.
+
+**Controlli complessivi** (revisione 5), eseguiti sul commit `d938195` con l'albero di lavoro pulito:
+- suite completa dell'app: **266 test, 266 superati, 0 falliti, 0 saltati, 0 annullati**. Comprende `clinical-relevance` (59), `knowledge-match` (8) e i 6 test nel browser della pagina della seduta;
+- typecheck: nessun errore. Build: riuscita;
+- test SQL: 7 file, tutti superati, solo su PostgreSQL locale nel container;
+- **nessuna modifica a database o dati di produzione**:
+  - nessun file SQL è cambiato dopo `eff1dbe`;
+  - in questa revisione non è stata eseguita alcuna chiamata a Supabase o Vercel;
+  - i nuovi campi degli esercizi stanno nel JSON della nota, già usato per campi interni, e non richiedono modifiche allo schema;
+- script del modello reale: aggiornato per riportare origine di esercizi e dosaggi e le etichette; **non** eseguito contro il modello reale (in questo ambiente non c'è una chiave);
+- questo documento è aggiornato con un commit successivo che modifica **solo** la documentazione.
+
 ## Test simulati e verifica con il modello reale
 
 | | Stato |
@@ -287,17 +332,26 @@ Altri test aggiornati di conseguenza (comportamento nuovo e voluto, non tolleran
 | Test simulati (modello scriptato, dati sintetici) | Eseguiti, risultati sopra |
 | Verifica con il modello AI reale, prima della revisione 3 | Eseguita dall'utente su tre casi sintetici, in ambiente isolato. Ha trovato i cinque problemi della revisione 3, riprodotti qui come regressioni simulate |
 | Verifica con il modello AI reale, dopo la revisione 3 (`cf0e971`) | Eseguita dall'utente sugli stessi tre casi sintetici. I reperti inventati risultano migliorati; ha trovato i problemi della revisione 4, riprodotti qui come regressioni simulate |
-| Verifica con il modello AI reale, dopo la revisione 4 | **Da eseguire, prima del merge.** In questo ambiente non c'è una chiave OpenAI. Le correzioni sono dimostrate **solo con risposte simulate** che riproducono gli output osservati. Che il modello reale, con la nuova logica, dia i risultati attesi sui tre casi **non è dimostrato** finché non c'è il nuovo report reale da confrontare con quello precedente |
+| Verifica con il modello AI reale, dopo la revisione 4 (`eff1dbe`) | Eseguita dall'utente sugli stessi tre casi (report `clinical-live-report-r4`). Ha trovato i sei problemi della revisione 5, riprodotti qui come regressioni simulate a partire dalla sua descrizione |
+| Verifica con il modello AI reale, dopo la revisione 5 | **Da eseguire, prima del merge.** In questo ambiente non c'è una chiave OpenAI. Le correzioni sono dimostrate **solo con risposte simulate**. Che il modello reale, con il nuovo prompt e i nuovi controlli, dia i risultati attesi **non è dimostrato** finché non c'è il nuovo report reale |
 
-**Ripetizione dei tre casi dopo la revisione 4** (dalla radice del repository, sul commit della PR, con la chiave solo nella variabile d'ambiente):
+**Ripetizione dei tre casi dopo la revisione 5** (dalla radice del repository, sul commit della PR, con la chiave solo nella variabile d'ambiente):
 
 ```
 npm ci
 node scripts/clinical-relevance-live.mjs --build
-OPENAI_API_KEY_LIVE=<chiave> node scripts/clinical-relevance-live.mjs --out ./clinical-live-report-r4 --repeat 1 --cases shoulderLeft,historyKnee,multiSiteSides
+OPENAI_API_KEY_LIVE=<chiave> node scripts/clinical-relevance-live.mjs --out ./clinical-live-report-r5 --repeat 1 --cases shoulderLeft,historyKnee,multiSiteSides
 ```
 
-Da confrontare con il report precedente (`cf0e971`), punto per punto:
+Da confrontare con `clinical-live-report-r4`, punto per punto:
+1. nessuna affermazione di assenza (segni neurologici, altre condizioni, red flag) non riferita; red flag non discusse indicate come "non indagate"; i negativi detti restano;
+2. nessuna diagnosi specifica presentata come certa se è stato descritto solo il dolore: etichettata "Ipotesi da confermare" (sezione "Tolto o etichettato" del report);
+3. ogni esercizio con la sua origine (`performed`, `stated`, `suggested`) e il dosaggio (`stated`, `suggested`); nel Piano i dosaggi non detti etichettati;
+4. lo studio sul tendine d'Achille non è `same_region` per il ginocchio;
+5. un esercizio per la cuffia dei rotatori "con gomito a 90 gradi" non è `exercise_region_unknown`;
+6. nessun `section_region` sul Piano multidistretto che nomina entrambi i distretti; `coverage_plan` solo se il Piano ne omette uno.
+
+Punti della revisione 4, da ricontrollare nello stesso report:
 1. "Rotazione esterna … gomito vicino al corpo" e "Mobilizzazione della colonna vertebrale con rotazione" non sono esclusi;
 2. plank, bacino, bird-dog e flessione laterale della colonna non risultano "non verificati" nel caso lombare;
 3. il ginocchio sinistro ha una scheda con lato, pertinenza e motivo;
@@ -329,6 +383,10 @@ Il modello reale può scrivere esercizi o valutazioni diversi da quelli delle re
 - **Una scheda o uno studio "non verificati" restano visibili.** Vanno valutati dal fisioterapista, che vede il motivo.
 - **Il controllo dei distretti non si applica a tutte le sezioni**: Differenziali, test suggeriti e precauzioni possono citare altri distretti; lì si controlla solo il lato.
 - **"Indiretta per meccanismo" dipende dalle parole del titolo**: può includere uno studio sullo stesso meccanismo in un contesto clinico diverso. Per questo è sempre etichettato e viene dopo le evidenze dirette.
+- **Negativi, diagnosi e dosaggi sono riconosciuti da vocabolari** in 4 lingue: un'affermazione negativa senza le parole elencate ("quadro neurologico tranquillo") o una diagnosi fuori elenco non vengono rilevate. Un aspetto è "sostenuto" se il fisioterapista ne ha parlato in qualsiasi modo: "nega febbre" sostiene un'affermazione generica sulle red flag.
+- **"Diagnosi detta" è decisa per concetto**: "tendinopatia del sovraspinato" detta sostiene "tendinopatia della cuffia" scritta. Una frase che contiene sia una diagnosi detta sia una non detta viene etichettata per intero.
+- **L'origine di un esercizio è un confronto di parole** con le frasi della trascrizione che parlano di esercizi: un esercizio detto con parole molto diverse risulta "suggerito" (l'errore va nel senso di non attribuirlo al fisioterapista). Il dosaggio è del fisioterapista solo con gli stessi numeri e la stessa unità.
+- **Le etichette valgono per la nota e la scheda**: il libretto PDF degli esercizi per il paziente riporta il dosaggio senza indicarne l'origine.
 - **I dati del test sono sintetici**: il database reale (1107 schede, 52 studi pubblicati, 1924 esercizi) può contenere casi non rappresentati.
 - **`refine-plan` è invariata e non usata** (vedi sopra).
 - **ESLint non è configurato nel repository**: i controlli statici eseguiti sono il typecheck e la build.

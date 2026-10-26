@@ -69,6 +69,8 @@ I casi sono quelli della matrice in `tests/support/clinical-world.mjs`. Vengono 
 | 27 | Oggi lombalgia; in anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico. (Esercizi come mobilizzazione della colonna con rotazione, plank, bacino, bird-dog, flessione laterale della colonna) | revisione 4: tutti lombari, nessuno escluso o "non verificato" |
 | 28 | Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi. Dolore alla spalla in elevazione e al ginocchio scendendo le scale. | revisione 4: una scheda per distretto con lato, pertinenza e motivo; nessuna diagnosi più specifica di quella detta; studi su popolazioni o meccanismi non indicati "non verificati"; esercizio del tronco "per la spalla" non compatibile |
 | 29 | Dolore al ginocchio destro dopo la corsa. Flessione 120 gradi, Lachman negativo, lieve versamento. | revisione 4: i dati oggettivi detti restano |
+| 30 | Lombalgia acuta da due giorni dopo aver sollevato un peso, nessuna irradiazione alla gamba. Oggi terapia manuale. | revisione 5: nessun negativo non valutato (segni neurologici, altre condizioni, red flag); "nessuna irradiazione", detto, resta |
+| 31 | Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi. Dolore alla spalla in elevazione e al ginocchio scendendo le scale. | revisione 5: diagnosi come ipotesi; esercizi e dosaggi non detti come suggerimenti; nessuno studio di un distretto vicino come "stesso distretto"; nessun falso `section_region` sul Piano |
 
 ## Che cosa controllare in ogni sezione
 
@@ -92,7 +94,9 @@ I casi sono quelli della matrice in `tests/support/clinical-world.mjs`. Vengono 
 - **Ragionamento clinico**:
   - ipotesi e differenziali plausibili per i dati;
   - "informazioni mancanti" specifiche del caso;
-  - red flag presenti o esplicitamente assenti.
+  - red flag: quelle riferite, oppure "non indagate" se non se n'è parlato; mai dichiarate assenti se non è stato detto;
+  - nessun risultato negativo non riferito ("nessun segno neurologico", "nessuna altra condizione acuta"): ciò che non è stato valutato è "non valutato", non negativo; i negativi detti restano;
+  - ipotesi etichettate come tali: nessuna diagnosi specifica presentata come certa sulla base del solo sintomo.
 - **Spunti clinici (scheda e protocollo)**:
   - scheda dello stesso distretto e condizione, oppure "pertinenza non verificata" con il motivo;
   - "non verificata: la diagnosi non risulta da ciò che hai detto" quando la condizione della scheda viene solo dalla valutazione;
@@ -110,6 +114,7 @@ I casi sono quelli della matrice in `tests/support/clinical-world.mjs`. Vengono 
   - nessun esercizio per un distretto citato solo in anamnesi o negato;
   - "Dalla nota: …" quando l'esercizio del database ha un nome diverso, e l'esercizio del database ha lo stesso movimento;
   - "Corrispondenza non verificata" quando non è certo, senza sostituzione automatica;
+  - origine indicata: "Svolto oggi", "Indicato da te" o "Suggerito dall'AI"; un dosaggio non detto è "suggerito", mai attribuito al fisioterapista;
   - dosaggio presente.
 - **Controlli di coerenza**:
   - gli esercizi esclusi indicano il distretto dell'esercizio e quello del caso;
