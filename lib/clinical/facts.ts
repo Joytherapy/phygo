@@ -83,7 +83,43 @@ const NEGATION = ['nessun', 'nessuna', 'nessuno', 'assenza', 'assente', 'assenti
 // …unless it says what is still to check, or that it was not assessed. "Non
 // riferito" and "not reported" are not enough: "non sono stati riportati segni
 // neurologici" reads as a negative result.
-const STILL_OPEN = ['da escludere', 'escluder*', 'rule out', 'da valutare', 'da indagare', 'da verificare', 'to be assessed', 'descartar', 'a exclure', 'non valutat*', 'non indagat*', 'non documentat*', 'not assessed', 'not documented', 'no evaluad*', 'non evalue*', 'da approfondire', 'to be explored', 'non documenta*', 'does not document', 'no documenta', 'ne documente pas']
+const STILL_OPEN = ['da escludere', 'escluder*', 'rule out', 'da valutare', 'da indagare', 'da verificare', 'to be assessed', 'descartar', 'a exclure', 'non valutat*', 'non indagat*', 'non documentat*', 'not assessed', 'not documented', 'no evaluad*', 'non evalue*', 'da approfondire', 'to be explored', 'non documenta*', 'does not document', 'no documenta', 'ne documente pas', 'por valorar', 'a approfondir', 'considerar*', 'consider*']
+
+// Causes, by concept: an etiology needs the clinician to have spoken of it.
+// The duration of the pain ("da un mese", "persistente", "cronico") is a
+// reported fact, not evidence of a cause.
+const ETIOLOGIES: Group[] = [
+  group('inflammatory', ['infiammator*', 'infiammazion*', 'flogos*', 'flogistic*', 'inflammat*', 'inflamator*', 'inflamacion*', 'inflammatoire*']),
+  group('degenerative', ['degenerativ*', 'degenerazion*', 'degenerat*', 'degeneratif*']),
+  group('infectious', ['infettiv*', 'infezion*', 'infect*', 'infeccios*', 'infeccion*', 'infectieu*']),
+  group('rheumatic', ['reumatic*', 'reumatolog*', 'rheumat*', 'rhumatism*']),
+  group('neuropathic', ['neuropatic*', 'neuropath*', 'neuropatico']),
+  group('autoimmune', ['autoimmun*', 'autoinmun*', 'auto immun*']),
+  group('metabolic', ['metabolic*', 'metabolique*']),
+]
+const DURATION_WORDS = ['persistent*', 'persistenz*', 'persiste*', 'cronic*', 'chronic*', 'prolungat*', 'protratt*', 'perdurant*', 'durata', 'duration', 'long standing', 'duracion', 'duree', 'persistant*']
+const DURATION_SPAN = /(?:^| )(?:da|per|from|for|desde|depuis|di|of)(?: circa| piu di| oltre| about| over)? (?:un|una|uno|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|alcun[ie]|qualche|divers[ie]|a|an|one|two|three|four|five|six|several|few|\d+) ?(?:giorn\w*|settiman\w*|mes[ei]|ann[io]|days?|weeks?|months?|years?|dias?|semanas?|mes(?:es)?|anos?|jours?|semaines?|mois|ans?)(?: |$)|(?:^| )\d+ ?(?:month|week|year|day)s?(?: |$)|(?:^| )(?:one|two|three|four|five|six|un|una) ?(?:month|week|year|mese|settimana|anno)(?: |$)/
+
+/**
+ * A cause (inflammatory, degenerative, infectious…) that a statement draws
+ * from the duration of the symptoms ("il dolore persistente da un mese
+ * suggerisce una condizione infiammatoria") when the clinician did not speak
+ * of that cause. A cause to consider or rule out is not such an inference.
+ */
+export function unsupportedEtiology(statement: string, transcript: string): UnsupportedFact[] {
+  const ws = words(statement)
+  // "La durata … da sola non indica una causa …": the opposite of an inference.
+  if (anyHit(ws, STILL_OPEN) || anyHit(ws, ['da sola non', 'da solo non', 'alone does not', 'por si sola no', 'ne suffit pas'])) return []
+  const text = ` ${ws.join(' ')} `
+  if (!anyHit(ws, DURATION_WORDS) && !DURATION_SPAN.test(text)) return []
+  const said = words(transcript)
+  const out: UnsupportedFact[] = []
+  for (const g of ETIOLOGIES) {
+    const hit = firstHit(ws, g.terms)
+    if (hit && !anyHit(said, g.terms)) out.push({ kind: 'unsupported_etiology', item: hit, concept: g.key })
+  }
+  return out
+}
 
 // Diagnoses, by concept: named in the note as a fact, they need the clinician
 // to have stated them (not only suspected). Symptom labels (lombalgia,
@@ -141,7 +177,7 @@ function firstHit(ws: string[], terms: string[]): string | null {
 }
 const anyHit = (ws: string[], terms: string[]) => terms.some((t) => hits(ws, t))
 
-export type FactKind = 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_negative'
+export type FactKind = 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_negative' | 'unsupported_etiology'
 export type UnsupportedFact = { kind: FactKind; item: string; concept?: string }
 
 // A movement said to be reduced ("rotazione cervicale ridotta", "flexion limited") is a range-of-motion finding.
@@ -422,7 +458,7 @@ export const isHedged = (statement: string) => anyHit(words(statement), HEDGE)
 /** Sentences of a text, keeping their punctuation. */
 export const sentencesOf = (text: string) => (text.match(/[^.;!?\n]+[.;!?]*/g) ?? []).map((s) => s.trim()).filter(Boolean)
 
-export type RemovalSection = 'subjective' | 'objective' | 'assessment' | 'plan' | 'summaryForPatient' | 'supportingFindings' | 'findingsAgainst' | 'redFlagsPrecautions'
+export type RemovalSection = 'subjective' | 'objective' | 'assessment' | 'plan' | 'summaryForPatient' | 'hypotheses' | 'supportingFindings' | 'findingsAgainst' | 'redFlagsPrecautions'
 /**
  * A change to the draft: `text` was taken out of `section`, or, when
  * `replacement` is given, replaced by it (a diagnosis or a dose labelled as a
@@ -458,6 +494,27 @@ const NOT_DOCUMENTED: Record<string, Record<Lang, string>> = {
   'other conditions': { it: 'La trascrizione non documenta l’esclusione di altre condizioni; da approfondire se indicato.', en: 'The transcript does not document that other conditions were ruled out; to be explored if indicated.', es: 'La transcripción no documenta que se hayan descartado otras condiciones; por valorar si está indicado.', fr: 'La transcription ne documente pas l’exclusion d’autres affections ; à approfondir si indiqué.' },
   complications: { it: 'La trascrizione non documenta l’assenza di complicazioni; da approfondire se indicato.', en: 'The transcript does not document the absence of complications; to be explored if indicated.', es: 'La transcripción no documenta la ausencia de complicaciones; por valorar si está indicado.', fr: 'La transcription ne documente pas l’absence de complications ; à approfondir si indiqué.' },
 }
+// What an etiology drawn from the duration alone becomes.
+const CAUSE: Record<string, Record<Lang, string>> = {
+  inflammatory: { it: 'infiammatoria', en: 'an inflammatory', es: 'inflamatoria', fr: 'inflammatoire' },
+  degenerative: { it: 'degenerativa', en: 'a degenerative', es: 'degenerativa', fr: 'dégénérative' },
+  infectious: { it: 'infettiva', en: 'an infectious', es: 'infecciosa', fr: 'infectieuse' },
+  rheumatic: { it: 'reumatica', en: 'a rheumatic', es: 'reumática', fr: 'rhumatismale' },
+  neuropathic: { it: 'neuropatica', en: 'a neuropathic', es: 'neuropática', fr: 'neuropathique' },
+  autoimmune: { it: 'autoimmune', en: 'an autoimmune', es: 'autoinmune', fr: 'auto-immune' },
+  metabolic: { it: 'metabolica', en: 'a metabolic', es: 'metabólica', fr: 'métabolique' },
+}
+const durationNotCause = (concept: string, lang: Lang) => {
+  const c = CAUSE[concept]?.[lang] ?? concept
+  return {
+    it: `La durata dei sintomi da sola non indica una causa ${c}; da approfondire se indicato.`,
+    en: `The duration of the symptoms alone does not indicate ${c} cause; to be explored if indicated.`,
+    es: `La duración de los síntomas por sí sola no indica una causa ${c}; por valorar si está indicado.`,
+    fr: `La durée des symptômes ne suffit pas à indiquer une cause ${c} ; à approfondir si indiqué.`,
+  }[lang]
+}
+const ETIOLOGY_SECTIONS = new Set(['subjective', 'objective', 'assessment', 'summaryForPatient', 'hypotheses', 'supportingFindings', 'findingsAgainst'])
+
 const notDocumented = (concept: string, item: string, lang: Lang) =>
   NOT_DOCUMENTED[concept]?.[lang] ?? { it: `La trascrizione non documenta questa valutazione (${item}); da approfondire se indicato.`, en: `The transcript does not document this assessment (${item}); to be explored if indicated.`, es: `La transcripción no documenta esta valoración (${item}); por valorar si está indicado.`, fr: `La transcription ne documente pas cette évaluation (${item}) ; à approfondir si indiqué.` }[lang]
 // Where a negative result starts in a sentence ("Il paziente ha riportato lombalgia | senza altre complicazioni").
@@ -520,6 +577,15 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
     // The concepts already said to be not documented in this section, once each.
     const reworded = new Set<string>(section === 'redFlagsPrecautions' ? ['red flags'] : [])
     for (const sentence of sentencesOf(text)) {
+      // A cause drawn from the duration alone: said not to follow from it.
+      const cause = ETIOLOGY_SECTIONS.has(section) ? unsupportedEtiology(sentence, transcript) : []
+      if (cause.length) {
+        const notes = Array.from(new Set(cause.map((c) => c.concept!))).filter((c) => !reworded.has(`cause:${c}`)).map((c) => { reworded.add(`cause:${c}`); return durationNotCause(c, lang) })
+        const replacement = notes.join(' ')
+        removed.push({ section, text: sentence, kind: 'unsupported_etiology', item: cause[0].item, ...(replacement ? { replacement } : {}) })
+        if (replacement) kept.push(replacement)
+        continue
+      }
       const whole = reasons(section, sentence)
       let result: string | null = sentence
       // A negative result nobody assessed: the said part stays, the rest is
@@ -623,6 +689,17 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
       // Red flags not discussed: said so, never declared absent.
       if (section === 'redFlagsPrecautions' && removed.length > before) cleaned = [LABEL.redFlags[lang], cleaned].filter(Boolean).join(' ')
       r[section] = cleaned
+    }
+    // Hypotheses, one by one: one drawn from the duration alone is replaced.
+    if (Array.isArray(reasoning.hypotheses)) {
+      r.hypotheses = (reasoning.hypotheses as unknown[]).map((h) => {
+        if (typeof h !== 'string') return h
+        const cause = unsupportedEtiology(h, transcript)
+        if (!cause.length) return h
+        const replacement = durationNotCause(cause[0].concept!, lang)
+        removed.push({ section: 'hypotheses', text: h, kind: 'unsupported_etiology', item: cause[0].item, replacement })
+        return replacement
+      })
     }
     out.clinicalReasoning = r
   }

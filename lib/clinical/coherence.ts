@@ -12,13 +12,13 @@
 // regions named only in history or as negated are not part of it, and each
 // side is checked against the region it was given for.
 import { analyzeMentions, caseProfile, exerciseFit, exerciseRegions, normalize, pertinentTo, regionFit, regionsOf, sideContradictions, type CaseProfile, type Region } from './region'
-import { historyNotKept, isHedged, sanitizeNote, sentencesOf, unapprovedInstructions, unstatedDiagnoses, unstatedDosage, unsupportedArrangements, unsupportedFindings, unsupportedNegatives } from './facts'
+import { historyNotKept, isHedged, sanitizeNote, sentencesOf, unapprovedInstructions, unstatedDiagnoses, unstatedDosage, unsupportedArrangements, unsupportedEtiology, unsupportedFindings, unsupportedNegatives, type Removal } from './facts'
 
 export type IssueKind =
   | 'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side'
   | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified'
   | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment'
-  | 'invented_negative' | 'unconfirmed_diagnosis' | 'generated_dosage' | 'unapproved_instruction' | 'history_missing'
+  | 'invented_negative' | 'unconfirmed_diagnosis' | 'generated_dosage' | 'unapproved_instruction' | 'history_missing' | 'unsupported_etiology' | 'plan_region_undefined'
   | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence' | 'coverage_plan' | 'objective_missing'
 export type Issue = { kind: IssueKind; severity: 'high' | 'medium'; item: string; section?: SectionName; regions?: Region[]; caseRegions?: Region[] }
 
@@ -239,6 +239,10 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
       if ((name === 'subjective' || name === 'objective' || name === 'assessment') && !(name === 'assessment' && (isHedged(sentence) || negatives.length))) {
         for (const f of unsupportedFindings(sentence, o.transcript)) issues.push({ kind: f.kind, severity: 'high', item: f.item, section: name })
       }
+      // A cause drawn from the duration of the symptoms alone.
+      if (['subjective', 'objective', 'assessment', 'summaryForPatient', 'hypotheses', 'supportingFindings', 'findingsAgainst'].includes(name)) {
+        for (const f of unsupportedEtiology(sentence, o.transcript)) issues.push({ kind: 'unsupported_etiology', severity: 'high', item: f.item, section: name })
+      }
       // A diagnosis presented as certain that the clinician did not state.
       if ((name === 'subjective' || name === 'objective' || name === 'assessment' || name === 'summaryForPatient') && !isHedged(sentence)) {
         for (const d of unstatedDiagnoses(sentence, o.transcript)) issues.push({ kind: 'unconfirmed_diagnosis', severity: 'high', item: d, section: name })
@@ -267,9 +271,12 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
   if (separate.length >= 2) {
     const primary = condition.length ? condition : [separate[0]]
     const planRegions = analyzeMentions(o.note.plan ?? '', { skipPositions: true }).filter((m) => m.status === 'active').map((m) => m.region)
+    // A region the plan names only to say it has no proposal yet (planByRegion).
+    const undefinedInPlan = new Set(sentencesOf(o.note.plan ?? '').filter(isUndefinedProposal).flatMap((x) => regionsOf(x)))
     for (const r of separate) {
       const near = pertinentTo([r])
-      if ((o.note.plan ?? '').trim() && !planRegions.some((x) => near.has(x))) issues.push({ kind: 'coverage_plan', severity: 'medium', item: r, section: 'plan' })
+      if (undefinedInPlan.has(r)) issues.push({ kind: 'plan_region_undefined', severity: 'medium', item: r, section: 'plan' })
+      else if ((o.note.plan ?? '').trim() && !planRegions.some((x) => near.has(x))) issues.push({ kind: 'coverage_plan', severity: 'medium', item: r, section: 'plan' })
       if (o.exercises.length && !o.exercises.some((e) => exerciseRegions(e).some((x) => near.has(x)))) issues.push({ kind: 'coverage_exercises', severity: 'medium', item: r })
       if (pertinentTo(primary).has(r)) continue
       if (o.protocol && !(o.otherProtocols ?? []).some((p) => p.region === r && p.name)) issues.push({ kind: 'coverage_protocol', severity: 'medium', item: r })
@@ -279,9 +286,71 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
   return issues
 }
 
+// ---------------------------------------------------------------- the plan, region by region
+
+type Lang = 'it' | 'en' | 'es' | 'fr'
+const REGION_NAME: Record<Region, Record<Lang, string>> = {
+  shoulder: { it: 'Spalla', en: 'Shoulder', es: 'Hombro', fr: 'Épaule' },
+  elbow: { it: 'Gomito', en: 'Elbow', es: 'Codo', fr: 'Coude' },
+  wrist_hand: { it: 'Polso e mano', en: 'Wrist and hand', es: 'Muñeca y mano', fr: 'Poignet et main' },
+  cervical: { it: 'Rachide cervicale', en: 'Neck', es: 'Columna cervical', fr: 'Rachis cervical' },
+  thoracic: { it: 'Rachide dorsale', en: 'Thoracic spine', es: 'Columna dorsal', fr: 'Rachis dorsal' },
+  lumbar: { it: 'Rachide lombare', en: 'Low back', es: 'Columna lumbar', fr: 'Rachis lombaire' },
+  hip: { it: 'Anca', en: 'Hip', es: 'Cadera', fr: 'Hanche' },
+  thigh: { it: 'Coscia', en: 'Thigh', es: 'Muslo', fr: 'Cuisse' },
+  knee: { it: 'Ginocchio', en: 'Knee', es: 'Rodilla', fr: 'Genou' },
+  lower_leg: { it: 'Gamba', en: 'Lower leg', es: 'Pierna', fr: 'Jambe' },
+  ankle_foot: { it: 'Caviglia e piede', en: 'Ankle and foot', es: 'Tobillo y pie', fr: 'Cheville et pied' },
+  upper_limb: { it: 'Arto superiore', en: 'Upper limb', es: 'Miembro superior', fr: 'Membre supérieur' },
+  lower_limb: { it: 'Arto inferiore', en: 'Lower limb', es: 'Miembro inferior', fr: 'Membre inférieur' },
+}
+const SIDE_NAME: Record<'left' | 'right' | 'both', Record<Lang, string>> = {
+  left: { it: 'lato sinistro', en: 'left side', es: 'lado izquierdo', fr: 'côté gauche' },
+  right: { it: 'lato destro', en: 'right side', es: 'lado derecho', fr: 'côté droit' },
+  both: { it: 'entrambi i lati', en: 'both sides', es: 'ambos lados', fr: 'des deux côtés' },
+}
+const PLAN_COMMON: Record<Lang, string> = { it: 'Indicazioni comuni, da adattare a ciascun distretto: ', en: 'Common to the regions, to adapt to each: ', es: 'Indicaciones comunes, por adaptar a cada región: ', fr: 'Indications communes, à adapter à chaque région : ' }
+const PLAN_UNDEFINED: Record<Lang, string> = { it: 'nessuna proposta specifica nella bozza per questo distretto; da definire.', en: 'no specific proposal in the draft for this region; to be defined.', es: 'ninguna propuesta específica en el borrador para esta región; por definir.', fr: 'aucune proposition spécifique dans le brouillon pour cette région ; à définir.' }
+// The marker is the part before the semicolon: sentences are split there.
+const isUndefinedProposal = (sentence: string) => Object.values(PLAN_UNDEFINED).some((p) => normalize(sentence).includes(normalize(p.split(/[;]/)[0]).trim()))
+
+/**
+ * With more than one region treated today, the plan names each, with its
+ * side. The model may write a generic plan ("esercizi di rinforzo e
+ * mobilità"): its sentences that name no region are said to be common, to
+ * adapt to each region, and a region the plan leaves out is named with "no
+ * specific proposal in the draft; to be defined". Nothing is added that the
+ * clinician did not say or that the draft did not propose.
+ */
+export function planByRegion(plan: string, transcript: string, language: unknown): string {
+  const lang: Lang = language === 'en' || language === 'es' || language === 'fr' ? language : 'it'
+  const profile = caseProfile(transcript)
+  const regions = separateRegions(profile.active)
+  if (regions.length < 2 || !plan.trim()) return plan
+  const named = analyzeMentions(plan, { skipPositions: true }).filter((m) => m.status === 'active').map((m) => m.region)
+  const missing = regions.filter((r) => !named.some((x) => pertinentTo([r]).has(x)))
+  if (!missing.length) return plan
+  const sentences = sentencesOf(plan)
+  // A plan naming no region at all: its proposals are common to the regions.
+  const generic = named.length === 0
+  const body = generic && sentences.length ? [`${PLAN_COMMON[lang]}${sentences[0].charAt(0).toLowerCase()}${sentences[0].slice(1)}`, ...sentences.slice(1)].join(' ') : plan.trim()
+  const lines = missing.map((r) => {
+    const side = profile.sides[r]
+    return `${REGION_NAME[r][lang]}${side ? ` (${SIDE_NAME[side][lang]})` : ''}: ${PLAN_UNDEFINED[lang]}`
+  })
+  return [body, ...lines].join(' ')
+}
+
 /**
  * The note without facts the clinician did not give (lib/clinical/facts.ts),
- * with the list of what was removed and why.
+ * with the list of what was removed and why; with more than one region
+ * treated today, a plan that names each (planByRegion).
  */
-export const sanitizeGeneratedNote = <T extends { subjective?: string; objective?: string; plan?: string; summaryForPatient?: string; [k: string]: unknown }>(note: T, transcript: string) =>
-  sanitizeNote(note, transcript, { measures: measuresNotInTranscript, treatments: treatmentsNotInTranscript, appointments: appointmentsNotInTranscript })
+export const sanitizeGeneratedNote = <T extends { subjective?: string; objective?: string; plan?: string; summaryForPatient?: string; [k: string]: unknown }>(note: T, transcript: string) => {
+  const result = sanitizeNote(note, transcript, { measures: measuresNotInTranscript, treatments: treatmentsNotInTranscript, appointments: appointmentsNotInTranscript })
+  const plan = typeof result.note.plan === 'string' ? result.note.plan : ''
+  const byRegion = planByRegion(plan, transcript, note.language)
+  if (byRegion === plan) return result
+  const change: Removal = { section: 'plan', text: plan, kind: 'plan_regions', item: 'plan', replacement: byRegion }
+  return { note: { ...result.note, plan: byRegion }, removed: [...result.removed, change] }
+}

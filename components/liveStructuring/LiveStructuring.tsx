@@ -807,6 +807,17 @@ recognition.lang = recordingLang;
   const restoreRemoved = (r: { section: string; text: string; replacement?: string }) => {
     setRemovedFacts((prev) => prev.filter((x) => x !== r));
     const undo = (current: string) => (r.replacement && current.includes(r.replacement) ? current.replace(r.replacement, r.text).replace(/\s{2,}/g, " ").trim() : current ? `${current} ${r.text}` : r.text);
+    // Hypotheses are a list: the replaced item gets its wording back.
+    if (r.section === "hypotheses") {
+      setFinalNote((prev: any) => {
+        const list: unknown[] = prev?.clinicalReasoning?.hypotheses ?? [];
+        const at = list.findIndex((h) => h === r.replacement);
+        const next = at >= 0 ? list.map((h, i) => (i === at ? r.text : h)) : [...list, r.text];
+        return prev ? { ...prev, clinicalReasoning: { ...(prev.clinicalReasoning ?? {}), hypotheses: next } } : prev;
+      });
+      setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+      return;
+    }
     if (["supportingFindings", "findingsAgainst", "redFlagsPrecautions"].includes(r.section)) {
       setFinalNote((prev: any) => (prev ? { ...prev, clinicalReasoning: { ...(prev.clinicalReasoning ?? {}), [r.section]: undo(((prev.clinicalReasoning ?? {})[r.section] ?? "").trim()) } } : prev));
       setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
@@ -889,8 +900,8 @@ recognition.lang = recordingLang;
     let item = issue.item;
     if (issue.kind === "side" && issue.section) item = sectionLabel(issue.section);
     if ((issue.kind === "section_region" || issue.kind === "history_as_active") && issue.section) item = `${sectionLabel(issue.section)} (${regionLabel(issue.regions)})`;
-    if (["invented", "invented_finding", "invented_test", "invented_appointment", "invented_agreement", "invented_treatment", "invented_negative", "unconfirmed_diagnosis", "generated_dosage"].includes(issue.kind) && issue.section) item = `"${issue.item}" (${sectionLabel(issue.section)})`;
-    if (issue.kind.startsWith("coverage_")) item = regionLabel([issue.item]);
+    if (["invented", "invented_finding", "invented_test", "invented_appointment", "invented_agreement", "invented_treatment", "invented_negative", "unconfirmed_diagnosis", "generated_dosage", "unsupported_etiology"].includes(issue.kind) && issue.section) item = `"${issue.item}" (${sectionLabel(issue.section)})`;
+    if (issue.kind.startsWith("coverage_") || issue.kind === "plan_region_undefined") item = regionLabel([issue.item]);
     if (issue.kind === "unapproved_instruction") item = `${sectionLabel("summaryForPatient")} (${(t.instructionReason as Record<string, string>)[issue.item] ?? issue.item})`;
     return t.coherenceIssue[issue.kind](item);
   };

@@ -541,6 +541,41 @@ export const CASES = {
     papers: ['low back pain'],
     expect: { sheet: 7 },
   },
+  // ---- The r9 live report.
+  // Two regions treated today, and a generic plan naming neither.
+  r10MultiSitePlan: {
+    transcript: 'Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi.',
+    note: {
+      subjective: 'Dolore alla spalla destra e al ginocchio sinistro.',
+      objective: '',
+      assessment: 'Dolore alla spalla destra e al ginocchio sinistro.',
+      plan: 'Esercizi di rinforzo e mobilità con progressione graduale del carico. Educazione del paziente sulla gestione del dolore.',
+      summaryForPatient: 'Oggi abbiamo trattato spalla e ginocchio.',
+      primaryCondition: 'right shoulder pain',
+      exercises: ['Rotazione esterna con elastico spalla destra 3x12', 'Estensione di ginocchio sinistro 3x12'],
+    },
+    papers: ['shoulder pain', 'knee pain'],
+    expect: {},
+  },
+  // Left shoulder: an etiology inferred from the duration of the pain alone.
+  r10ShoulderEtiology: {
+    transcript: 'Paziente di 45 anni con dolore alla spalla sinistra da circa un mese, dolore in elevazione oltre i 90 gradi e alla rotazione esterna contro resistenza. Sospetta problematica della cuffia dei rotatori. Oggi terapia manuale ed esercizi di rotazione esterna con elastico.',
+    note: {
+      subjective: 'Dolore alla spalla sinistra da circa un mese, in elevazione oltre i 90 gradi e alla rotazione esterna contro resistenza.',
+      objective: '',
+      assessment: 'Possibile tendinopatia della cuffia dei rotatori della spalla sinistra. Il dolore persistente da un mese suggerisce una condizione infiammatoria.',
+      plan: 'Oggi terapia manuale ed esercizi di rotazione esterna con elastico.',
+      summaryForPatient: 'Oggi abbiamo fatto terapia manuale ed esercizi per la spalla.',
+      primaryCondition: 'rotator cuff related shoulder pain',
+      exercises: ['Rotazione esterna con elastico spalla sinistra 3x12'],
+      clinicalReasoning: {
+        hypotheses: ['Possibile tendinopatia della cuffia dei rotatori, dato il dolore in elevazione e in rotazione esterna contro resistenza.', 'Possibile processo infiammatorio, data la durata di un mese.'],
+        supportingFindings: 'Dolore in elevazione e alla rotazione esterna contro resistenza; la durata di un mese è compatibile con un quadro infiammatorio.',
+      },
+    },
+    papers: ['rotator cuff tendinopathy'],
+    expect: { sheet: 1 },
+  },
 };
 
 export const KEYWORDS = [

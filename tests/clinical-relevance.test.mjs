@@ -624,6 +624,59 @@ test('r8: what the clinician documented is kept apart from what the AI suggested
   assert.deepEqual(F.exerciseOrigin('Estensione del ginocchio 3x10', t), { origin: 'suggested', dosage: 'suggested' }, 'the same movement on another joint is not what was done');
 });
 
+// ---------------------------------------------------------------- the r9 live report
+
+test('r9: with two regions treated today the plan names each, with its side; a region the draft left out is said to be undefined, nothing is invented', async () => {
+  const raw = rawIssues('r10MultiSitePlan').filter((x) => x.startsWith('coverage_plan:'));
+  assert.deepEqual(raw.sort(), ['coverage_plan:knee@plan', 'coverage_plan:shoulder@plan'], 'the generic plan of the report');
+  const out = await runCase('r10MultiSitePlan');
+  const plan = out.note.plan;
+  assert.match(plan, /^Indicazioni comuni, da adattare a ciascun distretto: esercizi di rinforzo e mobilità/, `the generic part is said to be common: ${plan}`);
+  assert.match(plan, /Spalla \(lato destro\): nessuna proposta specifica nella bozza per questo distretto; da definire\./);
+  assert.match(plan, /Ginocchio \(lato sinistro\): nessuna proposta specifica nella bozza per questo distretto; da definire\./);
+  assert.doesNotMatch(plan, /(eseguit|svolt|concordat|approvat)/i, 'nothing presented as done or agreed');
+  assert.ok(out.removed.some((r) => r.section === 'plan' && r.kind === 'plan_regions' && r.replacement === plan), 'listed, restorable');
+  const kinds = check('r10MultiSitePlan', out).map((i) => `${i.kind}:${i.item}`);
+  assert.ok(!kinds.some((k) => k.startsWith('coverage_plan:')), kinds.join(' | '));
+  assert.ok(kinds.includes('plan_region_undefined:shoulder') && kinds.includes('plan_region_undefined:knee'), `the missing proposals stay visible: ${kinds.join(' | ')}`);
+  assert.ok(!kinds.some((k) => k.startsWith('side:')), 'the sides are the clinician\'s');
+  // A plan that already distinguishes the regions is not changed.
+  const t = CASES.r10MultiSitePlan.transcript;
+  const good = 'Spalla destra: rinforzo progressivo della cuffia. Ginocchio sinistro: rinforzo del quadricipite e controllo motorio.';
+  const kept = K.sanitizeGeneratedNote({ language: 'it', plan: good }, t);
+  assert.equal(kept.note.plan, good);
+  assert.ok(!kept.removed.some((r) => r.kind === 'plan_regions'));
+  // Only one region missing: the other keeps its proposals, the missing one is said to be undefined.
+  const half = K.sanitizeGeneratedNote({ language: 'it', plan: 'Spalla destra: rinforzo progressivo della cuffia.' }, t);
+  assert.equal(half.note.plan, 'Spalla destra: rinforzo progressivo della cuffia. Ginocchio (lato sinistro): nessuna proposta specifica nella bozza per questo distretto; da definire.');
+  // One region: nothing to distinguish.
+  assert.equal(K.sanitizeGeneratedNote({ language: 'it', plan: 'Esercizi di rinforzo.' }, 'Dolore alla spalla destra.').note.plan, 'Esercizi di rinforzo.');
+});
+
+test('r9: the duration of the pain alone is not evidence of an etiology; hedged hypotheses based on findings stay', async () => {
+  const raw = rawIssues('r10ShoulderEtiology');
+  for (const where of ['assessment', 'hypotheses', 'supportingFindings']) assert.ok(raw.some((x) => x.startsWith('unsupported_etiology:') && x.endsWith(`@${where}`)), `${where} (found: ${raw.join(' | ')})`);
+  const out = await runCase('r10ShoulderEtiology');
+  assert.match(out.note.assessment, /^Possibile tendinopatia della cuffia dei rotatori della spalla sinistra\./, 'the hedged hypothesis from the findings stays');
+  assert.doesNotMatch(out.note.assessment, /suggerisce una condizione infiammatoria/);
+  assert.match(out.note.assessment, /La durata dei sintomi da sola non indica una causa infiammatoria; da approfondire se indicato\./);
+  const r = out.note.clinicalReasoning;
+  assert.equal(r.hypotheses[0], CASES.r10ShoulderEtiology.note.clinicalReasoning.hypotheses[0]);
+  assert.equal(r.hypotheses[1], 'La durata dei sintomi da sola non indica una causa infiammatoria; da approfondire se indicato.');
+  assert.match(r.supportingFindings, /^Dolore in elevazione e alla rotazione esterna contro resistenza[;.] /, `findings kept apart: ${r.supportingFindings}`);
+  assert.doesNotMatch(r.supportingFindings, /compatibile con un quadro infiammatorio/);
+  assert.ok(out.removed.filter((x) => x.kind === 'unsupported_etiology').every((x) => x.replacement), 'listed, restorable');
+  assert.ok(!check('r10ShoulderEtiology', out).some((i) => i.kind === 'unsupported_etiology'));
+  // An etiology the clinician stated, and a duration without an inference, stay.
+  const said = 'Dolore alla spalla sinistra da un mese; ecografia con borsite infiammatoria subacromiale.';
+  assert.deepEqual(F.unsupportedEtiology('Quadro infiammatorio da un mese, come da ecografia.', said), []);
+  assert.deepEqual(F.unsupportedEtiology('Dolore alla spalla sinistra da circa un mese.', CASES.r10ShoulderEtiology.transcript), []);
+  assert.deepEqual(F.unsupportedEtiology('Considerare una causa infiammatoria da escludere.', CASES.r10ShoulderEtiology.transcript), [], 'a differential to check is not an inference from duration');
+  for (const x of ['The one-month duration suggests an inflammatory process.', 'Dolore cronico da sei mesi, verosimilmente degenerativo.', 'La persistenza dei sintomi fa pensare a una genesi infiammatoria.']) {
+    assert.deepEqual(F.unsupportedEtiology(x, CASES.r10ShoulderEtiology.transcript).length, 1, x);
+  }
+});
+
 test('the screenshot case in detail: no hamstring/ankle swap, no leg paper', async () => {
   const out = await runCase('shoulderLeft');
   const pect = out.exercises.find((x) => /pettorale/i.test(x.name));
@@ -659,6 +712,8 @@ test('the prompts no longer push other-region exercises', () => {
   assert.match(note, /every past condition/i, 'reported history is kept, as history');
   assert.match(note, /without other complications/i, 'generic negatives are named as negatives');
   assert.match(note, /does not document a neurological assessment/i, 'an undocumented screening is said to be not documented');
+  assert.match(note, /one labelled part per region/i, 'a plan for each region treated today');
+  assert.match(note, /never infer an etiology/i, 'no cause from the duration alone');
   assert.match(note, /not yet approved/i, 'the patient summary does not present proposals as prescribed');
   assert.doesNotMatch(note, /may appear briefly in "subjective" if relevant/, 'history is no longer optional');
 });
