@@ -1516,8 +1516,12 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                         {t.categories[cat.key]}
                       </span>
                     </div>
-                    {items.length > 0 && <CheckCircle2 size={15} aria-hidden className="shrink-0 text-emerald-500" />}
+                    {/* A generated plan is a proposal: no "done" mark, and said so. */}
+                    {items.length > 0 && !(cat.key === "plan" && finalNote) && <CheckCircle2 size={15} aria-hidden className="shrink-0 text-emerald-500" />}
                   </div>
+                  {cat.key === "plan" && finalNote && items.length > 0 && (
+                    <p data-testid="plan-proposal" className="-mt-1 mb-3 text-[11px] font-medium text-amber-700 dark:text-amber-300">{t.planProposal}</p>
+                  )}
 
                   <div className="min-h-[52px] space-y-2.5">
                     {items.length === 0 && (
@@ -1867,6 +1871,14 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                   {showAddExercise ? t.cancel : t.addExercise}
                 </button>
               </div>
+
+              {/* The AI's exercises and doses are proposals until the clinician saves the note. */}
+              {noteTranscript && (() => {
+                const proposed = exerciseEntries.filter((ex: any) => exerciseOrigin(ex.draft ?? ex.name ?? "", noteTranscript).origin === "suggested").length;
+                const doses = exerciseEntries.filter((ex: any) => dosingOrigin(ex.dosing, noteTranscript) === "suggested").length;
+                if (!proposed && !doses) return null;
+                return <p data-testid="exercises-proposal" className="mt-2 text-[12px] font-medium text-amber-700 dark:text-amber-300">{t.exercisesProposal(proposed, doses)}</p>;
+              })()}
 
               {showAddExercise && (
                 <div className="mt-4 rounded-2xl border border-black/[0.06] bg-black/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.03]">

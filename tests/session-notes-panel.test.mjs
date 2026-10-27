@@ -357,6 +357,12 @@ test('statements the clinician did not give are taken out and listed, and can be
     // No objective finding stated: said so, not left silently empty.
     await checks.locator('li[data-kind="objective_missing"]').getByText('Nessun rilievo obiettivo riferito', { exact: false }).waitFor();
 
+    // The generated plan and the suggested exercises are proposals to confirm, not approved prescriptions.
+    await page.getByTestId('note-plan').getByTestId('plan-proposal').getByText('Proposta generata dall’AI: da rivedere e confermare', { exact: false }).waitFor();
+    assert.equal(await page.getByTestId('note-plan').locator('svg.text-emerald-500').count(), 0, 'no "done" check on a proposed plan');
+    await page.getByTestId('exercises-proposal').getByText('2 esercizi proposti dall’AI e 2 dosaggi suggeriti, da confermare', { exact: false }).waitFor();
+    await page.getByTestId('exercises-proposal').getByText('Salvando la nota li approvi come programma del paziente', { exact: false }).waitFor();
+
     // Neither exercise nor dose was given by the clinician: both are marked as the AI's suggestions.
     const origins = page.getByTestId('exercise-origin');
     assert.deepEqual(await origins.evaluateAll((els) => els.map((e) => e.getAttribute('data-origin'))), ['suggested', 'suggested']);

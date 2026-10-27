@@ -494,6 +494,38 @@ export const CASES = {
     papers: ['shoulder pain', 'knee pain'],
     expect: {},
   },
+  // ---- Fifth check with the real model (after e78336f): the two sentences of the r6 report, verbatim.
+  r7HistoryKnee: {
+    transcript: 'Oggi lombalgia; in anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico.',
+    note: {
+      subjective: 'Lombalgia. In anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico.',
+      objective: '',
+      assessment: 'Lombalgia aspecifica. Non sono stati riportati segni di compromissione neurologica o altre condizioni acute.',
+      plan: 'Esercizi di mobilità lombare.',
+      summaryForPatient: 'Oggi abbiamo parlato della schiena.',
+      primaryCondition: 'low back pain',
+      exercises: ['Cat-camel 2x10'],
+      clinicalReasoning: { hypotheses: ['Possibile lombalgia aspecifica.'], supportingFindings: 'Il paziente ha riportato lombalgia senza altre complicazioni.' },
+    },
+    papers: ['low back pain'],
+    expect: { sheet: 7 },
+  },
+  // The same kind of sentences when the clinician did screen and said so: they stay.
+  r7Documented: {
+    transcript: 'Lombalgia acuta da due giorni. Esame neurologico negativo, nessuna irradiazione, nega febbre e disturbi sfinterici. Nessuna complicazione dopo la caduta.',
+    note: {
+      subjective: 'Lombalgia acuta da due giorni, nessuna irradiazione.',
+      objective: 'Esame neurologico negativo.',
+      assessment: 'Lombalgia acuta senza segni di compromissione neurologica. Nessuna complicazione riferita dopo la caduta.',
+      plan: 'Esercizi di mobilità lombare.',
+      summaryForPatient: 'Muoviti con gradualità.',
+      primaryCondition: 'acute low back pain',
+      exercises: ['Cat-camel 2x10'],
+      clinicalReasoning: { supportingFindings: 'Esame neurologico negativo, nessuna irradiazione.', redFlagsPrecautions: 'Nessuna red flag: nega febbre e disturbi sfinterici.' },
+    },
+    papers: ['low back pain'],
+    expect: { sheet: 7 },
+  },
 };
 
 export const KEYWORDS = [

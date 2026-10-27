@@ -75,12 +75,15 @@ const TESTS: Group[] = [
 // What a negative statement can be about beyond the findings above.
 const NEGATIVE_CONCEPTS: Group[] = [
   group('red flags', ['red flag*', 'redflag*', 'bandier* ross*', 'segn* di allarme', 'segnal* di allarme', 'segn* d allarme', 'segnal* d allarme', 'campanell* d allarme', 'warning sign*', 'serious patholog*', 'patologi* grav*', 'banderas rojas', 'signos de alarma', 'drapeaux rouges', 'signes d alerte', 'cauda equina', 'anestesia a sella', 'saddle an*', 'incontinenz*', 'incontinence', 'ritenzione urinaria', 'urinary retention', 'febbre', 'fever', 'calo ponderale', 'perdita di peso', 'weight loss']),
+  group('complications', ['complicazion*', 'complicanz*', 'altr* complicazion*', 'altr* problem*', 'altr* problematic*', 'altr* sintom*', 'altro da segnalare', 'nient altro', 'nulla di rilevante', 'nulla da segnalare', 'nulla di particolare', 'complication*', 'other problem*', 'other symptom*', 'nothing else', 'complicacion*', 'otros problemas', 'otros sintomas', 'autres problemes', 'autres symptomes']),
   group('other conditions', ['altre condizioni', 'altra condizione', 'condizion* acut*', 'altre patologie', 'altra patologia', 'patologi* acut*', 'patologi* sistemic*', 'cause specifiche', 'causa specifica', 'other condition*', 'acute condition*', 'specific cause*', 'systemic', 'otras condiciones', 'otra condicion', 'autres conditions', 'autre condition']),
 ]
 // Words that make a statement negative ("senza", "nessun", "negativo"…)…
-const NEGATION = ['nessun', 'nessuna', 'nessuno', 'assenza', 'assente', 'assenti', 'senza', 'non ci sono', 'non c e', 'non si rilev*', 'non si evidenzi*', 'non si osserv*', 'non present*', 'non apparent*', 'non evident*', 'negativ*', 'esclus*', 'none', 'no', 'absence', 'absent', 'without', 'negative', 'not present', 'sin', 'ningun', 'ninguna', 'ausencia', 'ausente', 'aucun', 'aucune', 'sans', 'negatif']
-// …unless it says what is still to check, or that it was not assessed.
-const STILL_OPEN = ['da escludere', 'escluder*', 'rule out', 'da valutare', 'da indagare', 'da verificare', 'to be assessed', 'descartar', 'a exclure', 'non valutat*', 'non indagat*', 'non documentat*', 'non riferit*', 'not assessed', 'not documented', 'not reported', 'no evaluad*', 'non evalue*']
+const NEGATION = ['nessun', 'nessuna', 'nessuno', 'assenza', 'assente', 'assenti', 'senza', 'non ci sono', 'non c e', 'non si rilev*', 'non si evidenzi*', 'non si osserv*', 'non present*', 'non apparent*', 'non evident*', 'negativ*', 'esclus*', 'none', 'no', 'absence', 'absent', 'without', 'negative', 'not present', 'sin', 'ningun', 'ninguna', 'ausencia', 'ausente', 'aucun', 'aucune', 'sans', 'negatif', 'non sono stat* riportat*', 'non sono stat* rilevat*', 'non sono stat* evidenziat*', 'non sono stat* osservat*', 'non sono stat* riferit*', 'non e stat* riportat*', 'non e stat* rilevat*', 'non e stat* riferit*', 'non risult*', 'non emerg*', 'nessun altro', 'nessuna altra', 'nient altro', 'nulla di', 'niente di', 'no signs', 'no evidence', 'not reported', 'none reported', 'no other', 'nothing else', 'sin otras', 'sin otros', 'sans autre*']
+// …unless it says what is still to check, or that it was not assessed. "Non
+// riferito" and "not reported" are not enough: "non sono stati riportati segni
+// neurologici" reads as a negative result.
+const STILL_OPEN = ['da escludere', 'escluder*', 'rule out', 'da valutare', 'da indagare', 'da verificare', 'to be assessed', 'descartar', 'a exclure', 'non valutat*', 'non indagat*', 'non documentat*', 'not assessed', 'not documented', 'no evaluad*', 'non evalue*', 'da approfondire', 'to be explored', 'non documenta*', 'does not document', 'no documenta', 'ne documente pas']
 
 // Diagnoses, by concept: named in the note as a fact, they need the clinician
 // to have stated them (not only suspected). Symptom labels (lombalgia,
@@ -139,7 +142,7 @@ function firstHit(ws: string[], terms: string[]): string | null {
 const anyHit = (ws: string[], terms: string[]) => terms.some((t) => hits(ws, t))
 
 export type FactKind = 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_negative'
-export type UnsupportedFact = { kind: FactKind; item: string }
+export type UnsupportedFact = { kind: FactKind; item: string; concept?: string }
 
 // A movement said to be reduced ("rotazione cervicale ridotta", "flexion limited") is a range-of-motion finding.
 const MOVEMENT = '(flession\\w*|estension\\w*|rotazion\\w*|abduzion\\w*|adduzion\\w*|elevazion\\w*|inclinazion\\w*|mobilita|articolarita|escursione|flexion|extension|rotation|abduction|adduction|elevation|range|flexion|movilidad|mobilite)'
@@ -197,7 +200,7 @@ export function unsupportedNegatives(statement: string, transcript: string, find
   const out: UnsupportedFact[] = []
   for (const g of [...(findings ? FINDINGS : []), ...NEGATIVE_CONCEPTS]) {
     const hit = firstHit(ws, g.terms)
-    if (hit && !anyHit(said, g.terms)) out.push({ kind: 'invented_negative', item: hit })
+    if (hit && !anyHit(said, g.terms)) out.push({ kind: 'invented_negative', item: hit, concept: g.key })
   }
   return out
 }
@@ -447,6 +450,19 @@ const LABEL = {
   },
 } as const
 type Lang = keyof typeof LABEL.diagnosis
+// What a negative result nobody assessed becomes: said as not documented, by concept.
+const NOT_DOCUMENTED: Record<string, Record<Lang, string>> = {
+  neuro: { it: 'La trascrizione non documenta una valutazione neurologica; da approfondire se indicato.', en: 'The transcript does not document a neurological assessment; to be explored if indicated.', es: 'La transcripción no documenta una valoración neurológica; por valorar si está indicado.', fr: 'La transcription ne documente pas d’examen neurologique ; à approfondir si indiqué.' },
+  radiculopathy: { it: 'La trascrizione non documenta una valutazione dei segni radicolari; da approfondire se indicato.', en: 'The transcript does not document an assessment of radicular signs; to be explored if indicated.', es: 'La transcripción no documenta una valoración de signos radiculares; por valorar si está indicado.', fr: 'La transcription ne documente pas d’évaluation des signes radiculaires ; à approfondir si indiqué.' },
+  'red flags': { it: 'La trascrizione non documenta uno screening delle red flag; da approfondire se indicato.', en: 'The transcript does not document a red flag screening; to be explored if indicated.', es: 'La transcripción no documenta un cribado de banderas rojas; por valorar si está indicado.', fr: 'La transcription ne documente pas de dépistage des drapeaux rouges ; à approfondir si indiqué.' },
+  'other conditions': { it: 'La trascrizione non documenta l’esclusione di altre condizioni; da approfondire se indicato.', en: 'The transcript does not document that other conditions were ruled out; to be explored if indicated.', es: 'La transcripción no documenta que se hayan descartado otras condiciones; por valorar si está indicado.', fr: 'La transcription ne documente pas l’exclusion d’autres affections ; à approfondir si indiqué.' },
+  complications: { it: 'La trascrizione non documenta l’assenza di complicazioni; da approfondire se indicato.', en: 'The transcript does not document the absence of complications; to be explored if indicated.', es: 'La transcripción no documenta la ausencia de complicaciones; por valorar si está indicado.', fr: 'La transcription ne documente pas l’absence de complications ; à approfondir si indiqué.' },
+}
+const notDocumented = (concept: string, item: string, lang: Lang) =>
+  NOT_DOCUMENTED[concept]?.[lang] ?? { it: `La trascrizione non documenta questa valutazione (${item}); da approfondire se indicato.`, en: `The transcript does not document this assessment (${item}); to be explored if indicated.`, es: `La transcripción no documenta esta valoración (${item}); por valorar si está indicado.`, fr: `La transcription ne documente pas cette évaluation (${item}) ; à approfondir si indiqué.` }[lang]
+// Where a negative result starts in a sentence ("Il paziente ha riportato lombalgia | senza altre complicazioni").
+const NEGATIVE_START = /(?:^|[\s,])(senza|né|e\s+nessun\w*|nessun\w*|in\s+assenza|assenza\s+di|non\s+(?:sono|è|e)\s+stat\w*|non\s+risult\w*|non\s+emerg\w*|non\s+si\s+\w+|without|with\s+no|and\s+no|no\s+(?:signs?|evidence|other)|sin|sans|aucun\w*)(?=[\s,]|$)/i
+
 const langOf = (l: unknown): Lang => (l === 'en' || l === 'es' || l === 'fr' ? l : 'it')
 // "Condromalacia patellare…" → "Ipotesi da confermare: condromalacia patellare…" (an acronym keeps its case).
 const labelled = (label: string, sentence: string) => `${label}${/^[A-ZÀ-Ý]{2}/.test(sentence) ? sentence : sentence.charAt(0).toLowerCase() + sentence.slice(1)}`
@@ -458,8 +474,10 @@ const labelled = (label: string, sentence: string) => `${label}${/^[A-ZÀ-Ý]{2}
  * - visits, follow-ups and agreements in the plan and the patient summary;
  * - treatments presented as done in these;
  * - negative results nobody assessed, in these, in the assessment and in the
- *   reasoning (findings for and against, red flags: when red flags were not
- *   discussed they are said to be not assessed, not absent);
+ *   reasoning (findings for and against, red flags): never kept as a result,
+ *   reworded as not documented ("La trascrizione non documenta una
+ *   valutazione neurologica; da approfondire se indicato"); the part of the
+ *   sentence that was said stays ("Il paziente ha riportato lombalgia");
  * - a diagnosis written as a fact but not stated by the clinician, labelled
  *   as a hypothesis to confirm (subjective, objective, assessment), or taken
  *   out of the message to the patient;
@@ -480,7 +498,7 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
   const exercises = Array.isArray(note.exercises) ? note.exercises.map((e) => (typeof e === 'string' ? e : String((e as { name?: unknown })?.name ?? ''))) : []
   let confirmSaid = false
   const reasons = (section: RemovalSection, piece: string) => {
-    const found: { kind: string; item: string }[] = []
+    const found: { kind: string; item: string; concept?: string }[] = []
     if (section === 'subjective' || section === 'objective') {
       found.push(...unsupportedFindings(piece, transcript))
       for (const m of extra.measures(piece, transcript)) found.push({ kind: 'invented', item: m })
@@ -499,9 +517,29 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
   }
   const clean = (section: RemovalSection, text: string): string => {
     const kept: string[] = []
+    // The concepts already said to be not documented in this section, once each.
+    const reworded = new Set<string>(section === 'redFlagsPrecautions' ? ['red flags'] : [])
     for (const sentence of sentencesOf(text)) {
       const whole = reasons(section, sentence)
       let result: string | null = sentence
+      // A negative result nobody assessed: the said part stays, the rest is
+      // reworded as not documented; the original is kept for undo.
+      if (whole.length && whole.every((w) => w.kind === 'invented_negative')) {
+        const end = sentence.match(/[.;!?]+$/)?.[0] ?? '.'
+        const good: string[] = []
+        for (const clause of sentence.replace(/[.;!?]+$/, '').split(/,\s*/)) {
+          if (!reasons(section, clause).length) { good.push(clause.trim()); continue }
+          const at = clause.search(NEGATIVE_START)
+          const before = at > 0 ? clause.slice(0, at).trim() : ''
+          if (before.split(/\s+/).length >= 2 && !reasons(section, before).length) good.push(before)
+        }
+        const said = good.length ? `${good.join(', ')}${end}` : ''
+        const notes = Array.from(new Set(whole.map((w) => w.concept ?? w.item))).filter((c) => !reworded.has(c)).map((c) => { reworded.add(c); return notDocumented(c, whole.find((w) => (w.concept ?? w.item) === c)!.item, lang) })
+        const replacement = [said, ...notes].filter(Boolean).join(' ')
+        removed.push({ section, text: sentence, kind: 'invented_negative', item: whole[0].item, ...(replacement ? { replacement } : {}) })
+        if (replacement) kept.push(replacement)
+        continue
+      }
       if (whole.length) {
         // Clause by clause, keeping the clauses that are fine.
         const end = sentence.match(/[.;!?]+$/)?.[0] ?? ''

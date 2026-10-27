@@ -369,7 +369,8 @@ test('real model 3, low back pain: no negative result that was not assessed; the
   assert.ok(!raw.some((x) => x.startsWith('invented_negative:') && x.endsWith('@findingsAgainst')), '"assenza di irradiazione" was said: not an invented negative');
   const out = await runCase('r5LowBack');
   assert.match(out.note.assessment, /^Lombalgia acuta di origine meccanica/, 'what is supported stays');
-  assert.doesNotMatch(out.note.assessment, /neurolog|condizioni acute/i, 'no "no neurological signs / no other acute condition"');
+  assert.doesNotMatch(out.note.assessment, /senza segni di compromissione|né altre condizioni/i, 'no "no neurological signs / no other acute condition"');
+  assert.match(out.note.assessment, /non documenta una valutazione neurologica; da approfondire se indicato/, 'said as not documented');
   assert.doesNotMatch(out.note.clinicalReasoning.redFlagsPrecautions, /nessuna red flag/i);
   assert.match(out.note.clinicalReasoning.redFlagsPrecautions, /non indagat/i, 'red flags not assessed: said so, not declared absent');
   assert.equal(out.note.clinicalReasoning.findingsAgainst, 'Assenza di irradiazione alla gamba.', 'a documented negative is kept');
@@ -526,6 +527,51 @@ test('real model 4: "verified" is the sheet matching the documented case, never 
   assert.deepEqual([knee?.relevance, knee?.relevanceReason, knee?.diagnosisStatus], ['verified', 'symptom_only', 'not_stated'], 'a matching generic sheet, and no diagnosis');
 });
 
+// ---------------------------------------------------------------- fifth check with the real model (after e78336f)
+
+test('real model 5: "Non sono stati riportati segni…" and "senza altre complicazioni" are not negative results; what was not assessed is said to be not documented', async () => {
+  const raw = rawIssues('r7HistoryKnee');
+  assert.ok(raw.some((x) => x.startsWith('invented_negative:') && x.endsWith('@assessment')), `found: ${raw.join(' | ')}`);
+  assert.ok(raw.some((x) => x.startsWith('invented_negative:') && x.endsWith('@supportingFindings')), `found: ${raw.join(' | ')}`);
+  const out = await runCase('r7HistoryKnee');
+  const a = out.note.assessment;
+  assert.match(a, /^Lombalgia aspecifica\./, 'what is supported stays');
+  assert.doesNotMatch(a, /Non sono stati riportati segni/i, a);
+  assert.match(a, /La trascrizione non documenta una valutazione neurologica; da approfondire se indicato\./, a);
+  assert.match(a, /La trascrizione non documenta l’esclusione di altre condizioni; da approfondire se indicato\./, a);
+  const sf = out.note.clinicalReasoning.supportingFindings;
+  assert.match(sf, /^Il paziente ha riportato lombalgia\./, `the supported part of the sentence stays: ${sf}`);
+  assert.doesNotMatch(sf, /senza altre complicazioni/i);
+  assert.match(sf, /La trascrizione non documenta l’assenza di complicazioni; da approfondire se indicato\./, sf);
+  const removed = out.removed.filter((r) => r.kind === 'invented_negative').map((r) => `${r.section}:${r.text}`);
+  assert.deepEqual(removed, ['assessment:Non sono stati riportati segni di compromissione neurologica o altre condizioni acute.', 'supportingFindings:Il paziente ha riportato lombalgia senza altre complicazioni.'], 'each listed as written, with the explicit wording that replaced it');
+  assert.ok(out.removed.filter((r) => r.kind === 'invented_negative').every((r) => r.replacement), 'restorable');
+  const kinds = check('r7HistoryKnee', out).map((i) => i.kind);
+  assert.ok(!kinds.includes('invented_negative'), kinds.join(', '));
+  // The anamnesis of round 6 is untouched.
+  assert.match(out.note.subjective, /In anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico/);
+});
+
+test('real model 5: negatives the clinician did assess and report stay as they are', async () => {
+  const out = await runCase('r7Documented');
+  const note = CASES.r7Documented.note;
+  assert.equal(out.note.assessment, note.assessment);
+  assert.equal(out.note.objective, note.objective);
+  assert.deepEqual([out.note.clinicalReasoning.supportingFindings, out.note.clinicalReasoning.redFlagsPrecautions], [note.clinicalReasoning.supportingFindings, note.clinicalReasoning.redFlagsPrecautions]);
+  assert.deepEqual(out.removed.map((r) => `${r.section}:${r.kind}`), []);
+  assert.ok(!check('r7Documented', out).some((i) => i.kind === 'invented_negative'));
+});
+
+test('negative wording, in four languages: a result only when it was assessed; "not documented, to be assessed" is never a result', () => {
+  const t = CASES.r7HistoryKnee.transcript;
+  for (const x of ['Non sono stati riportati segni neurologici.', 'Non risultano altre complicazioni.', 'Nessun altro problema riferito.', 'Non emergono altre condizioni acute.', 'No signs of neurological compromise were reported.', 'No other complications.', 'Sin otras complicaciones.', 'Sans autre complication.']) {
+    assert.deepEqual(F.unsupportedNegatives(x, t).map((f) => f.kind), ['invented_negative'], x);
+  }
+  for (const x of ['La trascrizione non documenta una valutazione neurologica; da approfondire se indicato.', 'Valutazione neurologica non documentata, da approfondire.', 'Red flag non indagate: da valutare.', 'Escludere altre condizioni acute.']) {
+    assert.deepEqual(F.unsupportedNegatives(x, t), [], x);
+  }
+});
+
 test('the screenshot case in detail: no hamstring/ankle swap, no leg paper', async () => {
   const out = await runCase('shoulderLeft');
   const pect = out.exercises.find((x) => /pettorale/i.test(x.name));
@@ -559,6 +605,8 @@ test('the prompts no longer push other-region exercises', () => {
   assert.match(note, /never add a finding/i, 'objective findings only as reported');
   assert.match(note, /visit frequency/i, 'no appointments or visit frequency that were not agreed');
   assert.match(note, /every past condition/i, 'reported history is kept, as history');
+  assert.match(note, /without other complications/i, 'generic negatives are named as negatives');
+  assert.match(note, /does not document a neurological assessment/i, 'an undocumented screening is said to be not documented');
   assert.match(note, /not yet approved/i, 'the patient summary does not present proposals as prescribed');
   assert.doesNotMatch(note, /may appear briefly in "subjective" if relevant/, 'history is no longer optional');
 });
