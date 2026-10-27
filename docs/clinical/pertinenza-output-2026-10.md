@@ -207,6 +207,36 @@ L'utente ha eseguito i tre casi sintetici con il modello OpenAI reale (report `c
 | Riepilogo al paziente: «continua a casa gli esercizi come ti ho mostrato» senza assegnazione domiciliare documentata; nel multisede esercizi proposti dall'AI dati come istruzioni | **Prompt**: chiedeva per il riepilogo «only what was discussed today and the exercises». Nessun controllo sulle istruzioni | **`unapprovedInstructions`** (in `sanitizeNote`): nel messaggio al paziente vengono tolte le frasi con:<br>- un esercizio proposto dall'AI;<br>- un dosaggio o una frequenza non indicati;<br>- un programma a casa o un «come ti ho mostrato» non documentati;<br>- un'istruzione generica sul programma ("fai gli esercizi ogni giorno") quando il programma contiene proposte dell'AI.<br>La prima frase tolta è sostituita da «Il tuo fisioterapista ti confermerà quali esercizi fare a casa.». Ogni rimozione è elencata con "Ripristina". Resta ciò che è stato fatto oggi e il programma a casa effettivamente assegnato, con il suo dosaggio. Controllo `unapproved_instruction`. Il prompt dice che le proposte non sono ancora approvate |
 | Scheda della cuffia `verified` mentre la trascrizione parla di problema **sospetto** | **`knowledge-lookup`**: `relevance` indicava la corrispondenza della scheda con il caso documentato, ma nel report e nella lettura poteva sembrare una diagnosi confermata. Il sospetto valeva come "detto" | **Due campi separati**. `relevance` (verified/unverified) indica la corrispondenza della scheda con il caso documentato: distretto e condizione nominata dal fisioterapista, anche se solo come sospetto. Il nuovo `diagnosisStatus` (`diagnosisStatus` in `lib/knowledge/conditionMatch.ts`) indica che cosa ha detto il fisioterapista della diagnosi: `stated` (affermata), `suspected` (solo sospettata o ipotizzata), `not_stated`. Vale anche per gli altri distretti trattati. Il pannello mostra, per esempio, «Diagnosi sospetta, da confermare. La scheda corrisponde al caso documentato: non conferma la diagnosi.». Il report scrive «corrispondenza con il caso documentato: verified · diagnosi: suspected (la scheda non conferma la diagnosi)» |
 
+### Revisione 7: quinta verifica con il modello reale (dopo `e78336f`)
+
+L'utente ha eseguito i tre casi sintetici con il modello OpenAI reale (report `clinical-live-report-r6`, sul suo computer). Anamnesi, esercizi svolti e riepilogo per il paziente risultano migliorati; resta un problema sui reperti negativi non documentati in `historyKnee`. Le due frasi del report sono riprodotte **testualmente** nel caso `r7HistoryKnee`; il caso `r7Documented` contiene invece negativi realmente riferiti, che devono restare. Sul codice di `e78336f` i due nuovi test sulle frasi e il test dell'interfaccia fallivano; il caso di controllo passava già.
+
+**Perché la sanitizzazione non le toglieva** (`unsupportedNegatives` e `sanitizeNote` in `lib/clinical/facts.ts`):
+- «Non sono stati riportati segni di compromissione neurologica o altre condizioni acute»:
+  - la forma passiva "non sono stati riportati" non era tra le negazioni note (c'erano "nessun", "senza", "non si rilevano"…);
+  - "non riferito" e "not reported" erano trattati come "non valutato", ed esentavano la frase dal controllo; "non riportato" invece non era nell'elenco, ma la formulazione suona comunque come un esito negativo;
+  - nella Valutazione la frase veniva così letta solo come "reperto non detto" (`invented_finding`), che lì viene segnalato ma mai corretto.
+- «Il paziente ha riportato lombalgia senza altre complicazioni»:
+  - "complicazioni" non era un concetto clinico noto, quindi la frase non veniva controllata;
+  - la pulizia tagliava solo alle virgole, quindi non avrebbe potuto separare la parte detta da quella negativa.
+
+**Correzione.** Tre stati distinti:
+
+| Stato | Esempio | Che cosa succede |
+|---|---|---|
+| Negativo valutato e documentato | «Esame neurologico negativo», «nega febbre» | Resta com'è |
+| Aspetto non riportato o non valutato | «Non sono stati riportati segni…», «senza altre complicazioni» | Non è mai un risultato negativo. Viene **riformulato in modo esplicito**: la parte detta resta («Il paziente ha riportato lombalgia.»), il resto diventa «La trascrizione non documenta una valutazione neurologica; da approfondire se indicato.». Analogamente per esclusione di altre condizioni, assenza di complicazioni, segni radicolari, screening delle red flag e, in generale, «questa valutazione (…)». In 4 lingue, in tutte le sezioni e nel ragionamento clinico; l'originale è elencato e si può ripristinare |
+| Aspetto da valutare | «Da approfondire», «non documentato», «da escludere» | Non è un risultato negativo e resta |
+
+- **Nuove forme negative riconosciute**: "non sono stati riportati / rilevati / evidenziati / osservati", "non risulta", "non emergono", "nessun altro", "nient'altro", "no signs / no evidence / no other / not reported", "sin otras", "sans autre".
+- **Nuovo concetto "complicazioni / altri problemi / altri sintomi"**.
+- **Ciò che non esenta più una frase**: "non riferito" e "not reported".
+- **Prompt**: nomina queste formulazioni come negative e chiede la frase esplicita "non documentato".
+
+**Interfaccia del fisioterapista** (`components/liveStructuring/LiveStructuring.tsx`):
+- **Piano generato**: porta l'etichetta «Proposta generata dall'AI: da rivedere e confermare. Non è una prescrizione già approvata.» e non ha più il segno di spunta verde di "completato".
+- **Esercizi**: sopra l'elenco compare, per esempio, «2 esercizi proposti dall'AI e 2 dosaggi suggeriti, da confermare. Salvando la nota li approvi come programma del paziente.», oltre all'origine già indicata su ogni esercizio. Il salvataggio è il momento in cui il fisioterapista approva: gli esercizi salvati diventano visibili al paziente in My Phygo.
+
 ## Matrice dei casi e risultati (solo test simulati)
 
 Suite `tests/clinical-relevance.test.mjs`. Segue il percorso reale delle route:
@@ -359,6 +389,24 @@ Effetti voluti su test esistenti:
 - script del modello reale: eseguito contro un sostituto locale di OpenAI per verificare il report (scheda e diagnosi separate, origine `performed`), **non** contro il modello reale;
 - questo documento è aggiornato con un commit successivo che modifica **solo** la documentazione.
 
+**Revisione 7, regressioni dalla quinta verifica con il modello reale** (risposte simulate):
+
+| Test | Prima, sul codice di `e78336f` | Dopo |
+|---|---|---|
+| Le due frasi del report r6, testuali | ✗ nessuna negazione rilevata (solo `invented_finding:neurologica` sulla Valutazione, non corretto) | ✓ Valutazione: «Lombalgia aspecifica. La trascrizione non documenta una valutazione neurologica; da approfondire se indicato. La trascrizione non documenta l'esclusione di altre condizioni; da approfondire se indicato.»; ragionamento: «Il paziente ha riportato lombalgia. La trascrizione non documenta l'assenza di complicazioni; da approfondire se indicato.»; entrambe elencate e ripristinabili; anamnesi del ginocchio invariata |
+| Negativi realmente riferiti (esame neurologico negativo, nessuna irradiazione, nega febbre) | ✓ | ✓ nessuna modifica |
+| Varianti in 4 lingue | ✗ "non sono stati riportati", "non risultano altre complicazioni", "no other complications"… non rilevati | ✓ rilevate; le frasi "non documentato / da approfondire" mai trattate come risultati |
+| Interfaccia: piano ed esercizi | ✗ piano con spunta verde, nessuna indicazione di proposta | ✓ etichetta di proposta sul piano; conteggio di esercizi e dosaggi proposti; il salvataggio indicato come approvazione |
+
+**Effetto su un test esistente**: nel caso lombare della revisione 5 la Valutazione contiene ora, volutamente, la frase «non documenta una valutazione neurologica». Il test verifica che sparisca l'affermazione negativa, non la parola "neurologica".
+
+**Controlli complessivi** (revisione 7), eseguiti sul commit `6a0050c` con l'albero di lavoro pulito:
+- suite completa dell'app: **279 test, 279 superati, 0 falliti, 0 saltati, 0 annullati**. Comprende `clinical-relevance` (71) e i 6 test nel browser;
+- typecheck: nessun errore. Build: riuscita;
+- test SQL: 7 file, tutti superati, solo su PostgreSQL locale;
+- nessuna modifica a database o servizi di produzione: nessun file SQL cambiato dopo `e78336f`, nessuna chiamata a Supabase o Vercel;
+- questo documento è aggiornato con un commit successivo che modifica **solo** la documentazione.
+
 ## Test simulati e verifica con il modello reale
 
 | | Stato |
@@ -368,17 +416,23 @@ Effetti voluti su test esistenti:
 | Verifica con il modello AI reale, dopo la revisione 3 (`cf0e971`) | Eseguita dall'utente sugli stessi tre casi sintetici. I reperti inventati risultano migliorati; ha trovato i problemi della revisione 4, riprodotti qui come regressioni simulate |
 | Verifica con il modello AI reale, dopo la revisione 4 (`eff1dbe`) | Eseguita dall'utente sugli stessi tre casi (report `clinical-live-report-r4`). Ha trovato i sei problemi della revisione 5, riprodotti qui come regressioni simulate a partire dalla sua descrizione |
 | Verifica con il modello AI reale, dopo la revisione 5 (`9fa65eb`) | Eseguita dall'utente (report `clinical-live-report-r5`): miglioramenti della revisione 5 confermati; trovati i quattro problemi della revisione 6, riprodotti qui come regressioni simulate a partire dalla sua descrizione |
-| Verifica con il modello AI reale, dopo la revisione 6 | **Da eseguire, prima del merge.** In questo ambiente non c'è una chiave OpenAI. Le correzioni sono dimostrate **solo con risposte simulate**; il comportamento del modello reale con il nuovo prompt **non è dimostrato** finché non c'è il nuovo report |
+| Verifica con il modello AI reale, dopo la revisione 6 (`e78336f`) | Eseguita dall'utente (report `clinical-live-report-r6`): anamnesi, esercizi svolti e riepilogo migliorati; trovato il problema dei negativi non documentati della revisione 7, riprodotto qui con le frasi testuali del report |
+| Verifica con il modello AI reale, dopo la revisione 7 | **Da eseguire, prima del merge.** In questo ambiente non c'è una chiave OpenAI. Le correzioni sono dimostrate **solo con risposte simulate** |
 
-**Ripetizione dei tre casi dopo la revisione 6** (dalla radice del repository, sul commit della PR, con la chiave solo nella variabile d'ambiente):
+**Ripetizione dei tre casi dopo la revisione 7** (dalla radice del repository, sul commit della PR, con la chiave solo nella variabile d'ambiente):
 
 ```
 npm ci
 node scripts/clinical-relevance-live.mjs --build
-OPENAI_API_KEY_LIVE=<chiave> node scripts/clinical-relevance-live.mjs --out ./clinical-live-report-r6 --repeat 1 --cases shoulderLeft,historyKnee,multiSiteSides
+OPENAI_API_KEY_LIVE=<chiave> node scripts/clinical-relevance-live.mjs --out ./clinical-live-report-r7 --repeat 1 --cases shoulderLeft,historyKnee,multiSiteSides
 ```
 
-Da confrontare con `clinical-live-report-r5`, punto per punto:
+Da confrontare con `clinical-live-report-r6`:
+- in nessuna sezione, ragionamento clinico compreso, un risultato negativo non riferito («non sono stati riportati segni…», «senza altre complicazioni», «nessuna red flag»): al loro posto «La trascrizione non documenta …; da approfondire se indicato.» (voci `invented_negative` in "Tolto o etichettato", con la riformulazione);
+- i negativi detti dal fisioterapista restano;
+- l'interfaccia (da controllare a mano nel pannello, perché il report non la mostra): il piano porta l'etichetta di proposta; sopra gli esercizi il numero di esercizi e dosaggi proposti dall'AI.
+
+Punti della revisione 6, da ricontrollare nello stesso report:
 1. `historyKnee`: il Soggettivo contiene l'intervento al ginocchio sinistro come anamnesi (scritto dal modello, oppure aggiunto: voce `history_added` in "Tolto o etichettato"); nessuna scheda, esercizio o controllo per il ginocchio;
 2. `shoulderLeft`: la rotazione esterna con elastico ha `origine: performed`, con `dosaggio: suggested` se serie e ripetizioni non erano state dette;
 3. riepilogo al paziente: nessun «come ti ho mostrato», programma a casa, esercizio dell'AI o dosaggio non detti; le rimozioni compaiono come `unapproved_instruction`;
@@ -432,6 +486,9 @@ Il modello reale può scrivere esercizi o valutazioni diversi da quelli delle re
 - **L'origine dell'esercizio si basa su circa 25 movimenti e 7 tipi di attrezzo**: per un esercizio senza movimento noto resta il confronto delle parole, quindi un esercizio detto con parole molto diverse risulta "suggerito".
 - **Il controllo del messaggio al paziente si basa su elenchi di espressioni** (a casa, continua, ripeti, come ti ho mostrato, ogni giorno…): un'istruzione formulata diversamente, senza esercizi, dosaggi o frequenze riconoscibili, non viene rilevata. Le frasi tolte sono elencate e si possono ripristinare.
 - **`diagnosisStatus` distingue affermato e sospettato con le parole di ipotesi** (sospetto, possibile, compatibile…): una diagnosi detta come certa ma con un'espressione di dubbio fuori elenco risulta "indicata".
+- **I negativi riconosciuti dipendono da un elenco di forme e concetti**: una negazione formulata diversamente («quadro neurologico tranquillo», «tutto nella norma») non viene rilevata. Un concetto è "documentato" se il fisioterapista ne ha parlato in qualsiasi modo, anche con un'altra polarità.
+- **La parte detta di una frase viene conservata solo se precede la negazione** («X senza Y»). Se la negazione viene prima («Senza complicazioni, il paziente riferisce…»), la frase viene riformulata per intero; l'originale resta ripristinabile.
+- **Le etichette di proposta sono nell'interfaccia del fisioterapista**: una volta salvata la nota, gli esercizi sono considerati approvati. Il testo del piano salvato non porta l'etichetta, salvo le frasi con dosaggi non detti già etichettate dalla revisione 5.
 - **I dati del test sono sintetici**: il database reale (1107 schede, 52 studi pubblicati, 1924 esercizi) può contenere casi non rappresentati.
 - **`refine-plan` è invariata e non usata** (vedi sopra).
 - **ESLint non è configurato nel repository**: i controlli statici eseguiti sono il typecheck e la build.
