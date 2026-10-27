@@ -99,7 +99,7 @@ I casi sono quelli della matrice in `tests/support/clinical-world.mjs`. Vengono 
   - ipotesi e differenziali plausibili per i dati;
   - "informazioni mancanti" specifiche del caso;
   - red flag: quelle riferite, oppure "non indagate" se non se n'è parlato; mai dichiarate assenti se non è stato detto;
-  - nessun risultato negativo non riferito ("nessun segno neurologico", "nessuna altra condizione acuta"): ciò che non è stato valutato è "non valutato", non negativo; i negativi detti restano;
+  - nessun risultato negativo non riferito ("nessun segno neurologico", "non sono stati riportati segni…", "senza altre complicazioni", "nessuna altra condizione acuta"), anche nel ragionamento clinico: al suo posto "La trascrizione non documenta …; da approfondire se indicato"; i negativi detti restano;
   - ipotesi etichettate come tali: nessuna diagnosi specifica presentata come certa sulla base del solo sintomo.
 - **Spunti clinici (scheda e protocollo)**:
   - scheda dello stesso distretto e condizione, oppure "pertinenza non verificata" con il motivo;
@@ -120,6 +120,7 @@ I casi sono quelli della matrice in `tests/support/clinical-world.mjs`. Vengono 
   - "Dalla nota: …" quando l'esercizio del database ha un nome diverso, e l'esercizio del database ha lo stesso movimento;
   - "Corrispondenza non verificata" quando non è certo, senza sostituzione automatica;
   - origine indicata: "Svolto oggi", "Indicato da te" o "Suggerito dall'AI"; un dosaggio non detto è "suggerito", mai attribuito al fisioterapista;
+  - il piano generato porta l'etichetta di proposta da confermare; sopra gli esercizi è indicato quanti esercizi e dosaggi sono proposti dall'AI e che il salvataggio li approva;
   - dosaggio presente.
 - **Controlli di coerenza**:
   - gli esercizi esclusi indicano il distretto dell'esercizio e quello del caso;
