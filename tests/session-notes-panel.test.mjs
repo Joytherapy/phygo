@@ -131,7 +131,7 @@ test('the coherence checks say what was left out and why, keep what the clinicia
   // A condition sheet naming no body region: shown, marked as not verified.
   await page.route('**/api/knowledge-lookup', json({
     match: { id: 14, condition_name: 'Tendinopatia calcifica', condition_keywords: 'tendinopatia calcifica', goals: 'Obiettivi sintetici', clinical_tests: 'Test sintetici', red_flags: 'Nessuna', typical_exercises: 'Esercizi sintetici', source: 'Linea guida sintetica', source_date: '2024' },
-    phases: [], relevance: 'unverified', relevanceReason: 'sheet_region_unknown',
+    phases: [], relevance: 'unverified', relevanceReason: 'sheet_region_unknown', diagnosisStatus: 'suspected',
   }));
   await page.route('**/api/exercise-intelligence', (route) => {
     sent = JSON.parse(route.request().postData() || '{}');
@@ -158,7 +158,7 @@ test('the coherence checks say what was left out and why, keep what the clinicia
     await page.goto(`${app.url}/dashboard/patients/${P}/session`);
     await page.getByRole('heading', { level: 1, name: 'Paziente Sintetico' }).waitFor({ timeout: 15000 });
     await page.getByRole('button', { name: 'Scrivi', exact: true }).click();
-    const said = 'Dolore alla spalla sinistra da un mese, dolore in rotazione esterna resistita.';
+    const said = 'Dolore alla spalla sinistra da un mese, dolore in rotazione esterna resistita. Sospetta tendinopatia calcifica. Oggi esercizi di extrarotazione con theraband.';
     await page.getByRole('textbox', { name: 'Scrivi qui le tue osservazioni sulla seduta…' }).fill(said);
     await page.getByRole('button', { name: 'Genera nota' }).click();
     await page.getByText('Nota pronta').waitFor({ timeout: 15000 });
@@ -168,6 +168,14 @@ test('the coherence checks say what was left out and why, keep what the clinicia
     assert.equal(sent.transcript, said, 'the clinician’s words go with the exercises, as the reference for region and side');
     const cards = page.getByTestId('note-exercise');
     const excluded = checks.getByTestId('excluded-exercise');
+    // Done today (said with other words), with a dose the clinician did not give.
+    const firstOrigin = cards.first().getByTestId('exercise-origin');
+    assert.equal(await firstOrigin.getAttribute('data-origin'), 'performed');
+    await firstOrigin.getByText('Svolto oggi (dalla trascrizione)').waitFor();
+    await firstOrigin.getByTestId('dosage-suggested').getByText('Dosaggio suggerito dall’AI: non indicato da te').waitFor();
+    // The sheet's match is not a diagnosis.
+    await page.getByTestId('insight-diagnosis').getByText('Diagnosi sospetta, da confermare', { exact: false }).waitFor();
+    await page.getByTestId('insight-diagnosis').getByText('non conferma la diagnosi', { exact: false }).waitFor();
 
     // What does not match, and why.
     await checks.locator('li[data-kind="side"]').getByText('Piano: il lato non corrisponde a quello che hai indicato.').waitFor();

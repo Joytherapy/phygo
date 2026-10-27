@@ -154,9 +154,9 @@ const [exerciseSearching, setExerciseSearching] = useState(false);
 const [noteTranscript, setNoteTranscript] = useState("");
 const [excludedExercises, setExcludedExercises] = useState<{ name: string; reason?: string; regions?: string[]; caseRegions?: string[] }[]>([]);
 // Whether the condition sheet's region could be verified against the case (/api/knowledge-lookup).
-const [insightRelevance, setInsightRelevance] = useState<{ relevance: string | null; reason: string | null }>({ relevance: null, reason: null });
+const [insightRelevance, setInsightRelevance] = useState<{ relevance: string | null; reason: string | null; diagnosis?: string | null }>({ relevance: null, reason: null });
 // Condition sheets for the other regions treated today (/api/knowledge-lookup `others`).
-const [otherSheets, setOtherSheets] = useState<{ region: string; side: string | null; match: { condition_name: string } | null; relevance?: "verified" | "unverified" | null; relevanceReason?: string | null }[]>([]);
+const [otherSheets, setOtherSheets] = useState<{ region: string; side: string | null; match: { condition_name: string } | null; relevance?: "verified" | "unverified" | null; relevanceReason?: string | null; diagnosisStatus?: string | null }[]>([]);
 // Statements taken out of the draft because the clinician did not say them (/api/generate-note `removed`).
 const [removedFacts, setRemovedFacts] = useState<{ section: string; text: string; kind: string; item: string; replacement?: string }[]>([]);
 
@@ -537,7 +537,7 @@ body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.prima
             });
             const kbData = await kbRes.json();
 setClinicalInsight(kbData.match || null);
-setInsightRelevance({ relevance: kbData.relevance ?? null, reason: kbData.relevanceReason ?? null });
+setInsightRelevance({ relevance: kbData.relevance ?? null, reason: kbData.relevanceReason ?? null, diagnosis: kbData.diagnosisStatus ?? null });
 setOtherSheets(Array.isArray(kbData.others) ? kbData.others : []);
 setRehabPhases(kbData.phases || []);
 setEvidenceLevel(kbData.evidenceLevel || null);
@@ -806,7 +806,7 @@ recognition.lang = recordingLang;
   // original wording back. In the clinical reasoning too.
   const restoreRemoved = (r: { section: string; text: string; replacement?: string }) => {
     setRemovedFacts((prev) => prev.filter((x) => x !== r));
-    const undo = (current: string) => (r.replacement && current.includes(r.replacement) ? current.replace(r.replacement, r.text) : current ? `${current} ${r.text}` : r.text);
+    const undo = (current: string) => (r.replacement && current.includes(r.replacement) ? current.replace(r.replacement, r.text).replace(/\s{2,}/g, " ").trim() : current ? `${current} ${r.text}` : r.text);
     if (["supportingFindings", "findingsAgainst", "redFlagsPrecautions"].includes(r.section)) {
       setFinalNote((prev: any) => (prev ? { ...prev, clinicalReasoning: { ...(prev.clinicalReasoning ?? {}), [r.section]: undo(((prev.clinicalReasoning ?? {})[r.section] ?? "").trim()) } } : prev));
       setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
@@ -891,6 +891,7 @@ recognition.lang = recordingLang;
     if ((issue.kind === "section_region" || issue.kind === "history_as_active") && issue.section) item = `${sectionLabel(issue.section)} (${regionLabel(issue.regions)})`;
     if (["invented", "invented_finding", "invented_test", "invented_appointment", "invented_agreement", "invented_treatment", "invented_negative", "unconfirmed_diagnosis", "generated_dosage"].includes(issue.kind) && issue.section) item = `"${issue.item}" (${sectionLabel(issue.section)})`;
     if (issue.kind.startsWith("coverage_")) item = regionLabel([issue.item]);
+    if (issue.kind === "unapproved_instruction") item = `${sectionLabel("summaryForPatient")} (${(t.instructionReason as Record<string, string>)[issue.item] ?? issue.item})`;
     return t.coherenceIssue[issue.kind](item);
   };
 
@@ -1641,14 +1642,14 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                     {removedFacts.map((r, i) => (
                       <li key={`${r.section}-${i}`} data-testid="removed-fact" className="flex flex-wrap items-center justify-between gap-2 text-sm text-ink/75 dark:text-white/75">
                         <span className="min-w-0 break-words">
-                          «{r.text}»
+                          {r.text ? `«${r.text}»` : t.added(r.replacement ?? "")}
                           <span className="block text-[11px] text-ink/55 dark:text-white/45">
                             {sectionLabel(r.section as SectionName)} · {(t.removedReason as Record<string, string>)[r.kind] ?? r.kind}
                           </span>
-                          {r.replacement && <span data-testid="removed-fact-replacement" className="block text-[11px] text-ink/55 dark:text-white/45">{t.replacedWith(r.replacement)}</span>}
+                          {r.replacement && r.text && <span data-testid="removed-fact-replacement" className="block text-[11px] text-ink/55 dark:text-white/45">{t.replacedWith(r.replacement)}</span>}
                         </span>
                         <button type="button" onClick={() => restoreRemoved(r)} className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 text-xs font-semibold ${SECONDARY_BTN}`}>
-                          {t.restore}
+                          {r.text ? t.restore : t.undoAdd}
                         </button>
                       </li>
                     ))}
@@ -1720,6 +1721,12 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
               <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-black/[0.06] pt-4 dark:border-white/[0.07]">
                 <p className="text-[11px] text-ink/50 dark:text-white/40">
                   {clinicalInsight.source} ({clinicalInsight.source_date}) · {t.insightDisclaimer} {t.protocolIndicative}
+                  {/* The sheet's match is not a diagnosis: what the clinician said of it, separately. */}
+                  {insightRelevance.diagnosis && (t.diagnosisStatus as Record<string, string>)[insightRelevance.diagnosis] && (
+                    <span data-testid="insight-diagnosis" data-diagnosis={insightRelevance.diagnosis} className="mt-1 block font-medium text-ink/70 dark:text-white/60">
+                      {(t.diagnosisStatus as Record<string, string>)[insightRelevance.diagnosis]} {t.sheetMatchNote}
+                    </span>
+                  )}
                   {insightRelevance.relevance === "unverified" && insightRelevance.reason && (t.unverifiedReason as Record<string, string>)[insightRelevance.reason] && (
                     <span data-testid="insight-unverified" className="mt-1 block font-semibold text-amber-700 dark:text-amber-300">{(t.unverifiedReason as Record<string, string>)[insightRelevance.reason]}</span>
                   )}
@@ -1732,6 +1739,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                           {regionLabel([o.region])}
                           {o.side && o.side !== "both" ? ` (${o.side === "left" ? t.sideLeft : t.sideRight})` : ""}: {o.match?.condition_name ?? t.otherRegionNoSheet}
                           {o.relevanceReason && (t.otherSheetReason as Record<string, string>)[o.relevanceReason] && <span data-testid="other-region-reason"> — {(t.otherSheetReason as Record<string, string>)[o.relevanceReason]}</span>}
+                          {o.match && o.diagnosisStatus && (t.diagnosisStatus as Record<string, string>)[o.diagnosisStatus] && <span data-testid="other-region-diagnosis"> {(t.diagnosisStatus as Record<string, string>)[o.diagnosisStatus]}</span>}
                           {o.relevance === "unverified" && o.relevanceReason && (t.unverifiedReason as Record<string, string>)[o.relevanceReason] && (
                             <span data-testid="other-region-unverified" className="block font-semibold text-amber-700 dark:text-amber-300">{(t.unverifiedReason as Record<string, string>)[o.relevanceReason]}</span>
                           )}

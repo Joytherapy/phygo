@@ -72,6 +72,21 @@ export function conditionStated(row: KbRow, transcript: string, regionWords: Set
   return words.some((w) => said.includes(` ${w} `))
 }
 
+/**
+ * What the clinician said about the diagnosis of a sheet, apart from whether
+ * the sheet matches the case: 'stated' (affirmed), 'suspected' (named only as
+ * a suspicion or a hypothesis: "sospetta problematica della cuffia"), or
+ * 'not_stated'. A sheet that matches the case never confirms a diagnosis.
+ * `hedged`: whether a sentence is worded as a hypothesis
+ * (lib/clinical/facts.ts isHedged).
+ */
+export function diagnosisStatus(row: KbRow, transcript: string, regionWords: Set<string>, sameRegion: boolean, hedged: (sentence: string) => boolean): 'stated' | 'suspected' | 'not_stated' {
+  const sentences = transcript.split(/(?<=[.;!?])\s+|\n+/).filter((x) => x.trim())
+  const naming = sentences.filter((x) => conditionStated(row, x, regionWords, sameRegion))
+  if (!naming.length) return 'not_stated'
+  return naming.some((x) => !hedged(x)) ? 'stated' : 'suspected'
+}
+
 // What a clinician says when only the symptom and the region are known, to
 // find a regional sheet without a more specific diagnosis.
 export const REGION_SYMPTOMS: Record<string, string[]> = {

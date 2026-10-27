@@ -4,7 +4,8 @@ import { requireVerifiedProfessional } from '@/lib/auth/sessionServer';
 import { consumeHourly, HOURLY_LIMITS } from '@/lib/rateLimit';
 import { serviceClient } from '@/lib/verification';
 import { lazy } from '@/lib/lazy';
-import { bestCondition, conditionStated, isRegionalSheet, REGION_SYMPTOMS, type KbRow } from '@/lib/knowledge/conditionMatch';
+import { bestCondition, conditionStated, diagnosisStatus, isRegionalSheet, REGION_SYMPTOMS, type KbRow } from '@/lib/knowledge/conditionMatch';
+import { isHedged } from '@/lib/clinical/facts';
 import { analyzeMentions, REGION_WORDS, regionFit, regionsOf, type Region } from '@/lib/clinical/region';
 import { caseOf, conditionRegionsOf, otherRegionsOf } from '@/lib/clinical/coherence';
 
@@ -156,7 +157,8 @@ export async function POST(request: Request) {
           console.error('knowledge-lookup: AI fallback (other region) failed:', aiErr instanceof Error ? aiErr.message : aiErr);
         }
       }
-      others.push({ region, side, ...(entry ?? { match: null, relevance: null, relevanceReason: pool.length ? 'no_matching_sheet' : 'no_sheet_for_region', matchedBy: null }) });
+      const shown = entry?.match ? pool.find((r) => String(r.id) === String(entry!.match.id)) : null;
+      others.push({ region, side, ...(entry ?? { match: null, relevance: null, relevanceReason: pool.length ? 'no_matching_sheet' : 'no_sheet_for_region', matchedBy: null }), diagnosisStatus: shown && said ? diagnosisStatus(shown, sentencesAbout(said, region), REGION_WORDS, true, isHedged) : null });
     }
     const finalPhases = lang && lang !== 'it' ? phases.map((p: any) => (p.translations?.[lang] ? { ...p, ...p.translations[lang] } : p)) : phases;
 
@@ -171,10 +173,17 @@ export async function POST(request: Request) {
       relevanceReason = 'diagnosis_not_stated';
     }
 
+    // Two separate things: `relevance` is whether the sheet matches the case as
+    // documented (its region, and its condition named by the clinician);
+    // `diagnosisStatus` is what the clinician said of that diagnosis (stated,
+    // only suspected, not stated). A matching sheet never confirms a diagnosis.
+    const diagnosis = match && said ? diagnosisStatus(match, said, REGION_WORDS, regionFit(sheetRegions(match), view.profile.active) === 'compatible', isHedged) : null;
+
     return NextResponse.json({
       match: finalMatch || null,
       relevance,
       relevanceReason,
+      diagnosisStatus: diagnosis,
       phases: finalPhases,
       evidenceLevel: match?.evidence_level || null,
       matchedKeyword,

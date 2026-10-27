@@ -20,12 +20,24 @@
 // did not give is a generated suggestion, labelled as such in the plan and
 // told apart on each exercise (exerciseOrigin, dosingOrigin).
 //
+// History the clinician reported ("in anamnesi intervento al ginocchio
+// sinistro, ora asintomatico") stays in the subjective section as history: if
+// the draft leaves it out, it is added back in the clinician's words. It never
+// becomes today's problem (lib/clinical/region.ts reads it as history).
+//
+// The message to the patient does not turn the AI's proposals into a
+// prescription: an exercise the clinician did not do or name, a dose they did
+// not give, a home programme or a demonstration they did not mention are
+// taken out of it, and the patient is told that the clinician will confirm
+// the home exercises.
+//
 // sanitizeNote() removes or labels such statements in the parts of the note
 // that report facts and lists each change with its reason, so the clinician
 // can undo it. In the assessment only negatives are removed and certain
 // diagnoses labelled; the rest of the reasoning is flagged
 // (lib/clinical/coherence.ts), never edited.
-import { normalize, REGION_WORDS } from './region'
+import { movesOf } from './exerciseMatch'
+import { analyzeMentions, caseProfile, exerciseTextRegions, normalize, regionFit, regionsOf, REGION_WORDS } from './region'
 
 type Group = { key: string; terms: string[] }
 const group = (key: string, terms: string[]): Group => ({ key, terms })
@@ -262,32 +274,143 @@ const DONE = ['oggi', 'eseguit*', 'svolt*', 'effettuat*', 'fatto', 'fatti', 'fat
 const LATER = ['a casa', 'domicilio', 'proseguir*', 'continuer*', 'da fare', 'prescri*', 'assegn*', 'consigli*', 'propost*', 'propon*', 'prossim*', 'at home', 'home', 'will', 'should', 'next', 'en casa', 'a la maison', 'maison']
 const NOT_IDENTITY = new Set(['esercizi', 'esercizio', 'exercise', 'exercises', 'ejercicio', 'ejercicios', 'exercice', 'exercices', 'serie', 'series', 'sets', 'ripetizioni', 'reps', 'volte', 'times', 'minuti', 'minutes', 'secondi', 'seconds', 'settimana', 'week', 'giorno', 'day', 'gradi', 'degrees', 'sinistro', 'sinistra', 'destro', 'destra', 'left', 'right', 'izquierdo', 'izquierda', 'derecho', 'derecha', 'gauche', 'droit', 'droite', 'della', 'delle', 'degli', 'dello', 'with', 'avec', 'para', 'pour'])
 
+// Tools, by concept: one exercise is written "con elastico", "con banda
+// elastica", "with a theraband".
+const TOOLS: Group[] = [
+  group('band', ['elastic*', 'banda', 'bande', 'band', 'bands', 'theraband', 'thera band', 'tubing', 'goma', 'resistance band']),
+  group('weight', ['manubri*', 'peso', 'pesi', 'pesetti', 'dumbbell*', 'weight*', 'kettlebell*', 'mancuerna*', 'haltere*']),
+  group('cable', ['cavo', 'cavi', 'cable*', 'poulie']),
+  group('ball', ['palla', 'pallone', 'fitball', 'ball', 'pelota', 'balle', 'ballon']),
+  group('stick', ['bastone', 'bastoncino', 'stick', 'baston', 'baton']),
+  group('wall', ['muro', 'parete', 'wall', 'pared', 'mur']),
+  group('pulley', ['carrucola', 'pulley', 'polea']),
+]
+const toolsOf = (ws: string[]) => new Set(TOOLS.filter((g) => anyHit(ws, g.terms)).map((g) => g.key))
+// "Oggi non abbiamo fatto esercizi": not done, and not a programme either.
+const NOT_DONE = ['non abbiamo', 'non ha fatto', 'non ha eseguito', 'non eseguit*', 'non svolt*', 'non fatt*', 'senza esercizi', 'did not', 'didn t', 'not done', 'no hicimos', 'no se hizo', 'n avons pas']
+// Known movements, without "mobility" (too broad to say which exercise).
+const specificMoves = (text: string) => new Set(Array.from(movesOf(text)).filter((m) => m !== 'mobility'))
+
 /**
  * Where an exercise of the note comes from: done today as the clinician said
  * ('performed'), named by them for later ('stated'), or proposed by the model
  * ('suggested'); and whether its dose is the clinician's ('stated'), the
- * model's ('suggested'), or absent (null). An exercise is the clinician's when
- * a sentence about exercises names it (its own words, not just its region).
+ * model's ('suggested'), or absent (null). The two are separate: an exercise
+ * done today keeps a suggested dose when the clinician gave none.
+ *
+ * An exercise is the clinician's when a sentence of theirs about exercises
+ * names the same activity, whatever the wording: the same known movements
+ * ("extrarotazione", "rotazioni esterne", "external rotation" are one
+ * movement), no different tool ("banda elastica" and "theraband" are an
+ * elastic, a dumbbell is not) and no other region (a hip rotation is not the
+ * shoulder's). Without a known movement, its own words must be there. In
+ * doubt it is the model's: another movement, another tool, another region, a
+ * sentence saying it was not done.
  */
 export function exerciseOrigin(draft: string, transcript: string): { origin: 'performed' | 'stated' | 'suggested'; dosage: 'stated' | 'suggested' | null } {
   const doses = dosesOf(draft)
   const dosage = doses.length ? (unstatedDosage(draft, transcript).length ? 'suggested' : 'stated') : null
+  const draftMoves = specificMoves(draft)
+  const draftTools = toolsOf(words(draft))
+  const draftRegions = exerciseTextRegions(draft)
+  const caseRegions = caseProfile(transcript).active
   const stem = (w: string) => w.slice(0, 5)
   const all = words(draft).filter((w) => w.length >= 4 && !/\d/.test(w) && !NOT_IDENTITY.has(w))
   const own = all.filter((w) => !REGION_WORDS.has(w))
   // Its own words; an exercise named only by structures ("pendolo di Codman") by those.
   const identity = own.length ? own : all
-  let best: { matched: number; sentence: string[] } | null = null
+  let found: string[] | null = null
   for (const sentence of sentencesOf(transcript)) {
     const sw = words(sentence)
-    if (!anyHit(sw, EXERCISE_CONTEXT)) continue
-    const stems = new Set(sw.map(stem))
-    const matched = identity.filter((w) => stems.has(stem(w))).length
-    if (!best || matched > best.matched) best = { matched, sentence: sw }
+    if (!anyHit(sw, EXERCISE_CONTEXT) || anyHit(sw, NOT_DONE)) continue
+    let same: boolean
+    if (draftMoves.size) {
+      const said = movesOf(sentence)
+      const tools = toolsOf(sw)
+      const where = regionsOf(sentence).length ? regionsOf(sentence) : caseRegions
+      same = Array.from(draftMoves).every((m) => said.has(m))
+        && (!draftTools.size || !tools.size || Array.from(draftTools).some((t) => tools.has(t)))
+        && (!draftRegions.length || !where.length || regionFit(draftRegions, where) !== 'incompatible')
+    } else {
+      const stems = new Set(sw.map(stem))
+      const matched = identity.filter((w) => stems.has(stem(w))).length
+      same = identity.length > 0 && matched >= Math.min(2, identity.length) && matched / identity.length >= 0.5
+    }
+    if (!same) continue
+    // Done today, in a sentence that is not a proposal or a hypothesis.
+    if (anyHit(sw, DONE) && !anyHit(sw, LATER) && !isHedged(sentence)) return { origin: 'performed', dosage }
+    found = sw
   }
-  const named = !!best && identity.length > 0 && best.matched >= Math.min(2, identity.length) && best.matched / identity.length >= 0.5
-  if (!named) return { origin: 'suggested', dosage: dosage && 'suggested' }
-  return { origin: anyHit(best!.sentence, DONE) && !anyHit(best!.sentence, LATER) ? 'performed' : 'stated', dosage }
+  if (found) return { origin: 'stated', dosage }
+  return { origin: 'suggested', dosage: dosage && 'suggested' }
+}
+
+// ---------------------------------------------------------------- the message to the patient
+
+const EXERCISE_WORDS = ['eserciz*', 'exercise*', 'ejercicio*', 'exercice*', 'allenament*', 'training', 'routine']
+const HOME_CLAIM = ['a casa', 'a domicilio', 'at home', 'en casa', 'a la maison', 'continua*', 'prosegui*', 'ripet*', 'repeat*', 'repite', 'repete', 'keep doing', 'carry on', 'sigue', 'continue*']
+const HOME_SAID = ['a casa', 'domicili*', 'at home', 'home', 'en casa', 'maison', 'compit*', 'assegnat*', 'prescritt*', 'consegnat*', 'proseguir*', 'continuer*']
+const SHOWN_CLAIM = ['come ti ho mostrato', 'come ti ho insegnato', 'come ti ho spiegato', 'come ti ho fatto vedere', 'come abbiamo visto', 'come abbiamo provato', 'come visto', 'as i showed', 'as i showed you', 'as shown', 'as we practised', 'as we practiced', 'como te mostre', 'como te ensene', 'comme je t ai montre', 'comme vu']
+const SHOWN_SAID = ['mostrat*', 'insegnat*', 'spiegat*', 'fatto vedere', 'dimostrat*', 'provat*', 'showed', 'shown', 'taught', 'demonstrat*', 'practi*', 'mostre', 'ensene', 'montre']
+const FREQUENCY = ['ogni giorno', 'tutti i giorni', 'al giorno', 'quotidian*', 'ogni sera', 'ogni mattina', 'a settimana', 'alla settimana', 'daily', 'every day', 'per day', 'a day', 'a week', 'per week', 'cada dia', 'todos los dias', 'al dia', 'par jour', 'chaque jour', 'tous les jours', 'par semaine']
+// The sentence PHYGO writes in place of instructions not approved yet.
+const CONFIRM = ['conferm*', 'confirm*']
+
+/**
+ * Why a sentence of the message to the patient presents as prescribed what
+ * the clinician has not approved: a home programme or a demonstration they
+ * did not mention, an exercise only the AI proposed, a dose or frequency they
+ * did not give. `exercises`: the note's exercises as written.
+ */
+export function unapprovedInstructions(sentence: string, transcript: string, exercises: string[] = []): string[] {
+  const ws = words(sentence)
+  if (anyHit(ws, CONFIRM)) return []
+  const said = words(transcript)
+  const moves = specificMoves(sentence)
+  const named = exercises.filter((e) => Array.from(specificMoves(e)).some((m) => moves.has(m)))
+  const dose = unstatedDosage(sentence, transcript)
+  const frequency = FREQUENCY.filter((f) => hits(ws, f) && !hits(said, f))
+  if (!anyHit(ws, EXERCISE_WORDS) && !named.length && !dosesOf(sentence).length && !frequency.length) return []
+  const out: string[] = []
+  if (anyHit(ws, SHOWN_CLAIM) && !anyHit(said, SHOWN_SAID)) out.push('demonstration_not_documented')
+  else if (anyHit(ws, HOME_CLAIM) && !anyHit(said, HOME_SAID)) out.push('home_programme_not_documented')
+  const suggested = (e: string) => exerciseOrigin(e, transcript).origin === 'suggested'
+  if (named.some(suggested)) out.push('suggested_exercise')
+  // "Fai gli esercizi ogni giorno": an instruction about the programme, which holds AI proposals.
+  else if (!named.length && anyHit(ws, EXERCISE_WORDS) && !anyHit(ws, DONE) && exercises.some(suggested)) out.push('suggested_exercise')
+  if (dose.length || frequency.length) out.push('generated_dosage')
+  return out
+}
+
+// ---------------------------------------------------------------- history
+
+const HISTORY_MARKERS = ['anamnesi', 'anamnestic*', 'pregress*', 'in passato', 'storia di', 'history of', 'past medical', 'previous surgery', 'antecedent*', 'antecedentes', 'antecedents']
+const clausesOf = (text: string) => text.split(/[.;!?\n]+/).map((c) => c.trim()).filter(Boolean)
+
+/**
+ * The history the clinician reported (a past region or event: "in anamnesi
+ * intervento al ginocchio sinistro cinque anni fa, ora asintomatico") that
+ * the subjective section does not keep, in the clinician's words.
+ */
+export function historyNotKept(subjective: string, transcript: string): { text: string; item: string }[] {
+  const kept = analyzeMentions(subjective)
+  const keptStems = new Set(words(subjective).map((w) => w.slice(0, 5)))
+  const out: { text: string; item: string }[] = []
+  for (const whole of clausesOf(transcript)) {
+    // From the part that is history to the end ("Mal di schiena da due giorni, in passato episodi simili risolti").
+    const parts = whole.split(/,\s*/)
+    const from = parts.findIndex((p) => anyHit(words(p), HISTORY_MARKERS) || analyzeMentions(p).some((m) => m.status === 'history'))
+    if (from < 0) continue
+    const clause = parts.slice(from).join(', ')
+    const past = analyzeMentions(clause).filter((m) => m.status === 'history')
+    if (!past.length && !anyHit(words(clause), HISTORY_MARKERS)) continue
+    // Kept: its region named as history in the subjective, or most of its words there.
+    if (past.length && past.every((m) => kept.some((k) => k.region === m.region && k.status === 'history'))) continue
+    const content = words(clause).filter((w) => w.length >= 4 && !/^\d+$/.test(w))
+    if (content.length && content.filter((w) => keptStems.has(w.slice(0, 5))).length / content.length >= 0.6) continue
+    out.push({ text: `${clause.charAt(0).toUpperCase()}${clause.slice(1)}.`, item: past[0]?.region ?? 'history' })
+  }
+  return out
 }
 
 /** Whether an assessment statement is worded as a hypothesis (reasoning, not a finding). */
@@ -305,11 +428,17 @@ export type RemovalSection = 'subjective' | 'objective' | 'assessment' | 'plan' 
 export type Removal = { section: RemovalSection; text: string; kind: string; item: string; replacement?: string }
 
 type Reasoning = { supportingFindings?: string; findingsAgainst?: string; redFlagsPrecautions?: string; [k: string]: unknown }
-type Note = { subjective?: string; objective?: string; assessment?: string; plan?: string; summaryForPatient?: string; language?: unknown; clinicalReasoning?: Reasoning | null; [k: string]: unknown }
+type Note = { subjective?: string; objective?: string; assessment?: string; plan?: string; summaryForPatient?: string; language?: unknown; exercises?: unknown; clinicalReasoning?: Reasoning | null; [k: string]: unknown }
 
 const LABEL = {
   diagnosis: { it: 'Ipotesi da confermare: ', en: 'Hypothesis to be confirmed: ', es: 'Hipótesis por confirmar: ', fr: 'Hypothèse à confirmer : ' },
   dosage: { it: 'Proposta generata, da confermare: ', en: 'Generated suggestion, to be confirmed: ', es: 'Sugerencia generada, por confirmar: ', fr: 'Suggestion générée, à confirmer : ' },
+  homeExercises: {
+    it: 'Il tuo fisioterapista ti confermerà quali esercizi fare a casa.',
+    en: 'Your physiotherapist will confirm which exercises to do at home.',
+    es: 'Tu fisioterapeuta te confirmará qué ejercicios hacer en casa.',
+    fr: 'Votre kinésithérapeute vous confirmera les exercices à faire à la maison.',
+  },
   redFlags: {
     it: 'Red flag non indagate: non risultano da ciò che è stato riferito, da valutare.',
     en: 'Red flags not assessed: not in what was reported, to be checked.',
@@ -335,13 +464,21 @@ const labelled = (label: string, sentence: string) => `${label}${/^[A-ZÀ-Ý]{2}
  *   as a hypothesis to confirm (subjective, objective, assessment), or taken
  *   out of the message to the patient;
  * - a dose the clinician did not give, in the plan, labelled as a generated
- *   suggestion.
+ *   suggestion;
+ * - in the message to the patient, instructions the clinician has not
+ *   approved (an AI exercise, a dose, a home programme or a demonstration not
+ *   mentioned): taken out, the first replaced by "your physiotherapist will
+ *   confirm the home exercises";
+ * - history the clinician reported but the subjective section leaves out:
+ *   added back, in their words, as history.
  * A sentence is cut clause by clause (by commas), so what was said stays.
  */
 export function sanitizeNote<T extends Note>(note: T, transcript: string, extra: { measures: (s: string, t: string) => string[]; treatments: (s: string, t: string) => string[]; appointments: (s: string, t: string) => string[] }): { note: T; removed: Removal[] } {
   const removed: Removal[] = []
   const out: Note = { ...note }
   const lang = langOf(note.language)
+  const exercises = Array.isArray(note.exercises) ? note.exercises.map((e) => (typeof e === 'string' ? e : String((e as { name?: unknown })?.name ?? ''))) : []
+  let confirmSaid = false
   const reasons = (section: RemovalSection, piece: string) => {
     const found: { kind: string; item: string }[] = []
     if (section === 'subjective' || section === 'objective') {
@@ -395,6 +532,17 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
           continue
         }
       }
+      // Instructions to the patient that the clinician has not approved.
+      if (section === 'summaryForPatient') {
+        const why = unapprovedInstructions(result, transcript, exercises)
+        if (why.length) {
+          const replacement = confirmSaid ? undefined : LABEL.homeExercises[lang]
+          removed.push({ section, text: result, kind: 'unapproved_instruction', item: why[0], ...(replacement ? { replacement } : {}) })
+          if (!replacement) continue
+          confirmSaid = true
+          result = replacement
+        }
+      }
       if ((section === 'subjective' || section === 'objective' || section === 'assessment') && !isHedged(result)) {
         const dx = unstatedDiagnoses(result, transcript)
         if (dx.length) {
@@ -418,6 +566,13 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
   for (const section of ['subjective', 'objective', 'assessment', 'plan', 'summaryForPatient'] as const) {
     const text = note[section]
     if (typeof text === 'string' && text.trim()) out[section] = clean(section, text)
+  }
+  // History the clinician reported stays, as history.
+  const missing = historyNotKept(out.subjective ?? '', transcript)
+  if (missing.length) {
+    const added = missing.map((m) => m.text).join(' ')
+    out.subjective = [String(out.subjective ?? '').trim(), added].filter(Boolean).join(' ')
+    for (const m of missing) removed.push({ section: 'subjective', text: '', kind: 'history_added', item: m.item, replacement: m.text })
   }
   const reasoning = note.clinicalReasoning
   if (reasoning && typeof reasoning === 'object') {

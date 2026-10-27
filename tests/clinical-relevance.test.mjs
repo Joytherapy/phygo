@@ -391,8 +391,8 @@ test('real model 3, right shoulder + left knee: pain is not turned into certain 
   const kinds = check('r5MultiSite', out).map((i) => i.kind);
   assert.ok(!kinds.includes('unconfirmed_diagnosis'), kinds.join(', '));
   // In the message to the patient an unstated diagnosis is taken out, not labelled.
-  const { note: toPatient, removed } = K.sanitizeGeneratedNote({ language: 'it', summaryForPatient: 'Hai una condromalacia patellare. Fai gli esercizi ogni giorno.' }, CASES.r5MultiSite.transcript);
-  assert.equal(toPatient.summaryForPatient, 'Fai gli esercizi ogni giorno.');
+  const { note: toPatient, removed } = K.sanitizeGeneratedNote({ language: 'it', summaryForPatient: 'Hai una condromalacia patellare. Oggi abbiamo trattato spalla e ginocchio.' }, CASES.r5MultiSite.transcript);
+  assert.equal(toPatient.summaryForPatient, 'Oggi abbiamo trattato spalla e ginocchio.');
   assert.deepEqual(removed.map((r) => `${r.section}:${r.kind}:${r.replacement ?? ''}`), ['summaryForPatient:unconfirmed_diagnosis_removed:']);
   assert.deepEqual(F.unsupportedNegatives('Nessun segno di allarme riferito.', CASES.r5LowBack.transcript).map((f) => f.kind), ['invented_negative']);
   // Hedged hypotheses stay as they are.
@@ -454,6 +454,78 @@ test('anatomical mapping: no false region from a word that names another structu
   assert.deepEqual(R.regionsOf('Loading programmes in Achilles tendinopathy'), ['ankle_foot']);
 });
 
+// ---------------------------------------------------------------- fourth check with the real model (after 9fa65eb)
+
+test('real model 4, history: a past operation the clinician reported stays in the note, as history only', async () => {
+  const out = await runCase('r6HistoryKnee');
+  assert.match(out.note.subjective, /^Lombalgia\./);
+  assert.match(out.note.subjective, /in anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico/i, `the reported history is kept: ${out.note.subjective}`);
+  assert.ok(out.removed.some((r) => r.section === 'subjective' && r.kind === 'history_added' && /ginocchio sinistro/.test(r.replacement ?? '')), 'listed as added, so it can be taken out');
+  // History, never today's problem: no knee sheet, protocol, exercise or check.
+  const view = K.caseOf(out.transcript, out.note);
+  assert.deepEqual(view.profile.active, ['lumbar']);
+  assert.ok(R.caseProfile(out.note.subjective).history.includes('knee'), 'the knee is history in the subjective too');
+  assert.equal(out.kb.match?.id, 7);
+  assert.deepEqual((out.kb.others ?? []).map((o) => o.region), [], 'no sheet for the knee');
+  assert.ok(!out.exercises.some((x) => R.exerciseRegions(x).includes('knee')), 'no knee exercise');
+  const kinds = check('r6HistoryKnee', out).map((i) => `${i.kind}:${i.item}`);
+  assert.ok(!kinds.some((k) => /^(history_as_active|section_region|district|coverage_)/.test(k)), kinds.join(' | '));
+  // A note that already keeps the history is not changed.
+  const kept = K.sanitizeGeneratedNote({ language: 'it', subjective: 'Lombalgia. Pregresso intervento al ginocchio sinistro, ora asintomatico.' }, CASES.r6HistoryKnee.transcript);
+  assert.deepEqual(kept.removed, []);
+});
+
+test('real model 4: an exercise done today is "performed" whatever the wording; its dose stays the AI\'s when not given', () => {
+  const t = CASES.r6ShoulderLeft.transcript;
+  for (const d of ['Extrarotazione della spalla sinistra con banda elastica, gomito al fianco, 3x12', 'Rotazioni esterne con theraband 3 serie da 12', 'External rotation with resistance band 3x12', 'Esercizi di rotazione esterna della spalla con elastico, gomito vicino al corpo, 3x12']) {
+    assert.deepEqual(F.exerciseOrigin(d, t), { origin: 'performed', dosage: 'suggested' }, d);
+  }
+  assert.deepEqual(F.exerciseOrigin('Rotazione esterna con elastico', t), { origin: 'performed', dosage: null });
+  // Prudent when it is not the same exercise.
+  assert.deepEqual(F.exerciseOrigin('Rotazione interna con elastico 3x12', t).origin, 'suggested', 'another movement');
+  assert.deepEqual(F.exerciseOrigin('Rotazione esterna con manubrio 3x10', t).origin, 'suggested', 'another tool');
+  assert.deepEqual(F.exerciseOrigin('Rotazione esterna dell\'anca con elastico 3x10', t).origin, 'suggested', 'another region');
+  assert.deepEqual(F.exerciseOrigin('Retrazione scapolare 3x10', t).origin, 'suggested');
+  assert.deepEqual(F.exerciseOrigin('Rotazione esterna con elastico 3x12', 'Dolore alla spalla sinistra. Oggi non abbiamo fatto esercizi di rotazione esterna con elastico.').origin, 'suggested', 'said as not done');
+  assert.deepEqual(F.exerciseOrigin('Rotazione esterna con elastico 3x12', 'Dolore alla spalla sinistra. Potremmo proporre esercizi di rotazione esterna con elastico.').origin, 'stated', 'named, not done');
+});
+
+test('real model 4: the patient summary does not turn the AI\'s proposals into a prescription', async () => {
+  const out = await runCase('r6ShoulderLeft');
+  assert.match(out.note.summaryForPatient, /^Oggi abbiamo fatto terapia manuale ed esercizi per la spalla\./, 'what was done today stays');
+  assert.doesNotMatch(out.note.summaryForPatient, /come ti ho mostrato|3 serie|ogni giorno/i, out.note.summaryForPatient);
+  assert.match(out.note.summaryForPatient, /ti confermerà/i, 'the home exercises are left for the clinician to confirm');
+  const r = out.removed.find((x) => x.section === 'summaryForPatient' && x.kind === 'unapproved_instruction');
+  assert.ok(r && /come ti ho mostrato/.test(r.text) && r.replacement, 'listed, with what replaced it, so it can be restored on purpose');
+  const multi = await runCase('r6MultiSite');
+  assert.doesNotMatch(multi.note.summaryForPatient, /3 serie|step-down|ogni giorno/i, multi.note.summaryForPatient);
+  assert.match(multi.note.summaryForPatient, /^Oggi abbiamo trattato spalla e ginocchio\./);
+  for (const o of [out, multi]) {
+    const kinds = check('r6', o).map((i) => i.kind);
+    assert.ok(!kinds.includes('unapproved_instruction'), kinds.join(', '));
+  }
+  // Raw drafts are flagged.
+  assert.ok(rawIssues('r6ShoulderLeft').some((x) => x.startsWith('unapproved_instruction:') && x.endsWith('@summaryForPatient')));
+  // A home programme the clinician did give stays, with their dose.
+  const said = 'Dolore alla spalla sinistra. Oggi esercizi di rotazione esterna con elastico. A casa proseguirà con la retrazione scapolare 3x10.';
+  const kept = K.sanitizeGeneratedNote({ language: 'it', summaryForPatient: 'A casa continua con la retrazione scapolare, 3 serie da 10.', exercises: ['Retrazione scapolare 3x10'] }, said);
+  assert.equal(kept.note.summaryForPatient, 'A casa continua con la retrazione scapolare, 3 serie da 10.');
+  assert.deepEqual(kept.removed, []);
+});
+
+test('real model 4: "verified" is the sheet matching the documented case, never a confirmed diagnosis', async () => {
+  const shoulder = await runCase('r6ShoulderLeft');
+  assert.equal(shoulder.kb.match?.id, 1);
+  assert.equal(shoulder.kb.relevance, 'verified', 'the sheet matches the condition the clinician named');
+  assert.equal(shoulder.kb.diagnosisStatus, 'suspected', '"Sospetta problematica della cuffia": a suspicion, not a diagnosis');
+  const stated = await runCase('supraspinatusRight');
+  assert.equal(stated.kb.diagnosisStatus, 'stated');
+  const pain = await runCase('r4MultiSite');
+  assert.equal(pain.kb.diagnosisStatus, 'not_stated');
+  const knee = (pain.kb.others ?? []).find((o) => o.region === 'knee');
+  assert.deepEqual([knee?.relevance, knee?.relevanceReason, knee?.diagnosisStatus], ['verified', 'symptom_only', 'not_stated'], 'a matching generic sheet, and no diagnosis');
+});
+
 test('the screenshot case in detail: no hamstring/ankle swap, no leg paper', async () => {
   const out = await runCase('shoulderLeft');
   const pect = out.exercises.find((x) => /pettorale/i.test(x.name));
@@ -486,6 +558,9 @@ test('the prompts no longer push other-region exercises', () => {
   assert.doesNotMatch(note, /structures to rule out|sensible frequency\/timeline/i, 'no invitation to add findings or a visit timeline');
   assert.match(note, /never add a finding/i, 'objective findings only as reported');
   assert.match(note, /visit frequency/i, 'no appointments or visit frequency that were not agreed');
+  assert.match(note, /every past condition/i, 'reported history is kept, as history');
+  assert.match(note, /not yet approved/i, 'the patient summary does not present proposals as prescribed');
+  assert.doesNotMatch(note, /may appear briefly in "subjective" if relevant/, 'history is no longer optional');
 });
 
 after(() => {

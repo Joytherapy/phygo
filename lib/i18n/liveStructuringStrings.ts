@@ -67,9 +67,17 @@ interface LiveDict {
   coherenceTitle: string
   coherenceIntro: string
   coherenceOk: string
-  coherenceIssue: Record<'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side' | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified' | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment' | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence' | 'objective_missing' | 'invented_negative' | 'unconfirmed_diagnosis' | 'generated_dosage' | 'coverage_plan', (item: string) => string>
+  coherenceIssue: Record<'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side' | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified' | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment' | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence' | 'objective_missing' | 'invented_negative' | 'unconfirmed_diagnosis' | 'generated_dosage' | 'coverage_plan' | 'unapproved_instruction' | 'history_missing', (item: string) => string>
   removedTitle: string
-  removedReason: Record<'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment' | 'invented_negative' | 'unconfirmed_diagnosis' | 'unconfirmed_diagnosis_removed' | 'generated_dosage', string>
+  removedReason: Record<'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment' | 'invented_negative' | 'unconfirmed_diagnosis' | 'unconfirmed_diagnosis_removed' | 'generated_dosage' | 'unapproved_instruction' | 'history_added', string>
+  /** Why an instruction to the patient was not approved (lib/clinical/facts.ts unapprovedInstructions). */
+  instructionReason: Record<'home_programme_not_documented' | 'demonstration_not_documented' | 'suggested_exercise' | 'generated_dosage', string>
+  /** What the clinician said of the diagnosis of the condition sheet, apart from the sheet's match. */
+  diagnosisStatus: Record<'stated' | 'suspected' | 'not_stated', string>
+  sheetMatchNote: string
+  /** An addition PHYGO made to the draft (history the draft left out). */
+  added: (text: string) => string
+  undoAdd: string
   /** Shown under a statement that was relabelled instead of removed: what the draft now says. */
   replacedWith: (text: string) => string
   /** Where an exercise of the programme comes from, and whose its dose is. */
@@ -221,6 +229,8 @@ const it: LiveDict = {
     unconfirmed_diagnosis: (i) => `${i}: diagnosi presentata come certa, ma non l’hai indicata. Va trattata come ipotesi da confermare.`,
     generated_dosage: (i) => `${i}: dosaggio che non hai indicato, presentato come prescrizione. È un suggerimento generato.`,
     coverage_plan: (i) => `${i}: trattato oggi, ma il piano non ne parla.`,
+    unapproved_instruction: (i) => `${i}: il messaggio al paziente presentava come prescritto ciò che non hai approvato.`,
+    history_missing: (i) => `Anamnesi che hai riferito ma che il Soggettivo non riporta: ${i}`,
     objective_missing: () => 'Nessun rilievo obiettivo riferito: la sezione resta vuota. Aggiungilo tu se lo hai raccolto.',
     region_unknown: () => 'Distretto non riconosciuto nella nota: la pertinenza di esercizi, studi e protocollo non è stata verificata automaticamente.',
     district: (i) => `La condizione indicata ("${i}") riguarda un distretto diverso da quello che hai descritto.`,
@@ -238,7 +248,12 @@ const it: LiveDict = {
     protocol_unverified: (i) => `La scheda "${i}": pertinenza non verificata, il distretto non è riconosciuto.`,
   },
   removedTitle: 'Tolto o etichettato nella bozza perché non risulta da ciò che hai detto',
-  removedReason: { invented: 'misura non detta', invented_finding: 'reperto non detto', invented_test: 'test non nominato', invented_appointment: 'appuntamento o frequenza delle visite non concordati', invented_agreement: 'accordo non risultante', invented_treatment: 'trattamento non nominato', invented_negative: 'risultato negativo non documentato (non indagato)', unconfirmed_diagnosis: 'diagnosi non indicata da te: etichettata come ipotesi', unconfirmed_diagnosis_removed: 'diagnosi non indicata da te: tolta dal messaggio al paziente', generated_dosage: 'dosaggio non indicato da te: etichettato come proposta generata' },
+  removedReason: { invented: 'misura non detta', invented_finding: 'reperto non detto', invented_test: 'test non nominato', invented_appointment: 'appuntamento o frequenza delle visite non concordati', invented_agreement: 'accordo non risultante', invented_treatment: 'trattamento non nominato', invented_negative: 'risultato negativo non documentato (non indagato)', unconfirmed_diagnosis: 'diagnosi non indicata da te: etichettata come ipotesi', unconfirmed_diagnosis_removed: 'diagnosi non indicata da te: tolta dal messaggio al paziente', generated_dosage: 'dosaggio non indicato da te: etichettato come proposta generata', unapproved_instruction: 'istruzione al paziente non approvata da te', history_added: 'anamnesi riferita da te, mancante nella bozza: aggiunta come anamnesi' },
+  instructionReason: { home_programme_not_documented: 'programma a casa non indicato da te', demonstration_not_documented: 'dimostrazione non documentata', suggested_exercise: 'esercizio proposto dall’AI', generated_dosage: 'dosaggio o frequenza non indicati da te' },
+  diagnosisStatus: { stated: 'Diagnosi indicata da te.', suspected: 'Diagnosi sospetta, da confermare.', not_stated: 'Diagnosi non indicata da te.' },
+  sheetMatchNote: 'La scheda corrisponde al caso documentato: non conferma la diagnosi.',
+  added: (x) => `Aggiunto: «${x}»`,
+  undoAdd: 'Togli',
   replacedWith: (x) => `Ora nella bozza: «${x}»`,
   exerciseOrigin: { performed: 'Svolto oggi (dalla trascrizione)', stated: 'Indicato da te', suggested: 'Suggerito dall’AI, da confermare' },
   dosageSuggested: 'Dosaggio suggerito dall’AI: non indicato da te',
@@ -393,6 +408,8 @@ const en: LiveDict = {
     unconfirmed_diagnosis: (i) => `${i}: a diagnosis presented as certain that you did not give. It is a hypothesis to confirm.`,
     generated_dosage: (i) => `${i}: a dose you did not give, presented as a prescription. It is a generated suggestion.`,
     coverage_plan: (i) => `${i}: treated today, but the plan does not mention it.`,
+    unapproved_instruction: (i) => `${i}: the patient message presented as prescribed what you have not approved.`,
+    history_missing: (i) => `History you reported that the subjective section leaves out: ${i}`,
     objective_missing: () => 'No objective findings were stated: the section is left empty. Add them yourself if you collected any.',
     region_unknown: () => 'No body region recognised in the note: the pertinence of exercises, papers and protocol was not checked automatically.',
     district: (i) => `The condition given ("${i}") is about a different body region from the one you described.`,
@@ -410,7 +427,12 @@ const en: LiveDict = {
     protocol_unverified: (i) => `The sheet "${i}": pertinence not verified, the body region is not recognised.`,
   },
   removedTitle: 'Taken out of or labelled in the draft because it is not in what you said',
-  removedReason: { invented: 'measurement not given', invented_finding: 'finding not given', invented_test: 'test not named', invented_appointment: 'appointment or visit frequency not agreed', invented_agreement: 'agreement not given', invented_treatment: 'treatment not named', invented_negative: 'negative result not documented (not assessed)', unconfirmed_diagnosis: 'diagnosis you did not give: labelled as a hypothesis', unconfirmed_diagnosis_removed: 'diagnosis you did not give: taken out of the patient message', generated_dosage: 'dose you did not give: labelled as a generated suggestion' },
+  removedReason: { invented: 'measurement not given', invented_finding: 'finding not given', invented_test: 'test not named', invented_appointment: 'appointment or visit frequency not agreed', invented_agreement: 'agreement not given', invented_treatment: 'treatment not named', invented_negative: 'negative result not documented (not assessed)', unconfirmed_diagnosis: 'diagnosis you did not give: labelled as a hypothesis', unconfirmed_diagnosis_removed: 'diagnosis you did not give: taken out of the patient message', generated_dosage: 'dose you did not give: labelled as a generated suggestion', unapproved_instruction: 'instruction to the patient not approved by you', history_added: 'history you reported, missing from the draft: added as history' },
+  instructionReason: { home_programme_not_documented: 'home programme not given by you', demonstration_not_documented: 'demonstration not documented', suggested_exercise: 'exercise proposed by the AI', generated_dosage: 'dose or frequency not given by you' },
+  diagnosisStatus: { stated: 'Diagnosis given by you.', suspected: 'Suspected diagnosis, to be confirmed.', not_stated: 'Diagnosis not given by you.' },
+  sheetMatchNote: 'The sheet matches the documented case: it does not confirm the diagnosis.',
+  added: (x) => `Added: “${x}”`,
+  undoAdd: 'Remove',
   replacedWith: (x) => `Now in the draft: “${x}”`,
   exerciseOrigin: { performed: 'Done today (from the transcript)', stated: 'Named by you', suggested: 'Suggested by the AI, to be confirmed' },
   dosageSuggested: 'Dose suggested by the AI: not given by you',
@@ -565,6 +587,8 @@ const es: LiveDict = {
     unconfirmed_diagnosis: (i) => `${i}: diagnóstico presentado como seguro que no indicaste. Es una hipótesis por confirmar.`,
     generated_dosage: (i) => `${i}: dosis que no indicaste, presentada como prescripción. Es una sugerencia generada.`,
     coverage_plan: (i) => `${i}: tratado hoy, pero el plan no lo menciona.`,
+    unapproved_instruction: (i) => `${i}: el mensaje al paciente presentaba como prescrito lo que no has aprobado.`,
+    history_missing: (i) => `Antecedente que indicaste y que el apartado subjetivo omite: ${i}`,
     objective_missing: () => 'No se indicó ningún hallazgo objetivo: la sección queda vacía. Añádelo tú si lo recogiste.',
     region_unknown: () => 'No se ha reconocido ninguna región en la nota: la pertinencia de ejercicios, estudios y protocolo no se ha verificado automáticamente.',
     district: (i) => `La condición indicada ("${i}") corresponde a una región distinta de la que has descrito.`,
@@ -582,7 +606,12 @@ const es: LiveDict = {
     protocol_unverified: (i) => `La ficha "${i}": pertinencia no verificada, no se reconoce la región.`,
   },
   removedTitle: 'Retirado o etiquetado en el borrador porque no aparece en lo que has dicho',
-  removedReason: { invented: 'medida no dicha', invented_finding: 'hallazgo no dicho', invented_test: 'prueba no nombrada', invented_appointment: 'cita o frecuencia de visitas no acordadas', invented_agreement: 'acuerdo no indicado', invented_treatment: 'tratamiento no nombrado', invented_negative: 'resultado negativo no documentado (no evaluado)', unconfirmed_diagnosis: 'diagnóstico que no indicaste: etiquetado como hipótesis', unconfirmed_diagnosis_removed: 'diagnóstico que no indicaste: retirado del mensaje al paciente', generated_dosage: 'dosis que no indicaste: etiquetada como sugerencia generada' },
+  removedReason: { invented: 'medida no dicha', invented_finding: 'hallazgo no dicho', invented_test: 'prueba no nombrada', invented_appointment: 'cita o frecuencia de visitas no acordadas', invented_agreement: 'acuerdo no indicado', invented_treatment: 'tratamiento no nombrado', invented_negative: 'resultado negativo no documentado (no evaluado)', unconfirmed_diagnosis: 'diagnóstico que no indicaste: etiquetado como hipótesis', unconfirmed_diagnosis_removed: 'diagnóstico que no indicaste: retirado del mensaje al paciente', generated_dosage: 'dosis que no indicaste: etiquetada como sugerencia generada', unapproved_instruction: 'instrucción al paciente no aprobada por ti', history_added: 'antecedente que indicaste, ausente del borrador: añadido como antecedente' },
+  instructionReason: { home_programme_not_documented: 'programa en casa no indicado por ti', demonstration_not_documented: 'demostración no documentada', suggested_exercise: 'ejercicio propuesto por la IA', generated_dosage: 'dosis o frecuencia no indicadas por ti' },
+  diagnosisStatus: { stated: 'Diagnóstico indicado por ti.', suspected: 'Diagnóstico sospechado, por confirmar.', not_stated: 'Diagnóstico no indicado por ti.' },
+  sheetMatchNote: 'La ficha corresponde al caso documentado: no confirma el diagnóstico.',
+  added: (x) => `Añadido: «${x}»`,
+  undoAdd: 'Quitar',
   replacedWith: (x) => `Ahora en el borrador: «${x}»`,
   exerciseOrigin: { performed: 'Realizado hoy (de la transcripción)', stated: 'Indicado por ti', suggested: 'Sugerido por la IA, por confirmar' },
   dosageSuggested: 'Dosis sugerida por la IA: no indicada por ti',
@@ -737,6 +766,8 @@ const fr: LiveDict = {
     unconfirmed_diagnosis: (i) => `${i} : diagnostic présenté comme certain que vous n’avez pas donné. C’est une hypothèse à confirmer.`,
     generated_dosage: (i) => `${i} : dosage que vous n’avez pas donné, présenté comme une prescription. C’est une suggestion générée.`,
     coverage_plan: (i) => `${i} : traité aujourd’hui, mais le plan n’en parle pas.`,
+    unapproved_instruction: (i) => `${i} : le message au patient présentait comme prescrit ce que vous n’avez pas approuvé.`,
+    history_missing: (i) => `Antécédent que vous avez rapporté et que la section subjective omet : ${i}`,
     objective_missing: () => 'Aucun constat objectif indiqué : la section reste vide. Ajoutez-le vous-même si vous l’avez recueilli.',
     region_unknown: () => 'Aucune région reconnue dans la note : la pertinence des exercices, des études et du protocole n’a pas été vérifiée automatiquement.',
     district: (i) => `La pathologie indiquée (« ${i} ») concerne une autre région que celle que vous avez décrite.`,
@@ -754,7 +785,12 @@ const fr: LiveDict = {
     protocol_unverified: (i) => `La fiche « ${i} » : pertinence non vérifiée, la région n’est pas reconnue.`,
   },
   removedTitle: 'Retiré ou étiqueté dans le brouillon car absent de ce que vous avez dit',
-  removedReason: { invented: 'mesure non donnée', invented_finding: 'constat non donné', invented_test: 'test non nommé', invented_appointment: 'rendez-vous ou fréquence des séances non convenus', invented_agreement: 'accord non indiqué', invented_treatment: 'traitement non nommé', invented_negative: 'résultat négatif non documenté (non évalué)', unconfirmed_diagnosis: 'diagnostic que vous n’avez pas donné : étiqueté comme hypothèse', unconfirmed_diagnosis_removed: 'diagnostic que vous n’avez pas donné : retiré du message au patient', generated_dosage: 'dosage que vous n’avez pas donné : étiqueté comme suggestion générée' },
+  removedReason: { invented: 'mesure non donnée', invented_finding: 'constat non donné', invented_test: 'test non nommé', invented_appointment: 'rendez-vous ou fréquence des séances non convenus', invented_agreement: 'accord non indiqué', invented_treatment: 'traitement non nommé', invented_negative: 'résultat négatif non documenté (non évalué)', unconfirmed_diagnosis: 'diagnostic que vous n’avez pas donné : étiqueté comme hypothèse', unconfirmed_diagnosis_removed: 'diagnostic que vous n’avez pas donné : retiré du message au patient', generated_dosage: 'dosage que vous n’avez pas donné : étiqueté comme suggestion générée', unapproved_instruction: 'instruction au patient non approuvée par vous', history_added: 'antécédent que vous avez rapporté, absent du brouillon : ajouté comme antécédent' },
+  instructionReason: { home_programme_not_documented: 'programme à domicile non indiqué par vous', demonstration_not_documented: 'démonstration non documentée', suggested_exercise: 'exercice proposé par l’IA', generated_dosage: 'dosage ou fréquence non indiqués par vous' },
+  diagnosisStatus: { stated: 'Diagnostic indiqué par vous.', suspected: 'Diagnostic suspecté, à confirmer.', not_stated: 'Diagnostic non indiqué par vous.' },
+  sheetMatchNote: 'La fiche correspond au cas documenté : elle ne confirme pas le diagnostic.',
+  added: (x) => `Ajouté : « ${x} »`,
+  undoAdd: 'Retirer',
   replacedWith: (x) => `Désormais dans le brouillon : « ${x} »`,
   exerciseOrigin: { performed: 'Réalisé aujourd’hui (d’après la transcription)', stated: 'Indiqué par vous', suggested: 'Suggéré par l’IA, à confirmer' },
   dosageSuggested: 'Dosage suggéré par l’IA : non indiqué par vous',

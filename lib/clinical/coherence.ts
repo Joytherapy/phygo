@@ -12,13 +12,13 @@
 // regions named only in history or as negated are not part of it, and each
 // side is checked against the region it was given for.
 import { analyzeMentions, caseProfile, exerciseFit, exerciseRegions, normalize, pertinentTo, regionFit, regionsOf, sideContradictions, type CaseProfile, type Region } from './region'
-import { isHedged, sanitizeNote, sentencesOf, unstatedDiagnoses, unstatedDosage, unsupportedArrangements, unsupportedFindings, unsupportedNegatives } from './facts'
+import { historyNotKept, isHedged, sanitizeNote, sentencesOf, unapprovedInstructions, unstatedDiagnoses, unstatedDosage, unsupportedArrangements, unsupportedFindings, unsupportedNegatives } from './facts'
 
 export type IssueKind =
   | 'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side'
   | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified'
   | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment'
-  | 'invented_negative' | 'unconfirmed_diagnosis' | 'generated_dosage'
+  | 'invented_negative' | 'unconfirmed_diagnosis' | 'generated_dosage' | 'unapproved_instruction' | 'history_missing'
   | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence' | 'coverage_plan' | 'objective_missing'
 export type Issue = { kind: IssueKind; severity: 'high' | 'medium'; item: string; section?: SectionName; regions?: Region[]; caseRegions?: Region[] }
 
@@ -243,6 +243,11 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
       if ((name === 'subjective' || name === 'objective' || name === 'assessment' || name === 'summaryForPatient') && !isHedged(sentence)) {
         for (const d of unstatedDiagnoses(sentence, o.transcript)) issues.push({ kind: 'unconfirmed_diagnosis', severity: 'high', item: d, section: name })
       }
+      // An instruction to the patient the clinician has not approved.
+      if (name === 'summaryForPatient') {
+        const why = unapprovedInstructions(sentence, o.transcript, o.exercises.map((e) => e.draft || e.name))
+        if (why.length) issues.push({ kind: 'unapproved_instruction', severity: 'high', item: why[0], section: name })
+      }
       // A dose the clinician did not give, presented as theirs.
       if ((name === 'plan' || name === 'summaryForPatient') && !isHedged(sentence)) {
         for (const d of unstatedDosage(sentence, o.transcript)) issues.push({ kind: 'generated_dosage', severity: 'medium', item: d, section: name })
@@ -250,6 +255,8 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
     }
     for (const t of treatmentsNotInTranscript(text, o.transcript)) issues.push({ kind: 'invented_treatment', severity: 'high', item: t, section: name })
   }
+  // History the clinician reported, left out of the subjective section.
+  for (const h of historyNotKept(o.note.subjective ?? '', o.transcript)) issues.push({ kind: 'history_missing', severity: 'medium', item: h.text, section: 'subjective' })
   // No objective findings: said plainly, not left as an empty section.
   if (!(o.note.objective ?? '').trim()) issues.push({ kind: 'objective_missing', severity: 'medium', item: 'objective', section: 'objective' })
   // 7. More than one region treated today: the plan, exercises, condition

@@ -161,6 +161,14 @@ test('papers: "same region" means the same region; a neighbouring one is never c
   assert.ok(!thigh || thigh.level !== 'direct', JSON.stringify(thigh));
 });
 
+test('the diagnosis of a sheet: stated, only suspected, or not stated (whatever the sheet\'s match)', () => {
+  const cuff = { id: 1, condition_name: 'Tendinopatia della cuffia dei rotatori', condition_keywords: 'cuffia dei rotatori, rotator cuff' };
+  const hedged = (s) => /sospett|possibil|probabil/i.test(s);
+  assert.equal(K.diagnosisStatus(cuff, 'Dolore alla spalla. Sospetta problematica della cuffia dei rotatori.', G.REGION_WORDS, true, hedged), 'suspected');
+  assert.equal(K.diagnosisStatus(cuff, 'Tendinopatia della cuffia dei rotatori destra.', G.REGION_WORDS, true, hedged), 'stated');
+  assert.equal(K.diagnosisStatus(cuff, 'Dolore alla spalla in elevazione.', G.REGION_WORDS, true, hedged), 'not_stated');
+});
+
 test('knowledge lookup: past the first 1000 sheets, through translations, with its phases', async () => {
   assert.equal((await post('/api/knowledge-lookup', { assessment: 'x' }, null)).status, 401);
   const res = await post('/api/knowledge-lookup', { primaryCondition: 'Rotator cuff tendinopathy', assessment: 'Dolore anteriore di spalla', lang: 'it' });

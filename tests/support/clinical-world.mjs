@@ -13,7 +13,7 @@ export async function loadClinical() {
   const dir = mkdtempSync(join(tmpdir(), 'phygo-clin-'));
   const out = (f, src) => writeFileSync(join(dir, `${f}.mjs`), ts.transpileModule(src, { compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 } }).outputText);
   try {
-    const src = (f) => readFileSync(new URL(`../../lib/clinical/${f}.ts`, import.meta.url), 'utf8').replace("from './region'", "from './region.mjs'").replace("from './facts'", "from './facts.mjs'")
+    const src = (f) => readFileSync(new URL(`../../lib/clinical/${f}.ts`, import.meta.url), 'utf8').replace("from './region'", "from './region.mjs'").replace("from './facts'", "from './facts.mjs'").replace("from './exerciseMatch'", "from './exerciseMatch.mjs'")
     for (const f of ['region', 'facts', 'exerciseMatch', 'coherence']) out(f, src(f));
     return { R: await import(join(dir, 'region.mjs')), K: await import(join(dir, 'coherence.mjs')), F: await import(join(dir, 'facts.mjs')), M: await import(join(dir, 'exerciseMatch.mjs')) };
   } finally {
@@ -88,7 +88,8 @@ export const CASES = {
     papers: ['rotator cuff tendinopathy', 'shoulder pain', 'musculoskeletal pain'],
     expect: { region: 'shoulder', sheet: 1, papers: ['p-shoulder:direct', 'p-achilles:indirect', 'p-tendo:unverified'], offRegion: ['caviglia', 'hamstring', 'monopodalico'], noIssues: true,
       // "Nessuna red flag apparente": red flags were not discussed, so they are said to be not assessed, not absent.
-      issues: ['invented_negative:red flag'] },
+      // "Fai gli esercizi per la spalla ogni giorno": the AI's programme and a frequency nobody gave, as instructions.
+      issues: ['invented_negative:red flag', 'unapproved_instruction:suggested_exercise'] },
   },
   supraspinatusRight: {
     transcript: 'Tendinopatia del sovraspinato alla spalla destra, dolore notturno e in abduzione.',
@@ -452,9 +453,51 @@ export const CASES = {
     papers: ['patellar tendinopathy', 'rotator cuff tendinopathy'],
     expect: { kbRelevance: ['unverified', 'diagnosis_not_stated'] },
   },
+  // ---- Fourth check with the real model (after 9fa65eb), as the user reported it.
+  // Low back pain with a knee operation in the history: the model's
+  // subjective kept only the low back pain.
+  r6HistoryKnee: {
+    transcript: 'Oggi lombalgia; in anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico.',
+    note: { subjective: 'Lombalgia.', objective: '', assessment: 'Lombalgia aspecifica.', plan: 'Esercizi di mobilità lombare.', summaryForPatient: 'Oggi abbiamo lavorato sulla schiena.', primaryCondition: 'low back pain', exercises: ['Cat-camel 2x10'] },
+    papers: ['low back pain'],
+    expect: { sheet: 7 },
+  },
+  // Left shoulder: the external rotation done today, written by the model
+  // with other words; a patient summary telling to go on at home "come ti ho
+  // mostrato" with a dose nobody gave.
+  r6ShoulderLeft: {
+    transcript: 'Paziente di 45 anni con dolore alla spalla sinistra da circa un mese, dolore in elevazione oltre i 90 gradi e alla rotazione esterna contro resistenza. Sospetta problematica della cuffia dei rotatori. Oggi terapia manuale ed esercizi di rotazione esterna con elastico.',
+    note: {
+      subjective: 'Dolore alla spalla sinistra da circa un mese, in elevazione oltre i 90 gradi e alla rotazione esterna contro resistenza.',
+      objective: '',
+      assessment: 'Possibile tendinopatia della cuffia dei rotatori della spalla sinistra.',
+      plan: 'Oggi terapia manuale ed esercizi di rotazione esterna con elastico.',
+      summaryForPatient: 'Oggi abbiamo fatto terapia manuale ed esercizi per la spalla. Continua a casa gli esercizi di extrarotazione con la banda elastica come ti ho mostrato, 3 serie da 12 ogni giorno.',
+      primaryCondition: 'rotator cuff related shoulder pain',
+      exercises: ['Extrarotazione della spalla sinistra con banda elastica, gomito al fianco, 3x12', 'Retrazione scapolare 3x10'],
+    },
+    papers: ['rotator cuff tendinopathy'],
+    expect: { sheet: 1 },
+  },
+  // Right shoulder + left knee: the patient summary gives the AI's proposals as instructions.
+  r6MultiSite: {
+    transcript: 'Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi. Dolore alla spalla in elevazione e al ginocchio scendendo le scale.',
+    note: {
+      subjective: 'Dolore alla spalla destra in elevazione e al ginocchio sinistro scendendo le scale.',
+      objective: '',
+      assessment: 'Dolore alla spalla destra e al ginocchio sinistro.',
+      plan: 'Esercizi per la spalla destra e per il ginocchio sinistro.',
+      summaryForPatient: 'Oggi abbiamo trattato spalla e ginocchio. Fai 3 serie da 12 di rotazione esterna con elastico per la spalla destra e step-down per il ginocchio sinistro ogni giorno.',
+      primaryCondition: 'right shoulder pain',
+      exercises: ['Rotazione esterna con elastico 3x12', 'Step-down ginocchio sinistro 3x10'],
+    },
+    papers: ['shoulder pain', 'knee pain'],
+    expect: {},
+  },
 };
 
 export const KEYWORDS = [
+  [/extrarotazione/i, ['shoulder external rotation band', 'external rotation']],
   [/isometrici per la cuffia/i, ['isometric', 'rotator cuff']],
   [/step-down/i, ['step down']],
   [/colonna vertebrale con rotazione/i, ['spinal rotation mobilization', 'rotation']],
