@@ -526,9 +526,26 @@ export const CASES = {
     papers: ['low back pain'],
     expect: { sheet: 7 },
   },
+  // ---- The r8 live report: lumbar flexion/extension matched to "Knee extension" as verified.
+  r8LumbarMobility: {
+    transcript: 'Paziente con lombalgia da due settimane. Oggi esercizi di mobilità lombare in flessione ed estensione.',
+    note: {
+      subjective: 'Lombalgia da due settimane.',
+      objective: '',
+      assessment: 'Lombalgia aspecifica.',
+      plan: 'Esercizi di mobilità lombare.',
+      summaryForPatient: 'Oggi abbiamo lavorato sulla mobilità della schiena.',
+      primaryCondition: 'low back pain',
+      exercises: ['Mobilità lombare con flessione ed estensione della colonna vertebrale in posizione supina 2x10', 'Cat-camel 2x10'],
+    },
+    papers: ['low back pain'],
+    expect: { sheet: 7 },
+  },
 };
 
 export const KEYWORDS = [
+  // As the model extracted them: the movement words, which "Knee extension" shares.
+  [/flessione ed estensione della colonna/i, ['lumbar flexion extension', 'spinal extension', 'extension']],
   [/extrarotazione/i, ['shoulder external rotation band', 'external rotation']],
   [/isometrici per la cuffia/i, ['isometric', 'rotator cuff']],
   [/step-down/i, ['step down']],

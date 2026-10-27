@@ -7,7 +7,7 @@
 // note's text names no known movement, when every specific word of a keyword
 // is in the candidate's name. Otherwise the note's exercise is kept as
 // written and the match is "not verified".
-import { normalize, REGION_WORDS } from './region'
+import { exerciseTextRegions, normalize, REGION_WORDS, sameRegion, type Region } from './region'
 
 // Movements, by canonical name, in it/en/es/fr ("word*" matches any ending).
 const MOVES: Record<string, string[]> = {
@@ -82,8 +82,17 @@ export function checkMatch(draft: string, keywords: string[], candidateName: str
  * every specific word of a keyword in the name, including at least one that is
  * not a bare movement word ('name'). Only a match confirmed by movement says
  * which region the note's exercise works on.
+ *
+ * A movement is a movement of a joint: when the note's exercise and the
+ * candidate both say which region they work on, it must be the same region
+ * ("flessione ed estensione della colonna" is not "Knee extension", although
+ * both are an extension), otherwise it is a 'conflict'. `candidateRegions`:
+ * the candidate's regions when its name says none (its body region).
  */
-export function matchDetail(draft: string, keywords: string[], candidateName: string): MatchDetail {
+export function matchDetail(draft: string, keywords: string[], candidateName: string, candidateRegions: Region[] = []): MatchDetail {
+  const draftWhere = exerciseTextRegions(draft)
+  const candidateWhere = exerciseTextRegions(candidateName).length ? exerciseTextRegions(candidateName) : candidateRegions
+  if (draftWhere.length && candidateWhere.length && !sameRegion(draftWhere, candidateWhere)) return { check: 'conflict', by: null }
   const draftMoves = movesOf(draft)
   const candidateMoves = movesOf(candidateName)
   // "Mobility" is too broad to confirm anything on its own.

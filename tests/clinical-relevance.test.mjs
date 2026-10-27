@@ -572,6 +572,58 @@ test('negative wording, in four languages: a result only when it was assessed; "
   }
 });
 
+// ---------------------------------------------------------------- the r8 live report: matching by movement and joint
+
+test('r8: lumbar flexion/extension is never a verified "Knee extension": the movement must act on the same region', async () => {
+  const lumbar = 'Mobilità lombare con flessione ed estensione della colonna vertebrale in posizione supina 2x10';
+  // Through the pipeline.
+  const out = await runCase('r8LumbarMobility');
+  const e = out.exercises.find((x) => x.draft === lumbar);
+  assert.ok(e, `kept in the programme (excluded: ${out.excluded.map((x) => x.name).join(', ')})`);
+  assert.notEqual(e.name, 'Knee extension', 'not replaced by the knee exercise');
+  assert.notEqual(e.match_status, 'verified', 'no verified library match');
+  assert.notEqual(e.suggested_match?.name, 'Knee extension', 'not even suggested');
+  assert.equal(e.relevance, 'compatible', 'the exercise as written is a lumbar one');
+  assert.ok(!out.exercises.some((x) => x.name === 'Knee extension'), out.exercises.map((x) => x.name).join(', '));
+  for (const kw of [['lumbar flexion extension'], ['spinal extension', 'extension'], ['knee extension']]) {
+    assert.equal(M.matchDetail(lumbar, kw, 'Knee extension').check, 'conflict', `same movement word, another joint (${kw.join(', ')})`);
+  }
+  // A knee exercise is a knee exercise, whatever muscle region the catalogue gives it.
+  assert.deepEqual(R.exerciseRegions({ name: 'Knee extension', body_region: 'thighs', primary_muscle: 'quadriceps' }), ['knee']);
+  assert.equal(R.exerciseFit({ name: 'Knee extension', body_region: 'thighs', primary_muscle: 'quadriceps' }, ['lumbar']), 'incompatible');
+  const kinds = check('r8LumbarMobility', out).map((i) => `${i.kind}:${i.item}`);
+  assert.ok(!kinds.some((k) => /^(exercise|exercise_unverified|section_region):/.test(k)), kinds.join(' | '));
+});
+
+test('r8: correct matches still work: same movement on the same region', () => {
+  assert.equal(M.matchDetail('Rotazione esterna con elastico 3x12', ['external rotation'], 'Shoulder external rotation with band').check, 'verified');
+  assert.equal(M.matchDetail('Rotazione esterna con elastico spalla destra 3x12', ['shoulder external rotation band'], 'Shoulder external rotation with band').check, 'verified');
+  assert.equal(M.matchDetail('Extrarotazione della spalla sinistra con banda elastica 3x12', ['shoulder external rotation band'], 'Shoulder external rotation with band').check, 'verified');
+  assert.equal(M.matchDetail('Estensione di ginocchio sinistro 3x12', ['knee extension'], 'Knee extension').check, 'verified');
+  assert.equal(M.matchDetail('Ponte glutei 3x10', ['glute bridge'], 'Glute bridge').check, 'verified');
+  assert.equal(M.matchDetail('Plank 3x20 secondi', ['plank'], 'Plank').check, 'verified');
+  // Another joint with the same movement word stays out.
+  assert.equal(M.matchDetail('Rotazione esterna dell’anca con elastico 3x10', ['external rotation'], 'Shoulder external rotation with band').check, 'conflict');
+  assert.equal(M.matchDetail('Estensione di ginocchio sinistro 3x12', ['extension'], 'Back extension').check, 'conflict');
+});
+
+test('r8: with two regions treated today each exercise keeps its own side; a wrong side is flagged', async () => {
+  const out = await runCase('multiSiteSides');
+  const byDraft = Object.fromEntries(out.exercises.map((x) => [x.draft, x]));
+  assert.equal(byDraft['Rotazione esterna con elastico spalla destra 3x12']?.name, 'Shoulder external rotation with band');
+  assert.equal(byDraft['Estensione di ginocchio sinistro 3x12']?.name, 'Knee extension');
+  for (const d of Object.keys(byDraft)) assert.equal(byDraft[d].match_status, 'verified', d);
+  const sides = check('multiSiteSides', out).filter((i) => i.kind === 'side').map((i) => i.item);
+  assert.deepEqual(sides.sort(), ['Estensione di ginocchio destro 3x12', 'plan'], 'only the right knee (the case says left knee) and the plan');
+});
+
+test('r8: what the clinician documented is kept apart from what the AI suggested, exercise and dose', async () => {
+  const t = CASES.r8LumbarMobility.transcript;
+  assert.deepEqual(F.exerciseOrigin('Mobilità lombare con flessione ed estensione della colonna vertebrale in posizione supina 2x10', t), { origin: 'performed', dosage: 'suggested' }, 'done today; the 2x10 is the AI\'s');
+  assert.deepEqual(F.exerciseOrigin('Cat-camel 2x10', t), { origin: 'suggested', dosage: 'suggested' });
+  assert.deepEqual(F.exerciseOrigin('Estensione del ginocchio 3x10', t), { origin: 'suggested', dosage: 'suggested' }, 'the same movement on another joint is not what was done');
+});
+
 test('the screenshot case in detail: no hamstring/ankle swap, no leg paper', async () => {
   const out = await runCase('shoulderLeft');
   const pect = out.exercises.find((x) => /pettorale/i.test(x.name));

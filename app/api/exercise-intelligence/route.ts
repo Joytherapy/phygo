@@ -132,7 +132,8 @@ export async function POST(request: Request) {
       // Returns the regions of the exercise the draft names when that exercise is of another region.
       const pick = (candidates: ExerciseEntry[]): Region[] | void => {
         if (candidates.length === 0) return;
-        const checked = candidates.map((c) => ({ c, fit: exerciseFit(c, caseRegions), ...matchDetail(draftText, searchWith, `${c.name} ${c.source_name ?? ""}`) }));
+        // The candidate must be the same movement on the same region as the note's exercise (lib/clinical/exerciseMatch.ts).
+        const checked = candidates.map((c) => ({ c, fit: exerciseFit(c, caseRegions), ...matchDetail(draftText, searchWith, `${c.name} ${c.source_name ?? ""}`, exerciseRegions(c)) }));
         const confirmed = checked.filter((x) => x.check === "verified");
         // Only an exercise the draft is confirmed to be, by movement, tells its region ("Chin tuck").
         const byMovement = confirmed.find((x) => x.by === "movement");

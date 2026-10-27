@@ -28,9 +28,9 @@ const TERMS: Record<Region, string[]> = {
   wrist_hand: ['polso', 'polsi', 'mano', 'mani', 'dito', 'dita', 'pollice', 'carpo', 'carpale', 'tunnel carpale', 'de quervain', 'wrist', 'wrists', 'hand', 'hands', 'finger', 'fingers', 'thumb', 'carpal', 'carpal tunnel', 'muneca', 'dedo', 'dedos', 'pulgar', 'poignet', 'poignets', 'doigt', 'doigts', 'pouce', 'canal carpien'],
   cervical: ['cervicale', 'cervicali', 'collo', 'cervicalgia', 'cervicobrachialgia', 'colpo di frusta', 'rachide cervicale', 'neck', 'cervical', 'whiplash', 'cuello', 'cervicalgia', 'cou', 'cervicalgie', 'nuque', 'chin tuck', 'retrazione del mento'],
   // Not the bare word 'dorsale': "flessione dorsale" is the ankle.
-  // The spine named without a level is thoracic and lumbar ("colonna", "spine"); a level, when given, wins ("rachide cervicale").
-  thoracic: ['colonna vertebrale', 'colonna', 'rachide', 'vertebrale', 'vertebrali', 'spine', 'spinal', 'vertebral', 'columna vertebral', 'columna', 'colonne vertebrale', 'colonne', 'rachis', 'toracico', 'toracica', 'rachide dorsale', 'rachide toracico', 'costole', 'costale', 'dorsalgia', 'thoracic', 'thoracic spine', 'rib', 'ribs', 'toracica', 'columna dorsal', 'costillas', 'thoracique', 'cotes', 'colonna dorsale', 'tratto dorsale'],
-  lumbar: ['colonna vertebrale', 'colonna', 'rachide', 'vertebrale', 'vertebrali', 'spine', 'spinal', 'vertebral', 'columna vertebral', 'columna', 'colonne vertebrale', 'colonne', 'rachis', 'tronco', 'trunk', 'tronc', 'core', 'addome', 'addominali', 'addominale', 'abdomen', 'abdominal', 'abdominals', 'abdominales', 'abdominaux', 'bacino', 'pelvi', 'pelvico', 'pelvica', 'pelvis', 'pelvic', 'pelvien', 'pelvienne', 'plank', 'planks', 'plancia', 'bird dog', 'dead bug', 'cat camel', 'gatto cammello', 'gatto e cammello', 'lombare', 'lombari', 'lombalgia', 'lombosciatalgia', 'lombosacrale', 'sciatica', 'sciatalgia', 'mal di schiena', 'rachide lombare', 'sacroiliaca', 'sacroiliache', 'low back', 'low back pain', 'lumbar', 'lumbago', 'lumbosacral', 'sacroiliac', 'lumbalgia', 'lumbar', 'ciatica', 'lombaire', 'lombalgie', 'sciatique', 'lombo'],
+  // The spine named without a level is thoracic and lumbar ("colonna", "spine", "schiena", "back"); a level, when given, wins ("rachide cervicale", "upper back", "lower back").
+  thoracic: ['upper back', 'mid back', 'schiena', 'back', 'espalda', 'dos', 'colonna vertebrale', 'colonna', 'rachide', 'vertebrale', 'vertebrali', 'spine', 'spinal', 'vertebral', 'columna vertebral', 'columna', 'colonne vertebrale', 'colonne', 'rachis', 'toracico', 'toracica', 'rachide dorsale', 'rachide toracico', 'costole', 'costale', 'dorsalgia', 'thoracic', 'thoracic spine', 'rib', 'ribs', 'toracica', 'columna dorsal', 'costillas', 'thoracique', 'cotes', 'colonna dorsale', 'tratto dorsale'],
+  lumbar: ['lower back', 'schiena', 'back', 'espalda', 'dos', 'colonna vertebrale', 'colonna', 'rachide', 'vertebrale', 'vertebrali', 'spine', 'spinal', 'vertebral', 'columna vertebral', 'columna', 'colonne vertebrale', 'colonne', 'rachis', 'tronco', 'trunk', 'tronc', 'core', 'addome', 'addominali', 'addominale', 'abdomen', 'abdominal', 'abdominals', 'abdominales', 'abdominaux', 'bacino', 'pelvi', 'pelvico', 'pelvica', 'pelvis', 'pelvic', 'pelvien', 'pelvienne', 'plank', 'planks', 'plancia', 'bird dog', 'dead bug', 'cat camel', 'gatto cammello', 'gatto e cammello', 'lombare', 'lombari', 'lombalgia', 'lombosciatalgia', 'lombosacrale', 'sciatica', 'sciatalgia', 'mal di schiena', 'rachide lombare', 'sacroiliaca', 'sacroiliache', 'low back', 'low back pain', 'lumbar', 'lumbago', 'lumbosacral', 'sacroiliac', 'lumbalgia', 'lumbar', 'ciatica', 'lombaire', 'lombalgie', 'sciatique', 'lombo'],
   // Not 'anche' (the plural of anca is also the everyday word for "also").
   hip: ['collo del femore', 'collo femorale', 'femoral neck', 'neck of femur', 'neck of the femur', 'cuello femoral', 'col du femur', 'col femoral', 'ileopsoas', 'psoas', 'iliopsoas', 'tensore della fascia lata', 'bacino', 'pelvi', 'pelvis', 'pelvic', 'anca', 'coxartrosi', 'coxofemorale', 'gluteo', 'glutei', 'gluteo medio', 'piriforme', 'trocantere', 'trocanterica', 'trocanterite', 'inguine', 'inguinale', 'femoroacetabolare', 'hip', 'hips', 'gluteal', 'gluteus', 'glute', 'glutes', 'piriformis', 'trochanter', 'trochanteric', 'groin', 'femoroacetabular', 'cadera', 'caderas', 'gluteo', 'ingle', 'hanche', 'hanches', 'fessier', 'aine', 'coxarthrose'],
   thigh: ['bandelletta ileotibiale', 'banda ileotibiale', 'iliotibial band', 'it band', 'cintilla iliotibial', 'bandelette ilio tibiale', 'coscia', 'cosce', 'ischiocrurali', 'ischiocrurale', 'bicipite femorale', 'quadricipite', 'quadricipiti', 'adduttori', 'adduttore', 'hamstring', 'hamstrings', 'quadriceps', 'quads', 'thigh', 'adductor', 'adductors', 'isquiotibiales', 'isquiotibial', 'cuadriceps', 'muslo', 'aductores', 'ischio jambiers', 'ischiojambiers', 'cuisse', 'adducteurs'],
@@ -176,10 +176,33 @@ export const withoutPositions = (text: string | null | undefined) => normalize(t
 /** Every single word that names a region in some language (to tell a region-only keyword). */
 export const REGION_WORDS = new Set(Object.values(TERMS).flat().flatMap((t) => normalize(t).trim().split(' ')))
 
-/** The regions of a database exercise: its name, body region and primary muscle. */
+/**
+ * The regions of a database exercise: the region its name says it works on;
+ * only when the name says none, its body region and primary muscle. A "Knee
+ * extension" is a knee exercise, not also a thigh one because the catalogue
+ * files it under "thighs" (the quadriceps) — which would make it pertinent
+ * to a low back case, the thigh being next to the low back.
+ */
 export function exerciseRegions(ex: { name?: string | null; body_region?: string | null; primary_muscle?: string | null }): Region[] {
+  const named = exerciseTextRegions(ex.name)
+  if (named.length) return named
   const zone = ZONE[normalize(ex.body_region ?? '').trim()]
-  return Array.from(new Set([...exerciseTextRegions(ex.name), ...regionsOf(`${ex.body_region ?? ''} ${ex.primary_muscle ?? ''}`), ...(zone ? [zone] : [])]))
+  return Array.from(new Set([...regionsOf(`${ex.body_region ?? ''} ${ex.primary_muscle ?? ''}`), ...(zone ? [zone] : [])]))
+}
+
+// The limb as a whole contains its regions ("single leg" exercises include the knee).
+const WITHIN: Partial<Record<Region, Region[]>> = {
+  upper_limb: ['shoulder', 'elbow', 'wrist_hand'],
+  lower_limb: ['hip', 'thigh', 'knee', 'lower_leg', 'ankle_foot'],
+}
+/**
+ * Whether two exercises work on the same region: one region in common, or a
+ * whole limb and one of its regions. Not neighbours: the same movement on a
+ * neighbouring joint is another exercise (a spinal extension is not a knee
+ * extension, a hip rotation not a shoulder one).
+ */
+export function sameRegion(a: Region[], b: Region[]): boolean {
+  return a.some((x) => b.includes(x) || (WITHIN[x] ?? []).some((y) => b.includes(y)) || b.some((y) => (WITHIN[y] ?? []).includes(x)))
 }
 
 /** Every region pertinent to a set of regions (each one plus its neighbours). */
