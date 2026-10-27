@@ -237,6 +237,34 @@ L'utente ha eseguito i tre casi sintetici con il modello OpenAI reale (report `c
 - **Piano generato**: porta l'etichetta «Proposta generata dall'AI: da rivedere e confermare. Non è una prescrizione già approvata.» e non ha più il segno di spunta verde di "completato".
 - **Esercizi**: sopra l'elenco compare, per esempio, «2 esercizi proposti dall'AI e 2 dosaggi suggeriti, da confermare. Salvando la nota li approvi come programma del paziente.», oltre all'origine già indicata su ogni esercizio. Il salvataggio è il momento in cui il fisioterapista approva: gli esercizi salvati diventano visibili al paziente in My Phygo.
 
+### Revisione 8: abbinamento degli esercizi per movimento e distretto (report `clinical-live-report-r8`)
+
+Nel report r8 una nota di lombalgia con «mobilità lombare con flessione ed estensione della colonna vertebrale in posizione supina» veniva sostituita dall'esercizio di libreria «Knee extension», marcato `verified` e `compatible`. Il caso è riprodotto in `r8LumbarMobility` (`tests/support/clinical-world.mjs`). Sul codice di `c3304ce` il test falliva attraverso l'intera pipeline: l'esercizio lombare veniva sostituito da «Knee extension».
+
+**Cause (due, concorrenti)**
+1. **`matchDetail`** (`lib/clinical/exerciseMatch.ts`) confermava un candidato per il solo nome del movimento: "estensione" e "extension" sono lo stesso movimento canonico, ma non si controllava su quale articolazione agisse. Risultato: `verified` "per movimento".
+2. **`exerciseRegions`** (`lib/clinical/region.ts`) univa al distretto del nome quello del muscolo e della categoria del catalogo. «Knee extension», archiviato in "thighs" (quadricipite), era anche un esercizio della coscia, e la coscia è vicina alla zona lombare: così passava come `compatible` in un caso lombare.
+
+**Correzione**
+- Un abbinamento richiede **lo stesso movimento sullo stesso distretto** (`sameRegion`): un distretto in comune, oppure un arto intero e una sua parte; i distretti vicini non bastano. Altrimenti è un conflitto: l'esercizio della nota resta come scritto, non verificato, e il candidato non viene nemmeno suggerito.
+- Il distretto di un esercizio di libreria è quello del suo nome; categoria e muscolo valgono solo se il nome non ne indica uno.
+- "Back" e "schiena" sono riconosciuti come colonna ("upper back" dorsale, "lower back" lombare).
+
+**Regressioni** (risposte simulate)
+- Il caso r8 attraverso la pipeline: nessuna sostituzione, nessuna corrispondenza verificata né suggerita con «Knee extension»; l'esercizio scritto resta lombare e compatibile.
+- Corrispondenze corrette ancora verificate: rotazione esterna di spalla, anche "extrarotazione con banda elastica"; estensione del ginocchio; ponte glutei; plank. Sono invece respinte la rotazione esterna d'anca per quella di spalla e l'estensione del ginocchio per la «Back extension».
+- Spalla destra + ginocchio sinistro: ogni esercizio abbinato al suo distretto; segnalati solo il ginocchio destro e il Piano con il lato sbagliato.
+- Origine: la mobilità lombare documentata come svolta oggi è "svolta oggi" con dosaggio suggerito; il cat-camel e un'estensione del ginocchio (stesso movimento, altra articolazione) restano "suggeriti".
+
+**Controlli** sul commit `74962f0`, albero pulito:
+- suite completa 284/284 (0 falliti, 0 saltati);
+- typecheck senza errori e build riuscita;
+- test SQL locali 7/7;
+- nessun file SQL modificato, nessun accesso a Supabase o Vercel;
+- nessuna verifica con il modello reale in questo ambiente.
+
+**Limiti**: il controllo vale quando nota e candidato indicano un distretto. Un esercizio senza distretto né movimento noto resta abbinabile per nome, con le regole già esistenti. Un esercizio che coinvolge due distretti (es. "estensione d'anca e lombare") è accettato se uno dei due coincide.
+
 ## Matrice dei casi e risultati (solo test simulati)
 
 Suite `tests/clinical-relevance.test.mjs`. Segue il percorso reale delle route:
