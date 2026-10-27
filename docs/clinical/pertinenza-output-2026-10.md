@@ -265,6 +265,38 @@ Nel report r8 una nota di lombalgia con «mobilità lombare con flessione ed est
 
 **Limiti**: il controllo vale quando nota e candidato indicano un distretto. Un esercizio senza distretto né movimento noto resta abbinabile per nome, con le regole già esistenti. Un esercizio che coinvolge due distretti (es. "estensione d'anca e lombare") è accettato se uno dei due coincide.
 
+### Revisione 9: piano per distretto ed eziologia dalla sola durata (report `clinical-live-report-r9`)
+
+**1. Piano generico con più distretti** (spalla destra e ginocchio sinistro trattati oggi).
+- **Problema**: il controllo segnalava `coverage_plan` per spalla e ginocchio.
+- **Causa**: il formato del prompt chiedeva un "piano strutturato per fasi" senza una parte per distretto, e niente dava al piano questa struttura; il controllo poteva solo segnalarlo.
+- **Correzione**:
+  - il prompt chiede una parte per distretto, con il lato («Spalla destra: … Ginocchio sinistro: …»);
+  - `planByRegion` (`lib/clinical/coherence.ts`) dice che la parte generica è comune, da adattare a ciascun distretto, e nomina il distretto mancante con «nessuna proposta specifica nella bozza per questo distretto; da definire» e il suo lato;
+  - non aggiunge nulla come eseguito o approvato;
+  - la modifica è elencata e si può annullare;
+  - la mancanza resta visibile con `plan_region_undefined`;
+  - un piano che nomina già ogni distretto non viene modificato.
+
+**2. Eziologia dedotta dalla durata.**
+- **Problema**: «Il dolore persistente da un mese suggerisce una condizione infiammatoria» superava tutti i controlli.
+- **Causa**: nessun controllo conosceva le cause, e la durata veniva usata come prova.
+- **Correzione**:
+  - `unsupportedEtiology` (`lib/clinical/facts.ts`) riconosce le cause (infiammatoria, degenerativa, infettiva, reumatica, neuropatica, autoimmune, metabolica; 4 lingue) dedotte dalla sola durata ("da un mese", "persistente", "cronico") e non nominate dal fisioterapista;
+  - queste diventano «La durata dei sintomi da sola non indica una causa …; da approfondire se indicato.» nei Rilievi, nella Valutazione, nelle ipotesi e nel ragionamento;
+  - restano: le ipotesi prudenti basate sui reperti, una causa riferita dal fisioterapista, le cause da escludere;
+  - il prompt dice che la durata è un dato riferito, non una prova di causa.
+
+**Regressioni** (risposte simulate):
+- `r10MultiSitePlan`: prima `coverage_plan` per entrambi; dopo, piano per distretto con i lati, nessun `coverage_plan`, `plan_region_undefined` visibile. Controllato anche con un solo distretto mancante e con un solo distretto trattato.
+- `r10ShoulderEtiology`: prima nessuna segnalazione; dopo, le inferenze vengono riformulate nella Valutazione, nell'ipotesi e nei reperti a favore, mentre l'ipotesi della cuffia resta invariata. Varianti in inglese e italiano; restano invariati una causa riferita e una durata senza inferenza.
+- Sul codice di `3df855d` entrambi i test fallivano, come il controllo del prompt.
+
+**Controlli** sul commit `749dd5b`:
+- suite completa 293/293 (0 falliti), compresi i test del matching per movimento e distretto (`91a80c7`);
+- typecheck senza errori;
+- nessuna chiamata a OpenAI, nessun accesso a Supabase o Vercel, nessun report modificato.
+
 ## Matrice dei casi e risultati (solo test simulati)
 
 Suite `tests/clinical-relevance.test.mjs`. Segue il percorso reale delle route:
