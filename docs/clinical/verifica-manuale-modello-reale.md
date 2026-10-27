@@ -22,6 +22,19 @@ node scripts/clinical-relevance-live.mjs --build
 OPENAI_API_KEY_LIVE=<chiave> node scripts/clinical-relevance-live.mjs --out ./clinical-live-report --repeat 2
 ```
 
+- **Controlli preliminari gratuiti**, sempre eseguiti prima di ogni chiamata a pagamento (da soli con `--preflight`):
+  - l'app accetta il professionista sintetico: una nota con trascrizione vuota deve essere rifiutata come non valida (400), non come non autenticata (401) o oltre il limite (429);
+  - OpenAI accetta la chiave (`GET /models`, nessun costo).
+  
+  Una quota esaurita si vede solo alla prima richiesta di nota; una richiesta rifiutata per quota non viene addebitata.
+- **Se una chiamata fallisce**, lo script si ferma e mostra:
+  - status HTTP e corpo della risposta;
+  - la causa probabile: build legata a un altro Supabase sostitutivo, chiave, quota o limite OpenAI, rete, limite orario dell'app;
+  - l'ultima risposta di errore di OpenAI;
+  - le righe pertinenti del log di Next.js.
+  
+  Chiavi, token e cookie sono oscurati. Se la causa è la build (401), rifare `node scripts/clinical-relevance-live.mjs --build`.
+- **Un report esistente non viene sovrascritto**: scegliere una nuova cartella con `--out`, oppure passare `--overwrite`.
 - Si può limitare a una parte dei casi con `--cases shoulderLeft,historyKnee,multiSiteSides`.
 - Il risultato è in `clinical-live-report/report.md`, con una scheda di revisione per ogni esecuzione. Contiene:
   - tutte le sezioni generate;

@@ -589,14 +589,95 @@ export const worldTables = () => ({
       ask_phygo_usage: [],
 });
 
+// ---------------------------------------------------------------- calls to the app, with diagnostics
+
+/** Secrets never shown: API keys, bearer tokens, JWTs, session cookies. */
+export function redact(text) {
+  return String(text ?? '')
+    .replace(/sk-[A-Za-z0-9_*.-]{6,}/g, 'sk-[redatto]')
+    .replace(/(bearer\s+)[^\s"',;]+/gi, '$1[redatto]')
+    .replace(/eyJ[\w-]{8,}\.[\w-]{8,}\.[\w-]{8,}/g, '[jwt redatto]')
+    .replace(/((?:^|[\s;"'])sb-[\w-]+-auth-token(?:\.\d+)?=)[^;\s"']+/gi, '$1[redatto]')
+    .replace(/((?:cookie|set-cookie|authorization|api[-_]?key|apikey|service[-_]role[-_]key)["']?\s*[:=]\s*["']?)[^"',;\s}]+/gi, '$1[redatto]')
+}
+
+/** A call to the app that did not return what the pipeline needs. */
+export class RouteError extends Error {
+  constructor(path, status, body, problem = 'risposta di errore') {
+    super(`${/^[A-Z]+ /.test(path) ? '' : 'POST '}${path} → HTTP ${status} (${problem}): ${redact(typeof body === 'string' ? body : JSON.stringify(body)).slice(0, 800)}`)
+    this.name = 'RouteError'
+    this.path = path
+    this.status = status
+    this.body = body
+  }
+}
+
+/**
+ * A `post` for runPipeline: JSON in, JSON out; a non-2xx status or a body
+ * that is not JSON is a RouteError with the status and the (redacted) body.
+ */
+export function jsonPost(baseUrl, cookie) {
+  return async (path, body) => {
+    const res = await fetch(`${baseUrl}${path}`, { method: 'POST', headers: { 'content-type': 'application/json', cookie }, body: JSON.stringify(body) });
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch { throw new RouteError(path, res.status, text, 'corpo non JSON'); }
+    if (!res.ok) throw new RouteError(path, res.status, json);
+    return json;
+  };
+}
+
+/**
+ * What a failed call most likely means, from its status, its body, the app's
+ * log (already redacted) and the last OpenAI answer seen by the stand-in.
+ */
+export function diagnoseFailure({ status, body, logs = '', provider = null }) {
+  const text = `${JSON.stringify(body ?? '')} ${logs} ${provider ? JSON.stringify(provider) : ''}`.toLowerCase();
+  // OpenAI's own answer first, when there is one: an app error 500 often hides it.
+  if (provider?.status === 401 || /invalid_api_key|incorrect api key/.test(text)) return 'OpenAI ha rifiutato la chiave (401 invalid_api_key): controllare OPENAI_API_KEY_LIVE.';
+  if (/insufficient_quota|exceeded your current quota/.test(text)) return 'Quota OpenAI esaurita (429 insufficient_quota): controllare piano e credito del progetto OpenAI. Una richiesta rifiutata per quota non viene addebitata.';
+  if (provider?.status === 429 || /rate_limit_exceeded|rate limit reached/.test(text)) return 'Limite di frequenza OpenAI (429 rate limit): riprovare più tardi o con meno casi.';
+  if (provider?.status === 404 || /model_not_found|does not exist or you do not have access/.test(text)) return 'Modello OpenAI non disponibile per questa chiave (404 model_not_found).';
+  if (provider?.status === 0 || /forward failed|fetch failed|econnrefused|enotfound|etimedout|econnreset|getaddrinfo/.test(text)) return 'Rete: OpenAI non raggiungibile dal processo dello script (proxy, DNS o connessione).';
+  if (provider?.status >= 500) return `OpenAI ha risposto con un errore del servizio (${provider.status}): riprovare più tardi.`;
+  // Then the app's own refusals.
+  if (status === 401) return 'Autenticazione del professionista rifiutata (401): l\'app non riconosce la sessione del Supabase sostitutivo. Di solito la build non è quella dello script (è legata a un altro Supabase, per esempio la build dei test): rifare `node scripts/clinical-relevance-live.mjs --build`.';
+  if (status === 403) return 'Professionista non verificato (403): controllare il profilo sintetico del Supabase sostitutivo (worldTables).';
+  if (status === 429) return 'Limite orario dell\'app (429): troppe richieste nell\'ultima ora per il professionista sintetico.';
+  if (status === 503) return 'Servizio non disponibile (503): limite orario o verifica del profilo non disponibili (Supabase sostitutivo).';
+  if (status === 400) return 'Richiesta non valida (400): controllare il caso (trascrizione vuota?).';
+  if (status >= 500) return 'Errore interno della route: vedere il log di Next.js qui sotto.';
+  return 'Formato della risposta inatteso: vedere il corpo qui sotto.';
+}
+
+/** The lines of the app's log worth showing for a failure, redacted. */
+export function relevantLogs(logs, max = 40) {
+  const lines = redact(logs).split('\n').filter((l) => l.trim());
+  const hits = lines.filter((l) => /error|errore|warn|openai|401|403|429|500|quota|rate|fetch|refused|denied|unauthor/i.test(l));
+  return (hits.length ? hits : lines).slice(-max).join('\n');
+}
+
+const expectShape = (path, json, ok, what) => {
+  if (!ok) throw new RouteError(path, 200, json, `formato inatteso: manca ${what}`);
+  return json;
+};
+
 /** The note panel's sequence (components/liveStructuring/LiveStructuring.tsx, generateRealNote). */
 export async function runPipeline(post, transcript) {
-  const { note, removed } = await post('/api/generate-note', { transcript, lang: 'it' });
+  const gen = await post('/api/generate-note', { transcript, lang: 'it' });
+  expectShape('/api/generate-note', gen, gen && typeof gen.note === 'object' && gen.note !== null, '`note`');
+  const { note, removed } = gen;
   const science = await post('/api/science/relevant', { primaryCondition: note.primaryCondition, assessment: note.assessment, transcript });
+  expectShape('/api/science/relevant', science, science && typeof science === 'object', 'un oggetto');
   const kb = await post('/api/knowledge-lookup', { assessment: note.assessment, primaryCondition: note.primaryCondition, lang: 'it', transcript });
+  expectShape('/api/knowledge-lookup', kb, kb && typeof kb === 'object', 'un oggetto');
   let exercises = note.exercises;
-  if ((kb.phases ?? []).length) exercises = (await post('/api/refine-exercises', { transcript, assessment: note.assessment, exercisesDraft: note.exercises, phases: kb.phases, lang: 'it' })).exercises;
+  if ((kb.phases ?? []).length) {
+    const refined = await post('/api/refine-exercises', { transcript, assessment: note.assessment, exercisesDraft: note.exercises, phases: kb.phases, lang: 'it' });
+    exercises = expectShape('/api/refine-exercises', refined, refined && Array.isArray(refined.exercises), '`exercises`').exercises;
+  }
   const ei = await post('/api/exercise-intelligence', { exercisesDraft: exercises, assessment: note.assessment, primaryCondition: note.primaryCondition, lang: 'it', transcript });
+  expectShape('/api/exercise-intelligence', ei, ei && typeof ei === 'object', 'un oggetto');
   return { transcript, note, removed: removed ?? [], papers: science.papers ?? [], kb, exercises: ei.exercises ?? [], excluded: ei.excluded ?? [] };
 }
 
