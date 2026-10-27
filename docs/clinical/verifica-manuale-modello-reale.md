@@ -70,6 +70,8 @@ I casi sono quelli della matrice in `tests/support/clinical-world.mjs`. Vengono 
 | 28 | Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi. Dolore alla spalla in elevazione e al ginocchio scendendo le scale. | revisione 4: una scheda per distretto con lato, pertinenza e motivo; nessuna diagnosi più specifica di quella detta; studi su popolazioni o meccanismi non indicati "non verificati"; esercizio del tronco "per la spalla" non compatibile |
 | 29 | Dolore al ginocchio destro dopo la corsa. Flessione 120 gradi, Lachman negativo, lieve versamento. | revisione 4: i dati oggettivi detti restano |
 | 30 | Lombalgia acuta da due giorni dopo aver sollevato un peso, nessuna irradiazione alla gamba. Oggi terapia manuale. | revisione 5: nessun negativo non valutato (segni neurologici, altre condizioni, red flag); "nessuna irradiazione", detto, resta |
+| 32 | Oggi lombalgia; in anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico. | revisione 6: l'anamnesi resta nel Soggettivo, come anamnesi; nessuna scheda, esercizio o controllo per il ginocchio |
+| 33 | Paziente di 45 anni con dolore alla spalla sinistra… Oggi terapia manuale ed esercizi di rotazione esterna con elastico. | revisione 6: la rotazione esterna è "Svolto oggi", con dosaggio suggerito se non detto; il riepilogo non dice «come ti ho mostrato» né dà a casa ciò che non è stato assegnato; scheda «corrispondente» e diagnosi «sospetta» |
 | 31 | Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi. Dolore alla spalla in elevazione e al ginocchio scendendo le scale. | revisione 5: diagnosi come ipotesi; esercizi e dosaggi non detti come suggerimenti; nessuno studio di un distretto vicino come "stesso distretto"; nessun falso `section_region` sul Piano |
 
 ## Che cosa controllare in ogni sezione
@@ -77,6 +79,7 @@ I casi sono quelli della matrice in `tests/support/clinical-world.mjs`. Vengono 
 - **Tolto dalla bozza** (pannello e report): ogni rimozione era davvero un dato non detto (nessuna rimozione di cose dette), e nessun dato inventato è rimasto nel testo.
 - **Rilievi**:
   - solo ciò che è stato detto, e tutto ciò che è stato detto (nessun dato oggettivo riferito perso);
+  - l'anamnesi riferita è presente, scritta come anamnesi, anche se il distretto è asintomatico, e non diventa un problema attuale;
   - se non è stato riferito nulla di oggettivo, la sezione è vuota e il pannello lo dice;
   - nessuna misura, test o trattamento aggiunti;
   - distretto e lato invariati.
@@ -89,6 +92,7 @@ I casi sono quelli della matrice in `tests/support/clinical-world.mjs`. Vengono 
   - lato corretto **per ogni distretto** nei casi multidistretto;
   - nessun distretto dell'anamnesi trattato come problema attuale.
 - **Follow-up / sintesi per il paziente**:
+  - nessun esercizio, dosaggio, frequenza o programma a casa che il fisioterapista non abbia indicato, e nessun «come ti ho mostrato» non documentato; al loro posto il rinvio alla conferma del fisioterapista;
   - nessun giorno, data o orario non detti;
   - nessun risultato futuro presentato come certo.
 - **Ragionamento clinico**:
@@ -99,6 +103,7 @@ I casi sono quelli della matrice in `tests/support/clinical-world.mjs`. Vengono 
   - ipotesi etichettate come tali: nessuna diagnosi specifica presentata come certa sulla base del solo sintomo.
 - **Spunti clinici (scheda e protocollo)**:
   - scheda dello stesso distretto e condizione, oppure "pertinenza non verificata" con il motivo;
+  - la corrispondenza della scheda non è una diagnosi: la diagnosi è indicata a parte come «indicata da te», «sospetta, da confermare» o «non indicata da te»;
   - "non verificata: la diagnosi non risulta da ciò che hai detto" quando la condizione della scheda viene solo dalla valutazione;
   - per ogni altro distretto trattato oggi: lato, scheda (o "nessuna scheda") e motivo; mai una diagnosi più specifica di quella detta;
   - avviso "protocollo indicativo" presente.

@@ -196,6 +196,17 @@ L'utente ha eseguito di nuovo i tre casi sintetici con il modello OpenAI reale (
 | Esercizio per la cuffia dei rotatori "con gomito flesso a 90 gradi" con `exercise_region_unknown` | **`exerciseTextRegions`**: "per la cuffia dei rotatori" è uno scopo e veniva sempre ignorato; il gomito è una posizione | Ordine di deduzione: oggetto dell'esercizio, poi movimento, poi **scopo**, solo se non c'è altro. "Flessione laterale del tronco per la spalla" resta del tronco (l'oggetto vince). Nessuna nuova corrispondenza con la libreria: l'abbinamento resta quello confermato dal movimento |
 | Piano multidistretto segnalato `section_region` pur citando entrambi i distretti | **Controllo delle sezioni** (`checkOutput`): "gomito a 90 gradi" nel Piano era letto come una menzione del gomito; il gomito non è tra i vicini della spalla | Nelle sezioni un distretto nominato solo come posizione non conta (`analyzeMentions(…, { skipPositions })`, stessa logica degli esercizi). Le omissioni reali restano visibili: un distretto trattato oggi che il Piano non nomina è segnalato (`coverage_plan`); un altro distretto davvero nominato (es. "rinforzo del gomito") resta `section_region`; il lato sbagliato resta segnalato. Un Piano con "core" o "tronco" in un caso spalla + ginocchio resta segnalato: è un altro distretto |
 
+### Revisione 6: quarta verifica con il modello reale (dopo `9fa65eb`)
+
+L'utente ha eseguito i tre casi sintetici con il modello OpenAI reale (report `clinical-live-report-r5`, sul suo computer). I miglioramenti della revisione 5 risultano confermati; restano quattro difetti. Sono riprodotti, **come descritti dall'utente**, con risposte simulate nei casi `r6HistoryKnee`, `r6ShoulderLeft` e `r6MultiSite`, con quattro test dedicati in `tests/clinical-relevance.test.mjs`, uno in `tests/knowledge-match.test.mjs` e un'estensione del test nel browser. Sul codice di `9fa65eb` tutti questi test fallivano, ciascuno per il motivo osservato, e così il controllo del prompt.
+
+| Problema osservato con il modello reale | Funzione responsabile e causa | Correzione |
+|---|---|---|
+| `historyKnee`: il Soggettivo conserva la lombalgia e perde «in anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico» | **Generazione**: il prompt diceva che la storia pregressa «may appear briefly in "subjective" if relevant», cioè facoltativa. La sanitizzazione non la toglieva: verificato su quattro formulazioni | **Prompt**: il Soggettivo deve conservare ogni condizione, intervento o lesione pregressi riferiti, come anamnesi, anche se il distretto è asintomatico. Non va mai presentata come attuale né usata per il piano. **Garanzia deterministica** (`historyNotKept` e `sanitizeNote` in `lib/clinical/facts.ts`): l'anamnesi riferita che la bozza omette viene aggiunta con le parole del fisioterapista. Si aggiunge solo la parte storica di una frase che mescola presente e passato. L'aggiunta è elencata con "Togli". Resta anamnesi: lo stato per menzione la legge come storia, quindi nessuna scheda, protocollo, esercizio o controllo la tratta come problema attuale (verificato nel test). Controllo `history_missing` |
+| `shoulderLeft`: rotazione esterna con elastico, documentata come eseguita oggi, classificata `origine: suggested` | **`exerciseOrigin`**: il confronto era per radici di parole, quindi "extrarotazione", "banda elastica" e "theraband" non corrispondevano a "rotazione esterna con elastico" | Confronto per **attività**: stessi movimenti noti (lo stesso movimento in 4 lingue e varianti), nessun attrezzo diverso (elastico, banda elastica, theraband e resistance band sono lo stesso attrezzo; un manubrio no), nessun altro distretto (una rotazione d'anca non è quella di spalla). È "svolto oggi" se la frase lo dice come fatto, non come proposta o ipotesi. In caso di dubbio resta dell'AI: altro movimento, attrezzo o distretto, oppure "non abbiamo fatto". **Origine e dosaggio sono separati**: "Svolto oggi" con "Dosaggio suggerito dall'AI" se serie e ripetizioni non erano state indicate |
+| Riepilogo al paziente: «continua a casa gli esercizi come ti ho mostrato» senza assegnazione domiciliare documentata; nel multisede esercizi proposti dall'AI dati come istruzioni | **Prompt**: chiedeva per il riepilogo «only what was discussed today and the exercises». Nessun controllo sulle istruzioni | **`unapprovedInstructions`** (in `sanitizeNote`): nel messaggio al paziente vengono tolte le frasi con:<br>- un esercizio proposto dall'AI;<br>- un dosaggio o una frequenza non indicati;<br>- un programma a casa o un «come ti ho mostrato» non documentati;<br>- un'istruzione generica sul programma ("fai gli esercizi ogni giorno") quando il programma contiene proposte dell'AI.<br>La prima frase tolta è sostituita da «Il tuo fisioterapista ti confermerà quali esercizi fare a casa.». Ogni rimozione è elencata con "Ripristina". Resta ciò che è stato fatto oggi e il programma a casa effettivamente assegnato, con il suo dosaggio. Controllo `unapproved_instruction`. Il prompt dice che le proposte non sono ancora approvate |
+| Scheda della cuffia `verified` mentre la trascrizione parla di problema **sospetto** | **`knowledge-lookup`**: `relevance` indicava la corrispondenza della scheda con il caso documentato, ma nel report e nella lettura poteva sembrare una diagnosi confermata. Il sospetto valeva come "detto" | **Due campi separati**. `relevance` (verified/unverified) indica la corrispondenza della scheda con il caso documentato: distretto e condizione nominata dal fisioterapista, anche se solo come sospetto. Il nuovo `diagnosisStatus` (`diagnosisStatus` in `lib/knowledge/conditionMatch.ts`) indica che cosa ha detto il fisioterapista della diagnosi: `stated` (affermata), `suspected` (solo sospettata o ipotizzata), `not_stated`. Vale anche per gli altri distretti trattati. Il pannello mostra, per esempio, «Diagnosi sospetta, da confermare. La scheda corrisponde al caso documentato: non conferma la diagnosi.». Il report scrive «corrispondenza con il caso documentato: verified · diagnosi: suspected (la scheda non conferma la diagnosi)» |
+
 ## Matrice dei casi e risultati (solo test simulati)
 
 Suite `tests/clinical-relevance.test.mjs`. Segue il percorso reale delle route:
@@ -325,6 +336,29 @@ Effetti voluti su test esistenti:
 - script del modello reale: aggiornato per riportare origine di esercizi e dosaggi e le etichette; **non** eseguito contro il modello reale (in questo ambiente non c'è una chiave);
 - questo documento è aggiornato con un commit successivo che modifica **solo** la documentazione.
 
+**Revisione 6, regressioni dalla quarta verifica con il modello reale** (risposte simulate):
+
+| Test | Prima, sul codice di `9fa65eb` | Dopo |
+|---|---|---|
+| Anamnesi del ginocchio | ✗ Soggettivo «Lombalgia.» | ✓ «Lombalgia. In anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico.». Il problema attuale resta solo lombare: scheda della lombalgia, nessuna scheda né esercizio per il ginocchio, nessun `history_as_active`. Una nota che conserva già l'anamnesi non viene modificata |
+| Origine dell'esercizio | ✗ "Extrarotazione … con banda elastica" `suggested` | ✓ quattro formulazioni (extrarotazione / banda elastica, rotazioni esterne / theraband, inglese, "della spalla … gomito vicino al corpo") sono "svolto oggi" con dosaggio suggerito. Restano "suggerito": rotazione interna, manubrio, anca, "non abbiamo fatto". "Potremmo proporre" vale "indicato da te", non "svolto" |
+| Riepilogo al paziente | ✗ «come ti ho mostrato, 3 serie da 12 ogni giorno» e istruzioni con esercizi dell'AI conservati | ✓ tolti; resta «Oggi abbiamo fatto terapia manuale ed esercizi per la spalla.» e il rinvio alla conferma del fisioterapista. Un programma a casa assegnato davvero resta con il suo dosaggio |
+| Significato di `verified` | ✗ nessuna distinzione | ✓ cuffia: `verified` e diagnosi `suspected`; sovraspinato affermato: `stated`; solo dolore: `not_stated`; scheda generica del ginocchio: `verified` (`symptom_only`) con diagnosi `not_stated` |
+| Prompt | ✗ storia facoltativa; riepilogo con «the exercises» | ✓ |
+| Browser | ✗ origine `suggested` | ✓ "Svolto oggi (dalla trascrizione)" con "Dosaggio suggerito dall'AI"; «Diagnosi sospetta, da confermare … non conferma la diagnosi» |
+
+Effetti voluti su test esistenti:
+- **Caso degli screenshot** (`shoulderLeft`): il riepilogo «Fai gli esercizi per la spalla ogni giorno…» presentava come istruzione il programma generato, con una frequenza non indicata. Ora viene sostituito; il caso registra la rimozione.
+- **Riepilogo con frequenza non detta**: nel test della revisione 5, il riepilogo di controllo «Fai gli esercizi ogni giorno.» ora viene tolto, perché la frequenza non era stata detta. Il test usa una frase senza istruzioni.
+
+**Controlli complessivi** (revisione 6), eseguiti sul commit `0a04d38` con l'albero di lavoro pulito:
+- suite completa dell'app: **274 test, 274 superati, 0 falliti, 0 saltati, 0 annullati**. Comprende `clinical-relevance` (66), `knowledge-match` (9) e i 6 test nel browser;
+- typecheck: nessun errore. Build: riuscita;
+- test SQL: 7 file, tutti superati, solo su PostgreSQL locale nel container;
+- nessuna modifica a database o servizi di produzione: nessun file SQL cambiato dopo `9fa65eb` e nessuna chiamata a Supabase o Vercel. `diagnosisStatus` è un campo della risposta API, non del database;
+- script del modello reale: eseguito contro un sostituto locale di OpenAI per verificare il report (scheda e diagnosi separate, origine `performed`), **non** contro il modello reale;
+- questo documento è aggiornato con un commit successivo che modifica **solo** la documentazione.
+
 ## Test simulati e verifica con il modello reale
 
 | | Stato |
@@ -333,17 +367,24 @@ Effetti voluti su test esistenti:
 | Verifica con il modello AI reale, prima della revisione 3 | Eseguita dall'utente su tre casi sintetici, in ambiente isolato. Ha trovato i cinque problemi della revisione 3, riprodotti qui come regressioni simulate |
 | Verifica con il modello AI reale, dopo la revisione 3 (`cf0e971`) | Eseguita dall'utente sugli stessi tre casi sintetici. I reperti inventati risultano migliorati; ha trovato i problemi della revisione 4, riprodotti qui come regressioni simulate |
 | Verifica con il modello AI reale, dopo la revisione 4 (`eff1dbe`) | Eseguita dall'utente sugli stessi tre casi (report `clinical-live-report-r4`). Ha trovato i sei problemi della revisione 5, riprodotti qui come regressioni simulate a partire dalla sua descrizione |
-| Verifica con il modello AI reale, dopo la revisione 5 | **Da eseguire, prima del merge.** In questo ambiente non c'è una chiave OpenAI. Le correzioni sono dimostrate **solo con risposte simulate**. Che il modello reale, con il nuovo prompt e i nuovi controlli, dia i risultati attesi **non è dimostrato** finché non c'è il nuovo report reale |
+| Verifica con il modello AI reale, dopo la revisione 5 (`9fa65eb`) | Eseguita dall'utente (report `clinical-live-report-r5`): miglioramenti della revisione 5 confermati; trovati i quattro problemi della revisione 6, riprodotti qui come regressioni simulate a partire dalla sua descrizione |
+| Verifica con il modello AI reale, dopo la revisione 6 | **Da eseguire, prima del merge.** In questo ambiente non c'è una chiave OpenAI. Le correzioni sono dimostrate **solo con risposte simulate**; il comportamento del modello reale con il nuovo prompt **non è dimostrato** finché non c'è il nuovo report |
 
-**Ripetizione dei tre casi dopo la revisione 5** (dalla radice del repository, sul commit della PR, con la chiave solo nella variabile d'ambiente):
+**Ripetizione dei tre casi dopo la revisione 6** (dalla radice del repository, sul commit della PR, con la chiave solo nella variabile d'ambiente):
 
 ```
 npm ci
 node scripts/clinical-relevance-live.mjs --build
-OPENAI_API_KEY_LIVE=<chiave> node scripts/clinical-relevance-live.mjs --out ./clinical-live-report-r5 --repeat 1 --cases shoulderLeft,historyKnee,multiSiteSides
+OPENAI_API_KEY_LIVE=<chiave> node scripts/clinical-relevance-live.mjs --out ./clinical-live-report-r6 --repeat 1 --cases shoulderLeft,historyKnee,multiSiteSides
 ```
 
-Da confrontare con `clinical-live-report-r4`, punto per punto:
+Da confrontare con `clinical-live-report-r5`, punto per punto:
+1. `historyKnee`: il Soggettivo contiene l'intervento al ginocchio sinistro come anamnesi (scritto dal modello, oppure aggiunto: voce `history_added` in "Tolto o etichettato"); nessuna scheda, esercizio o controllo per il ginocchio;
+2. `shoulderLeft`: la rotazione esterna con elastico ha `origine: performed`, con `dosaggio: suggested` se serie e ripetizioni non erano state dette;
+3. riepilogo al paziente: nessun «come ti ho mostrato», programma a casa, esercizio dell'AI o dosaggio non detti; le rimozioni compaiono come `unapproved_instruction`;
+4. scheda clinica: «corrispondenza con il caso documentato» separata da «diagnosi: suspected / stated / not_stated».
+
+Punti della revisione 5, da ricontrollare nello stesso report:
 1. nessuna affermazione di assenza (segni neurologici, altre condizioni, red flag) non riferita; red flag non discusse indicate come "non indagate"; i negativi detti restano;
 2. nessuna diagnosi specifica presentata come certa se è stato descritto solo il dolore: etichettata "Ipotesi da confermare" (sezione "Tolto o etichettato" del report);
 3. ogni esercizio con la sua origine (`performed`, `stated`, `suggested`) e il dosaggio (`stated`, `suggested`); nel Piano i dosaggi non detti etichettati;
@@ -387,6 +428,10 @@ Il modello reale può scrivere esercizi o valutazioni diversi da quelli delle re
 - **"Diagnosi detta" è decisa per concetto**: "tendinopatia del sovraspinato" detta sostiene "tendinopatia della cuffia" scritta. Una frase che contiene sia una diagnosi detta sia una non detta viene etichettata per intero.
 - **L'origine di un esercizio è un confronto di parole** con le frasi della trascrizione che parlano di esercizi: un esercizio detto con parole molto diverse risulta "suggerito" (l'errore va nel senso di non attribuirlo al fisioterapista). Il dosaggio è del fisioterapista solo con gli stessi numeri e la stessa unità.
 - **Le etichette valgono per la nota e la scheda**: il libretto PDF degli esercizi per il paziente riporta il dosaggio senza indicarne l'origine.
+- **L'anamnesi viene riconosciuta dalle parole indicatrici** (anamnesi, pregresso, in passato, storia di…) e dallo stato per menzione: un'anamnesi senza indicatori («operato al ginocchio nel 2019») non viene riconosciuta come tale e non viene aggiunta. Il controllo "già presente" confronta distretto e parole: una riformulazione molto diversa può portare a un'aggiunta ridondante, che si può togliere.
+- **L'origine dell'esercizio si basa su circa 25 movimenti e 7 tipi di attrezzo**: per un esercizio senza movimento noto resta il confronto delle parole, quindi un esercizio detto con parole molto diverse risulta "suggerito".
+- **Il controllo del messaggio al paziente si basa su elenchi di espressioni** (a casa, continua, ripeti, come ti ho mostrato, ogni giorno…): un'istruzione formulata diversamente, senza esercizi, dosaggi o frequenze riconoscibili, non viene rilevata. Le frasi tolte sono elencate e si possono ripristinare.
+- **`diagnosisStatus` distingue affermato e sospettato con le parole di ipotesi** (sospetto, possibile, compatibile…): una diagnosi detta come certa ma con un'espressione di dubbio fuori elenco risulta "indicata".
 - **I dati del test sono sintetici**: il database reale (1107 schede, 52 studi pubblicati, 1924 esercizi) può contenere casi non rappresentati.
 - **`refine-plan` è invariata e non usata** (vedi sopra).
 - **ESLint non è configurato nel repository**: i controlli statici eseguiti sono il typecheck e la build.
