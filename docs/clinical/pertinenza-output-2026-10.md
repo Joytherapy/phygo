@@ -297,6 +297,30 @@ Nel report r8 una nota di lombalgia con «mobilità lombare con flessione ed est
 - typecheck senza errori;
 - nessuna chiamata a OpenAI, nessun accesso a Supabase o Vercel, nessun report modificato.
 
+### Revisione 10: cause, anamnesi, piano per distretto ed evidenze (report `clinical-live-report-r10`)
+
+Il report r10 è sul computer dell'utente: dalla sessione cloud la cartella `phygo` non era accessibile. I casi `r11ShoulderCause`, `r11HistoryKnee` e `r11MultiSitePlan` (`tests/support/clinical-world.mjs`) riproducono i problemi **come descritti dall'utente**, con risposte simulate. Sul codice di `120bbbb` tutti i nuovi test fallivano, ciascuno per il motivo osservato; fallivano anche il controllo del prompt, il test sul libretto e il test del pannello.
+
+| Problema | Causa | Correzione |
+|---|---|---|
+| `shoulderLeft`: «potrebbe essere correlato a fattori ergonomici o ad attività fisiche recenti», non riferiti | Nessun controllo conosceva cause e fattori di rischio; la frase prudente ("potrebbe") passava come ipotesi | `unsupportedCauses` (`lib/clinical/facts.ts`): una causa o un fattore di rischio presentati come causa del problema (correlato, dovuto, legato, secondario…), che il fisioterapista non ha nominato, diventano «La trascrizione non documenta cause o fattori di rischio; da indagare se indicato.». Categorie riconosciute: ergonomia, postura, lavoro, sport, sovraccarico, trauma, sollevamento, stile di vita. Vale per Rilievi, Valutazione, ipotesi e ragionamento. Restano: le ipotesi prudenti basate sui reperti, una causa riferita dal fisioterapista e le informazioni mancanti («attività lavorativa non indagata») |
+| `historyKnee`: sindrome miofasciale e legame tra lombalgia e vecchio intervento al ginocchio | Nessun controllo sui legami con l'anamnesi; un'ipotesi prudente non richiedeva i reperti su cui si basa | `historyLinks`: un legame causale tra il problema attuale e un distretto indicato solo in anamnesi diventa «La trascrizione non documenta un legame tra il problema attuale e l'anamnesi; da valutare se indicato.», salvo che il fisioterapista l'abbia indicato. `unsupportedHypotheses`: una sindrome miofasciale senza reperti palpatori o trigger point riferiti diventa «Ipotesi di sindrome miofasciale non sostenuta dai reperti riferiti; da valutare se indicato.». L'anamnesi resta, come anamnesi |
+| `multiSiteSides`: una frase che nomina entrambi i distretti contava come piano per ciascuno | `planByRegion` considerava coperto ogni distretto nominato in una frase qualsiasi | Un distretto ha una parte propria solo in una frase che nomina lui e nessun altro distretto del caso. La frase comune viene indicata come «Indicazioni comuni, da adattare a ciascun distretto», e ogni distretto senza parte propria compare con il suo lato e «da definire». Nuovo controllo `plan_region_not_specific` sulla bozza; nulla è presentato come eseguito o prescritto |
+| Evidenze indirette o non verificate presentate come supporto | (1) Uno studio con titolo generico ("chronic musculoskeletal pain") e il distretto solo nell'abstract era `direct`. (2) Il pannello mostrava tutti gli studi sotto «Evidenze scientifiche pertinenti», con «Perché è pertinente:» anche per quelli indiretti o non verificati. (3) Il libretto del paziente includeva fino a 5 studi senza guardarne la pertinenza | (1) `paperRelevance` applica da sé il controllo su popolazione e meccanismo; un distretto presente solo nell'abstract dà `indirect` (`region_in_abstract_only`). (2) Il pannello raggruppa gli studi: «Evidenza diretta per questo caso», «Evidenza indiretta: non è un supporto diretto di questo caso», «Pertinenza non verificata: da non usare come supporto di questo caso». «Perché è pertinente:» compare solo per gli studi diretti; per gli altri «Che cosa dice lo studio:». (3) Il libretto riporta solo gli studi diretti |
+
+**Effetto su un caso esistente**: `secondaryActive` aveva il piano «Esercizio per spalla e lombare.», cioè una frase sola per due distretti; ora viene diviso per distretto, ed entrambi i distretti risultano «da definire».
+
+**Controlli** sul commit `4383811`, albero pulito:
+- suite completa 301/301 (0 falliti);
+- typecheck senza errori;
+- nessuna chiamata a OpenAI, a Supabase o a Vercel; nessun report modificato.
+
+**Limiti**:
+- cause, legami e ipotesi sono riconosciuti da elenchi di termini e connettivi;
+- tra le ipotesi che richiedono reperti propri, per ora solo la sindrome miofasciale;
+- un legame con l'anamnesi è riconosciuto quando nomina il distretto dell'anamnesi o parole come "pregresso";
+- il titolo del pannello è ora «Evidenze scientifiche», senza «pertinenti».
+
 ## Matrice dei casi e risultati (solo test simulati)
 
 Suite `tests/clinical-relevance.test.mjs`. Segue il percorso reale delle route:
