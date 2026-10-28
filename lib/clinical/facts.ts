@@ -174,24 +174,50 @@ export function historyLinks(statement: string, transcript: string): Unsupported
 // is theirs, not the model's. A mention that is negated ("esclusa una sindrome
 // miofasciale", "nessun punto trigger") supports nothing.
 const HYPOTHESIS_NEEDS: { key: string; terms: string[]; findings: string[] }[] = [
-  { key: 'myofascial', terms: ['miofascial*', 'myofascial*', 'trigger point*', 'punti trigger', 'punto trigger'], findings: ['trigger', 'trigger point*', 'punt* trigger', 'dolorabilit*', 'palpazion*', 'contrattur*', 'tension* muscolar*', 'banderell*', 'taut band*', 'tender*', 'palpation', 'puntos gatillo', 'points gachette'] },
+  { key: 'myofascial', terms: ['miofascial*', 'myofascial*', 'trigger point*', 'punti trigger', 'punto trigger'], findings: ['trigger', 'trigger point*', 'punt* trigger', 'dolorabilit*', 'palpazion*', 'contrattur*', 'tension* muscolar*', 'muscle tension*', 'muscular tension*', 'banderell*', 'taut band*', 'tender*', 'palpation', 'puntos gatillo', 'points gachette'] },
 ]
 // Words that negate what follows them in a clause, or what precedes them.
 const NEGATED_BEFORE = ['non', 'nessun', 'nessuna', 'nessuno', 'senza', 'assenza', 'assente', 'assenti', 'esclus*', 'negativ*', 'nega', 'nemmeno', 'neanche', 'neppure', 'no', 'not', 'without', 'absent', 'absence', 'nor', 'neither', 'sin', 'tampoco', 'sans', 'aucun', 'aucune', 'ningun', 'ninguna']
-const NEGATED_AFTER = ['assent*', 'negativ*', 'esclus*', 'non rilevat*', 'non presenti', 'not found', 'absent', 'ausent*', 'absents']
+const NEGATED_AFTER = ['assent*', 'negativ*', 'esclus*', 'non rilevat*', 'non presenti', 'non sospett*', 'non e sospett*', 'not found', 'not suspected', 'absent', 'ausent*', 'absents']
+// "Non solo dolorabilità, ma anche…": "non" followed by one of these negates nothing.
+const ONLY = ['solo', 'soltanto', 'solamente', 'only', 'seulement']
 // A contrast ends what a negation covers: in "nessun punto trigger alla
 // palpazione ma sospetta sindrome miofasciale" the hypothesis is not negated.
 const CONTRAST = / (?:ma|pero|tuttavia|invece|bensi|but|however|sin embargo|mais|cependant|pourtant) /
+// "E" coordinates what one negation covers ("nessuna dolorabilità e tensione
+// muscolare": both negated) unless the conjunct is a statement of its own: a
+// hypothesis ("e sospetta sindrome miofasciale", "and myofascial syndrome is
+// suspected") or a report ("e riferisce tensione muscolare").
+const COORDINATORS = ['e', 'ed', 'and', 'y', 'et']
+const LEADING = ['e', 'un', 'una', 'uno', 'il', 'la', 'lo', 'l', 'i', 'gli', 'le', 'a', 'an', 'the', 'el', 'los', 'las', 'une', 'des', 'si', 'se', 'on']
+const OPENS_STATEMENT = ['sospett*', 'possibil*', 'probabil*', 'ipotes*', 'ipotizz*', 'verosimil*', 'compatib*', 'suspect*', 'possibl*', 'probabl*', 'likely', 'hypothes*', 'consistent', 'sospech*', 'posibl*', 'suspicion', 'soupcon*', 'riferisce', 'riferiscono', 'presenta', 'presentano', 'presente', 'presenti', 'rileva*', 'apprezza*', 'evidenzia*', 'osserva*', 'lamenta', 'c e', 'ci sono', 'reports', 'presents', 'shows', 'has', 'there', 'refiere', 'observa*', 'hay', 'rapporte']
+const STATED_AFTER = ['is suspected', 'are suspected', 'is possible', 'is likely', 'is probable', 'e sospett*', 'e possibil*', 'e probabil*', 'e ipotizzat*', 'viene sospettat*', 'viene ipotizzat*', 'es posible', 'se sospecha', 'est suspecte*', 'est possible', 'est probable']
 
-/** Whether the clinician said one of these, not negated (in its clause and up to a contrast, before or right after it). */
-function saidAffirmatively(transcript: string, terms: string[]): boolean {
+const matchAt = (ws: string[], i: number, t: string) => { const pw = t.split(' '); return i + pw.length <= ws.length && pw.every((p, k) => (p.endsWith('*') ? ws[i + k].startsWith(p.slice(0, -1)) : ws[i + k] === p)) }
+const opensStatement = (ws: string[], from: number) => { let j = from; while (j < ws.length && LEADING.includes(ws[j])) j++; return OPENS_STATEMENT.some((t) => matchAt(ws, j, t)) }
+
+/**
+ * Whether the clinician said one of these, not negated: a negation before it
+ * counts up to a contrast, and across "e" only when what follows is not a
+ * statement of its own; a negation after it counts within a few words.
+ */
+export function saidAffirmatively(transcript: string, terms: string[]): boolean {
   for (const part of transcript.split(/[.;,!?\n]+/).flatMap((c) => normalize(c).split(CONTRAST))) {
     const ws = part.trim().split(' ').filter(Boolean)
+    const coords = ws.flatMap((w, j) => (COORDINATORS.includes(w) ? [j] : []))
     for (let i = 0; i < ws.length; i++) {
-      const hit = terms.find((t) => { const pw = t.split(' '); return i + pw.length <= ws.length && pw.every((p, k) => (p.endsWith('*') ? ws[i + k].startsWith(p.slice(0, -1)) : ws[i + k] === p)) })
+      const hit = terms.find((t) => matchAt(ws, i, t))
       if (!hit) continue
       const end = i + hit.split(' ').length
-      if (anyHit(ws.slice(0, i), NEGATED_BEFORE) || anyHit(ws.slice(end, end + 4), NEGATED_AFTER)) continue
+      const prev = coords.filter((j) => j < i).pop() ?? -1
+      const next = coords.find((j) => j >= end) ?? ws.length
+      const own = opensStatement(ws, prev + 1) || anyHit(ws.slice(end, end + 4), STATED_AFTER)
+      const from = own ? prev + 1 : 0
+      const negatedBefore = ws.slice(from, i).some((w, k) => NEGATED_BEFORE.some((t) => matchAt([w], 0, t)) && !ONLY.includes(ws[from + k + 1]))
+      const afterEnd = own || (next < ws.length && opensStatement(ws, next + 1)) ? next : ws.length
+      // A negation that starts before the next statement counts whole: "non è sospettata" ("è" reads as "e").
+      const negatedAfter = ws.slice(end, Math.min(end + 4, afterEnd)).some((_, k) => NEGATED_AFTER.some((t) => matchAt(ws, end + k, t)))
+      if (negatedBefore || negatedAfter) continue
       return true
     }
   }
@@ -246,6 +272,7 @@ const DIAGNOSES: Group[] = [
   group('spondylolisthesis', ['spondilolis*', 'spondylolis*', 'espondilolis*']),
   group('dyskinesia', ['discinesi*', 'dyskinesi*', 'discinesia']),
   group('fibromyalgia', ['fibromialgi*', 'fibromyalgi*']),
+  group('myofascial', ['miofascial*', 'myofascial*']),
   group('whiplash', ['colpo di frusta', 'whiplash', 'latigazo']),
   group('de quervain', ['de quervain']),
 ]
@@ -259,7 +286,7 @@ const AGREEMENT = ['concordat*', 'abbiamo deciso', 'abbiamo stabilito', 'abbiamo
 const AGREEMENT_SAID = ['concord*', 'accordo', 'decis*', 'stabilit*', 'agree*', 'decided', 'acord*', 'convenu*']
 const NUMBER_WORDS = ['una', 'uno', 'due', 'tre', 'quattro', 'cinque', 'sei', 'sette', 'otto', 'dieci', 'one', 'two', 'three', 'four', 'five', 'six', 'dos', 'tres', 'cuatro', 'deux', 'trois', 'quatre']
 // Hypothesis wording: a hedged sentence in the assessment is reasoning, not a finding.
-const HEDGE = ['possibil*', 'probabil*', 'compatibil*', 'consider*', 'da valutare', 'da escludere', 'escluder*', 'sospett*', 'ipotes*', 'potrebbe', 'may', 'might', 'could', 'rule out', 'suggest*', 'posible', 'possible', 'evaluer', 'a valutare', 'da confermare', 'to be confirmed', 'por confirmar', 'a confirmer', 'non confermat*', 'unconfirmed', 'not confirmed', 'hypothesis', 'hipotesis', 'hypothese', 'proposta generata', 'generated suggestion', 'sugerencia generada', 'suggestion generee']
+const HEDGE = ['possibil*', 'probabil*', 'probabl*', 'compatibil*', 'consider*', 'da valutare', 'da escludere', 'escluder*', 'sospett*', 'suspect*', 'sospech*', 'soupcon*', 'ipotes*', 'potrebbe', 'may', 'might', 'could', 'rule out', 'suggest*', 'posible', 'possible', 'evaluer', 'a valutare', 'da confermare', 'to be confirmed', 'por confirmar', 'a confirmer', 'non confermat*', 'unconfirmed', 'not confirmed', 'hypothesis', 'hipotesis', 'hypothese', 'proposta generata', 'generated suggestion', 'sugerencia generada', 'suggestion generee']
 
 const words = (s: string) => normalize(s).trim().split(' ').filter(Boolean)
 function hits(ws: string[], phrase: string): boolean {

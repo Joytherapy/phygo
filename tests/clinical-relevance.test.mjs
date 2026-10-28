@@ -811,6 +811,100 @@ test('myofascial hypotheses: a negation covers its own words up to a contrast, n
   assert.ok(!removed.some((r) => r.kind === 'unsupported_hypothesis'), JSON.stringify(removed));
 });
 
+test('negation scope across "e"/"and": a finding negated, a hypothesis or a report of its own not; "non solo… ma anche" negates nothing', () => {
+  // Each finding on its own, so that one negated and one reported are told apart; `hyp` is the hypothesis stated, not negated.
+  const TERMS = { trigger: ['trigger', 'trigger point*', 'punt* trigger'], tender: ['dolorabilit*', 'tender*'], tension: ['tension* muscolar*', 'muscle tension*', 'muscular tension*'] };
+  const read = (t, keys) => Object.fromEntries(keys.map((k) => [k, k === 'hyp' ? F.hypothesisSupport('myofascial', t).stated : F.saidAffirmatively(t, TERMS[k])]));
+  const CASES = [
+    // A negated finding, then the clinician's own hypothesis: hypothesis present, trigger points absent.
+    ['Nessun punto trigger e sospetta sindrome miofasciale.', { trigger: false, hyp: true }],
+    ['Nessun punto trigger ed è sospetta una sindrome miofasciale', { trigger: false, hyp: true }],
+    ['Nessun punto trigger e si sospetta una sindrome miofasciale.', { trigger: false, hyp: true }],
+    ['Nessun punto trigger e la sindrome miofasciale è sospetta.', { trigger: false, hyp: true }],
+    ['Nessun punto trigger; sospetta sindrome miofasciale', { trigger: false, hyp: true }],
+    ['Trigger point non rilevati e sospetta sindrome miofasciale', { trigger: false, hyp: true }],
+    ['Sospetta sindrome miofasciale e trigger point assenti.', { trigger: false, hyp: true }],
+    ['No trigger points and suspected myofascial pain syndrome.', { trigger: false, hyp: true }],
+    ['No trigger points and possible myofascial syndrome', { trigger: false, hyp: true }],
+    ['No trigger points and myofascial syndrome is suspected.', { trigger: false, hyp: true }],
+    ['Suspected myofascial syndrome and trigger points absent.', { trigger: false, hyp: true }],
+    // One negation over coordinated findings: all negative.
+    ['Nessuna dolorabilità e nessuna tensione muscolare.', { tender: false, tension: false, hyp: false }],
+    ['Nessuna dolorabilità e tensione muscolare.', { tender: false, tension: false, hyp: false }],
+    ['Nessuna dolorabilità né tensione muscolare', { tender: false, tension: false, hyp: false }],
+    ['Non presenta dolorabilità e tensione muscolare.', { tender: false, tension: false }],
+    ['Trigger point e banderelle assenti.', { trigger: false, hyp: false }],
+    ['No tenderness and no muscle tension.', { tender: false, tension: false, hyp: false }],
+    ['No tenderness or muscle tension.', { tender: false, tension: false, hyp: false }],
+    ['Without tenderness and without muscle tension', { tender: false, tension: false }],
+    // A contrast: trigger points absent, tenderness present.
+    ['Nessun punto trigger, ma dolorabilità alla palpazione.', { trigger: false, tender: true, hyp: false }],
+    ['Nessun punto trigger ma dolorabilità alla palpazione', { trigger: false, tender: true, hyp: false }],
+    ['No trigger points, but tenderness on palpation.', { trigger: false, tender: true, hyp: false }],
+    // A report of its own after "e", and a negation after a report.
+    ['Nessuna dolorabilità e riferisce tensione muscolare.', { tender: false, tension: true }],
+    ['Riferisce dolorabilità e nessuna tensione muscolare.', { tender: true, tension: false }],
+    // The hypothesis negated, before or after it.
+    ['Non sospetta sindrome miofasciale.', { hyp: false }],
+    ['Non si sospetta una sindrome miofasciale.', { hyp: false }],
+    ['Sindrome miofasciale non è sospettata.', { hyp: false }],
+    ['La sindrome miofasciale non è sospetta', { hyp: false }],
+    ['Myofascial syndrome not suspected.', { hyp: false }],
+    ['Myofascial syndrome is not suspected', { hyp: false }],
+    ['Not suspected myofascial syndrome.', { hyp: false }],
+    ['No trigger points and no suspected myofascial syndrome.', { trigger: false, hyp: false }],
+    ['Nessun dolore e non sospetta sindrome miofasciale.', { hyp: false }],
+    ['Esclusa una sindrome miofasciale e nessun punto trigger.', { trigger: false, hyp: false }],
+    ['Esclusa sindrome miofasciale e sospetta cervicalgia.', { hyp: false }],
+    // Without a statement of its own after "e", the negation still covers it.
+    ['Nessun punto trigger e sindrome miofasciale.', { trigger: false, hyp: false }],
+    // "Non solo… ma anche": both present.
+    ['Non solo dolorabilità, ma anche tensione muscolare.', { tender: true, tension: true }],
+    ['Non solo dolorabilità ma anche tensione muscolare', { tender: true, tension: true }],
+    ['Not only tenderness but also muscle tension.', { tender: true, tension: true }],
+    ['Dolorabilità non solo al trapezio', { tender: true }],
+  ];
+  for (const [t, want] of CASES) assert.deepEqual(read(t, Object.keys(want)), want, t);
+  // A hypothesis is not a finding: stated without findings, it is supported as the clinician's own and nothing more.
+  assert.deepEqual(F.hypothesisSupport('myofascial', 'Nessun punto trigger e sospetta sindrome miofasciale.'), { findings: false, stated: true });
+  assert.deepEqual(F.hypothesisSupport('myofascial', 'No tenderness and no muscle tension.'), { findings: false, stated: false });
+});
+
+test('the clean-up keeps a hypothesis the clinician stated without findings, and does not turn it into a diagnosis', () => {
+  const H = 'Possibile sindrome miofasciale del trapezio superiore.';
+  const clean = (said, assessment, extra = {}) => K.sanitizeGeneratedNote({ language: /^No /.test(said) ? 'en' : 'it', assessment, ...extra }, said);
+  // Stated as a hypothesis after a negated finding: kept, in the assessment and in the hypotheses.
+  for (const said of ['Nessun punto trigger e sospetta sindrome miofasciale del trapezio.', 'Nessun punto trigger ed è sospetta una sindrome miofasciale.']) {
+    const { note, removed } = clean(said, 'Cervicalgia. Possibile sindrome miofasciale del trapezio.', { clinicalReasoning: { hypotheses: [H] } });
+    assert.equal(note.assessment, 'Cervicalgia. Possibile sindrome miofasciale del trapezio.', said);
+    assert.deepEqual(note.clinicalReasoning.hypotheses, [H], said);
+    assert.deepEqual(removed, [], said);
+  }
+  const en = clean('No trigger points and suspected myofascial pain syndrome of the upper trapezius.', 'Neck pain. Possible myofascial pain syndrome of the upper trapezius.');
+  assert.equal(en.note.assessment, 'Neck pain. Possible myofascial pain syndrome of the upper trapezius.');
+  assert.deepEqual(en.removed, []);
+  // Written as certain when the clinician only suspected it, or only reported findings: labelled a hypothesis to be confirmed, the original restorable.
+  for (const [said, want] of [
+    ['Nessun punto trigger e sospetta sindrome miofasciale del trapezio.', 'Ipotesi da confermare: sindrome miofasciale del trapezio superiore.'],
+    ['Punti trigger dolorosi nel trapezio superiore.', 'Ipotesi da confermare: sindrome miofasciale del trapezio superiore.'],
+  ]) {
+    const { note, removed } = clean(said, 'Sindrome miofasciale del trapezio superiore.');
+    assert.equal(note.assessment, want, said);
+    assert.deepEqual(removed.map((r) => [r.kind, r.text]), [['unconfirmed_diagnosis', 'Sindrome miofasciale del trapezio superiore.']], said);
+  }
+  assert.equal(clean('No trigger points and suspected myofascial pain syndrome.', 'Myofascial pain syndrome of the upper trapezius.').note.assessment, 'Hypothesis to be confirmed: myofascial pain syndrome of the upper trapezius.');
+  // Stated as a diagnosis by the clinician: kept as it is.
+  assert.equal(clean('Sindrome miofasciale del trapezio superiore, punti trigger attivi.', 'Sindrome miofasciale del trapezio superiore.').note.assessment, 'Sindrome miofasciale del trapezio superiore.');
+  // Neither findings nor the hypothesis: still replaced as not supported.
+  for (const said of ['Dolore cervicale da una settimana.', 'Nessuna dolorabilità e nessuna tensione muscolare.', 'Non sospetta sindrome miofasciale.']) {
+    const { note, removed } = clean(said, 'Cervicalgia. Possibile sindrome miofasciale del trapezio.');
+    assert.equal(note.assessment, 'Cervicalgia. Ipotesi di sindrome miofasciale non sostenuta dai reperti riferiti; da valutare se indicato.', said);
+    assert.ok(removed.some((r) => r.kind === 'unsupported_hypothesis'), said);
+  }
+  // To the patient, a suspected syndrome is not told as a diagnosis.
+  assert.deepEqual(clean('Nessun punto trigger e sospetta sindrome miofasciale.', 'Cervicalgia.', { summaryForPatient: 'Hai una sindrome miofasciale del trapezio.' }).removed.map((r) => r.kind), ['unconfirmed_diagnosis_removed']);
+});
+
 test('the screenshot case in detail: no hamstring/ankle swap, no leg paper', async () => {
   const out = await runCase('shoulderLeft');
   const pect = out.exercises.find((x) => /pettorale/i.test(x.name));
