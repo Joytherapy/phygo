@@ -32,8 +32,9 @@ export function bookletPapers(papers: unknown): BookletPaper[] {
   if (!Array.isArray(papers)) return []
   return papers
     .filter((p) => p && typeof p === 'object' && s(p.title))
-    // Only direct evidence for the case: an indirect or unverified paper is not given to the patient as support.
-    .filter((p) => p.relevance !== 'indirect' && p.relevance !== 'unverified')
+    // Only direct evidence for the case: an indirect, unverified or unclassified
+    // paper (no relevance, null, any other value) is not given to the patient as support.
+    .filter((p) => p.relevance === 'direct')
     .slice(0, 5)
     .map((p) => ({ title: s(p.title), journal: s(p.journal) || null, year: s(p.publication_date).slice(0, 4) || null, strength: s(p.evidence_strength) || null, why: s(p.why_it_matters) || null }))
 }

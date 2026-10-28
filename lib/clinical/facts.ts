@@ -170,17 +170,42 @@ export function historyLinks(statement: string, transcript: string): Unsupported
 
 // Hypotheses that rest on findings of their own: without any of them in what
 // the clinician said, the hypothesis has nothing to stand on, however hedged.
+// The clinician's own hypothesis ("sospetta sindrome miofasciale") stays: it
+// is theirs, not the model's. A mention that is negated ("esclusa una sindrome
+// miofasciale", "nessun punto trigger") supports nothing.
 const HYPOTHESIS_NEEDS: { key: string; terms: string[]; findings: string[] }[] = [
-  { key: 'myofascial', terms: ['miofascial*', 'myofascial*', 'trigger point*', 'punti trigger', 'punto trigger'], findings: ['trigger', 'punt* trigger', 'dolorabilit*', 'palpazion*', 'contrattur*', 'tension* muscolar*', 'banderell*', 'taut band*', 'tender*', 'palpation', 'puntos gatillo', 'points gachette', 'miofascial*', 'myofascial*'] },
+  { key: 'myofascial', terms: ['miofascial*', 'myofascial*', 'trigger point*', 'punti trigger', 'punto trigger'], findings: ['trigger', 'trigger point*', 'punt* trigger', 'dolorabilit*', 'palpazion*', 'contrattur*', 'tension* muscolar*', 'banderell*', 'taut band*', 'tender*', 'palpation', 'puntos gatillo', 'points gachette'] },
 ]
+// Words that negate what follows them in a clause, or what precedes them.
+const NEGATED_BEFORE = ['non', 'nessun', 'nessuna', 'nessuno', 'senza', 'assenza', 'assente', 'assenti', 'esclus*', 'negativ*', 'nega', 'no', 'not', 'without', 'absent', 'absence', 'sin', 'sans', 'aucun', 'aucune', 'ningun', 'ninguna']
+const NEGATED_AFTER = ['assent*', 'negativ*', 'esclus*', 'non rilevat*', 'non presenti', 'not found', 'absent', 'ausent*', 'absents']
 
-/** Hypotheses a statement makes whose own findings the clinician did not report. */
+/** Whether the clinician said one of these, not negated (in its clause, before or right after it). */
+function saidAffirmatively(transcript: string, terms: string[]): boolean {
+  for (const clause of transcript.split(/[.;,!?\n]+/)) {
+    const ws = words(clause)
+    for (let i = 0; i < ws.length; i++) {
+      const hit = terms.find((t) => { const pw = t.split(' '); return i + pw.length <= ws.length && pw.every((p, k) => (p.endsWith('*') ? ws[i + k].startsWith(p.slice(0, -1)) : ws[i + k] === p)) })
+      if (!hit) continue
+      const end = i + hit.split(' ').length
+      if (anyHit(ws.slice(0, i), NEGATED_BEFORE) || anyHit(ws.slice(end, end + 4), NEGATED_AFTER)) continue
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * Hypotheses a statement makes that the clinician's words do not support:
+ * neither the findings it rests on (reported, not negated) nor the
+ * clinician's own hypothesis. A mere mention of the syndrome by the model is
+ * not a finding.
+ */
 export function unsupportedHypotheses(statement: string, transcript: string): UnsupportedFact[] {
   const ws = words(statement)
   // "Ipotesi … non sostenuta dai reperti riferiti": the opposite of proposing it.
   if (anyHit(ws, STILL_OPEN) || anyHit(ws, ['non sostenut*', 'not supported', 'no sustentad*', 'non etaye*'])) return []
-  const said = words(transcript)
-  return HYPOTHESIS_NEEDS.filter((h) => anyHit(ws, h.terms) && !anyHit(said, h.findings)).map((h) => ({ kind: 'unsupported_hypothesis' as const, item: firstHit(ws, h.terms) ?? h.key, concept: h.key }))
+  return HYPOTHESIS_NEEDS.filter((h) => anyHit(ws, h.terms) && !saidAffirmatively(transcript, h.findings) && !saidAffirmatively(transcript, h.terms)).map((h) => ({ kind: 'unsupported_hypothesis' as const, item: firstHit(ws, h.terms) ?? h.key, concept: h.key }))
 }
 
 /** Every inference of a statement that the clinician's words do not support (cause, link, hypothesis). */

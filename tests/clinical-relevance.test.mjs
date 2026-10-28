@@ -757,6 +757,29 @@ test('r10: papers whose population, mechanism or region is not verified are neve
   assert.deepEqual(out.papers.filter((p) => p.relevance === 'direct').map((p) => p.id), ['p-shoulder']);
 });
 
+test('myofascial hypotheses: a mention of the syndrome is not a finding; the clinician\'s own hypothesis and reported findings support it', () => {
+  const H = 'Possibile sindrome miofasciale del trapezio superiore.';
+  const unsupported = (t) => F.unsupportedHypotheses(H, t).map((f) => f.kind);
+  // Findings that support it, as the clinician reported them.
+  assert.deepEqual(unsupported('Dolore cervicale; punti trigger dolorosi nel trapezio superiore.'), []);
+  assert.deepEqual(unsupported('Dolore al collo, banderelle tese palpabili nel trapezio.'), []);
+  // The clinician's own hypothesis stays, even without findings (it is theirs, not the model's).
+  assert.deepEqual(unsupported('Dolore cervicale, sospetta sindrome miofasciale del trapezio.'), []);
+  assert.deepEqual(unsupported('Neck pain, possible myofascial pain syndrome.'), []);
+  // A negated mention or a negative finding supports nothing.
+  assert.deepEqual(unsupported('Dolore cervicale, esclusa una sindrome miofasciale.'), ['unsupported_hypothesis']);
+  assert.deepEqual(unsupported('Dolore cervicale, nessun punto trigger alla palpazione.'), ['unsupported_hypothesis']);
+  assert.deepEqual(unsupported('Neck pain, no trigger points found.'), ['unsupported_hypothesis']);
+  // Nothing about it: not supported (the r10 case).
+  assert.deepEqual(unsupported('Dolore cervicale da una settimana.'), ['unsupported_hypothesis']);
+  // Through the clean-up: the clinician's hypothesis is not removed from the note.
+  const said = 'Dolore cervicale, sospetta sindrome miofasciale del trapezio.';
+  const { note, removed } = K.sanitizeGeneratedNote({ language: 'it', assessment: 'Cervicalgia. Possibile sindrome miofasciale del trapezio.', clinicalReasoning: { hypotheses: [H] } }, said);
+  assert.equal(note.assessment, 'Cervicalgia. Possibile sindrome miofasciale del trapezio.');
+  assert.deepEqual(note.clinicalReasoning.hypotheses, [H]);
+  assert.ok(!removed.some((r) => r.kind === 'unsupported_hypothesis'), JSON.stringify(removed));
+});
+
 test('the screenshot case in detail: no hamstring/ankle swap, no leg paper', async () => {
   const out = await runCase('shoulderLeft');
   const pect = out.exercises.find((x) => /pettorale/i.test(x.name));
