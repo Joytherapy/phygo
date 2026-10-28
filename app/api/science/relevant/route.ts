@@ -4,7 +4,7 @@ import { consumeHourly, HOURLY_LIMITS, limitResponse } from '@/lib/rateLimit';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { lazy } from '@/lib/lazy';
-import { paperRelevance, paperScore, searchTerms, unstatedQualifiers, type PaperRelevance } from '@/lib/knowledge/paperRank';
+import { paperRelevance, paperScore, searchTerms, type PaperRelevance } from '@/lib/knowledge/paperRank';
 import { caseOf, conditionRegionsOf, otherRegionsOf } from '@/lib/clinical/coherence';
 import { regionsOf, type Region } from '@/lib/clinical/region';
 
@@ -113,8 +113,7 @@ export async function POST(req: Request) {
       .filter((p: any) => p.status === 'published')
       .map((p: any) => {
         // About a population or a mechanism the case does not state: not claimed as evidence for it.
-        let relevance: PaperRelevance | null = paperRelevance(p, terms, targets);
-        if (relevance && relevance.reason !== 'case_region_unknown' && unstatedQualifiers(p.title, caseText).length) relevance = { level: 'unverified', reason: 'population_or_mechanism_not_stated' };
+        const relevance: PaperRelevance | null = paperRelevance(p, terms, targets, caseText);
         return { p, score: paperScore(p, terms), relevance };
       })
       .filter((x) => x.score > 0 && x.relevance !== null)

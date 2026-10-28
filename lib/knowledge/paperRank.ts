@@ -34,7 +34,7 @@ export function paperScore(paper: { title?: string | null; abstract?: string | n
 
 export type PaperRelevance =
   | { level: 'direct'; reason: 'same_condition' | 'same_region' }
-  | { level: 'indirect'; reason: 'same_region' | 'same_mechanism_other_region' }
+  | { level: 'indirect'; reason: 'same_region' | 'same_mechanism_other_region' | 'region_in_abstract_only' }
   | { level: 'unverified'; reason: 'case_region_unknown' | 'paper_region_unknown' | 'population_or_mechanism_not_stated' | 'adjacent_region' }
 
 /**
@@ -50,9 +50,19 @@ export type PaperRelevance =
  *   the ankle for exercises, but an Achilles paper is not knee evidence), so
  *   its pertinence is not claimed;
  * - null: another region without a shared mechanism, or only generic words.
- * `regions` are the regions of the condition.
+ * `regions` are the regions of the condition. `caseText`: the clinician's
+ * words, the condition and the assessment; a paper about a population or a
+ * mechanism they do not state is unverified (unstatedQualifiers).
  */
-export function paperRelevance(paper: { title?: string | null; abstract?: string | null }, terms: { phrases: string[]; words: string[] }, regions: Region[]): PaperRelevance | null {
+export function paperRelevance(paper: { title?: string | null; abstract?: string | null }, terms: { phrases: string[]; words: string[] }, regions: Region[], caseText?: string): PaperRelevance | null {
+  const relevance = regionRelevance(paper, terms, regions)
+  // About a population or a mechanism the case does not state (children,
+  // athletes, trauma, surgery…): not claimed as evidence for it, whatever the region.
+  if (relevance && caseText !== undefined && relevance.reason !== 'case_region_unknown' && unstatedQualifiers(paper.title, caseText).length) return { level: 'unverified', reason: 'population_or_mechanism_not_stated' }
+  return relevance
+}
+
+function regionRelevance(paper: { title?: string | null; abstract?: string | null }, terms: { phrases: string[]; words: string[] }, regions: Region[]): PaperRelevance | null {
   const title = ` ${normalizeText(paper.title ?? '')} `
   const abstract = ` ${normalizeText(paper.abstract ?? '')} `
   const phraseInTitle = terms.phrases.some((p) => title.includes(` ${p} `))
@@ -75,6 +85,9 @@ export function paperRelevance(paper: { title?: string | null; abstract?: string
     if (mechanismInTitle && shared) return { level: 'indirect', reason: 'same_mechanism_other_region' }
     return shared ? { level: 'unverified', reason: 'adjacent_region' } : null
   }
+  // The region only in the abstract, under a title about something broader
+  // ("chronic musculoskeletal pain"): the paper is not about this case's region.
+  if (!titleRegions.length) return { level: 'indirect', reason: 'region_in_abstract_only' }
   if (phraseInTitle) return { level: 'direct', reason: 'same_condition' }
   if (phraseInAbstract) return { level: 'direct', reason: 'same_region' }
   return { level: 'indirect', reason: 'same_region' }

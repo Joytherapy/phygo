@@ -27,11 +27,13 @@ export function bookletPhases(phases: unknown): BookletPhase[] {
     .sort((a, b) => a.number - b.number)
 }
 
-/** The papers shown in the note's evidence block, as references. */
+/** The papers of the note's evidence block that are direct evidence for the case, as references. */
 export function bookletPapers(papers: unknown): BookletPaper[] {
   if (!Array.isArray(papers)) return []
   return papers
     .filter((p) => p && typeof p === 'object' && s(p.title))
+    // Only direct evidence for the case: an indirect or unverified paper is not given to the patient as support.
+    .filter((p) => p.relevance !== 'indirect' && p.relevance !== 'unverified')
     .slice(0, 5)
     .map((p) => ({ title: s(p.title), journal: s(p.journal) || null, year: s(p.publication_date).slice(0, 4) || null, strength: s(p.evidence_strength) || null, why: s(p.why_it_matters) || null }))
 }

@@ -315,7 +315,12 @@ test('statements the clinician did not give are taken out and listed, and can be
   const dosing = { sets: 3, reps: 12, duration_seconds: null, frequency_per_week: null, notes: null };
   const suggestion = { internal_id: 'exercises-9', provider: 'exercises', provider_id: 'e9', name: 'Pendulum swing', body_region: 'shoulder', primary_muscle: 'Deltoid', media: null };
   await page.route('**/api/generate-note', json({ note, removed }));
-  await page.route('**/api/science/relevant', json({ papers: [] }));
+  // Direct, indirect and unverified papers: only the first is evidence for the case.
+  await page.route('**/api/science/relevant', json({ papers: [
+    { id: 'pd', title: 'Exercise therapy for rotator cuff tendinopathy', relevance: 'direct', relevance_reason: 'same_condition', why_it_matters: 'Sintesi diretta', regions: ['shoulder'] },
+    { id: 'pi', title: 'Loading programmes in Achilles tendinopathy', relevance: 'indirect', relevance_reason: 'same_mechanism_other_region', why_it_matters: 'Sintesi indiretta', regions: [] },
+    { id: 'pu', title: 'Traumatic leg pain in adolescents: a cohort study', relevance: 'unverified', relevance_reason: 'population_or_mechanism_not_stated', why_it_matters: 'Sintesi non verificata', regions: [] },
+  ] }));
   await page.route('**/api/knowledge-lookup', json({
     match: { id: 1, condition_name: 'Tendinopatia della cuffia dei rotatori', condition_keywords: 'cuffia dei rotatori', goals: 'g', clinical_tests: 't', red_flags: 'r', typical_exercises: 'e', source: 'Linea guida sintetica', source_date: '2024' },
     // The clinician said "dolore alla spalla": the cuff sheet comes from the
@@ -356,6 +361,16 @@ test('statements the clinician did not give are taken out and listed, and can be
     await page.getByTestId('other-region-reason').getByText('scheda generica del distretto (hai descritto il sintomo, non una diagnosi)', { exact: false }).waitFor();
     // No objective finding stated: said so, not left silently empty.
     await checks.locator('li[data-kind="objective_missing"]').getByText('Nessun rilievo obiettivo riferito', { exact: false }).waitFor();
+
+    // Evidence: only a direct paper is shown as support; indirect and unverified ones are apart, with what they are.
+    await page.getByTestId('evidence-direct').getByText('Exercise therapy for rotator cuff tendinopathy').waitFor();
+    await page.getByTestId('evidence-indirect').getByText('Evidenza indiretta: non è un supporto diretto di questo caso', { exact: false }).waitFor();
+    await page.getByTestId('evidence-indirect').getByText('Loading programmes in Achilles tendinopathy').waitFor();
+    await page.getByTestId('evidence-unverified').getByText('Pertinenza non verificata: da non usare come supporto di questo caso', { exact: false }).waitFor();
+    await page.getByTestId('evidence-unverified').getByText('Traumatic leg pain in adolescents: a cohort study').waitFor();
+    assert.equal(await page.getByTestId('evidence-direct').getByText('Perché è pertinente:', { exact: false }).count(), 1);
+    assert.equal(await page.getByTestId('evidence-indirect').getByText('Perché è pertinente:', { exact: false }).count(), 0, 'an indirect paper is not said to be pertinent');
+    assert.equal(await page.getByTestId('evidence-unverified').getByText('Perché è pertinente:', { exact: false }).count(), 0);
 
     // The generated plan and the suggested exercises are proposals to confirm, not approved prescriptions.
     await page.getByTestId('note-plan').getByTestId('plan-proposal').getByText('Proposta generata dall’AI: da rivedere e confermare', { exact: false }).waitFor();

@@ -62,14 +62,20 @@ interface LiveDict {
   viewSource: string
   evidenceDisclaimer: string
   evidenceIndirect: string
+  /** The evidence block, by level: only direct papers are support for the case. */
+  evidenceDirectTitle: string
+  evidenceIndirectTitle: string
+  evidenceUnverifiedTitle: string
+  /** For a paper that is not direct evidence: what it says, not why it is pertinent. */
+  paperSummary: string
   evidenceUnverified: string
-  evidenceReason: Record<'same_region' | 'same_mechanism_other_region' | 'case_region_unknown' | 'paper_region_unknown' | 'population_or_mechanism_not_stated' | 'adjacent_region', string>
+  evidenceReason: Record<'same_region' | 'same_mechanism_other_region' | 'case_region_unknown' | 'paper_region_unknown' | 'population_or_mechanism_not_stated' | 'adjacent_region' | 'region_in_abstract_only', string>
   coherenceTitle: string
   coherenceIntro: string
   coherenceOk: string
-  coherenceIssue: Record<'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side' | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified' | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment' | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence' | 'objective_missing' | 'invented_negative' | 'unconfirmed_diagnosis' | 'generated_dosage' | 'coverage_plan' | 'unapproved_instruction' | 'history_missing' | 'unsupported_etiology' | 'plan_region_undefined', (item: string) => string>
+  coherenceIssue: Record<'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side' | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified' | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment' | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence' | 'objective_missing' | 'invented_negative' | 'unconfirmed_diagnosis' | 'generated_dosage' | 'coverage_plan' | 'unapproved_instruction' | 'history_missing' | 'unsupported_etiology' | 'plan_region_undefined' | 'unsupported_cause' | 'history_link' | 'unsupported_hypothesis' | 'plan_region_not_specific', (item: string) => string>
   removedTitle: string
-  removedReason: Record<'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment' | 'invented_negative' | 'unconfirmed_diagnosis' | 'unconfirmed_diagnosis_removed' | 'generated_dosage' | 'unapproved_instruction' | 'history_added' | 'unsupported_etiology' | 'plan_regions', string>
+  removedReason: Record<'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment' | 'invented_negative' | 'unconfirmed_diagnosis' | 'unconfirmed_diagnosis_removed' | 'generated_dosage' | 'unapproved_instruction' | 'history_added' | 'unsupported_etiology' | 'plan_regions' | 'unsupported_cause' | 'history_link' | 'unsupported_hypothesis', string>
   /** Why an instruction to the patient was not approved (lib/clinical/facts.ts unapprovedInstructions). */
   instructionReason: Record<'home_programme_not_documented' | 'demonstration_not_documented' | 'suggested_exercise' | 'generated_dosage', string>
   /** What the clinician said of the diagnosis of the condition sheet, apart from the sheet's match. */
@@ -203,13 +209,17 @@ const it: LiveDict = {
   askLimit: 'Hai raggiunto il limite di domande per questa ora. Riprova più tardi o passa a un piano superiore.',
   askNoAnswer: 'Non sono riuscito a generare una risposta.',
   askError: 'Errore durante la richiesta. Riprova.',
-  evidenceTitle: 'Evidenze scientifiche pertinenti',
+  evidenceTitle: 'Evidenze scientifiche',
   evidenceSearching: 'Ricerca nella libreria delle evidenze…',
   evidenceNone: 'Nessuno studio pubblicato nella libreria Science di PHYGO corrisponde a questo caso.',
   whyRelevant: 'Perché è pertinente: ',
   viewSource: 'Vedi la fonte',
   evidenceDisclaimer: 'La presenza di uno studio non convalida da sola un trattamento: il giudizio clinico resta al professionista.',
   evidenceIndirect: 'Evidenza indiretta',
+  evidenceDirectTitle: 'Evidenza diretta per questo caso',
+  evidenceIndirectTitle: 'Evidenza indiretta: non è un supporto diretto di questo caso',
+  evidenceUnverifiedTitle: 'Pertinenza non verificata: da non usare come supporto di questo caso',
+  paperSummary: 'Che cosa dice lo studio: ',
   evidenceUnverified: 'Pertinenza non verificata',
   evidenceReason: {
     same_region: 'Stesso distretto, ma non la condizione esatta di questo caso.',
@@ -218,6 +228,7 @@ const it: LiveDict = {
     paper_region_unknown: 'Lo studio non indica un distretto riconoscibile: la pertinenza non è stata verificata.',
     population_or_mechanism_not_stated: 'Lo studio riguarda una popolazione o un meccanismo (es. età, trauma, chirurgia, sport) che non hai indicato per questo caso: pertinenza non verificata.',
     adjacent_region: 'Studio su un distretto vicino, non sullo stesso: la pertinenza non è stata verificata.',
+    region_in_abstract_only: 'Lo studio nomina il distretto solo nell’abstract, sotto un titolo più generale: non riguarda specificamente questo caso.',
   },
   coherenceTitle: 'Controlli di coerenza',
   coherenceIntro: 'Confronto automatico tra ciò che hai detto e ciò che è stato generato. Il contenuto clinico resta da verificare da parte tua.',
@@ -233,6 +244,10 @@ const it: LiveDict = {
     unconfirmed_diagnosis: (i) => `${i}: diagnosi presentata come certa, ma non l’hai indicata. Va trattata come ipotesi da confermare.`,
     generated_dosage: (i) => `${i}: dosaggio che non hai indicato, presentato come prescrizione. È un suggerimento generato.`,
     coverage_plan: (i) => `${i}: trattato oggi, ma il piano non ne parla.`,
+    unsupported_cause: (i) => `${i}: causa o fattore di rischio che non hai riferito.`,
+    history_link: (i) => `${i}: legame tra il problema attuale e l’anamnesi che non hai indicato.`,
+    unsupported_hypothesis: (i) => `${i}: ipotesi non sostenuta dai reperti che hai riferito.`,
+    plan_region_not_specific: (i) => `${i}: il piano lo nomina solo insieme agli altri distretti, senza una proposta specifica.`,
     unsupported_etiology: (i) => `${i}: causa dedotta dalla sola durata dei sintomi, non riferita da te.`,
     plan_region_undefined: (i) => `${i}: trattato oggi, ma la bozza non contiene proposte specifiche per questo distretto.`,
     unapproved_instruction: (i) => `${i}: il messaggio al paziente presentava come prescritto ciò che non hai approvato.`,
@@ -254,7 +269,7 @@ const it: LiveDict = {
     protocol_unverified: (i) => `La scheda "${i}": pertinenza non verificata, il distretto non è riconosciuto.`,
   },
   removedTitle: 'Tolto o etichettato nella bozza perché non risulta da ciò che hai detto',
-  removedReason: { invented: 'misura non detta', invented_finding: 'reperto non detto', invented_test: 'test non nominato', invented_appointment: 'appuntamento o frequenza delle visite non concordati', invented_agreement: 'accordo non risultante', invented_treatment: 'trattamento non nominato', invented_negative: 'risultato negativo non documentato (non indagato)', unconfirmed_diagnosis: 'diagnosi non indicata da te: etichettata come ipotesi', unconfirmed_diagnosis_removed: 'diagnosi non indicata da te: tolta dal messaggio al paziente', generated_dosage: 'dosaggio non indicato da te: etichettato come proposta generata', unapproved_instruction: 'istruzione al paziente non approvata da te', history_added: 'anamnesi riferita da te, mancante nella bozza: aggiunta come anamnesi', unsupported_etiology: 'causa dedotta dalla sola durata dei sintomi', plan_regions: 'piano organizzato per distretto, senza aggiungere proposte' },
+  removedReason: { invented: 'misura non detta', invented_finding: 'reperto non detto', invented_test: 'test non nominato', invented_appointment: 'appuntamento o frequenza delle visite non concordati', invented_agreement: 'accordo non risultante', invented_treatment: 'trattamento non nominato', invented_negative: 'risultato negativo non documentato (non indagato)', unconfirmed_diagnosis: 'diagnosi non indicata da te: etichettata come ipotesi', unconfirmed_diagnosis_removed: 'diagnosi non indicata da te: tolta dal messaggio al paziente', generated_dosage: 'dosaggio non indicato da te: etichettato come proposta generata', unapproved_instruction: 'istruzione al paziente non approvata da te', history_added: 'anamnesi riferita da te, mancante nella bozza: aggiunta come anamnesi', unsupported_etiology: 'causa dedotta dalla sola durata dei sintomi', plan_regions: 'piano organizzato per distretto, senza aggiungere proposte', unsupported_cause: 'causa o fattore di rischio non riferito da te', history_link: 'legame con l’anamnesi non indicato da te', unsupported_hypothesis: 'ipotesi senza i reperti che la sostengono' },
   instructionReason: { home_programme_not_documented: 'programma a casa non indicato da te', demonstration_not_documented: 'dimostrazione non documentata', suggested_exercise: 'esercizio proposto dall’AI', generated_dosage: 'dosaggio o frequenza non indicati da te' },
   diagnosisStatus: { stated: 'Diagnosi indicata da te.', suspected: 'Diagnosi sospetta, da confermare.', not_stated: 'Diagnosi non indicata da te.' },
   sheetMatchNote: 'La scheda corrisponde al caso documentato: non conferma la diagnosi.',
@@ -386,13 +401,17 @@ const en: LiveDict = {
   askLimit: 'You have reached the question limit for this hour. Try again later or upgrade your plan.',
   askNoAnswer: 'An answer could not be generated.',
   askError: 'The request failed. Please try again.',
-  evidenceTitle: 'Relevant scientific evidence',
+  evidenceTitle: 'Scientific evidence',
   evidenceSearching: 'Searching the evidence library…',
   evidenceNone: 'No published paper in the PHYGO Science library matches this case.',
   whyRelevant: 'Why it’s relevant: ',
   viewSource: 'View source',
   evidenceDisclaimer: 'Showing a paper here does not by itself validate a treatment: clinical judgment remains with the treating professional.',
   evidenceIndirect: 'Indirect evidence',
+  evidenceDirectTitle: 'Direct evidence for this case',
+  evidenceIndirectTitle: 'Indirect evidence: not direct support for this case',
+  evidenceUnverifiedTitle: 'Pertinence not verified: not to be used as support for this case',
+  paperSummary: 'What the paper says: ',
   evidenceUnverified: 'Pertinence not verified',
   evidenceReason: {
     same_region: 'Same body region, but not this exact condition.',
@@ -401,6 +420,7 @@ const en: LiveDict = {
     paper_region_unknown: 'The paper names no recognisable body region: pertinence not verified.',
     population_or_mechanism_not_stated: 'The paper is about a population or a mechanism (e.g. age, trauma, surgery, sport) you did not state for this case: pertinence not verified.',
     adjacent_region: 'Paper about a neighbouring region, not the same one: pertinence not verified.',
+    region_in_abstract_only: 'The paper names the region only in its abstract, under a broader title: it is not specifically about this case.',
   },
   coherenceTitle: 'Coherence checks',
   coherenceIntro: 'An automatic comparison between what you said and what was generated. The clinical content is still yours to verify.',
@@ -416,6 +436,10 @@ const en: LiveDict = {
     unconfirmed_diagnosis: (i) => `${i}: a diagnosis presented as certain that you did not give. It is a hypothesis to confirm.`,
     generated_dosage: (i) => `${i}: a dose you did not give, presented as a prescription. It is a generated suggestion.`,
     coverage_plan: (i) => `${i}: treated today, but the plan does not mention it.`,
+    unsupported_cause: (i) => `${i}: a cause or risk factor you did not report.`,
+    history_link: (i) => `${i}: a link between today’s problem and the history that you did not make.`,
+    unsupported_hypothesis: (i) => `${i}: a hypothesis not supported by the findings you reported.`,
+    plan_region_not_specific: (i) => `${i}: the plan names it only together with the other regions, with no specific proposal.`,
     unsupported_etiology: (i) => `${i}: a cause drawn from the duration of the symptoms alone, not given by you.`,
     plan_region_undefined: (i) => `${i}: treated today, but the draft has no specific proposal for this region.`,
     unapproved_instruction: (i) => `${i}: the patient message presented as prescribed what you have not approved.`,
@@ -437,7 +461,7 @@ const en: LiveDict = {
     protocol_unverified: (i) => `The sheet "${i}": pertinence not verified, the body region is not recognised.`,
   },
   removedTitle: 'Taken out of or labelled in the draft because it is not in what you said',
-  removedReason: { invented: 'measurement not given', invented_finding: 'finding not given', invented_test: 'test not named', invented_appointment: 'appointment or visit frequency not agreed', invented_agreement: 'agreement not given', invented_treatment: 'treatment not named', invented_negative: 'negative result not documented (not assessed)', unconfirmed_diagnosis: 'diagnosis you did not give: labelled as a hypothesis', unconfirmed_diagnosis_removed: 'diagnosis you did not give: taken out of the patient message', generated_dosage: 'dose you did not give: labelled as a generated suggestion', unapproved_instruction: 'instruction to the patient not approved by you', history_added: 'history you reported, missing from the draft: added as history', unsupported_etiology: 'cause drawn from the duration of the symptoms alone', plan_regions: 'plan organised by region, no proposal added' },
+  removedReason: { invented: 'measurement not given', invented_finding: 'finding not given', invented_test: 'test not named', invented_appointment: 'appointment or visit frequency not agreed', invented_agreement: 'agreement not given', invented_treatment: 'treatment not named', invented_negative: 'negative result not documented (not assessed)', unconfirmed_diagnosis: 'diagnosis you did not give: labelled as a hypothesis', unconfirmed_diagnosis_removed: 'diagnosis you did not give: taken out of the patient message', generated_dosage: 'dose you did not give: labelled as a generated suggestion', unapproved_instruction: 'instruction to the patient not approved by you', history_added: 'history you reported, missing from the draft: added as history', unsupported_etiology: 'cause drawn from the duration of the symptoms alone', plan_regions: 'plan organised by region, no proposal added', unsupported_cause: 'cause or risk factor you did not report', history_link: 'link to the history you did not make', unsupported_hypothesis: 'hypothesis without the findings it rests on' },
   instructionReason: { home_programme_not_documented: 'home programme not given by you', demonstration_not_documented: 'demonstration not documented', suggested_exercise: 'exercise proposed by the AI', generated_dosage: 'dose or frequency not given by you' },
   diagnosisStatus: { stated: 'Diagnosis given by you.', suspected: 'Suspected diagnosis, to be confirmed.', not_stated: 'Diagnosis not given by you.' },
   sheetMatchNote: 'The sheet matches the documented case: it does not confirm the diagnosis.',
@@ -569,13 +593,17 @@ const es: LiveDict = {
   askLimit: 'Has alcanzado el límite de preguntas de esta hora. Inténtalo más tarde o cambia a un plan superior.',
   askNoAnswer: 'No se pudo generar una respuesta.',
   askError: 'Error en la solicitud. Inténtalo de nuevo.',
-  evidenceTitle: 'Evidencia científica relevante',
+  evidenceTitle: 'Evidencia científica',
   evidenceSearching: 'Buscando en la biblioteca de evidencia…',
   evidenceNone: 'Ningún estudio publicado en la biblioteca Science de PHYGO coincide con este caso.',
   whyRelevant: 'Por qué es relevante: ',
   viewSource: 'Ver la fuente',
   evidenceDisclaimer: 'Que aparezca un estudio no valida por sí solo un tratamiento: el juicio clínico corresponde al profesional.',
   evidenceIndirect: 'Evidencia indirecta',
+  evidenceDirectTitle: 'Evidencia directa para este caso',
+  evidenceIndirectTitle: 'Evidencia indirecta: no es un apoyo directo de este caso',
+  evidenceUnverifiedTitle: 'Pertinencia no verificada: no usar como apoyo de este caso',
+  paperSummary: 'Qué dice el estudio: ',
   evidenceUnverified: 'Pertinencia no verificada',
   evidenceReason: {
     same_region: 'Misma región, pero no la condición exacta de este caso.',
@@ -584,6 +612,7 @@ const es: LiveDict = {
     paper_region_unknown: 'El estudio no indica una región reconocible: pertinencia no verificada.',
     population_or_mechanism_not_stated: 'El estudio trata de una población o un mecanismo (p. ej. edad, traumatismo, cirugía, deporte) que no indicaste para este caso: pertinencia no verificada.',
     adjacent_region: 'Estudio sobre una región vecina, no la misma: pertinencia no verificada.',
+    region_in_abstract_only: 'El estudio nombra la región solo en el resumen, bajo un título más general: no trata específicamente de este caso.',
   },
   coherenceTitle: 'Controles de coherencia',
   coherenceIntro: 'Comparación automática entre lo que has dicho y lo generado. El contenido clínico debes verificarlo tú.',
@@ -599,6 +628,10 @@ const es: LiveDict = {
     unconfirmed_diagnosis: (i) => `${i}: diagnóstico presentado como seguro que no indicaste. Es una hipótesis por confirmar.`,
     generated_dosage: (i) => `${i}: dosis que no indicaste, presentada como prescripción. Es una sugerencia generada.`,
     coverage_plan: (i) => `${i}: tratado hoy, pero el plan no lo menciona.`,
+    unsupported_cause: (i) => `${i}: causa o factor de riesgo que no indicaste.`,
+    history_link: (i) => `${i}: relación entre el problema actual y los antecedentes que no indicaste.`,
+    unsupported_hypothesis: (i) => `${i}: hipótesis no sustentada por los hallazgos que indicaste.`,
+    plan_region_not_specific: (i) => `${i}: el plan lo nombra solo junto con las otras regiones, sin una propuesta específica.`,
     unsupported_etiology: (i) => `${i}: causa deducida solo de la duración de los síntomas, no indicada por ti.`,
     plan_region_undefined: (i) => `${i}: tratado hoy, pero el borrador no contiene propuestas específicas para esta región.`,
     unapproved_instruction: (i) => `${i}: el mensaje al paciente presentaba como prescrito lo que no has aprobado.`,
@@ -620,7 +653,7 @@ const es: LiveDict = {
     protocol_unverified: (i) => `La ficha "${i}": pertinencia no verificada, no se reconoce la región.`,
   },
   removedTitle: 'Retirado o etiquetado en el borrador porque no aparece en lo que has dicho',
-  removedReason: { invented: 'medida no dicha', invented_finding: 'hallazgo no dicho', invented_test: 'prueba no nombrada', invented_appointment: 'cita o frecuencia de visitas no acordadas', invented_agreement: 'acuerdo no indicado', invented_treatment: 'tratamiento no nombrado', invented_negative: 'resultado negativo no documentado (no evaluado)', unconfirmed_diagnosis: 'diagnóstico que no indicaste: etiquetado como hipótesis', unconfirmed_diagnosis_removed: 'diagnóstico que no indicaste: retirado del mensaje al paciente', generated_dosage: 'dosis que no indicaste: etiquetada como sugerencia generada', unapproved_instruction: 'instrucción al paciente no aprobada por ti', history_added: 'antecedente que indicaste, ausente del borrador: añadido como antecedente', unsupported_etiology: 'causa deducida solo de la duración de los síntomas', plan_regions: 'plan organizado por región, sin añadir propuestas' },
+  removedReason: { invented: 'medida no dicha', invented_finding: 'hallazgo no dicho', invented_test: 'prueba no nombrada', invented_appointment: 'cita o frecuencia de visitas no acordadas', invented_agreement: 'acuerdo no indicado', invented_treatment: 'tratamiento no nombrado', invented_negative: 'resultado negativo no documentado (no evaluado)', unconfirmed_diagnosis: 'diagnóstico que no indicaste: etiquetado como hipótesis', unconfirmed_diagnosis_removed: 'diagnóstico que no indicaste: retirado del mensaje al paciente', generated_dosage: 'dosis que no indicaste: etiquetada como sugerencia generada', unapproved_instruction: 'instrucción al paciente no aprobada por ti', history_added: 'antecedente que indicaste, ausente del borrador: añadido como antecedente', unsupported_etiology: 'causa deducida solo de la duración de los síntomas', plan_regions: 'plan organizado por región, sin añadir propuestas', unsupported_cause: 'causa o factor de riesgo no indicado por ti', history_link: 'relación con los antecedentes no indicada por ti', unsupported_hypothesis: 'hipótesis sin los hallazgos que la sustentan' },
   instructionReason: { home_programme_not_documented: 'programa en casa no indicado por ti', demonstration_not_documented: 'demostración no documentada', suggested_exercise: 'ejercicio propuesto por la IA', generated_dosage: 'dosis o frecuencia no indicadas por ti' },
   diagnosisStatus: { stated: 'Diagnóstico indicado por ti.', suspected: 'Diagnóstico sospechado, por confirmar.', not_stated: 'Diagnóstico no indicado por ti.' },
   sheetMatchNote: 'La ficha corresponde al caso documentado: no confirma el diagnóstico.',
@@ -752,13 +785,17 @@ const fr: LiveDict = {
   askLimit: 'Vous avez atteint la limite de questions pour cette heure. Réessayez plus tard ou passez à une offre supérieure.',
   askNoAnswer: "Aucune réponse n'a pu être générée.",
   askError: 'La demande a échoué. Réessayez.',
-  evidenceTitle: 'Données scientifiques pertinentes',
+  evidenceTitle: 'Données scientifiques',
   evidenceSearching: 'Recherche dans la bibliothèque de données probantes…',
   evidenceNone: 'Aucune étude publiée dans la bibliothèque Science de PHYGO ne correspond à ce cas.',
   whyRelevant: 'Pourquoi c’est pertinent : ',
   viewSource: 'Voir la source',
   evidenceDisclaimer: "La présence d'une étude ne valide pas à elle seule un traitement : le jugement clinique reste au professionnel.",
   evidenceIndirect: 'Preuve indirecte',
+  evidenceDirectTitle: 'Preuve directe pour ce cas',
+  evidenceIndirectTitle: 'Preuve indirecte : ce n’est pas un appui direct de ce cas',
+  evidenceUnverifiedTitle: 'Pertinence non vérifiée : à ne pas utiliser comme appui de ce cas',
+  paperSummary: 'Ce que dit l’étude : ',
   evidenceUnverified: 'Pertinence non vérifiée',
   evidenceReason: {
     same_region: 'Même région, mais pas la pathologie exacte de ce cas.',
@@ -767,6 +804,7 @@ const fr: LiveDict = {
     paper_region_unknown: 'L’étude n’indique pas de région reconnaissable : pertinence non vérifiée.',
     population_or_mechanism_not_stated: 'L’étude porte sur une population ou un mécanisme (p. ex. âge, traumatisme, chirurgie, sport) que vous n’avez pas indiqué pour ce cas : pertinence non vérifiée.',
     adjacent_region: 'Étude sur une région voisine, pas la même : pertinence non vérifiée.',
+    region_in_abstract_only: 'L’étude ne nomme la région que dans le résumé, sous un titre plus général : elle ne porte pas spécifiquement sur ce cas.',
   },
   coherenceTitle: 'Contrôles de cohérence',
   coherenceIntro: 'Comparaison automatique entre ce que vous avez dit et ce qui a été généré. Le contenu clinique reste à vérifier par vous.',
@@ -782,6 +820,10 @@ const fr: LiveDict = {
     unconfirmed_diagnosis: (i) => `${i} : diagnostic présenté comme certain que vous n’avez pas donné. C’est une hypothèse à confirmer.`,
     generated_dosage: (i) => `${i} : dosage que vous n’avez pas donné, présenté comme une prescription. C’est une suggestion générée.`,
     coverage_plan: (i) => `${i} : traité aujourd’hui, mais le plan n’en parle pas.`,
+    unsupported_cause: (i) => `${i} : cause ou facteur de risque que vous n’avez pas indiqué.`,
+    history_link: (i) => `${i} : lien entre le problème actuel et les antécédents que vous n’avez pas indiqué.`,
+    unsupported_hypothesis: (i) => `${i} : hypothèse non étayée par les constats que vous avez rapportés.`,
+    plan_region_not_specific: (i) => `${i} : le plan ne le nomme qu’avec les autres régions, sans proposition spécifique.`,
     unsupported_etiology: (i) => `${i} : cause déduite de la seule durée des symptômes, non indiquée par vous.`,
     plan_region_undefined: (i) => `${i} : traité aujourd’hui, mais le brouillon ne contient pas de proposition spécifique pour cette région.`,
     unapproved_instruction: (i) => `${i} : le message au patient présentait comme prescrit ce que vous n’avez pas approuvé.`,
@@ -803,7 +845,7 @@ const fr: LiveDict = {
     protocol_unverified: (i) => `La fiche « ${i} » : pertinence non vérifiée, la région n’est pas reconnue.`,
   },
   removedTitle: 'Retiré ou étiqueté dans le brouillon car absent de ce que vous avez dit',
-  removedReason: { invented: 'mesure non donnée', invented_finding: 'constat non donné', invented_test: 'test non nommé', invented_appointment: 'rendez-vous ou fréquence des séances non convenus', invented_agreement: 'accord non indiqué', invented_treatment: 'traitement non nommé', invented_negative: 'résultat négatif non documenté (non évalué)', unconfirmed_diagnosis: 'diagnostic que vous n’avez pas donné : étiqueté comme hypothèse', unconfirmed_diagnosis_removed: 'diagnostic que vous n’avez pas donné : retiré du message au patient', generated_dosage: 'dosage que vous n’avez pas donné : étiqueté comme suggestion générée', unapproved_instruction: 'instruction au patient non approuvée par vous', history_added: 'antécédent que vous avez rapporté, absent du brouillon : ajouté comme antécédent', unsupported_etiology: 'cause déduite de la seule durée des symptômes', plan_regions: 'plan organisé par région, sans proposition ajoutée' },
+  removedReason: { invented: 'mesure non donnée', invented_finding: 'constat non donné', invented_test: 'test non nommé', invented_appointment: 'rendez-vous ou fréquence des séances non convenus', invented_agreement: 'accord non indiqué', invented_treatment: 'traitement non nommé', invented_negative: 'résultat négatif non documenté (non évalué)', unconfirmed_diagnosis: 'diagnostic que vous n’avez pas donné : étiqueté comme hypothèse', unconfirmed_diagnosis_removed: 'diagnostic que vous n’avez pas donné : retiré du message au patient', generated_dosage: 'dosage que vous n’avez pas donné : étiqueté comme suggestion générée', unapproved_instruction: 'instruction au patient non approuvée par vous', history_added: 'antécédent que vous avez rapporté, absent du brouillon : ajouté comme antécédent', unsupported_etiology: 'cause déduite de la seule durée des symptômes', plan_regions: 'plan organisé par région, sans proposition ajoutée', unsupported_cause: 'cause ou facteur de risque non indiqué par vous', history_link: 'lien avec les antécédents non indiqué par vous', unsupported_hypothesis: 'hypothèse sans les constats qui la soutiennent' },
   instructionReason: { home_programme_not_documented: 'programme à domicile non indiqué par vous', demonstration_not_documented: 'démonstration non documentée', suggested_exercise: 'exercice proposé par l’IA', generated_dosage: 'dosage ou fréquence non indiqués par vous' },
   diagnosisStatus: { stated: 'Diagnostic indiqué par vous.', suspected: 'Diagnostic suspecté, à confirmer.', not_stated: 'Diagnostic non indiqué par vous.' },
   sheetMatchNote: 'La fiche correspond au cas documenté : elle ne confirme pas le diagnostic.',

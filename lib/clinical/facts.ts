@@ -121,6 +121,73 @@ export function unsupportedEtiology(statement: string, transcript: string): Unsu
   return out
 }
 
+// Causes and risk factors, by concept: named as a cause of the problem
+// ("potrebbe essere correlato a fattori ergonomici"), they need the clinician
+// to have mentioned them.
+const CAUSE_FACTORS: Group[] = [
+  group('ergonomic', ['ergonomi*', 'postazion*', 'postur*', 'posture*']),
+  group('activity', ['attivita fisic*', 'attivita sportiv*', 'sport*', 'allenament*', 'training', 'physical activit*', 'actividad fisica', 'activite physique', 'activites physiques']),
+  group('overuse', ['sovraccaric*', 'overuse', 'overload*', 'uso eccessivo', 'movimenti ripetitiv*', 'gesti ripetitiv*', 'ripetitiv*', 'repetitive*', 'sobrecarga', 'surmenage', 'surcharge']),
+  group('work', ['lavor*', 'attivita lavorativ*', 'occupazional*', 'work*', 'occupation*', 'job', 'trabajo', 'travail']),
+  group('trauma', ['trauma*', 'cadut*', 'fall', 'falls', 'incident*', 'infortun*', 'injur*', 'caida', 'chute']),
+  group('lifting', ['sollevament* di pes*', 'sollevare pes*', 'lifting', 'heavy lifting']),
+  group('lifestyle', ['sedentari*', 'stress', 'sonno', 'sleep', 'obesit*', 'sovrappeso', 'overweight', 'fumo', 'smoking']),
+]
+// What makes a factor a cause in a statement.
+const CAUSAL_LINK = ['correlat*', 'dovut*', 'causat*', 'legat*', 'secondari*', 'scatenat*', 'favorit*', 'attribuibil*', 'riconducibil*', 'derivant*', 'conseguenz*', 'a causa', 'per via', 'fattor*', 'related', 'due to', 'caused', 'triggered', 'secondary', 'associated with', 'attributable', 'factor*', 'relacionad*', 'debid*', 'causad*', 'lie a', 'lies a', 'du a', 'dus a']
+// The clinician linking two things: the causal words, or one following the other.
+const SAID_LINK = [...CAUSAL_LINK, 'dopo', 'da quando', 'in seguito', 'seguito', 'since', 'after', 'despues', 'depuis', 'apres']
+
+/** Causes or risk factors a statement gives for the problem that the clinician did not mention. */
+export function unsupportedCauses(statement: string, transcript: string): UnsupportedFact[] {
+  const ws = words(statement)
+  if (anyHit(ws, STILL_OPEN) || !anyHit(ws, CAUSAL_LINK)) return []
+  const said = words(transcript)
+  for (const g of CAUSE_FACTORS) {
+    const hit = firstHit(ws, g.terms)
+    if (hit && !anyHit(said, g.terms)) return [{ kind: 'unsupported_cause', item: hit, concept: 'cause' }]
+  }
+  return []
+}
+
+/**
+ * A link a statement draws between today's problem and the history (a region
+ * the clinician gave only as history: "la lombalgia potrebbe essere correlata
+ * a compensi dovuti al pregresso intervento al ginocchio"), when the clinician
+ * did not link them.
+ */
+export function historyLinks(statement: string, transcript: string): UnsupportedFact[] {
+  const ws = words(statement)
+  if (anyHit(ws, STILL_OPEN) || !anyHit(ws, CAUSAL_LINK)) return []
+  const profile = caseProfile(transcript)
+  const pastOnly = profile.history.filter((r) => !profile.active.includes(r))
+  const regions = regionsOf(statement).filter((r) => pastOnly.includes(r))
+  if (!regions.length && !(pastOnly.length && anyHit(ws, ['pregress*', 'anamnes*', 'in passato', 'previous surgery', 'past surgery', 'antecedent*']))) return []
+  // The clinician made the link: a sentence of theirs ties the two.
+  const linked = sentencesOf(transcript).some((x) => anyHit(words(x), SAID_LINK) && regionsOf(x).some((r) => pastOnly.includes(r)) && !analyzeMentions(x).every((m) => m.status !== 'active'))
+  return linked ? [] : [{ kind: 'history_link', item: regions[0] ?? 'history', concept: 'history' }]
+}
+
+// Hypotheses that rest on findings of their own: without any of them in what
+// the clinician said, the hypothesis has nothing to stand on, however hedged.
+const HYPOTHESIS_NEEDS: { key: string; terms: string[]; findings: string[] }[] = [
+  { key: 'myofascial', terms: ['miofascial*', 'myofascial*', 'trigger point*', 'punti trigger', 'punto trigger'], findings: ['trigger', 'punt* trigger', 'dolorabilit*', 'palpazion*', 'contrattur*', 'tension* muscolar*', 'banderell*', 'taut band*', 'tender*', 'palpation', 'puntos gatillo', 'points gachette', 'miofascial*', 'myofascial*'] },
+]
+
+/** Hypotheses a statement makes whose own findings the clinician did not report. */
+export function unsupportedHypotheses(statement: string, transcript: string): UnsupportedFact[] {
+  const ws = words(statement)
+  // "Ipotesi … non sostenuta dai reperti riferiti": the opposite of proposing it.
+  if (anyHit(ws, STILL_OPEN) || anyHit(ws, ['non sostenut*', 'not supported', 'no sustentad*', 'non etaye*'])) return []
+  const said = words(transcript)
+  return HYPOTHESIS_NEEDS.filter((h) => anyHit(ws, h.terms) && !anyHit(said, h.findings)).map((h) => ({ kind: 'unsupported_hypothesis' as const, item: firstHit(ws, h.terms) ?? h.key, concept: h.key }))
+}
+
+/** Every inference of a statement that the clinician's words do not support (cause, link, hypothesis). */
+export function unsupportedInferences(statement: string, transcript: string): UnsupportedFact[] {
+  return [...unsupportedEtiology(statement, transcript), ...unsupportedCauses(statement, transcript), ...historyLinks(statement, transcript), ...unsupportedHypotheses(statement, transcript)]
+}
+
 // Diagnoses, by concept: named in the note as a fact, they need the clinician
 // to have stated them (not only suspected). Symptom labels (lombalgia,
 // cervicalgia, gonalgia, dolore) are not diagnoses.
@@ -177,7 +244,7 @@ function firstHit(ws: string[], terms: string[]): string | null {
 }
 const anyHit = (ws: string[], terms: string[]) => terms.some((t) => hits(ws, t))
 
-export type FactKind = 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_negative' | 'unsupported_etiology'
+export type FactKind = 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_negative' | 'unsupported_etiology' | 'unsupported_cause' | 'history_link' | 'unsupported_hypothesis'
 export type UnsupportedFact = { kind: FactKind; item: string; concept?: string }
 
 // A movement said to be reduced ("rotazione cervicale ridotta", "flexion limited") is a range-of-motion finding.
@@ -514,6 +581,13 @@ const durationNotCause = (concept: string, lang: Lang) => {
   }[lang]
 }
 const ETIOLOGY_SECTIONS = new Set(['subjective', 'objective', 'assessment', 'summaryForPatient', 'hypotheses', 'supportingFindings', 'findingsAgainst'])
+// What an unsupported cause, link or hypothesis becomes.
+const INFERENCE_NOTE: Record<string, Record<Lang, string>> = {
+  cause: { it: 'La trascrizione non documenta cause o fattori di rischio; da indagare se indicato.', en: 'The transcript does not document causes or risk factors; to be explored if indicated.', es: 'La transcripción no documenta causas ni factores de riesgo; por valorar si está indicado.', fr: 'La transcription ne documente pas de cause ni de facteur de risque ; à approfondir si indiqué.' },
+  history: { it: 'La trascrizione non documenta un legame tra il problema attuale e l’anamnesi; da valutare se indicato.', en: 'The transcript does not document a link between today’s problem and the history; to be assessed if indicated.', es: 'La transcripción no documenta una relación entre el problema actual y los antecedentes; por valorar si está indicado.', fr: 'La transcription ne documente pas de lien entre le problème actuel et les antécédents ; à approfondir si indiqué.' },
+  myofascial: { it: 'Ipotesi di sindrome miofasciale non sostenuta dai reperti riferiti; da valutare se indicato.', en: 'Myofascial syndrome hypothesis not supported by the reported findings; to be assessed if indicated.', es: 'Hipótesis de síndrome miofascial no sustentada por los hallazgos referidos; por valorar si está indicado.', fr: 'Hypothèse de syndrome myofascial non étayée par les constats rapportés ; à approfondir si indiqué.' },
+}
+const inferenceNote = (f: UnsupportedFact, lang: Lang) => (f.kind === 'unsupported_etiology' ? durationNotCause(f.concept!, lang) : INFERENCE_NOTE[f.concept!]?.[lang] ?? INFERENCE_NOTE.cause[lang])
 
 const notDocumented = (concept: string, item: string, lang: Lang) =>
   NOT_DOCUMENTED[concept]?.[lang] ?? { it: `La trascrizione non documenta questa valutazione (${item}); da approfondire se indicato.`, en: `The transcript does not document this assessment (${item}); to be explored if indicated.`, es: `La transcripción no documenta esta valoración (${item}); por valorar si está indicado.`, fr: `La transcription ne documente pas cette évaluation (${item}) ; à approfondir si indiqué.` }[lang]
@@ -577,12 +651,15 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
     // The concepts already said to be not documented in this section, once each.
     const reworded = new Set<string>(section === 'redFlagsPrecautions' ? ['red flags'] : [])
     for (const sentence of sentencesOf(text)) {
-      // A cause drawn from the duration alone: said not to follow from it.
-      const cause = ETIOLOGY_SECTIONS.has(section) ? unsupportedEtiology(sentence, transcript) : []
+      // A cause drawn from the duration alone, a cause or risk factor nobody
+      // mentioned, a link to the history the clinician did not make, a
+      // hypothesis without its findings: said not to be documented.
+      const cause = ETIOLOGY_SECTIONS.has(section) ? unsupportedInferences(sentence, transcript) : []
       if (cause.length) {
-        const notes = Array.from(new Set(cause.map((c) => c.concept!))).filter((c) => !reworded.has(`cause:${c}`)).map((c) => { reworded.add(`cause:${c}`); return durationNotCause(c, lang) })
+        const keyOf = (c: UnsupportedFact) => `${c.kind}:${c.concept}`
+        const notes = cause.filter((c, i) => cause.findIndex((d) => keyOf(d) === keyOf(c)) === i && !reworded.has(keyOf(c))).map((c) => { reworded.add(keyOf(c)); return inferenceNote(c, lang) })
         const replacement = notes.join(' ')
-        removed.push({ section, text: sentence, kind: 'unsupported_etiology', item: cause[0].item, ...(replacement ? { replacement } : {}) })
+        removed.push({ section, text: sentence, kind: cause[0].kind, item: cause[0].item, ...(replacement ? { replacement } : {}) })
         if (replacement) kept.push(replacement)
         continue
       }
@@ -690,14 +767,14 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
       if (section === 'redFlagsPrecautions' && removed.length > before) cleaned = [LABEL.redFlags[lang], cleaned].filter(Boolean).join(' ')
       r[section] = cleaned
     }
-    // Hypotheses, one by one: one drawn from the duration alone is replaced.
+    // Hypotheses, one by one: one the clinician's words do not support is replaced.
     if (Array.isArray(reasoning.hypotheses)) {
       r.hypotheses = (reasoning.hypotheses as unknown[]).map((h) => {
         if (typeof h !== 'string') return h
-        const cause = unsupportedEtiology(h, transcript)
+        const cause = unsupportedInferences(h, transcript)
         if (!cause.length) return h
-        const replacement = durationNotCause(cause[0].concept!, lang)
-        removed.push({ section: 'hypotheses', text: h, kind: 'unsupported_etiology', item: cause[0].item, replacement })
+        const replacement = inferenceNote(cause[0], lang)
+        removed.push({ section: 'hypotheses', text: h, kind: cause[0].kind, item: cause[0].item, replacement })
         return replacement
       })
     }

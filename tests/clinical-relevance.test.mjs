@@ -677,6 +677,86 @@ test('r9: the duration of the pain alone is not evidence of an etiology; hedged 
   }
 });
 
+// ---------------------------------------------------------------- the r10 live report
+
+test('r10: no cause or risk factor the clinician did not mention; hedged hypotheses resting on findings stay', async () => {
+  const raw = rawIssues('r11ShoulderCause');
+  for (const where of ['assessment', 'hypotheses']) assert.ok(raw.some((x) => x.startsWith('unsupported_cause:') && x.endsWith(`@${where}`)), `${where} (found: ${raw.join(' | ')})`);
+  assert.ok(!raw.some((x) => x.startsWith('unsupported_cause:') && x.endsWith('@missingInformation')), 'what is missing may name what was not asked');
+  const out = await runCase('r11ShoulderCause');
+  const a = out.note.assessment;
+  assert.match(a, /^Possibile tendinopatia della cuffia dei rotatori della spalla sinistra, dato il dolore in elevazione/, 'the hedged hypothesis from the findings stays');
+  assert.doesNotMatch(a, /ergonomic|attività fisiche recenti/i, a);
+  assert.match(a, /La trascrizione non documenta cause o fattori di rischio; da indagare se indicato\./, a);
+  const h = out.note.clinicalReasoning.hypotheses;
+  assert.equal(h[0], CASES.r11ShoulderCause.note.clinicalReasoning.hypotheses[0]);
+  assert.equal(h[1], 'La trascrizione non documenta cause o fattori di rischio; da indagare se indicato.');
+  assert.equal(out.note.clinicalReasoning.missingInformation, CASES.r11ShoulderCause.note.clinicalReasoning.missingInformation);
+  assert.ok(out.removed.filter((r) => r.kind === 'unsupported_cause').every((r) => r.replacement), 'listed, restorable');
+  assert.ok(!check('r11ShoulderCause', out).some((i) => i.kind === 'unsupported_cause'));
+  // A cause the clinician did report stays.
+  const said = 'Dolore alla spalla destra da quando lavora molte ore al computer con il braccio sollevato.';
+  assert.deepEqual(F.unsupportedCauses('Dolore probabilmente correlato al lavoro al computer con il braccio sollevato.', said), []);
+  for (const x of ['Il quadro potrebbe essere legato a una postura scorretta.', 'Possible overuse related to recent sport.', 'Sintomi probabilmente dovuti a movimenti ripetitivi sul lavoro.']) assert.equal(F.unsupportedCauses(x, CASES.r11ShoulderCause.transcript).length, 1, x);
+  assert.deepEqual(F.unsupportedCauses('Considerare fattori ergonomici da indagare.', CASES.r11ShoulderCause.transcript), [], 'something to ask is not a cause');
+});
+
+test('r10: the history is not linked to today\'s problem, and no myofascial syndrome without findings', async () => {
+  const raw = rawIssues('r11HistoryKnee');
+  assert.ok(raw.some((x) => x.startsWith('history_link:') && x.endsWith('@assessment')), raw.join(' | '));
+  assert.ok(raw.some((x) => x.startsWith('history_link:') && x.endsWith('@hypotheses')), raw.join(' | '));
+  assert.ok(raw.some((x) => x.startsWith('unsupported_hypothesis:') && x.endsWith('@assessment')), raw.join(' | '));
+  const out = await runCase('r11HistoryKnee');
+  const a = out.note.assessment;
+  assert.match(a, /^Lombalgia aspecifica\./);
+  assert.doesNotMatch(a, /Possibile sindrome miofasciale|compensi dovuti/i, a);
+  assert.match(a, /La trascrizione non documenta un legame tra il problema attuale e l’anamnesi; da valutare se indicato\./, a);
+  assert.match(a, /Ipotesi di sindrome miofasciale non sostenuta dai reperti riferiti; da valutare se indicato\./, a);
+  const h = out.note.clinicalReasoning.hypotheses;
+  assert.equal(h[0], 'Possibile lombalgia aspecifica.');
+  assert.equal(h[1], 'Ipotesi di sindrome miofasciale non sostenuta dai reperti riferiti; da valutare se indicato.');
+  assert.equal(h[2], 'La trascrizione non documenta un legame tra il problema attuale e l’anamnesi; da valutare se indicato.');
+  // The history itself stays, as history, and today\'s problem stays lumbar.
+  assert.match(out.note.subjective, /In anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico/);
+  assert.deepEqual(K.caseOf(out.transcript, out.note).profile.active, ['lumbar']);
+  assert.deepEqual((out.kb.others ?? []).map((o) => o.region), []);
+  const kinds = check('r11HistoryKnee', out).map((i) => i.kind);
+  assert.ok(!kinds.includes('history_link') && !kinds.includes('unsupported_hypothesis') && !kinds.includes('history_as_active'), kinds.join(', '));
+  // Myofascial with palpation findings, and a link the clinician made, stay.
+  assert.deepEqual(F.unsupportedHypotheses('Possibile sindrome miofasciale.', 'Lombalgia con punti trigger dolorosi alla palpazione del quadrato dei lombi.'), []);
+  const linked = 'Lombalgia comparsa dopo l’intervento al ginocchio sinistro, per il carico asimmetrico; ginocchio ora asintomatico.';
+  assert.deepEqual(F.historyLinks('La lombalgia è correlata al carico asimmetrico dopo l’intervento al ginocchio sinistro.', linked), []);
+});
+
+test('r10: with two regions the plan has a part for each, with its side; one sentence naming both is not enough; nothing invented or presented as done', async () => {
+  const raw = rawIssues('r11MultiSitePlan').filter((x) => /^(plan_region_not_specific|coverage_plan):/.test(x));
+  assert.deepEqual(raw.sort(), ['plan_region_not_specific:knee@plan', 'plan_region_not_specific:shoulder@plan'], 'the sentence of the report names both regions in one');
+  const out = await runCase('r11MultiSitePlan');
+  assert.equal(out.note.plan, 'Indicazioni comuni, da adattare a ciascun distretto: esercizi di rinforzo e mobilità per la spalla destra e il ginocchio sinistro, con progressione graduale del carico. Spalla (lato destro): nessuna proposta specifica nella bozza per questo distretto; da definire. Ginocchio (lato sinistro): nessuna proposta specifica nella bozza per questo distretto; da definire.');
+  assert.doesNotMatch(out.note.plan, /(eseguit|svolt|concordat|approvat|prescritt)/i);
+  const kinds = check('r11MultiSitePlan', out).map((i) => `${i.kind}:${i.item}`);
+  assert.ok(kinds.includes('plan_region_undefined:shoulder') && kinds.includes('plan_region_undefined:knee'), kinds.join(' | '));
+  assert.ok(!kinds.some((k) => /^(plan_region_not_specific|coverage_plan|side):/.test(k)), kinds.join(' | '));
+  // The exercises keep their regions and sides, and stay the AI's proposals.
+  const byDraft = Object.fromEntries(out.exercises.map((x) => [x.draft, x]));
+  assert.equal(byDraft['Rotazione esterna con elastico spalla destra 3x12']?.name, 'Shoulder external rotation with band');
+  assert.equal(byDraft['Estensione di ginocchio sinistro 3x12']?.name, 'Knee extension');
+  for (const d of Object.keys(byDraft)) assert.deepEqual(F.exerciseOrigin(d, out.transcript), { origin: 'suggested', dosage: 'suggested' }, d);
+  // A plan with a part for each region is not changed; a part for one only adds the other.
+  const t = CASES.r11MultiSitePlan.transcript;
+  const good = 'Spalla destra: rinforzo progressivo della cuffia. Ginocchio sinistro: rinforzo del quadricipite.';
+  assert.equal(K.sanitizeGeneratedNote({ language: 'it', plan: good }, t).note.plan, good);
+  assert.equal(K.sanitizeGeneratedNote({ language: 'it', plan: 'Spalla destra e ginocchio sinistro: mobilità. Spalla destra: rinforzo della cuffia.' }, t).note.plan, 'Spalla destra e ginocchio sinistro: mobilità. Spalla destra: rinforzo della cuffia. Ginocchio (lato sinistro): nessuna proposta specifica nella bozza per questo distretto; da definire.');
+});
+
+test('r10: papers whose population, mechanism or region is not verified are never direct support', async () => {
+  // The unit checks of paperRelevance are in tests/knowledge-match.test.mjs.
+  // Through the pipeline: only direct papers carry no reason; indirect and unverified ones say why.
+  const out = await runCase('r11ShoulderCause');
+  for (const p of out.papers) if (p.relevance !== 'direct') assert.ok(p.relevance_reason, p.title);
+  assert.deepEqual(out.papers.filter((p) => p.relevance === 'direct').map((p) => p.id), ['p-shoulder']);
+});
+
 test('the screenshot case in detail: no hamstring/ankle swap, no leg paper', async () => {
   const out = await runCase('shoulderLeft');
   const pect = out.exercises.find((x) => /pettorale/i.test(x.name));
@@ -714,6 +794,9 @@ test('the prompts no longer push other-region exercises', () => {
   assert.match(note, /does not document a neurological assessment/i, 'an undocumented screening is said to be not documented');
   assert.match(note, /one labelled part per region/i, 'a plan for each region treated today');
   assert.match(note, /never infer an etiology/i, 'no cause from the duration alone');
+  assert.match(note, /risk factor/i, 'no undocumented cause or risk factor');
+  assert.match(note, /never link a past condition/i, 'history is not linked to today\'s problem without the therapist saying so');
+  assert.match(note, /one sentence naming several regions is not a plan for each/i, 'a part per region');
   assert.match(note, /not yet approved/i, 'the patient summary does not present proposals as prescribed');
   assert.doesNotMatch(note, /may appear briefly in "subjective" if relevant/, 'history is no longer optional');
 });

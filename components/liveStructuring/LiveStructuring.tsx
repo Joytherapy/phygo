@@ -1817,49 +1817,61 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                 {!papersLoading && relevantPapers.length === 0 && <p className="text-xs text-ink/55 dark:text-white/40">{t.evidenceNone}</p>}
 
                 {!papersLoading && relevantPapers.length > 0 && (
-                  <div className="space-y-3">
-                    {relevantPapers.map((paper: any) => (
-                      <div key={paper.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.03]">
-                        <div className="mb-1.5 flex items-start justify-between gap-3">
-                          <p className="text-sm font-semibold leading-snug text-ink dark:text-white">{paper.title}</p>
-                          {paper.study_type && (
-                            <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${CHIP}`}>{paper.study_type}</span>
-                          )}
+                  // By level: only a direct paper is support for the case; an indirect or
+                  // unverified one is shown apart, saying what it is, never as pertinent.
+                  <div className="space-y-5">
+                    {([["direct", t.evidenceDirectTitle], ["indirect", t.evidenceIndirectTitle], ["unverified", t.evidenceUnverifiedTitle]] as const).map(([level, groupTitle]) => {
+                      const group = relevantPapers.filter((paper: any) => (paper.relevance === "direct" || paper.relevance === "indirect" ? paper.relevance : "unverified") === level);
+                      if (!group.length) return null;
+                      return (
+                        <div key={level} data-testid={`evidence-${level}`} className="space-y-3">
+                          <p className={`${LABEL} ${level === "unverified" ? "text-amber-700 dark:text-amber-300" : ""}`}>{groupTitle}</p>
+                          {group.map((paper: any) => (
+                          <div key={paper.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.03]">
+                            <div className="mb-1.5 flex items-start justify-between gap-3">
+                              <p className="text-sm font-semibold leading-snug text-ink dark:text-white">{paper.title}</p>
+                              {paper.study_type && (
+                                <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${CHIP}`}>{paper.study_type}</span>
+                              )}
+                            </div>
+                            <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                              {paper.evidence_strength && <EvidenceBadge level={paper.evidence_strength} />}
+                              {paper.relevance === "indirect" && <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${CHIP}`}>{t.evidenceIndirect}</span>}
+                              {paper.relevance === "unverified" && (
+                                <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300">{t.evidenceUnverified}</span>
+                              )}
+                            </div>
+                            {(paper.relevance === "indirect" || paper.relevance === "unverified") && paper.relevance_reason && (t.evidenceReason as Record<string, string>)[paper.relevance_reason] && (
+                              <p data-testid="paper-relevance-reason" className="mb-2 text-[11px] leading-relaxed text-ink/60 dark:text-white/50">{(t.evidenceReason as Record<string, string>)[paper.relevance_reason]}</p>
+                            )}
+                            <p className="mb-2 text-[11px] text-ink/50 dark:text-white/45">
+                              {[
+                                paper.authors,
+                                paper.journal,
+                                paper.publication_date ? String(paper.publication_date).slice(0, 4) : null,
+                                paper.pmid ? `PMID ${paper.pmid}` : null,
+                              ]
+                                .filter(Boolean)
+                                .join(" · ")}
+                            </p>
+                            {paper.why_it_matters && (
+                              <p className="mb-2 text-xs leading-relaxed text-ink/65 dark:text-white/65">
+                                <span className="font-semibold text-ink/80 dark:text-white/80">{level === "direct" ? t.whyRelevant : t.paperSummary}</span>
+                                {paper.why_it_matters}
+                              </p>
+                            )}
+                            {paper.original_url && (
+                              <a href={paper.original_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#7C83FF] hover:underline">
+                                {t.viewSource}
+                                <ExternalLink size={10} aria-hidden />
+                              </a>
+                            )}
+                          </div>
+
+                          ))}
                         </div>
-                        <div className="mb-2 flex flex-wrap items-center gap-1.5">
-                          {paper.evidence_strength && <EvidenceBadge level={paper.evidence_strength} />}
-                          {paper.relevance === "indirect" && <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${CHIP}`}>{t.evidenceIndirect}</span>}
-                          {paper.relevance === "unverified" && (
-                            <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300">{t.evidenceUnverified}</span>
-                          )}
-                        </div>
-                        {(paper.relevance === "indirect" || paper.relevance === "unverified") && paper.relevance_reason && (t.evidenceReason as Record<string, string>)[paper.relevance_reason] && (
-                          <p data-testid="paper-relevance-reason" className="mb-2 text-[11px] leading-relaxed text-ink/60 dark:text-white/50">{(t.evidenceReason as Record<string, string>)[paper.relevance_reason]}</p>
-                        )}
-                        <p className="mb-2 text-[11px] text-ink/50 dark:text-white/45">
-                          {[
-                            paper.authors,
-                            paper.journal,
-                            paper.publication_date ? String(paper.publication_date).slice(0, 4) : null,
-                            paper.pmid ? `PMID ${paper.pmid}` : null,
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </p>
-                        {paper.why_it_matters && (
-                          <p className="mb-2 text-xs leading-relaxed text-ink/65 dark:text-white/65">
-                            <span className="font-semibold text-ink/80 dark:text-white/80">{t.whyRelevant}</span>
-                            {paper.why_it_matters}
-                          </p>
-                        )}
-                        {paper.original_url && (
-                          <a href={paper.original_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#7C83FF] hover:underline">
-                            {t.viewSource}
-                            <ExternalLink size={10} aria-hidden />
-                          </a>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

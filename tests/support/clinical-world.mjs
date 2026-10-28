@@ -220,7 +220,9 @@ export const CASES = {
     papers: ['rotator cuff'],
     // The low back: the generic regional sheet (pain described, no diagnosis
     // named); no paper in this world, which is said, not hidden.
-    expect: { sheet: 1, kbRelevance: ['unverified', 'diagnosis_not_stated'], others: [['lumbar', null, 7, 'verified', 'symptom_only']], keep: [/shoulder|spalla/i, /cat-camel/i], noIssues: true, issues: ['coverage_evidence:lumbar'], notIssues: ['coverage_protocol:lumbar'] },
+    expect: { sheet: 1, kbRelevance: ['unverified', 'diagnosis_not_stated'], others: [['lumbar', null, 7, 'verified', 'symptom_only']], keep: [/shoulder|spalla/i, /cat-camel/i], noIssues: true, issues: ['coverage_evidence:lumbar',
+      // "Esercizio per spalla e lombare": one sentence for both is not a part for each; each is said to be undefined.
+      'plan_regions:plan', 'plan_region_undefined:shoulder', 'plan_region_undefined:lumbar'], notIssues: ['coverage_protocol:lumbar'] },
   },
   // The same region negated: its exercise is left out.
   secondaryNegated: {
@@ -575,6 +577,59 @@ export const CASES = {
     },
     papers: ['rotator cuff tendinopathy'],
     expect: { sheet: 1 },
+  },
+  // ---- The r10 live report (as described by the user; the report stays on their computer).
+  // Left shoulder: causes and risk factors nobody mentioned.
+  r11ShoulderCause: {
+    transcript: 'Paziente di 45 anni con dolore alla spalla sinistra da circa un mese, dolore in elevazione oltre i 90 gradi e alla rotazione esterna contro resistenza. Sospetta problematica della cuffia dei rotatori. Oggi terapia manuale ed esercizi di rotazione esterna con elastico.',
+    note: {
+      subjective: 'Dolore alla spalla sinistra da circa un mese, in elevazione oltre i 90 gradi e alla rotazione esterna contro resistenza.',
+      objective: '',
+      assessment: 'Possibile tendinopatia della cuffia dei rotatori della spalla sinistra, dato il dolore in elevazione e alla rotazione esterna contro resistenza. Il dolore potrebbe essere correlato a fattori ergonomici o ad attività fisiche recenti.',
+      plan: 'Oggi terapia manuale ed esercizi di rotazione esterna con elastico.',
+      summaryForPatient: 'Oggi abbiamo fatto terapia manuale ed esercizi per la spalla.',
+      primaryCondition: 'rotator cuff related shoulder pain',
+      exercises: ['Rotazione esterna con elastico spalla sinistra 3x12'],
+      clinicalReasoning: {
+        hypotheses: ['Possibile tendinopatia della cuffia dei rotatori, dato il dolore in elevazione e in rotazione esterna contro resistenza.', 'Possibile sovraccarico dovuto all’attività lavorativa o sportiva.'],
+        supportingFindings: 'Dolore in elevazione e alla rotazione esterna contro resistenza.',
+        missingInformation: 'Attività lavorativa, postura e attività sportiva non indagate.',
+      },
+    },
+    papers: ['rotator cuff tendinopathy'],
+    expect: { sheet: 1 },
+  },
+  // Low back pain with a knee operation in the history: a myofascial syndrome
+  // and a causal link to the old operation, neither documented.
+  r11HistoryKnee: {
+    transcript: 'Oggi lombalgia; in anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico.',
+    note: {
+      subjective: 'Lombalgia. In anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico.',
+      objective: '',
+      assessment: 'Lombalgia aspecifica. Possibile sindrome miofasciale lombare. La lombalgia potrebbe essere correlata a compensi dovuti al pregresso intervento al ginocchio sinistro.',
+      plan: 'Esercizi di mobilità lombare.',
+      summaryForPatient: 'Oggi abbiamo parlato della schiena.',
+      primaryCondition: 'low back pain',
+      exercises: ['Cat-camel 2x10'],
+      clinicalReasoning: { hypotheses: ['Possibile lombalgia aspecifica.', 'Possibile sindrome miofasciale.', 'Possibile alterazione biomeccanica secondaria al pregresso intervento al ginocchio sinistro.'] },
+    },
+    papers: ['low back pain'],
+    expect: { sheet: 7 },
+  },
+  // Right shoulder + left knee: one sentence naming both regions is not a plan for each.
+  r11MultiSitePlan: {
+    transcript: 'Dolore alla spalla destra e al ginocchio sinistro, trattati entrambi oggi.',
+    note: {
+      subjective: 'Dolore alla spalla destra e al ginocchio sinistro.',
+      objective: '',
+      assessment: 'Dolore alla spalla destra e al ginocchio sinistro.',
+      plan: 'Esercizi di rinforzo e mobilità per la spalla destra e il ginocchio sinistro, con progressione graduale del carico.',
+      summaryForPatient: 'Oggi abbiamo trattato spalla e ginocchio.',
+      primaryCondition: 'right shoulder pain',
+      exercises: ['Rotazione esterna con elastico spalla destra 3x12', 'Estensione di ginocchio sinistro 3x12'],
+    },
+    papers: ['shoulder pain', 'knee pain'],
+    expect: {},
   },
 };
 

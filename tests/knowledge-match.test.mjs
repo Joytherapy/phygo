@@ -169,6 +169,18 @@ test('the diagnosis of a sheet: stated, only suspected, or not stated (whatever 
   assert.equal(K.diagnosisStatus(cuff, 'Dolore alla spalla in elevazione.', G.REGION_WORDS, true, hedged), 'not_stated');
 });
 
+test('r10: papers whose population, mechanism or region is not verified are never direct support', () => {
+  const terms = { phrases: ['rotator cuff tendinopathy', 'shoulder pain'], words: ['rotator', 'tendinopathy', 'shoulder'] };
+  const t = 'Paziente di 45 anni con dolore alla spalla sinistra da circa un mese. Sospetta problematica della cuffia dei rotatori.';
+  // The region only in the abstract, under a generic title: not this case's evidence.
+  assert.deepEqual(R.paperRelevance({ title: 'Exercise therapy for chronic musculoskeletal pain', abstract: 'Exercise for shoulder pain and rotator cuff tendinopathy in adults.' }, terms, ['shoulder'], t), { level: 'indirect', reason: 'region_in_abstract_only' });
+  // A population the case does not state, decided in one place.
+  assert.deepEqual(R.paperRelevance({ title: 'Shoulder pain in overhead athletes: a cohort', abstract: 'Rotator cuff tendinopathy.' }, terms, ['shoulder'], t), { level: 'unverified', reason: 'population_or_mechanism_not_stated' });
+  // The same population stated by the clinician: direct.
+  assert.deepEqual(R.paperRelevance({ title: 'Shoulder pain in overhead athletes: a cohort', abstract: 'Rotator cuff tendinopathy.' }, terms, ['shoulder'], `${t} Gioca a pallavolo a livello agonistico.`), { level: 'direct', reason: 'same_condition' });
+  assert.deepEqual(R.paperRelevance({ title: 'Exercise therapy for rotator cuff tendinopathy', abstract: 'Adults with shoulder pain.' }, terms, ['shoulder'], t), { level: 'direct', reason: 'same_condition' });
+});
+
 test('knowledge lookup: past the first 1000 sheets, through translations, with its phases', async () => {
   assert.equal((await post('/api/knowledge-lookup', { assessment: 'x' }, null)).status, 401);
   const res = await post('/api/knowledge-lookup', { primaryCondition: 'Rotator cuff tendinopathy', assessment: 'Dolore anteriore di spalla', lang: 'it' });

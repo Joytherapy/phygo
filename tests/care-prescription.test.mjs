@@ -105,6 +105,9 @@ test('the patient booklet: summary, path with "you are here", exercises, evidenc
   assert.deepEqual(phases.map((p) => p.number), [1, 2], 'ordered; a phase without a name is left out');
   const papers = B.bookletPapers([{ title: 'Synthetic trial of exercise', journal: 'Synthetic Journal', publication_date: '2024-05-01', evidence_strength: 'moderate', why_it_matters: 'Exercise helps synthetic knees' }, { title: '' }]);
   assert.deepEqual(papers.map((p) => [p.title, p.year]), [['Synthetic trial of exercise', '2024']]);
+  // The patient's booklet carries only papers that are direct evidence for the case.
+  const shown = B.bookletPapers([{ title: 'Direct synthetic paper', relevance: 'direct' }, { title: 'Indirect synthetic paper', relevance: 'indirect', relevance_reason: 'same_mechanism_other_region' }, { title: 'Unverified synthetic paper', relevance: 'unverified', relevance_reason: 'population_or_mechanism_not_stated' }]);
+  assert.deepEqual(shown.map((p) => p.title), ['Direct synthetic paper'], 'indirect and unverified evidence is not given to the patient as support');
   const exercises = B.bookletExercises([
     { internal_id: 'e1', name: 'Synthetic squat', instructions: ['Sit back', 'Stand up'], dosing: { sets: 3, reps: 10, frequency_per_week: 3, notes: 'Slowly' } },
     'Synthetic walk',
