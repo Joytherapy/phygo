@@ -895,14 +895,136 @@ test('the clean-up keeps a hypothesis the clinician stated without findings, and
   assert.equal(clean('No trigger points and suspected myofascial pain syndrome.', 'Myofascial pain syndrome of the upper trapezius.').note.assessment, 'Hypothesis to be confirmed: myofascial pain syndrome of the upper trapezius.');
   // Stated as a diagnosis by the clinician: kept as it is.
   assert.equal(clean('Sindrome miofasciale del trapezio superiore, punti trigger attivi.', 'Sindrome miofasciale del trapezio superiore.').note.assessment, 'Sindrome miofasciale del trapezio superiore.');
-  // Neither findings nor the hypothesis: still replaced as not supported.
-  for (const said of ['Dolore cervicale da una settimana.', 'Nessuna dolorabilità e nessuna tensione muscolare.', 'Non sospetta sindrome miofasciale.']) {
+  // Neither findings nor the hypothesis: still replaced as not supported (excluded by the clinician: see the diagnosis-certainty test).
+  for (const said of ['Dolore cervicale da una settimana.', 'Nessuna dolorabilità e nessuna tensione muscolare.']) {
     const { note, removed } = clean(said, 'Cervicalgia. Possibile sindrome miofasciale del trapezio.');
     assert.equal(note.assessment, 'Cervicalgia. Ipotesi di sindrome miofasciale non sostenuta dai reperti riferiti; da valutare se indicato.', said);
     assert.ok(removed.some((r) => r.kind === 'unsupported_hypothesis'), said);
   }
   // To the patient, a suspected syndrome is not told as a diagnosis.
   assert.deepEqual(clean('Nessun punto trigger e sospetta sindrome miofasciale.', 'Cervicalgia.', { summaryForPatient: 'Hai una sindrome miofasciale del trapezio.' }).removed.map((r) => r.kind), ['unconfirmed_diagnosis_removed']);
+});
+
+test('diagnostic certainty: affirmed, uncertain, negated or insufficient, from the polarity and context of each mention, not from the absence of "sospetta"', () => {
+  const CASES = [
+    // Affirmed: confirmed, or named plainly (not negated, not hedged, not a question, not someone else's).
+    ['Sindrome miofasciale confermata.', 'affirmed'],
+    ['Sindrome miofasciale del trapezio superiore', 'affirmed'],
+    ['Myofascial syndrome is confirmed.', 'affirmed'],
+    ['Myofascial syndrome confirmed and radiculopathy ruled out.', 'affirmed'],
+    ['Sindrome miofasciale confermata e radicolopatia esclusa.', 'affirmed'],
+    // Uncertain: a hypothesis, a negation that leaves it open, a question, something to assess.
+    ['Sospetta sindrome miofasciale.', 'uncertain'],
+    ['Suspected myofascial syndrome', 'uncertain'],
+    ['Non si può escludere una sindrome miofasciale.', 'uncertain'],
+    ['Non si può escludere una sindrome miofasciale del trapezio, da valutare', 'uncertain'],
+    ['Sindrome miofasciale non è esclusa.', 'uncertain'],
+    ['Non è stata esclusa una sindrome miofasciale.', 'uncertain'],
+    ['Sindrome miofasciale non confermata.', 'uncertain'],
+    ['A myofascial syndrome cannot be ruled out.', 'uncertain'],
+    ['A myofascial syndrome has not been ruled out', 'uncertain'],
+    ['Sindrome miofasciale del trapezio, da confermare.', 'uncertain'],
+    ['Sindrome miofasciale?', 'uncertain'],
+    ['Quadro compatibile con sindrome miofasciale.', 'uncertain'],
+    ['Diagnosi differenziale con sindrome miofasciale.', 'uncertain'],
+    // Negated.
+    ['Non sospetta sindrome miofasciale.', 'negated'],
+    ['Sindrome miofasciale esclusa.', 'negated'],
+    ['Esclusa una sindrome miofasciale', 'negated'],
+    ['Nessuna evidenza di sindrome miofasciale.', 'negated'],
+    ['Myofascial syndrome is not suspected.', 'negated'],
+    ['Myofascial syndrome ruled out.', 'negated'],
+    ['Ruled out myofascial syndrome', 'negated'],
+    ['No evidence of myofascial syndrome.', 'negated'],
+    ['Nessun punto trigger e nessuna sindrome miofasciale sospetta.', 'negated'],
+    ['Nessuna evidenza clinica o strumentale di sindrome miofasciale.', 'negated'],
+    // Insufficient or ambiguous: not said, said by someone else, or affirmed and excluded.
+    ['Dolore cervicale da una settimana.', 'insufficient'],
+    ['Il paziente chiede se ha una sindrome miofasciale.', 'insufficient'],
+    ['The patient is worried about a myofascial syndrome.', 'insufficient'],
+    ['Sospetta sindrome miofasciale. Dopo la palpazione sindrome miofasciale esclusa.', 'insufficient'],
+    // A "no" far before it in an unpunctuated spoken clause may be about something else.
+    ['no dolore notturno da tre settimane dolore cervicale con sindrome miofasciale del trapezio', 'insufficient'],
+  ];
+  for (const [t, want] of CASES) assert.equal(F.diagnosisCertainty(t, 'myofascial'), want, t);
+  // Other diagnoses, each mention on its own.
+  assert.deepEqual(['tear', 'tendinopathy'].map((k) => F.diagnosisCertainty('Esclusa lesione della cuffia, tendinopatia del sovraspinato.', k)), ['negated', 'affirmed']);
+  assert.deepEqual(['tendinopathy', 'tear'].map((k) => F.diagnosisCertainty('Sospetta tendinopatia, esclusa lesione.', k)), ['uncertain', 'negated']);
+  assert.equal(F.diagnosisCertainty('Tendinopatia del sovraspinato, da confermare con ecografia.', 'tendinopathy'), 'uncertain');
+  assert.equal(F.diagnosisCertainty('Escludere ernia discale.', 'disc'), 'uncertain');
+  assert.equal(F.diagnosisCertainty('Rule out disc herniation.', 'disc'), 'uncertain');
+  assert.equal(F.diagnosisCertainty('Ruled out disc herniation.', 'disc'), 'negated');
+  assert.deepEqual(['tendinopathy', 'bursitis'].map((k) => F.diagnosisCertainty('Non solo tendinopatia ma anche borsite.', k)), ['affirmed', 'affirmed']);
+  // A correction in speech is not a negation (the voiceAmbiguous case): the sprain stays in the note.
+  const voice = 'dolore al ginocchio no scusa alla caviglia sinistra dopo una distorsione';
+  assert.equal(F.diagnosisCertainty(voice, 'sprain'), 'affirmed');
+  assert.deepEqual(K.sanitizeGeneratedNote({ language: 'it', assessment: 'Distorsione di caviglia sinistra.' }, voice).removed, []);
+});
+
+test('the draft does not turn a hypothesis of the clinician\'s into a certain diagnosis', () => {
+  const FIND = { it: 'Punti trigger dolorosi nel trapezio superiore. ', en: 'Painful trigger points in the upper trapezius. ' };
+  const clean = (lang, said, assessment) => K.sanitizeGeneratedNote({ language: lang, assessment }, FIND[lang] + said);
+  for (const [lang, said] of [['it', 'Sospetta sindrome miofasciale.'], ['it', 'Non si può escludere una sindrome miofasciale.'], ['it', 'Sindrome miofasciale non confermata.'], ['en', 'Suspected myofascial syndrome.'], ['en', 'A myofascial syndrome cannot be ruled out.']]) {
+    // Written as certain: labelled a hypothesis to be confirmed, the original restorable.
+    const certain = lang === 'it' ? 'Sindrome miofasciale del trapezio superiore.' : 'Myofascial syndrome of the upper trapezius.';
+    const out = clean(lang, said, certain);
+    assert.equal(out.note.assessment, lang === 'it' ? 'Ipotesi da confermare: sindrome miofasciale del trapezio superiore.' : 'Hypothesis to be confirmed: myofascial syndrome of the upper trapezius.', said);
+    assert.deepEqual(out.removed.map((r) => [r.kind, r.text]), [['unconfirmed_diagnosis', certain]], said);
+    // Written as a hypothesis: kept.
+    const hedged = lang === 'it' ? 'Possibile sindrome miofasciale del trapezio superiore.' : 'Possible myofascial syndrome of the upper trapezius.';
+    assert.deepEqual([clean(lang, said, hedged).note.assessment, clean(lang, said, hedged).removed], [hedged, []], said);
+  }
+  // Without the hedge in its own sentence but after a comma, the clinician's sentence is still a hypothesis.
+  assert.equal(K.sanitizeGeneratedNote({ language: 'it', assessment: 'Tendinopatia del sovraspinato.' }, 'Tendinopatia del sovraspinato, da confermare con ecografia.').note.assessment, 'Ipotesi da confermare: tendinopatia del sovraspinato.');
+  // A question of the patient's states nothing: the draft's certain diagnosis is labelled.
+  assert.match(clean('it', 'Il paziente chiede se ha una sindrome miofasciale.', 'Sindrome miofasciale del trapezio superiore.').note.assessment, /^Ipotesi da confermare: /);
+  // Affirmed by the clinician: the certain diagnosis stays.
+  for (const [lang, said, certain] of [['it', 'Sindrome miofasciale confermata.', 'Sindrome miofasciale del trapezio superiore.'], ['en', 'Myofascial syndrome is confirmed.', 'Myofascial syndrome of the upper trapezius.']]) {
+    const out = clean(lang, said, certain);
+    assert.deepEqual([out.note.assessment, out.removed], [certain, []], said);
+  }
+  // The issue shown to the clinician.
+  const issues = K.checkOutput({ transcript: 'Sospetta sindrome miofasciale.', note: { assessment: 'Sindrome miofasciale del trapezio superiore.' }, exercises: [], papers: [], protocol: null }).map((i) => `${i.kind}@${i.section}`);
+  assert.ok(issues.includes('unconfirmed_diagnosis@assessment'), issues.join(', '));
+});
+
+test('the draft does not turn a diagnosis the clinician excluded into an affirmed one, nor exclude one they gave', () => {
+  const FIND = { it: 'Punti trigger dolorosi nel trapezio superiore. ', en: 'Painful trigger points in the upper trapezius. ' };
+  const clean = (lang, said, note) => K.sanitizeGeneratedNote({ language: lang, ...note }, FIND[lang] + said);
+  const EXCLUDED = [['it', 'Sindrome miofasciale esclusa.'], ['it', 'Non sospetta sindrome miofasciale.'], ['it', 'Nessuna evidenza di sindrome miofasciale.'], ['en', 'Myofascial syndrome is not suspected.'], ['en', 'Myofascial syndrome ruled out.'], ['en', 'No evidence of myofascial syndrome.']];
+  for (const [lang, said] of EXCLUDED) {
+    const certain = lang === 'it' ? 'Sindrome miofasciale del trapezio superiore.' : 'Myofascial syndrome of the upper trapezius.';
+    const hedged = lang === 'it' ? 'Possibile sindrome miofasciale del trapezio superiore.' : 'Possible myofascial syndrome of the upper trapezius.';
+    // Affirmed, or proposed as a hypothesis, against the clinician: taken out (never "Ipotesi da confermare"), the original restorable.
+    for (const text of [certain, hedged]) {
+      const out = clean(lang, said, { assessment: `Cervicalgia. ${text}`, clinicalReasoning: { hypotheses: [text] }, summaryForPatient: text });
+      assert.equal(out.note.assessment, 'Cervicalgia.', `${said} | ${text}`);
+      assert.deepEqual(out.note.clinicalReasoning.hypotheses, [], `${said} | ${text}`);
+      assert.equal(out.note.summaryForPatient, '', `${said} | ${text}`);
+      assert.deepEqual(out.removed.map((r) => `${r.section}:${r.kind}`), ['assessment:contradicted_diagnosis', 'summaryForPatient:contradicted_diagnosis', 'hypotheses:contradicted_diagnosis'], `${said} | ${text}`);
+      assert.ok(out.removed.every((r) => r.text === text && !r.replacement), `${said} | ${text}`);
+    }
+    // Excluded in the draft too: consistent, kept.
+    const excluded = lang === 'it' ? 'Sindrome miofasciale esclusa.' : 'Myofascial syndrome ruled out.';
+    assert.deepEqual(clean(lang, said, { clinicalReasoning: { findingsAgainst: excluded } }).removed, [], said);
+  }
+  // Excluded in the draft against a diagnosis the clinician gave or suspected: taken out.
+  for (const said of ['Sindrome miofasciale confermata.', 'Sospetta sindrome miofasciale.', 'Non si può escludere una sindrome miofasciale.']) {
+    const out = clean('it', said, { clinicalReasoning: { findingsAgainst: 'Sindrome miofasciale esclusa.' } });
+    assert.equal(out.note.clinicalReasoning.findingsAgainst, '', said);
+    assert.deepEqual(out.removed.map((r) => r.kind), ['contradicted_diagnosis'], said);
+  }
+  // Excluded in the draft, never spoken of: said not to be documented.
+  const unsaid = clean('it', 'Dolore cervicale da una settimana.', { clinicalReasoning: { findingsAgainst: 'Sindrome miofasciale esclusa.' } });
+  assert.equal(unsaid.note.clinicalReasoning.findingsAgainst, 'La trascrizione non documenta che questa diagnosi sia stata esclusa (miofasciale); da valutare se indicato.');
+  assert.deepEqual(unsaid.removed.map((r) => r.kind), ['invented_negative']);
+  // The issue shown to the clinician, and no issue for our own wording.
+  const issues = (transcript, note) => K.checkOutput({ transcript, note, exercises: [], papers: [], protocol: null }).map((i) => `${i.kind}@${i.section}`);
+  assert.ok(issues('Sindrome miofasciale esclusa.', { assessment: 'Sindrome miofasciale del trapezio superiore.' }).includes('contradicted_diagnosis@assessment'));
+  assert.ok(issues('Myofascial syndrome is confirmed.', { assessment: 'Myofascial syndrome ruled out.' }).includes('contradicted_diagnosis@assessment'));
+  const clean2 = clean('it', 'Dolore cervicale da una settimana.', { assessment: 'Cervicalgia. Possibile sindrome miofasciale del trapezio superiore.' }).note;
+  assert.ok(!issues('Dolore cervicale da una settimana.', clean2).some((i) => /diagnosis/.test(i)), 'the "non sostenuta" wording is not a diagnosis');
+  assert.ok(!issues('Dolore cervicale da una settimana.', unsaid.note).some((i) => /diagnosis|invented_negative/.test(i)), 'the "non documenta" wording is not an exclusion');
 });
 
 test('the screenshot case in detail: no hamstring/ankle swap, no leg paper', async () => {

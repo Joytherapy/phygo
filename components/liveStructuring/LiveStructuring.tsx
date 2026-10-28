@@ -900,7 +900,7 @@ recognition.lang = recordingLang;
     let item = issue.item;
     if (issue.kind === "side" && issue.section) item = sectionLabel(issue.section);
     if ((issue.kind === "section_region" || issue.kind === "history_as_active") && issue.section) item = `${sectionLabel(issue.section)} (${regionLabel(issue.regions)})`;
-    if (["invented", "invented_finding", "invented_test", "invented_appointment", "invented_agreement", "invented_treatment", "invented_negative", "unconfirmed_diagnosis", "generated_dosage", "unsupported_etiology"].includes(issue.kind) && issue.section) item = `"${issue.item}" (${sectionLabel(issue.section)})`;
+    if (["invented", "invented_finding", "invented_test", "invented_appointment", "invented_agreement", "invented_treatment", "invented_negative", "unconfirmed_diagnosis", "contradicted_diagnosis", "generated_dosage", "unsupported_etiology"].includes(issue.kind) && issue.section) item = `"${issue.item}" (${sectionLabel(issue.section)})`;
     if (issue.kind.startsWith("coverage_") || issue.kind === "plan_region_undefined") item = regionLabel([issue.item]);
     if (issue.kind === "unapproved_instruction") item = `${sectionLabel("summaryForPatient")} (${(t.instructionReason as Record<string, string>)[issue.item] ?? issue.item})`;
     return t.coherenceIssue[issue.kind](item);

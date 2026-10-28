@@ -177,10 +177,11 @@ const HYPOTHESIS_NEEDS: { key: string; terms: string[]; findings: string[] }[] =
   { key: 'myofascial', terms: ['miofascial*', 'myofascial*', 'trigger point*', 'punti trigger', 'punto trigger'], findings: ['trigger', 'trigger point*', 'punt* trigger', 'dolorabilit*', 'palpazion*', 'contrattur*', 'tension* muscolar*', 'muscle tension*', 'muscular tension*', 'banderell*', 'taut band*', 'tender*', 'palpation', 'puntos gatillo', 'points gachette'] },
 ]
 // Words that negate what follows them in a clause, or what precedes them.
-const NEGATED_BEFORE = ['non', 'nessun', 'nessuna', 'nessuno', 'senza', 'assenza', 'assente', 'assenti', 'esclus*', 'negativ*', 'nega', 'nemmeno', 'neanche', 'neppure', 'no', 'not', 'without', 'absent', 'absence', 'nor', 'neither', 'sin', 'tampoco', 'sans', 'aucun', 'aucune', 'ningun', 'ninguna']
-const NEGATED_AFTER = ['assent*', 'negativ*', 'esclus*', 'non rilevat*', 'non presenti', 'non sospett*', 'non e sospett*', 'not found', 'not suspected', 'absent', 'ausent*', 'absents']
-// "Non solo dolorabilità, ma anche…": "non" followed by one of these negates nothing.
-const ONLY = ['solo', 'soltanto', 'solamente', 'only', 'seulement']
+const NEGATED_BEFORE = ['non', 'nessun', 'nessuna', 'nessuno', 'senza', 'assenza', 'assente', 'assenti', 'esclus*', 'negativ*', 'nega', 'nemmeno', 'neanche', 'neppure', 'no', 'not', 'without', 'absent', 'absence', 'nor', 'neither', 'ruled', 'excluded', 'sin', 'descartad*', 'tampoco', 'sans', 'aucun', 'aucune', 'ningun', 'ninguna']
+const NEGATED_AFTER = ['assent*', 'negativ*', 'esclus*', 'non rilevat*', 'non presenti', 'non sospett*', 'non e sospett*', 'not found', 'not suspected', 'ruled out', 'excluded', 'absent', 'ausent*', 'descartad*', 'absents', 'exclu', 'exclue', 'exclues']
+// "Non solo dolorabilità, ma anche…": "non" followed by one of these negates
+// nothing; nor does a correction in speech ("ginocchio no scusa caviglia").
+const ONLY = ['solo', 'soltanto', 'solamente', 'only', 'seulement', 'scusa', 'scusate', 'anzi', 'cioe', 'sorry', 'mean', 'perdon', 'pardon']
 // A contrast ends what a negation covers: in "nessun punto trigger alla
 // palpazione ma sospetta sindrome miofasciale" the hypothesis is not negated.
 const CONTRAST = / (?:ma|pero|tuttavia|invece|bensi|but|however|sin embargo|mais|cependant|pourtant) /
@@ -191,37 +192,92 @@ const CONTRAST = / (?:ma|pero|tuttavia|invece|bensi|but|however|sin embargo|mais
 const COORDINATORS = ['e', 'ed', 'and', 'y', 'et']
 const LEADING = ['e', 'un', 'una', 'uno', 'il', 'la', 'lo', 'l', 'i', 'gli', 'le', 'a', 'an', 'the', 'el', 'los', 'las', 'une', 'des', 'si', 'se', 'on']
 const OPENS_STATEMENT = ['sospett*', 'possibil*', 'probabil*', 'ipotes*', 'ipotizz*', 'verosimil*', 'compatib*', 'suspect*', 'possibl*', 'probabl*', 'likely', 'hypothes*', 'consistent', 'sospech*', 'posibl*', 'suspicion', 'soupcon*', 'riferisce', 'riferiscono', 'presenta', 'presentano', 'presente', 'presenti', 'rileva*', 'apprezza*', 'evidenzia*', 'osserva*', 'lamenta', 'c e', 'ci sono', 'reports', 'presents', 'shows', 'has', 'there', 'refiere', 'observa*', 'hay', 'rapporte']
+// A term with a predicate of its own ("sindrome miofasciale confermata e radicolopatia esclusa") is a statement of its own.
+const OWN_PREDICATE = ['confermat*', 'presente', 'presenti', 'positiv*', 'attiv*', 'confirmed', 'present', 'positive', 'active', 'confirmad*', 'presentes', 'confirme*']
 const STATED_AFTER = ['is suspected', 'are suspected', 'is possible', 'is likely', 'is probable', 'e sospett*', 'e possibil*', 'e probabil*', 'e ipotizzat*', 'viene sospettat*', 'viene ipotizzat*', 'es posible', 'se sospecha', 'est suspecte*', 'est possible', 'est probable']
 
 const matchAt = (ws: string[], i: number, t: string) => { const pw = t.split(' '); return i + pw.length <= ws.length && pw.every((p, k) => (p.endsWith('*') ? ws[i + k].startsWith(p.slice(0, -1)) : ws[i + k] === p)) }
 const opensStatement = (ws: string[], from: number) => { let j = from; while (j < ws.length && LEADING.includes(ws[j])) j++; return OPENS_STATEMENT.some((t) => matchAt(ws, j, t)) }
 
+// `negatedAt`: where the negation before it is (-1: none); `tail`: the rest of
+// the sentence after the clause, up to a contrast ("Tendinopatia, da confermare con ecografia").
+type Mention = { ws: string[]; i: number; end: number; from: number; afterEnd: number; question: boolean; negatedAt: number; negatedAfter: boolean; negated: boolean; tail: string[] }
 /**
- * Whether the clinician said one of these, not negated: a negation before it
- * counts up to a contrast, and across "e" only when what follows is not a
+ * Each mention of one of these terms, with what covers it: a negation before
+ * it counts up to a contrast, and across "e" only when what follows is not a
  * statement of its own; a negation after it counts within a few words.
  */
-export function saidAffirmatively(transcript: string, terms: string[]): boolean {
-  for (const part of transcript.split(/[.;,!?\n]+/).flatMap((c) => normalize(c).split(CONTRAST))) {
-    const ws = part.trim().split(' ').filter(Boolean)
-    const coords = ws.flatMap((w, j) => (COORDINATORS.includes(w) ? [j] : []))
-    for (let i = 0; i < ws.length; i++) {
-      const hit = terms.find((t) => matchAt(ws, i, t))
-      if (!hit) continue
-      const end = i + hit.split(' ').length
-      const prev = coords.filter((j) => j < i).pop() ?? -1
-      const next = coords.find((j) => j >= end) ?? ws.length
-      const own = opensStatement(ws, prev + 1) || anyHit(ws.slice(end, end + 4), STATED_AFTER)
-      const from = own ? prev + 1 : 0
-      const negatedBefore = ws.slice(from, i).some((w, k) => NEGATED_BEFORE.some((t) => matchAt([w], 0, t)) && !ONLY.includes(ws[from + k + 1]))
-      const afterEnd = own || (next < ws.length && opensStatement(ws, next + 1)) ? next : ws.length
-      // A negation that starts before the next statement counts whole: "non è sospettata" ("è" reads as "e").
-      const negatedAfter = ws.slice(end, Math.min(end + 4, afterEnd)).some((_, k) => NEGATED_AFTER.some((t) => matchAt(ws, end + k, t)))
-      if (negatedBefore || negatedAfter) continue
-      return true
+function mentionsOf(text: string, terms: string[]): Mention[] {
+  const out: Mention[] = []
+  for (const sentence of text.match(/[^.;!?\n]+[.;!?]*/g) ?? []) {
+    const question = /\?\s*$/.test(sentence)
+    const clauses = sentence.split(/[.;,!?]+/)
+    for (const [ci, clause] of clauses.entries()) for (const [pi, part, parts] of normalize(clause).split(CONTRAST).map((x, k, all) => [k, x, all] as const)) {
+      const tail = pi === parts.length - 1 ? normalize(clauses.slice(ci + 1).join(' ')).split(CONTRAST)[0].trim().split(' ').filter(Boolean) : []
+      const ws = part.trim().split(' ').filter(Boolean)
+      const coords = ws.flatMap((w, j) => (COORDINATORS.includes(w) ? [j] : []))
+      for (let i = 0; i < ws.length; i++) {
+        const hit = terms.find((t) => matchAt(ws, i, t))
+        if (!hit) continue
+        const end = i + hit.split(' ').length
+        const prev = coords.filter((j) => j < i).pop() ?? -1
+        const next = coords.find((j) => j >= end) ?? ws.length
+        const own = opensStatement(ws, prev + 1) || anyHit(ws.slice(end, end + 4), STATED_AFTER)
+        const from = own ? prev + 1 : 0
+        const negatedAt = ws.slice(from, i).map((w, k) => (NEGATED_BEFORE.some((t) => matchAt([w], 0, t)) && !ONLY.includes(ws[from + k + 1]) ? from + k : -1)).filter((k) => k >= 0).pop() ?? -1
+        const afterEnd = own || anyHit(ws.slice(end, next), OWN_PREDICATE) || (next < ws.length && opensStatement(ws, next + 1)) ? next : ws.length
+        // A negation that starts before the next statement counts whole: "non è sospettata" ("è" reads as "e").
+        const negatedAfter = ws.slice(end, Math.min(end + 4, afterEnd)).some((_, k) => NEGATED_AFTER.some((t) => matchAt(ws, end + k, t)))
+        out.push({ ws, i, end, from, afterEnd, question, negatedAt, negatedAfter, negated: negatedAt >= 0 || negatedAfter, tail })
+      }
     }
   }
-  return false
+  return out
+}
+
+/** Whether the clinician said one of these, not negated. */
+export function saidAffirmatively(transcript: string, terms: string[]): boolean {
+  return mentionsOf(transcript, terms).some((m) => !m.negated)
+}
+
+// How certain a diagnosis is where it is named. Its polarity first: a
+// negation that leaves it open ("non si può escludere", "cannot be ruled
+// out", "non confermata") makes it uncertain, any other negation excludes it.
+// A mention attributed to someone else ("il paziente chiede se…") says
+// nothing of the clinician's judgement. Then the wording: a hypothesis, a
+// question or something still to assess is uncertain. Only what is left,
+// named plainly or confirmed, is affirmed.
+export type Certainty = 'affirmed' | 'uncertain' | 'negated' | 'insufficient'
+const LEFT_OPEN = ['non si puo escluder*', 'non si possono escluder*', 'non escludibil*', 'non esclus*', 'non e esclus*', 'non e da escluder*', 'non ancora esclus*', 'non e stat* esclus*', 'non sono stat* esclus*', 'non e stat* confermat*', 'da escluder*', 'escluder*', 'non confermat*', 'non e confermat*', 'non ancora confermat*', 'cannot be ruled out', 'can not be ruled out', 'cannot be excluded', 'cannot rule out', 'cannot exclude', 'not ruled out', 'not been ruled out', 'not excluded', 'not been excluded', 'not been confirmed', 'not confirmed', 'not yet confirmed', 'unconfirmed', 'rule out', 'to be ruled out', 'no se puede descartar', 'no descartad*', 'descartar', 'no confirmad*', 'on ne peut pas exclure', 'non exclu*', 'a exclure', 'non confirme*']
+const ATTRIBUTED = ['chiede', 'domanda se', 'teme', 'timore', 'paura', 'preoccupat*', 'ha letto', 'internet', 'online', 'pensa di avere', 'crede di avere', 'convint*', 'asks', 'asked', 'wonders', 'worried', 'worries', 'afraid', 'fears', 'read', 'thinks', 'believes', 'pregunta*', 'preocupad*', 'miedo', 'demande*', 'craint', 'inquiet*', 'peur']
+const OPEN_WORDING = ['differenzial*', 'differential', 'valutare', 'indagare', 'verificare', 'approfondire', 'presunt*', 'presumed', 'verosimil*', 'likely', 'suspicion', 'ipotizz*']
+const certaintyAt = (m: Mention): Certainty => {
+  const before = m.ws.slice(m.from, m.i)
+  // Wide enough for "(syndrome) has not been ruled out".
+  const after = m.ws.slice(m.end, Math.min(m.end + 7, m.afterEnd))
+  const near = (terms: string[]) => anyHit(before, terms) || anyHit(after, terms)
+  if (anyHit(m.ws.slice(0, m.i), ATTRIBUTED)) return 'insufficient'
+  if (near(LEFT_OPEN) || anyHit(m.tail, LEFT_OPEN)) return 'uncertain'
+  // A diagnosis is excluded by a negation close to it ("nessuna evidenza
+  // clinica o strumentale di…"); a "no" far before it in a long spoken clause
+  // may be about something else: it settles nothing either way.
+  if (m.negatedAfter || (m.negatedAt >= 0 && m.i - m.negatedAt <= 8)) return 'negated'
+  if (m.negatedAt >= 0) return 'insufficient'
+  if (m.question || near(HEDGE) || near(OPEN_WORDING) || anyHit(m.tail, HEDGE)) return 'uncertain'
+  return 'affirmed'
+}
+/** The certainty of a text about these terms, and the certainties of its mentions. */
+function certaintyOf(text: string, terms: string[]): { status: Certainty; seen: Set<Certainty> } {
+  const seen = new Set(mentionsOf(text, terms).map(certaintyAt))
+  // Affirmed and excluded, or suspected and excluded: the text does not settle it.
+  const status: Certainty = seen.has('negated') && (seen.has('affirmed') || seen.has('uncertain')) ? 'insufficient'
+    : seen.has('affirmed') ? 'affirmed' : seen.has('negated') ? 'negated' : seen.has('uncertain') ? 'uncertain' : 'insufficient'
+  return { status, seen }
+}
+/** How certain a diagnosis (by its concept, e.g. 'myofascial') is in a text. */
+export function diagnosisCertainty(text: string, key: string): Certainty {
+  const g = DIAGNOSES.find((d) => d.key === key)
+  return g ? certaintyOf(text, g.terms).status : 'insufficient'
 }
 
 /**
@@ -234,14 +290,16 @@ export function unsupportedHypotheses(statement: string, transcript: string): Un
   const ws = words(statement)
   // "Ipotesi … non sostenuta dai reperti riferiti": the opposite of proposing it.
   if (anyHit(ws, STILL_OPEN) || anyHit(ws, ['non sostenut*', 'not supported', 'no sustentad*', 'non etaye*'])) return []
-  return HYPOTHESIS_NEEDS.filter((h) => anyHit(ws, h.terms) && !saidAffirmatively(transcript, h.findings) && !saidAffirmatively(transcript, h.terms)).map((h) => ({ kind: 'unsupported_hypothesis' as const, item: firstHit(ws, h.terms) ?? h.key, concept: h.key }))
+  return HYPOTHESIS_NEEDS.filter((h) => anyHit(ws, h.terms) && !saidAffirmatively(transcript, h.findings) && !statedByClinician(transcript, h.terms)).map((h) => ({ kind: 'unsupported_hypothesis' as const, item: firstHit(ws, h.terms) ?? h.key, concept: h.key }))
 }
 
 /** What in the clinician's words supports a hypothesis: findings reported, or the hypothesis stated, each not negated. */
 export function hypothesisSupport(key: string, transcript: string): { findings: boolean; stated: boolean } {
   const h = HYPOTHESIS_NEEDS.find((x) => x.key === key)
-  return { findings: !!h && saidAffirmatively(transcript, h.findings), stated: !!h && saidAffirmatively(transcript, h.terms) }
+  return { findings: !!h && saidAffirmatively(transcript, h.findings), stated: !!h && statedByClinician(transcript, h.terms) }
 }
+// Stated by the clinician, as a hypothesis or as a diagnosis: "non si può escludere" leaves it stated, "esclusa" does not.
+const statedByClinician = (transcript: string, terms: string[]) => mentionsOf(transcript, terms).some((m) => { const c = certaintyAt(m); return c === 'affirmed' || c === 'uncertain' })
 
 /** Every inference of a statement that the clinician's words do not support (cause, link, hypothesis). */
 export function unsupportedInferences(statement: string, transcript: string): UnsupportedFact[] {
@@ -369,21 +427,44 @@ export function unsupportedNegatives(statement: string, transcript: string, find
   return out
 }
 
+export type DiagnosisConflict = { kind: 'unconfirmed_diagnosis' | 'contradicted_diagnosis' | 'unstated_exclusion'; item: string; concept: string }
+// Our own wording, which names a diagnosis without proposing or excluding it.
+const NOT_PROPOSED = ['non sostenut*', 'not supported', 'no sustentad*', 'non etaye*', 'non documenta*', 'does not document', 'no documenta', 'ne documente pas']
 /**
- * Diagnoses a statement names that the clinician did not state as such: not
- * said at all, or only suspected ("sospetta cuffia" does not state a
- * tendinopathy, "sospetta tendinopatia" does not state it as certain).
+ * The diagnoses a statement treats with a certainty the clinician did not
+ * give, mention by mention (not by the absence of "sospetta" in the sentence):
+ * - unconfirmed: affirmed in the statement, only suspected, not said or not
+ *   settled by the clinician ("sospetta tendinopatia" does not state it);
+ * - contradicted: affirmed or proposed when the clinician excluded it, or
+ *   excluded when the clinician affirmed or suspected it;
+ * - unstated exclusion: excluded when the clinician did not speak of it.
+ * A mention that settles nothing (a question of the patient's) is left alone.
  */
-export function unstatedDiagnoses(statement: string, transcript: string): string[] {
+export function diagnosisConflicts(statement: string, transcript: string): DiagnosisConflict[] {
   const ws = words(statement)
-  const firm = sentencesOf(transcript).filter((s) => !isHedged(s)).map(words)
-  const out: string[] = []
+  if (anyHit(ws, NOT_PROPOSED)) return []
+  const out: DiagnosisConflict[] = []
   for (const g of DIAGNOSES) {
-    const hit = firstHit(ws, g.terms)
-    if (hit && !firm.some((f) => anyHit(f, g.terms))) out.push(hit)
+    const item = firstHit(ws, g.terms)
+    if (!item) continue
+    const draft = certaintyOf(statement, g.terms).status
+    const said = certaintyOf(transcript, g.terms)
+    const conflict = (kind: DiagnosisConflict['kind']) => out.push({ kind, item, concept: g.key })
+    if (draft === 'affirmed') {
+      if (said.status === 'negated') conflict('contradicted_diagnosis')
+      else if (said.status !== 'affirmed') conflict('unconfirmed_diagnosis')
+    } else if (draft === 'uncertain') {
+      if (said.status === 'negated') conflict('contradicted_diagnosis')
+    } else if (draft === 'negated') {
+      if (said.status === 'affirmed' || said.status === 'uncertain') conflict('contradicted_diagnosis')
+      else if (!said.seen.has('negated') && said.status !== 'negated') conflict('unstated_exclusion')
+    }
   }
   return out
 }
+/** Diagnoses a statement presents as certain that the clinician did not state as such. */
+export const unstatedDiagnoses = (statement: string, transcript: string): string[] =>
+  diagnosisConflicts(statement, transcript).filter((c) => c.kind === 'unconfirmed_diagnosis').map((c) => c.item)
 
 // Doses: "3x12", "3 serie", "12 ripetizioni", "10 minuti", "3 volte".
 const NUMBER_WORD: Record<string, string> = { uno: '1', una: '1', due: '2', tre: '3', quattro: '4', cinque: '5', sei: '6', sette: '7', otto: '8', nove: '9', dieci: '10', dodici: '12', quindici: '15', venti: '20', trenta: '30', one: '1', two: '2', three: '3', four: '4', five: '5', six: '6', ten: '10', twelve: '12', fifteen: '15', twenty: '20', thirty: '30', dos: '2', tres: '3', cuatro: '4', cinco: '5', diez: '10', doce: '12', deux: '2', trois: '3', quatre: '4', cinq: '5', dix: '10', douze: '12' }
@@ -655,6 +736,13 @@ const notDocumented = (concept: string, item: string, lang: Lang) =>
 // Where a negative result starts in a sentence ("Il paziente ha riportato lombalgia | senza altre complicazioni").
 const NEGATIVE_START = /(?:^|[\s,])(senza|né|e\s+nessun\w*|nessun\w*|in\s+assenza|assenza\s+di|non\s+(?:sono|è|e)\s+stat\w*|non\s+risult\w*|non\s+emerg\w*|non\s+si\s+\w+|without|with\s+no|and\s+no|no\s+(?:signs?|evidence|other)|sin|sans|aucun\w*)(?=[\s,]|$)/i
 
+const exclusionNotDocumented = (item: string, lang: Lang) => ({
+  it: `La trascrizione non documenta che questa diagnosi sia stata esclusa (${item}); da valutare se indicato.`,
+  en: `The transcript does not document that this diagnosis was ruled out (${item}); to be assessed if indicated.`,
+  es: `La transcripción no documenta que este diagnóstico se haya descartado (${item}); por valorar si está indicado.`,
+  fr: `La transcription ne documente pas que ce diagnostic ait été exclu (${item}) ; à approfondir si indiqué.`,
+})[lang]
+
 const langOf = (l: unknown): Lang => (l === 'en' || l === 'es' || l === 'fr' ? l : 'it')
 // "Condromalacia patellare…" → "Ipotesi da confermare: condromalacia patellare…" (an acronym keeps its case).
 const labelled = (label: string, sentence: string) => `${label}${/^[A-ZÀ-Ý]{2}/.test(sentence) ? sentence : sentence.charAt(0).toLowerCase() + sentence.slice(1)}`
@@ -712,6 +800,13 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
     // The concepts already said to be not documented in this section, once each.
     const reworded = new Set<string>(section === 'redFlagsPrecautions' ? ['red flags'] : [])
     for (const sentence of sentencesOf(text)) {
+      // A diagnosis the clinician excluded, proposed here, or one they affirmed
+      // or suspected, excluded here: taken out, the original kept for undo.
+      const contradicted = ETIOLOGY_SECTIONS.has(section) ? diagnosisConflicts(sentence, transcript).find((d) => d.kind === 'contradicted_diagnosis') : undefined
+      if (contradicted) {
+        removed.push({ section, text: sentence, kind: 'contradicted_diagnosis', item: contradicted.item })
+        continue
+      }
       // A cause drawn from the duration alone, a cause or risk factor nobody
       // mentioned, a link to the history the clinician did not make, a
       // hypothesis without its findings: said not to be documented.
@@ -765,9 +860,19 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
         }
       }
       if (result === null) continue
-      // Said as certain, not stated: labelled, with the original kept for undo;
-      // in the message to the patient it is taken out instead.
-      if (section === 'summaryForPatient' && !isHedged(result)) {
+      // A diagnosis excluded here that the clinician never spoke of, and that
+      // no check above took out: said not to be documented.
+      const exclusion = ETIOLOGY_SECTIONS.has(section) ? diagnosisConflicts(result, transcript).find((d) => d.kind === 'unstated_exclusion') : undefined
+      if (exclusion) {
+        const replacement = exclusionNotDocumented(exclusion.item, lang)
+        removed.push({ section, text: result, kind: 'invented_negative', item: exclusion.item, replacement })
+        kept.push(replacement)
+        continue
+      }
+      // Said as certain, not stated as such (mention by mention): labelled,
+      // with the original kept for undo; in the message to the patient it is
+      // taken out instead.
+      if (section === 'summaryForPatient') {
         const dx = unstatedDiagnoses(result, transcript)
         if (dx.length) {
           removed.push({ section, text: result, kind: 'unconfirmed_diagnosis_removed', item: dx[0] })
@@ -785,7 +890,7 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
           result = replacement
         }
       }
-      if ((section === 'subjective' || section === 'objective' || section === 'assessment') && !isHedged(result)) {
+      if (section === 'subjective' || section === 'objective' || section === 'assessment') {
         const dx = unstatedDiagnoses(result, transcript)
         if (dx.length) {
           const replacement = labelled(LABEL.diagnosis[lang], result)
@@ -830,13 +935,19 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
     }
     // Hypotheses, one by one: one the clinician's words do not support is replaced.
     if (Array.isArray(reasoning.hypotheses)) {
-      r.hypotheses = (reasoning.hypotheses as unknown[]).map((h) => {
-        if (typeof h !== 'string') return h
+      r.hypotheses = (reasoning.hypotheses as unknown[]).flatMap((h) => {
+        if (typeof h !== 'string') return [h]
+        // A hypothesis the clinician excluded: taken out.
+        const contradicted = diagnosisConflicts(h, transcript).find((d) => d.kind === 'contradicted_diagnosis')
+        if (contradicted) {
+          removed.push({ section: 'hypotheses', text: h, kind: 'contradicted_diagnosis', item: contradicted.item })
+          return []
+        }
         const cause = unsupportedInferences(h, transcript)
-        if (!cause.length) return h
+        if (!cause.length) return [h]
         const replacement = inferenceNote(cause[0], lang)
         removed.push({ section: 'hypotheses', text: h, kind: cause[0].kind, item: cause[0].item, replacement })
-        return replacement
+        return [replacement]
       })
     }
     out.clinicalReasoning = r

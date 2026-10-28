@@ -12,13 +12,13 @@
 // regions named only in history or as negated are not part of it, and each
 // side is checked against the region it was given for.
 import { analyzeMentions, caseProfile, exerciseFit, exerciseRegions, normalize, pertinentTo, regionFit, regionsOf, sideContradictions, type CaseProfile, type Region } from './region'
-import { historyNotKept, isHedged, sanitizeNote, sentencesOf, unapprovedInstructions, unstatedDiagnoses, unstatedDosage, unsupportedArrangements, unsupportedInferences, unsupportedFindings, unsupportedNegatives, type Removal } from './facts'
+import { diagnosisConflicts, historyNotKept, isHedged, sanitizeNote, sentencesOf, unapprovedInstructions, unstatedDosage, unsupportedArrangements, unsupportedInferences, unsupportedFindings, unsupportedNegatives, type Removal } from './facts'
 
 export type IssueKind =
   | 'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side'
   | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified'
   | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment'
-  | 'invented_negative' | 'unconfirmed_diagnosis' | 'generated_dosage' | 'unapproved_instruction' | 'history_missing' | 'unsupported_etiology' | 'plan_region_undefined'
+  | 'invented_negative' | 'unconfirmed_diagnosis' | 'contradicted_diagnosis' | 'generated_dosage' | 'unapproved_instruction' | 'history_missing' | 'unsupported_etiology' | 'plan_region_undefined'
   | 'unsupported_cause' | 'history_link' | 'unsupported_hypothesis' | 'plan_region_not_specific'
   | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence' | 'coverage_plan' | 'objective_missing'
 export type Issue = { kind: IssueKind; severity: 'high' | 'medium'; item: string; section?: SectionName; regions?: Region[]; caseRegions?: Region[] }
@@ -235,6 +235,7 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
     // about them.
     const negativesToo = ['assessment', 'supportingFindings', 'findingsAgainst', 'redFlagsPrecautions'].includes(name)
     for (const sentence of sentencesOf(text)) {
+      const before = issues.length
       const negatives = negativesToo || ['subjective', 'objective', 'plan', 'summaryForPatient'].includes(name) ? unsupportedNegatives(sentence, o.transcript, negativesToo) : []
       for (const f of negatives) issues.push({ kind: f.kind, severity: 'high', item: f.item, section: name })
       if ((name === 'subjective' || name === 'objective' || name === 'assessment') && !(name === 'assessment' && (isHedged(sentence) || negatives.length))) {
@@ -246,9 +247,16 @@ export function checkOutput(o: GeneratedOutput): Issue[] {
       if (['subjective', 'objective', 'assessment', 'summaryForPatient', 'hypotheses', 'supportingFindings', 'findingsAgainst'].includes(name)) {
         for (const f of unsupportedInferences(sentence, o.transcript)) issues.push({ kind: f.kind, severity: 'high', item: f.item, section: name })
       }
-      // A diagnosis presented as certain that the clinician did not state.
-      if ((name === 'subjective' || name === 'objective' || name === 'assessment' || name === 'summaryForPatient') && !isHedged(sentence)) {
-        for (const d of unstatedDiagnoses(sentence, o.transcript)) issues.push({ kind: 'unconfirmed_diagnosis', severity: 'high', item: d, section: name })
+      // A diagnosis with a certainty the clinician did not give: presented as
+      // certain when they did not state it, proposed when they excluded it (or
+      // excluded when they affirmed or suspected it), excluded unsaid.
+      if (['subjective', 'objective', 'assessment', 'summaryForPatient', 'hypotheses', 'supportingFindings', 'findingsAgainst'].includes(name)) {
+        for (const d of diagnosisConflicts(sentence, o.transcript)) {
+          if (d.kind === 'unconfirmed_diagnosis' && !['subjective', 'objective', 'assessment', 'summaryForPatient'].includes(name)) continue
+          // An exclusion already reported as an invented finding or negative.
+          if (d.kind === 'unstated_exclusion' && issues.length > before) continue
+          issues.push({ kind: d.kind === 'unstated_exclusion' ? 'invented_negative' : d.kind, severity: 'high', item: d.item, section: name })
+        }
       }
       // An instruction to the patient the clinician has not approved.
       if (name === 'summaryForPatient') {
