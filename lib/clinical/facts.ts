@@ -177,13 +177,16 @@ const HYPOTHESIS_NEEDS: { key: string; terms: string[]; findings: string[] }[] =
   { key: 'myofascial', terms: ['miofascial*', 'myofascial*', 'trigger point*', 'punti trigger', 'punto trigger'], findings: ['trigger', 'trigger point*', 'punt* trigger', 'dolorabilit*', 'palpazion*', 'contrattur*', 'tension* muscolar*', 'banderell*', 'taut band*', 'tender*', 'palpation', 'puntos gatillo', 'points gachette'] },
 ]
 // Words that negate what follows them in a clause, or what precedes them.
-const NEGATED_BEFORE = ['non', 'nessun', 'nessuna', 'nessuno', 'senza', 'assenza', 'assente', 'assenti', 'esclus*', 'negativ*', 'nega', 'no', 'not', 'without', 'absent', 'absence', 'sin', 'sans', 'aucun', 'aucune', 'ningun', 'ninguna']
+const NEGATED_BEFORE = ['non', 'nessun', 'nessuna', 'nessuno', 'senza', 'assenza', 'assente', 'assenti', 'esclus*', 'negativ*', 'nega', 'nemmeno', 'neanche', 'neppure', 'no', 'not', 'without', 'absent', 'absence', 'nor', 'neither', 'sin', 'tampoco', 'sans', 'aucun', 'aucune', 'ningun', 'ninguna']
 const NEGATED_AFTER = ['assent*', 'negativ*', 'esclus*', 'non rilevat*', 'non presenti', 'not found', 'absent', 'ausent*', 'absents']
+// A contrast ends what a negation covers: in "nessun punto trigger alla
+// palpazione ma sospetta sindrome miofasciale" the hypothesis is not negated.
+const CONTRAST = / (?:ma|pero|tuttavia|invece|bensi|but|however|sin embargo|mais|cependant|pourtant) /
 
-/** Whether the clinician said one of these, not negated (in its clause, before or right after it). */
+/** Whether the clinician said one of these, not negated (in its clause and up to a contrast, before or right after it). */
 function saidAffirmatively(transcript: string, terms: string[]): boolean {
-  for (const clause of transcript.split(/[.;,!?\n]+/)) {
-    const ws = words(clause)
+  for (const part of transcript.split(/[.;,!?\n]+/).flatMap((c) => normalize(c).split(CONTRAST))) {
+    const ws = part.trim().split(' ').filter(Boolean)
     for (let i = 0; i < ws.length; i++) {
       const hit = terms.find((t) => { const pw = t.split(' '); return i + pw.length <= ws.length && pw.every((p, k) => (p.endsWith('*') ? ws[i + k].startsWith(p.slice(0, -1)) : ws[i + k] === p)) })
       if (!hit) continue
@@ -206,6 +209,12 @@ export function unsupportedHypotheses(statement: string, transcript: string): Un
   // "Ipotesi … non sostenuta dai reperti riferiti": the opposite of proposing it.
   if (anyHit(ws, STILL_OPEN) || anyHit(ws, ['non sostenut*', 'not supported', 'no sustentad*', 'non etaye*'])) return []
   return HYPOTHESIS_NEEDS.filter((h) => anyHit(ws, h.terms) && !saidAffirmatively(transcript, h.findings) && !saidAffirmatively(transcript, h.terms)).map((h) => ({ kind: 'unsupported_hypothesis' as const, item: firstHit(ws, h.terms) ?? h.key, concept: h.key }))
+}
+
+/** What in the clinician's words supports a hypothesis: findings reported, or the hypothesis stated, each not negated. */
+export function hypothesisSupport(key: string, transcript: string): { findings: boolean; stated: boolean } {
+  const h = HYPOTHESIS_NEEDS.find((x) => x.key === key)
+  return { findings: !!h && saidAffirmatively(transcript, h.findings), stated: !!h && saidAffirmatively(transcript, h.terms) }
 }
 
 /** Every inference of a statement that the clinician's words do not support (cause, link, hypothesis). */

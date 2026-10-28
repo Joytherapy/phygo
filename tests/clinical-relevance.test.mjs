@@ -780,6 +780,37 @@ test('myofascial hypotheses: a mention of the syndrome is not a finding; the cli
   assert.ok(!removed.some((r) => r.kind === 'unsupported_hypothesis'), JSON.stringify(removed));
 });
 
+test('myofascial hypotheses: a negation covers its own words up to a contrast, not the clinician\'s hypothesis after "ma"', () => {
+  const H = 'Possibile sindrome miofasciale del trapezio superiore.';
+  const unsupported = (t) => F.unsupportedHypotheses(H, t).map((f) => f.kind);
+  const support = (t) => F.hypothesisSupport('myofascial', t);
+  // 1. A negative finding, then the clinician's own hypothesis: the hypothesis stays; the trigger points are not findings.
+  for (const t of ['Nessun punto trigger alla palpazione, ma sospetta sindrome miofasciale.', 'Nessun punto trigger alla palpazione ma sospetta sindrome miofasciale.', 'No trigger points on palpation but suspected myofascial pain syndrome.', 'Sospetta sindrome miofasciale ma trigger point assenti.']) {
+    assert.deepEqual(unsupported(t), [], t);
+    assert.deepEqual(support(t), { findings: false, stated: true }, t);
+  }
+  // 2. The syndrome excluded: not a hypothesis of the clinician's.
+  for (const t of ['Esclusa una sindrome miofasciale.', 'Esclusa una sindrome miofasciale del trapezio.', 'Non sospetta sindrome miofasciale.', 'Sindrome miofasciale esclusa.']) {
+    assert.deepEqual(unsupported(t), ['unsupported_hypothesis'], t);
+    assert.deepEqual(support(t), { findings: false, stated: false }, t);
+  }
+  // 3. Positive palpation findings still support it, also after a negative one.
+  for (const t of ['Punti trigger dolorosi nel trapezio superiore.', 'Dolorabilità alla palpazione del trapezio superiore.', 'Nessun deficit di forza ma banderelle tese palpabili nel trapezio.', 'Nessun punto trigger ma dolorabilità alla palpazione del trapezio.']) {
+    assert.deepEqual(unsupported(t), [], t);
+    assert.equal(support(t).findings, true, t);
+  }
+  // 4. No finding and no hypothesis of the clinician's: the generated one is still flagged.
+  for (const t of ['Dolore cervicale da una settimana.', 'Dolore cervicale, nessun punto trigger alla palpazione.', 'Nessun punto trigger ma dolore cervicale da una settimana.', 'Nessuna dolorabilità ma nemmeno tensione muscolare.']) {
+    assert.deepEqual(unsupported(t), ['unsupported_hypothesis'], t);
+    assert.deepEqual(support(t), { findings: false, stated: false }, t);
+  }
+  // Through the clean-up: the clinician's hypothesis after the negative finding is kept in the note.
+  const said = 'Nessun punto trigger alla palpazione ma sospetta sindrome miofasciale del trapezio.';
+  const { note, removed } = K.sanitizeGeneratedNote({ language: 'it', assessment: 'Cervicalgia. Possibile sindrome miofasciale del trapezio.', clinicalReasoning: { hypotheses: [H] } }, said);
+  assert.deepEqual(note.clinicalReasoning.hypotheses, [H]);
+  assert.ok(!removed.some((r) => r.kind === 'unsupported_hypothesis'), JSON.stringify(removed));
+});
+
 test('the screenshot case in detail: no hamstring/ankle swap, no leg paper', async () => {
   const out = await runCase('shoulderLeft');
   const pect = out.exercises.find((x) => /pettorale/i.test(x.name));
