@@ -1027,6 +1027,69 @@ test('the draft does not turn a diagnosis the clinician excluded into an affirme
   assert.ok(!issues('Dolore cervicale da una settimana.', unsaid.note).some((i) => /diagnosis|invented_negative/.test(i)), 'the "non documenta" wording is not an exclusion');
 });
 
+test('a diagnosis in conflict is corrected in its own piece of the sentence when that is safe; otherwise the sentence, marked for review; always restorable', () => {
+  // The note panel's undo (components/liveStructuring/LiveStructuring.tsx
+  // restoreRemoved): an entry goes back in place of what replaced it, or at the
+  // end of its section; the other entries of the same change leave the list.
+  const undo = (current, r) => (r.replacement && current.includes(r.replacement) ? current.replace(r.replacement, r.text).replace(/\s{2,}/g, ' ').trim() : current ? `${current} ${r.text}` : r.text);
+  const restore = ({ text, list }, r) => ({ text: undo(text, r), list: list.filter((x) => x !== r && !(x.section === r.section && x.text === r.text && x.replacement === r.replacement)) });
+  // Whichever entry the clinician restores first, then the rest in order: the draft as it was written.
+  const restoresWhole = (text, removed, draft) => removed.every((r) => {
+    let state = restore({ text, list: removed }, r);
+    while (state.list.length) state = restore(state, state.list[0]);
+    return state.text === draft;
+  });
+  const run = (said, section, draft, lang = 'it') => {
+    const { note, removed } = K.sanitizeGeneratedNote({ language: lang, [section]: draft }, said);
+    return { text: note[section], removed: removed.map((r) => [r.kind, r.replacement ?? null, r.review ?? false]), restored: restoresWhole(note[section] ?? '', removed, draft) };
+  };
+  const CASES = [
+    // Excluded by the clinician, named in the draft next to a documented neck pain: only that piece goes.
+    ['Cervicalgia da due settimane. Esclusa tendinopatia della cuffia dei rotatori.', 'assessment', 'Cervicalgia con tendinopatia della cuffia dei rotatori.',
+      { text: 'Cervicalgia.', removed: [['contradicted_diagnosis', 'Cervicalgia.', false]], restored: true }],
+    // A diagnosis the clinician did not give next to one they did: only it is labelled, the neck pain stays theirs.
+    ['Cervicalgia da due settimane.', 'assessment', 'Cervicalgia e tendinopatia della cuffia dei rotatori.',
+      { text: 'Cervicalgia. Ipotesi da confermare: tendinopatia della cuffia dei rotatori.', removed: [['unconfirmed_diagnosis', 'Cervicalgia. Ipotesi da confermare: tendinopatia della cuffia dei rotatori.', false]], restored: true }],
+    ['Cervicalgia da due settimane.', 'assessment', 'Cervicalgia con tendinopatia della cuffia dei rotatori.',
+      { text: 'Cervicalgia. Ipotesi da confermare: tendinopatia della cuffia dei rotatori.', removed: [['unconfirmed_diagnosis', 'Cervicalgia. Ipotesi da confermare: tendinopatia della cuffia dei rotatori.', false]], restored: true }],
+    // Two diagnoses in one sentence, one affirmed and one excluded by the clinician: the affirmed one stays.
+    ['Tendinopatia della cuffia dei rotatori confermata. Esclusa capsulite adesiva.', 'assessment', 'Tendinopatia della cuffia dei rotatori della spalla destra e capsulite adesiva.',
+      { text: 'Tendinopatia della cuffia dei rotatori della spalla destra.', removed: [['contradicted_diagnosis', 'Tendinopatia della cuffia dei rotatori della spalla destra.', false]], restored: true }],
+    ['Rotator cuff tendinopathy confirmed. Adhesive capsulitis ruled out.', 'assessment', 'Right rotator cuff tendinopathy, with adhesive capsulitis.',
+      { text: 'Right rotator cuff tendinopathy.', removed: [['contradicted_diagnosis', 'Right rotator cuff tendinopathy.', false]], restored: true }, 'en'],
+    // To the patient: the diagnosis not given goes, the rest of the message stays.
+    ['Cervicalgia da due settimane.', 'summaryForPatient', 'Hai una cervicalgia e una tendinopatia della cuffia dei rotatori.',
+      { text: 'Hai una cervicalgia.', removed: [['unconfirmed_diagnosis_removed', 'Hai una cervicalgia.', false]], restored: true }],
+    // "…, esclusa dal fisioterapista" refers back to the tendinopathy: in line with the clinician, kept as it is.
+    ['Cervicalgia da due settimane. Esclusa tendinopatia della cuffia dei rotatori.', 'assessment', 'Cervicalgia con sospetta tendinopatia della cuffia, esclusa dal fisioterapista.',
+      { text: 'Cervicalgia con sospetta tendinopatia della cuffia, esclusa dal fisioterapista.', removed: [], restored: true }],
+    // Against the clinician's suspicion, and "esclusa" cannot be taken out without making it a suspicion again: the
+    // sentence goes as before, marked for review, not rewritten.
+    ['Cervicalgia da due settimane. Sospetta tendinopatia della cuffia dei rotatori.', 'assessment', 'Cervicalgia con sospetta tendinopatia della cuffia, esclusa dal fisioterapista.',
+      { text: '', removed: [['contradicted_diagnosis', null, true]], restored: true }],
+    // The side is only in the piece to take out: the rest would lose it.
+    ['Tendinopatia della cuffia dei rotatori confermata. Esclusa capsulite adesiva.', 'assessment', 'Tendinopatia della cuffia dei rotatori e capsulite adesiva della spalla destra.',
+      { text: '', removed: [['contradicted_diagnosis', null, true]], restored: true }],
+    // Other clinical content in the piece ("dolore notturno"): not separated.
+    ['Cervicalgia da due settimane. Esclusa tendinopatia della cuffia dei rotatori.', 'assessment', 'Cervicalgia, dolore notturno da tendinopatia della cuffia dei rotatori.',
+      { text: '', removed: [['contradicted_diagnosis', null, true]], restored: true }],
+    // The rest hangs on the diagnosis ("con dolore notturno"): not separated, and the night pain went with it: for review.
+    ['Cervicalgia da due settimane. Esclusa tendinopatia della cuffia dei rotatori.', 'assessment', 'Tendinopatia della cuffia dei rotatori con dolore notturno.',
+      { text: '', removed: [['contradicted_diagnosis', null, true]], restored: true }],
+    // Two changes one after the other (the excluded piece out, then the diagnosis not given labelled):
+    // both entries undo the whole change, in place, once.
+    ['Cervicalgia da due settimane. Esclusa tendinopatia della cuffia dei rotatori.', 'assessment', 'Cervicalgia con tendinopatia della cuffia dei rotatori e capsulite adesiva.',
+      { text: 'Cervicalgia. Ipotesi da confermare: capsulite adesiva.', removed: [['contradicted_diagnosis', 'Cervicalgia. Ipotesi da confermare: capsulite adesiva.', false], ['unconfirmed_diagnosis', 'Cervicalgia. Ipotesi da confermare: capsulite adesiva.', false]], restored: true }],
+    // A sentence that is only the diagnosis: labelled as before, no review.
+    ['Dolore alla spalla destra.', 'assessment', 'Tendinopatia del sovraspinato destro, in fase acuta.',
+      { text: 'Ipotesi da confermare: tendinopatia del sovraspinato destro, in fase acuta.', removed: [['unconfirmed_diagnosis', 'Ipotesi da confermare: tendinopatia del sovraspinato destro, in fase acuta.', false]], restored: true }],
+  ];
+  for (const [said, section, draft, want, lang] of CASES) assert.deepEqual(run(said, section, draft, lang), want, draft);
+  // The checks shown to the clinician still name the conflict in the draft.
+  const issues = K.checkOutput({ transcript: 'Cervicalgia da due settimane. Esclusa tendinopatia della cuffia dei rotatori.', note: { assessment: 'Cervicalgia con tendinopatia della cuffia dei rotatori.' }, exercises: [], papers: [], protocol: null }).map((i) => `${i.kind}@${i.section}`);
+  assert.ok(issues.includes('contradicted_diagnosis@assessment'), issues.join(', '));
+});
+
 test('the screenshot case in detail: no hamstring/ankle swap, no leg paper', async () => {
   const out = await runCase('shoulderLeft');
   const pect = out.exercises.find((x) => /pettorale/i.test(x.name));

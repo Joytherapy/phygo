@@ -311,6 +311,11 @@ test('statements the clinician did not give are taken out and listed, and can be
     { section: 'objective', text: 'Gonfiore al ginocchio sinistro', kind: 'invented_finding', item: 'gonfiore' },
     { section: 'summaryForPatient', text: 'Ci vediamo due volte a settimana', kind: 'invented_appointment', item: 'ci vediamo' },
     { section: 'assessment', text: 'Condromalacia patellare al ginocchio sinistro.', kind: 'unconfirmed_diagnosis', item: 'condromalacia', replacement: 'Ipotesi da confermare: condromalacia patellare al ginocchio sinistro.' },
+    // Taken out as a whole although it said more: marked for review.
+    { section: 'summaryForPatient', text: 'Hai un dolore alla spalla con una tendinopatia della cuffia, esclusa.', kind: 'contradicted_diagnosis', item: 'tendinopatia', review: true },
+    // Two changes one after the other to the same sentence: listed with the same original and result.
+    { section: 'assessment', text: 'Possibile dolore di spalla destra correlato alla cuffia dei rotatori, capsulite adesiva e fibromialgia.', kind: 'contradicted_diagnosis', item: 'capsulite', replacement: 'Possibile dolore di spalla destra correlato alla cuffia dei rotatori.' },
+    { section: 'assessment', text: 'Possibile dolore di spalla destra correlato alla cuffia dei rotatori, capsulite adesiva e fibromialgia.', kind: 'unconfirmed_diagnosis', item: 'fibromialgia', replacement: 'Possibile dolore di spalla destra correlato alla cuffia dei rotatori.' },
   ];
   const dosing = { sets: 3, reps: 12, duration_seconds: null, frequency_per_week: null, notes: null };
   const suggestion = { internal_id: 'exercises-9', provider: 'exercises', provider_id: 'e9', name: 'Pendulum swing', body_region: 'shoulder', primary_muscle: 'Deltoid', media: null };
@@ -347,8 +352,15 @@ test('statements the clinician did not give are taken out and listed, and can be
 
     // What was taken out, where and why.
     const list = checks.getByTestId('removed-fact');
-    assert.equal(await list.count(), 4);
+    assert.equal(await list.count(), 7);
     await checks.getByText('Tolto o etichettato nella bozza perché non risulta da ciò che hai detto').waitFor();
+    assert.match(await list.nth(4).innerText(), /Hai un dolore alla spalla[\s\S]*diagnosi in contrasto con ciò che hai detto[\s\S]*Da rivedere: la frase diceva anche altro/);
+    assert.equal(await checks.getByTestId('removed-fact-review').count(), 1, 'only the entry changed as a whole is marked for review');
+    // Restoring either entry of one change puts the sentence back once, in its place, and both leave the list.
+    await list.nth(6).getByRole('button', { name: 'Ripristina' }).click();
+    assert.equal(await list.count(), 5);
+    await page.getByText('correlato alla cuffia dei rotatori, capsulite adesiva e fibromialgia.', { exact: false }).first().waitFor();
+    assert.equal(await page.getByText('capsulite adesiva e fibromialgia', { exact: false }).count(), 1, 'once');
     assert.match(await list.nth(3).innerText(), /Condromalacia patellare al ginocchio sinistro[\s\S]*Valutazione · diagnosi non indicata da te: etichettata come ipotesi[\s\S]*Ora nella bozza: «Ipotesi da confermare: condromalacia/);
     assert.match(await list.nth(0).innerText(), /Test di Neer e Hawkins positivi a destra[\s\S]*Oggettivo · test non nominato/);
     assert.match(await list.nth(2).innerText(), /Ci vediamo due volte a settimana[\s\S]*Sintesi per il paziente · appuntamento o frequenza delle visite non concordati/);
@@ -395,11 +407,11 @@ test('statements the clinician did not give are taken out and listed, and can be
     // Restored on purpose: back in its section, off the list; the clinician then saves.
     // A labelled diagnosis can be put back as it was written, on purpose.
     await list.nth(3).getByRole('button', { name: 'Ripristina' }).click();
-    assert.equal(await list.count(), 3);
+    assert.equal(await list.count(), 4);
     await page.getByText('Condromalacia patellare al ginocchio sinistro.', { exact: false }).first().waitFor();
     assert.doesNotMatch(await page.getByText('Possibile dolore di spalla destra', { exact: false }).first().innerText(), /Ipotesi da confermare/);
     await list.nth(1).getByRole('button', { name: 'Ripristina' }).click();
-    assert.equal(await list.count(), 2);
+    assert.equal(await list.count(), 3);
     await page.getByTestId('note-findings').getByText('Gonfiore al ginocchio sinistro').waitFor();
     await checks.locator('li[data-kind="objective_missing"]').waitFor({ state: 'detached' });
     await page.getByRole('button', { name: 'Salva nella scheda' }).click();
@@ -410,7 +422,7 @@ test('statements the clinician did not give are taken out and listed, and can be
     assert.doesNotMatch(saved.summary_for_patient ?? '', /vediamo/);
     assert.deepEqual((saved.exercises ?? []).map((e) => (typeof e === 'string' ? e : e.name)), ['Pendulum swing', 'Knee extension']);
     assert.deepEqual((saved.exercises ?? []).map((e) => [e.origin, e.dosing_origin]), [['suggested', 'suggested'], ['suggested', 'suggested']], 'the saved programme keeps whose each exercise and dose is');
-    assert.equal(saved.assessment, 'Possibile dolore di spalla destra correlato alla cuffia dei rotatori. Condromalacia patellare al ginocchio sinistro.', 'the restored wording is what is saved');
+    assert.equal(saved.assessment, 'Possibile dolore di spalla destra correlato alla cuffia dei rotatori, capsulite adesiva e fibromialgia. Condromalacia patellare al ginocchio sinistro.', 'the restored wording is what is saved');
   } finally {
     await ctx.close();
   }

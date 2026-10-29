@@ -73,18 +73,41 @@ export function conditionStated(row: KbRow, transcript: string, regionWords: Set
 }
 
 /**
- * What the clinician said about the diagnosis of a sheet, apart from whether
- * the sheet matches the case: 'stated' (affirmed), 'suspected' (named only as
- * a suspicion or a hypothesis: "sospetta problematica della cuffia"), or
- * 'not_stated'. A sheet that matches the case never confirms a diagnosis.
- * `hedged`: whether a sentence is worded as a hypothesis
- * (lib/clinical/facts.ts isHedged).
+ * The phrases by which the clinician may have named a sheet's condition (what
+ * conditionStated looks for), as written: its names and keywords in every
+ * language and, for a sheet of a region they spoke about, the words of its
+ * name that name a condition.
  */
-export function diagnosisStatus(row: KbRow, transcript: string, regionWords: Set<string>, sameRegion: boolean, hedged: (sentence: string) => boolean): 'stated' | 'suspected' | 'not_stated' {
+export function namingPhrases(row: KbRow, regionWords: Set<string>, sameRegion: boolean): string[] {
+  const named = [row.condition_name ?? '', ...(row.condition_keywords ?? '').split(','), ...Object.values(row.translations ?? {}).flatMap((t) => (t && typeof t === 'object' ? [t.condition_name ?? '', ...(t.condition_keywords ?? '').split(',')] : []))]
+  const out = named.filter((c) => normalizeText(c).length >= MIN_CHARS && !GENERIC.has(normalizeText(c)))
+  if (sameRegion) {
+    const names = [row.condition_name, ...Object.values(row.translations ?? {}).map((t) => t?.condition_name)]
+    out.push(...names.flatMap((n) => normalizeText(n ?? '').split(' ')).filter((w) => w.length >= 6 && !regionWords.has(w) && !GENERIC.has(w) && !COMMON.has(w)))
+  }
+  return out
+}
+
+/** How certain a text is about some phrases (lib/clinical/facts.ts textCertainty). */
+export type CertaintyOf = (text: string, phrases: string[]) => 'affirmed' | 'uncertain' | 'negated' | 'insufficient'
+export type DiagnosisStatus = 'stated' | 'suspected' | 'excluded' | 'ambiguous' | 'not_stated'
+const STATUS = { affirmed: 'stated', uncertain: 'suspected', negated: 'excluded', insufficient: 'ambiguous' } as const
+
+/**
+ * What the clinician said about the diagnosis of a sheet, apart from whether
+ * the sheet matches the case, mention by mention: 'stated' (affirmed),
+ * 'suspected' (a hypothesis, or left open: "sospetta problematica della
+ * cuffia", "non si può escludere", "non confermata"), 'excluded' ("esclusa",
+ * "nessuna evidenza di", "ruled out"), 'ambiguous' (named without settling
+ * it: someone else's question, or both suspected and excluded), or
+ * 'not_stated'. A sheet that matches the case never confirms a diagnosis, and
+ * no hedge does not mean affirmed.
+ */
+export function diagnosisStatus(row: KbRow, transcript: string, regionWords: Set<string>, sameRegion: boolean, certainty: CertaintyOf): DiagnosisStatus {
   const sentences = transcript.split(/(?<=[.;!?])\s+|\n+/).filter((x) => x.trim())
   const naming = sentences.filter((x) => conditionStated(row, x, regionWords, sameRegion))
   if (!naming.length) return 'not_stated'
-  return naming.some((x) => !hedged(x)) ? 'stated' : 'suspected'
+  return STATUS[certainty(naming.join(' '), namingPhrases(row, regionWords, sameRegion))]
 }
 
 // What a clinician says when only the symptom and the region are known, to

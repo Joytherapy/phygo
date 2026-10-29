@@ -5,7 +5,7 @@ import { consumeHourly, HOURLY_LIMITS } from '@/lib/rateLimit';
 import { serviceClient } from '@/lib/verification';
 import { lazy } from '@/lib/lazy';
 import { bestCondition, conditionStated, diagnosisStatus, isRegionalSheet, REGION_SYMPTOMS, type KbRow } from '@/lib/knowledge/conditionMatch';
-import { isHedged } from '@/lib/clinical/facts';
+import { textCertainty } from '@/lib/clinical/facts';
 import { analyzeMentions, REGION_WORDS, regionFit, regionsOf, type Region } from '@/lib/clinical/region';
 import { caseOf, conditionRegionsOf, otherRegionsOf } from '@/lib/clinical/coherence';
 
@@ -118,6 +118,11 @@ export async function POST(request: Request) {
     const sentencesAbout = (source: string, region: Region) =>
       source.split(/(?<=[.;!?])\s+|\n+/).filter((sentence) => analyzeMentions(sentence).some((m) => m.region === region && m.status === 'active')).join(' ');
     const ownSheet = (r: KbRow) => regionsOf([r.condition_name, r.condition_keywords].filter(Boolean).join(' '));
+    // What the clinician said of a sheet's diagnosis (lib/clinical/facts.ts
+    // textCertainty, as in the note's checks). A condition they excluded, or
+    // named without settling it, does not make the sheet verified.
+    const statusOf = (row: KbRow, source: string, sameRegion: boolean) => diagnosisStatus(row, source, REGION_WORDS, sameRegion, textCertainty);
+    const DIAGNOSIS_REASON: Partial<Record<string, string>> = { excluded: 'diagnosis_excluded', ambiguous: 'diagnosis_ambiguous' };
     const others = [];
     for (const { region, side } of otherRegionsOf(view)) {
       const pool = rows.filter((r) => ownSheet(r).length > 0 && regionFit(sheetRegions(r), [region]) === 'compatible');
@@ -125,7 +130,13 @@ export async function POST(request: Request) {
         const l = inLang(row)!;
         return { id: l.id, condition_name: l.condition_name, source: l.source ?? null, source_date: l.source_date ?? null, evidence_level: l.evidence_level ?? null };
       };
-      const stated = bestCondition(pool, '', sentencesAbout(said, region));
+      // The condition the clinician named for it, not one they excluded.
+      const about = sentencesAbout(said, region);
+      let stated = bestCondition(pool, '', about);
+      for (let rest = pool; stated && statusOf(stated.row, about, true) === 'excluded'; ) {
+        rest = rest.filter((r) => r !== stated!.row);
+        stated = bestCondition(rest, '', about);
+      }
       const regional = pool.filter((r) => isRegionalSheet(r, region));
       const symptom = !stated && regional.length && view.profile.active.includes(region) ? { row: regional[0] } : null;
       const fromAssessment = !stated && !symptom ? bestCondition(pool, '', sentencesAbout(text, region)) : null;
@@ -158,7 +169,9 @@ export async function POST(request: Request) {
         }
       }
       const shown = entry?.match ? pool.find((r) => String(r.id) === String(entry!.match.id)) : null;
-      others.push({ region, side, ...(entry ?? { match: null, relevance: null, relevanceReason: pool.length ? 'no_matching_sheet' : 'no_sheet_for_region', matchedBy: null }), diagnosisStatus: shown && said ? diagnosisStatus(shown, sentencesAbout(said, region), REGION_WORDS, true, isHedged) : null });
+      const status = shown && said ? statusOf(shown, about, true) : null;
+      if (entry && status && DIAGNOSIS_REASON[status]) entry = { ...entry, relevance: 'unverified', relevanceReason: DIAGNOSIS_REASON[status] };
+      others.push({ region, side, ...(entry ?? { match: null, relevance: null, relevanceReason: pool.length ? 'no_matching_sheet' : 'no_sheet_for_region', matchedBy: null }), diagnosisStatus: status });
     }
     const finalPhases = lang && lang !== 'it' ? phases.map((p: any) => (p.translations?.[lang] ? { ...p, ...p.translations[lang] } : p)) : phases;
 
@@ -176,8 +189,14 @@ export async function POST(request: Request) {
     // Two separate things: `relevance` is whether the sheet matches the case as
     // documented (its region, and its condition named by the clinician);
     // `diagnosisStatus` is what the clinician said of that diagnosis (stated,
-    // only suspected, not stated). A matching sheet never confirms a diagnosis.
-    const diagnosis = match && said ? diagnosisStatus(match, said, REGION_WORDS, regionFit(sheetRegions(match), view.profile.active) === 'compatible', isHedged) : null;
+    // suspected, excluded, ambiguous, not stated). A matching sheet never
+    // confirms a diagnosis; one whose diagnosis they excluded, or named
+    // without settling it, is not verified.
+    const diagnosis = match && said ? statusOf(match, said, regionFit(sheetRegions(match), view.profile.active) === 'compatible') : null;
+    if (diagnosis && DIAGNOSIS_REASON[diagnosis]) {
+      relevance = 'unverified';
+      relevanceReason = DIAGNOSIS_REASON[diagnosis]!;
+    }
 
     return NextResponse.json({
       match: finalMatch || null,

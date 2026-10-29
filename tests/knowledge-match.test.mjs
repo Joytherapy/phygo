@@ -19,6 +19,7 @@ import { join } from 'node:path';
 import ts from 'typescript';
 import { startFakeSupabase, sessionCookie } from './support/fake-supabase.mjs';
 import { startApp } from './support/app.mjs';
+import { loadClinical } from './support/clinical-world.mjs';
 
 const FAKE_PORT = Number(process.env.FAKE_SUPABASE_PORT ?? 54808);
 const APP_PORT = Number(process.env.KNOWLEDGE_APP_PORT ?? 3808);
@@ -161,12 +162,16 @@ test('papers: "same region" means the same region; a neighbouring one is never c
   assert.ok(!thigh || thigh.level !== 'direct', JSON.stringify(thigh));
 });
 
-test('the diagnosis of a sheet: stated, only suspected, or not stated (whatever the sheet\'s match)', () => {
+test('the diagnosis of a sheet: stated, suspected, excluded, ambiguous or not stated (whatever the sheet\'s match)', async () => {
   const cuff = { id: 1, condition_name: 'Tendinopatia della cuffia dei rotatori', condition_keywords: 'cuffia dei rotatori, rotator cuff' };
-  const hedged = (s) => /sospett|possibil|probabil/i.test(s);
-  assert.equal(K.diagnosisStatus(cuff, 'Dolore alla spalla. Sospetta problematica della cuffia dei rotatori.', G.REGION_WORDS, true, hedged), 'suspected');
-  assert.equal(K.diagnosisStatus(cuff, 'Tendinopatia della cuffia dei rotatori destra.', G.REGION_WORDS, true, hedged), 'stated');
-  assert.equal(K.diagnosisStatus(cuff, 'Dolore alla spalla in elevazione.', G.REGION_WORDS, true, hedged), 'not_stated');
+  // The same classification as the note's checks (lib/clinical/facts.ts), not a rule of its own.
+  const { F } = await loadClinical();
+  const status = (said) => K.diagnosisStatus(cuff, said, G.REGION_WORDS, true, F.textCertainty);
+  assert.equal(status('Dolore alla spalla. Sospetta problematica della cuffia dei rotatori.'), 'suspected');
+  assert.equal(status('Tendinopatia della cuffia dei rotatori destra.'), 'stated');
+  assert.equal(status('Dolore alla spalla in elevazione.'), 'not_stated');
+  assert.equal(status('Dolore alla spalla. Esclusa tendinopatia della cuffia dei rotatori.'), 'excluded');
+  assert.equal(status('Dolore alla spalla. Il paziente chiede se ha una tendinopatia della cuffia dei rotatori.'), 'ambiguous');
 });
 
 test('r10: papers whose population, mechanism or region is not verified are never direct support', () => {

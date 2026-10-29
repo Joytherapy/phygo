@@ -199,9 +199,9 @@ const STATED_AFTER = ['is suspected', 'are suspected', 'is possible', 'is likely
 const matchAt = (ws: string[], i: number, t: string) => { const pw = t.split(' '); return i + pw.length <= ws.length && pw.every((p, k) => (p.endsWith('*') ? ws[i + k].startsWith(p.slice(0, -1)) : ws[i + k] === p)) }
 const opensStatement = (ws: string[], from: number) => { let j = from; while (j < ws.length && LEADING.includes(ws[j])) j++; return OPENS_STATEMENT.some((t) => matchAt(ws, j, t)) }
 
-// `negatedAt`: where the negation before it is (-1: none); `tail`: the rest of
-// the sentence after the clause, up to a contrast ("Tendinopatia, da confermare con ecografia").
-type Mention = { ws: string[]; i: number; end: number; from: number; afterEnd: number; question: boolean; negatedAt: number; negatedAfter: boolean; negated: boolean; tail: string[] }
+// `negatedAt`: where the negation before it is (-1: none); `tail`: the clauses
+// of the sentence after its own, up to a contrast ("Tendinopatia, da confermare con ecografia").
+type Mention = { ws: string[]; i: number; end: number; from: number; afterEnd: number; question: boolean; negatedAt: number; negatedAfter: boolean; negated: boolean; tail: string[][] }
 /**
  * Each mention of one of these terms, with what covers it: a negation before
  * it counts up to a contrast, and across "e" only when what follows is not a
@@ -213,7 +213,8 @@ function mentionsOf(text: string, terms: string[]): Mention[] {
     const question = /\?\s*$/.test(sentence)
     const clauses = sentence.split(/[.;,!?]+/)
     for (const [ci, clause] of clauses.entries()) for (const [pi, part, parts] of normalize(clause).split(CONTRAST).map((x, k, all) => [k, x, all] as const)) {
-      const tail = pi === parts.length - 1 ? normalize(clauses.slice(ci + 1).join(' ')).split(CONTRAST)[0].trim().split(' ').filter(Boolean) : []
+      const tail: string[][] = []
+      if (pi === parts.length - 1) for (const c of clauses.slice(ci + 1)) { const [own, ...after] = normalize(c).split(CONTRAST); tail.push(own.trim().split(' ').filter(Boolean)); if (after.length) break }
       const ws = part.trim().split(' ').filter(Boolean)
       const coords = ws.flatMap((w, j) => (COORDINATORS.includes(w) ? [j] : []))
       for (let i = 0; i < ws.length; i++) {
@@ -251,19 +252,33 @@ export type Certainty = 'affirmed' | 'uncertain' | 'negated' | 'insufficient'
 const LEFT_OPEN = ['non si puo escluder*', 'non si possono escluder*', 'non escludibil*', 'non esclus*', 'non e esclus*', 'non e da escluder*', 'non ancora esclus*', 'non e stat* esclus*', 'non sono stat* esclus*', 'non e stat* confermat*', 'da escluder*', 'escluder*', 'non confermat*', 'non e confermat*', 'non ancora confermat*', 'cannot be ruled out', 'can not be ruled out', 'cannot be excluded', 'cannot rule out', 'cannot exclude', 'not ruled out', 'not been ruled out', 'not excluded', 'not been excluded', 'not been confirmed', 'not confirmed', 'not yet confirmed', 'unconfirmed', 'rule out', 'to be ruled out', 'no se puede descartar', 'no descartad*', 'descartar', 'no confirmad*', 'on ne peut pas exclure', 'non exclu*', 'a exclure', 'non confirme*']
 const ATTRIBUTED = ['chiede', 'domanda se', 'teme', 'timore', 'paura', 'preoccupat*', 'ha letto', 'internet', 'online', 'pensa di avere', 'crede di avere', 'convint*', 'asks', 'asked', 'wonders', 'worried', 'worries', 'afraid', 'fears', 'read', 'thinks', 'believes', 'pregunta*', 'preocupad*', 'miedo', 'demande*', 'craint', 'inquiet*', 'peur']
 const OPEN_WORDING = ['differenzial*', 'differential', 'valutare', 'indagare', 'verificare', 'approfondire', 'presunt*', 'presumed', 'verosimil*', 'likely', 'suspicion', 'ipotizz*']
+// A later clause that only qualifies what came before ("…, da confermare con
+// ecografia", "…, non si può escludere", "…, sospetta."), not a statement of
+// its own ("…, sospetta lesione del legamento crociato").
+const QUALIFIER = ['da confermare', 'da valutare', 'da escludere', 'da approfondire', 'da verificare', 'da indagare', 'da definire', 'in attesa di conferma', 'to be confirmed', 'to be assessed', 'to be ruled out', 'to be excluded', 'yet to be confirmed', 'pending', 'por confirmar', 'a confirmer', 'probabilmente', 'probably', 'possibly', 'forse', 'verosimilmente', 'presumibilmente']
+const qualifies = (clause: string[], terms: string[]) => {
+  let j = 0
+  while (j < clause.length && LEADING.includes(clause[j])) j++
+  return [...QUALIFIER, ...LEFT_OPEN].some((t) => matchAt(clause, j, t)) || (clause.length <= 3 && anyHit(clause, terms))
+}
 const certaintyAt = (m: Mention): Certainty => {
   const before = m.ws.slice(m.from, m.i)
   // Wide enough for "(syndrome) has not been ruled out".
   const after = m.ws.slice(m.end, Math.min(m.end + 7, m.afterEnd))
   const near = (terms: string[]) => anyHit(before, terms) || anyHit(after, terms)
   if (anyHit(m.ws.slice(0, m.i), ATTRIBUTED)) return 'insufficient'
-  if (near(LEFT_OPEN) || anyHit(m.tail, LEFT_OPEN)) return 'uncertain'
+  const tail = m.tail.filter((c) => qualifies(c, HEDGE))
+  if (near(LEFT_OPEN) || tail.some((c) => anyHit(c, LEFT_OPEN))) return 'uncertain'
+  // "…tendinopatia della cuffia, esclusa dal fisioterapista": a short clause
+  // after it that excludes, naming no diagnosis of its own.
+  const next = m.tail[0] ?? []
+  if (next.length <= 4 && NEGATED_AFTER.some((t) => matchAt(next, 0, t)) && !DIAGNOSES.some((g) => anyHit(next, g.terms))) return 'negated'
   // A diagnosis is excluded by a negation close to it ("nessuna evidenza
   // clinica o strumentale di…"); a "no" far before it in a long spoken clause
   // may be about something else: it settles nothing either way.
   if (m.negatedAfter || (m.negatedAt >= 0 && m.i - m.negatedAt <= 8)) return 'negated'
   if (m.negatedAt >= 0) return 'insufficient'
-  if (m.question || near(HEDGE) || near(OPEN_WORDING) || anyHit(m.tail, HEDGE)) return 'uncertain'
+  if (m.question || near(HEDGE) || near(OPEN_WORDING) || tail.length) return 'uncertain'
   return 'affirmed'
 }
 /** The certainty of a text about these terms, and the certainties of its mentions. */
@@ -273,6 +288,14 @@ function certaintyOf(text: string, terms: string[]): { status: Certainty; seen: 
   const status: Certainty = seen.has('negated') && (seen.has('affirmed') || seen.has('uncertain')) ? 'insufficient'
     : seen.has('affirmed') ? 'affirmed' : seen.has('negated') ? 'negated' : seen.has('uncertain') ? 'uncertain' : 'insufficient'
   return { status, seen }
+}
+/**
+ * How certain a text is about these phrases, as written (e.g. the names and
+ * keywords of a condition sheet): the same classification as every check of
+ * the note, for /api/knowledge-lookup (lib/knowledge/conditionMatch.ts).
+ */
+export function textCertainty(text: string, phrases: string[]): Certainty {
+  return certaintyOf(text, Array.from(new Set(phrases.map((p) => normalize(p).trim()).filter(Boolean)))).status
 }
 /** How certain a diagnosis (by its concept, e.g. 'myofascial') is in a text. */
 export function diagnosisCertainty(text: string, key: string): Certainty {
@@ -673,7 +696,9 @@ export type RemovalSection = 'subjective' | 'objective' | 'assessment' | 'plan' 
  * `replacement` is given, replaced by it (a diagnosis or a dose labelled as a
  * hypothesis or a suggestion; red flags said to be not assessed).
  */
-export type Removal = { section: RemovalSection; text: string; kind: string; item: string; replacement?: string }
+// `review`: the whole sentence was changed although it says more than the
+// diagnosis in question, because that part could not be separated safely.
+export type Removal = { section: RemovalSection; text: string; kind: string; item: string; replacement?: string; review?: true }
 
 type Reasoning = { supportingFindings?: string; findingsAgainst?: string; redFlagsPrecautions?: string; [k: string]: unknown }
 type Note = { subjective?: string; objective?: string; assessment?: string; plan?: string; summaryForPatient?: string; language?: unknown; exercises?: unknown; clinicalReasoning?: Reasoning | null; [k: string]: unknown }
@@ -743,6 +768,90 @@ const exclusionNotDocumented = (item: string, lang: Lang) => ({
   fr: `La transcription ne documente pas que ce diagnostic ait été exclu (${item}) ; à approfondir si indiqué.`,
 })[lang]
 
+// Where a sentence can be cut without changing what the rest says: at ", ",
+// "; " and at "e", "ed", "and", "con", "with" ("Cervicalgia con tendinopatia
+// della cuffia" → "Cervicalgia").
+const PIECE_SEP = /(,\s+|;\s+|\s+(?:e|ed|and|con|with)\s+)/
+const HANGS_ON = /^\s+(?:con|with)\s+$/
+const ARTICLES = ['un', 'una', 'uno', 'il', 'la', 'lo', 'l', 'i', 'gli', 'le', 'an', 'the', 'el', 'los', 'las', 'une', 'des']
+// A piece that starts like this refers to what comes before it.
+const DEPENDENT_START = ['esclus*', 'confermat*', 'sospett*', 'ipotizzat*', 'compatibil*', 'verosimil*', 'probabil*', 'possibil*', 'presumibil*', 'da', 'che', 'cui', 'quale', 'quali', 'which', 'that', 'who', 'excluded', 'ruled', 'confirmed', 'suspected', 'to', 'likely', 'probably', 'possibly', 'not', 'non', 'secondari*', 'dovut*', 'legat*', 'correlat*', 'associat*', 'secondary', 'due', 'related', 'associated', 'senza', 'in', 'per', 'di', 'a', 'without', 'for', 'of', 'from', 'at', 'ma', 'but', 'pero', 'tuttavia', 'quest*', 'this', 'these', 'it']
+// Clinical content a piece must not carry to be taken out with the diagnosis.
+const CLINICAL_CONTENT = ['dolor*', 'pain', 'douleur*', 'rigidit*', 'stiff*', 'limitazion*', 'limited', 'deficit', 'forza', 'strength', 'rom', 'gonfior*', 'swelling', 'edema', 'test', 'positiv*', 'negativ*', 'notturn*', 'night', 'irradia*', 'radiat*', 'parestesi*', 'formicol*', 'numb*']
+const SIDE_WORDS = ['destr*', 'sinistr*', 'right', 'left', 'bilateral*', 'derech*', 'izquierd*', 'droit*', 'gauche*']
+const startsDependent = (piece: string) => { const ws = words(piece); let j = 0; while (j < ws.length && ARTICLES.includes(ws[j])) j++; return DEPENDENT_START.some((t) => matchAt(ws, j, t)) }
+
+/**
+ * The sentence without the piece that names this diagnosis, when it can be
+ * taken out without changing what the rest says: the piece alone says of the
+ * diagnosis what the sentence says, carries no other clinical content and no
+ * side the rest would lose, the rest does not hang on it ("Tendinopatia con
+ * dolore notturno") nor refer back to it ("…, esclusa dal fisioterapista").
+ * Otherwise null: the sentence is changed as a whole, for review.
+ */
+function isolate(sentence: string, terms: string[]): { rest: string; piece: string } | null {
+  const end = sentence.match(/[.;!?]+$/)?.[0] ?? '.'
+  const bits = sentence.replace(/[.;!?]+$/, '').trim().split(PIECE_SEP)
+  const parts = bits.filter((_, k) => k % 2 === 0)
+  const seps = bits.filter((_, k) => k % 2 === 1)
+  const at = parts.flatMap((p, k) => (anyHit(words(p), terms) ? [k] : []))
+  if (parts.length < 2 || at.length !== 1) return null
+  const k = at[0]
+  const piece = parts[k]
+  const pw = words(piece)
+  const others = parts.filter((_, j) => j !== k)
+  if (certaintyOf(piece, terms).status !== certaintyOf(sentence, terms).status) return null
+  if (DIAGNOSES.some((g) => g.terms !== terms && anyHit(pw, g.terms)) || anyHit(pw, CLINICAL_CONTENT) || /\d/.test(piece)) return null
+  if (anyHit(pw, SIDE_WORDS) && !others.some((p) => anyHit(words(p), SIDE_WORDS))) return null
+  if ((k < seps.length && HANGS_ON.test(seps[k])) || (k + 1 < parts.length && startsDependent(parts[k + 1]))) return null
+  // The piece goes with the separator before it (after it, for the first one).
+  let rest = ''
+  for (let j = 0; j < parts.length; j++) {
+    if (j === k) continue
+    rest += (rest ? seps[j - 1] : '') + parts[j]
+  }
+  if (!/[a-zà-ÿ]{3}/i.test(rest)) return null
+  return { rest: `${rest.charAt(0).toUpperCase()}${rest.slice(1)}${end}`, piece: `${piece}${end}` }
+}
+const termsOf = (concept: string) => DIAGNOSES.find((g) => g.key === concept)?.terms ?? []
+/** Each of these diagnoses taken out of a sentence in turn; null when one cannot be. */
+function isolateAll(sentence: string, concepts: string[]): { rest: string; pieces: string[] } | null {
+  let rest = sentence
+  const pieces: string[] = []
+  for (const c of concepts) {
+    const cut = isolate(rest, termsOf(c))
+    if (!cut) return null
+    rest = cut.rest
+    pieces.push(cut.piece)
+  }
+  return { rest, pieces }
+}
+// Whether a sentence says something of its own besides these diagnoses (a
+// piece that neither names them nor depends on them): changing it as a whole
+// is then for review.
+const saysMore = (sentence: string, concepts: string[]) => {
+  const terms = concepts.flatMap(termsOf)
+  return sentence.replace(/[.;!?]+$/, '').trim().split(PIECE_SEP).filter((_, k) => k % 2 === 0).some((p, k) => k > 0 ? !anyHit(words(p), terms) && !startsDependent(p) : !anyHit(words(p), terms))
+}
+const review = (sentence: string, concepts: string[]) => (saysMore(sentence, concepts) ? { review: true as const } : {})
+const conceptsOf = (dx: DiagnosisConflict[]) => Array.from(new Set(dx.map((d) => d.concept)))
+/**
+ * Changes made one after another to the same sentence, the first of them a
+ * correction in place (a piece taken out, then the rest labelled or cut), are
+ * undone together: each entry goes from the original sentence to what stays
+ * of it, so restoring any of them puts the sentence back as it was written,
+ * in its place, once.
+ */
+function settle(removed: Removal[], first: number, original: string, out: string | null) {
+  const mine = removed.slice(first)
+  if (mine.length < 2 || mine[0].text !== original || mine[0].replacement === undefined) return
+  for (const r of mine) {
+    r.text = original
+    if (out) r.replacement = out
+    else delete r.replacement
+  }
+}
+
 const langOf = (l: unknown): Lang => (l === 'en' || l === 'es' || l === 'fr' ? l : 'it')
 // "Condromalacia patellare…" → "Ipotesi da confermare: condromalacia patellare…" (an acronym keeps its case).
 const labelled = (label: string, sentence: string) => `${label}${/^[A-ZÀ-Ý]{2}/.test(sentence) ? sentence : sentence.charAt(0).toLowerCase() + sentence.slice(1)}`
@@ -799,13 +908,20 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
     const kept: string[] = []
     // The concepts already said to be not documented in this section, once each.
     const reworded = new Set<string>(section === 'redFlagsPrecautions' ? ['red flags'] : [])
-    for (const sentence of sentencesOf(text)) {
+    // One sentence: what stays of it (null: nothing), with what was changed in `removed`.
+    const one = (original: string): string | null => {
+      let sentence = original
       // A diagnosis the clinician excluded, proposed here, or one they affirmed
       // or suspected, excluded here: taken out, the original kept for undo.
-      const contradicted = ETIOLOGY_SECTIONS.has(section) ? diagnosisConflicts(sentence, transcript).find((d) => d.kind === 'contradicted_diagnosis') : undefined
-      if (contradicted) {
-        removed.push({ section, text: sentence, kind: 'contradicted_diagnosis', item: contradicted.item })
-        continue
+      // Only the piece that names it when that is safe ("Cervicalgia con
+      // tendinopatia della cuffia" → "Cervicalgia."); otherwise the sentence,
+      // for review when it said more.
+      const contradicted = ETIOLOGY_SECTIONS.has(section) ? diagnosisConflicts(sentence, transcript).filter((d) => d.kind === 'contradicted_diagnosis') : []
+      if (contradicted.length) {
+        const cut = isolateAll(sentence, conceptsOf(contradicted))
+        removed.push({ section, text: sentence, kind: 'contradicted_diagnosis', item: contradicted[0].item, ...(cut ? { replacement: cut.rest } : review(sentence, conceptsOf(contradicted))) })
+        if (!cut) return null
+        sentence = cut.rest
       }
       // A cause drawn from the duration alone, a cause or risk factor nobody
       // mentioned, a link to the history the clinician did not make, a
@@ -816,8 +932,7 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
         const notes = cause.filter((c, i) => cause.findIndex((d) => keyOf(d) === keyOf(c)) === i && !reworded.has(keyOf(c))).map((c) => { reworded.add(keyOf(c)); return inferenceNote(c, lang) })
         const replacement = notes.join(' ')
         removed.push({ section, text: sentence, kind: cause[0].kind, item: cause[0].item, ...(replacement ? { replacement } : {}) })
-        if (replacement) kept.push(replacement)
-        continue
+        return replacement || null
       }
       const whole = reasons(section, sentence)
       let result: string | null = sentence
@@ -836,8 +951,7 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
         const notes = Array.from(new Set(whole.map((w) => w.concept ?? w.item))).filter((c) => !reworded.has(c)).map((c) => { reworded.add(c); return notDocumented(c, whole.find((w) => (w.concept ?? w.item) === c)!.item, lang) })
         const replacement = [said, ...notes].filter(Boolean).join(' ')
         removed.push({ section, text: sentence, kind: 'invented_negative', item: whole[0].item, ...(replacement ? { replacement } : {}) })
-        if (replacement) kept.push(replacement)
-        continue
+        return replacement || null
       }
       if (whole.length) {
         // Clause by clause, keeping the clauses that are fine.
@@ -859,24 +973,27 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
           result = good.length ? `${good.join(', ')}${end || '.'}` : null
         }
       }
-      if (result === null) continue
+      if (result === null) return null
       // A diagnosis excluded here that the clinician never spoke of, and that
       // no check above took out: said not to be documented.
-      const exclusion = ETIOLOGY_SECTIONS.has(section) ? diagnosisConflicts(result, transcript).find((d) => d.kind === 'unstated_exclusion') : undefined
-      if (exclusion) {
-        const replacement = exclusionNotDocumented(exclusion.item, lang)
-        removed.push({ section, text: result, kind: 'invented_negative', item: exclusion.item, replacement })
-        kept.push(replacement)
-        continue
+      const exclusion = ETIOLOGY_SECTIONS.has(section) ? diagnosisConflicts(result, transcript).filter((d) => d.kind === 'unstated_exclusion') : []
+      if (exclusion.length) {
+        const cut = isolateAll(result, conceptsOf(exclusion))
+        const notes = Array.from(new Set(exclusion.map((d) => exclusionNotDocumented(d.item, lang)))).join(' ')
+        const replacement = cut ? `${cut.rest} ${notes}` : notes
+        removed.push({ section, text: result, kind: 'invented_negative', item: exclusion[0].item, replacement, ...(cut ? {} : review(result, conceptsOf(exclusion))) })
+        return replacement
       }
       // Said as certain, not stated as such (mention by mention): labelled,
       // with the original kept for undo; in the message to the patient it is
       // taken out instead.
       if (section === 'summaryForPatient') {
-        const dx = unstatedDiagnoses(result, transcript)
+        const dx = diagnosisConflicts(result, transcript).filter((d) => d.kind === 'unconfirmed_diagnosis')
         if (dx.length) {
-          removed.push({ section, text: result, kind: 'unconfirmed_diagnosis_removed', item: dx[0] })
-          continue
+          const cut = isolateAll(result, conceptsOf(dx))
+          removed.push({ section, text: result, kind: 'unconfirmed_diagnosis_removed', item: dx[0].item, ...(cut ? { replacement: cut.rest } : review(result, conceptsOf(dx))) })
+          if (!cut) return null
+          result = cut.rest
         }
       }
       // Instructions to the patient that the clinician has not approved.
@@ -885,16 +1002,20 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
         if (why.length) {
           const replacement = confirmSaid ? undefined : LABEL.homeExercises[lang]
           removed.push({ section, text: result, kind: 'unapproved_instruction', item: why[0], ...(replacement ? { replacement } : {}) })
-          if (!replacement) continue
+          if (!replacement) return null
           confirmSaid = true
           result = replacement
         }
       }
       if (section === 'subjective' || section === 'objective' || section === 'assessment') {
-        const dx = unstatedDiagnoses(result, transcript)
+        const dx = diagnosisConflicts(result, transcript).filter((d) => d.kind === 'unconfirmed_diagnosis')
         if (dx.length) {
-          const replacement = labelled(LABEL.diagnosis[lang], result)
-          removed.push({ section, text: result, kind: 'unconfirmed_diagnosis', item: dx[0], replacement })
+          // Only the diagnosis labelled when it can be separated ("Cervicalgia.
+          // Ipotesi da confermare: tendinopatia della cuffia."), not what the
+          // clinician did say.
+          const cut = isolateAll(result, conceptsOf(dx))
+          const replacement = cut ? [cut.rest, ...cut.pieces.map((p) => labelled(LABEL.diagnosis[lang], p))].join(' ') : labelled(LABEL.diagnosis[lang], result)
+          removed.push({ section, text: result, kind: 'unconfirmed_diagnosis', item: dx[0].item, replacement, ...(cut ? {} : review(result, conceptsOf(dx))) })
           result = replacement
         }
       }
@@ -906,7 +1027,13 @@ export function sanitizeNote<T extends Note>(note: T, transcript: string, extra:
           result = replacement
         }
       }
-      kept.push(result)
+      return result
+    }
+    for (const original of sentencesOf(text)) {
+      const first = removed.length
+      const out = one(original)
+      if (out) kept.push(out)
+      settle(removed, first, original, out)
     }
     return kept.join(' ')
   }

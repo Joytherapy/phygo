@@ -158,7 +158,7 @@ const [insightRelevance, setInsightRelevance] = useState<{ relevance: string | n
 // Condition sheets for the other regions treated today (/api/knowledge-lookup `others`).
 const [otherSheets, setOtherSheets] = useState<{ region: string; side: string | null; match: { condition_name: string } | null; relevance?: "verified" | "unverified" | null; relevanceReason?: string | null; diagnosisStatus?: string | null }[]>([]);
 // Statements taken out of the draft because the clinician did not say them (/api/generate-note `removed`).
-const [removedFacts, setRemovedFacts] = useState<{ section: string; text: string; kind: string; item: string; replacement?: string }[]>([]);
+const [removedFacts, setRemovedFacts] = useState<{ section: string; text: string; kind: string; item: string; replacement?: string; review?: true }[]>([]);
 
 const [textInput, setTextInput] = useState("");
 
@@ -805,7 +805,9 @@ recognition.lang = recordingLang;
   // of its section; a labelled one ("Ipotesi da confermare: …") gets its
   // original wording back. In the clinical reasoning too.
   const restoreRemoved = (r: { section: string; text: string; replacement?: string }) => {
-    setRemovedFacts((prev) => prev.filter((x) => x !== r));
+    // Changes made one after another to one sentence are listed with the same
+    // original and result (lib/clinical/facts.ts settle): undone together.
+    setRemovedFacts((prev) => prev.filter((x) => x !== r && !(x.section === r.section && x.text === r.text && x.replacement === r.replacement)));
     const undo = (current: string) => (r.replacement && current.includes(r.replacement) ? current.replace(r.replacement, r.text).replace(/\s{2,}/g, " ").trim() : current ? `${current} ${r.text}` : r.text);
     // Hypotheses are a list: the replaced item gets its wording back.
     if (r.section === "hypotheses") {
@@ -1662,6 +1664,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                             {sectionLabel(r.section as SectionName)} · {(t.removedReason as Record<string, string>)[r.kind] ?? r.kind}
                           </span>
                           {r.replacement && r.text && <span data-testid="removed-fact-replacement" className="block text-[11px] text-ink/55 dark:text-white/45">{t.replacedWith(r.replacement)}</span>}
+                          {r.review && <span data-testid="removed-fact-review" className="block text-[11px] font-semibold text-amber-700 dark:text-amber-300">{t.removedReview}</span>}
                         </span>
                         <button type="button" onClick={() => restoreRemoved(r)} className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 text-xs font-semibold ${SECONDARY_BTN}`}>
                           {r.text ? t.restore : t.undoAdd}
