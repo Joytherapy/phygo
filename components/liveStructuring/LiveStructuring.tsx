@@ -542,7 +542,9 @@ setOtherSheets(Array.isArray(kbData.others) ? kbData.others : []);
 setRehabPhases(kbData.phases || []);
 setEvidenceLevel(kbData.evidenceLevel || null);
 setMatchedKeyword(kbData.matchedKeyword || null);
-rehabPhasesLocal = kbData.phases || [];
+// A sheet whose diagnosis the clinician excluded is shown, with why it is not
+// verified, but its phases do not guide the exercises.
+rehabPhasesLocal = kbData.diagnosisStatus === "excluded" ? [] : kbData.phases || [];
 setKbChecked(note.primaryCondition || note.assessment.slice(0, 80));
 
           } catch (kbErr) {
@@ -1742,7 +1744,9 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                   {/* The sheet's match is not a diagnosis: what the clinician said of it, separately. */}
                   {insightRelevance.diagnosis && (t.diagnosisStatus as Record<string, string>)[insightRelevance.diagnosis] && (
                     <span data-testid="insight-diagnosis" data-diagnosis={insightRelevance.diagnosis} className="mt-1 block font-medium text-ink/70 dark:text-white/60">
-                      {(t.diagnosisStatus as Record<string, string>)[insightRelevance.diagnosis]} {t.sheetMatchNote}
+                      {(t.diagnosisStatus as Record<string, string>)[insightRelevance.diagnosis]}
+                      {/* Not for a diagnosis excluded or left unsettled: the sheet does not match the case then. */}
+                      {!["excluded", "ambiguous"].includes(insightRelevance.diagnosis) && ` ${t.sheetMatchNote}`}
                     </span>
                   )}
                   {insightRelevance.relevance === "unverified" && insightRelevance.reason && (t.unverifiedReason as Record<string, string>)[insightRelevance.reason] && (
