@@ -53,6 +53,7 @@ import { CalendarCheck, PlayCircle } from "lucide-react";
 import { CARE_STRINGS } from "@/lib/i18n/careStrings";
 import { syncProgrammeFromNote, type SyncResult } from "@/lib/care/fromNote";
 import { bookletExercises, bookletPapers, bookletPhases, buildPatientBooklet, type BookletSections } from "@/lib/care/patientBooklet";
+import { protocolGuides } from "@/lib/knowledge/conditionMatch";
 import { imageAsJpeg } from "@/lib/care/programPdf";
 import { usePatientContext } from "@/contexts/PatientContext";
 import { localDate } from "@/lib/care/program";
@@ -121,6 +122,8 @@ export default function LiveStructuring({
   const [finalNote, setFinalNote] = useState<any>(null);
   const [clinicalInsight, setClinicalInsight] = useState<any>(null);
   const [rehabPhases, setRehabPhases] = useState<any[]>([]);
+  // Whether those phases may guide what is generated (exercises, the booklet's path), or are shown for reference only.
+  const [phasesGuide, setPhasesGuide] = useState(true);
   const [evidenceLevel, setEvidenceLevel] = useState<string | null>(null);
 const [relevantPapers, setRelevantPapers] = useState<any[]>([]);
 const [papersLoading, setPapersLoading] = useState(false);
@@ -542,15 +545,19 @@ setOtherSheets(Array.isArray(kbData.others) ? kbData.others : []);
 setRehabPhases(kbData.phases || []);
 setEvidenceLevel(kbData.evidenceLevel || null);
 setMatchedKeyword(kbData.matchedKeyword || null);
-// A sheet whose diagnosis the clinician excluded is shown, with why it is not
-// verified, but its phases do not guide the exercises.
-rehabPhasesLocal = kbData.diagnosisStatus === "excluded" ? [] : kbData.phases || [];
+// A sheet whose diagnosis the clinician excluded or did not settle (or a
+// status this panel does not know) is shown, with why it is not verified, but
+// its phases do not guide the exercises: they are not sent to the generator.
+const guides = protocolGuides(kbData.diagnosisStatus);
+setPhasesGuide(guides);
+rehabPhasesLocal = guides ? kbData.phases || [] : [];
 setKbChecked(note.primaryCondition || note.assessment.slice(0, 80));
 
           } catch (kbErr) {
             console.error("Knowledge lookup failed:", kbErr);
             setClinicalInsight(null);
             setRehabPhases([]);
+            setPhasesGuide(true);
 
           }
         }
@@ -1043,7 +1050,8 @@ const downloadBooklet = async () => {
       clinician: await loadClinicianSignature(supabase),
       date: localDate(new Date()),
       summary: finalNote.summaryForPatient || "",
-      phases: bookletPhases(rehabPhases),
+      // The path only from a protocol allowed to guide it.
+      phases: phasesGuide ? bookletPhases(rehabPhases) : [],
       currentPhase,
       exercises: bookletExercises(exerciseEntries.length > 0 ? exerciseEntries : finalNote.exercises, care.plan, care.clinician.weekdays, images),
       papers: bookletPapers(relevantPapers),
@@ -1237,7 +1245,7 @@ if (rehabPhases.length > 0) {
         `${t.phase(p.phase_number)}: ${p.phase_name} (${p.typical_duration})\n${t.phaseGoals}${p.phase_goals}\n${t.phaseExercises}${p.phase_exercises}\n${t.progressWhen}${p.criteria_to_progress}`
     )
     .join("\n\n");
-  addSection(t.rehabProtocol, phasesText);
+  addSection(t.rehabProtocol, phasesGuide ? phasesText : `${t.protocolReferenceOnly}\n\n${phasesText}`);
 }
 
 doc.save(`phygo-note-${Date.now()}.pdf`);
@@ -2128,6 +2136,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
           {rehabPhases.length > 0 && (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className={BLOCK}>
               <BlockTitle icon={FileText}>{t.rehabProtocol}</BlockTitle>
+              {!phasesGuide && <p data-testid="protocol-reference-only" className="mt-2 text-xs font-semibold leading-relaxed text-amber-700 dark:text-amber-300">{t.protocolReferenceOnly}</p>}
 
               <div className={`mt-4 grid gap-3 ${compact ? "" : "sm:grid-cols-3"}`}>
                 {rehabPhases.map((rp) => (
@@ -2171,7 +2180,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                 <div className="mt-2 flex flex-wrap gap-2">
                   {([
                     ["summary", care.booklet.summary, !!finalNote.summaryForPatient],
-                    ["path", care.booklet.path, rehabPhases.length > 0],
+                    ["path", care.booklet.path, rehabPhases.length > 0 && phasesGuide],
                     ["exercises", care.booklet.exercises, exerciseEntries.length > 0 || (finalNote.exercises || []).length > 0],
                     ["evidence", care.booklet.evidence, relevantPapers.length > 0 || !!clinicalInsight?.source],
                   ] as [keyof BookletSections, string, boolean][]).filter(([, , available]) => available).map(([key, label]) => (
@@ -2182,7 +2191,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                   ))}
                 </div>
               </fieldset>
-              {rehabPhases.length > 0 && bookletSections.path && (
+              {rehabPhases.length > 0 && phasesGuide && bookletSections.path && (
                 <label className="mt-4 block max-w-sm">
                   <span className={LABEL}>{care.booklet.currentPhase}</span>
                   <select value={currentPhase ?? ""} onChange={(e) => setCurrentPhase(e.target.value === "" ? null : Number(e.target.value))} className={`${FIELD} mt-1.5`}>

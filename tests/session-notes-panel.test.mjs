@@ -428,51 +428,79 @@ test('statements the clinician did not give are taken out and listed, and can be
   }
 });
 
-test('the condition sheet: an excluded or unsettled diagnosis is never shown as matching the case, and an excluded one does not guide the exercises', { skip }, async () => {
+test('the condition sheet: only a protocol allowed to guide is sent to the exercise generator and used for the booklet\'s path; an excluded or unsettled one is shown for reference only', { skip }, async () => {
   const sheet = { id: 1, condition_name: 'Tendinopatia della cuffia dei rotatori', condition_keywords: 'cuffia dei rotatori', goals: 'Obiettivi sintetici', clinical_tests: 'Test sintetici', red_flags: 'Nessuna', typical_exercises: 'Esercizi sintetici', source: 'Synthetic guideline', source_date: '2024', evidence_level: 'moderate' };
   const phases = [{ id: 'ph1-1', condition_id: 1, phase_number: 1, phase_name: 'Fase sintetica', typical_duration: '2 settimane', phase_goals: 'obiettivi', phase_exercises: 'esercizi', criteria_to_progress: 'criteri' }];
+  const said = 'Dolore alla spalla destra. Esclusa tendinopatia della cuffia dei rotatori.';
+  const draft = ['Rotazione esterna con elastico 3x12'];
+  const refinedList = ['Rotazione esterna con elastico 3x12 (fase 1 del protocollo)'];
   const SCENARIOS = [
-    { status: 'excluded', relevance: 'unverified', reason: 'diagnosis_excluded', shown: 'Diagnosi esclusa da te.', warning: 'hai escluso la diagnosi della scheda', phasesSent: false },
-    { status: 'ambiguous', relevance: 'unverified', reason: 'diagnosis_ambiguous', shown: 'Diagnosi nominata senza un’indicazione chiara: da verificare.', warning: 'nominata senza che tu l’abbia confermata, sospettata o esclusa', phasesSent: true },
-    { status: 'stated', relevance: 'verified', reason: null, shown: 'Diagnosi indicata da te.', warning: null, phasesSent: true },
-    // A value this panel does not know: nothing said about the diagnosis, rather than a guess.
-    { status: 'some_future_value', relevance: 'unverified', reason: 'some_future_reason', shown: null, warning: null, phasesSent: true },
+    // As before: these statuses keep guiding (suspected and not_stated: documented risk, unchanged here).
+    { status: 'stated', relevance: 'verified', reason: null, shown: 'Diagnosi indicata da te.', warning: null, guides: true },
+    { status: 'suspected', relevance: 'verified', reason: null, shown: 'Diagnosi sospetta, da confermare.', warning: null, guides: true },
+    { status: 'not_stated', relevance: 'unverified', reason: 'diagnosis_not_stated', shown: 'Diagnosi non indicata da te.', warning: 'la diagnosi della scheda non risulta da ciò che hai detto', guides: true },
+    { status: null, relevance: 'verified', reason: null, shown: null, warning: null, guides: true },
+    // Excluded or not settled: shown for reference, never sent to the generator.
+    { status: 'excluded', relevance: 'unverified', reason: 'diagnosis_excluded', shown: 'Diagnosi esclusa da te.', warning: 'hai escluso la diagnosi della scheda', guides: false },
+    { status: 'ambiguous', relevance: 'unverified', reason: 'diagnosis_ambiguous', shown: 'Diagnosi nominata senza un’indicazione chiara: da verificare.', warning: 'nominata senza che tu l’abbia confermata, sospettata o esclusa', guides: false },
+    // A value this panel does not know, or none at all: nothing said of the diagnosis, and no protocol used as verified.
+    { status: 'some_future_value', relevance: 'unverified', reason: 'some_future_reason', shown: null, warning: null, guides: false },
+    { status: undefined, relevance: 'verified', reason: null, shown: null, warning: null, guides: false },
   ];
   for (const sc of SCENARIOS) {
+    const label = String(sc.status);
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'it-IT', reducedMotion: 'reduce' });
     const [name, value] = sessionCookie('tok-clin', U).split(/=(.*)/s);
     await ctx.addCookies([{ name, value, url: app.url }]);
     const page = await ctx.newPage();
     const json = (body) => (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
-    const note = { subjective: 'Dolore alla spalla destra.', objective: '', assessment: 'Tendinopatia della cuffia dei rotatori della spalla destra.', plan: 'Rinforzo della spalla destra.', summaryForPatient: 'Esercizi ogni giorno.', primaryCondition: 'rotator cuff tendinopathy', exercises: ['Rotazione esterna con elastico 3x12'], language: 'it' };
+    const note = { subjective: 'Dolore alla spalla destra.', objective: '', assessment: 'Tendinopatia della cuffia dei rotatori della spalla destra.', plan: 'Rinforzo della spalla destra.', summaryForPatient: 'Esercizi ogni giorno.', primaryCondition: 'rotator cuff tendinopathy', exercises: draft, language: 'it' };
+    const kb = { match: sheet, phases, relevance: sc.relevance, relevanceReason: sc.reason, evidenceLevel: 'moderate', matchedKeyword: 'cuffia dei rotatori', matchedBy: 'keyword', others: [] };
+    if (sc.status !== undefined) kb.diagnosisStatus = sc.status;
     let refined = null;
+    let intelligence = null;
     await page.route('**/api/generate-note', json({ note }));
     await page.route('**/api/science/relevant', json({ papers: [] }));
-    await page.route('**/api/knowledge-lookup', json({ match: sheet, phases, relevance: sc.relevance, relevanceReason: sc.reason, diagnosisStatus: sc.status, evidenceLevel: 'moderate', matchedKeyword: 'cuffia dei rotatori', matchedBy: 'keyword', others: [] }));
-    await page.route('**/api/refine-exercises', (route) => { refined = JSON.parse(route.request().postData() || '{}'); return json({ exercises: ['Rotazione esterna con elastico 3x12'] })(route); });
-    await page.route('**/api/exercise-intelligence', json({ exercises: [], excluded: [] }));
+    await page.route('**/api/knowledge-lookup', json(kb));
+    await page.route('**/api/refine-exercises', (route) => { refined = JSON.parse(route.request().postData() || '{}'); return json({ exercises: refinedList })(route); });
+    await page.route('**/api/exercise-intelligence', (route) => { intelligence = JSON.parse(route.request().postData() || '{}'); return json({ exercises: [], excluded: [] })(route); });
     try {
       await page.goto(`${app.url}/dashboard/patients/${P}/session`);
       await page.getByRole('heading', { level: 1, name: 'Paziente Sintetico' }).waitFor({ timeout: 15000 });
       await page.getByRole('button', { name: 'Scrivi', exact: true }).click();
-      await page.getByRole('textbox', { name: 'Scrivi qui le tue osservazioni sulla seduta…' }).fill('Dolore alla spalla destra. Esclusa tendinopatia della cuffia dei rotatori.');
+      await page.getByRole('textbox', { name: 'Scrivi qui le tue osservazioni sulla seduta…' }).fill(said);
       await page.getByRole('button', { name: 'Genera nota' }).click();
       await page.getByText('Nota pronta').waitFor({ timeout: 15000 });
       await page.getByText('Tendinopatia della cuffia dei rotatori', { exact: true }).first().waitFor();
+
+      // What is actually sent: the phases go to the generator only when they may guide it.
+      if (sc.guides) {
+        assert.ok(refined, `${label}: /api/refine-exercises is called`);
+        assert.deepEqual([refined.phases.map((p) => p.id), refined.transcript, refined.exercisesDraft, refined.assessment], [['ph1-1'], said, draft, note.assessment], label);
+        assert.deepEqual(intelligence?.exercisesDraft, refinedList, `${label}: the refined exercises go on`);
+      } else {
+        assert.equal(refined, null, `${label}: no request to /api/refine-exercises, so no phase reaches the generator`);
+        assert.deepEqual(intelligence?.exercisesDraft, draft, `${label}: the draft goes on unrefined by the protocol`);
+      }
+      // Shown, and for what.
+      await page.getByText('Fase sintetica', { exact: true }).first().waitFor();
+      assert.equal(await page.getByTestId('protocol-reference-only').count(), sc.guides ? 0 : 1, `${label}: reference-only note`);
+      if (!sc.guides) await page.getByTestId('protocol-reference-only').getByText('queste fasi non guidano gli esercizi proposti né il percorso nel libretto del paziente', { exact: false }).waitFor();
+      // The booklet's path only from a protocol allowed to guide it.
+      await page.getByTestId('patient-booklet').waitFor();
+      assert.equal(await page.getByTestId('patient-booklet').getByText('Il tuo percorso di recupero', { exact: true }).count(), sc.guides ? 1 : 0, `${label}: booklet path`);
+      // What the clinician said of the diagnosis, and why the sheet is not verified (as before).
       const diagnosis = page.getByTestId('insight-diagnosis');
       if (sc.shown) {
         await diagnosis.getByText(sc.shown, { exact: false }).waitFor();
         const text = await diagnosis.innerText();
-        if (sc.relevance === 'verified') assert.match(text, /corrisponde al caso documentato: non conferma la diagnosi/, sc.status);
-        else assert.doesNotMatch(text, /corrisponde al caso documentato/, `${sc.status}: a sheet whose diagnosis is excluded or unsettled is not said to match the case`);
+        if (['excluded', 'ambiguous'].includes(sc.status)) assert.doesNotMatch(text, /corrisponde al caso documentato/, label);
+        else assert.match(text, /corrisponde al caso documentato: non conferma la diagnosi/, label);
       } else {
-        assert.equal(await diagnosis.count(), 0, `${sc.status}: an unknown value says nothing`);
+        assert.equal(await diagnosis.count(), 0, `${label}: nothing said of the diagnosis`);
       }
       if (sc.warning) await page.getByTestId('insight-unverified').getByText(sc.warning, { exact: false }).waitFor();
-      else assert.equal(await page.getByTestId('insight-unverified').count(), 0, sc.status);
-      // The sheet's phases guide the refined exercises only if its diagnosis was not excluded.
-      assert.equal(refined !== null, sc.phasesSent, `${sc.status}: phases sent to /api/refine-exercises`);
-      if (refined) assert.deepEqual(refined.phases.map((p) => p.id), ['ph1-1']);
+      else assert.equal(await page.getByTestId('insight-unverified').count(), 0, label);
     } finally {
       await ctx.close();
     }

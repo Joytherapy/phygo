@@ -134,6 +134,7 @@ interface LiveDict {
   editExercise: string
   removeExercise: string
   rehabProtocol: string
+  protocolReferenceOnly: string
   phase: (n: number) => string
   phaseGoals: string
   phaseExercises: string
@@ -330,6 +331,7 @@ const it: LiveDict = {
   editExercise: 'Modifica esercizio',
   removeExercise: 'Rimuovi esercizio',
   rehabProtocol: 'Protocollo riabilitativo',
+  protocolReferenceOnly: 'Solo come riferimento: la diagnosi della scheda è esclusa o non chiara, quindi queste fasi non guidano gli esercizi proposti né il percorso nel libretto del paziente.',
   phase: (n) => `Fase ${n}`,
   phaseGoals: 'Obiettivi: ',
   phaseExercises: 'Esercizi: ',
@@ -526,6 +528,7 @@ const en: LiveDict = {
   editExercise: 'Edit exercise',
   removeExercise: 'Remove exercise',
   rehabProtocol: 'Rehab protocol',
+  protocolReferenceOnly: 'For reference only: the sheet\'s diagnosis is ruled out or unclear, so these phases do not guide the suggested exercises or the path in the patient booklet.',
   phase: (n) => `Phase ${n}`,
   phaseGoals: 'Goals: ',
   phaseExercises: 'Exercises: ',
@@ -722,6 +725,7 @@ const es: LiveDict = {
   editExercise: 'Editar ejercicio',
   removeExercise: 'Quitar ejercicio',
   rehabProtocol: 'Protocolo de rehabilitación',
+  protocolReferenceOnly: 'Solo como referencia: el diagnóstico de la ficha está descartado o no está claro, por lo que estas fases no guían los ejercicios propuestos ni el recorrido del cuaderno del paciente.',
   phase: (n) => `Fase ${n}`,
   phaseGoals: 'Objetivos: ',
   phaseExercises: 'Ejercicios: ',
@@ -918,6 +922,7 @@ const fr: LiveDict = {
   editExercise: "Modifier l'exercice",
   removeExercise: "Retirer l'exercice",
   rehabProtocol: 'Protocole de rééducation',
+  protocolReferenceOnly: 'À titre de référence uniquement : le diagnostic de la fiche est exclu ou incertain, ces phases ne guident donc ni les exercices proposés ni le parcours du livret du patient.',
   phase: (n) => `Phase ${n}`,
   phaseGoals: 'Objectifs : ',
   phaseExercises: 'Exercices : ',

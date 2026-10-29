@@ -174,6 +174,13 @@ test('the diagnosis of a sheet: stated, suspected, excluded, ambiguous or not st
   assert.equal(status('Dolore alla spalla. Il paziente chiede se ha una tendinopatia della cuffia dei rotatori.'), 'ambiguous');
 });
 
+test('a sheet\'s phases guide the generated exercises and the booklet\'s path only for a known status that allows it', () => {
+  const allowed = [null, 'stated', 'suspected', 'not_stated'];
+  const refused = ['excluded', 'ambiguous', undefined, '', 'STATED', 'verified', 'some_future_value', 1, true, {}, []];
+  assert.deepEqual(allowed.map(K.protocolGuides), allowed.map(() => true));
+  assert.deepEqual(refused.map(K.protocolGuides), refused.map(() => false), 'excluded, unsettled, unknown or invalid: never used as a verified protocol');
+});
+
 test('r10: papers whose population, mechanism or region is not verified are never direct support', () => {
   const terms = { phrases: ['rotator cuff tendinopathy', 'shoulder pain'], words: ['rotator', 'tendinopathy', 'shoulder'] };
   const t = 'Paziente di 45 anni con dolore alla spalla sinistra da circa un mese. Sospetta problematica della cuffia dei rotatori.';

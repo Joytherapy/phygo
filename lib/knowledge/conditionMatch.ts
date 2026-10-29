@@ -94,6 +94,17 @@ export type DiagnosisStatus = 'stated' | 'suspected' | 'excluded' | 'ambiguous' 
 const STATUS = { affirmed: 'stated', uncertain: 'suspected', negated: 'excluded', insufficient: 'ambiguous' } as const
 
 /**
+ * Whether a sheet's rehab phases may guide what is generated for the patient
+ * (the refined exercises, the booklet's path), from what the clinician said of
+ * its diagnosis. Not when they excluded it or did not settle it, nor for a
+ * value this code does not know; `null` (nothing said to judge by) and the
+ * other statuses keep the behaviour they had.
+ */
+export function protocolGuides(status: unknown): boolean {
+  return status === null || status === 'stated' || status === 'suspected' || status === 'not_stated'
+}
+
+/**
  * What the clinician said about the diagnosis of a sheet, apart from whether
  * the sheet matches the case, mention by mention: 'stated' (affirmed),
  * 'suspected' (a hypothesis, or left open: "sospetta problematica della
