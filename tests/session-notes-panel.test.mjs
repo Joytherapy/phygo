@@ -428,24 +428,23 @@ test('statements the clinician did not give are taken out and listed, and can be
   }
 });
 
-test('the condition sheet: only a protocol allowed to guide is sent to the exercise generator and used for the booklet\'s path; an excluded or unsettled one is shown for reference only', { skip }, async () => {
+test('the condition sheet\'s protocol and the diagnosis status: what the exercise generator gets, what the clinician may choose and undo, and the booklet\'s path', { skip }, async () => {
   const sheet = { id: 1, condition_name: 'Tendinopatia della cuffia dei rotatori', condition_keywords: 'cuffia dei rotatori', goals: 'Obiettivi sintetici', clinical_tests: 'Test sintetici', red_flags: 'Nessuna', typical_exercises: 'Esercizi sintetici', source: 'Synthetic guideline', source_date: '2024', evidence_level: 'moderate' };
   const phases = [{ id: 'ph1-1', condition_id: 1, phase_number: 1, phase_name: 'Fase sintetica', typical_duration: '2 settimane', phase_goals: 'obiettivi', phase_exercises: 'esercizi', criteria_to_progress: 'criteri' }];
-  const said = 'Dolore alla spalla destra. Esclusa tendinopatia della cuffia dei rotatori.';
-  const draft = ['Rotazione esterna con elastico 3x12'];
+  const said = 'Dolore alla spalla destra in elevazione, forza in rotazione esterna ridotta.';
+  // The exercises the documented findings justify (the draft), and what the generator returns with the protocol.
+  const draft = ['Rotazione esterna isometrica 3x10'];
   const refinedList = ['Rotazione esterna con elastico 3x12 (fase 1 del protocollo)'];
+  const chosenList = ['Rotazione esterna con elastico 3x12 (riferimento scelto)'];
   const SCENARIOS = [
-    // As before: these statuses keep guiding (suspected and not_stated: documented risk, unchanged here).
-    { status: 'stated', relevance: 'verified', reason: null, shown: 'Diagnosi indicata da te.', warning: null, guides: true },
-    { status: 'suspected', relevance: 'verified', reason: null, shown: 'Diagnosi sospetta, da confermare.', warning: null, guides: true },
-    { status: 'not_stated', relevance: 'unverified', reason: 'diagnosis_not_stated', shown: 'Diagnosi non indicata da te.', warning: 'la diagnosi della scheda non risulta da ciò che hai detto', guides: true },
-    { status: null, relevance: 'verified', reason: null, shown: null, warning: null, guides: true },
-    // Excluded or not settled: shown for reference, never sent to the generator.
-    { status: 'excluded', relevance: 'unverified', reason: 'diagnosis_excluded', shown: 'Diagnosi esclusa da te.', warning: 'hai escluso la diagnosi della scheda', guides: false },
-    { status: 'ambiguous', relevance: 'unverified', reason: 'diagnosis_ambiguous', shown: 'Diagnosi nominata senza un’indicazione chiara: da verificare.', warning: 'nominata senza che tu l’abbia confermata, sospettata o esclusa', guides: false },
-    // A value this panel does not know, or none at all: nothing said of the diagnosis, and no protocol used as verified.
-    { status: 'some_future_value', relevance: 'unverified', reason: 'some_future_reason', shown: null, warning: null, guides: false },
-    { status: undefined, relevance: 'verified', reason: null, shown: null, warning: null, guides: false },
+    { status: 'stated', relevance: 'verified', reason: null, auto: 'stated', choose: null, path: true, shown: 'Diagnosi indicata da te.', note: 'Usato come riferimento per gli esercizi proposti: diagnosi indicata da te.' },
+    { status: 'suspected', relevance: 'verified', reason: null, auto: 'suspected', choose: 'Usalo anche per il percorso nel libretto', path: false, shown: 'Diagnosi sospetta, da confermare.', note: 'la diagnosi è solo sospettata, non confermata' },
+    { status: 'not_stated', relevance: 'unverified', reason: 'diagnosis_not_stated', auto: null, choose: 'Usa questo protocollo come riferimento', path: false, shown: 'Diagnosi non indicata da te.', note: 'Non usato per gli esercizi: la diagnosi della scheda non risulta da ciò che hai detto' },
+    { status: null, relevance: 'verified', reason: null, auto: null, choose: 'Usa questo protocollo come riferimento', path: false, shown: null, note: 'Non usato per gli esercizi' },
+    { status: 'excluded', relevance: 'unverified', reason: 'diagnosis_excluded', auto: null, choose: null, path: false, shown: 'Diagnosi esclusa da te.', note: null },
+    { status: 'ambiguous', relevance: 'unverified', reason: 'diagnosis_ambiguous', auto: null, choose: null, path: false, shown: 'Diagnosi nominata senza un’indicazione chiara: da verificare.', note: null },
+    { status: 'some_future_value', relevance: 'unverified', reason: 'some_future_reason', auto: null, choose: null, path: false, shown: null, note: null },
+    { status: undefined, relevance: 'verified', reason: null, auto: null, choose: null, path: false, shown: null, note: null },
   ];
   for (const sc of SCENARIOS) {
     const label = String(sc.status);
@@ -454,16 +453,29 @@ test('the condition sheet: only a protocol allowed to guide is sent to the exerc
     await ctx.addCookies([{ name, value, url: app.url }]);
     const page = await ctx.newPage();
     const json = (body) => (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
-    const note = { subjective: 'Dolore alla spalla destra.', objective: '', assessment: 'Tendinopatia della cuffia dei rotatori della spalla destra.', plan: 'Rinforzo della spalla destra.', summaryForPatient: 'Esercizi ogni giorno.', primaryCondition: 'rotator cuff tendinopathy', exercises: draft, language: 'it' };
+    const note = { subjective: 'Dolore alla spalla destra in elevazione.', objective: 'Forza in rotazione esterna ridotta.', assessment: 'Tendinopatia della cuffia dei rotatori della spalla destra.', plan: 'Rinforzo della spalla destra.', summaryForPatient: 'Esercizi ogni giorno.', primaryCondition: 'rotator cuff tendinopathy', exercises: draft, language: 'it' };
     const kb = { match: sheet, phases, relevance: sc.relevance, relevanceReason: sc.reason, evidenceLevel: 'moderate', matchedKeyword: 'cuffia dei rotatori', matchedBy: 'keyword', others: [] };
     if (sc.status !== undefined) kb.diagnosisStatus = sc.status;
-    let refined = null;
-    let intelligence = null;
+    const refined = [];
+    const intelligence = [];
     await page.route('**/api/generate-note', json({ note }));
     await page.route('**/api/science/relevant', json({ papers: [] }));
     await page.route('**/api/knowledge-lookup', json(kb));
-    await page.route('**/api/refine-exercises', (route) => { refined = JSON.parse(route.request().postData() || '{}'); return json({ exercises: refinedList })(route); });
-    await page.route('**/api/exercise-intelligence', (route) => { intelligence = JSON.parse(route.request().postData() || '{}'); return json({ exercises: [], excluded: [] })(route); });
+    // As the route answers (tests/refine-exercises.test.mjs checks the route itself).
+    await page.route('**/api/refine-exercises', (route) => {
+      const body = JSON.parse(route.request().postData() || '{}');
+      refined.push(body);
+      if (body.protocolChoice === 'clinician') return json({ exercises: chosenList, protocol: { used: true, mode: 'chosen', status: sc.status ?? null, reason: null } })(route);
+      return json({ exercises: refinedList, protocol: { used: true, mode: sc.auto, status: sc.status, reason: null } })(route);
+    });
+    await page.route('**/api/exercise-intelligence', (route) => {
+      const body = JSON.parse(route.request().postData() || '{}');
+      intelligence.push(body.exercisesDraft);
+      return json({ exercises: body.exercisesDraft.map((n, i) => ({ internal_id: `custom-${i}`, provider: 'custom', provider_id: null, name: n, draft: n, body_region: 'shoulder', primary_muscle: null, media: null, source_type: 'custom' })), excluded: [] })(route);
+    });
+    const cards = page.getByTestId('note-exercise');
+    const shownExercises = async () => (await cards.evaluateAll((els) => els.map((e) => e.querySelector('p')?.textContent ?? '')));
+    const pathOffered = async () => page.getByTestId('patient-booklet').getByText('Il tuo percorso di recupero', { exact: true }).count();
     try {
       await page.goto(`${app.url}/dashboard/patients/${P}/session`);
       await page.getByRole('heading', { level: 1, name: 'Paziente Sintetico' }).waitFor({ timeout: 15000 });
@@ -471,36 +483,54 @@ test('the condition sheet: only a protocol allowed to guide is sent to the exerc
       await page.getByRole('textbox', { name: 'Scrivi qui le tue osservazioni sulla seduta…' }).fill(said);
       await page.getByRole('button', { name: 'Genera nota' }).click();
       await page.getByText('Nota pronta').waitFor({ timeout: 15000 });
-      await page.getByText('Tendinopatia della cuffia dei rotatori', { exact: true }).first().waitFor();
-
-      // What is actually sent: the phases go to the generator only when they may guide it.
-      if (sc.guides) {
-        assert.ok(refined, `${label}: /api/refine-exercises is called`);
-        assert.deepEqual([refined.phases.map((p) => p.id), refined.transcript, refined.exercisesDraft, refined.assessment], [['ph1-1'], said, draft, note.assessment], label);
-        assert.deepEqual(intelligence?.exercisesDraft, refinedList, `${label}: the refined exercises go on`);
-      } else {
-        assert.equal(refined, null, `${label}: no request to /api/refine-exercises, so no phase reaches the generator`);
-        assert.deepEqual(intelligence?.exercisesDraft, draft, `${label}: the draft goes on unrefined by the protocol`);
-      }
-      // Shown, and for what.
       await page.getByText('Fase sintetica', { exact: true }).first().waitFor();
-      assert.equal(await page.getByTestId('protocol-reference-only').count(), sc.guides ? 0 : 1, `${label}: reference-only note`);
-      if (!sc.guides) await page.getByTestId('protocol-reference-only').getByText('queste fasi non guidano gli esercizi proposti né il percorso nel libretto del paziente', { exact: false }).waitFor();
-      // The booklet's path only from a protocol allowed to guide it.
       await page.getByTestId('patient-booklet').waitFor();
-      assert.equal(await page.getByTestId('patient-booklet').getByText('Il tuo percorso di recupero', { exact: true }).count(), sc.guides ? 1 : 0, `${label}: booklet path`);
-      // What the clinician said of the diagnosis, and why the sheet is not verified (as before).
-      const diagnosis = page.getByTestId('insight-diagnosis');
-      if (sc.shown) {
-        await diagnosis.getByText(sc.shown, { exact: false }).waitFor();
-        const text = await diagnosis.innerText();
-        if (['excluded', 'ambiguous'].includes(sc.status)) assert.doesNotMatch(text, /corrisponde al caso documentato/, label);
-        else assert.match(text, /corrisponde al caso documentato: non conferma la diagnosi/, label);
+
+      // What the generator gets: the sheet by id, never its phases as text; only for a stated or suspected diagnosis.
+      if (sc.auto) {
+        assert.equal(refined.length, 1, label);
+        assert.deepEqual([refined[0].conditionId, refined[0].transcript, refined[0].exercisesDraft, refined[0].primaryCondition, 'phases' in refined[0], 'protocolChoice' in refined[0]], [1, said, draft, note.primaryCondition, false, false], label);
+        assert.deepEqual([intelligence, await shownExercises()], [[refinedList], refinedList], label);
       } else {
-        assert.equal(await diagnosis.count(), 0, `${label}: nothing said of the diagnosis`);
+        assert.equal(refined.length, 0, `${label}: no request to /api/refine-exercises`);
+        // Not a blanket block: the exercises the documented findings justify stay.
+        assert.deepEqual([intelligence, await shownExercises()], [[draft], draft], label);
       }
-      if (sc.warning) await page.getByTestId('insight-unverified').getByText(sc.warning, { exact: false }).waitFor();
-      else assert.equal(await page.getByTestId('insight-unverified').count(), 0, label);
+      // How the protocol was used, said where it is shown.
+      if (sc.note) await page.getByTestId('protocol-use').getByText(sc.note, { exact: false }).waitFor();
+      else assert.equal(await page.getByTestId('protocol-use').count(), 0, label);
+      assert.equal(await page.getByTestId('protocol-reference-only').count(), ['excluded', 'ambiguous', 'some_future_value', 'undefined'].includes(label) ? 1 : 0, label);
+      assert.equal(await pathOffered(), sc.path ? 1 : 0, `${label}: booklet path`);
+      // What the clinician said of the diagnosis, as before.
+      if (sc.shown) await page.getByTestId('insight-diagnosis').getByText(sc.shown, { exact: false }).waitFor();
+      else assert.equal(await page.getByTestId('insight-diagnosis').count(), 0, label);
+
+      // The clinician's explicit choice, and undoing it.
+      const choose = page.getByTestId('protocol-choose');
+      if (!sc.choose) {
+        assert.equal(await choose.count(), 0, `${label}: nothing to choose`);
+        continue;
+      }
+      await choose.getByText(sc.choose, { exact: true }).click();
+      await page.getByTestId('protocol-chosen').waitFor();
+      assert.equal(await pathOffered(), 1, `${label}: the path, by the clinician's choice`);
+      if (sc.auto) {
+        assert.equal(refined.length, 1, `${label}: already used for the exercises, no new request`);
+        assert.deepEqual(await shownExercises(), refinedList);
+      } else {
+        assert.equal(refined.length, 1, label);
+        assert.deepEqual([refined[0].conditionId, refined[0].protocolChoice, refined[0].exercisesDraft, 'phases' in refined[0]], [1, 'clinician', draft, false], label);
+        await page.getByTestId('protocol-use').getByText('Usato come riferimento per scelta tua', { exact: false }).waitFor();
+        await cards.first().getByText(chosenList[0]).waitFor();
+        assert.deepEqual([intelligence.at(-1), await shownExercises()], [chosenList, chosenList], label);
+      }
+      await page.getByTestId('protocol-undo').click();
+      await page.getByTestId('protocol-choose').waitFor();
+      assert.equal(await page.getByTestId('protocol-chosen').count(), 0, label);
+      assert.equal(await pathOffered(), 0, `${label}: path withdrawn with the choice`);
+      await cards.first().getByText((sc.auto ? refinedList : draft)[0], { exact: true }).waitFor();
+      assert.deepEqual(await shownExercises(), sc.auto ? refinedList : draft, `${label}: the exercises as they were`);
+      if (sc.note) await page.getByTestId('protocol-use').getByText(sc.note, { exact: false }).waitFor();
     } finally {
       await ctx.close();
     }

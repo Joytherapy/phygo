@@ -94,14 +94,37 @@ export type DiagnosisStatus = 'stated' | 'suspected' | 'excluded' | 'ambiguous' 
 const STATUS = { affirmed: 'stated', uncertain: 'suspected', negated: 'excluded', insufficient: 'ambiguous' } as const
 
 /**
- * Whether a sheet's rehab phases may guide what is generated for the patient
- * (the refined exercises, the booklet's path), from what the clinician said of
- * its diagnosis. Not when they excluded it or did not settle it, nor for a
- * value this code does not know; `null` (nothing said to judge by) and the
- * other statuses keep the behaviour they had.
+ * How a sheet's rehab protocol may be used for what is generated (the refined
+ * exercises, the booklet's path), from what the clinician said of its
+ * diagnosis. Three things stay apart: that the diagnosis is in the note, how
+ * certain it is, and whether an exercise suits this patient (always from what
+ * was found today).
+ * - 'stated': used, as the reference of the diagnosis the clinician gave (it
+ *   does not prove the protocol fits the patient);
+ * - 'suspected': used as the reference of a hypothesis, never as a confirmed
+ *   diagnosis; the booklet's path only if the clinician chooses it;
+ * - 'on_choice' (not stated, or nothing said to judge by): not used unless the
+ *   clinician chooses it; the exercises rest on what they documented;
+ * - 'blocked' (excluded, ambiguous, or a value this code does not know): never.
  */
-export function protocolGuides(status: unknown): boolean {
-  return status === null || status === 'stated' || status === 'suspected' || status === 'not_stated'
+export type ProtocolUse = 'stated' | 'suspected' | 'on_choice' | 'blocked'
+export function protocolUse(status: unknown): ProtocolUse {
+  if (status === 'stated' || status === 'suspected') return status
+  if (status === 'not_stated' || status === null) return 'on_choice'
+  return 'blocked'
+}
+/** Whether the protocol guides the generated exercises without the clinician's choice. */
+export const protocolGuides = (status: unknown): boolean => ['stated', 'suspected'].includes(protocolUse(status))
+/**
+ * How the exercise generator is told about the protocol: 'stated', 'suspected'
+ * (a hypothesis), 'chosen' (the clinician's reference for a diagnosis they did
+ * not state), or null: not given to it at all.
+ */
+export type ProtocolMode = 'stated' | 'suspected' | 'chosen'
+export function protocolMode(status: unknown, clinicianChose: boolean): ProtocolMode | null {
+  const use = protocolUse(status)
+  if (use === 'stated' || use === 'suspected') return use
+  return use === 'on_choice' && clinicianChose ? 'chosen' : null
 }
 
 /**

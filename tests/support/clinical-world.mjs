@@ -762,13 +762,17 @@ export async function runPipeline(post, transcript) {
   const kb = await post('/api/knowledge-lookup', { assessment: note.assessment, primaryCondition: note.primaryCondition, lang: 'it', transcript });
   expectShape('/api/knowledge-lookup', kb, kb && typeof kb === 'object', 'un oggetto');
   let exercises = note.exercises;
-  if ((kb.phases ?? []).length) {
-    const refined = await post('/api/refine-exercises', { transcript, assessment: note.assessment, exercisesDraft: note.exercises, phases: kb.phases, lang: 'it' });
+  let protocol = null;
+  // As the panel: the sheet by id, to the generator only for a diagnosis stated
+  // or suspected (lib/knowledge/conditionMatch.ts protocolUse); the server checks again.
+  if ((kb.phases ?? []).length && kb.match?.id != null && ['stated', 'suspected'].includes(kb.diagnosisStatus)) {
+    const refined = await post('/api/refine-exercises', { transcript, assessment: note.assessment, primaryCondition: note.primaryCondition, exercisesDraft: note.exercises, conditionId: kb.match.id, lang: 'it' });
     exercises = expectShape('/api/refine-exercises', refined, refined && Array.isArray(refined.exercises), '`exercises`').exercises;
+    protocol = refined.protocol ?? null;
   }
   const ei = await post('/api/exercise-intelligence', { exercisesDraft: exercises, assessment: note.assessment, primaryCondition: note.primaryCondition, lang: 'it', transcript });
   expectShape('/api/exercise-intelligence', ei, ei && typeof ei === 'object', 'un oggetto');
-  return { transcript, note, removed: removed ?? [], papers: science.papers ?? [], kb, exercises: ei.exercises ?? [], excluded: ei.excluded ?? [] };
+  return { transcript, note, removed: removed ?? [], papers: science.papers ?? [], kb, protocol, exercises: ei.exercises ?? [], excluded: ei.excluded ?? [] };
 }
 
 /** checkOutput's input for one pipeline output. */

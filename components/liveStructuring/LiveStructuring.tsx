@@ -53,7 +53,7 @@ import { CalendarCheck, PlayCircle } from "lucide-react";
 import { CARE_STRINGS } from "@/lib/i18n/careStrings";
 import { syncProgrammeFromNote, type SyncResult } from "@/lib/care/fromNote";
 import { bookletExercises, bookletPapers, bookletPhases, buildPatientBooklet, type BookletSections } from "@/lib/care/patientBooklet";
-import { protocolGuides } from "@/lib/knowledge/conditionMatch";
+import { protocolUse, type ProtocolUse } from "@/lib/knowledge/conditionMatch";
 import { imageAsJpeg } from "@/lib/care/programPdf";
 import { usePatientContext } from "@/contexts/PatientContext";
 import { localDate } from "@/lib/care/program";
@@ -122,8 +122,15 @@ export default function LiveStructuring({
   const [finalNote, setFinalNote] = useState<any>(null);
   const [clinicalInsight, setClinicalInsight] = useState<any>(null);
   const [rehabPhases, setRehabPhases] = useState<any[]>([]);
-  // Whether those phases may guide what is generated (exercises, the booklet's path), or are shown for reference only.
-  const [phasesGuide, setPhasesGuide] = useState(true);
+  // How those phases may be used for what is generated (lib/knowledge/conditionMatch.ts
+  // protocolUse); whether the clinician chose to use them; how the exercise
+  // generator actually used them (its answer); and, after a choice, what to go back to.
+  const [protocolAllowed, setProtocolAllowed] = useState<ProtocolUse>("blocked");
+  const [protocolChosen, setProtocolChosen] = useState(false);
+  const [exerciseProtocol, setExerciseProtocol] = useState<{ used: boolean; mode: string | null; status: string | null; reason: string | null } | null>(null);
+  const [protocolRequest, setProtocolRequest] = useState<Record<string, unknown> | null>(null);
+  const [protocolUndo, setProtocolUndo] = useState<{ exercises: any; entries: any[]; excluded: any[]; protocol: typeof exerciseProtocol } | null>(null);
+  const [protocolBusy, setProtocolBusy] = useState(false);
   const [evidenceLevel, setEvidenceLevel] = useState<string | null>(null);
 const [relevantPapers, setRelevantPapers] = useState<any[]>([]);
 const [papersLoading, setPapersLoading] = useState(false);
@@ -471,6 +478,34 @@ const [recordingLang, setRecordingLang] = useState(DICTATION_LOCALE[lang]);
   return text.replace(pattern, "\n\n$1").trim();
 };
 
+  // The exercises through the library check (/api/exercise-intelligence): the
+  // matched entries, and the list without what belongs to another region
+  // (listed under the coherence checks, with "Add anyway").
+  const checkExercises = async (list: any, ctx: { assessment?: string; primaryCondition?: string; lang?: string; transcript: string }) => {
+    let entries: any[] = [];
+    let kept = list;
+    if (Array.isArray(list) && list.length > 0) {
+      try {
+        const eiRes = await fetch("/api/exercise-intelligence", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ exercisesDraft: list, assessment: ctx.assessment, primaryCondition: ctx.primaryCondition, lang: ctx.lang, transcript: ctx.transcript }),
+        });
+        const eiData = await eiRes.json();
+        if (Array.isArray(eiData.exercises)) entries = eiData.exercises;
+        const excluded: { name: string; reason?: string; regions?: string[]; caseRegions?: string[] }[] = Array.isArray(eiData.excluded) ? eiData.excluded : [];
+        setExcludedExercises(excluded);
+        if (excluded.length) {
+          const out = new Set(excluded.map((e) => e.name));
+          kept = list.filter((e: any) => !out.has(typeof e === "string" ? e : e?.name));
+        }
+      } catch (eiErr) {
+        console.error("Errore exercise-intelligence:", eiErr);
+      }
+    }
+    return { entries, list: kept };
+  };
+
   const generateRealNote = useCallback(
     async (raw: string, transcriptPhrases: Phrase[]) => {
       setPhase("pause");
@@ -530,6 +565,8 @@ if (!res.ok) {
         }
 
         let rehabPhasesLocal: any[] = [];
+        let kbConditionId: unknown = null;
+        let kbStatus: unknown = undefined;
 
         if (note.assessment) {
           try {
@@ -545,19 +582,27 @@ setOtherSheets(Array.isArray(kbData.others) ? kbData.others : []);
 setRehabPhases(kbData.phases || []);
 setEvidenceLevel(kbData.evidenceLevel || null);
 setMatchedKeyword(kbData.matchedKeyword || null);
-// A sheet whose diagnosis the clinician excluded or did not settle (or a
-// status this panel does not know) is shown, with why it is not verified, but
-// its phases do not guide the exercises: they are not sent to the generator.
-const guides = protocolGuides(kbData.diagnosisStatus);
-setPhasesGuide(guides);
-rehabPhasesLocal = guides ? kbData.phases || [] : [];
+// How the sheet's protocol may be used, from what the clinician said of its
+// diagnosis: stated or suspected, it goes to the exercise generator (which
+// checks again on the server); not stated, only if the clinician chooses it;
+// excluded, ambiguous or unknown, never (shown for reference only).
+const allowed = protocolUse(kbData.diagnosisStatus);
+setProtocolAllowed(allowed);
+setProtocolChosen(false);
+setProtocolUndo(null);
+rehabPhasesLocal = kbData.phases || [];
+kbConditionId = kbData.match?.id ?? null;
+kbStatus = kbData.diagnosisStatus;
+if (rehabPhasesLocal.length) setExerciseProtocol(allowed === "stated" || allowed === "suspected" ? null : { used: false, mode: null, status: kbData.diagnosisStatus ?? null, reason: allowed === "on_choice" ? "needs_clinician_choice" : "diagnosis_not_usable" });
+else setExerciseProtocol(null);
 setKbChecked(note.primaryCondition || note.assessment.slice(0, 80));
 
           } catch (kbErr) {
             console.error("Knowledge lookup failed:", kbErr);
             setClinicalInsight(null);
             setRehabPhases([]);
-            setPhasesGuide(true);
+            setProtocolAllowed("blocked");
+            setExerciseProtocol(null);
 
           }
         }
@@ -573,57 +618,32 @@ setKbChecked(note.primaryCondition || note.assessment.slice(0, 80));
         // sessione. Rimossa; refine-plan/route.ts (identico a
         // refine-exercises/route.ts) non è più chiamato da nessuna parte —
         // può essere eliminato dal progetto.
-        if (rehabPhasesLocal.length > 0) {
+        // What the exercise generator gets: the sheet by id, never its
+        // phases as text; the server reads them and decides how they may be
+        // used. Kept to use later, if the clinician chooses the protocol.
+        const refineBase = { transcript: raw, assessment: note.assessment, primaryCondition: note.primaryCondition, exercisesDraft: note.exercises, conditionId: kbConditionId, lang: note.language || recordingLang };
+        setProtocolRequest(rehabPhasesLocal.length > 0 && kbConditionId != null ? refineBase : null);
+        const allowedNow = protocolUse(kbStatus);
+        if (rehabPhasesLocal.length > 0 && kbConditionId != null && (allowedNow === "stated" || allowedNow === "suspected")) {
   try {
     const exRes = await fetch("/api/refine-exercises", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        transcript: raw,
-        assessment: note.assessment,
-        exercisesDraft: note.exercises,
-        phases: rehabPhasesLocal,
-        lang: note.language || recordingLang,
-      }),
+      body: JSON.stringify(refineBase),
     });
     const exData = await exRes.json();
     if (exData.exercises) {
       exercisesArr = exData.exercises;
     }
+    setExerciseProtocol(exData.protocol ?? null);
   } catch (exErr) {
     console.error("Errore refine-exercises:", exErr);
   }
 }
 
-if (Array.isArray(exercisesArr) && exercisesArr.length > 0) {
-  try {
-    const eiRes = await fetch("/api/exercise-intelligence", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        exercisesDraft: exercisesArr,
-        assessment: note.assessment,
-        primaryCondition: note.primaryCondition,
-        lang: note.language || recordingLang,
-        transcript: raw,
-      }),
-    });
-    const eiData = await eiRes.json();
-    if (Array.isArray(eiData.exercises)) {
-      exerciseEntriesArr = eiData.exercises;
-    }
-    // Exercises for another body region stay out of the note too; they are
-    // listed under the coherence checks, with "Add anyway".
-    const excluded: { name: string; reason?: string; regions?: string[]; caseRegions?: string[] }[] = Array.isArray(eiData.excluded) ? eiData.excluded : [];
-    setExcludedExercises(excluded);
-    if (excluded.length && Array.isArray(exercisesArr)) {
-      const out = new Set(excluded.map((e) => e.name));
-      exercisesArr = exercisesArr.filter((e: any) => !out.has(typeof e === "string" ? e : e?.name));
-    }
-  } catch (eiErr) {
-    console.error("Errore exercise-intelligence:", eiErr);
-  }
-}
+const checked = await checkExercises(exercisesArr, { assessment: note.assessment, primaryCondition: note.primaryCondition, lang: note.language || recordingLang, transcript: raw });
+exercisesArr = checked.list;
+exerciseEntriesArr = checked.entries;
 setExerciseEntries(exerciseEntriesArr);
 
 setFinalNote((prev: any) =>
@@ -1034,6 +1054,58 @@ const sendToProgramme = async () => {
   setProgramStatus(result);
 };
 
+// The clinician chooses the sheet's protocol as a reference: for a diagnosis
+// they did not state, the exercises are refined with it (the server checks the
+// choice against what was said); for a suspected one, already used for the
+// exercises, it is the booklet's path that it now allows. Undone as it was.
+const chooseProtocol = async () => {
+  if (!protocolRequest || protocolBusy) return;
+  if (exerciseProtocol?.used) {
+    setProtocolUndo({ exercises: finalNote?.exercises, entries: exerciseEntries, excluded: excludedExercises, protocol: exerciseProtocol });
+    setProtocolChosen(true);
+    return;
+  }
+  setProtocolBusy(true);
+  try {
+    const res = await fetch("/api/refine-exercises", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...protocolRequest, protocolChoice: "clinician" }) });
+    const data = await res.json();
+    if (data.protocol?.used && Array.isArray(data.exercises)) {
+      const before = { exercises: finalNote?.exercises, entries: exerciseEntries, excluded: excludedExercises, protocol: exerciseProtocol };
+      const req = protocolRequest as { assessment?: string; primaryCondition?: string; lang?: string; transcript: string };
+      const checked = await checkExercises(data.exercises, req);
+      setExerciseEntries(checked.entries);
+      setFinalNote((prev: any) => (prev ? { ...prev, exercises: checked.list } : prev));
+      setProtocolUndo(before);
+      setProtocolChosen(true);
+    }
+    setExerciseProtocol(data.protocol ?? exerciseProtocol);
+    setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+  } catch (err) {
+    console.error("Errore refine-exercises (scelta del protocollo):", err);
+  } finally {
+    setProtocolBusy(false);
+  }
+};
+const undoProtocolChoice = () => {
+  if (protocolUndo) {
+    setExerciseEntries(protocolUndo.entries);
+    setExcludedExercises(protocolUndo.excluded);
+    setFinalNote((prev: any) => (prev ? { ...prev, exercises: protocolUndo.exercises } : prev));
+    setExerciseProtocol(protocolUndo.protocol);
+  }
+  setProtocolUndo(null);
+  setProtocolChosen(false);
+  setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+};
+// The booklet's path only from a protocol of a diagnosis the clinician gave, or one they chose.
+const pathAllowed = protocolAllowed === "stated" || (protocolChosen && protocolAllowed !== "blocked");
+// What the protocol block says of how the phases were used.
+const protocolNote = protocolAllowed === "blocked" ? t.protocolReferenceOnly
+  : exerciseProtocol?.used && exerciseProtocol.mode ? (t.protocolUsed as Record<string, string>)[exerciseProtocol.mode] ?? t.protocolNotUsed
+  : exerciseProtocol?.reason === "needs_clinician_choice" ? t.protocolNeedsChoice
+  : exerciseProtocol ? t.protocolNotUsed : null;
+const canChooseProtocol = !protocolChosen && !!protocolRequest && protocolAllowed !== "blocked" && (exerciseProtocol?.used ? protocolAllowed === "suspected" : exerciseProtocol?.reason === "needs_clinician_choice");
+
 const downloadBooklet = async () => {
   if (!finalNote) return;
   setBookletStatus("working");
@@ -1051,7 +1123,7 @@ const downloadBooklet = async () => {
       date: localDate(new Date()),
       summary: finalNote.summaryForPatient || "",
       // The path only from a protocol allowed to guide it.
-      phases: phasesGuide ? bookletPhases(rehabPhases) : [],
+      phases: pathAllowed ? bookletPhases(rehabPhases) : [],
       currentPhase,
       exercises: bookletExercises(exerciseEntries.length > 0 ? exerciseEntries : finalNote.exercises, care.plan, care.clinician.weekdays, images),
       papers: bookletPapers(relevantPapers),
@@ -1245,7 +1317,7 @@ if (rehabPhases.length > 0) {
         `${t.phase(p.phase_number)}: ${p.phase_name} (${p.typical_duration})\n${t.phaseGoals}${p.phase_goals}\n${t.phaseExercises}${p.phase_exercises}\n${t.progressWhen}${p.criteria_to_progress}`
     )
     .join("\n\n");
-  addSection(t.rehabProtocol, phasesGuide ? phasesText : `${t.protocolReferenceOnly}\n\n${phasesText}`);
+  addSection(t.rehabProtocol, protocolNote ? `${protocolNote}\n\n${phasesText}` : phasesText);
 }
 
 doc.save(`phygo-note-${Date.now()}.pdf`);
@@ -2136,7 +2208,25 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
           {rehabPhases.length > 0 && (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className={BLOCK}>
               <BlockTitle icon={FileText}>{t.rehabProtocol}</BlockTitle>
-              {!phasesGuide && <p data-testid="protocol-reference-only" className="mt-2 text-xs font-semibold leading-relaxed text-amber-700 dark:text-amber-300">{t.protocolReferenceOnly}</p>}
+              {protocolAllowed === "blocked" && <p data-testid="protocol-reference-only" className="mt-2 text-xs font-semibold leading-relaxed text-amber-700 dark:text-amber-300">{t.protocolReferenceOnly}</p>}
+              {protocolAllowed !== "blocked" && protocolNote && (
+                <p data-testid="protocol-use" data-mode={exerciseProtocol?.used ? exerciseProtocol.mode ?? "" : "none"} className={`mt-2 text-xs leading-relaxed ${exerciseProtocol?.mode === "stated" ? "text-ink/60 dark:text-white/55" : "font-semibold text-amber-700 dark:text-amber-300"}`}>{protocolNote}</p>
+              )}
+              {(canChooseProtocol || protocolChosen) && (
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {canChooseProtocol && (
+                    <button type="button" data-testid="protocol-choose" onClick={chooseProtocol} disabled={protocolBusy} className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 text-xs font-semibold ${SECONDARY_BTN}`}>
+                      {exerciseProtocol?.used ? t.protocolChooseForPath : t.protocolChoose}
+                    </button>
+                  )}
+                  {protocolChosen && (
+                    <>
+                      <span data-testid="protocol-chosen" className="text-xs text-ink/60 dark:text-white/55">{t.protocolChosen}</span>
+                      <button type="button" data-testid="protocol-undo" onClick={undoProtocolChoice} className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 text-xs font-semibold ${SECONDARY_BTN}`}>{t.protocolUndo}</button>
+                    </>
+                  )}
+                </div>
+              )}
 
               <div className={`mt-4 grid gap-3 ${compact ? "" : "sm:grid-cols-3"}`}>
                 {rehabPhases.map((rp) => (
@@ -2180,7 +2270,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                 <div className="mt-2 flex flex-wrap gap-2">
                   {([
                     ["summary", care.booklet.summary, !!finalNote.summaryForPatient],
-                    ["path", care.booklet.path, rehabPhases.length > 0 && phasesGuide],
+                    ["path", care.booklet.path, rehabPhases.length > 0 && pathAllowed],
                     ["exercises", care.booklet.exercises, exerciseEntries.length > 0 || (finalNote.exercises || []).length > 0],
                     ["evidence", care.booklet.evidence, relevantPapers.length > 0 || !!clinicalInsight?.source],
                   ] as [keyof BookletSections, string, boolean][]).filter(([, , available]) => available).map(([key, label]) => (
@@ -2191,7 +2281,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                   ))}
                 </div>
               </fieldset>
-              {rehabPhases.length > 0 && phasesGuide && bookletSections.path && (
+              {rehabPhases.length > 0 && pathAllowed && bookletSections.path && (
                 <label className="mt-4 block max-w-sm">
                   <span className={LABEL}>{care.booklet.currentPhase}</span>
                   <select value={currentPhase ?? ""} onChange={(e) => setCurrentPhase(e.target.value === "" ? null : Number(e.target.value))} className={`${FIELD} mt-1.5`}>

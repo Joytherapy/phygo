@@ -135,6 +135,13 @@ interface LiveDict {
   removeExercise: string
   rehabProtocol: string
   protocolReferenceOnly: string
+  protocolUsed: Record<'stated' | 'suspected' | 'chosen', string>
+  protocolNeedsChoice: string
+  protocolNotUsed: string
+  protocolChoose: string
+  protocolChooseForPath: string
+  protocolChosen: string
+  protocolUndo: string
   phase: (n: number) => string
   phaseGoals: string
   phaseExercises: string
@@ -331,6 +338,13 @@ const it: LiveDict = {
   editExercise: 'Modifica esercizio',
   removeExercise: 'Rimuovi esercizio',
   rehabProtocol: 'Protocollo riabilitativo',
+  protocolUsed: { stated: 'Usato come riferimento per gli esercizi proposti: diagnosi indicata da te. Ogni esercizio va comunque verificato su ciò che hai rilevato oggi.', suspected: 'Usato per gli esercizi proposti come ipotesi: la diagnosi è solo sospettata, non confermata. Gli esercizi devono essere giustificati da ciò che hai documentato; il percorso nel libretto richiede la tua scelta.', chosen: 'Usato come riferimento per scelta tua: la diagnosi della scheda non risulta da ciò che hai detto e non è presentata come diagnosi del paziente.' },
+  protocolNeedsChoice: 'Non usato per gli esercizi: la diagnosi della scheda non risulta da ciò che hai detto. Gli esercizi proposti si basano su ciò che hai documentato; puoi scegliere di usarlo come riferimento.',
+  protocolNotUsed: 'Non usato per gli esercizi proposti.',
+  protocolChoose: 'Usa questo protocollo come riferimento',
+  protocolChooseForPath: 'Usalo anche per il percorso nel libretto',
+  protocolChosen: 'Scelto da te come riferimento.',
+  protocolUndo: 'Annulla la scelta',
   protocolReferenceOnly: 'Solo come riferimento: la diagnosi della scheda è esclusa o non chiara, quindi queste fasi non guidano gli esercizi proposti né il percorso nel libretto del paziente.',
   phase: (n) => `Fase ${n}`,
   phaseGoals: 'Obiettivi: ',
@@ -528,6 +542,13 @@ const en: LiveDict = {
   editExercise: 'Edit exercise',
   removeExercise: 'Remove exercise',
   rehabProtocol: 'Rehab protocol',
+  protocolUsed: { stated: 'Used as a reference for the suggested exercises: diagnosis given by you. Each exercise still needs checking against what you found today.', suspected: 'Used for the suggested exercises as a hypothesis: the diagnosis is only suspected, not confirmed. The exercises must be justified by what you documented; the booklet path needs your choice.', chosen: 'Used as a reference by your choice: the sheet\'s diagnosis is not in what you said and is not presented as the patient\'s diagnosis.' },
+  protocolNeedsChoice: 'Not used for the exercises: the sheet\'s diagnosis is not in what you said. The suggested exercises rest on what you documented; you can choose to use it as a reference.',
+  protocolNotUsed: 'Not used for the suggested exercises.',
+  protocolChoose: 'Use this protocol as a reference',
+  protocolChooseForPath: 'Also use it for the booklet path',
+  protocolChosen: 'Chosen by you as a reference.',
+  protocolUndo: 'Undo the choice',
   protocolReferenceOnly: 'For reference only: the sheet\'s diagnosis is ruled out or unclear, so these phases do not guide the suggested exercises or the path in the patient booklet.',
   phase: (n) => `Phase ${n}`,
   phaseGoals: 'Goals: ',
@@ -725,6 +746,13 @@ const es: LiveDict = {
   editExercise: 'Editar ejercicio',
   removeExercise: 'Quitar ejercicio',
   rehabProtocol: 'Protocolo de rehabilitación',
+  protocolUsed: { stated: 'Usado como referencia para los ejercicios propuestos: diagnóstico indicado por ti. Cada ejercicio debe verificarse igualmente con lo que encontraste hoy.', suspected: 'Usado para los ejercicios propuestos como hipótesis: el diagnóstico solo es sospechado, no confirmado. Los ejercicios deben justificarse con lo que documentaste; el recorrido del cuaderno requiere tu elección.', chosen: 'Usado como referencia por elección tuya: el diagnóstico de la ficha no consta en lo que dijiste y no se presenta como diagnóstico del paciente.' },
+  protocolNeedsChoice: 'No usado para los ejercicios: el diagnóstico de la ficha no consta en lo que dijiste. Los ejercicios propuestos se basan en lo que documentaste; puedes elegir usarlo como referencia.',
+  protocolNotUsed: 'No usado para los ejercicios propuestos.',
+  protocolChoose: 'Usar este protocolo como referencia',
+  protocolChooseForPath: 'Usarlo también para el recorrido del cuaderno',
+  protocolChosen: 'Elegido por ti como referencia.',
+  protocolUndo: 'Deshacer la elección',
   protocolReferenceOnly: 'Solo como referencia: el diagnóstico de la ficha está descartado o no está claro, por lo que estas fases no guían los ejercicios propuestos ni el recorrido del cuaderno del paciente.',
   phase: (n) => `Fase ${n}`,
   phaseGoals: 'Objetivos: ',
@@ -922,6 +950,13 @@ const fr: LiveDict = {
   editExercise: "Modifier l'exercice",
   removeExercise: "Retirer l'exercice",
   rehabProtocol: 'Protocole de rééducation',
+  protocolUsed: { stated: 'Utilisé comme référence pour les exercices proposés : diagnostic indiqué par vous. Chaque exercice reste à vérifier au regard de ce que vous avez constaté aujourd’hui.', suspected: 'Utilisé pour les exercices proposés comme hypothèse : le diagnostic est seulement suspecté, non confirmé. Les exercices doivent être justifiés par ce que vous avez documenté ; le parcours du livret demande votre choix.', chosen: 'Utilisé comme référence par votre choix : le diagnostic de la fiche ne ressort pas de ce que vous avez dit et n’est pas présenté comme celui du patient.' },
+  protocolNeedsChoice: 'Non utilisé pour les exercices : le diagnostic de la fiche ne ressort pas de ce que vous avez dit. Les exercices proposés reposent sur ce que vous avez documenté ; vous pouvez choisir de l’utiliser comme référence.',
+  protocolNotUsed: 'Non utilisé pour les exercices proposés.',
+  protocolChoose: 'Utiliser ce protocole comme référence',
+  protocolChooseForPath: 'L’utiliser aussi pour le parcours du livret',
+  protocolChosen: 'Choisi par vous comme référence.',
+  protocolUndo: 'Annuler le choix',
   protocolReferenceOnly: 'À titre de référence uniquement : le diagnostic de la fiche est exclu ou incertain, ces phases ne guident donc ni les exercices proposés ni le parcours du livret du patient.',
   phase: (n) => `Phase ${n}`,
   phaseGoals: 'Objectifs : ',

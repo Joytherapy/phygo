@@ -8,6 +8,7 @@ import { bestCondition, conditionStated, diagnosisStatus, isRegionalSheet, REGIO
 import { textCertainty } from '@/lib/clinical/facts';
 import { analyzeMentions, REGION_WORDS, regionFit, regionsOf, type Region } from '@/lib/clinical/region';
 import { caseOf, conditionRegionsOf, otherRegionsOf } from '@/lib/clinical/coherence';
+import { mainSheetStatus, sheetRegions } from '@/lib/knowledge/sheetDiagnosis';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,8 +52,6 @@ export async function POST(request: Request) {
     }
 
     const conditionRegions = conditionRegionsOf(primary, text);
-    const sheetRegions = (r: KbRow) =>
-      regionsOf([r.condition_name, r.condition_keywords, ...Object.values(r.translations ?? {}).flatMap((t) => [t?.condition_name, t?.condition_keywords])].filter(Boolean).join(' '));
     const fitOf = (r: KbRow) => regionFit(sheetRegions(r), conditionRegions);
     const verified = rows.filter((r) => fitOf(r) === 'compatible');
     const unverified = rows.filter((r) => fitOf(r) === 'unknown');
@@ -192,7 +191,7 @@ export async function POST(request: Request) {
     // suspected, excluded, ambiguous, not stated). A matching sheet never
     // confirms a diagnosis; one whose diagnosis they excluded, or named
     // without settling it, is not verified.
-    const diagnosis = match && said ? statusOf(match, said, regionFit(sheetRegions(match), view.profile.active) === 'compatible') : null;
+    const diagnosis = match && said ? mainSheetStatus(match, said, { primaryCondition: primary, assessment: text }) : null;
     if (diagnosis && DIAGNOSIS_REASON[diagnosis]) {
       relevance = 'unverified';
       relevanceReason = DIAGNOSIS_REASON[diagnosis]!;
