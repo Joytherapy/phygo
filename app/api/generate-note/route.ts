@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import { requireVerifiedProfessional } from "@/lib/auth/sessionServer";
 import { consumeHourly, HOURLY_LIMITS, limitResponse } from "@/lib/rateLimit";
 import { lazy } from "@/lib/lazy";
+import { sanitizeGeneratedNote } from "@/lib/clinical/coherence";
 
 const openai = lazy(() => new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -41,20 +42,26 @@ The user has selected "${lang || 'auto'}" as the expected spoken language for th
 
 
 Writing style:
-- Write like a clinician documenting a case, NOT like someone paraphrasing what was said.
+- Write like a clinician documenting a case, in clinical register, without adding anything that was not said.
 - Use precise, standard physiotherapy terminology where appropriate, while staying clear and readable.
-- Be structured and thorough, not conversational. State findings and reasoning directly, the way a real clinical note reads.
-- "Objective" should read like exam findings, including relevant differential considerations when the picture allows it (e.g. structures likely involved, structures to rule out).
+- Be structured, not conversational. Keep four things apart: what the patient reported ("subjective"), what the therapist observed, measured or tested and said so ("objective"), hypotheses (hedged, in "assessment" and "clinicalReasoning"), and what is missing ("clinicalReasoning.missingInformation").
+- "Objective" contains ONLY the examination findings, measurements and test results the therapist actually reported. Never add a finding: no range-of-motion limits, swelling, strength, neurological signs, instability, palpation findings or gait findings that were not said, no test names or test results (e.g. Neer, Hawkins, Lachman, Lasègue) that were not said, and no negative findings (e.g. "no radiculopathy", "no instability", "ROM preserved") that were not said. If the therapist reported no objective data, "objective" is an empty string. Differential considerations and tests worth doing belong in "clinicalReasoning" (differentials, suggestedAssessments), never in "objective".
 - "Assessment" should read like clinical reasoning: the likely clinical picture, contributing factors, and prognosis considerations where reasonable. The Assessment MUST always explicitly name the specific condition, diagnosis, or procedure being treated (e.g. "total hip replacement", "rotator cuff tendinopathy") — never describe it only in generic terms like "post-operative recovery" without naming what surgery or condition it refers to.
-- "Plan" should be structured in phases where appropriate (e.g. acute/early phase vs progression phase), including approach, rationale, and a sensible frequency/timeline.
+- "Plan" should be structured in phases where appropriate (e.g. acute/early phase vs progression phase), with approach, rationale and criteria to progress. Keep what was done today (only if the therapist said it) apart from what is proposed for the next sessions. Do not state a visit frequency, a number of sessions, follow-up dates, a re-assessment date or any appointment unless the therapist said it; never present a treatment as agreed or already done unless the therapist said so.
 - "Exercises" should include enough prescription detail to be usable: sets, reps, and frequency for each exercise, not just a name.
 
 Content behavior:
-- For "subjective", "objective" and "assessment": use ONLY what the therapist actually said. Do not invent patient facts, symptoms, or findings that were not mentioned.
+- For "subjective", "objective" and "assessment": use ONLY what the therapist actually said. Do not invent patient facts, symptoms, or findings that were not mentioned. Past conditions are written as history ("in anamnesi…") and are never described as current.
+- If the transcript describes more than one body region treated today (e.g. right shoulder and left knee), the plan and the exercises cover each of them, each with its own side. Write the plan with one labelled part per region, each starting with the region and its side (e.g. "Spalla destra: …. Ginocchio sinistro: …."); what applies to both goes in a part said to be common. Keep what was done today (only if the therapist said it) apart from what is proposed, and never present a proposal as done or agreed.
+- Do not add a cause, a risk factor or a causal mechanism the therapist did not mention (e.g. ergonomics, posture, work, recent physical activity or sport, overuse, trauma): if they were not discussed, they are missing information, not hypotheses. Never link a past condition to today's problem (e.g. "low back pain due to compensation after the old knee surgery") unless the therapist made that link; a hypothesis that needs findings of its own (e.g. a myofascial syndrome needs palpation findings or trigger points) is proposed only if those findings were reported.
+- With more than one region, one sentence naming several regions is not a plan for each: give each region its own part; if there is no specific proposal for a region, say it is to be defined.
+- Never infer an etiology (inflammatory, degenerative, infectious, rheumatic, neuropathic…) from the duration of the symptoms alone: "pain for a month" or "persistent pain" is a reported fact, not evidence of a cause. A hypothesis says what reported findings it rests on, is worded as a hypothesis, and stays apart from the findings themselves.
 - For "plan" and "exercises": you MAY go beyond a literal restatement. Based on the condition described, propose a reasonable, clinically sound and reasonably thorough treatment approach, consistent with common physiotherapy practice for that condition — even if the therapist didn't list it in detail. This is a draft for the practitioner to review, adjust, or discard.
-- Exercises must be scaled to the patient current functional stage as described in the transcript, for any condition being treated, not generic beginner-level exercises regardless of progress made. When the transcript indicates the patient is advanced in recovery (e.g. walks without aids, mild or no pain, good tolerance), propose a broader and more varied set of exercises appropriate to the condition, not just the same 2-3 basic exercises repeated. Gradually introduce more challenging and complementary variants when the clinical picture justifies it, for example (illustrative only, always adapt to the specific condition): bridge progressions (single-leg, weighted at the ankle), isometrics for hamstrings or quadriceps, gastrocnemius strengthening, gluteus medius work (e.g. lateral or side-stepping), stair gait training, balance progression (e.g. eyes-closed, light obstacles). Always account for any precautions, contraindications, or specific risks mentioned (e.g. dislocation risk, post-surgical restrictions) when selecting exercises.
-- Exercises must not be limited to a small fixed number of isolated movements. Reason in terms of functional categories relevant to the condition being treated - for example: muscular strengthening, balance/proprioception, gait/ambulation, joint mobility, cardiovascular conditioning (e.g. stationary bike, treadmill if appropriate) - and select one or more genuinely appropriate exercises for each relevant category, based on the patient's functional stage. Not every category applies in every case: use clinical judgement to decide which are relevant for THIS condition and THIS stage. Reason with the practical expertise of an experienced physiotherapist combined with a broader clinical framing, as a physician would when considering the patient's overall picture rather than just the isolated exercise. The goal is a complete and clinically credible exercise plan, not a minimal checklist.
-- CRITICAL: if the transcript mentions more than one condition, identify the ONE that is the primary reason for TODAY'S session. Name ONLY that condition in "assessment". Any other condition mentioned (past surgery, old injury, unrelated diagnosis) is background history only — it may appear briefly in "subjective" if relevant, but must NEVER be treated as the diagnosis being assessed today.
+- Exercises must be scaled to the patient current functional stage as described in the transcript, for any condition being treated, not generic beginner-level exercises regardless of progress made. When the transcript indicates the patient is advanced in recovery (e.g. walks without aids, mild or no pain, good tolerance), propose a broader and more varied set of exercises appropriate to the condition, not just the same 2-3 basic exercises repeated. Gradually introduce more challenging and complementary variants when the clinical picture justifies it (progressions in load, range, speed, complexity or functional demand for the body region involved). Always account for any precautions, contraindications, or specific risks mentioned (e.g. dislocation risk, post-surgical restrictions) when selecting exercises.
+- Exercises must not be limited to a small fixed number of isolated movements. Reason in terms of functional categories relevant to the condition being treated - for example: muscular strengthening, balance/proprioception, gait/ambulation, joint mobility, cardiovascular conditioning (e.g. stationary bike, treadmill if appropriate) - and select one or more genuinely appropriate exercises for each relevant category, based on the patient's functional stage. Not every category applies in every case: use clinical judgement to decide which are relevant for THIS condition and THIS stage (e.g. gait training is not relevant to an isolated shoulder problem).
+- Every exercise must target the body region of TODAY'S condition, its neighbouring structures (e.g. scapular and thoracic work for the shoulder; hip and ankle work for the knee), or a general need the transcript supports (e.g. aerobic conditioning). Do NOT add exercises for another body region (e.g. ankle mobility or hamstring stretching for a shoulder problem) unless the transcript describes a problem or goal in that region. Keep the side stated by the therapist (left/right) and never switch it. Reason with the practical expertise of an experienced physiotherapist combined with a broader clinical framing, as a physician would when considering the patient's overall picture rather than just the isolated exercise. The goal is a complete and clinically credible exercise plan, not a minimal checklist.
+- CRITICAL: if the transcript mentions more than one condition, identify the ONE that is the primary reason for TODAY'S session. Name ONLY that condition in "assessment". Any other condition mentioned (past surgery, old injury, unrelated diagnosis) is background history only and must NEVER be treated as the diagnosis being assessed today.
+- "subjective" MUST keep every past condition, surgery or injury the therapist reported, written as history (e.g. "In anamnesi intervento al ginocchio sinistro cinque anni fa, ora asintomatico"), even when that region has no symptoms now. Never drop it, and never describe it as current, as today's diagnosis or as a reason for today's plan or exercises.
 - Additionally, output a field "primaryCondition" containing ONLY the name of the condition being treated today (2-6 words, e.g. "chronic low back pain"). This field must NEVER include any other condition, history, or past diagnosis — it is used for internal matching only.
 - Do NOT cite specific studies, journals, statistics, or named research papers. Never invent citations or fabricate evidence. You may draw on general, widely accepted clinical practice without naming a specific source.
 
@@ -67,16 +74,18 @@ Clinical reasoning (separate from "assessment"):
 - "findingsAgainst": findings that are missing, or that would argue against the leading hypothesis, if any. An honest empty string is correct when nothing argues against it — do not invent a counterpoint.
 - "missingInformation": clinically relevant information NOT present in the transcript that would help confirm or refine the picture (e.g. a specific ROM measurement, an outcome measure score, a detail of symptom irritability). Be specific to this case, not a generic checklist.
 - "suggestedAssessments": additional tests, special orthopedic tests, or outcome measures that could reasonably be performed next to clarify the picture.
-- "redFlagsPrecautions": any red flags or precautions relevant to this specific presentation. Never leave this empty by omission — if nothing concerning is apparent from what was described, say so explicitly (e.g. "No red flags apparent from the information provided") rather than leaving it blank.
+- "redFlagsPrecautions": the red flags and precautions relevant to this specific presentation. Never declare red flags absent unless the therapist said they screened for them: if they did not discuss them, write that red flags were not assessed in what was reported and list the ones worth screening for this presentation (e.g. "Red flags not assessed in the report: screen for saddle anaesthesia, bladder or bowel changes, fever, unexplained weight loss").
+- Negative results are results. Never write that something is absent, negative or excluded (e.g. "no neurological signs", "no neurological compromise", "no other acute condition", "no red flags") unless the therapist said so; what was not discussed is "not assessed", not absent, and belongs in "missingInformation". This includes wordings that read as a negative result: "no signs of … were reported", "without other complications", "no other problems". When a screening was not documented, say so explicitly (e.g. "The transcript does not document a neurological assessment; to be explored if indicated"), in every section, the clinical reasoning included.
+- Do not turn symptoms into diagnoses. When the therapist described only pain or a symptom in a region, "assessment" says that, and any specific diagnosis (e.g. chondromalacia patellae, rotator cuff tendinopathy) is worded as an unconfirmed hypothesis, never as a fact.
 
 Respond ALWAYS and ONLY in valid JSON, with this exact structure:
 {
   "subjective": "what the patient reports",
-  "objective": "clinical exam findings, in clinical register, including relevant differential considerations",
-  "assessment": "clinical reasoning, likely picture, contributing factors",
+  "objective": "only the exam findings, measurements and test results the therapist reported; empty string if none",
+  "assessment": "clinical reasoning, likely picture, contributing factors; a diagnosis the therapist did not state is worded as an unconfirmed hypothesis",
   "plan": "structured, phased treatment plan with brief rationale",
-  "exercises": ["exercise 1 with sets/reps/frequency", "exercise 2 with sets/reps/frequency", "exercise 3 with sets/reps/frequency — add more items if clinically appropriate, the array length is NOT fixed at 3"],
-  "summaryForPatient": "short, simple message to send the patient via WhatsApp — plain language, not clinical jargon",
+  "exercises": ["exercise 1, with the sets/reps/frequency the therapist gave, or a suggested dose", "exercise 2", "exercise 3 — add more items if clinically appropriate, the array length is NOT fixed at 3; doses the therapist did not give are shown to them as AI suggestions"],
+  "summaryForPatient": "short, simple message to send the patient via WhatsApp — plain language, not clinical jargon; only what was discussed and done today; mention a home programme, an exercise or its sets/repetitions/frequency only if the therapist said so — exercises and doses you proposed are not yet approved by the therapist and must not be presented as prescribed; never write 'as I showed you' unless the therapist said they showed it; no appointment, visit frequency, follow-up date or agreed treatment unless the therapist said it",
   "clinicalReasoning": {
     "hypotheses": ["possible hypothesis 1, hedged", "possible hypothesis 2, hedged — omit if only one is reasonable"],
     "differentials": ["differential to consider, hedged", "..."],
@@ -84,7 +93,7 @@ Respond ALWAYS and ONLY in valid JSON, with this exact structure:
     "findingsAgainst": "findings missing or against the leading hypothesis, or empty string if none",
     "missingInformation": "specific clinically relevant information not mentioned in the transcript",
     "suggestedAssessments": "additional tests or outcome measures that could clarify the picture",
-    "redFlagsPrecautions": "red flags/precautions for this presentation, or an explicit statement that none are apparent"
+    "redFlagsPrecautions": "red flags/precautions for this presentation; if they were not discussed, that they were not assessed and which ones to screen for"
   }
   If the transcript references standard clinical precautions generically without listing them (e.g. "the usual hip precautions", "the three golden rules"), and the context makes the specific condition clear (e.g. total hip arthroplasty), you may state the standard, widely-recognized precautions explicitly as a reasonable clinical default (e.g. avoid hip flexion beyond 90 degrees, avoid adduction past midline, avoid excessive internal/external rotation) — but always phrase this as a draft for the therapist to confirm against the specific surgical approach, never as a fact the patient stated.
 "language": "the two-letter ISO code of the language you detected and used for this entire response (it, en, es, fr, or others)",
@@ -114,8 +123,12 @@ If a field truly cannot be inferred even loosely from the transcript and conditi
       );
     }
 
-    const note = JSON.parse(raw);
-    return NextResponse.json({ note });
+    // The model may still write facts that were not said (findings, test
+    // results, visits, agreements): they are taken out of the parts that
+    // report facts and listed, with the reason, for the clinician to review
+    // (lib/clinical/facts.ts). The assessment is reasoning and is only flagged.
+    const { note, removed } = sanitizeGeneratedNote(JSON.parse(raw), transcript);
+    return NextResponse.json({ note, removed });
   } catch (err) {
     console.error("Errore generate-note:", err);
     return NextResponse.json(

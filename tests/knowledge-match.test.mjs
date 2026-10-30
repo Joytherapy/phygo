@@ -19,20 +19,24 @@ import { join } from 'node:path';
 import ts from 'typescript';
 import { startFakeSupabase, sessionCookie } from './support/fake-supabase.mjs';
 import { startApp } from './support/app.mjs';
+import { loadClinical } from './support/clinical-world.mjs';
 
 const FAKE_PORT = Number(process.env.FAKE_SUPABASE_PORT ?? 54808);
 const APP_PORT = Number(process.env.KNOWLEDGE_APP_PORT ?? 3808);
 
 let K; // conditionMatch
 let R; // paperRank
+let G; // region
 before(async () => {
   const dir = mkdtempSync(join(tmpdir(), 'phygo-kb-'));
   const out = (f, src) => writeFileSync(join(dir, `${f}.mjs`), ts.transpileModule(src, { compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 } }).outputText);
   try {
     out('conditionMatch', readFileSync(new URL('../lib/knowledge/conditionMatch.ts', import.meta.url), 'utf8'));
-    out('paperRank', readFileSync(new URL('../lib/knowledge/paperRank.ts', import.meta.url), 'utf8').replace("from './conditionMatch'", "from './conditionMatch.mjs'"));
+    out('region', readFileSync(new URL('../lib/clinical/region.ts', import.meta.url), 'utf8'));
+    out('paperRank', readFileSync(new URL('../lib/knowledge/paperRank.ts', import.meta.url), 'utf8').replace("from './conditionMatch'", "from './conditionMatch.mjs'").replace("from '../clinical/region'", "from './region.mjs'"));
     K = await import(join(dir, 'conditionMatch.mjs'));
     R = await import(join(dir, 'paperRank.mjs'));
+    G = await import(join(dir, 'region.mjs'));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -60,6 +64,24 @@ test('papers: whole phrase and title first', () => {
   const wordsInAbstract = R.paperScore({ title: 'Shoulder pain trial', abstract: 'rotator muscles and tendinopathy' }, terms);
   assert.ok(phraseInTitle > wordsInAbstract && wordsInAbstract > 0);
   assert.equal(R.paperScore({ title: 'Knee osteoarthritis', abstract: 'quadriceps' }, terms), 0);
+});
+
+test('papers: direct, indirect with its reason, unverified, or not shown', () => {
+  const terms = R.searchTerms(['rotator cuff tendinopathy', 'shoulder pain', 'musculoskeletal pain']);
+  assert.ok(!terms.phrases.includes('musculoskeletal pain'), 'a phrase of generic words only is not a search term');
+  const shoulder = ['shoulder'];
+  const rel = (title, abstract = '', regions = shoulder) => R.paperRelevance({ title, abstract }, terms, regions);
+  assert.deepEqual(rel('Exercise for rotator cuff tendinopathy'), { level: 'direct', reason: 'same_condition' });
+  assert.deepEqual(rel('Subacromial pain: a randomised trial', 'Patients with rotator cuff tendinopathy'), { level: 'direct', reason: 'same_region' });
+  assert.deepEqual(rel('Shoulder tendinopathy and sleep', 'tendinopathy'), { level: 'indirect', reason: 'same_region' });
+  // A relevant mechanism in a paper about another region: kept, with the reason said.
+  assert.deepEqual(rel('Loading programmes in Achilles tendinopathy', 'tendinopathy'), { level: 'indirect', reason: 'same_mechanism_other_region' });
+  // Another region, sharing only a mention of shoulder pain in the abstract: not shown.
+  assert.equal(rel('Traumatic leg pain in adolescents', 'including shoulder pain and knee complaints'), null);
+  assert.equal(rel('Exercise therapy for chronic musculoskeletal pain', 'Exercise and education'), null, 'generic words only');
+  // Region not recognised: shown as unverified, never as direct.
+  assert.deepEqual(rel('Tendinopathy: principles of load', 'tendinopathy and rotator mechanics'), { level: 'unverified', reason: 'paper_region_unknown' });
+  assert.deepEqual(rel('Exercise for rotator cuff tendinopathy', '', []), { level: 'unverified', reason: 'case_region_unknown' });
 });
 
 // ---------------------------------------------------------------- routes
@@ -103,6 +125,82 @@ const post = async (path, body, who = 'clin') => {
   const res = await fetch(`${app.url}${path}`, { method: 'POST', headers: { 'content-type': 'application/json', ...(who ? { cookie: sessionCookie('tok-clin', CLIN) } : {}) }, body: JSON.stringify(body) });
   return { status: res.status, body: await res.json().catch(() => null) };
 };
+
+test('a diagnosis is stated only by the clinician; a generic regional sheet names only the region\'s pain', () => {
+  const row = (condition_name, condition_keywords = '') => ({ id: 1, condition_name, condition_keywords });
+  const cuff = row('Tendinopatia della cuffia dei rotatori', 'cuffia dei rotatori, rotator cuff');
+  assert.equal(K.conditionStated(cuff, 'dolore alla spalla destra in elevazione', G.REGION_WORDS, true), false, 'pain in the shoulder does not state a cuff tendinopathy');
+  assert.equal(K.conditionStated(cuff, 'sospetta cuffia dei rotatori', G.REGION_WORDS, true), true);
+  assert.equal(K.conditionStated(cuff, 'tendinopatia del sovraspinato', G.REGION_WORDS, true), true, 'the condition word of the sheet, same region');
+  assert.equal(K.conditionStated(cuff, 'tendinopatia achillea', G.REGION_WORDS, false), false, 'the condition word alone, in another region, is not enough');
+  assert.equal(K.conditionStated(row('Dolore femororotuleo', 'femororotuleo, dolore anteriore di ginocchio'), 'dolore al ginocchio scendendo le scale', G.REGION_WORDS, true), false);
+  for (const [name, region, want] of [['Dolore di ginocchio aspecifico', 'knee', true], ['Lombalgia aspecifica', 'lumbar', true], ['Cervicalgia', 'cervical', true], ['Dolore femororotuleo', 'knee', false], ['Coxartrosi', 'hip', false], ['Tendinopatia della cuffia dei rotatori', 'shoulder', false], ['Lombalgia aspecifica', 'knee', false]]) {
+    assert.equal(K.isRegionalSheet(row(name), region), want, `${name} (${region})`);
+  }
+});
+
+test('papers: a population or a mechanism the case does not state is not claimed', () => {
+  const leg = 'Traumatic leg pain in adolescents: a cohort study';
+  assert.deepEqual(R.unstatedQualifiers(leg, 'Dolore al ginocchio sinistro scendendo le scale'), ['adolescents', 'trauma']);
+  assert.deepEqual(R.unstatedQualifiers(leg, 'Ragazzo di 15 anni, dolore al ginocchio dopo una caduta'), [], 'age and fall stated');
+  assert.deepEqual(R.unstatedQualifiers('Rehabilitation after anterior cruciate ligament reconstruction', 'Ricostruzione LCA sei settimane fa'), []);
+  assert.deepEqual(R.unstatedQualifiers('Rehabilitation after anterior cruciate ligament reconstruction', 'Dolore al ginocchio'), ['surgery']);
+  assert.deepEqual(R.unstatedQualifiers('Knee pain in older adults', 'Paziente di 72 anni con gonalgia'), [], 'an age in the range counts');
+  assert.deepEqual(R.unstatedQualifiers('Exercise therapy for patellofemoral pain', 'dolore al ginocchio'), [], 'no population, no mechanism');
+});
+
+test('papers: "same region" means the same region; a neighbouring one is never claimed as it', () => {
+  const terms = R.searchTerms(['patellar tendinopathy', 'knee pain']);
+  const achilles = R.paperRelevance({ title: 'Loading programmes in Achilles tendinopathy', abstract: 'Progressive tendon loading in tendinopathy.' }, terms, ['knee']);
+  assert.ok(achilles && achilles.reason !== 'same_region' && achilles.level !== 'direct', JSON.stringify(achilles));
+  assert.deepEqual(achilles, { level: 'indirect', reason: 'same_mechanism_other_region' }, 'the shared mechanism, said as such');
+  const calf = R.paperRelevance({ title: 'Calf strength and knee pain in runners', abstract: 'Knee pain.' }, terms, ['knee']);
+  assert.ok(calf && calf.reason !== 'adjacent_region', 'a paper that names the knee is about the knee');
+  const hip = R.paperRelevance({ title: 'Hip muscle strength in tendinopathy', abstract: 'Hip strength.' }, terms, ['knee']);
+  assert.notEqual(hip?.reason, 'same_region', `the hip is near the knee, not the knee (${JSON.stringify(hip)})`);
+  const thigh = R.paperRelevance({ title: 'Quadriceps strength after injury', abstract: 'Knee pain and quadriceps.' }, terms, ['knee']);
+  assert.ok(!thigh || thigh.level !== 'direct', JSON.stringify(thigh));
+});
+
+test('the diagnosis of a sheet: stated, suspected, excluded, ambiguous or not stated (whatever the sheet\'s match)', async () => {
+  const cuff = { id: 1, condition_name: 'Tendinopatia della cuffia dei rotatori', condition_keywords: 'cuffia dei rotatori, rotator cuff' };
+  // The same classification as the note's checks (lib/clinical/facts.ts), not a rule of its own.
+  const { F } = await loadClinical();
+  const status = (said) => K.diagnosisStatus(cuff, said, G.REGION_WORDS, true, F.textCertainty);
+  assert.equal(status('Dolore alla spalla. Sospetta problematica della cuffia dei rotatori.'), 'suspected');
+  assert.equal(status('Tendinopatia della cuffia dei rotatori destra.'), 'stated');
+  assert.equal(status('Dolore alla spalla in elevazione.'), 'not_stated');
+  assert.equal(status('Dolore alla spalla. Esclusa tendinopatia della cuffia dei rotatori.'), 'excluded');
+  assert.equal(status('Dolore alla spalla. Il paziente chiede se ha una tendinopatia della cuffia dei rotatori.'), 'ambiguous');
+});
+
+test('how a sheet\'s protocol may be used: stated, as a hypothesis, only by the clinician\'s choice, or never', () => {
+  const CASES = [
+    ['stated', 'stated', 'stated', 'stated'],
+    ['suspected', 'suspected', 'suspected', 'suspected'],
+    ['not_stated', 'on_choice', null, 'chosen'],
+    [null, 'on_choice', null, 'chosen'],
+    ['excluded', 'blocked', null, null],
+    ['ambiguous', 'blocked', null, null],
+    [undefined, 'blocked', null, null],
+    ...['', 'STATED', 'verified', 'some_future_value', 1, true, {}, []].map((v) => [v, 'blocked', null, null]),
+  ];
+  // [status, use, mode without the clinician's choice, mode with it]
+  assert.deepEqual(CASES.map(([v]) => [v, K.protocolUse(v), K.protocolMode(v, false), K.protocolMode(v, true)]), CASES);
+  assert.deepEqual([null, 'stated', 'suspected', 'not_stated', 'excluded', 'ambiguous', undefined, 'x'].map(K.protocolGuides), [false, true, true, false, false, false, false, false], 'guides without a choice: stated and suspected only');
+});
+
+test('r10: papers whose population, mechanism or region is not verified are never direct support', () => {
+  const terms = { phrases: ['rotator cuff tendinopathy', 'shoulder pain'], words: ['rotator', 'tendinopathy', 'shoulder'] };
+  const t = 'Paziente di 45 anni con dolore alla spalla sinistra da circa un mese. Sospetta problematica della cuffia dei rotatori.';
+  // The region only in the abstract, under a generic title: not this case's evidence.
+  assert.deepEqual(R.paperRelevance({ title: 'Exercise therapy for chronic musculoskeletal pain', abstract: 'Exercise for shoulder pain and rotator cuff tendinopathy in adults.' }, terms, ['shoulder'], t), { level: 'indirect', reason: 'region_in_abstract_only' });
+  // A population the case does not state, decided in one place.
+  assert.deepEqual(R.paperRelevance({ title: 'Shoulder pain in overhead athletes: a cohort', abstract: 'Rotator cuff tendinopathy.' }, terms, ['shoulder'], t), { level: 'unverified', reason: 'population_or_mechanism_not_stated' });
+  // The same population stated by the clinician: direct.
+  assert.deepEqual(R.paperRelevance({ title: 'Shoulder pain in overhead athletes: a cohort', abstract: 'Rotator cuff tendinopathy.' }, terms, ['shoulder'], `${t} Gioca a pallavolo a livello agonistico.`), { level: 'direct', reason: 'same_condition' });
+  assert.deepEqual(R.paperRelevance({ title: 'Exercise therapy for rotator cuff tendinopathy', abstract: 'Adults with shoulder pain.' }, terms, ['shoulder'], t), { level: 'direct', reason: 'same_condition' });
+});
 
 test('knowledge lookup: past the first 1000 sheets, through translations, with its phases', async () => {
   assert.equal((await post('/api/knowledge-lookup', { assessment: 'x' }, null)).status, 401);

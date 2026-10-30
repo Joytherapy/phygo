@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mic,
@@ -25,6 +25,7 @@ import {
   ChevronDown,
   Languages,
   PenLine,
+  ShieldCheck,
 
 } from "lucide-react";
 
@@ -52,11 +53,15 @@ import { CalendarCheck, PlayCircle } from "lucide-react";
 import { CARE_STRINGS } from "@/lib/i18n/careStrings";
 import { syncProgrammeFromNote, type SyncResult } from "@/lib/care/fromNote";
 import { bookletExercises, bookletPapers, bookletPhases, buildPatientBooklet, type BookletSections } from "@/lib/care/patientBooklet";
+import { protocolUse, type ProtocolUse } from "@/lib/knowledge/conditionMatch";
 import { imageAsJpeg } from "@/lib/care/programPdf";
 import { usePatientContext } from "@/contexts/PatientContext";
 import { localDate } from "@/lib/care/program";
 import EvidenceBadge from "@/components/EvidenceBadge";
 import { loadClinicianSignature } from "@/lib/care/clinicianSignature";
+import { caseOf, checkOutput, type Issue, type SectionName } from "@/lib/clinical/coherence";
+import { exerciseFit } from "@/lib/clinical/region";
+import { dosingOrigin, exerciseOrigin } from "@/lib/clinical/facts";
 
 // One look for every block of the panel (a quiet tile inside the page card).
 const BLOCK = "mt-4 rounded-[22px] border border-black/[0.06] bg-white/70 p-5 sm:p-6 dark:border-white/[0.07] dark:bg-white/[0.025]";
@@ -117,6 +122,15 @@ export default function LiveStructuring({
   const [finalNote, setFinalNote] = useState<any>(null);
   const [clinicalInsight, setClinicalInsight] = useState<any>(null);
   const [rehabPhases, setRehabPhases] = useState<any[]>([]);
+  // How those phases may be used for what is generated (lib/knowledge/conditionMatch.ts
+  // protocolUse); whether the clinician chose to use them; how the exercise
+  // generator actually used them (its answer); and, after a choice, what to go back to.
+  const [protocolAllowed, setProtocolAllowed] = useState<ProtocolUse>("blocked");
+  const [protocolChosen, setProtocolChosen] = useState(false);
+  const [exerciseProtocol, setExerciseProtocol] = useState<{ used: boolean; mode: string | null; status: string | null; reason: string | null } | null>(null);
+  const [protocolRequest, setProtocolRequest] = useState<Record<string, unknown> | null>(null);
+  const [protocolUndo, setProtocolUndo] = useState<{ exercises: any; entries: any[]; excluded: any[]; protocol: typeof exerciseProtocol } | null>(null);
+  const [protocolBusy, setProtocolBusy] = useState(false);
   const [evidenceLevel, setEvidenceLevel] = useState<string | null>(null);
 const [relevantPapers, setRelevantPapers] = useState<any[]>([]);
 const [papersLoading, setPapersLoading] = useState(false);
@@ -145,6 +159,16 @@ const [showAddExercise, setShowAddExercise] = useState(false);
 const [exerciseSearchQuery, setExerciseSearchQuery] = useState("");
 const [exerciseSearchResults, setExerciseSearchResults] = useState<any[]>([]);
 const [exerciseSearching, setExerciseSearching] = useState(false);
+// What the clinician said for the last generated note, and the exercises the
+// draft proposed for another body region (left out, can be added back).
+const [noteTranscript, setNoteTranscript] = useState("");
+const [excludedExercises, setExcludedExercises] = useState<{ name: string; reason?: string; regions?: string[]; caseRegions?: string[] }[]>([]);
+// Whether the condition sheet's region could be verified against the case (/api/knowledge-lookup).
+const [insightRelevance, setInsightRelevance] = useState<{ relevance: string | null; reason: string | null; diagnosis?: string | null }>({ relevance: null, reason: null });
+// Condition sheets for the other regions treated today (/api/knowledge-lookup `others`).
+const [otherSheets, setOtherSheets] = useState<{ region: string; side: string | null; match: { condition_name: string } | null; relevance?: "verified" | "unverified" | null; relevanceReason?: string | null; diagnosisStatus?: string | null }[]>([]);
+// Statements taken out of the draft because the clinician did not say them (/api/generate-note `removed`).
+const [removedFacts, setRemovedFacts] = useState<{ section: string; text: string; kind: string; item: string; replacement?: string; review?: true }[]>([]);
 
 const [textInput, setTextInput] = useState("");
 
@@ -317,6 +341,11 @@ const [recordingLang, setRecordingLang] = useState(DICTATION_LOCALE[lang]);
     setProgress(0);
 
     setExerciseEntries([]);
+    setExcludedExercises([]);
+    setInsightRelevance({ relevance: null, reason: null });
+    setOtherSheets([]);
+    setRemovedFacts([]);
+    setNoteTranscript("");
     setExpandedExercise(null);
     setEditingExercise(null);
     setShowAddExercise(false);
@@ -449,6 +478,34 @@ const [recordingLang, setRecordingLang] = useState(DICTATION_LOCALE[lang]);
   return text.replace(pattern, "\n\n$1").trim();
 };
 
+  // The exercises through the library check (/api/exercise-intelligence): the
+  // matched entries, and the list without what belongs to another region
+  // (listed under the coherence checks, with "Add anyway").
+  const checkExercises = async (list: any, ctx: { assessment?: string; primaryCondition?: string; lang?: string; transcript: string }) => {
+    let entries: any[] = [];
+    let kept = list;
+    if (Array.isArray(list) && list.length > 0) {
+      try {
+        const eiRes = await fetch("/api/exercise-intelligence", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ exercisesDraft: list, assessment: ctx.assessment, primaryCondition: ctx.primaryCondition, lang: ctx.lang, transcript: ctx.transcript }),
+        });
+        const eiData = await eiRes.json();
+        if (Array.isArray(eiData.exercises)) entries = eiData.exercises;
+        const excluded: { name: string; reason?: string; regions?: string[]; caseRegions?: string[] }[] = Array.isArray(eiData.excluded) ? eiData.excluded : [];
+        setExcludedExercises(excluded);
+        if (excluded.length) {
+          const out = new Set(excluded.map((e) => e.name));
+          kept = list.filter((e: any) => !out.has(typeof e === "string" ? e : e?.name));
+        }
+      } catch (eiErr) {
+        console.error("Errore exercise-intelligence:", eiErr);
+      }
+    }
+    return { entries, list: kept };
+  };
+
   const generateRealNote = useCallback(
     async (raw: string, transcriptPhrases: Phrase[]) => {
       setPhase("pause");
@@ -478,6 +535,8 @@ if (!res.ok) {
         const data = await res.json();
         const note = data.note ?? {};
         setFinalNote(note);
+        setNoteTranscript(raw);
+        setRemovedFacts(Array.isArray(data.removed) ? data.removed : []);
 
         // Evidenze scientifiche rilevanti dalla libreria Scienza/PubMed già
         // esistente in Phygo — parte in parallelo (non await) così non
@@ -490,6 +549,7 @@ if (!res.ok) {
             body: JSON.stringify({
               primaryCondition: note.primaryCondition,
               assessment: note.assessment,
+              transcript: raw,
             }),
           })
             .then((r) => r.json())
@@ -505,26 +565,44 @@ if (!res.ok) {
         }
 
         let rehabPhasesLocal: any[] = [];
+        let kbConditionId: unknown = null;
+        let kbStatus: unknown = undefined;
 
         if (note.assessment) {
           try {
             const kbRes = await fetch("/api/knowledge-lookup", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.primaryCondition, lang: note.language || 'it' }),
+body: JSON.stringify({ assessment: note.assessment, primaryCondition: note.primaryCondition, lang: note.language || 'it', transcript: raw }),
             });
             const kbData = await kbRes.json();
 setClinicalInsight(kbData.match || null);
+setInsightRelevance({ relevance: kbData.relevance ?? null, reason: kbData.relevanceReason ?? null, diagnosis: kbData.diagnosisStatus ?? null });
+setOtherSheets(Array.isArray(kbData.others) ? kbData.others : []);
 setRehabPhases(kbData.phases || []);
 setEvidenceLevel(kbData.evidenceLevel || null);
 setMatchedKeyword(kbData.matchedKeyword || null);
+// How the sheet's protocol may be used, from what the clinician said of its
+// diagnosis: stated or suspected, it goes to the exercise generator (which
+// checks again on the server); not stated, only if the clinician chooses it;
+// excluded, ambiguous or unknown, never (shown for reference only).
+const allowed = protocolUse(kbData.diagnosisStatus);
+setProtocolAllowed(allowed);
+setProtocolChosen(false);
+setProtocolUndo(null);
 rehabPhasesLocal = kbData.phases || [];
+kbConditionId = kbData.match?.id ?? null;
+kbStatus = kbData.diagnosisStatus;
+if (rehabPhasesLocal.length) setExerciseProtocol(allowed === "stated" || allowed === "suspected" ? null : { used: false, mode: null, status: kbData.diagnosisStatus ?? null, reason: allowed === "on_choice" ? "needs_clinician_choice" : "diagnosis_not_usable" });
+else setExerciseProtocol(null);
 setKbChecked(note.primaryCondition || note.assessment.slice(0, 80));
 
           } catch (kbErr) {
             console.error("Knowledge lookup failed:", kbErr);
             setClinicalInsight(null);
             setRehabPhases([]);
+            setProtocolAllowed("blocked");
+            setExerciseProtocol(null);
 
           }
         }
@@ -540,48 +618,32 @@ setKbChecked(note.primaryCondition || note.assessment.slice(0, 80));
         // sessione. Rimossa; refine-plan/route.ts (identico a
         // refine-exercises/route.ts) non è più chiamato da nessuna parte —
         // può essere eliminato dal progetto.
-        if (rehabPhasesLocal.length > 0) {
+        // What the exercise generator gets: the sheet by id, never its
+        // phases as text; the server reads them and decides how they may be
+        // used. Kept to use later, if the clinician chooses the protocol.
+        const refineBase = { transcript: raw, assessment: note.assessment, primaryCondition: note.primaryCondition, exercisesDraft: note.exercises, conditionId: kbConditionId, lang: note.language || recordingLang };
+        setProtocolRequest(rehabPhasesLocal.length > 0 && kbConditionId != null ? refineBase : null);
+        const allowedNow = protocolUse(kbStatus);
+        if (rehabPhasesLocal.length > 0 && kbConditionId != null && (allowedNow === "stated" || allowedNow === "suspected")) {
   try {
     const exRes = await fetch("/api/refine-exercises", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        transcript: raw,
-        assessment: note.assessment,
-        exercisesDraft: note.exercises,
-        phases: rehabPhasesLocal,
-        lang: note.language || recordingLang,
-      }),
+      body: JSON.stringify(refineBase),
     });
     const exData = await exRes.json();
     if (exData.exercises) {
       exercisesArr = exData.exercises;
     }
+    setExerciseProtocol(exData.protocol ?? null);
   } catch (exErr) {
     console.error("Errore refine-exercises:", exErr);
   }
 }
 
-if (Array.isArray(exercisesArr) && exercisesArr.length > 0) {
-  try {
-    const eiRes = await fetch("/api/exercise-intelligence", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        exercisesDraft: exercisesArr,
-        assessment: note.assessment,
-        primaryCondition: note.primaryCondition,
-        lang: note.language || recordingLang,
-      }),
-    });
-    const eiData = await eiRes.json();
-    if (Array.isArray(eiData.exercises)) {
-      exerciseEntriesArr = eiData.exercises;
-    }
-  } catch (eiErr) {
-    console.error("Errore exercise-intelligence:", eiErr);
-  }
-}
+const checked = await checkExercises(exercisesArr, { assessment: note.assessment, primaryCondition: note.primaryCondition, lang: note.language || recordingLang, transcript: raw });
+exercisesArr = checked.list;
+exerciseEntriesArr = checked.entries;
 setExerciseEntries(exerciseEntriesArr);
 
 setFinalNote((prev: any) =>
@@ -768,6 +830,113 @@ recognition.lang = recordingLang;
     setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
   };
 
+  // Undoes a change to the draft: a statement taken out goes back at the end
+  // of its section; a labelled one ("Ipotesi da confermare: …") gets its
+  // original wording back. In the clinical reasoning too.
+  const restoreRemoved = (r: { section: string; text: string; replacement?: string }) => {
+    // Changes made one after another to one sentence are listed with the same
+    // original and result (lib/clinical/facts.ts settle): undone together.
+    setRemovedFacts((prev) => prev.filter((x) => x !== r && !(x.section === r.section && x.text === r.text && x.replacement === r.replacement)));
+    const undo = (current: string) => (r.replacement && current.includes(r.replacement) ? current.replace(r.replacement, r.text).replace(/\s{2,}/g, " ").trim() : current ? `${current} ${r.text}` : r.text);
+    // Hypotheses are a list: the replaced item gets its wording back.
+    if (r.section === "hypotheses") {
+      setFinalNote((prev: any) => {
+        const list: unknown[] = prev?.clinicalReasoning?.hypotheses ?? [];
+        const at = list.findIndex((h) => h === r.replacement);
+        const next = at >= 0 ? list.map((h, i) => (i === at ? r.text : h)) : [...list, r.text];
+        return prev ? { ...prev, clinicalReasoning: { ...(prev.clinicalReasoning ?? {}), hypotheses: next } } : prev;
+      });
+      setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+      return;
+    }
+    if (["supportingFindings", "findingsAgainst", "redFlagsPrecautions"].includes(r.section)) {
+      setFinalNote((prev: any) => (prev ? { ...prev, clinicalReasoning: { ...(prev.clinicalReasoning ?? {}), [r.section]: undo(((prev.clinicalReasoning ?? {})[r.section] ?? "").trim()) } } : prev));
+      setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+      return;
+    }
+    const id = Object.keys(phraseFields).find((k) => phraseFields[k] === r.section);
+    const current = (finalNote?.[r.section] as string | undefined)?.trim() ?? "";
+    const text = undo(current);
+    if (id) return updatePhraseText(id, text);
+    const newId = `${instanceId}-restored-${Date.now()}`;
+    const cat: Category = r.section === "plan" ? "plan" : r.section === "summaryForPatient" ? "followup" : r.section === "assessment" ? "assessment" : "findings";
+    setAiPhrases((prev) => [...prev, { id: newId, text, cat }]);
+    setPhraseFields((prev) => ({ ...prev, [newId]: r.section }));
+    setFinalNote((prev: any) => (prev ? { ...prev, [r.section]: text } : prev));
+    setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+  };
+
+  // Replaces a note exercise with the library exercise suggested for it (an unverified match), keeping its dose.
+  const useSuggestedMatch = (key: string) => {
+    setExerciseEntries((prev) =>
+      prev.map((ex: any, i: number) => {
+        if ((ex.internal_id || String(i)) !== key || !ex.suggested_match) return ex;
+        return { ...ex.suggested_match, internal_id: `${ex.suggested_match.internal_id}-${Date.now()}`, draft: ex.draft, dosing: ex.dosing, source_type: ex.source_type, clinical_check: null, relevance: ex.relevance, relevance_reason: ex.relevance_reason, match_status: "verified", suggested_match: null };
+      })
+    );
+    setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+  };
+
+  const addBackExcluded = (name: string) => {
+    setExcludedExercises((prev) => prev.filter((e) => e.name !== name));
+    setExerciseEntries((prev) => [
+      ...prev,
+      {
+        internal_id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        provider: "custom",
+        provider_id: null,
+        name,
+        draft: name,
+        description: null,
+        instructions: null,
+        body_region: null,
+        primary_muscle: null,
+        media: null,
+        source_type: "professional",
+        dosing: { sets: null, reps: null, duration_seconds: null, frequency_per_week: null, notes: null },
+        clinical_check: null,
+      },
+    ]);
+    setFinalNote((prev: any) => (prev && Array.isArray(prev.exercises) ? { ...prev, exercises: [...prev.exercises, name] } : prev));
+    setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+  };
+
+  // Deterministic checks of what was generated against what the clinician
+  // said (lib/clinical/coherence.ts): region, side, exercises, papers,
+  // protocol, measurements not given. Recomputed as the clinician edits.
+  // Today's case (regions of the current problem, history, sides) for the badges on exercises.
+  const caseView = useMemo(() => (finalNote && noteTranscript ? caseOf(noteTranscript, finalNote) : null), [finalNote, noteTranscript]);
+
+  const coherenceIssues = useMemo(() => {
+    if (!finalNote || !noteTranscript) return [];
+    return checkOutput({
+      transcript: noteTranscript,
+      note: finalNote,
+      exercises: exerciseEntries.map((e: any) => ({ name: e.name ?? "", draft: e.draft ?? null, body_region: e.body_region, primary_muscle: e.primary_muscle })),
+      papers: relevantPapers.map((p: any) => ({ title: p.title ?? "", relevance: p.relevance ?? null, relevance_reason: p.relevance_reason ?? null, regions: p.regions ?? null })),
+      protocol: clinicalInsight ? { name: clinicalInsight.condition_name ?? "", keywords: clinicalInsight.condition_keywords ?? null } : null,
+      otherProtocols: otherSheets.map((o: any) => ({ region: o.region, name: o.match?.condition_name ?? null })),
+    });
+  }, [finalNote, noteTranscript, exerciseEntries, relevantPapers, clinicalInsight, otherSheets]);
+
+  // How each check names what it is about: a section by its heading, regions by name.
+  const sectionLabel = (name: SectionName): string =>
+    ({
+      subjective: t.subjective, objective: t.objective, assessment: t.assessment, plan: t.plan, summaryForPatient: t.patientSummary,
+      hypotheses: t.hypotheses, differentials: t.differentials, supportingFindings: t.supportingFindings, findingsAgainst: t.findingsAgainst,
+      missingInformation: t.missingInfo, suggestedAssessments: t.suggestedAssessments, redFlagsPrecautions: t.redFlagsPrecautions,
+    })[name];
+  const regionLabel = (regions?: string[]) => (regions ?? []).map((r) => (t.regionNames as Record<string, string>)[r] ?? r).join(", ");
+  const issueText = (issue: Issue) => {
+    let item = issue.item;
+    if (issue.kind === "side" && issue.section) item = sectionLabel(issue.section);
+    if ((issue.kind === "section_region" || issue.kind === "history_as_active") && issue.section) item = `${sectionLabel(issue.section)} (${regionLabel(issue.regions)})`;
+    if (["invented", "invented_finding", "invented_test", "invented_appointment", "invented_agreement", "invented_treatment", "invented_negative", "unconfirmed_diagnosis", "contradicted_diagnosis", "generated_dosage", "unsupported_etiology"].includes(issue.kind) && issue.section) item = `"${issue.item}" (${sectionLabel(issue.section)})`;
+    if (issue.kind.startsWith("coverage_") || issue.kind === "plan_region_undefined") item = regionLabel([issue.item]);
+    if (issue.kind === "unapproved_instruction") item = `${sectionLabel("summaryForPatient")} (${(t.instructionReason as Record<string, string>)[issue.item] ?? issue.item})`;
+    return t.coherenceIssue[issue.kind](item);
+  };
+
   const searchExerciseDb = async (query: string) => {
     setExerciseSearchQuery(query);
     if (!query.trim()) {
@@ -826,7 +995,11 @@ recognition.lang = recordingLang;
       // in 30 minutes: they are not stored; the reference (provider_id) is.
       const exercisesToSave =
         exerciseEntries.length > 0
-          ? exerciseEntries.map((ex: any) => (ex.provider === "exercises" ? { ...ex, media: null } : ex))
+          ? exerciseEntries.map((ex: any) => {
+              // Whose it is: done today, named by the clinician, or the AI's suggestion; and whose its dose is.
+              const origin = noteTranscript ? { origin: exerciseOrigin(ex.draft ?? ex.name ?? "", noteTranscript).origin, dosing_origin: dosingOrigin(ex.dosing, noteTranscript) } : {};
+              return ex.provider === "exercises" ? { ...ex, ...origin, media: null } : { ...ex, ...origin };
+            })
           : finalNote.exercises || null;
 
       const payload = {
@@ -881,6 +1054,58 @@ const sendToProgramme = async () => {
   setProgramStatus(result);
 };
 
+// The clinician chooses the sheet's protocol as a reference: for a diagnosis
+// they did not state, the exercises are refined with it (the server checks the
+// choice against what was said); for a suspected one, already used for the
+// exercises, it is the booklet's path that it now allows. Undone as it was.
+const chooseProtocol = async () => {
+  if (!protocolRequest || protocolBusy) return;
+  if (exerciseProtocol?.used) {
+    setProtocolUndo({ exercises: finalNote?.exercises, entries: exerciseEntries, excluded: excludedExercises, protocol: exerciseProtocol });
+    setProtocolChosen(true);
+    return;
+  }
+  setProtocolBusy(true);
+  try {
+    const res = await fetch("/api/refine-exercises", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...protocolRequest, protocolChoice: "clinician" }) });
+    const data = await res.json();
+    if (data.protocol?.used && Array.isArray(data.exercises)) {
+      const before = { exercises: finalNote?.exercises, entries: exerciseEntries, excluded: excludedExercises, protocol: exerciseProtocol };
+      const req = protocolRequest as { assessment?: string; primaryCondition?: string; lang?: string; transcript: string };
+      const checked = await checkExercises(data.exercises, req);
+      setExerciseEntries(checked.entries);
+      setFinalNote((prev: any) => (prev ? { ...prev, exercises: checked.list } : prev));
+      setProtocolUndo(before);
+      setProtocolChosen(true);
+    }
+    setExerciseProtocol(data.protocol ?? exerciseProtocol);
+    setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+  } catch (err) {
+    console.error("Errore refine-exercises (scelta del protocollo):", err);
+  } finally {
+    setProtocolBusy(false);
+  }
+};
+const undoProtocolChoice = () => {
+  if (protocolUndo) {
+    setExerciseEntries(protocolUndo.entries);
+    setExcludedExercises(protocolUndo.excluded);
+    setFinalNote((prev: any) => (prev ? { ...prev, exercises: protocolUndo.exercises } : prev));
+    setExerciseProtocol(protocolUndo.protocol);
+  }
+  setProtocolUndo(null);
+  setProtocolChosen(false);
+  setNoteSaveStatus((s) => (s === "saved" ? "idle" : s));
+};
+// The booklet's path only from a protocol of a diagnosis the clinician gave, or one they chose.
+const pathAllowed = protocolAllowed === "stated" || (protocolChosen && protocolAllowed !== "blocked");
+// What the protocol block says of how the phases were used.
+const protocolNote = protocolAllowed === "blocked" ? t.protocolReferenceOnly
+  : exerciseProtocol?.used && exerciseProtocol.mode ? (t.protocolUsed as Record<string, string>)[exerciseProtocol.mode] ?? t.protocolNotUsed
+  : exerciseProtocol?.reason === "needs_clinician_choice" ? t.protocolNeedsChoice
+  : exerciseProtocol ? t.protocolNotUsed : null;
+const canChooseProtocol = !protocolChosen && !!protocolRequest && protocolAllowed !== "blocked" && (exerciseProtocol?.used ? protocolAllowed === "suspected" : exerciseProtocol?.reason === "needs_clinician_choice");
+
 const downloadBooklet = async () => {
   if (!finalNote) return;
   setBookletStatus("working");
@@ -897,7 +1122,8 @@ const downloadBooklet = async () => {
       clinician: await loadClinicianSignature(supabase),
       date: localDate(new Date()),
       summary: finalNote.summaryForPatient || "",
-      phases: bookletPhases(rehabPhases),
+      // The path only from a protocol allowed to guide it.
+      phases: pathAllowed ? bookletPhases(rehabPhases) : [],
       currentPhase,
       exercises: bookletExercises(exerciseEntries.length > 0 ? exerciseEntries : finalNote.exercises, care.plan, care.clinician.weekdays, images),
       papers: bookletPapers(relevantPapers),
@@ -1091,7 +1317,7 @@ if (rehabPhases.length > 0) {
         `${t.phase(p.phase_number)}: ${p.phase_name} (${p.typical_duration})\n${t.phaseGoals}${p.phase_goals}\n${t.phaseExercises}${p.phase_exercises}\n${t.progressWhen}${p.criteria_to_progress}`
     )
     .join("\n\n");
-  addSection(t.rehabProtocol, phasesText);
+  addSection(t.rehabProtocol, protocolNote ? `${protocolNote}\n\n${phasesText}` : phasesText);
 }
 
 doc.save(`phygo-note-${Date.now()}.pdf`);
@@ -1385,8 +1611,12 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                         {t.categories[cat.key]}
                       </span>
                     </div>
-                    {items.length > 0 && <CheckCircle2 size={15} aria-hidden className="shrink-0 text-emerald-500" />}
+                    {/* A generated plan is a proposal: no "done" mark, and said so. */}
+                    {items.length > 0 && !(cat.key === "plan" && finalNote) && <CheckCircle2 size={15} aria-hidden className="shrink-0 text-emerald-500" />}
                   </div>
+                  {cat.key === "plan" && finalNote && items.length > 0 && (
+                    <p data-testid="plan-proposal" className="-mt-1 mb-3 text-[11px] font-medium text-amber-700 dark:text-amber-300">{t.planProposal}</p>
+                  )}
 
                   <div className="min-h-[52px] space-y-2.5">
                     {items.length === 0 && (
@@ -1487,6 +1717,71 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
             </motion.div>
           )}
 
+          {isLiveVoice && finalNote && noteTranscript && phase === "done" && (
+            <motion.div data-testid="coherence-checks" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className={BLOCK}>
+              <BlockTitle icon={ShieldCheck}>{t.coherenceTitle}</BlockTitle>
+              <p className="mt-2 text-[11px] leading-relaxed text-ink/50 dark:text-white/40">{t.coherenceIntro}</p>
+              {coherenceIssues.length === 0 && excludedExercises.length === 0 && removedFacts.length === 0 && (
+                <p className="mt-3 text-sm text-emerald-700 dark:text-emerald-300">{t.coherenceOk}</p>
+              )}
+              {coherenceIssues.length > 0 && (
+                <ul className="mt-3 space-y-1.5">
+                  {coherenceIssues.map((issue, i) => (
+                    <li key={`${issue.kind}-${i}`} data-kind={issue.kind} className="flex gap-2 text-sm leading-relaxed text-amber-900 dark:text-amber-200/90">
+                      <AlertTriangle size={14} aria-hidden className={`mt-1 shrink-0 ${issue.severity === "high" ? "text-red-500" : "text-amber-500"}`} />
+                      <span>{issueText(issue)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {removedFacts.length > 0 && (
+                <div data-testid="removed-facts" className="mt-4 border-t border-black/[0.06] pt-3 dark:border-white/[0.07]">
+                  <p className={`${LABEL} mb-2`}>{t.removedTitle}</p>
+                  <ul className="space-y-2">
+                    {removedFacts.map((r, i) => (
+                      <li key={`${r.section}-${i}`} data-testid="removed-fact" className="flex flex-wrap items-center justify-between gap-2 text-sm text-ink/75 dark:text-white/75">
+                        <span className="min-w-0 break-words">
+                          {r.text ? `«${r.text}»` : t.added(r.replacement ?? "")}
+                          <span className="block text-[11px] text-ink/55 dark:text-white/45">
+                            {sectionLabel(r.section as SectionName)} · {(t.removedReason as Record<string, string>)[r.kind] ?? r.kind}
+                          </span>
+                          {r.replacement && r.text && <span data-testid="removed-fact-replacement" className="block text-[11px] text-ink/55 dark:text-white/45">{t.replacedWith(r.replacement)}</span>}
+                          {r.review && <span data-testid="removed-fact-review" className="block text-[11px] font-semibold text-amber-700 dark:text-amber-300">{t.removedReview}</span>}
+                        </span>
+                        <button type="button" onClick={() => restoreRemoved(r)} className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 text-xs font-semibold ${SECONDARY_BTN}`}>
+                          {r.text ? t.restore : t.undoAdd}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {excludedExercises.length > 0 && (
+                <div className="mt-4 border-t border-black/[0.06] pt-3 dark:border-white/[0.07]">
+                  <p className={`${LABEL} mb-2`}>{t.excludedTitle}</p>
+                  <ul className="space-y-2">
+                    {excludedExercises.map((e) => (
+                      <li key={e.name} data-testid="excluded-exercise" className="flex flex-wrap items-center justify-between gap-2 text-sm text-ink/75 dark:text-white/75">
+                        <span className="min-w-0 break-words">
+                          {e.name}
+                          {e.reason === "history_only" ? (
+                            <span className="block text-[11px] text-ink/55 dark:text-white/45">{t.excludedHistory(regionLabel(e.regions))}</span>
+                          ) : (e.regions?.length || e.caseRegions?.length) ? (
+                            <span className="block text-[11px] text-ink/55 dark:text-white/45">{t.excludedReason(regionLabel(e.regions) || "—", regionLabel(e.caseRegions) || "—")}</span>
+                          ) : null}
+                        </span>
+                        <button type="button" onClick={() => addBackExcluded(e.name)} className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 text-xs font-semibold ${SECONDARY_BTN}`}>
+                          <Plus size={12} aria-hidden />
+                          {t.addBack}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </motion.div>
+          )}
+
           {!clinicalInsight && kbChecked && isLiveVoice && (
             <p data-testid="no-protocol" className="mt-4 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3 text-xs leading-relaxed text-amber-800 dark:text-amber-300">
               {care.plan.noProtocol(kbChecked)}
@@ -1525,7 +1820,35 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
 
               <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-black/[0.06] pt-4 dark:border-white/[0.07]">
                 <p className="text-[11px] text-ink/50 dark:text-white/40">
-                  {clinicalInsight.source} ({clinicalInsight.source_date}) · {t.insightDisclaimer}
+                  {clinicalInsight.source} ({clinicalInsight.source_date}) · {t.insightDisclaimer} {t.protocolIndicative}
+                  {/* The sheet's match is not a diagnosis: what the clinician said of it, separately. */}
+                  {insightRelevance.diagnosis && (t.diagnosisStatus as Record<string, string>)[insightRelevance.diagnosis] && (
+                    <span data-testid="insight-diagnosis" data-diagnosis={insightRelevance.diagnosis} className="mt-1 block font-medium text-ink/70 dark:text-white/60">
+                      {(t.diagnosisStatus as Record<string, string>)[insightRelevance.diagnosis]}
+                      {/* Not for a diagnosis excluded or left unsettled: the sheet does not match the case then. */}
+                      {!["excluded", "ambiguous"].includes(insightRelevance.diagnosis) && ` ${t.sheetMatchNote}`}
+                    </span>
+                  )}
+                  {insightRelevance.relevance === "unverified" && insightRelevance.reason && (t.unverifiedReason as Record<string, string>)[insightRelevance.reason] && (
+                    <span data-testid="insight-unverified" className="mt-1 block font-semibold text-amber-700 dark:text-amber-300">{(t.unverifiedReason as Record<string, string>)[insightRelevance.reason]}</span>
+                  )}
+                  {otherSheets.length > 0 && (
+                    <span data-testid="other-regions" className="mt-2 block">
+                      <span className="font-semibold">{t.otherRegionsTitle}: </span>
+                      {otherSheets.map((o, i) => (
+                        <span key={o.region}>
+                          {i > 0 ? " · " : ""}
+                          {regionLabel([o.region])}
+                          {o.side && o.side !== "both" ? ` (${o.side === "left" ? t.sideLeft : t.sideRight})` : ""}: {o.match?.condition_name ?? t.otherRegionNoSheet}
+                          {o.relevanceReason && (t.otherSheetReason as Record<string, string>)[o.relevanceReason] && <span data-testid="other-region-reason"> — {(t.otherSheetReason as Record<string, string>)[o.relevanceReason]}</span>}
+                          {o.match && o.diagnosisStatus && (t.diagnosisStatus as Record<string, string>)[o.diagnosisStatus] && <span data-testid="other-region-diagnosis"> {(t.diagnosisStatus as Record<string, string>)[o.diagnosisStatus]}</span>}
+                          {o.relevance === "unverified" && o.relevanceReason && (t.unverifiedReason as Record<string, string>)[o.relevanceReason] && (
+                            <span data-testid="other-region-unverified" className="block font-semibold text-amber-700 dark:text-amber-300">{(t.unverifiedReason as Record<string, string>)[o.relevanceReason]}</span>
+                          )}
+                        </span>
+                      ))}
+                    </span>
+                  )}
                 </p>
                 {matchedKeyword && (
                   <button type="button" onClick={() => setShowWhy(!showWhy)} aria-expanded={showWhy} className="text-xs font-semibold text-[#7C83FF] hover:underline">
@@ -1581,40 +1904,61 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                 {!papersLoading && relevantPapers.length === 0 && <p className="text-xs text-ink/55 dark:text-white/40">{t.evidenceNone}</p>}
 
                 {!papersLoading && relevantPapers.length > 0 && (
-                  <div className="space-y-3">
-                    {relevantPapers.map((paper: any) => (
-                      <div key={paper.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.03]">
-                        <div className="mb-1.5 flex items-start justify-between gap-3">
-                          <p className="text-sm font-semibold leading-snug text-ink dark:text-white">{paper.title}</p>
-                          {paper.study_type && (
-                            <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${CHIP}`}>{paper.study_type}</span>
-                          )}
+                  // By level: only a direct paper is support for the case; an indirect or
+                  // unverified one is shown apart, saying what it is, never as pertinent.
+                  <div className="space-y-5">
+                    {([["direct", t.evidenceDirectTitle], ["indirect", t.evidenceIndirectTitle], ["unverified", t.evidenceUnverifiedTitle]] as const).map(([level, groupTitle]) => {
+                      const group = relevantPapers.filter((paper: any) => (paper.relevance === "direct" || paper.relevance === "indirect" ? paper.relevance : "unverified") === level);
+                      if (!group.length) return null;
+                      return (
+                        <div key={level} data-testid={`evidence-${level}`} className="space-y-3">
+                          <p className={`${LABEL} ${level === "unverified" ? "text-amber-700 dark:text-amber-300" : ""}`}>{groupTitle}</p>
+                          {group.map((paper: any) => (
+                          <div key={paper.id} className="rounded-2xl border border-black/[0.05] bg-black/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.03]">
+                            <div className="mb-1.5 flex items-start justify-between gap-3">
+                              <p className="text-sm font-semibold leading-snug text-ink dark:text-white">{paper.title}</p>
+                              {paper.study_type && (
+                                <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${CHIP}`}>{paper.study_type}</span>
+                              )}
+                            </div>
+                            <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                              {paper.evidence_strength && <EvidenceBadge level={paper.evidence_strength} />}
+                              {paper.relevance === "indirect" && <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${CHIP}`}>{t.evidenceIndirect}</span>}
+                              {paper.relevance === "unverified" && (
+                                <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300">{t.evidenceUnverified}</span>
+                              )}
+                            </div>
+                            {(paper.relevance === "indirect" || paper.relevance === "unverified") && paper.relevance_reason && (t.evidenceReason as Record<string, string>)[paper.relevance_reason] && (
+                              <p data-testid="paper-relevance-reason" className="mb-2 text-[11px] leading-relaxed text-ink/60 dark:text-white/50">{(t.evidenceReason as Record<string, string>)[paper.relevance_reason]}</p>
+                            )}
+                            <p className="mb-2 text-[11px] text-ink/50 dark:text-white/45">
+                              {[
+                                paper.authors,
+                                paper.journal,
+                                paper.publication_date ? String(paper.publication_date).slice(0, 4) : null,
+                                paper.pmid ? `PMID ${paper.pmid}` : null,
+                              ]
+                                .filter(Boolean)
+                                .join(" · ")}
+                            </p>
+                            {paper.why_it_matters && (
+                              <p className="mb-2 text-xs leading-relaxed text-ink/65 dark:text-white/65">
+                                <span className="font-semibold text-ink/80 dark:text-white/80">{level === "direct" ? t.whyRelevant : t.paperSummary}</span>
+                                {paper.why_it_matters}
+                              </p>
+                            )}
+                            {paper.original_url && (
+                              <a href={paper.original_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#7C83FF] hover:underline">
+                                {t.viewSource}
+                                <ExternalLink size={10} aria-hidden />
+                              </a>
+                            )}
+                          </div>
+
+                          ))}
                         </div>
-                        {paper.evidence_strength && <EvidenceBadge level={paper.evidence_strength} className="mb-2" />}
-                        <p className="mb-2 text-[11px] text-ink/50 dark:text-white/45">
-                          {[
-                            paper.authors,
-                            paper.journal,
-                            paper.publication_date ? String(paper.publication_date).slice(0, 4) : null,
-                            paper.pmid ? `PMID ${paper.pmid}` : null,
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </p>
-                        {paper.why_it_matters && (
-                          <p className="mb-2 text-xs leading-relaxed text-ink/65 dark:text-white/65">
-                            <span className="font-semibold text-ink/80 dark:text-white/80">{t.whyRelevant}</span>
-                            {paper.why_it_matters}
-                          </p>
-                        )}
-                        {paper.original_url && (
-                          <a href={paper.original_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#7C83FF] hover:underline">
-                            {t.viewSource}
-                            <ExternalLink size={10} aria-hidden />
-                          </a>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -1637,6 +1981,14 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                   {showAddExercise ? t.cancel : t.addExercise}
                 </button>
               </div>
+
+              {/* The AI's exercises and doses are proposals until the clinician saves the note. */}
+              {noteTranscript && (() => {
+                const proposed = exerciseEntries.filter((ex: any) => exerciseOrigin(ex.draft ?? ex.name ?? "", noteTranscript).origin === "suggested").length;
+                const doses = exerciseEntries.filter((ex: any) => dosingOrigin(ex.dosing, noteTranscript) === "suggested").length;
+                if (!proposed && !doses) return null;
+                return <p data-testid="exercises-proposal" className="mt-2 text-[12px] font-medium text-amber-700 dark:text-amber-300">{t.exercisesProposal(proposed, doses)}</p>;
+              })()}
 
               {showAddExercise && (
                 <div className="mt-4 rounded-2xl border border-black/[0.06] bg-black/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.03]">
@@ -1691,6 +2043,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                   return (
                     <div
                       key={key}
+                      data-testid="note-exercise"
                       className={`flex flex-col gap-3 rounded-2xl border border-black/[0.05] bg-black/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.03] ${isOpen || isEditing ? "sm:col-span-2" : ""}`}
                     >
                       <div className="flex gap-3">
@@ -1707,6 +2060,41 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                           )}
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-ink dark:text-white">{ex.name}</p>
+                            {/* Matched to a database exercise with another name: say what the note wrote. */}
+                            {ex.draft && ex.draft !== ex.name && <p className="mt-0.5 text-[11px] text-ink/50 dark:text-white/40">{t.fromNote(ex.draft)}</p>}
+                            {/* A library match that could not be confirmed: the note's exercise stays; a suggestion can be taken on purpose. */}
+                            {ex.match_status === "unverified" && (
+                              <div data-testid="match-unverified" className="mt-0.5 whitespace-normal text-[11px] text-amber-700 dark:text-amber-300">
+                                {t.matchUnverified}
+                                {ex.suggested_match?.name && (
+                                  <button type="button" onClick={(e) => { e.stopPropagation(); useSuggestedMatch(key); }} className="ml-1 font-semibold underline">
+                                    {t.useSuggestion(ex.suggested_match.name)}
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                            {/* Region against today's case: a general activity is said as such; one not recognised is not verified, the clinician decides. */}
+                            {caseView && isLiveVoice && (() => {
+                              const fit = exerciseFit(ex, caseView.regions);
+                              if (fit === "general") return <p data-testid="exercise-general" className="mt-0.5 text-[11px] text-ink/55 dark:text-white/45">{t.generalActivity}</p>;
+                              if (fit !== "unknown") return null;
+                              return (
+                                <p data-testid="exercise-unverified" className="mt-0.5 whitespace-normal text-[11px] font-medium text-amber-700 dark:text-amber-300">
+                                  {t.unverifiedReason[caseView.regions.length ? "exercise_region_unknown" : "case_region_unknown"]}
+                                </p>
+                              );
+                            })()}
+                            {/* Whose exercise and dose this is: what the clinician said and did, or the AI's suggestion. */}
+                            {noteTranscript && (() => {
+                              const origin = exerciseOrigin(ex.draft ?? ex.name ?? "", noteTranscript).origin;
+                              const dose = dosingOrigin(ex.dosing, noteTranscript);
+                              return (
+                                <p data-testid="exercise-origin" data-origin={origin} className={`mt-0.5 whitespace-normal text-[11px] ${origin === "suggested" ? "font-medium text-amber-700 dark:text-amber-300" : "text-ink/55 dark:text-white/45"}`}>
+                                  {t.exerciseOrigin[origin]}
+                                  {dose === "suggested" && <span data-testid="dosage-suggested" className="block">{t.dosageSuggested}</span>}
+                                </p>
+                              );
+                            })()}
                             {ex.primary_muscle && <p className="mt-0.5 text-[11px] text-ink/55 dark:text-white/45">{ex.primary_muscle}</p>}
                             {!isEditing && (ex.dosing?.sets || ex.dosing?.reps || ex.dosing?.duration_seconds) && (
                               <p className="mt-1 text-[11px] text-ink/65 dark:text-white/55">
@@ -1820,6 +2208,25 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
           {rehabPhases.length > 0 && (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className={BLOCK}>
               <BlockTitle icon={FileText}>{t.rehabProtocol}</BlockTitle>
+              {protocolAllowed === "blocked" && <p data-testid="protocol-reference-only" className="mt-2 text-xs font-semibold leading-relaxed text-amber-700 dark:text-amber-300">{t.protocolReferenceOnly}</p>}
+              {protocolAllowed !== "blocked" && protocolNote && (
+                <p data-testid="protocol-use" data-mode={exerciseProtocol?.used ? exerciseProtocol.mode ?? "" : "none"} className={`mt-2 text-xs leading-relaxed ${exerciseProtocol?.mode === "stated" ? "text-ink/60 dark:text-white/55" : "font-semibold text-amber-700 dark:text-amber-300"}`}>{protocolNote}</p>
+              )}
+              {(canChooseProtocol || protocolChosen) && (
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {canChooseProtocol && (
+                    <button type="button" data-testid="protocol-choose" onClick={chooseProtocol} disabled={protocolBusy} className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 text-xs font-semibold ${SECONDARY_BTN}`}>
+                      {exerciseProtocol?.used ? t.protocolChooseForPath : t.protocolChoose}
+                    </button>
+                  )}
+                  {protocolChosen && (
+                    <>
+                      <span data-testid="protocol-chosen" className="text-xs text-ink/60 dark:text-white/55">{t.protocolChosen}</span>
+                      <button type="button" data-testid="protocol-undo" onClick={undoProtocolChoice} className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 text-xs font-semibold ${SECONDARY_BTN}`}>{t.protocolUndo}</button>
+                    </>
+                  )}
+                </div>
+              )}
 
               <div className={`mt-4 grid gap-3 ${compact ? "" : "sm:grid-cols-3"}`}>
                 {rehabPhases.map((rp) => (
@@ -1863,7 +2270,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                 <div className="mt-2 flex flex-wrap gap-2">
                   {([
                     ["summary", care.booklet.summary, !!finalNote.summaryForPatient],
-                    ["path", care.booklet.path, rehabPhases.length > 0],
+                    ["path", care.booklet.path, rehabPhases.length > 0 && pathAllowed],
                     ["exercises", care.booklet.exercises, exerciseEntries.length > 0 || (finalNote.exercises || []).length > 0],
                     ["evidence", care.booklet.evidence, relevantPapers.length > 0 || !!clinicalInsight?.source],
                   ] as [keyof BookletSections, string, boolean][]).filter(([, , available]) => available).map(([key, label]) => (
@@ -1874,7 +2281,7 @@ doc.save(`phygo-note-${Date.now()}.pdf`);
                   ))}
                 </div>
               </fieldset>
-              {rehabPhases.length > 0 && bookletSections.path && (
+              {rehabPhases.length > 0 && pathAllowed && bookletSections.path && (
                 <label className="mt-4 block max-w-sm">
                   <span className={LABEL}>{care.booklet.currentPhase}</span>
                   <select value={currentPhase ?? ""} onChange={(e) => setCurrentPhase(e.target.value === "" ? null : Number(e.target.value))} className={`${FIELD} mt-1.5`}>

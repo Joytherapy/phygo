@@ -25,6 +25,12 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     // Storage objects ("bucket/path" -> { size, contentType }); missingBuckets answer
     // like Supabase does for a bucket that was never created.
     storage: { objects: new Map(), missingBuckets: new Set() },
+    // OpenAI stand-in for content tests: a function (system prompt, user prompt) ->
+    // JSON-serialisable answer, or undefined to refuse the call as usual.
+    openai: null,
+    // Only for the manual check with the real model (scripts/clinical-relevance-live.mjs):
+    // an async function (request body) -> { status, json } that forwards the call.
+    openaiForward: null,
   };
 
   const server = http.createServer(async (req, res) => {
@@ -111,7 +117,21 @@ export async function startFakeSupabase({ port, tables = {}, users = {}, primary
     }
 
     // OpenAI stand-in: any call is recorded and refused, so tests can assert none happened.
-    if (url.pathname.startsWith('/openai/')) return send(500, { error: { message: 'OpenAI is not available in tests' } });
+    if (url.pathname.startsWith('/openai/')) {
+      if (state.openaiForward && url.pathname.endsWith('/chat/completions')) {
+        const { status, json } = await state.openaiForward(JSON.parse(body || '{}'));
+        return send(status, json);
+      }
+      if (state.openai && url.pathname.endsWith('/chat/completions')) {
+        const req = JSON.parse(body || '{}');
+        const msgs = req.messages ?? [];
+        const answer = state.openai(msgs.find((m) => m.role === 'system')?.content ?? '', msgs.filter((m) => m.role === 'user').map((m) => m.content).join('\n'));
+        if (answer !== undefined) {
+          return send(200, { id: 'chatcmpl-test', object: 'chat.completion', created: 0, model: req.model ?? 'test', choices: [{ index: 0, finish_reason: 'stop', message: { role: 'assistant', content: JSON.stringify(answer) } }], usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 } });
+        }
+      }
+      return send(500, { error: { message: 'OpenAI is not available in tests' } });
+    }
 
     // Daily stand-in: room creation answers with a synthetic room, so tests can count calls.
     if (url.pathname === '/daily/v1/rooms' && req.method === 'POST') {

@@ -14,6 +14,21 @@ const SIGNED_URL_TTL_SECONDS = 60 * 30
 export const toExerciseLang = (lang: string | null | undefined): ExerciseLang =>
   lang === 'en' || lang === 'es' || lang === 'fr' ? lang : 'it'
 
+// Words that describe a kind of exercise, not which one: a keyword made only of
+// these ("stretch", "mobility", "balance") matches exercises of any body region
+// ("Stretching pettorale" → "Hamstring stretch"), so it is not used to pick
+// the database exercise for a note's exercise.
+const GENERIC_WORDS = new Set([
+  'stretch', 'stretches', 'stretching', 'mobility', 'mobilization', 'mobilisation', 'exercise', 'exercises',
+  'strengthening', 'strength', 'isometric', 'isometrics', 'balance', 'proprioception', 'proprioceptive',
+  'warm', 'up', 'cardio', 'training', 'activation', 'conditioning', 'workout', 'active', 'passive', 'assisted',
+  'stability', 'control', 'motor', 'range', 'motion', 'rom', 'with', 'band', 'the', 'of', 'and', 'for', 'a', 'light', 'gentle',
+])
+
+/** The keywords that name a specific exercise (not only a kind of exercise). */
+export const specificKeywords = (keywords: string[]) =>
+  keywords.filter((k) => k.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).some((w) => !GENERIC_WORDS.has(w)))
+
 // PostgREST pattern characters typed by a user are matched literally.
 const literal = (s: string) => s.replace(/[%_*,()\\]/g, ' ').trim()
 
@@ -98,6 +113,7 @@ export async function searchLibraryExercises(db: SupabaseClient, keywords: strin
       provider: 'exercises',
       provider_id: id,
       name: text.name || original.name,
+      source_name: original.name,
       description: text.tips ?? null,
       instructions: Array.isArray(text.instructions) ? text.instructions : null,
       body_region: ex.body_region ?? null,

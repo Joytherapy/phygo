@@ -27,11 +27,14 @@ export function bookletPhases(phases: unknown): BookletPhase[] {
     .sort((a, b) => a.number - b.number)
 }
 
-/** The papers shown in the note's evidence block, as references. */
+/** The papers of the note's evidence block that are direct evidence for the case, as references. */
 export function bookletPapers(papers: unknown): BookletPaper[] {
   if (!Array.isArray(papers)) return []
   return papers
     .filter((p) => p && typeof p === 'object' && s(p.title))
+    // Only direct evidence for the case: an indirect, unverified or unclassified
+    // paper (no relevance, null, any other value) is not given to the patient as support.
+    .filter((p) => p.relevance === 'direct')
     .slice(0, 5)
     .map((p) => ({ title: s(p.title), journal: s(p.journal) || null, year: s(p.publication_date).slice(0, 4) || null, strength: s(p.evidence_strength) || null, why: s(p.why_it_matters) || null }))
 }
@@ -86,6 +89,7 @@ export function buildPatientBooklet(opts: {
 
   if (opts.sections.path && opts.phases.length) {
     pdf.section(++n, t.path)
+    pdf.paragraph(t.pathIndicative, MUTED, 10)
     // Each phase: number, name ("you are here" on the right when it is the
     // current one), the typical duration on its own line, then goals and when
     // to progress. Lines are placed one by one (pdf.ensure), so long texts

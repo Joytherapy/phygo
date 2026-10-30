@@ -1,0 +1,378 @@
+// Deterministic coherence checks on everything generated from a note, with
+// the clinician's own words (the transcript) as the reference. Used by the
+// note panel ("Coherence checks") and by the content tests. It only states
+// facts it can check: a region or side that does not match, a measurement, an
+// appointment or a treatment "done" that is not in the clinician's words, a
+// paper whose pertinence could not be verified. Whether the reasoning is sound
+// stays with the clinician; when the region of the case is not recognised it
+// says so instead of reporting "no inconsistency", and an item whose region
+// is not recognised is reported as not verified, never as pertinent.
+//
+// The case is today's problem as the clinician describes it (caseProfile):
+// regions named only in history or as negated are not part of it, and each
+// side is checked against the region it was given for.
+import { analyzeMentions, caseProfile, exerciseFit, exerciseRegions, normalize, pertinentTo, regionFit, regionsOf, sideContradictions, type CaseProfile, type Region } from './region'
+import { diagnosisConflicts, historyNotKept, isHedged, sanitizeNote, sentencesOf, unapprovedInstructions, unstatedDosage, unsupportedArrangements, unsupportedInferences, unsupportedFindings, unsupportedNegatives, type Removal } from './facts'
+
+export type IssueKind =
+  | 'region_unknown' | 'district' | 'section_region' | 'history_as_active' | 'side'
+  | 'exercise' | 'exercise_unverified' | 'evidence' | 'evidence_unverified' | 'protocol' | 'protocol_unverified'
+  | 'invented' | 'invented_finding' | 'invented_test' | 'invented_appointment' | 'invented_agreement' | 'invented_treatment'
+  | 'invented_negative' | 'unconfirmed_diagnosis' | 'contradicted_diagnosis' | 'generated_dosage' | 'unapproved_instruction' | 'history_missing' | 'unsupported_etiology' | 'plan_region_undefined'
+  | 'unsupported_cause' | 'history_link' | 'unsupported_hypothesis' | 'plan_region_not_specific'
+  | 'coverage_exercises' | 'coverage_protocol' | 'coverage_evidence' | 'coverage_plan' | 'objective_missing'
+export type Issue = { kind: IssueKind; severity: 'high' | 'medium'; item: string; section?: SectionName; regions?: Region[]; caseRegions?: Region[] }
+
+export type SectionName =
+  | 'subjective' | 'objective' | 'assessment' | 'plan' | 'summaryForPatient'
+  | 'hypotheses' | 'differentials' | 'supportingFindings' | 'findingsAgainst' | 'missingInformation' | 'suggestedAssessments' | 'redFlagsPrecautions'
+
+type Reasoning = Partial<Record<'hypotheses' | 'differentials', string[] | string>> & Partial<Record<'supportingFindings' | 'findingsAgainst' | 'missingInformation' | 'suggestedAssessments' | 'redFlagsPrecautions', string>>
+
+export type GeneratedOutput = {
+  transcript: string
+  note: { subjective?: string; objective?: string; assessment?: string; plan?: string; summaryForPatient?: string; primaryCondition?: string; clinicalReasoning?: Reasoning | null }
+  /** `draft`: the exercise as the note wrote it (with its side), when matched to a database exercise. */
+  exercises: { name: string; draft?: string | null; body_region?: string | null; primary_muscle?: string | null }[]
+  /** `regions`: the regions of the case a paper is evidence for (/api/science/relevant). */
+  papers: { title: string; relevance?: string | null; relevance_reason?: string | null; regions?: Region[] | null }[]
+  protocol: { name: string; keywords?: string | null } | null
+  /** Condition sheets for the other regions treated today (/api/knowledge-lookup `others`). */
+  otherProtocols?: { region: Region; name: string | null }[]
+}
+
+const MEASURE = /(\d+(?:[.,]\d+)?)\s*(°|gradi|degrees|grados|degres|cm|mm|kg|\/\s*10|%|secondi|seconds|sec\b|ripetizioni|reps\b)/gi
+const digits = (s: string) => s.replace(',', '.')
+
+/** Numbers with a unit or a 0–10 scale written in a section but absent from the clinician's words. */
+export function measuresNotInTranscript(section: string, transcript: string): string[] {
+  const said = new Set(Array.from(transcript.matchAll(/\d+(?:[.,]\d+)?/g)).map((m) => digits(m[0])))
+  const out: string[] = []
+  for (const m of Array.from(section.matchAll(MEASURE))) {
+    if (!said.has(digits(m[1]))) out.push(m[0].trim())
+  }
+  return Array.from(new Set(out))
+}
+
+// A fixed day, date or time is an appointment; the clinician has to have said
+// it. Numeric dates are not looked for: "6/10" and "2-3" are scores and doses.
+const WEEKDAYS = ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
+const MONTHS = 'gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre|january|february|march|april|may|june|july|august|september|october|november|december|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|janvier|fevrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|novembre|decembre'
+const DAY_OF_MONTH = new RegExp(` (\\d{1,2} (?:${MONTHS})) `, 'g')
+const TIME = /\b\d{1,2}:\d{2}\b/g
+
+/** Days, dates and times written in a section but not in the clinician's words. */
+export function appointmentsNotInTranscript(section: string, transcript: string): string[] {
+  const said = normalize(transcript)
+  const t = normalize(section)
+  const out = WEEKDAYS.filter((d) => t.includes(` ${d} `) && !said.includes(` ${d} `))
+  for (const m of Array.from(t.matchAll(DAY_OF_MONTH))) if (!said.includes(` ${m[1]} `)) out.push(m[1])
+  for (const m of Array.from(section.matchAll(TIME))) if (!transcript.includes(m[0])) out.push(m[0])
+  return Array.from(new Set(out))
+}
+
+// A sentence saying a treatment was done ("eseguita terapia manuale") must
+// name a treatment the clinician said; otherwise a proposal reads as done.
+const DONE = / (eseguit[oaie]|effettuat[oaie]|svolt[oaie]|praticat[oaie]|applicat[oaie]|performed|carried out|applied|delivered|realizad[oa]s?|aplicad[oa]s?|effectuee?s?|realisee?s?|pratiquee?s?) /
+const TREATMENTS = ['terapia manuale', 'manual therapy', 'terapia manual', 'therapie manuelle', 'tecar', 'laser', 'ultrasuoni', 'ultrasound', 'ultrasonidos', 'ultrasons', 'onde d urto', 'shock wave', 'shockwave', 'ondas de choque', 'ondes de choc', 'dry needling', 'taping', 'kinesio', 'bendaggio', 'massaggio', 'massage', 'masaje', 'mobilizzazion', 'mobilization', 'mobilisation', 'movilizacion', 'manipolazion', 'manipulation', 'manipulacion', 'elettrostimolazion', 'electrical stimulation', 'tens', 'crioterapia', 'cryotherapy', 'infiltrazion', 'injection']
+
+// Word stems (any ending); the other terms are whole words ("tens" is not "tensione").
+const STEMS = new Set(['mobilizzazion', 'manipolazion', 'elettrostimolazion', 'infiltrazion'])
+const names = (text: string, t: string) => text.includes(STEMS.has(t) ? ` ${t}` : ` ${t} `)
+
+/** Treatments a section presents as done that the clinician did not mention. */
+export function treatmentsNotInTranscript(section: string, transcript: string): string[] {
+  const said = normalize(transcript)
+  const out: string[] = []
+  for (const sentence of section.split(/[.;!?\n]+/)) {
+    const s = normalize(sentence)
+    if (!DONE.test(s)) continue
+    for (const t of TREATMENTS) if (names(s, t) && !names(said, t)) out.push(t)
+  }
+  return Array.from(new Set(out))
+}
+
+/**
+ * Regions of the condition assessed today: those of the primary condition,
+ * or, when it names none, of the current statements of the assessment
+ * (not its history: "pregresso intervento al ginocchio").
+ */
+export function conditionRegionsOf(primaryCondition: string | null | undefined, assessment: string | null | undefined): Region[] {
+  const primary = regionsOf(primaryCondition)
+  return primary.length ? primary : caseProfile(assessment).active
+}
+
+export type CaseView = {
+  profile: CaseProfile
+  /** The condition's regions, as the note names them. */
+  condition: Region[]
+  /** Regions of today's case: the clinician's current problem(s) plus the condition, never a region they gave only as history. */
+  regions: Region[]
+}
+
+export function caseOf(transcript: string, note: Pick<GeneratedOutput['note'], 'primaryCondition' | 'assessment'>): CaseView {
+  const profile = caseProfile(transcript)
+  const condition = conditionRegionsOf(note.primaryCondition, note.assessment)
+  const historyOnly = new Set([...profile.history, ...profile.negated])
+  const regions = Array.from(new Set([...profile.active, ...condition.filter((r) => !historyOnly.has(r))]))
+  return { profile, condition, regions }
+}
+
+/** Active regions that are not neighbours of each other (shoulder and upper limb count once). */
+export const separateRegions = (regions: Region[]) =>
+  regions.filter((r, i) => !regions.slice(0, i).some((q) => pertinentTo([q]).has(r) && pertinentTo([r]).has(q)))
+
+/**
+ * Other regions treated today, beyond the condition's (e.g. the left knee in
+ * a note about a right shoulder and a left knee), with their side: they need
+ * their own sheet, papers and exercises.
+ */
+export function otherRegionsOf(view: CaseView): { region: Region; side: CaseProfile['sides'][Region] | null }[] {
+  const covered = pertinentTo(view.condition.length ? view.condition : separateRegions(view.profile.active).slice(0, 1))
+  return separateRegions(view.profile.active)
+    .filter((r) => !covered.has(r))
+    .map((region) => ({ region, side: view.profile.sides[region] ?? null }))
+}
+
+/** Regions of today's case (see caseOf). */
+export const caseRegionsOf = (transcript: string, note: Pick<GeneratedOutput['note'], 'primaryCondition' | 'assessment'>) => caseOf(transcript, note).regions
+
+const asText = (v: string[] | string | undefined | null) => (Array.isArray(v) ? v.join(' ') : v ?? '')
+
+/** Every generated section that has text, by name. */
+export function sectionsOf(note: GeneratedOutput['note']): [SectionName, string][] {
+  const r = note.clinicalReasoning ?? {}
+  const all: [SectionName, string][] = [
+    ['subjective', note.subjective ?? ''], ['objective', note.objective ?? ''], ['assessment', note.assessment ?? ''], ['plan', note.plan ?? ''], ['summaryForPatient', note.summaryForPatient ?? ''],
+    ['hypotheses', asText(r.hypotheses)], ['differentials', asText(r.differentials)], ['supportingFindings', asText(r.supportingFindings)], ['findingsAgainst', asText(r.findingsAgainst)],
+    ['missingInformation', asText(r.missingInformation)], ['suggestedAssessments', asText(r.suggestedAssessments)], ['redFlagsPrecautions', asText(r.redFlagsPrecautions)],
+  ]
+  return all.filter(([, text]) => text.trim())
+}
+
+// Sections that state the case (where it is, what is proposed). Differentials,
+// tests to consider and precautions may legitimately name other regions.
+const REGION_SECTIONS: SectionName[] = ['subjective', 'objective', 'assessment', 'plan', 'summaryForPatient', 'hypotheses', 'supportingFindings']
+
+export function checkOutput(o: GeneratedOutput): Issue[] {
+  const issues: Issue[] = []
+  const { profile, condition, regions: caseRegions } = caseOf(o.transcript, o.note)
+  const history = new Set(profile.history)
+  const sections = sectionsOf(o.note)
+  const reference = condition.filter((r) => caseRegions.includes(r)).length ? condition.filter((r) => caseRegions.includes(r)) : caseRegions
+  const others = otherRegionsOf({ profile, condition, regions: caseRegions })
+
+  // 0. Without a recognised region nothing below can be verified by region: say so.
+  if (caseRegions.length === 0) issues.push({ kind: 'region_unknown', severity: 'medium', item: '' })
+
+  // 1. The condition assessed today is in a region of today's problem, not of the history.
+  if (profile.active.length && condition.length && regionFit(condition, profile.active) === 'incompatible') {
+    const asHistory = condition.some((r) => history.has(r))
+    issues.push({ kind: asHistory ? 'history_as_active' : 'district', severity: 'high', item: o.note.primaryCondition || o.note.assessment || '', regions: condition, caseRegions: profile.active })
+  }
+  // 2. Each section: its current statements stay in today's regions (or their
+  //    neighbours) and keep the side given for each region.
+  const near = pertinentTo(caseRegions)
+  for (const [name, text] of sections) {
+    if (caseRegions.length && REGION_SECTIONS.includes(name)) {
+      // A region named only as a position ("gomito a 90 gradi") is not a region the section is about.
+      const named = analyzeMentions(text, { skipPositions: true }).filter((m) => m.status === 'active').map((m) => m.region)
+      const off = Array.from(new Set(named.filter((r) => !near.has(r))))
+      const asHistory = off.filter((r) => history.has(r))
+      const other = off.filter((r) => !history.has(r))
+      if (asHistory.length) issues.push({ kind: 'history_as_active', severity: 'high', item: name, section: name, regions: asHistory, caseRegions })
+      if (other.length) issues.push({ kind: 'section_region', severity: 'medium', item: name, section: name, regions: other, caseRegions })
+    }
+    if (sideContradictions(text, profile).length) issues.push({ kind: 'side', severity: 'high', item: name, section: name })
+  }
+  // 3. Exercises: compatible, general, not verified, or incompatible.
+  for (const e of o.exercises) {
+    const fit = exerciseFit(e, caseRegions)
+    const r = exerciseRegions(e)
+    if (fit === 'incompatible') issues.push({ kind: r.some((x) => history.has(x)) ? 'history_as_active' : 'exercise', severity: 'high', item: e.name, regions: r, caseRegions })
+    else if (fit === 'unknown' && caseRegions.length) issues.push({ kind: 'exercise_unverified', severity: 'medium', item: e.name })
+    else if (sideContradictions(`${e.draft ?? ''} ${e.name}`, profile).length) issues.push({ kind: 'side', severity: 'medium', item: e.draft || e.name })
+  }
+  // 4. Papers: as classified by the search (lib/knowledge/paperRank.ts), or by their title.
+  for (const p of o.papers) {
+    if (p.relevance === 'unverified') {
+      issues.push({ kind: 'evidence_unverified', severity: 'medium', item: p.title })
+      continue
+    }
+    if (p.relevance === 'direct' || p.relevance === 'indirect') {
+      // Shown with its level and reason; only a paper of another region without one is wrong.
+      if (p.relevance_reason === 'same_mechanism_other_region') continue
+      // Classified by the search against the regions treated today, which it names.
+      if (p.regions?.length) continue
+    }
+    const fit = regionFit(regionsOf(p.title), [...reference, ...others.map((x) => x.region)])
+    if (fit === 'incompatible') issues.push({ kind: 'evidence', severity: 'high', item: p.title, regions: regionsOf(p.title), caseRegions })
+    else if (fit === 'unknown' && !p.relevance) issues.push({ kind: 'evidence_unverified', severity: 'medium', item: p.title })
+  }
+  // 5. Protocol (condition sheet).
+  if (o.protocol) {
+    const r = regionsOf(`${o.protocol.name} ${o.protocol.keywords ?? ''}`)
+    const fit = regionFit(r, reference)
+    if (fit === 'incompatible') issues.push({ kind: 'protocol', severity: 'high', item: o.protocol.name, regions: r, caseRegions })
+    else if (fit === 'unknown') issues.push({ kind: 'protocol_unverified', severity: 'medium', item: o.protocol.name })
+  }
+  // 6. Facts must come from the clinician: measurements in the findings and
+  //    assessment, fixed appointments in the plan and follow-up, treatments
+  //    presented as done.
+  for (const [name, text] of sections) {
+    if (name === 'subjective' || name === 'objective' || name === 'assessment') {
+      for (const m of measuresNotInTranscript(text, o.transcript)) issues.push({ kind: 'invented', severity: 'medium', item: m, section: name })
+    }
+    if (name === 'plan' || name === 'summaryForPatient') {
+      for (const a of appointmentsNotInTranscript(text, o.transcript)) issues.push({ kind: 'invented_appointment', severity: 'medium', item: a, section: name })
+      for (const sentence of sentencesOf(text)) {
+        for (const f of unsupportedArrangements(sentence, o.transcript)) issues.push({ kind: f.kind, severity: f.kind === 'invented_agreement' ? 'high' : 'medium', item: f.item, section: name })
+      }
+    }
+    // Findings and test results: in the findings always, in the assessment
+    // when stated as fact (a hedged hypothesis is reasoning). A negative
+    // result nobody assessed, wherever the note states facts or reasoning
+    // about them.
+    const negativesToo = ['assessment', 'supportingFindings', 'findingsAgainst', 'redFlagsPrecautions'].includes(name)
+    for (const sentence of sentencesOf(text)) {
+      const before = issues.length
+      const negatives = negativesToo || ['subjective', 'objective', 'plan', 'summaryForPatient'].includes(name) ? unsupportedNegatives(sentence, o.transcript, negativesToo) : []
+      for (const f of negatives) issues.push({ kind: f.kind, severity: 'high', item: f.item, section: name })
+      if ((name === 'subjective' || name === 'objective' || name === 'assessment') && !(name === 'assessment' && (isHedged(sentence) || negatives.length))) {
+        for (const f of unsupportedFindings(sentence, o.transcript)) issues.push({ kind: f.kind, severity: 'high', item: f.item, section: name })
+      }
+      // A cause drawn from the duration alone, a cause or risk factor nobody
+      // mentioned, a link to the history the clinician did not make, a
+      // hypothesis without its findings.
+      if (['subjective', 'objective', 'assessment', 'summaryForPatient', 'hypotheses', 'supportingFindings', 'findingsAgainst'].includes(name)) {
+        for (const f of unsupportedInferences(sentence, o.transcript)) issues.push({ kind: f.kind, severity: 'high', item: f.item, section: name })
+      }
+      // A diagnosis with a certainty the clinician did not give: presented as
+      // certain when they did not state it, proposed when they excluded it (or
+      // excluded when they affirmed or suspected it), excluded unsaid.
+      if (['subjective', 'objective', 'assessment', 'summaryForPatient', 'hypotheses', 'supportingFindings', 'findingsAgainst'].includes(name)) {
+        for (const d of diagnosisConflicts(sentence, o.transcript)) {
+          if (d.kind === 'unconfirmed_diagnosis' && !['subjective', 'objective', 'assessment', 'summaryForPatient'].includes(name)) continue
+          // An exclusion already reported as an invented finding or negative.
+          if (d.kind === 'unstated_exclusion' && issues.length > before) continue
+          issues.push({ kind: d.kind === 'unstated_exclusion' ? 'invented_negative' : d.kind, severity: 'high', item: d.item, section: name })
+        }
+      }
+      // An instruction to the patient the clinician has not approved.
+      if (name === 'summaryForPatient') {
+        const why = unapprovedInstructions(sentence, o.transcript, o.exercises.map((e) => e.draft || e.name))
+        if (why.length) issues.push({ kind: 'unapproved_instruction', severity: 'high', item: why[0], section: name })
+      }
+      // A dose the clinician did not give, presented as theirs.
+      if ((name === 'plan' || name === 'summaryForPatient') && !isHedged(sentence)) {
+        for (const d of unstatedDosage(sentence, o.transcript)) issues.push({ kind: 'generated_dosage', severity: 'medium', item: d, section: name })
+      }
+    }
+    for (const t of treatmentsNotInTranscript(text, o.transcript)) issues.push({ kind: 'invented_treatment', severity: 'high', item: t, section: name })
+  }
+  // History the clinician reported, left out of the subjective section.
+  for (const h of historyNotKept(o.note.subjective ?? '', o.transcript)) issues.push({ kind: 'history_missing', severity: 'medium', item: h.text, section: 'subjective' })
+  // No objective findings: said plainly, not left as an empty section.
+  if (!(o.note.objective ?? '').trim()) issues.push({ kind: 'objective_missing', severity: 'medium', item: 'objective', section: 'objective' })
+  // 7. More than one region treated today: the plan, exercises, condition
+  //    sheets and papers for each (for the plan and the exercises a region
+  //    next to one already covered counts as covered; a paper must be about
+  //    the region itself).
+  const separate = separateRegions(profile.active)
+  if (separate.length >= 2) {
+    const primary = condition.length ? condition : [separate[0]]
+    const planRegions = analyzeMentions(o.note.plan ?? '', { skipPositions: true }).filter((m) => m.status === 'active').map((m) => m.region)
+    // A region the plan names only to say it has no proposal yet (planByRegion).
+    const undefinedInPlan = new Set(sentencesOf(o.note.plan ?? '').filter(isUndefinedProposal).flatMap((x) => regionsOf(x)))
+    for (const r of separate) {
+      const near = pertinentTo([r])
+      if (undefinedInPlan.has(r)) issues.push({ kind: 'plan_region_undefined', severity: 'medium', item: r, section: 'plan' })
+      else if ((o.note.plan ?? '').trim() && !planRegions.some((x) => near.has(x))) issues.push({ kind: 'coverage_plan', severity: 'medium', item: r, section: 'plan' })
+      // Named only together with the other regions ("per la spalla destra e il ginocchio sinistro"): no part of its own.
+      else if ((o.note.plan ?? '').trim() && !specificInPlan(o.note.plan ?? '', r, separate)) issues.push({ kind: 'plan_region_not_specific', severity: 'medium', item: r, section: 'plan' })
+      if (o.exercises.length && !o.exercises.some((e) => exerciseRegions(e).some((x) => near.has(x)))) issues.push({ kind: 'coverage_exercises', severity: 'medium', item: r })
+      if (pertinentTo(primary).has(r)) continue
+      if (o.protocol && !(o.otherProtocols ?? []).some((p) => p.region === r && p.name)) issues.push({ kind: 'coverage_protocol', severity: 'medium', item: r })
+      if (!o.papers.some((p) => p.relevance !== 'unverified' && (p.regions ?? regionsOf(p.title)).includes(r))) issues.push({ kind: 'coverage_evidence', severity: 'medium', item: r })
+    }
+  }
+  return issues
+}
+
+// ---------------------------------------------------------------- the plan, region by region
+
+type Lang = 'it' | 'en' | 'es' | 'fr'
+const REGION_NAME: Record<Region, Record<Lang, string>> = {
+  shoulder: { it: 'Spalla', en: 'Shoulder', es: 'Hombro', fr: 'Épaule' },
+  elbow: { it: 'Gomito', en: 'Elbow', es: 'Codo', fr: 'Coude' },
+  wrist_hand: { it: 'Polso e mano', en: 'Wrist and hand', es: 'Muñeca y mano', fr: 'Poignet et main' },
+  cervical: { it: 'Rachide cervicale', en: 'Neck', es: 'Columna cervical', fr: 'Rachis cervical' },
+  thoracic: { it: 'Rachide dorsale', en: 'Thoracic spine', es: 'Columna dorsal', fr: 'Rachis dorsal' },
+  lumbar: { it: 'Rachide lombare', en: 'Low back', es: 'Columna lumbar', fr: 'Rachis lombaire' },
+  hip: { it: 'Anca', en: 'Hip', es: 'Cadera', fr: 'Hanche' },
+  thigh: { it: 'Coscia', en: 'Thigh', es: 'Muslo', fr: 'Cuisse' },
+  knee: { it: 'Ginocchio', en: 'Knee', es: 'Rodilla', fr: 'Genou' },
+  lower_leg: { it: 'Gamba', en: 'Lower leg', es: 'Pierna', fr: 'Jambe' },
+  ankle_foot: { it: 'Caviglia e piede', en: 'Ankle and foot', es: 'Tobillo y pie', fr: 'Cheville et pied' },
+  upper_limb: { it: 'Arto superiore', en: 'Upper limb', es: 'Miembro superior', fr: 'Membre supérieur' },
+  lower_limb: { it: 'Arto inferiore', en: 'Lower limb', es: 'Miembro inferior', fr: 'Membre inférieur' },
+}
+const SIDE_NAME: Record<'left' | 'right' | 'both', Record<Lang, string>> = {
+  left: { it: 'lato sinistro', en: 'left side', es: 'lado izquierdo', fr: 'côté gauche' },
+  right: { it: 'lato destro', en: 'right side', es: 'lado derecho', fr: 'côté droit' },
+  both: { it: 'entrambi i lati', en: 'both sides', es: 'ambos lados', fr: 'des deux côtés' },
+}
+const PLAN_COMMON: Record<Lang, string> = { it: 'Indicazioni comuni, da adattare a ciascun distretto: ', en: 'Common to the regions, to adapt to each: ', es: 'Indicaciones comunes, por adaptar a cada región: ', fr: 'Indications communes, à adapter à chaque région : ' }
+const PLAN_UNDEFINED: Record<Lang, string> = { it: 'nessuna proposta specifica nella bozza per questo distretto; da definire.', en: 'no specific proposal in the draft for this region; to be defined.', es: 'ninguna propuesta específica en el borrador para esta región; por definir.', fr: 'aucune proposition spécifique dans le brouillon pour cette région ; à définir.' }
+// The marker is the part before the semicolon: sentences are split there.
+const isUndefinedProposal = (sentence: string) => Object.values(PLAN_UNDEFINED).some((p) => normalize(sentence).includes(normalize(p.split(/[;]/)[0]).trim()))
+
+/** The regions of today's case that a sentence of the plan names (positions aside). */
+const planSentenceRegions = (sentence: string, regions: Region[]) => {
+  const named = analyzeMentions(sentence, { skipPositions: true }).filter((m) => m.status === 'active').map((m) => m.region)
+  return regions.filter((r) => named.some((x) => pertinentTo([r]).has(x)))
+}
+/** Whether the plan has a part of its own for a region: a sentence that names it and no other region of the case. */
+const specificInPlan = (plan: string, region: Region, regions: Region[]) =>
+  sentencesOf(plan).some((x) => { const here = planSentenceRegions(x, regions); return here.length === 1 && here[0] === region })
+
+/**
+ * With more than one region treated today, the plan names each, with its
+ * side, in a part of its own: one sentence naming them all is common to
+ * them, not a plan for each. The model may write a generic plan ("esercizi di rinforzo e
+ * mobilità"): its sentences that name no region are said to be common, to
+ * adapt to each region, and a region the plan leaves out is named with "no
+ * specific proposal in the draft; to be defined". Nothing is added that the
+ * clinician did not say or that the draft did not propose.
+ */
+export function planByRegion(plan: string, transcript: string, language: unknown): string {
+  const lang: Lang = language === 'en' || language === 'es' || language === 'fr' ? language : 'it'
+  const profile = caseProfile(transcript)
+  const regions = separateRegions(profile.active)
+  if (regions.length < 2 || !plan.trim()) return plan
+  const missing = regions.filter((r) => !specificInPlan(plan, r, regions))
+  if (!missing.length) return plan
+  const sentences = sentencesOf(plan)
+  // A plan with no part of its own for any region: its proposals are common to them.
+  const generic = !regions.some((r) => specificInPlan(plan, r, regions))
+  const body = generic && sentences.length ? [`${PLAN_COMMON[lang]}${sentences[0].charAt(0).toLowerCase()}${sentences[0].slice(1)}`, ...sentences.slice(1)].join(' ') : plan.trim()
+  const lines = missing.map((r) => {
+    const side = profile.sides[r]
+    return `${REGION_NAME[r][lang]}${side ? ` (${SIDE_NAME[side][lang]})` : ''}: ${PLAN_UNDEFINED[lang]}`
+  })
+  return [body, ...lines].join(' ')
+}
+
+/**
+ * The note without facts the clinician did not give (lib/clinical/facts.ts),
+ * with the list of what was removed and why; with more than one region
+ * treated today, a plan that names each (planByRegion).
+ */
+export const sanitizeGeneratedNote = <T extends { subjective?: string; objective?: string; plan?: string; summaryForPatient?: string; [k: string]: unknown }>(note: T, transcript: string) => {
+  const result = sanitizeNote(note, transcript, { measures: measuresNotInTranscript, treatments: treatmentsNotInTranscript, appointments: appointmentsNotInTranscript })
+  const plan = typeof result.note.plan === 'string' ? result.note.plan : ''
+  const byRegion = planByRegion(plan, transcript, note.language)
+  if (byRegion === plan) return result
+  const change: Removal = { section: 'plan', text: plan, kind: 'plan_regions', item: 'plan', replacement: byRegion }
+  return { note: { ...result.note, plan: byRegion }, removed: [...result.removed, change] }
+}

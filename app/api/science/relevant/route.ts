@@ -4,7 +4,9 @@ import { consumeHourly, HOURLY_LIMITS, limitResponse } from '@/lib/rateLimit';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { lazy } from '@/lib/lazy';
-import { paperScore, searchTerms } from '@/lib/knowledge/paperRank';
+import { paperRelevance, paperScore, searchTerms, type PaperRelevance } from '@/lib/knowledge/paperRank';
+import { caseOf, conditionRegionsOf, otherRegionsOf } from '@/lib/clinical/coherence';
+import { regionsOf, type Region } from '@/lib/clinical/region';
 
 // Collega il motore clinico AI (LiveStructuring) alla libreria Scienza/PubMed
 // che esiste già in Phygo (research_papers + research_summaries, alimentata
@@ -23,6 +25,7 @@ const supabase = lazy(() => createClient(
 const openai = lazy(() => new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
 
 const MAX_RESULTS = 3;
+const RANK = { direct: 0, indirect: 1, unverified: 2 } as const;
 
 export async function POST(req: Request) {
   // Clinician-only paid AI operation (OpenAI) on real clinical information: verified professional + hourly cap.
@@ -32,12 +35,18 @@ export async function POST(req: Request) {
   if (limited) return limited;
 
   try {
-    const { primaryCondition, assessment } = await req.json();
+    const { primaryCondition, assessment, transcript } = await req.json();
+    const primary = typeof primaryCondition === 'string' ? primaryCondition : '';
+    const assess = typeof assessment === 'string' ? assessment : '';
 
-    const clinicalText: string =
-      (typeof primaryCondition === 'string' && primaryCondition.trim()) ||
-      (typeof assessment === 'string' && assessment.trim()) ||
-      '';
+    // More than one region treated today (e.g. right shoulder and left knee):
+    // the search covers each, so it starts from the assessment as well.
+    const said = typeof transcript === 'string' ? transcript.slice(0, 8000) : '';
+    const others = otherRegionsOf(caseOf(said, { primaryCondition: primary, assessment: assess }));
+    const caseText = [said, primary, assess].join(' ');
+    const clinicalText: string = others.length
+      ? [primary.trim(), assess.trim()].filter(Boolean).join('; ')
+      : primary.trim() || assess.trim() || '';
 
     if (!clinicalText) {
       return NextResponse.json({ papers: [] });
@@ -95,17 +104,40 @@ export async function POST(req: Request) {
       return NextResponse.json({ papers: [] });
     }
 
-    // Most relevant first (lib/knowledge/paperRank.ts), newest first on a tie.
-    const data = (found || [])
+    // Only papers pertinent to the condition (lib/knowledge/paperRank.ts):
+    // direct first, then indirect (same region before another region with the
+    // same mechanism), then unverified; most relevant, then newest, on a tie.
+    const conditionRegions = conditionRegionsOf(primary, assess);
+    const targets: Region[] = Array.from(new Set([...conditionRegions, ...others.map((o) => o.region)]));
+    const ranked = (found || [])
       .filter((p: any) => p.status === 'published')
-      .map((p: any) => ({ p, score: paperScore(p, terms) }))
-      .filter((x) => x.score > 0)
-      .sort((a, b) => b.score - a.score || String(b.p.publication_date ?? '').localeCompare(String(a.p.publication_date ?? '')))
-      .slice(0, MAX_RESULTS)
-      .map((x) => x.p);
+      .map((p: any) => {
+        // About a population or a mechanism the case does not state: not claimed as evidence for it.
+        const relevance: PaperRelevance | null = paperRelevance(p, terms, targets, caseText);
+        return { p, score: paperScore(p, terms), relevance };
+      })
+      .filter((x) => x.score > 0 && x.relevance !== null)
+      .sort((a, b) => RANK[a.relevance!.level] - RANK[b.relevance!.level] || Number(a.relevance!.reason === 'same_mechanism_other_region') - Number(b.relevance!.reason === 'same_mechanism_other_region') || b.score - a.score || String(b.p.publication_date ?? '').localeCompare(String(a.p.publication_date ?? '')))
+      .map((x) => {
+        const paperRegions = regionsOf(x.p.title).length ? regionsOf(x.p.title) : regionsOf(x.p.abstract);
+        // The regions treated today that the paper is about: the same region, not a neighbouring one.
+        return { ...x, regions: targets.filter((t) => paperRegions.includes(t)) };
+      });
+    // The best paper for each region treated today first, then the rest by rank.
+    const limit = Math.max(MAX_RESULTS, targets.length);
+    const chosen: typeof ranked = [];
+    for (const t of targets) {
+      const best = ranked.find((x) => x.regions.includes(t) && !chosen.includes(x));
+      if (best && chosen.length < limit) chosen.push(best);
+    }
+    for (const x of ranked) if (chosen.length < limit && !chosen.includes(x)) chosen.push(x);
+    const data = ranked.filter((x) => chosen.includes(x));
 
-    const papers = data.map((p: any) => ({
+    const papers = data.map(({ p, relevance, regions }: any) => ({
       id: p.id,
+      regions,
+      relevance: relevance.level,
+      relevance_reason: relevance.reason,
       title: p.title,
       authors: p.authors,
       journal: p.journal,
