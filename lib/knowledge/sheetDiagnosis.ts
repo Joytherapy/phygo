@@ -5,7 +5,7 @@
 
 import { diagnosisStatus, type DiagnosisStatus, type KbRow } from './conditionMatch'
 import { textCertainty } from '../clinical/facts'
-import { REGION_WORDS, regionFit, regionsOf } from '../clinical/region'
+import { REGION_WORDS, regionFit, regionsOf, type Fit } from '../clinical/region'
 import { caseOf } from '../clinical/coherence'
 
 /** The body regions a sheet names, in every language. */
@@ -17,4 +17,14 @@ export function mainSheetStatus(row: KbRow, transcript: string, note: { primaryC
   if (!transcript) return null
   const view = caseOf(transcript, { primaryCondition: note.primaryCondition ?? '', assessment: note.assessment ?? '' })
   return diagnosisStatus(row, transcript, REGION_WORDS, regionFit(sheetRegions(row), view.profile.active) === 'compatible', textCertainty)
+}
+
+/**
+ * Whether the sheet's body region fits today's problem as the clinician
+ * described it: 'incompatible' only when both name a region and they differ
+ * (a sheet or a case naming none is 'unknown', never proven incompatible).
+ */
+export function mainSheetRegionFit(row: KbRow, transcript: string, note: { primaryCondition?: string; assessment?: string }): Fit {
+  const view = caseOf(transcript, { primaryCondition: note.primaryCondition ?? '', assessment: note.assessment ?? '' })
+  return regionFit(sheetRegions(row), view.profile.active)
 }

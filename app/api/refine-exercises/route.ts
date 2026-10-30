@@ -5,7 +5,7 @@ import OpenAI from "openai";
 import { lazy } from "@/lib/lazy";
 import { serviceClient } from "@/lib/verification";
 import { protocolMode, protocolUse, type KbRow, type ProtocolMode } from "@/lib/knowledge/conditionMatch";
-import { mainSheetStatus } from "@/lib/knowledge/sheetDiagnosis";
+import { mainSheetRegionFit, mainSheetStatus } from "@/lib/knowledge/sheetDiagnosis";
 
 const openai = lazy(() => new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -57,6 +57,9 @@ export async function POST(request: NextRequest) {
     const { data: phaseRows } = await db.from("rehab_phases").select("*").eq("condition_id", row.id).order("phase_number", { ascending: true });
     const phases = (phaseRows ?? []).filter((p: any) => String(p.condition_id) === String(row.id)).sort((a: any, b: any) => (a.phase_number ?? 0) - (b.phase_number ?? 0));
     if (!phases.length) return notUsed("no_protocol");
+
+    // A protocol of another body region never reaches the model, not even by the clinician's choice.
+    if (mainSheetRegionFit(row, said, { primaryCondition: primary, assessment: text }) === "incompatible") return notUsed("region_mismatch");
 
     const status = mainSheetStatus(row, said, { primaryCondition: primary, assessment: text });
     const mode = protocolMode(status, protocolChoice === "clinician");

@@ -127,3 +127,35 @@ test('/api/refine-plan, not used by the app, gets the same checks', async () => 
   assert.equal(stated.protocol.mode, 'stated');
   assert.equal(prompts.length, 1);
 });
+
+// Anatomical fit of the sheet with the case: a protocol of another region is never given to the model,
+// not even when the clinician chooses it; a sheet naming no region is not proven incompatible.
+const KNEE = 'Dolore al ginocchio destro in flessione, deficit di estensione attivo, quadricipite ipotonico.';
+const KNEE_NOTE = { assessment: 'Dolore di ginocchio destro.', primaryCondition: 'right knee pain', exercisesDraft: ['Estensione di ginocchio isometrica 3x10'], lang: 'it' };
+
+test('region: a shoulder sheet with shoulder findings and a usable status guides the exercises', async () => {
+  const res = await refine(`${FINDINGS} Tendinopatia della cuffia dei rotatori confermata.`);
+  assert.deepEqual([res.exercises, res.protocol.used, res.protocol.mode], [REFINED, true, 'stated']);
+  assert.equal(prompts.length, 1);
+  assert.match(prompts[0].system, /Rotator cuff tendinopathy phase 1/);
+});
+
+test('region: a shoulder sheet chosen by the clinician for a knee-only case never reaches the model', async () => {
+  for (const extra of [{ protocolChoice: 'clinician' }, { protocolChoice: 'clinician', diagnosisStatus: 'stated' }, {}]) {
+    const res = await post('/api/refine-exercises', { ...KNEE_NOTE, transcript: KNEE, conditionId: 1, ...extra });
+    assert.deepEqual(res.exercises, KNEE_NOTE.exercisesDraft, JSON.stringify(extra));
+    assert.equal(res.protocol.used, false, JSON.stringify(extra));
+    assert.equal(res.protocol.mode, null, JSON.stringify(extra));
+  }
+  assert.equal(prompts.length, 0, 'no model call, so no shoulder protocol in any prompt');
+});
+
+test('region: a sheet naming no body region is not proven incompatible; the clinician may choose it, it is never verified', async () => {
+  for (const id of [13, 14]) {
+    const unchosen = await post('/api/refine-exercises', { ...KNEE_NOTE, transcript: KNEE, conditionId: id });
+    assert.deepEqual([unchosen.exercises, unchosen.protocol.used, unchosen.protocol.reason], [KNEE_NOTE.exercisesDraft, false, 'needs_clinician_choice'], `sheet ${id}`);
+    const chosen = await post('/api/refine-exercises', { ...KNEE_NOTE, transcript: KNEE, conditionId: id, protocolChoice: 'clinician' });
+    assert.deepEqual([chosen.exercises, chosen.protocol.used, chosen.protocol.mode], [REFINED, true, 'chosen'], `sheet ${id}`);
+  }
+  assert.equal(prompts.length, 2);
+});
